@@ -12,8 +12,8 @@ const Footer = () => {
 
         <section className={styles.community}>
           <a href="https://delightlabs.io">
-            <span>Oraiswap powered by</span>
-            <Logo height={24} />
+            <span>© 2022 Powered by Oraichain</span>
+            {/* <Logo height={24} /> */}
           </a>
         </section>
       </Container>

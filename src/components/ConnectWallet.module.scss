@@ -1,0 +1,37 @@
+@import "src/styles/variables";
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  iframe {
+    border: none;
+    width: 200px;
+    height: 100%;
+  }
+}
+
+.address {
+  color: $white;
+  margin: 0 10px 0 8px;
+}
+
+button.connected {
+  border: 1px solid $white;
+  text-transform: none;
+}
+
+button.connect {
+  text-transform: none;
+  background: linear-gradient(99.99deg, $navy 0%, $green 98.89%);
+  border-radius: 8px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 100%;
+  min-height: 44px;
+  img {
+    margin-right: 10px;
+  }
+}

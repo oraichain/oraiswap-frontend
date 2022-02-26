@@ -1,5 +1,5 @@
-@import 'src/styles/mixins';
-@import 'src/styles/variables';
+@import "src/styles/mixins";
+@import "src/styles/variables";
 
 .header {
   position: sticky;
@@ -27,6 +27,13 @@
   @include flex;
   font-size: 20px;
   color: #ffffff;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.link {
+  padding-left: 58px;
+  font-size: 14px;
 }
 
 .logo {
@@ -37,6 +44,16 @@
     width: auto;
   }
 }
+
+.mode {
+  cursor: pointer;
+  padding-left: 24px;
+}
+
+.nft {
+  padding-right: 24px
+}
+
 .connect {
   @include flex;
   @include desktop;

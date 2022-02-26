@@ -17,6 +17,7 @@
       "ConnectKeplr": "Connect Keplr",
       "ConnectMetamask": "Connect Metamask",
       "ConnectTheWallet": "Connect the Wallet",
+      "ConnectWallet": "Connect Wallet",
       "SelectAsset": "Select an asset",
       "SelectToken": "Token"
     },
@@ -50,7 +51,18 @@
     "DownloadExtension": "Download Terra Extension",
     "ConnectKeplr": "Connect Keplr",
     "CopyAddress": "Copy Address",
-    "TerraFinder": "View on Terra Finder"
+    "TerraFinder": "View on Terra Finder",
+    "Metamask": "Metamask",
+    "WalletConnect": "WalletConnect",
+    "OraichainWallet": "Oraichain Wallet",
+    "ConnectWeb":"Connect using web app",
+    "ConnectMobile":"Connect using mobile wallet",
+    "ConnectBrowser": "Connect using browser wallet"
+  },
+  "Header": {
+    "OraiBridge": "Orai Bridge",
+    "NftBridge": "NFT Bridge",
+    "Support": "Support"
   },
   "MyPage": {
     "Empty": {

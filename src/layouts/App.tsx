@@ -10,11 +10,12 @@ import { ThemeProvider } from 'styled-components';
 import variables from 'styles/_variables.scss';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
+import { ThemeContext, Theme } from './ThemeContext';
 
 const App = () => {
   const [address] = useLocalStorage<string>('address');
   const { isLoading: isPairsLoading } = usePairs();
-
+  const [theme, setTheme] = useState(Theme.Light);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,11 +32,13 @@ const App = () => {
   return (
     <ThemeProvider theme={variables}>
       <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <Header />
-        <ContractProvider value={contract}>
-          {!isLoading && routes()}
-        </ContractProvider>
-        <Footer />
+        <ThemeContext.Provider value={{ theme, setTheme }}>
+          <Header />
+          <ContractProvider value={contract}>
+            {!isLoading && routes()}
+          </ContractProvider>
+          <Footer />
+        </ThemeContext.Provider>
       </Web3ReactProvider>
     </ThemeProvider>
   );
