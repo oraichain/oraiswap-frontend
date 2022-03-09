@@ -44,14 +44,13 @@ const PageContainer = styled.div`
 
 const OverviewSection = styled.div`
   background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
-    url('/public/assets/backgrounds/osmosis-pool-machine.png') no-repeat;
+    url('/assets/backgrounds/osmosis-pool-machine.png') no-repeat;
   background-size: cover;
   background-position-x: right;
   padding: 84px 20px 20px;
 
   @media (min-width: 768px) {
-    background: url('/public/assets/backgrounds/osmosis-pool-machine.png')
-      no-repeat;
+    background: url('/assets/backgrounds/osmosis-pool-machine.png') no-repeat;
     background-size: contain;
     background-position-x: right;
     padding: 40px;

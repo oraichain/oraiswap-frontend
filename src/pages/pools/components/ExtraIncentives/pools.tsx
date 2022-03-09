@@ -65,7 +65,7 @@ export const PoolCardItem = (props: {
   const currency = {
     coinDecimals: 6,
     coinGeckoId: 'juno-network',
-    coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg',
+    coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg',
     coinMinimalDenom:
       'ibc/46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED',
     coinDenom: 'JUNO',
@@ -81,7 +81,7 @@ export const PoolCardItem = (props: {
       coinMinimalDenom: 'ujuno',
       coinDecimals: 6,
       coinGeckoId: 'juno-network',
-      coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg'
+      coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg'
     }
   };
   let sumRemainingBonus: CoinPretty = new CoinPretty(currency, new Dec(0));
@@ -98,10 +98,7 @@ export const PoolCardItem = (props: {
   return (
     <PoolCardItemContainer onClick={onClick}>
       <TokenInfoContainer>
-        <PoolCardTokenIcon
-          bgIndex={poolId}
-          src="/public/assets/Icons/OSMO.svg"
-        />
+        <PoolCardTokenIcon bgIndex={poolId} src="/assets/Icons/OSMO.svg" />
         <div style={{ marginTop: '15px' }}>
           <h5>Pool #{poolId}</h5>
           <PoolSubTitle>

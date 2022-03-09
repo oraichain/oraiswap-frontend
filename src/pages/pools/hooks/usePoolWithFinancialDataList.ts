@@ -13,8 +13,214 @@ export function usePoolWithFinancialDataList() {
   //     priceStore,
   //     priceStore.getFiatCurrency('usd')!
   //   );
-  const pools = [];
-  const poolFinancialDataByPoolId = 1;
+  const pools = [
+    {
+      id: '1',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '3000000000000000'
+        }
+      }
+    },
+    {
+      id: '560',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '2000000000000000'
+        }
+      }
+    },
+    {
+      id: '561',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '2000000000000000'
+        }
+      }
+    },
+    {
+      id: '497',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '3000000000000000'
+        }
+      }
+    },
+    {
+      id: '604',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '3000000000000000'
+        }
+      }
+    },
+    {
+      id: '584',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '2000000000000000'
+        }
+      }
+    },
+    {
+      id: '2',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '5000000000000000'
+        }
+      }
+    },
+    {
+      id: '605',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '2000000000000000'
+        }
+      }
+    },
+    {
+      id: '9',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '2000000000000000'
+        }
+      }
+    },
+    {
+      id: '601',
+      swapFee: {
+        floatingDecimalPointRight: 2,
+        _options: {
+          maxDecimals: 4,
+          trim: true,
+          shrink: false,
+          ready: true,
+          locale: true,
+          inequalitySymbol: false,
+          inequalitySymbolSeparator: ' '
+        },
+        dec: {
+          int: '3000000000000000'
+        }
+      }
+    }
+  ];
+  const poolFinancialDataByPoolId = {
+    status: 'loading',
+    isLoading: true,
+    isSuccess: false,
+    isError: false,
+    isIdle: false,
+    dataUpdatedAt: 0,
+    error: null,
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    isFetched: false,
+    isFetchedAfterMount: false,
+    isFetching: true,
+    isLoadingError: false,
+    isPlaceholderData: false,
+    isPreviousData: false,
+    isRefetchError: false,
+    isStale: true
+  };
+
+  const fiat = {
+    currency: 'usd',
+    symbol: '$',
+    maxDecimals: 2,
+    locale: 'en-US'
+  };
 
   return useMemo(() => {
     return pools.map((pool) => {
@@ -28,14 +234,17 @@ export function usePoolWithFinancialDataList() {
       const volume24h =
         volume24hRaw != null
           ? new PricePretty(
-              priceStore.getFiatCurrency('usd')!,
+              //   priceStore.getFiatCurrency('usd')!,
+              fiat,
               new Dec(volume24hRaw.toFixed(10))
             ).toString()
           : '...';
-      const tvl = pool.computeTotalValueLocked(
-        priceStore,
-        priceStore.getFiatCurrency('usd')!
-      );
+      //   const tvl = pool.computeTotalValueLocked(
+      //     priceStore,
+      //     // priceStore.getFiatCurrency('usd')!
+      //     'usd'
+      //   );
+      const tvl = new PricePretty(fiat, new Dec(0));
       const swapFee = `${pool.swapFee.toString()}%`;
       return { pool, volume24h, tvl, swapFee };
     });

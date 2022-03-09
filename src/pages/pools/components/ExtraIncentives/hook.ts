@@ -10,7 +10,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'juno-network',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg',
         coinMinimalDenom:
           'ibc/46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED',
         coinDenom: 'JUNO',
@@ -26,7 +26,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ujuno',
           coinDecimals: 6,
           coinGeckoId: 'juno-network',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg'
         }
       },
       {
@@ -34,7 +34,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1679', '1680', '1681'],
@@ -47,7 +47,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -63,13 +63,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'juno-network',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg',
         coinMinimalDenom:
           'ibc/46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED',
         coinDenom: 'JUNO',
@@ -85,7 +85,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ujuno',
           coinDecimals: 6,
           coinGeckoId: 'juno-network',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/juno.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/juno.svg'
         }
       }
     ],
@@ -99,7 +99,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -115,13 +115,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:utick',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/tick.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/tick.svg',
         coinMinimalDenom:
           'ibc/655BCEF3CDEBE32863FF281DBBE3B06160339E9897DC9C9C9821932A5F8BA6F8',
         coinDenom: 'TICK',
@@ -137,7 +137,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'utick',
           coinDecimals: 6,
           coinGeckoId: 'pool:utick',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/tick.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/tick.svg'
         }
       }
     ],
@@ -151,7 +151,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 9,
         coinGeckoId: 'likecoin',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/likecoin.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/likecoin.svg',
         coinMinimalDenom:
           'ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525',
         coinDenom: 'LIKE',
@@ -167,8 +167,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'nanolike',
           coinDecimals: 9,
           coinGeckoId: 'likecoin',
-          coinImageUrl:
-            'http://localhost:8080/public/assets/tokens/likecoin.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/likecoin.svg'
         }
       },
       {
@@ -176,7 +175,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2257', '2256', '2255'],
@@ -189,7 +188,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -205,13 +204,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 9,
         coinGeckoId: 'likecoin',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/likecoin.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/likecoin.svg',
         coinMinimalDenom:
           'ibc/9989AD6CCA39D1131523DB0617B50F6442081162294B4795E26746292467B525',
         coinDenom: 'LIKE',
@@ -227,8 +226,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'nanolike',
           coinDecimals: 9,
           coinGeckoId: 'likecoin',
-          coinImageUrl:
-            'http://localhost:8080/public/assets/tokens/likecoin.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/likecoin.svg'
         }
       }
     ],
@@ -242,7 +240,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -258,7 +256,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       },
       {
@@ -266,7 +264,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1948', '1949', '1950'],
@@ -279,7 +277,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'terra-luna',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/luna.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/luna.png',
         coinMinimalDenom:
           'ibc/0EF15DF2F02480ADE0BB6E85D9EBB5DAEA2836D3860E9F97F9AADE4F57A31AA0',
         coinDenom: 'LUNA',
@@ -295,13 +293,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uluna',
           coinDecimals: 6,
           coinGeckoId: 'terra-luna',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/luna.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/luna.png'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -317,7 +315,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       }
     ],
@@ -331,7 +329,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'bitcanna',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/bcna.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/bcna.svg',
         coinMinimalDenom:
           'ibc/D805F1DA50D31B96E4282C1D4181EDDFB1A44A598BFF5666F4B43E4B8BEA95A5',
         coinDenom: 'BCNA',
@@ -347,7 +345,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ubcna',
           coinDecimals: 6,
           coinGeckoId: 'bitcanna',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/bcna.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/bcna.svg'
         }
       },
       {
@@ -355,7 +353,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1759', '1760', '1761'],
@@ -368,7 +366,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -384,13 +382,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'bitcanna',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/bcna.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/bcna.svg',
         coinMinimalDenom:
           'ibc/D805F1DA50D31B96E4282C1D4181EDDFB1A44A598BFF5666F4B43E4B8BEA95A5',
         coinDenom: 'BCNA',
@@ -406,7 +404,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ubcna',
           coinDecimals: 6,
           coinGeckoId: 'bitcanna',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/bcna.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/bcna.svg'
         }
       }
     ],
@@ -420,7 +418,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:ubtsg',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg',
         coinMinimalDenom:
           'ibc/4E5444C35610CC76FC94E7F7886B93121175C28262DDFDDE6F84E82BF2425452',
         coinDenom: 'BTSG',
@@ -436,7 +434,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ubtsg',
           coinDecimals: 6,
           coinGeckoId: 'pool:ubtsg',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg'
         }
       },
       {
@@ -444,7 +442,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2030', '2031', '2032'],
@@ -457,7 +455,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -473,13 +471,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:ubtsg',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg',
         coinMinimalDenom:
           'ibc/4E5444C35610CC76FC94E7F7886B93121175C28262DDFDDE6F84E82BF2425452',
         coinDenom: 'BTSG',
@@ -495,7 +493,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ubtsg',
           coinDecimals: 6,
           coinGeckoId: 'pool:ubtsg',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg'
         }
       }
     ],
@@ -509,7 +507,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uxki',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ki.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ki.svg',
         coinMinimalDenom:
           'ibc/B547DC9B897E7C3AA5B824696110B8E3D2C31E3ED3F02FF363DCBAD82457E07E',
         coinDenom: 'XKI',
@@ -525,7 +523,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uxki',
           coinDecimals: 6,
           coinGeckoId: 'pool:uxki',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ki.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ki.svg'
         }
       },
       {
@@ -533,7 +531,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2088', '2089', '2090'],
@@ -546,7 +544,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uxki',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ki.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ki.svg',
         coinMinimalDenom:
           'ibc/B547DC9B897E7C3AA5B824696110B8E3D2C31E3ED3F02FF363DCBAD82457E07E',
         coinDenom: 'XKI',
@@ -562,13 +560,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uxki',
           coinDecimals: 6,
           coinGeckoId: 'pool:uxki',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ki.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ki.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -584,7 +582,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       }
     ],
@@ -598,7 +596,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'medibloc',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/med.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/med.png',
         coinMinimalDenom:
           'ibc/3BCCC93AD5DF58D11A6F8A05FA8BC801CBA0BA61A981F57E91B8B598BF8061CB',
         coinDenom: 'MED',
@@ -614,7 +612,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'umed',
           coinDecimals: 6,
           coinGeckoId: 'medibloc',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/med.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/med.png'
         }
       },
       {
@@ -622,7 +620,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1885', '1886', '1887'],
@@ -635,7 +633,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -651,13 +649,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'medibloc',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/med.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/med.png',
         coinMinimalDenom:
           'ibc/3BCCC93AD5DF58D11A6F8A05FA8BC801CBA0BA61A981F57E91B8B598BF8061CB',
         coinDenom: 'MED',
@@ -673,7 +671,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'umed',
           coinDecimals: 6,
           coinGeckoId: 'medibloc',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/med.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/med.png'
         }
       }
     ],
@@ -687,7 +685,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:ubtsg',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg',
         coinMinimalDenom:
           'ibc/4E5444C35610CC76FC94E7F7886B93121175C28262DDFDDE6F84E82BF2425452',
         coinDenom: 'BTSG',
@@ -703,13 +701,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ubtsg',
           coinDecimals: 6,
           coinGeckoId: 'pool:ubtsg',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/btsg.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/btsg.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -725,7 +723,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       }
     ],
@@ -739,7 +737,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 9,
         coinGeckoId: 'cheqd-network',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cheq.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cheq.svg',
         coinMinimalDenom:
           'ibc/7A08C6F11EF0F59EB841B9F788A87EC9F2361C7D9703157EC13D940DC53031FA',
         coinDenom: 'CHEQ',
@@ -755,7 +753,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ncheq',
           coinDecimals: 9,
           coinGeckoId: 'cheqd-network',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cheq.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cheq.svg'
         }
       },
       {
@@ -763,7 +761,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2127', '2128'],
@@ -776,7 +774,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:ustars',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/stars.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/stars.png',
         coinMinimalDenom:
           'ibc/987C17B11ABC2B20019178ACE62929FE9840202CE79498E29FE8E5CB02B7C0A4',
         coinDenom: 'STARS',
@@ -792,7 +790,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ustars',
           coinDecimals: 6,
           coinGeckoId: 'pool:ustars',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/stars.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/stars.png'
         }
       },
       {
@@ -800,7 +798,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1995', '1996', '1997'],
@@ -813,7 +811,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uhuahua',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/huahua.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/huahua.png',
         coinMinimalDenom:
           'ibc/B9E0A1A524E98BB407D3CED8720EFEFD186002F90C1B1B7964811DD0CCC12228',
         coinDenom: 'HUAHUA',
@@ -829,7 +827,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uhuahua',
           coinDecimals: 6,
           coinGeckoId: 'pool:uhuahua',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/huahua.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/huahua.png'
         }
       },
       {
@@ -837,7 +835,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1960', '1961', '1962'],
@@ -850,7 +848,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -866,13 +864,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uhuahua',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/huahua.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/huahua.png',
         coinMinimalDenom:
           'ibc/B9E0A1A524E98BB407D3CED8720EFEFD186002F90C1B1B7964811DD0CCC12228',
         coinDenom: 'HUAHUA',
@@ -888,7 +886,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uhuahua',
           coinDecimals: 6,
           coinGeckoId: 'pool:uhuahua',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/huahua.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/huahua.png'
         }
       }
     ],
@@ -902,7 +900,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -918,13 +916,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:ustars',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/stars.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/stars.png',
         coinMinimalDenom:
           'ibc/987C17B11ABC2B20019178ACE62929FE9840202CE79498E29FE8E5CB02B7C0A4',
         coinDenom: 'STARS',
@@ -940,7 +938,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ustars',
           coinDecimals: 6,
           coinGeckoId: 'pool:ustars',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/stars.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/stars.png'
         }
       }
     ],
@@ -954,7 +952,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'persistence',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/xprt.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/xprt.png',
         coinMinimalDenom:
           'ibc/A0CC0CF735BFB30E730C70019D4218A1244FF383503FF7579C9201AB93CA9293',
         coinDenom: 'XPRT',
@@ -970,13 +968,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uxprt',
           coinDecimals: 6,
           coinGeckoId: 'persistence',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/xprt.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/xprt.png'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -992,7 +990,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       }
     ],
@@ -1006,7 +1004,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'vidulum',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/vdl.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/vdl.svg',
         coinMinimalDenom:
           'ibc/E7B35499CFBEB0FF5778127ABA4FB2C4B79A6B8D3D831D4379C4048C238796BD',
         coinDenom: 'VDL',
@@ -1022,7 +1020,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uvdl',
           coinDecimals: 6,
           coinGeckoId: 'vidulum',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/vdl.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/vdl.svg'
         }
       },
       {
@@ -1030,7 +1028,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['1982', '2013', '2014'],
@@ -1043,7 +1041,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -1059,13 +1057,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 9,
         coinGeckoId: 'cheqd-network',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cheq.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cheq.svg',
         coinMinimalDenom:
           'ibc/7A08C6F11EF0F59EB841B9F788A87EC9F2361C7D9703157EC13D940DC53031FA',
         coinDenom: 'CHEQ',
@@ -1081,7 +1079,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'ncheq',
           coinDecimals: 9,
           coinGeckoId: 'cheqd-network',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cheq.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cheq.svg'
         }
       }
     ],
@@ -1095,7 +1093,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -1111,13 +1109,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:udsm',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/dsm.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/dsm.svg',
         coinMinimalDenom:
           'ibc/EA4C0A9F72E2CEDF10D0E7A9A6A22954DB3444910DB5BE980DF59B05A46DAD1C',
         coinDenom: 'DSM',
@@ -1133,7 +1131,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'udsm',
           coinDecimals: 6,
           coinGeckoId: 'pool:udsm',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/dsm.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/dsm.svg'
         }
       }
     ],
@@ -1147,7 +1145,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:udsm',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/dsm.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/dsm.svg',
         coinMinimalDenom:
           'ibc/EA4C0A9F72E2CEDF10D0E7A9A6A22954DB3444910DB5BE980DF59B05A46DAD1C',
         coinDenom: 'DSM',
@@ -1163,7 +1161,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'udsm',
           coinDecimals: 6,
           coinGeckoId: 'pool:udsm',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/dsm.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/dsm.svg'
         }
       },
       {
@@ -1171,7 +1169,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2007', '2008', '2009'],
@@ -1184,7 +1182,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:udig',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/dig.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/dig.png',
         coinMinimalDenom:
           'ibc/307E5C96C8F60D1CBEE269A9A86C0834E1DB06F2B3788AE4F716EDB97A48B97D',
         coinDenom: 'DIG',
@@ -1200,7 +1198,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'udig',
           coinDecimals: 6,
           coinGeckoId: 'pool:udig',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/dig.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/dig.png'
         }
       },
       {
@@ -1208,7 +1206,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2020'],
@@ -1221,7 +1219,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:udarc',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/darc.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/darc.svg',
         coinMinimalDenom:
           'ibc/346786EA82F41FE55FAD14BF69AD8BA9B36985406E43F3CB23E6C45A285A9593',
         coinDenom: 'DARC',
@@ -1237,7 +1235,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'udarc',
           coinDecimals: 6,
           coinGeckoId: 'pool:udarc',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/darc.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/darc.svg'
         }
       },
       {
@@ -1245,7 +1243,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2258', '2259', '2260'],
@@ -1258,7 +1256,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -1274,13 +1272,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:udarc',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/darc.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/darc.svg',
         coinMinimalDenom:
           'ibc/346786EA82F41FE55FAD14BF69AD8BA9B36985406E43F3CB23E6C45A285A9593',
         coinDenom: 'DARC',
@@ -1296,7 +1294,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'udarc',
           coinDecimals: 6,
           coinGeckoId: 'pool:udarc',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/darc.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/darc.svg'
         }
       }
     ],
@@ -1310,7 +1308,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uumee',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png',
         coinMinimalDenom:
           'ibc/67795E528DF67C5606FC20F824EA39A6EF55BA133F4DC79C90A8C47A0901E17C',
         coinDenom: 'UMEE',
@@ -1326,7 +1324,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uumee',
           coinDecimals: 6,
           coinGeckoId: 'pool:uumee',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png'
         }
       },
       {
@@ -1334,7 +1332,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2129', '2130', '2131'],
@@ -1347,7 +1345,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uumee',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png',
         coinMinimalDenom:
           'ibc/67795E528DF67C5606FC20F824EA39A6EF55BA133F4DC79C90A8C47A0901E17C',
         coinDenom: 'UMEE',
@@ -1363,13 +1361,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uumee',
           coinDecimals: 6,
           coinGeckoId: 'pool:uumee',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'terrausd',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png',
         coinMinimalDenom:
           'ibc/BE1BB42D4BE3C30D50B68D7C41DB4DFCE9678E8EF8C539F6E6A9345048894FCC',
         coinDenom: 'UST',
@@ -1385,7 +1383,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uusd',
           coinDecimals: 6,
           coinGeckoId: 'terrausd',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/ust.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/ust.png'
         }
       }
     ],
@@ -1399,7 +1397,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 6,
         coinGeckoId: 'cosmos',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg',
         coinMinimalDenom:
           'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
         coinDenom: 'ATOM',
@@ -1415,13 +1413,13 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uatom',
           coinDecimals: 6,
           coinGeckoId: 'cosmos',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/cosmos.svg'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/cosmos.svg'
         }
       },
       {
         coinDecimals: 6,
         coinGeckoId: 'pool:uumee',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png',
         coinMinimalDenom:
           'ibc/67795E528DF67C5606FC20F824EA39A6EF55BA133F4DC79C90A8C47A0901E17C',
         coinDenom: 'UMEE',
@@ -1437,7 +1435,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'uumee',
           coinDecimals: 6,
           coinGeckoId: 'pool:uumee',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/umee.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/umee.png'
         }
       }
     ],
@@ -1451,7 +1449,7 @@ const extraIncentivePools = [
       {
         coinDecimals: 18,
         coinGeckoId: 'pstake-finance',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/pstake.png',
+        coinImageUrl: 'http://localhost:8080/assets/tokens/pstake.png',
         coinMinimalDenom:
           'ibc/8061A06D3BD4D52C4A28FFECF7150D370393AF0BA661C3776C54FF32836C3961',
         coinDenom: 'PSTAKE (channel-4)',
@@ -1471,7 +1469,7 @@ const extraIncentivePools = [
           coinMinimalDenom: 'gravity0xfB5c6815cA3AC72Ce9F5006869AE67f18bF77006',
           coinDecimals: 18,
           coinGeckoId: 'pstake-finance',
-          coinImageUrl: 'http://localhost:8080/public/assets/tokens/pstake.png'
+          coinImageUrl: 'http://localhost:8080/assets/tokens/pstake.png'
         }
       },
       {
@@ -1479,7 +1477,7 @@ const extraIncentivePools = [
         coinMinimalDenom: 'uosmo',
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
-        coinImageUrl: 'http://localhost:8080/public/assets/tokens/osmosis.svg'
+        coinImageUrl: 'http://localhost:8080/assets/tokens/osmosis.svg'
       }
     ],
     gaugeIds: ['2272'],

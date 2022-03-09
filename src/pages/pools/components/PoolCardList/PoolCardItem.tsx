@@ -37,10 +37,7 @@ export const PoolCardItem = function PoolCardItem(
     >
       <PoolCardItemContainer>
         <TokenInfoContainer>
-          <PoolCardTokenIcon
-            bgIndex={poolId}
-            src="/public/assets/Icons/OSMO.svg"
-          />
+          <PoolCardTokenIcon bgIndex={poolId} src="/assets/Icons/OSMO.svg" />
           <div style={{ marginTop: '15px' }}>
             <h5>Pool #{poolId}</h5>
             <PoolSubTitle>
