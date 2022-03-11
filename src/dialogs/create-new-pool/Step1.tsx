@@ -2,23 +2,20 @@ import styled from '@emotion/styled';
 import { observer } from 'mobx-react-lite';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePrevious } from 'react-use';
-import { ButtonFaint, ButtonPrimary } from 'src/components/layouts/Buttons';
-import { CenterV } from 'src/components/layouts/Containers';
-import { TokenSelect } from 'src/components/SwapToken/TokenSelect';
-import { Text, TitleText } from 'src/components/Texts';
+import { ButtonFaint, ButtonPrimary } from 'components/layouts/Buttons';
+import { CenterV } from 'components/layouts/Containers';
+import { TokenSelect } from 'components/SwapToken/TokenSelect';
+import { Text, TitleText } from 'components/Texts';
 import {
   colorBlack,
   colorFilterWhiteHigh,
   colorGold,
   colorWhiteFaint
-} from 'src/emotionStyles/colors';
-import {
-  cssAlignRightInput,
-  cssNumberTextInput
-} from 'src/emotionStyles/forms';
-import { cssFontPoppins } from 'src/emotionStyles/texts';
+} from 'emotionStyles/colors';
+import { cssAlignRightInput, cssNumberTextInput } from 'emotionStyles/forms';
+import { cssFontPoppins } from 'emotionStyles/texts';
 import { CreateNewPoolConfig } from './index';
-import { PoolCreationFeeView } from 'src/dialogs/create-new-pool/creation-fee';
+import { PoolCreationFeeView } from 'dialogs/create-new-pool/creation-fee';
 
 interface Props {
   config: CreateNewPoolConfig;

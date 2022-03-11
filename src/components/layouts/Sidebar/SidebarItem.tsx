@@ -6,9 +6,9 @@ import React, {
   useState
 } from 'react';
 import cn from 'clsx';
-import { TSIDEBAR_ITEM } from 'src/constants';
+import { TSIDEBAR_ITEM } from 'constants/layout';
 import { NavLink } from 'react-router-dom';
-import { cssAbsoluteCenter } from 'src/emotionStyles/layout';
+import { cssAbsoluteCenter } from 'emotionStyles/layout';
 
 const NavLinkFallback: FunctionComponent<{
   sidebarItem: TSIDEBAR_ITEM;

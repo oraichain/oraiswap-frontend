@@ -7,7 +7,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import 'hooks/useContractsAddress';
 import './index.scss';
-// import ScrollToTop from './layouts/ScrollToTop';
+import ScrollToTop from './layouts/ScrollToTop';
 import Contract from './layouts/Contract';
 import App from './layouts/App';
 import Keplr from 'libs/keplr';
@@ -44,7 +44,7 @@ const checkKeplr = async () => {
               <IBCHistoryNotifier />
               <Contract>
                 <Router>
-                  {/* <ScrollToTop /> */}
+                  <ScrollToTop />
                   <App />
                 </Router>
               </Contract>

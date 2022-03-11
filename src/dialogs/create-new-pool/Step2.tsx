@@ -4,7 +4,7 @@ import { CreateNewPoolConfig } from './index';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../../stores';
 import { AppCurrency } from '@keplr-wallet/types';
-import { PoolCreationFeeView } from 'src/dialogs/create-new-pool/creation-fee';
+import { PoolCreationFeeView } from 'dialogs/create-new-pool/creation-fee';
 
 export const NewPoolStage2: FunctionComponent<{
   config: CreateNewPoolConfig;

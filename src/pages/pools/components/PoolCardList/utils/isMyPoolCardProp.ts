@@ -3,7 +3,7 @@
 import {
   IncentivizedPoolCardProp,
   MyPoolCardProp
-} from 'src/pages/pools/models/poolCardProps';
+} from 'pages/pools/models/poolCardProps';
 import { Optional } from 'utility-types';
 
 export function isMyPoolCardProp(

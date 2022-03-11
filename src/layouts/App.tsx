@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { ContractProvider, useContractState } from 'hooks/useContract';
 import useLocalStorage from 'libs/useLocalStorage';
 import Header from './Header';

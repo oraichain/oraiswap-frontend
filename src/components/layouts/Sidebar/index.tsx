@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import cn from 'clsx';
-import { Container } from '../../containers';
+import { Container } from 'components/containers';
 import { TCardTypes } from '../../../interfaces';
 import {
   LAYOUT,
@@ -12,7 +12,7 @@ import { SidebarItem } from './SidebarItem';
 import { useHistory, withRouter } from 'react-router-dom';
 import { SidebarBottom } from './SidebarBottom';
 import isArray from 'lodash-es/isArray';
-import useWindowSize from 'src/hooks/useWindowSize';
+import useWindowSize from 'hooks/useWindowSize';
 
 const SideBar: FunctionComponent = () => {
   const history = useHistory();
