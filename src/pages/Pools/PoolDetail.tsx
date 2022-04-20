@@ -204,6 +204,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ],
     async () => {
       let t = await fetchRewardInfo(address, assetToken);
+      console.log(t);
 
       return t;
     },
@@ -228,57 +229,72 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   }, [pairInfoData]);
 
+  // useEffect(() => {
+  //   if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
+  //     const totalRewardAmount = !!totalRewardInfoData.reward_infos.length
+  //       ? +totalRewardInfoData.reward_infos[0]?.pending_reward
+  //       : 0;
+
+  //     const totalRewardPerSec = rewardPerSecInfoData.reduce(
+  //       (a: any, b: any) => +a.amount + +b.amount
+  //     );
+  //     let res = rewardPerSecInfoData.map((r: any) => {
+  //       const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
+  //       if (!!r.info.token) {
+  //         let token = filteredTokens.find(
+  //           (t) => t.contractAddress === r.info.token.contract_addr!
+  //         );
+  //         // const usdValue = getUsd(
+  //         //   amount,
+  //         //   prices[token!.coingeckoId].price,
+  //         //   token!.decimals
+  //         // );
+  //         return {
+  //           ...token,
+  //           amount,
+  //           rewardPerSec: +r.amount,
+  //           name: tokenAddrToName[
+  //             r.info.token.contract_addr! as keyof typeof tokenAddrToName
+  //           ]
+  //           // usdValue
+  //         };
+  //       } else {
+  //         let token = filteredTokens.find(
+  //           (t) => t.denom === r.info.native_token.denom!
+  //         );
+  //         // const usdValue = getUsd(
+  //         //   amount,
+  //         //   prices[token!.coingeckoId].price,
+  //         //   token!.decimals
+  //         // );
+  //         return {
+  //           ...token,
+  //           amount,
+  //           rewardPerSec: +r.amount,
+  //           name: r.info.native_token.denom
+
+  //           // usdValue
+  //         };
+  //       }
+  //     });
+  //     setPendingRewards(res);
+  //   }
+  // }, [totalRewardInfoData, rewardPerSecInfoData]);
+
   useEffect(() => {
-    if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
+    if (!!totalRewardInfoData) {
       const totalRewardAmount = !!totalRewardInfoData.reward_infos.length
         ? +totalRewardInfoData.reward_infos[0]?.pending_reward
         : 0;
 
-      const totalRewardPerSec = rewardPerSecInfoData.reduce(
-        (a: any, b: any) => +a.amount + +b.amount
-      );
-      let res = rewardPerSecInfoData.map((r: any) => {
-        const amount = (totalRewardAmount * +r.amount) / totalRewardPerSec;
-        if (!!r.info.token) {
-          let token = filteredTokens.find(
-            (t) => t.contractAddress === r.info.token.contract_addr!
-          );
-          // const usdValue = getUsd(
-          //   amount,
-          //   prices[token!.coingeckoId].price,
-          //   token!.decimals
-          // );
-          return {
-            ...token,
-            amount,
-            rewardPerSec: +r.amount,
-            name: tokenAddrToName[
-              r.info.token.contract_addr! as keyof typeof tokenAddrToName
-            ]
-            // usdValue
-          };
-        } else {
-          let token = filteredTokens.find(
-            (t) => t.denom === r.info.native_token.denom!
-          );
-          // const usdValue = getUsd(
-          //   amount,
-          //   prices[token!.coingeckoId].price,
-          //   token!.decimals
-          // );
-          return {
-            ...token,
-            amount,
-            rewardPerSec: +r.amount,
-            name: r.info.native_token.denom
-
-            // usdValue
-          };
+      setPendingRewards([
+        {
+          name: 'ORAIX',
+          amount: totalRewardAmount
         }
-      });
-      setPendingRewards(res);
+      ]);
     }
-  }, [totalRewardInfoData, rewardPerSecInfoData]);
+  }, [totalRewardInfoData]);
 
   const Token1Icon = pairInfoData?.token1.Icon,
     Token2Icon = pairInfoData?.token2.Icon;
