@@ -1,4 +1,4 @@
-import { LocalKVStore } from '@keplr-wallet/common/build/kv-store/local';
+import { LocalKVStore } from '@owallet/common/build/kv-store/local';
 import { BSC_RPC, ORAI } from 'config/constants';
 // import { WalletConnect } from '@web3-react/walletconnect';
 import { BSC_CHAIN_ID } from 'config/constants';

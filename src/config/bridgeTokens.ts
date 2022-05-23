@@ -80,7 +80,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'cosmoshub-4',
         rpc: 'https://rpc-cosmos.oraidex.io',
-        lcd: 'https://lcd-cosmoshub.keplr.app',
+        lcd: 'https://lcd-cosmoshub.owallet.app',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
         Icon: ATOMCOSMOS
@@ -95,7 +95,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'columbus-5',
         rpc: 'https://rpc-terra.orai.io',
-        lcd: 'https://lcd-columbus.keplr.app',
+        lcd: 'https://lcd-columbus.owallet.app',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
         Icon: LUNA
@@ -110,7 +110,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'columbus-5',
         rpc: 'https://rpc-terra.orai.io',
-        lcd: 'https://lcd-columbus.keplr.app',
+        lcd: 'https://lcd-columbus.owallet.app',
         cosmosBased: true,
         Icon: UST
       },
@@ -122,7 +122,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'osmosis-1',
         rpc: 'https://osmosis.rpc.orai.io',
-        lcd: 'https://lcd-osmosis.keplr.app',
+        lcd: 'https://lcd-osmosis.owallet.app',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,

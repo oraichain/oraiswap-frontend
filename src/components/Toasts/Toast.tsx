@@ -117,7 +117,7 @@ export const displayToast: DisplayToastFn = (
       );
     case TToastType.KEPLR_FAILED:
       return toast(
-        <ToastKeplrFailed message={inputExtraData.message} />,
+        <ToastOWalletFailed message={inputExtraData.message} />,
         inputOptions
       );
     default:
@@ -154,13 +154,13 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   </div>
 );
 
-const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
+const ToastOWalletFailed: FunctionComponent<{ message: string }> = ({
   message
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
     <section className={styles.toast_section}>
-      <h6>Keplr failed</h6>
+      <h6>OWallet failed</h6>
       <p>{message}</p>
     </section>
   </div>

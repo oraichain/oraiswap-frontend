@@ -5,7 +5,7 @@ import MESSAGE from 'lang/MESSAGE.json';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
 import MetamaskImage from 'assets/icons/metamask.svg';
-import KeplrImage from 'assets/images/keplr.png';
+import OWalletImage from 'assets/images/owallet.png';
 
 const cx = cn.bind(style);
 
@@ -16,16 +16,16 @@ interface ConnectWalletModalProps {
   address: string;
   metamaskAddress: string | null;
   disconnectMetamask: () => Promise<void>;
-  disconnectKeplr: () => Promise<void>;
-  connectKeplr: () => Promise<void>;
+  disconnectOWallet: () => Promise<void>;
+  connectOWallet: () => Promise<void>;
   connectMetamask: () => Promise<void>;
 }
 
 const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   isOpen,
   close,
-  connectKeplr,
-  disconnectKeplr,
+  connectOWallet,
+  disconnectOWallet,
   connectMetamask,
   metamaskAddress,
   disconnectMetamask,
@@ -40,11 +40,11 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         </div>
         <div className={cx('options')}>
           <LoginWidget
-            text={MESSAGE.Form.Button.ConnectKeplr}
+            text={MESSAGE.Form.Button.ConnectOWallet}
             address={address}
-            logo={KeplrImage}
-            connect={connectKeplr}
-            disconnect={disconnectKeplr}
+            logo={OWalletImage}
+            connect={connectOWallet}
+            disconnect={disconnectOWallet}
           />
           <LoginWidget
             address={metamaskAddress}

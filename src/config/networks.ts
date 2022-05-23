@@ -56,7 +56,7 @@ export interface NetworkItem {
   rpc: string;
 }
 
-// sadly our Oraichain is not added into keplr yet
+// sadly our Oraichain is not added into owallet yet
 export const mobileBlacklistNetworks: string[] = [
   network.chainId
   // 'cosmoshub-4',

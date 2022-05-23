@@ -14,7 +14,7 @@
       }
     },
     "Button": {
-      "ConnectKeplr": "Keplr Wallet",
+      "ConnectOWallet": "OWallet Wallet",
       "ConnectMetamask": "Connect Metamask",
       "ConnectTheWallet": "Connect the Wallet",
       "SelectAsset": "Select an asset",
@@ -48,7 +48,7 @@
     "Connect": "Connect",
     "Disconnect": "Disconnect",
     "DownloadExtension": "Download Terra Extension",
-    "ConnectKeplr": "Connect Keplr",
+    "ConnectOWallet": "Connect OWallet",
     "CopyAddress": "Copy Address",
     "TerraFinder": "View on Terra Finder"
   },

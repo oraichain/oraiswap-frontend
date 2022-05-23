@@ -17,9 +17,9 @@ const App = () => {
 
   const updateAddress = async () => {
     // automatically update. If user is also using Oraichain wallet => dont update
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) throw 'You must install Keplr to continue';
-    const newAddress = await window.Keplr.getKeplrAddr();
+    const owallet = await window.OWallet.getOWallet();
+    if (!owallet) throw 'You must install OWallet to continue';
+    const newAddress = await window.OWallet.getOWalletAddr();
     if (newAddress) {
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
@@ -36,20 +36,20 @@ const App = () => {
     if (!address) {
       updateAddress();
     }
-    window.addEventListener('keplr_keystorechange', keplrHandler);
+    window.addEventListener('owallet_keystorechange', owalletHandler);
   }, []);
 
-  const keplrHandler = async () => {
+  const owalletHandler = async () => {
     try {
       console.log(
-        'Key store in Keplr is changed. You may need to refetch the account info.'
+        'Key store in OWallet is changed. You may need to refetch the account info.'
       );
       await updateAddress();
       // window.location.reload();
     } catch (error) {
       console.log('Error: ', error);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`
+        message: `There is an unexpected error with OWallet wallet. Please try again!`
       });
     }
   };

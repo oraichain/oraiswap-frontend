@@ -18,14 +18,16 @@ const Modal: FC<Modal> = ({
     isOpen={isOpen}
     onRequestClose={close}
   >
-    {isCloseBtn && (
-      <div className={styles.close}>
-        <span onClick={close}>
-          <CloseIcon color={'#ffffff'} width={20} height={20} />
-        </span>
-      </div>
-    )}
-    {children}
+    <>
+      {isCloseBtn && (
+        <div className={styles.close}>
+          <span onClick={close}>
+            <CloseIcon color={'#ffffff'} width={20} height={20} />
+          </span>
+        </div>
+      )}
+      {children}
+    </>
   </ReactModal>
 );
 

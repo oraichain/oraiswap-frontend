@@ -39,7 +39,7 @@ import {
   parseAmountToWithDecimal as parseAmountTo
 } from 'libs/utils';
 import Loader from 'components/Loader';
-import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
+import { Bech32Address, ibc } from '@owallet/cosmos';
 import Long from 'long';
 import { isMobile } from '@walletconnect/browser-utils';
 import useGlobalState from 'hooks/useGlobalState';
@@ -315,7 +315,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 type AmountDetails = { [key: string]: AmountDetail };
 
 const Balance: React.FC<BalanceProps> = () => {
-  const [keplrAddress] = useGlobalState('address');
+  const [owalletAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
@@ -410,10 +410,10 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) {
+      const owallet = await window.OWallet.getOWallet();
+      if (!owallet) {
         return displayToast(TToastType.TX_FAILED, {
-          message: 'You must install Keplr to continue'
+          message: 'You must install OWallet to continue'
         });
       }
       const pendingList: TokenItemType[] = [];
@@ -421,7 +421,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrAddr(token.chainId);
+            const address = await window.OWallet.getOWalletAddr(token.chainId);
             return loadAmountDetail(address, token, pendingList);
           })
         )
@@ -500,17 +500,19 @@ const Balance: React.FC<BalanceProps> = () => {
     amount: number
   ) => {
     try {
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) return;
+      const owallet = await window.OWallet.getOWallet();
+      if (!owallet) return;
 
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      await window.OWallet.suggestChain(fromToken.chainId);
+      const fromAddress = await window.OWallet.getOWalletAddr(
+        fromToken.chainId
+      );
       const rawAmount = Math.round(
         amount * 10 ** fromToken.decimals - parseInt(ORAI_BRIDGE_EVM_FEE)
       ).toString();
 
-      const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const offlineSigner = window.owallet.getOfflineSigner(fromToken.chainId);
+      // Initialize the gaia api with the offline signer that is injected by OWallet extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
@@ -554,12 +556,14 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     try {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) return;
-      await window.Keplr.suggestChain(fromToken.chainId);
-      await window.Keplr.suggestChain(toToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      const owallet = await window.OWallet.getOWallet();
+      if (!owallet) return;
+      await window.OWallet.suggestChain(fromToken.chainId);
+      await window.OWallet.suggestChain(toToken.chainId);
+      const fromAddress = await window.OWallet.getOWalletAddr(
+        fromToken.chainId
+      );
+      const toAddress = await window.OWallet.getOWalletAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
         return;
       }
@@ -592,8 +596,10 @@ const Balance: React.FC<BalanceProps> = () => {
         console.log(url);
         window.location.href = url;
       } else {
-        const offlineSigner = window.keplr.getOfflineSigner(fromToken.chainId);
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+        const offlineSigner = window.owallet.getOfflineSigner(
+          fromToken.chainId
+        );
+        // Initialize the gaia api with the offline signer that is injected by OWallet extension.
         const client = await SigningStargateClient.connectWithSigner(
           fromToken.rpc,
           offlineSigner
@@ -623,9 +629,9 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async () => {
-    if (!metamaskAddress || !keplrAddress) {
+    if (!metamaskAddress || !owalletAddress) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Please login both metamask and keplr!'
+        message: 'Please login both metamask and owallet!'
       });
       return;
     }
@@ -647,7 +653,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAmount.toString(),
         from!.contractAddress!,
         metamaskAddress,
-        keplrAddress
+        owalletAddress
       );
 
       displayToast(TToastType.TX_SUCCESSFUL, {
@@ -698,7 +704,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const msgs = await generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
-        sender: keplrAddress,
+        sender: owalletAddress,
         fromAmount: _fromAmount,
         fromToken: token
       });
@@ -711,7 +717,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
-        walletAddr: keplrAddress,
+        walletAddr: owalletAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds } as HandleOptions

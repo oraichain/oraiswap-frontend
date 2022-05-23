@@ -44,21 +44,21 @@ const RequireAuthButton: React.FC<any> = ({
     }
   };
 
-  const connectKeplr = async () => {
-    if (!(await window.Keplr.getKeplr())) {
-      alert('You must install Keplr to continue');
+  const connectOWallet = async () => {
+    if (!(await window.OWallet.getOWallet())) {
+      alert('You must install OWallet to continue');
       return;
     }
 
-    await window.Keplr.suggestChain(network.chainId);
-    const address = await window.Keplr.getKeplrAddr();
+    await window.OWallet.suggestChain(network.chainId);
+    const address = await window.OWallet.getOWalletAddr();
     console.log(address);
     setAddress(address as string);
   };
 
-  const disconnectKeplr = async () => {
+  const disconnectOWallet = async () => {
     try {
-      window.Keplr.disconnect();
+      window.OWallet.disconnect();
       setAddress('');
     } catch (ex) {
       console.log(ex);
@@ -88,9 +88,9 @@ const RequireAuthButton: React.FC<any> = ({
       {openConnectWalletModal && (
         <ConnectWalletModal
           connectMetamask={connectMetamask}
-          connectKeplr={connectKeplr}
+          connectOWallet={connectOWallet}
           disconnectMetamask={disconnectMetamask}
-          disconnectKeplr={disconnectKeplr}
+          disconnectOWallet={disconnectOWallet}
           address={address}
           metamaskAddress={metamaskAddress}
           isOpen={openConnectWalletModal}

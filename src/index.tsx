@@ -4,7 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import App from './layouts/App';
-import Keplr from 'libs/keplr';
+import OWallet from 'libs/owallet';
 import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,20 +12,20 @@ import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
 
-// enable Keplr
-window.Keplr = new Keplr();
+// enable OWallet
+window.OWallet = new OWallet();
 window.Metamask = new Metamask();
 const queryClient = new QueryClient();
 
 const startApp = async () => {
   try {
-    const keplr = await window.Keplr.getKeplr();
+    const owallet = await window.OWallet.getOWallet();
     // suggest our chain
-    if (keplr) {
+    if (owallet) {
       // always trigger suggest chain when users enter the webpage
-      await window.Keplr.suggestChain(network.chainId);
-      await window.Keplr.suggestChain('columbus-5');
-      await window.Keplr.suggestChain('oraibridge-subnet');
+      await window.OWallet.suggestChain(network.chainId);
+      await window.OWallet.suggestChain('columbus-5');
+      await window.OWallet.suggestChain('oraibridge-subnet');
     }
   } catch (ex) {
     console.log(ex);

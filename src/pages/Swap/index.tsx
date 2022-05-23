@@ -34,15 +34,15 @@ interface SwapProps {}
 
 const suggestToken = async (token: TokenItemType) => {
   if (token.contractAddress) {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
+    const owallet = await window.OWallet.getOWallet();
+    if (!owallet) {
       return displayToast(TToastType.KEPLR_FAILED, {
-        message: 'You need to install Keplr to continue'
+        message: 'You need to install OWallet to continue'
       });
     }
 
     if (!isMobile())
-      await keplr.suggestToken(token.chainId, token.contractAddress);
+      await owallet.suggestToken(token.chainId, token.contractAddress);
   }
 };
 

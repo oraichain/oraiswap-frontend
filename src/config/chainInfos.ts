@@ -1,5 +1,5 @@
-import { Bech32Address } from '@keplr-wallet/cosmos';
-import { ChainInfo } from '@keplr-wallet/types';
+import { Bech32Address } from '@owallet/cosmos';
+import { ChainInfo } from '@owallet/types';
 import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_DENOM,
@@ -26,7 +26,6 @@ export const embedChainInfos: ChainInfo[] = [
       coinImageUrl:
         'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
     },
-    walletUrl: 'https://api.wallet.orai.io',
     bip44: {
       coinType: 118
     },

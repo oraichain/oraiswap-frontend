@@ -21,12 +21,12 @@ export interface HandleOptions {
 }
 
 const collectWallet = async () => {
-  const keplr = await window.Keplr.getKeplr();
-  if (!keplr) {
-    throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
+  const owallet = await window.OWallet.getOWallet();
+  if (!owallet) {
+    throw 'You have to install OWallet first if you do not use a mnemonic to sign transactions';
   }
-  // use keplr instead
-  const wallet = keplr.getOfflineSigner(network.chainId);
+  // use owallet instead
+  const wallet = owallet.getOfflineSigner(network.chainId);
   return wallet;
 };
 
@@ -55,8 +55,8 @@ class CosmJs {
         prefix,
         walletAddr
       } = args;
-      if (await window.Keplr.getKeplr())
-        await window.Keplr.suggestChain(network.chainId);
+      if (await window.OWallet.getOWallet())
+        await window.OWallet.suggestChain(network.chainId);
       const wallet = await collectWallet();
       const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
         network.rpc,

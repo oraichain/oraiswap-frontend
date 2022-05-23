@@ -1,8 +1,8 @@
 import { Network } from 'bip32';
 import { Buffer } from 'buffer';
-import { KVStore } from '@keplr-wallet/common';
-import Keplr from '../libs/keplr';
-import { Keplr as keplr } from '@keplr-wallet/types';
+import { KVStore } from '@owallet/common';
+import OWallet from '../libs/owallet';
+import { OWallet as owallet } from '@owallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
@@ -45,7 +45,7 @@ declare global {
     memo?: string;
   };
 
-  type ExecuteKeplrOptions = {
+  type ExecuteOWalletOptions = {
     accountNumber: Long | null;
     sequence: number;
     gas: number;
@@ -96,17 +96,17 @@ declare global {
     MSStream: String;
     Keystation: any;
     Wallet: Wallet;
-    Keplr: Keplr;
+    OWallet: OWallet;
     web3: Web3;
     ethereum: MetaMaskEthereumProvider;
     Metamask: Metamask;
-    keplr: keplr;
+    owallet: owallet;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
 
   declare const APP_SETTINGS: Record<string, any>;
-  type keplrType = keplr;
+  type owalletType = owallet;
   namespace NodeJS {
     interface ProcessEnv {
       REACT_APP_NETWORK: 'testnet' | 'mainnet';
