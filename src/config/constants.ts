@@ -37,13 +37,13 @@ export const ETHEREUM_RPC =
   'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
-export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
+export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet';
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
-export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
+export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'gravity';
 export const ORAI_BRIDGE_EVM_FEE = '1';
-export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
-export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
+export const ORAI_BRIDGE_RPC = 'https://bridge.rpc.orai.io';
+export const ORAI_BRIDGE_LCD = 'https://bridge.lcd.orai.io';
 export const ORAIX_CLAIM_URL = 'http://localhost:8080';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
