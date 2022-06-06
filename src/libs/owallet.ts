@@ -2,7 +2,7 @@ import { isAndroid, isMobile } from '@walletconnect/browser-utils';
 import { mobileBlacklistNetworks, network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
 import WalletConnect from '@walletconnect/client';
-import { OWalletWalletConnectV1 } from '@owallet/wc-client';
+import { OWalletConnectV1 } from '@owallet/wc-client';
 import { IJsonRpcRequest, IRequestOptions } from '@walletconnect/types';
 import { BroadcastMode, StdTx } from '@cosmjs/launchpad';
 import Axios from 'axios';
@@ -137,7 +137,7 @@ export default class OWallet {
       }
     }
 
-    return new OWalletWalletConnectV1(this.walletConnector!, {
+    return new OWalletConnectV1(this.walletConnector!, {
       sendTx,
       onBeforeSendRequest: this.onBeforeSendRequest
     });
