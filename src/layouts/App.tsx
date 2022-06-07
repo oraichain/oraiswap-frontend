@@ -34,7 +34,7 @@ const App = () => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     if (!address) {
-      updateAddress();
+      owalletHandler();
     }
     window.addEventListener('owallet_keystorechange', owalletHandler);
   }, []);
@@ -48,9 +48,9 @@ const App = () => {
       // window.location.reload();
     } catch (error) {
       console.log('Error: ', error);
-      displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with OWallet wallet. Please try again!`
-      });
+      // displayToast(TToastType.TX_INFO, {
+      //   message: `There is an unexpected error with OWallet wallet. Please try again!`
+      // });
     }
   };
 
