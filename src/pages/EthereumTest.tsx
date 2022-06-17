@@ -16,32 +16,32 @@ const EthereumTest: FunctionComponent = () => {
       setClaimLoading(true);
 
       console.log("window ethereum: ", parseInt('100', 16))
-      window.ReactNativeWebView?.postMessage(String(window.ethereum))
+      window.ReactNativeWebView?.postMessage("foobar");
 
       const web3 = new Web3(window.ethereum);
+
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: ['kawaii_6886-1'] });
 
       // const nonce = await window.ethereum.request({ method: 'eth_getTransactionCount', params: ['0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222', 'latest'], rpc: 'https://endpoint1.kawaii.global' });
       // alert(`nonce: ${nonce}`)
 
-      const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [], chainId: 'kawaii_6886-1' });
-      alert(`accounts: ${accounts}`)
+      // const accounts = await window.ethereum.request({ method: 'eth_accounts', params: [] });
+      // alert(`accounts: ${accounts}`)
 
 
-      // const result = await window.ethereum.request({
-      //   method: 'eth_sendTransaction',
-      //   params: [{
-      //     from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
-      //     to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
-      //     value: web3.utils.toHex(1),
-      //   }],
-      //   chainId: 'kawaii_6886-1',
-      //   signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222'
-      // })
+      const result = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+          to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+          value: web3.utils.toHex(1),
+        }],
+      })
 
-      // console.log("result: ", result);
-      // displayToast(TToastType.TX_SUCCESSFUL, {
-      //   customLink: `https://scan.kawaii.global/tx/${result}`,
-      // });
+      console.log("result: ", result);
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `https://scan.kawaii.global/tx/${result}`,
+      });
 
     } catch (error: any) {
       console.log('error message handle claim: ', error);
