@@ -40,7 +40,7 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1ynmd2cemryhcwtjq3adhcwayrm89l2cr4tws4v',
-      asset_denoms: [ORAI, process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
+      asset_denoms: [ORAI, 'kwt'],
     },
     // {
     //   contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
@@ -56,17 +56,17 @@ export const pairs =
   process.env.REACT_APP_DEPRECATED === 'true'
     ? pairsMap[network.id]
     : pairsMap[network.id].filter(
-        // filter out LUNA and UST pool
-        (p) =>
-          !_.isEqual(p.asset_denoms, [
-            ORAI,
-            process.env.REACT_APP_UST_ORAICHAIN_DENOM,
-          ]) &&
-          !_.isEqual(p.asset_denoms, [
-            ORAI,
-            process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
-          ])
-      );
+      // filter out LUNA and UST pool
+      (p) =>
+        !_.isEqual(p.asset_denoms, [
+          ORAI,
+          process.env.REACT_APP_UST_ORAICHAIN_DENOM,
+        ]) &&
+        !_.isEqual(p.asset_denoms, [
+          ORAI,
+          process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
+        ])
+    );
 
 export const pairDenoms = _.uniq(
   _.flatten(pairs.map((pair) => pair.asset_denoms))
