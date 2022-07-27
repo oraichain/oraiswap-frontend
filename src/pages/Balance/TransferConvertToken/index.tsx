@@ -16,7 +16,7 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
-  BSC_CHAIN_ID,
+  BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
@@ -292,7 +292,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <span>
                     Transfer To{' '}
                     <strong>
-                      {token.bridgeNetworkChainId && token.bridgeNetworkChainId === BSC_CHAIN_ID
+                      {token.bridgeNetworkIdentifier && token.bridgeNetworkIdentifier === BSC_ORG
                         ? 'Binance Smart Chain'
                         : 'Ethereum'}
                     </strong>

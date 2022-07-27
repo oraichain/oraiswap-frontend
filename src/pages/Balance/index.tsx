@@ -438,7 +438,7 @@ const Balance: React.FC<BalanceProps> = () => {
         parseAmountToWithDecimal(transferAmount, fromToken.erc20Cw20Map[0].decimals.erc20Decimals).toFixed(0),
         fromToken.erc20Cw20Map[0].erc20Denom
       );
-      const msgConvertReverses = await generateConvertCw20Erc20Message(fromToken, fromAddress);
+      const msgConvertReverses = await generateConvertCw20Erc20Message(fromToken, fromAddress, amount);
       const executeContractMsgs = getExecuteContractMsgs(fromAddress, parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses)));
 
       // get raw ibc tx

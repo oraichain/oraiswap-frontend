@@ -13,6 +13,7 @@ import {
   AIRI_BSC_CONTRACT,
   BEP20_ORAI,
   BSC_CHAIN_ID,
+  BSC_ORG,
   BSC_RPC,
   COSMOS_DECIMALS,
   ERC20_ORAI,
@@ -62,7 +63,7 @@ export type TokenItemType = {
   prefix?: string;
   contractAddress?: string;
   erc20Cw20Map?: Erc20Cw20Map[];
-  bridgeNetworkChainId?: string;
+  bridgeNetworkIdentifier?: string;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   chainId: string;
   coinType?: number;
@@ -155,7 +156,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
-        bridgeNetworkChainId: BSC_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -170,7 +171,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
-        bridgeNetworkChainId: BSC_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -185,7 +186,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
-        bridgeNetworkChainId: BSC_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
         rpc: ORAI_BRIDGE_RPC,
         lcd: ORAI_BRIDGE_LCD,
         decimals: EVM_DECIMALS,
@@ -198,7 +199,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
-        bridgeNetworkChainId: BSC_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
         coinType: 118,
         denom: KWT_DENOM,
         rpc: ORAI_BRIDGE_RPC,
@@ -222,7 +223,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       // },
       {
         name: 'ORAI',
-        org: 'BNB Chain',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: BEP20_ORAI,
         contractAddress: ORAI_BSC_CONTRACT,
@@ -234,7 +235,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'AIRI',
-        org: 'BNB Chain',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_airi',
         contractAddress: AIRI_BSC_CONTRACT,
@@ -246,7 +247,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'USDT',
-        org: 'BNB Chain',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_usdt',
         contractAddress: USDT_BSC_CONTRACT,
@@ -258,7 +259,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'KWT',
-        org: 'BNB Chain',
+        org: BSC_ORG,
         chainId: BSC_CHAIN_ID,
         denom: 'bep20_kwt',
         contractAddress: KWT_BSC_CONTRACT,

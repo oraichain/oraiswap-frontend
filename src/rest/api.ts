@@ -345,12 +345,18 @@ async function generateConvertErc20Cw20Message(tokenInfo: TokenItemType, sender:
   return msgConverts;
 }
 
-async function generateConvertCw20Erc20Message(tokenInfo: TokenItemType, sender: string) {
+async function generateConvertCw20Erc20Message(tokenInfo: TokenItemType, sender: string, sendCoin: Coin) {
   var msgConverts: any[] = [];
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
     var balance: string;
+    // optimize. Only convert if not enough balance & match denom
+    if (mapping.erc20Denom !== sendCoin.denom) continue;
+    balance = new Big((await fetchBalance(sender, sendCoin.denom))).toFixed(0);
+    // if this wallet already has enough native ibc bridge balance => no need to convert reverse
+    if (balance >= sendCoin.amount) break;
+
     if (!tokenInfo.contractAddress) balance = new Big((await fetchBalance(sender, tokenInfo.denom))).toFixed(0);
     else balance = new Big((await fetchBalance(sender, '', tokenInfo.contractAddress))).toFixed(0);
     if (balance > "0") {
