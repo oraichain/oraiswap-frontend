@@ -18,9 +18,11 @@ import {
 import Loader from 'components/Loader';
 import {
   BSC_ORG,
+  ETH_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_ETHER_CHAIN_ID,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -271,7 +273,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
+          if ([ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(token.chainId)) {
             return (
               <>
                 <button
@@ -293,9 +295,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <span>
                     Transfer To{' '}
                     <strong>
-                      {token.bridgeNetworkIdentifier && token.bridgeNetworkIdentifier === BSC_ORG
-                        ? 'Binance Smart Chain'
-                        : 'Ethereum'}
+                      {token.bridgeNetworkIdentifier}
                     </strong>
                   </span>
                 </button>
@@ -320,30 +320,27 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <>
-                {token.bridgeNetworkIdentifier && (
-                  <button
-                    className={styles.tfBtn}
-                    disabled={convertLoading}
-                    onClick={async (event) => {
-                      event.stopPropagation();
-                      try {
-                        const isValid = checkValidAmount();
-                        if (!isValid) return;
-                        setConvertLoading(true);
-                        await convertToken(convertAmount, token, 'nativeToCw20');
-                      } finally {
-                        setConvertLoading(false);
-                      }
-                    }}
-                  >
-                    {convertLoading && <Loader width={20} height={20} />}
-                    <span>
-                      Convert To
-                      <strong style={{ marginLeft: 5 }}>{parseBep20Erc20Name(name)}</strong>
-                    </span>
-                  </button>
-                )
-                }
+                {/* <button
+                  className={styles.tfBtn}
+                  disabled={convertLoading}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
+                      setConvertLoading(true);
+                      await convertToken(convertAmount, token, 'nativeToCw20');
+                    } finally {
+                      setConvertLoading(false);
+                    }
+                  }}
+                >
+                  {convertLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Convert To
+                    <strong style={{ marginLeft: 5 }}>{name}</strong>
+                  </span>
+                </button> */}
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}

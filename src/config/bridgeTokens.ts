@@ -20,6 +20,7 @@ import {
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
+  ETH_ORG,
   EVM_DECIMALS,
   KAWAII_CONTRACT,
   KAWAII_LCD,
@@ -29,6 +30,9 @@ import {
   KWT_DENOM,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_ETHER_CHAIN_ID,
+  ORAI_BRIDGE_ETHER_LCD,
+  ORAI_BRIDGE_ETHER_RPC,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_LCD,
   ORAI_BRIDGE_PREFIX,
@@ -54,14 +58,14 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -75,17 +79,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -156,6 +160,21 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         name: 'ORAI',
         prefix: ORAI_BRIDGE_PREFIX,
         org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_ETHER_CHAIN_ID,
+        coinType: 118,
+        denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_ETH_CONTRACT,
+        bridgeNetworkIdentifier: 'Ethereum',
+        rpc: ORAI_BRIDGE_ETHER_RPC,
+        lcd: ORAI_BRIDGE_ETHER_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'oraichain-token',
+        cosmosBased: true,
+        Icon: ORAI,
+      },
+      {
+        name: 'ORAI',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
         denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
@@ -212,18 +231,18 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         Icon: KWT,
       },
-      // {
-      //   name: 'ERC20 ORAI',
-      //   org: 'Ethereum',
-      //   coingeckoId: 'oraichain-token',
-      //   denom: ERC20_ORAI,
-      //   contractAddress: ORAI_ETH_CONTRACT,
-      //   decimals: EVM_DECIMALS,
-      //   chainId: ETHEREUM_CHAIN_ID,
-      //   rpc: ETHEREUM_RPC,
-      //   cosmosBased: false,
-      //   Icon: ORAI
-      // },
+      {
+        name: 'ORAI',
+        org: ETH_ORG,
+        coingeckoId: 'oraichain-token',
+        denom: ERC20_ORAI,
+        contractAddress: ORAI_ETH_CONTRACT,
+        decimals: EVM_DECIMALS,
+        chainId: ETHEREUM_CHAIN_ID,
+        rpc: ETHEREUM_RPC,
+        cosmosBased: false,
+        Icon: ORAI,
+      },
       {
         name: 'ORAI',
         org: BSC_ORG,
@@ -463,6 +482,19 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         Icon: ORAI,
       },
+      {
+        name: 'ERC20 ORAI',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'oraichain-token',
+        denom: process.env.REACT_APP_ORAIETHER_ORAICHAIN_DENOM,
+        decimals: EVM_DECIMALS,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: ORAI,
+      },
       // {
       //   name: 'AIRI',
       //   org: 'Oraichain',
@@ -554,8 +586,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 

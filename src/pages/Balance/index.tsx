@@ -42,6 +42,7 @@ import {
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_ETHER_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE
 } from 'config/constants';
@@ -206,7 +207,6 @@ const Balance: React.FC<BalanceProps> = () => {
         ];
       })
     );
-
     const amountDetails = Object.fromEntries(entries);
     // update amounts
     setAmounts((old) => ({ ...old, ...amountDetails }));
@@ -304,13 +304,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      if (token.denom === ERC20_ORAI) {
-        displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`
-        });
-        return;
-      }
-
       if (type === 'to') {
         if (_.isEqual(to, token)) {
           setTo(undefined);
@@ -817,7 +810,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+        !from || (
+          ![ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(from.chainId)
+          && t.name === from.name)
     );
   };
 
@@ -1006,7 +1001,8 @@ const Balance: React.FC<BalanceProps> = () => {
                       }
                       return (
                         !from ||
-                        (from.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+                        (
+                          ![ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(from.chainId) &&
                           t.name === from.name)
                       );
                     })
@@ -1016,7 +1012,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         (t) =>
                           t.cosmosBased &&
                           t.name.includes(name) &&
-                          t.chainId !== ORAI_BRIDGE_CHAIN_ID
+                          ![ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(t.chainId)
                       );
 
                       return (
