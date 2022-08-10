@@ -43,6 +43,11 @@ interface TransferConvertProps {
   toToken: TokenItemType;
 }
 
+const gravityToEvm = {
+  [ORAI_BRIDGE_CHAIN_ID]: "BNB Chain",
+  [ORAI_BRIDGE_ETHER_CHAIN_ID]: "Ethereum",
+}
+
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
@@ -229,6 +234,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
                           t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
+                      console.log("to token: ", to)
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
@@ -315,7 +321,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID && (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID && token.erc20Cw20Map &&
             name
           ) {
             return (
@@ -358,6 +364,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       );
 
                       // convert reverse before transferring
+
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
