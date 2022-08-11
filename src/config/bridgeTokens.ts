@@ -53,7 +53,7 @@ export type Erc20Cw20Map = {
     cw20Decimals: number;
   };
   erc20Denom: string;
-  linkedGravityChain: string;
+  bridgeNetworkIdentifier: string;
 };
 
 export type TokenItemType = {
@@ -387,7 +387,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            linkedGravityChain: ORAI_BRIDGE_CHAIN_ID,
+            bridgeNetworkIdentifier: BSC_ORG,
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -415,7 +415,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            linkedGravityChain: ORAI_BRIDGE_CHAIN_ID,
+            bridgeNetworkIdentifier: BSC_ORG,
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
@@ -479,6 +479,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         prefix: 'orai',
         coingeckoId: 'oraichain-token',
         denom: process.env.REACT_APP_ORAIETHER_ORAICHAIN_DENOM,
+        bridgeNetworkIdentifier: ETH_ORG,
         decimals: EVM_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -536,7 +537,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            linkedGravityChain: ORAI_BRIDGE_CHAIN_ID,
+            bridgeNetworkIdentifier: BSC_ORG,
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,

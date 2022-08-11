@@ -33,9 +33,9 @@ export const WECHAT = '';
 export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
-export const ETHEREUM_CHAIN_ID = '0x2A';
+export const ETHEREUM_CHAIN_ID = '0x5';
 export const ETHEREUM_RPC =
-  'https://kovan.infura.io/v3/21b6c55de2de4abd872d63f63e959e5d';
+  'https://goerli.infura.io/v3/c311195fa53249c4a7f8d5364044c151';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
@@ -55,7 +55,7 @@ export const ORAI_BRIDGE_PREFIX = 'oraib';
 export const ORAI_BRIDGE_ETHER_RPC = 'http://45.55.51.48:26657';
 export const ORAI_BRIDGE_ETHER_LCD = 'http://45.55.51.48:1317';
 
-export const ORAI_ETH_CONTRACT = '0xa36085F69e2889c224210F603D836748e7dC0088';
+export const ORAI_ETH_CONTRACT = '0x7af963cF6D228E564e2A0aA0DdBF06210B38615D';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';

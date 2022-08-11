@@ -7,7 +7,7 @@ import useGlobalState from './useGlobalState';
 import { isMobile } from '@walletconnect/browser-utils';
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 56, 42],
+  supportedChainIds: [1, 56, 5],
 });
 
 export function useEagerConnect(isInactive) {
