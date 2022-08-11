@@ -52,8 +52,8 @@ export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
-export const ORAI_BRIDGE_ETHER_RPC = 'http://45.55.51.48:26657';
-export const ORAI_BRIDGE_ETHER_LCD = 'http://45.55.51.48:1317';
+export const ORAI_BRIDGE_ETHER_RPC = 'https://bridge-ethereum.rpc.orai.io';
+export const ORAI_BRIDGE_ETHER_LCD = 'https://bridge-ethereum.lcd.orai.io';
 
 export const ORAI_ETH_CONTRACT = '0x7af963cF6D228E564e2A0aA0DdBF06210B38615D';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
