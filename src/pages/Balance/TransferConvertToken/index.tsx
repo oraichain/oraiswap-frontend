@@ -18,9 +18,11 @@ import {
 import Loader from 'components/Loader';
 import {
   BSC_ORG,
+  ETH_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_ETHER_CHAIN_ID,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -39,6 +41,11 @@ interface TransferConvertProps {
   convertKwt?: any;
   onClickTransfer?: any;
   toToken: TokenItemType;
+}
+
+const evmToGravity = {
+  [BSC_ORG]: ORAI_BRIDGE_CHAIN_ID,
+  [ETH_ORG]: ORAI_BRIDGE_ETHER_CHAIN_ID,
 }
 
 const TransferConvertToken: FC<TransferConvertProps> = ({
@@ -227,6 +234,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
                           t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
+                      console.log("to token: ", to)
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
@@ -271,7 +279,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
+          if ([ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(token.chainId)) {
             return (
               <>
                 <button
@@ -293,9 +301,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <span>
                     Transfer To{' '}
                     <strong>
-                      {token.bridgeNetworkIdentifier && token.bridgeNetworkIdentifier === BSC_ORG
-                        ? 'Binance Smart Chain'
-                        : 'Ethereum'}
+                      {token.bridgeNetworkIdentifier}
                     </strong>
                   </span>
                 </button>
@@ -315,35 +321,32 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID && (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            (![ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_ETHER_CHAIN_ID].includes(token.chainId)) && token.bridgeNetworkIdentifier &&
             name
           ) {
             return (
               <>
-                {token.bridgeNetworkIdentifier && (
-                  <button
-                    className={styles.tfBtn}
-                    disabled={convertLoading}
-                    onClick={async (event) => {
-                      event.stopPropagation();
-                      try {
-                        const isValid = checkValidAmount();
-                        if (!isValid) return;
-                        setConvertLoading(true);
-                        await convertToken(convertAmount, token, 'nativeToCw20');
-                      } finally {
-                        setConvertLoading(false);
-                      }
-                    }}
-                  >
-                    {convertLoading && <Loader width={20} height={20} />}
-                    <span>
-                      Convert To
-                      <strong style={{ marginLeft: 5 }}>{parseBep20Erc20Name(name)}</strong>
-                    </span>
-                  </button>
-                )
-                }
+                <button
+                  className={styles.tfBtn}
+                  disabled={convertLoading}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
+                      setConvertLoading(true);
+                      await convertToken(convertAmount, token, 'nativeToCw20');
+                    } finally {
+                      setConvertLoading(false);
+                    }
+                  }}
+                >
+                  {convertLoading && <Loader width={20} height={20} />}
+                  <span>
+                    Convert To
+                    <strong style={{ marginLeft: 5 }}>{parseBep20Erc20Name(name)}</strong>
+                  </span>
+                </button>
                 <button
                   disabled={transferLoading}
                   className={styles.tfBtn}
@@ -356,11 +359,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const name = parseBep20Erc20Name(token.name);
                       const to = filteredTokens.find(
                         (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
-                      );
+                          t.chainId === evmToGravity[token.bridgeNetworkIdentifier] &&
+                          t.name.includes(name)
+                      );                        
+                      // convert reverse before transferring  
 
-                      // convert reverse before transferring
                       await transferIBC(token, to, convertAmount);
                     } finally {
                       setTransferLoading(false);
@@ -369,9 +372,52 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>OraiBridge</strong>
+                    Transfer To <strong>OraiBridge ({token.bridgeNetworkIdentifier})</strong>
                   </span>
                 </button>
+              </>
+            );
+          }
+
+          if (
+            token.cosmosBased &&
+            token.erc20Cw20Map &&
+            name
+          ) {
+            return (
+              <>
+                {token.erc20Cw20Map.map((i, idx) => (
+                  <button
+                    key={idx}
+                    disabled={transferLoading}
+                    className={styles.tfBtn}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      try {
+                        const isValid = checkValidAmount();
+                        if (!isValid) return;
+                        setTransferLoading(true);
+                        const name = parseBep20Erc20Name(token.name);
+                        const to = filteredTokens.find(
+                          (t) =>
+                            t.chainId === evmToGravity[i.bridgeNetworkIdentifier] &&
+                            t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                        );
+
+                        // convert reverse before transferring
+
+                        await transferIBC(token, to, convertAmount);
+                      } finally {
+                        setTransferLoading(false);
+                      }
+                    }}
+                  >
+                    {transferLoading && <Loader width={20} height={20} />}
+                    <span>
+                      Transfer To <strong>OraiBridge ({i.bridgeNetworkIdentifier})</strong>
+                    </span>
+                  </button>
+                ))}
               </>
             );
           }
