@@ -18,8 +18,7 @@ export function useEagerConnect(isInactive) {
 
   useEffect(() => {
     if (!window.ethereum) return;
-    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(window.ethereum.chainId))
-      return;
+    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(window.ethereum.chainId)) return;
     if (
       !web3React.account &&
       !isInactive &&

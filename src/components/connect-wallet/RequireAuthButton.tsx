@@ -7,6 +7,7 @@ import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import useGlobalState from 'hooks/useGlobalState';
+import { BSC_CHAIN_ID } from 'config/constants';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
@@ -27,11 +28,20 @@ const RequireAuthButton: React.FC<any> = ({
   const connectMetamask = async () => {
     try {
       setIsInactiveMetamask(false);
+
+      // if chain id empty, we switch to default network which is BSC
+      if (!window.ethereum.chainId) {
+        await window.ethereum.request!({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BSC_CHAIN_ID }]
+        });
+      }
       await activate(injected, (ex) => {
+        console.log("error: ", ex)
         displayToast(TToastType.METAMASK_FAILED, { message: ex.message });
       });
     } catch (ex) {
-      console.log(ex);
+      console.log("error in connecting metamask: ", ex);
     }
   };
 
