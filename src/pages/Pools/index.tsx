@@ -17,10 +17,17 @@ import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { STABLE_DENOM } from 'config/constants';
+import { useQuery } from 'react-query';
 
 const { Search } = Input;
-
-interface PoolsProps {}
+const useQueryConfig = {
+  retry: 3,
+  retryDelay: 3000,
+  refetchOnMount: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+}
+interface PoolsProps { }
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
@@ -53,7 +60,8 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({
   );
 };
 
-const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate, apr }) => {
+
+const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commissionRate, apr }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) =>
     filteredTokens.find((token) => token.denom === denom)
@@ -124,8 +132,9 @@ const WatchList = memo(() => {
 
 const ListPools = memo<{
   pairInfos: PairInfoData[];
+  allPoolApr: any;
   setIsOpenNewPoolModal: any;
-}>(({ pairInfos, setIsOpenNewPoolModal }) => {
+}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
@@ -174,7 +183,7 @@ const ListPools = memo<{
       </div>
       <div className={styles.listpools_list}>
         {filteredPairInfos.map((info) => (
-          <PairBox {...info} key={info.pair.contract_addr} />
+          <PairBox {...info} apr={allPoolApr[info.pair.contract_addr]} key={info.pair.contract_addr} />
         ))}
       </div>
     </div>
@@ -187,7 +196,6 @@ type PairInfoData = {
   commissionRate: string;
   fromToken: any;
   toToken: any;
-  apr: number;
 } & PoolInfo;
 
 const Pools: React.FC<PoolsProps> = () => {
@@ -197,7 +205,6 @@ const Pools: React.FC<PoolsProps> = () => {
 
   const fetchPairInfoData = async (
     pair: Pair,
-    apr: number
   ): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
@@ -221,7 +228,6 @@ const Pools: React.FC<PoolsProps> = () => {
         commissionRate: infoData.commission_rate,
         fromToken,
         toToken,
-        apr,
       };
     } catch (ex) {
       console.log(ex);
@@ -229,19 +235,18 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    const aprList = await fetchAllPoolApr();
     const poolList = _.compact(
       await Promise.all(
-        pairs.map((p) => fetchPairInfoData(p, aprList[p.contract_addr]))
+        pairs.map((p) => fetchPairInfoData(p))
       )
     );
-    const oraiUstPool = poolList.find(
+    const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
-    )!;
-
+    );
+    if (!oraiUsdtPool) throw Error('Ust pool not found')
     const oraiPrice = new Fraction(
-      oraiUstPool.askPoolAmount,
-      oraiUstPool.offerPoolAmount
+      oraiUsdtPool?.askPoolAmount,
+      oraiUsdtPool?.offerPoolAmount
     );
 
     poolList.forEach((pool) => {
@@ -256,9 +261,12 @@ const Pools: React.FC<PoolsProps> = () => {
     setOraiPrice(oraiPrice);
   };
 
-  useEffect(() => {
-    fetchPairInfoDataList();
-  }, []);
+
+  const {
+    data: allPoolApr
+  } = useQuery(['fetchAllPoolApr'], () => fetchAllPoolApr(), useQueryConfig)
+  useQuery(['fetchPairInfoDataList'], () => fetchPairInfoDataList(), useQueryConfig)
+
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
 
@@ -269,6 +277,7 @@ const Pools: React.FC<PoolsProps> = () => {
         <WatchList />
         <ListPools
           pairInfos={pairInfos}
+          allPoolApr={allPoolApr}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal
