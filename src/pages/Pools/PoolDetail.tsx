@@ -44,7 +44,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useGlobalState('address');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const [bondingTxHash, setBondingTxHash] = useState('');
-  const [liquidityTxHash, setLiquidityTxHash] = useState('');
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
 
   const getPairInfo = async () => {
@@ -121,22 +120,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     };
   };
 
-  const {
-    data: pairInfoData,
-    error: pairInfoError,
-    isError: isPairInfoError,
-    isLoading: isPairInfoLoading,
-  } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
-    // enabled: !!token1! && !!token2!,
-    refetchOnWindowFocus: false,
-  });
+  const { data: pairInfoData } = useQuery(
+    ['pair-info', poolUrl],
+    () => getPairInfo(),
+    {
+      // enabled: !!token1! && !!token2!,
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  let {
-    data: pairAmountInfoData,
-    error: pairAmountInfoError,
-    isError: isPairAmountInfoError,
-    isLoading: isPairAmountInfoLoading,
-  } = useQuery(
+  let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
     ['pair-amount-info', pairInfoData],
     () => {
       return getPairAmountInfo();
@@ -148,19 +141,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const {
-    data: lpTokenBalance,
-    error: lpTokenBalanceError,
-    isError: isLpTokenBalanceError,
-    isLoading: isLpTokenBalanceLoading,
-  } = useQuery(
-    [
-      'token-balance',
-      pairInfoData,
-      bondingTxHash,
-      liquidityTxHash,
-      withdrawTxHash,
-    ],
+  const { data: lpTokenBalance, refetch: refetchLpTokenBalance } = useQuery(
+    ['token-balance', pairInfoData, bondingTxHash, withdrawTxHash],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
@@ -168,12 +150,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const {
-    data: lpTokenInfoData,
-    error: lpTokenInfoError,
-    isError: isLpTokenInfoError,
-    isLoading: isLpTokenInfoLoading,
-  } = useQuery(
+  const { data: lpTokenInfoData } = useQuery(
     ['token-info', pairInfoData],
     () =>
       fetchTokenInfo({
@@ -453,8 +430,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 token2InfoData={pairInfoData.token2}
                 lpTokenInfoData={lpTokenInfoData}
                 lpTokenBalance={lpTokenBalance}
-                setLiquidityHash={setLiquidityTxHash}
-                liquidityHash={liquidityTxHash}
+                // setLiquidityHash={setLiquidityTxHash}
+                pairAmountInfoData={pairAmountInfoData}
+                refetchPairAmountInfo={refetchPairAmountInfo}
+                pairInfoData={pairInfoData}
+                refetchLpTokenBalance={refetchLpTokenBalance}
               />
             )}
           {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (

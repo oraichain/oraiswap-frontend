@@ -41,8 +41,10 @@ interface ModalProps {
   token2InfoData: TokenItemType;
   lpTokenInfoData: TokenInfo;
   lpTokenBalance: any;
-  setLiquidityHash: any;
-  liquidityHash: any;
+  pairAmountInfoData: any;
+  refetchPairAmountInfo: any;
+  refetchLpTokenBalance: any;
+  pairInfoData: any;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -53,8 +55,10 @@ const LiquidityModal: FC<ModalProps> = ({
   token2InfoData,
   lpTokenInfoData,
   lpTokenBalance,
-  setLiquidityHash: setTxHash,
-  liquidityHash: txHash,
+  pairAmountInfoData,
+  refetchPairAmountInfo,
+  refetchLpTokenBalance,
+  pairInfoData,
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
@@ -75,42 +79,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [estimatedLP, setEstimatedLP] = useState(0);
-
-  let {
-    data: pairAmountInfoData,
-    error: pairAmountInfoError,
-    isError: isPairAmountInfoError,
-    isLoading: isPairAmountInfoLoading,
-    refetch: refetchPairAmountInfo,
-  } = useQuery(
-    ['pair-amount-info', token1InfoData, token2InfoData, prices],
-    () => {
-      return getPairAmountInfo();
-    },
-    {
-      enabled: !!prices && !!token1InfoData && !!token2InfoData,
-      refetchOnWindowFocus: false,
-      refetchInterval: 10000,
-    }
-  );
-
-  const {
-    data: pairInfoData,
-    error: pairInfoError,
-    isError: isPairInfoError,
-    isLoading: isPairInfoLoading,
-  } = useQuery(
-    [
-      'pair-info',
-      JSON.stringify(token1InfoData),
-      JSON.stringify(token2InfoData),
-    ],
-    () => getPairInfo(),
-    {
-      enabled: !!token1InfoData && !!token2InfoData,
-      refetchOnWindowFocus: false,
-    }
-  );
 
   const { data: token1Balance = 0, refetch: refetchToken1Balance } = useQuery(
     ['balance', token1!.denom, address],
@@ -224,10 +192,11 @@ const LiquidityModal: FC<ModalProps> = ({
     setEstimatedLP(estimatedLP);
   };
 
-  const refetchBalancesPairAmount = () => {
+  const onLiquidityChange = () => {
     refetchToken1Balance();
     refetchToken2Balance();
     refetchPairAmountInfo();
+    refetchLpTokenBalance();
   };
 
   const getPairAmountInfo = async () => {
@@ -295,12 +264,11 @@ const LiquidityModal: FC<ModalProps> = ({
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: `${network.explorer}/txs/${result.transactionHash}`,
       });
-      setTxHash(result.transactionHash);
     }
   };
 
   const handleAddLiquidity = async (amount1: number, amount2: number) => {
-    if (!pairInfoData?.pair) return;
+    if (!pairInfoData) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
 
@@ -339,7 +307,7 @@ const LiquidityModal: FC<ModalProps> = ({
         toInfo: token2InfoData!,
         fromAmount: amount1,
         toAmount: amount2,
-        pair: pairInfoData.pair.contract_addr,
+        pair: pairInfoData.contract_addr,
       } as ProvideQuery);
 
       const msg = msgs[0];
@@ -362,9 +330,7 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
-
-        setTxHash(result.transactionHash);
-        refetchBalancesPairAmount();
+        onLiquidityChange();
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -381,7 +347,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const handleWithdrawLiquidity = async (amount: number) => {
-    if (!pairInfoData?.pair) return;
+    if (!pairInfoData) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -390,7 +356,7 @@ const LiquidityModal: FC<ModalProps> = ({
         sender: address,
         lpAddr: lpTokenInfoData!.contractAddress!,
         amount,
-        pair: pairInfoData!.pair.contract_addr,
+        pair: pairInfoData.contract_addr,
       });
 
       const msg = msgs[0];
@@ -416,8 +382,7 @@ const LiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
-        setTxHash(result.transactionHash);
-        refetchBalancesPairAmount();
+        onLiquidityChange();
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -650,7 +615,7 @@ const LiquidityModal: FC<ModalProps> = ({
           actionLoading ||
           !token1InfoData ||
           !token2InfoData ||
-          !pairInfoData?.pair ||
+          !pairInfoData ||
           isToken1AllowanceToPairLoading ||
           isToken2AllowanceToPairLoading ||
           !!disableMsg;
@@ -660,15 +625,7 @@ const LiquidityModal: FC<ModalProps> = ({
               disabled: disabled,
             })}
             onClick={() => {
-              // const sortedKwtPair = sortKwtPair(amount1, amount2);
-              // if (!sortedKwtPair) return handleAddLiquidity(amount1, amount2);
               return handleAddLiquidity(amount1, amount2);
-              // return handleAddLiquidityWithKWT(
-              //   sortKwtPair[0].amount,
-              //   sortKwtPair[0].token,
-              //   sortKwtPair[1].amount,
-              //   sortKwtPair[1].token
-              // );
             }}
             disabled={disabled}
           >
@@ -836,10 +793,7 @@ const LiquidityModal: FC<ModalProps> = ({
         if (amount > lpTokenBalance)
           disableMsg = `Insufficient LP token balance`;
         const disabled =
-          actionLoading ||
-          !lpTokenInfoData ||
-          !pairInfoData?.pair ||
-          !!disableMsg;
+          actionLoading || !lpTokenInfoData || !pairInfoData || !!disableMsg;
         return (
           <button
             className={cx('swap-btn', {
