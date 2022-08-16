@@ -17,9 +17,16 @@ import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { STABLE_DENOM } from 'config/constants';
+import { useQuery } from 'react-query';
 
 const { Search } = Input;
-
+const useQueryConfig = {
+  retry: 3,
+  retryDelay: 3000,
+  refetchOnMount: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+};
 interface PoolsProps {}
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
@@ -53,66 +60,70 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({
   );
 };
 
-const PairBox = memo<PairInfoData>(({ pair, amount, commissionRate, apr }) => {
-  const navigate = useNavigate();
-  const [token1, token2] = pair.asset_denoms.map((denom) =>
-    filteredTokens.find((token) => token.denom === denom)
-  );
+const PairBox = memo<PairInfoData & { apr: number }>(
+  ({ pair, amount, commissionRate, apr }) => {
+    const navigate = useNavigate();
+    const [token1, token2] = pair.asset_denoms.map((denom) =>
+      filteredTokens.find((token) => token.denom === denom)
+    );
 
-  if (!token1 || !token2) return null;
+    if (!token1 || !token2) return null;
 
-  return (
-    <div
-      className={styles.pairbox}
-      onClick={() =>
-        navigate(
-          `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(
-            token2.denom
-          )}`
-          // { replace: true }
-        )
-      }
-    >
-      <div className={styles.pairbox_header}>
-        <div className={styles.pairbox_logos}>
-          <token1.Icon className={styles.pairbox_logo1} />
-          <token2.Icon className={styles.pairbox_logo2} />
-        </div>
-        <div className={styles.pairbox_pair}>
-          <div className={styles.pairbox_pair_name}>
-            {token1.name}/{token2.name}
+    return (
+      <div
+        className={styles.pairbox}
+        onClick={() =>
+          navigate(
+            `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(
+              token2.denom
+            )}`
+            // { replace: true }
+          )
+        }
+      >
+        <div className={styles.pairbox_header}>
+          <div className={styles.pairbox_logos}>
+            <token1.Icon className={styles.pairbox_logo1} />
+            <token2.Icon className={styles.pairbox_logo2} />
           </div>
-          <div className={styles.pairbox_pair_rate}>
-            {token1.name} (50%)/{token2.name} (50%)
+          <div className={styles.pairbox_pair}>
+            <div className={styles.pairbox_pair_name}>
+              {token1.name}/{token2.name}
+            </div>
+            <div className={styles.pairbox_pair_rate}>
+              {token1.name} (50%)/{token2.name} (50%)
+            </div>
+            <span className={styles.pairbox_pair_apr}>ORAIX Bonus</span>
           </div>
-          <span className={styles.pairbox_pair_apr}>ORAIX Bonus</span>
         </div>
-      </div>
-      <div className={styles.pairbox_content}>
-        {!!apr && (
+        <div className={styles.pairbox_content}>
+          {!!apr && (
+            <div className={styles.pairbox_data}>
+              <span className={styles.pairbox_data_name}>APR</span>
+              <span className={styles.pairbox_data_value}>
+                {apr.toFixed(2)}%
+              </span>
+            </div>
+          )}
           <div className={styles.pairbox_data}>
-            <span className={styles.pairbox_data_name}>APR</span>
-            <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
+            <span className={styles.pairbox_data_name}>Swap Fee</span>
+            <span className={styles.pairbox_data_value}>
+              {100 * parseFloat(commissionRate)}%
+            </span>
           </div>
-        )}
-        <div className={styles.pairbox_data}>
-          <span className={styles.pairbox_data_name}>Swap Fee</span>
-          <span className={styles.pairbox_data_value}>
-            {100 * parseFloat(commissionRate)}%
-          </span>
-        </div>
-        <div className={styles.pairbox_data}>
-          <span className={styles.pairbox_data_name}>Liquidity</span>
-          <TokenBalance
-            balance={amount}
-            className={styles.pairbox_data_value}
-            decimalScale={2}
-          />
+          <div className={styles.pairbox_data}>
+            <span className={styles.pairbox_data_name}>Liquidity</span>
+            <TokenBalance
+              balance={amount}
+              className={styles.pairbox_data_value}
+              decimalScale={2}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 const WatchList = memo(() => {
   return (
@@ -124,8 +135,9 @@ const WatchList = memo(() => {
 
 const ListPools = memo<{
   pairInfos: PairInfoData[];
+  allPoolApr: any;
   setIsOpenNewPoolModal: any;
-}>(({ pairInfos, setIsOpenNewPoolModal }) => {
+}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
@@ -174,7 +186,11 @@ const ListPools = memo<{
       </div>
       <div className={styles.listpools_list}>
         {filteredPairInfos.map((info) => (
-          <PairBox {...info} key={info.pair.contract_addr} />
+          <PairBox
+            {...info}
+            apr={allPoolApr[info.pair.contract_addr] ?? 0}
+            key={info.pair.contract_addr}
+          />
         ))}
       </div>
     </div>
@@ -187,7 +203,6 @@ type PairInfoData = {
   commissionRate: string;
   fromToken: any;
   toToken: any;
-  apr: number;
 } & PoolInfo;
 
 const Pools: React.FC<PoolsProps> = () => {
@@ -195,10 +210,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
-  const fetchPairInfoData = async (
-    pair: Pair,
-    apr: number
-  ): Promise<PairInfoData> => {
+  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
@@ -221,7 +233,6 @@ const Pools: React.FC<PoolsProps> = () => {
         commissionRate: infoData.commission_rate,
         fromToken,
         toToken,
-        apr,
       };
     } catch (ex) {
       console.log(ex);
@@ -229,19 +240,16 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    const aprList = await fetchAllPoolApr();
     const poolList = _.compact(
-      await Promise.all(
-        pairs.map((p) => fetchPairInfoData(p, aprList[p.contract_addr]))
-      )
+      await Promise.all(pairs.map((p) => fetchPairInfoData(p)))
     );
-    const oraiUstPool = poolList.find(
+    const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
-    )!;
-
+    );
+    if (!oraiUsdtPool) throw Error('Ust pool not found');
     const oraiPrice = new Fraction(
-      oraiUstPool.askPoolAmount,
-      oraiUstPool.offerPoolAmount
+      oraiUsdtPool?.askPoolAmount,
+      oraiUsdtPool?.offerPoolAmount
     );
 
     poolList.forEach((pool) => {
@@ -256,9 +264,16 @@ const Pools: React.FC<PoolsProps> = () => {
     setOraiPrice(oraiPrice);
   };
 
-  useEffect(() => {
-    fetchPairInfoDataList();
-  }, []);
+  const { data: allPoolApr } = useQuery(
+    ['fetchAllPoolApr'],
+    () => fetchAllPoolApr(),
+    useQueryConfig
+  );
+  useQuery(
+    ['fetchPairInfoDataList'],
+    () => fetchPairInfoDataList(),
+    useQueryConfig
+  );
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
 
@@ -269,6 +284,7 @@ const Pools: React.FC<PoolsProps> = () => {
         <WatchList />
         <ListPools
           pairInfos={pairInfos}
+          allPoolApr={allPoolApr}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal

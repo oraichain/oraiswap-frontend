@@ -41,7 +41,7 @@ const Swap: React.FC = () => {
     [string, string]
   >(['orai', 'usdt']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
-  const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
+  const [[fromAmount, toAmount], setSwapAmount] = useState([undefined, undefined]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
@@ -50,7 +50,8 @@ const Swap: React.FC = () => {
   const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);
 
-  const onChangeFromAmount = (amount: number) => {
+  const onChangeFromAmount = (amount: number | undefined) => {       
+    if (!amount) return setSwapAmount([undefined, toAmount]);
     setSwapAmount([amount, toAmount]);
   };
 
@@ -73,18 +74,12 @@ const Swap: React.FC = () => {
 
   const {
     data: fromTokenInfoData,
-    error: fromTokenInfoError,
-    isError: isFromTokenInfoError,
-    isLoading: isFromTokenInfoLoading
   } = useQuery(['from-token-info', fromToken], () =>
     fetchTokenInfo(fromToken!)
   );
 
   const {
     data: toTokenInfoData,
-    error: toTokenInfoError,
-    isError: isToTokenInfoError,
-    isLoading: isToTokenInfoLoading
   } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
 
   // suggest tokens
@@ -96,10 +91,7 @@ const Swap: React.FC = () => {
   }, [fromToken, toToken]);
 
   const {
-    data: fromTokenBalance = 0,
-    error: fromTokenBalanceError,
-    isError: isFromTokenBalanceError,
-    isLoading: isFromTokenBalanceLoading
+    data: fromTokenBalance = 0,  
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
     async () =>
@@ -115,9 +107,6 @@ const Swap: React.FC = () => {
 
   const {
     data: toTokenBalance,
-    error: toTokenBalanceError,
-    isError: isToTokenBalanceError,
-    isLoading: isLoadingToTokenBalance
   } = useQuery(
     ['to-token-balance', toToken, txHash],
     async () =>
@@ -131,12 +120,7 @@ const Swap: React.FC = () => {
     { enabled: !!address && !!toToken }
   );
 
-  const {
-    data: exchangeRate,
-    error: exchangeRateError,
-    isError: isExchangeRateError,
-    isLoading: isExchangeRateLoading
-  } = useQuery(
+  useQuery(
     ['exchange-rate', fromTokenInfoData, toTokenInfoData],
     () => fetchExchangeRate(toTokenInfoData!.denom, fromTokenInfoData!.denom),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
@@ -144,9 +128,6 @@ const Swap: React.FC = () => {
 
   const {
     data: simulateData,
-    error: simulateDataError,
-    isError: isSimulateDataError,
-    isLoading: isSimulateDataLoading
   } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
     () =>
@@ -323,13 +304,14 @@ const Swap: React.FC = () => {
               </div>
 
               <NumberFormat
+                placeholder='0'
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
                 type="text"
                 value={fromAmount}
                 onValueChange={({ floatValue }) => {
-                  onChangeFromAmount(floatValue ?? 0);
+                  onChangeFromAmount(floatValue);
                 }}
               />
 

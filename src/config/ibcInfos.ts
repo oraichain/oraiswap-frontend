@@ -2,8 +2,7 @@ import { IBCInfo } from 'types/ibc';
 import {
   IBC_TRANSFER_TIMEOUT,
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_ETHER_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from './constants';
 import { network, NetworkKey } from './networks';
 
@@ -17,8 +16,6 @@ const [oraib2oraichain, oraichain2oraib] =
   process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
 const [kwt2oraichain, oraichain2kwt] =
   process.env.REACT_APP_KWT_ORAICHAIN_CHANNELS.split(/\s+/);
-const [oraibether2oraichain, oraichain2oraibether] =
-  process.env.REACT_APP_ORAIB_ETHER_ORAICHAIN_CHANNELS.split(/\s+/);
 
 export interface IBCInfoMap {
   [key: string]: { [key: string]: IBCInfo };
@@ -31,50 +28,50 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
       Oraichain: {
         source: 'transfer',
         channel: atom2oraichain,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
     },
     'columbus-5': {
       Oraichain: {
         source: 'transfer',
         channel: terra2oraichain,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
     },
     'osmosis-1': {
       Oraichain: {
         source: 'transfer',
         channel: osmosis2oraichain,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
     },
     [KWT_SUBNETWORK_CHAIN_ID]: {
       Oraichain: {
         source: 'transfer',
         channel: kwt2oraichain,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
+        timeout: IBC_TRANSFER_TIMEOUT
+      }
     },
     Oraichain: {
       'cosmoshub-4': {
         source: 'transfer',
         channel: oraicbain2atom,
-        timeout: IBC_TRANSFER_TIMEOUT,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       'columbus-5': {
         source: 'transfer',
         channel: oraicbain2terra,
-        timeout: IBC_TRANSFER_TIMEOUT,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       'osmosis-1': {
         source: 'transfer',
         channel: oraicbain2osmosis,
-        timeout: IBC_TRANSFER_TIMEOUT,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       [ORAI_BRIDGE_CHAIN_ID]: {
         source: 'transfer',
         channel: oraichain2oraib,
-        timeout: IBC_TRANSFER_TIMEOUT,
+        timeout: IBC_TRANSFER_TIMEOUT
       },
       [KWT_SUBNETWORK_CHAIN_ID]: {
         source: 'transfer',

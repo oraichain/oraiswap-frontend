@@ -56,9 +56,14 @@ const Menu: React.FC<{}> = React.memo((props) => {
     isLoading,
     error,
     data: balance,
-  } = useQuery(['balance', address], () => fetchNativeTokenBalance(address), {
-    enabled: address?.length > 0,
-  });
+  } = useQuery(
+    ['balance', ORAI, address],
+    () => fetchNativeTokenBalance(address),
+    {
+      enabled: address?.length > 0,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   useEffect(() => {
     setLink(location.pathname);
@@ -195,12 +200,14 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
             </RequireAuthButton>
-            {new Date().getTime() > 1655908200000 && renderLink( // 21h30 22/6/22
-              '/claim-oraix',
-              'Claim ORAIX',
-              setLink,
-              <Wallet style={{ width: 30, height: 30 }} />
-            )}
+            {new Date().getTime() > 1655908200000 &&
+              renderLink(
+                // 21h30 22/6/22
+                '/claim-oraix',
+                'Claim ORAIX',
+                setLink,
+                <Wallet style={{ width: 30, height: 30 }} />
+              )}
             {renderLink(
               '/swap',
               'Swap',
@@ -228,7 +235,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => { },
+              () => {},
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}

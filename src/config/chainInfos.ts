@@ -3,9 +3,6 @@ import { ChainInfo } from '@keplr-wallet/types';
 import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_DENOM,
-  ORAI_BRIDGE_ETHER_CHAIN_ID,
-  ORAI_BRIDGE_ETHER_LCD,
-  ORAI_BRIDGE_ETHER_RPC,
   ORAI_BRIDGE_LCD,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
@@ -111,36 +108,6 @@ export const embedChainInfos: ChainInfo[] = [
       'eth-address-gen',
       'eth-key-sign',
     ],
-  },
-  {
-    rpc: ORAI_BRIDGE_ETHER_RPC,
-    rest: ORAI_BRIDGE_ETHER_LCD,
-    chainId: ORAI_BRIDGE_ETHER_CHAIN_ID,
-    chainName: 'OraiBridge-Kovan',
-    stakeCurrency: {
-      coinDenom: ORAI_BRIDGE_DENOM,
-      coinMinimalDenom: ORAI_BRIDGE_UDENOM,
-      coinDecimals: 6,
-      coinGeckoId: 'oraichain-token',
-      coinImageUrl:
-        'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png',
-    },
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: Bech32Address.defaultBech32Config(ORAI_BRIDGE_PREFIX),
-    get currencies() {
-      return [this.stakeCurrency];
-    },
-    get feeCurrencies() {
-      return [this.stakeCurrency];
-    },
-    gasPriceStep: {
-      low: 0,
-      average: 0,
-      high: 0,
-    },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm'],
   },
 ];
 

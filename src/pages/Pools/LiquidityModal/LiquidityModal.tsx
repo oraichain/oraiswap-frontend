@@ -81,8 +81,9 @@ const LiquidityModal: FC<ModalProps> = ({
     error: pairAmountInfoError,
     isError: isPairAmountInfoError,
     isLoading: isPairAmountInfoLoading,
+    refetch: refetchPairAmountInfo,
   } = useQuery(
-    ['pair-amount-info', token1InfoData, token2InfoData, prices, txHash],
+    ['pair-amount-info', token1InfoData, token2InfoData, prices],
     () => {
       return getPairAmountInfo();
     },
@@ -111,44 +112,34 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   );
 
-  const {
-    data: token1Balance = 0,
-    error: token1BalanceError,
-    isError: isToken1BalanceError,
-    isLoading: isToken1BalanceLoading,
-  } = useQuery(
-    ['token-balance', token1?.denom, txHash],
+  const { data: token1Balance = 0, refetch: refetchToken1Balance } = useQuery(
+    ['balance', token1!.denom, address],
     async () =>
       token1?.erc20Cw20Map
         ? (await fetchBalanceWithMapping(address, token1)).amount
         : fetchBalance(
-          address,
-          token1!.denom,
-          token1!.contractAddress,
-          token1!.lcd
-        ),
+            address,
+            token1!.denom,
+            token1!.contractAddress,
+            token1!.lcd
+          ),
     {
       enabled: !!address && !!token1,
       refetchOnWindowFocus: false,
     }
   );
 
-  const {
-    data: token2Balance = 0,
-    error: token2BalanceError,
-    isError: isToken2BalanceError,
-    isLoading: isLoadingToken2Balance,
-  } = useQuery(
-    ['token-balance', token2?.denom, txHash],
+  const { data: token2Balance = 0, refetch: refetchToken2Balance } = useQuery(
+    ['balance', token2!.denom, address],
     async () =>
       token2?.erc20Cw20Map
         ? (await fetchBalanceWithMapping(address, token2)).amount
         : fetchBalance(
-          address,
-          token2!.denom,
-          token2!.contractAddress,
-          token2!.lcd
-        ),
+            address,
+            token2!.denom,
+            token2!.contractAddress,
+            token2!.lcd
+          ),
     {
       enabled: !!address && !!token2,
       refetchOnWindowFocus: false,
@@ -157,11 +148,10 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const {
     data: token1AllowanceToPair,
-    error: token1AllowanceToPairError,
-    isError: isToken1AllowanceToPairError,
     isLoading: isToken1AllowanceToPairLoading,
+    refetch: refetchToken1Allowance,
   } = useQuery(
-    ['token-allowance', JSON.stringify(pairInfoData), token1InfoData, txHash],
+    ['token-allowance', JSON.stringify(pairInfoData), token1InfoData],
     () => {
       return fetchTokenAllowance(
         token1InfoData.contractAddress!,
@@ -177,11 +167,10 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const {
     data: token2AllowanceToPair,
-    error: token2AllowanceToPairError,
-    isError: isToken2AllowanceToPairError,
     isLoading: isToken2AllowanceToPairLoading,
+    refetch: refetchToken2Allowance,
   } = useQuery(
-    ['token-allowance', JSON.stringify(pairInfoData), token2InfoData, txHash],
+    ['token-allowance', JSON.stringify(pairInfoData), token2InfoData],
     () => {
       return fetchTokenAllowance(
         token2InfoData.contractAddress!,
@@ -233,6 +222,12 @@ const LiquidityModal: FC<ModalProps> = ({
       (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
       +lpTokenInfoData.total_supply;
     setEstimatedLP(estimatedLP);
+  };
+
+  const refetchBalancesPairAmount = () => {
+    refetchToken1Balance();
+    refetchToken2Balance();
+    refetchPairAmountInfo();
   };
 
   const getPairAmountInfo = async () => {
@@ -310,18 +305,22 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1)
+      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1) {
         await increaseAllowance(
           '9'.repeat(30),
           token1InfoData!.contractAddress!,
           address
         );
-      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2)
+        refetchToken1Allowance();
+      }
+      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2) {
         await increaseAllowance(
           '9'.repeat(30),
           token2InfoData!.contractAddress!,
           address
         );
+        refetchToken2Allowance();
+      }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
       const firstTokenConverts = await generateConvertErc20Cw20Message(
@@ -365,6 +364,7 @@ const LiquidityModal: FC<ModalProps> = ({
         });
 
         setTxHash(result.transactionHash);
+        refetchBalancesPairAmount();
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -379,105 +379,6 @@ const LiquidityModal: FC<ModalProps> = ({
       setActionLoading(false);
     }
   };
-
-  // const handleAddLiquidityWithKWT = async (
-  //   pairedAmount: number,
-  //   pairedToken: TokenItemType,
-  //   kwtAmount: number,
-  //   kwtToken: TokenItemType
-  // ) => {
-  //   if (!pairInfoData?.pair) return;
-  //   setActionLoading(true);
-  //   displayToast(TToastType.TX_BROADCASTING);
-
-  //   try {
-  //     const _kwtAmount = parseAmountToWithDecimal(
-  //       kwtAmount,
-  //       kwtToken.decimals
-  //     ).toFixed(0);
-
-  //     const convertNativeKwtMsg = (
-  //       await generateConvertMsgs({
-  //         type: Type.CONVERT_TOKEN,
-  //         sender: address,
-  //         inputAmount: _kwtAmount,
-  //         inputToken: kwtToken,
-  //       })
-  //     )[0];
-  //     const increaseAllowanceKwtMsg = (
-  //       await generateContractMessages({
-  //         type: Type.INCREASE_ALLOWANCE,
-  //         amount: '9'.repeat(30),
-  //         sender: address,
-  //         spender: pairInfoData!.contract_addr,
-  //         token: kwtToken?.contractAddress,
-  //       })
-  //     )[0];
-
-  //     const provideLiqMsg = (
-  //       await generateContractMessages({
-  //         type: Type.PROVIDE,
-  //         sender: address,
-  //         fromInfo: pairedToken,
-  //         toInfo: kwtToken,
-  //         fromAmount: pairedAmount,
-  //         toAmount: kwtAmount,
-  //         pair: pairInfoData.pair.contract_addr,
-  //       } as ProvideQuery)
-  //     )[0];
-  //     const msgs = [
-  //       {
-  //         contractAddress: convertNativeKwtMsg.contract,
-  //         handleMsg: convertNativeKwtMsg.toString(),
-  //         handleOptions: {
-  //           funds: convertNativeKwtMsg.sent_funds,
-  //         } as HandleOptions,
-  //       },
-  //       {
-  //         contractAddress: increaseAllowanceKwtMsg.contract,
-  //         handleMsg: increaseAllowanceKwtMsg.toString(),
-  //         handleOptions: {
-  //           funds: increaseAllowanceKwtMsg.sent_funds,
-  //         } as HandleOptions,
-  //       },
-  //       {
-  //         contractAddress: provideLiqMsg.contract,
-  //         handleMsg: provideLiqMsg.toString(),
-  //         handleOptions: { funds: provideLiqMsg.sent_funds } as HandleOptions,
-  //       },
-  //     ];
-
-  //     console.log('msgs: ', msgs);
-
-  //     const result = await CosmJs.executeMultiple({
-  //       prefix: ORAI,
-  //       walletAddr: address,
-  //       msgs,
-  //       gasAmount: { denom: ORAI, amount: '0' },
-  //     });
-  //     console.log('result provide tx hash: ', result);
-
-  //     if (result) {
-  //       console.log('in correct result');
-  //       displayToast(TToastType.TX_SUCCESSFUL, {
-  //         customLink: `${network.explorer}/txs/${result.transactionHash}`,
-  //       });
-
-  //       setTxHash(result.transactionHash);
-  //     }
-  //   } catch (error) {
-  //     console.log('error in swap form: ', error);
-  //     let finalError = '';
-  //     if (typeof error === 'string' || error instanceof String) {
-  //       finalError = error as string;
-  //     } else finalError = String(error);
-  //     displayToast(TToastType.TX_FAILED, {
-  //       message: finalError,
-  //     });
-  //   } finally {
-  //     setActionLoading(false);
-  //   }
-  // };
 
   const handleWithdrawLiquidity = async (amount: number) => {
     if (!pairInfoData?.pair) return;
@@ -516,6 +417,7 @@ const LiquidityModal: FC<ModalProps> = ({
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setTxHash(result.transactionHash);
+        refetchBalancesPairAmount();
       }
     } catch (error) {
       console.log('error in swap form: ', error);
@@ -617,7 +519,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img
           src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => { }}
+          onClick={() => {}}
         />
       </div>
       <div className={cx('supply')}>
@@ -730,9 +632,9 @@ const LiquidityModal: FC<ModalProps> = ({
       </div>
       {(() => {
         const amount1 = +parseAmount(
-          amountToken1.toString(),
-          token1InfoData!.decimals
-        ),
+            amountToken1.toString(),
+            token1InfoData!.decimals
+          ),
           amount2 = +parseAmount(
             amountToken2.toString(),
             token2InfoData!.decimals
@@ -884,7 +786,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -914,7 +816,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
