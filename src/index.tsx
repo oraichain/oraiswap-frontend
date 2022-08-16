@@ -14,8 +14,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_ETHER_CHAIN_ID
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
@@ -49,8 +48,7 @@ const startApp = async () => {
         Promise.all([
           window.Keplr.suggestChain(network.chainId),
           window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
-          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID),
-          // window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID)
+          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID),          
         ]),
         new Promise((resolve) => {
           setTimeout(resolve, 10000);

@@ -123,7 +123,6 @@ declare global {
       REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
       REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
-      REACT_APP_ORAIB_ETHER_ORAICHAIN_CHANNELS: string;
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
@@ -135,7 +134,6 @@ declare global {
       REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
-      REACT_APP_ORAIETHER_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
