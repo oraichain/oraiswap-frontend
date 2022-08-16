@@ -30,7 +30,7 @@ export function useEagerConnect(isInactive) {
   }, [pathname]);
 
   useEffect(() => {
-    if (!window.ethereum || isInactive || isMobile()) return;
+    if (!window.ethereum || isInactive) return;
     (async function () {
       if (isMobile())
         await window.ethereum.request!({

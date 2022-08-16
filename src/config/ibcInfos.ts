@@ -81,11 +81,11 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
         channel: oraichain2kwt,
         timeout: IBC_TRANSFER_TIMEOUT,
       },
-      [ORAI_BRIDGE_ETHER_CHAIN_ID]: {
-        source: 'transfer',
-        channel: oraichain2oraibether,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
+      // [ORAI_BRIDGE_ETHER_CHAIN_ID]: {
+      //   source: 'transfer',
+      //   channel: oraichain2oraibether,
+      //   timeout: IBC_TRANSFER_TIMEOUT,
+      // },
     },
     [ORAI_BRIDGE_CHAIN_ID]: {
       Oraichain: {
@@ -94,13 +94,13 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
         timeout: IBC_TRANSFER_TIMEOUT,
       },
     },
-    [ORAI_BRIDGE_ETHER_CHAIN_ID]: {
-      Oraichain: {
-        source: 'transfer',
-        channel: oraibether2oraichain,
-        timeout: IBC_TRANSFER_TIMEOUT,
-      },
-    },
+    // [ORAI_BRIDGE_ETHER_CHAIN_ID]: {
+    //   Oraichain: {
+    //     source: 'transfer',
+    //     channel: oraibether2oraichain,
+    //     timeout: IBC_TRANSFER_TIMEOUT,
+    //   },
+    // },
   },
 };
 
