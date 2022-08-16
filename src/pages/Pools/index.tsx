@@ -188,7 +188,7 @@ const ListPools = memo<{
         {filteredPairInfos.map((info) => (
           <PairBox
             {...info}
-            apr={!!allPoolApr ?? allPoolApr[info.pair.contract_addr]}
+            apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
             key={info.pair.contract_addr}
           />
         ))}
