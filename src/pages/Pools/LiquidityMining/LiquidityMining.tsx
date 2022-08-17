@@ -24,7 +24,7 @@ interface LiquidityMiningProps {
   setIsOpenUnbondModal: any;
   pairAmountInfoData: any;
   assetToken: TokenItemType;
-  setWithdrawTxHash: any;
+  onBondingAction: any;
   totalRewardInfoData: any;
   rewardPerSecInfoData: any;
   stakingPoolInfoData: any;
@@ -38,7 +38,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setIsOpenUnbondModal,
   pairAmountInfoData,
   assetToken,
-  setWithdrawTxHash,
+  onBondingAction,
   totalRewardInfoData,
   rewardPerSecInfoData,
   stakingPoolInfoData,
@@ -136,11 +136,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
       const msg = msgs[0];
 
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
-
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: address,
@@ -156,7 +151,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
         setActionLoading(false);
-        setWithdrawTxHash(result.transactionHash);
+        onBondingAction();
         return;
       }
     } catch (error) {

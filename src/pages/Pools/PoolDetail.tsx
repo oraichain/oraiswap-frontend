@@ -42,9 +42,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
-  const [assetToken, setAssetToken] = useState<TokenItemType>();
-  const [bondingTxHash, setBondingTxHash] = useState('');
-  const [withdrawTxHash, setWithdrawTxHash] = useState('');
+  const [assetToken, setAssetToken] = useState<TokenItemType>();  
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
@@ -120,6 +118,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     };
   };
 
+  const onBondingAction = () => {
+    refetchLpTokenBalance();
+    refetchRewardInfo();
+  };
+
   const { data: pairInfoData } = useQuery(
     ['pair-info', poolUrl],
     () => getPairInfo(),
@@ -137,12 +140,12 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     {
       enabled: !!pairInfoData,
       refetchOnWindowFocus: false,
-      // refetchInterval: 10000,
+      refetchInterval: 15000,
     }
   );
 
   const { data: lpTokenBalance, refetch: refetchLpTokenBalance } = useQuery(
-    ['token-balance', pairInfoData, bondingTxHash, withdrawTxHash],
+    ['token-balance', pairInfoData],
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
@@ -162,15 +165,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const { data: totalRewardInfoData } = useQuery(
-    [
-      'reward-info',
-      address,
-      bondingTxHash,
-      pairInfoData,
-      assetToken,
-      withdrawTxHash,
-    ],
+  const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
+    ['reward-info', address, pairInfoData, assetToken],
     () => fetchRewardInfo(address, assetToken!),
     { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
   );
@@ -409,7 +405,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                   setIsOpenUnbondModal={setIsOpenUnbondModal}
                   pairAmountInfoData={pairAmountInfoData}
                   assetToken={assetToken}
-                  setWithdrawTxHash={setWithdrawTxHash}
+                  onBondingAction={onBondingAction}
                   totalRewardInfoData={totalRewardInfoData}
                   rewardPerSecInfoData={rewardPerSecInfoData}
                   stakingPoolInfoData={stakingPoolInfoData}
@@ -430,7 +426,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 token2InfoData={pairInfoData.token2}
                 lpTokenInfoData={lpTokenInfoData}
                 lpTokenBalance={lpTokenBalance}
-                // setLiquidityHash={setLiquidityTxHash}
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData}
@@ -446,7 +441,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               lpTokenBalance={lpTokenBalance}
               liquidityValue={liquidity1Usd + liquidity2Usd}
               assetToken={assetToken}
-              setTxHash={setBondingTxHash}
+              onBondingAction={onBondingAction}
               pairInfoData={pairInfoData}
             />
           )}
@@ -461,7 +456,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               bondAmountUsd={bondAmountUsd}
               lpTokenInfoData={lpTokenInfoData}
               assetToken={assetToken}
-              setTxHash={setBondingTxHash}
+              onBondingAction={onBondingAction}
             />
           )}
         </>
