@@ -71,8 +71,7 @@ const LiquidityModal: FC<ModalProps> = ({
   type PriceKey = keyof typeof prices;
 
   const [activeTab, setActiveTab] = useState(0);
-  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [withdrawPercent, setWithdrawPercent] = useState(10);
+  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);  
   const [amountToken1, setAmountToken1] = useState('');
   const [amountToken2, setAmountToken2] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -398,8 +397,7 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   };
 
-  const onChangeWithdrawPercent = (option: number) => {
-    setWithdrawPercent(option);
+  const onChangeWithdrawPercent = (option: number) => {    
     setLpAmountBurn(
       +parseDisplayAmount(
         ((option * lpTokenBalance) / 100).toString(),
