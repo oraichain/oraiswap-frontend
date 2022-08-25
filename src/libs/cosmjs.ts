@@ -65,13 +65,27 @@ const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
 const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
   return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
     return {
-      typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
+      typeUrl: 'wasm/MsgExecuteContract',
       value: tx_4.MsgExecuteContract.fromPartial({
         sender: senderAddress,
         contract: contractAddress,
         msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
         funds: [...(transferAmount || [])],
       }),
+    };
+  });
+};
+
+const getAminoExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+  return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
+    return {
+      type: 'wasm/MsgExecuteContract',
+      value: {
+        sender: senderAddress,
+        contract: contractAddress,
+        msg: handleMsg,
+        sent_funds: [...(transferAmount || [])],
+      },
     };
   });
 };
@@ -100,6 +114,39 @@ const executeMultipleDirectClient = async (
     transactionHash: result.transactionHash,
   };
 };
+
+// {
+//   "chain_id": "Oraichain",
+//   "account_number": "13291",
+//   "sequence": "91",
+//   "fee": {
+//     "gas": "2000000",
+//     "amount": [
+//       {
+//         "denom": "orai",
+//         "amount": "0"
+//       }
+//     ]
+//   },
+//   "msgs": [
+//     {
+//       "typeUrl": "wasm/MsgExecuteContract",
+//       "value": {
+//         "sender": "orai1lg53gcjway7v8rwg6ceg2h5puvhuzyvk2ye7wu",
+//         "contract": "orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh",
+//         "msg": {
+//           "send": {
+//             "contract": "orai14wy8xndhnvjmx6zl2866xqvs7fqwv2arhhrqq9",
+//             "amount": "7507126",
+//             "msg": "eyJjb252ZXJ0X3JldmVyc2UiOnsiZnJvbSI6eyJuYXRpdmVfdG9rZW4iOnsiZGVub20iOiJpYmMvRThCNTUwOUJFNzkwMjVERDdBNTcyNDMwMjA0MjcxRDMwNjFBNTM1Q0M2NkEzQTI4RkRFQzQ1NzNFNDczRjMyRiJ9fX19"
+//           }
+//         },
+//         "sent_funds": []
+//       }
+//     }
+//   ],
+//   "memo": ""
+// }
 
 const executeMultipleAminoClient = async (
   msgs: Msg[],
@@ -407,6 +454,11 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple };
+export {
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs,
+};
 
 export default CosmJs;

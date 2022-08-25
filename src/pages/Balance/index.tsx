@@ -52,6 +52,7 @@ import {
   ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
 import CosmJs, {
+  getAminoExecuteContractMsgs,
   getExecuteContractMsgs,
   HandleOptions,
   parseExecuteContractMultiple,
@@ -402,8 +403,6 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const key = await window.Keplr.getKeplrKey();
-      // if (key.isNanoLedger)
-      //   throw 'This feature has not supported Ledger device yet!';
 
       const message = {
         typeUrl: '/gravity.v1.MsgSendToEth',
@@ -425,9 +424,26 @@ const Balance: React.FC<BalanceProps> = () => {
         amount: [],
         gas: '200000',
       };
-      const result = await client.signAndBroadcast(fromAddress, [message], fee);
 
-      processTxResult(fromToken, result);
+      if (key.isNanoLedger) {
+        const result = await CosmJs.sendMultipleAmino({
+          msgs: [message],
+          walletAddr: keplrAddress,
+          gasAmount: { denom: ORAI, amount: '0' },
+        });
+
+        if (result) {
+          processTxResult(fromToken, result as any);
+        }
+      } else {
+        const result = await client.signAndBroadcast(
+          fromAddress,
+          [message],
+          fee
+        );
+
+        processTxResult(fromToken, result);
+      }
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: `${ex}`,
@@ -481,13 +497,13 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAddress,
         amount
       );
-      const executeContractMsgs = getExecuteContractMsgs(
+
+      const executeContractMsgs = getAminoExecuteContractMsgs(
         fromAddress,
         parseExecuteContractMultiple(
           buildMultipleMessages(undefined, msgConvertReverses)
         )
       );
-
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -507,7 +523,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const key = await window.Keplr.getKeplrKey();
         if (key.isNanoLedger) {
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs, msgTransfer],
+            msgs: [...executeContractMsgs],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });

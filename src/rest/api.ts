@@ -130,10 +130,15 @@ async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`
-  );
-  return data.data;
+  try {
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`
+    );
+    return data.data;
+  } catch (error) {
+    console.log(error);
+    return 0;
+  }
 }
 
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
