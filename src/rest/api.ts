@@ -397,7 +397,7 @@ async function generateConvertCw20Erc20Message(
       await fetchNativeTokenBalance(sender, sendCoin.denom, null, true)
     ).toFixed(0);
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
-    if (balance >= sendCoin.amount) break;
+    if (+balance >= +sendCoin.amount) break;
 
     if (!tokenInfo.contractAddress)
       balance = new Big(
@@ -407,7 +407,7 @@ async function generateConvertCw20Erc20Message(
       balance = new Big(
         await fetchTokenBalance(tokenInfo.contractAddress, sender, null, true)
       ).toFixed(0);
-    if (balance > '0') {
+    if (+balance > 0) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
         denom: mapping.erc20Denom,
