@@ -507,7 +507,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const key = await window.Keplr.getKeplrKey();
         if (key.isNanoLedger) {
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs, msgTransfer],
+            msgs: [...executeContractMsgs],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });
