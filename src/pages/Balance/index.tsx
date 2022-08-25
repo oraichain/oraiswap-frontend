@@ -498,6 +498,12 @@ const Balance: React.FC<BalanceProps> = () => {
         amount
       );
 
+      const executeContractMsgs = getAminoExecuteContractMsgs(
+        fromAddress,
+        parseExecuteContractMultiple(
+          buildMultipleMessages(undefined, msgConvertReverses)
+        )
+      );
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
