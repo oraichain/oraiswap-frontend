@@ -503,26 +503,46 @@ const Balance: React.FC<BalanceProps> = () => {
         }),
       };
 
-      const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
-      );
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-      const client = await SigningStargateClient.connectWithSigner(
-        fromToken.rpc,
-        offlineSigner,
-        { registry: cosmwasmRegistry }
-      );
-
       try {
-        const result = await client.signAndBroadcast(
-          fromAddress,
-          [...executeContractMsgs, msgTransfer],
-          {
-            gas: '300000',
-            amount: [],
+        const key = await window.Keplr.getKeplrKey();
+        if (key.isNanoLedger) {
+          const result = await CosmJs.sendMultipleAmino({
+            msgs: [...executeContractMsgs, msgTransfer],
+            walletAddr: keplrAddress,
+            gasAmount: { denom: ORAI, amount: '0' },
+          });
+
+          if (result) {
+            processTxResult(
+              fromToken,
+              result as any,
+              `${network.explorer}/txs/${result.transactionHash}`
+            );
           }
-        );
-        processTxResult(fromToken, result);
+        } else {
+          const offlineSigner = await window.Keplr.getOfflineSigner(
+            fromToken.chainId
+          );
+          // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+          const client = await SigningStargateClient.connectWithSigner(
+            fromToken.rpc,
+            offlineSigner,
+            { registry: cosmwasmRegistry }
+          );
+          const result = await client.signAndBroadcast(
+            fromAddress,
+            [...executeContractMsgs, msgTransfer],
+            {
+              gas: '300000',
+              amount: [],
+            }
+          );
+          processTxResult(
+            fromToken,
+            result,
+            `${network.explorer}/txs/${result.transactionHash}`
+          );
+        }
       } catch (ex: any) {
         console.log('error in transfer ibc custom: ', ex);
         displayToast(TToastType.TX_FAILED, {
