@@ -76,6 +76,20 @@ const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
   });
 };
 
+const getAminoExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+  return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
+    return {
+      type: 'wasm/MsgExecuteContract',
+      value: {
+        sender: senderAddress,
+        contract: contractAddress,
+        msg: handleMsg,
+        sent_funds: [...(transferAmount || [])],
+      },
+    };
+  });
+};
+
 const executeMultipleDirectClient = async (
   senderAddress: string,
   msgs: Msg[],
@@ -407,6 +421,11 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple };
+export {
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs,
+};
 
 export default CosmJs;
