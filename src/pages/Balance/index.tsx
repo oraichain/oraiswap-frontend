@@ -494,103 +494,23 @@ const Balance: React.FC<BalanceProps> = () => {
             )
           );
 
-          // const msgTransfer = {
-          //   type: 'cosmos-sdk/MsgTransfer',
-          //   value: {
-          //     sourcePort: ibcInfo.source,
-          //     sourceChannel: ibcInfo.channel,
-          //     token: amount,
-          //     sender: fromAddress,
-          //     receiver: toAddress,
-          //     timeout_height: {},
-          //     timeout_timestamp: Long.fromNumber(
-          //       Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          //     )
-          //       .multiply(1000000000)
-          //       .toString(),
-          //   },
-          // };
           const msgTransfer = {
             type: 'cosmos-sdk/MsgTransfer',
             value: {
-              source_port: 'transfer',
-              source_channel: 'channel-20',
-              token: {
-                denom:
-                  'ibc/C458B4CC4F5581388B9ACB40774FDFBCEDC77A7F7CDFB112B469794AF86C4A69',
-                amount: '240181771000000000000',
-              },
-              sender: 'orai1lg53gcjway7v8rwg6ceg2h5puvhuzyvk2ye7wu',
-              receiver: 'oraib1lg53gcjway7v8rwg6ceg2h5puvhuzyvka9ajll',
+              source_port: ibcInfo.source,
+              source_channel: ibcInfo.channel,
+              token: amount,
+              sender: fromAddress,
+              receiver: toAddress,
               timeout_height: {},
-              timeout_timestamp: '1661493549000000000',
+              timeout_timestamp: Long.fromNumber(
+                Math.floor(Date.now() / 1000) + ibcInfo.timeout
+              )
+                .multiply(1000000000)
+                .toString(),
             },
           };
 
-          // {
-          //   "chain_id": "Oraichain",
-          //   "account_number": "13291",
-          //   "sequence": "96",
-          //   "fee": {
-          //     "gas": "2000000",
-          //     "amount": [
-          //       {
-          //         "denom": "orai",
-          //         "amount": "0"
-          //       }
-          //     ]
-          //   },
-          //   "msgs": [
-          //     {
-          //       "type": "cosmos-sdk/MsgTransfer",
-          //       "value": {
-          //         "sourcePort": "transfer",
-          //         "sourceChannel": "channel-20",
-          //         "token": {
-          //           "amount": "100000000000000000000",
-          //           "denom": "ibc/C458B4CC4F5581388B9ACB40774FDFBCEDC77A7F7CDFB112B469794AF86C4A69"
-          //         },
-          //         "sender": "orai1lg53gcjway7v8rwg6ceg2h5puvhuzyvk2ye7wu",
-          //         "receiver": "oraib1lg53gcjway7v8rwg6ceg2h5puvhuzyvka9ajll",
-          //         "timeout_height": {},
-          //         "timeout_timestamp": "1661493393000000000"
-          //       }
-          //     }
-          //   ],
-          //   "memo": ""
-          // }
-          // {
-          //   "chain_id": "Oraichain",
-          //   "account_number": "13291",
-          //   "sequence": "96",
-          //   "fee": {
-          //     "gas": "200000",
-          //     "amount": [
-          //       {
-          //         "denom": "orai",
-          //         "amount": "500"
-          //       }
-          //     ]
-          //   },
-          //   "msgs": [
-          //     {
-          //       "type": "cosmos-sdk/MsgTransfer",
-          //       "value": {
-          //         "source_port": "transfer",
-          //         "source_channel": "channel-20",
-          //         "token": {
-          //           "denom": "ibc/C458B4CC4F5581388B9ACB40774FDFBCEDC77A7F7CDFB112B469794AF86C4A69",
-          //           "amount": "240181771000000000000"
-          //         },
-          //         "sender": "orai1lg53gcjway7v8rwg6ceg2h5puvhuzyvk2ye7wu",
-          //         "receiver": "oraib1lg53gcjway7v8rwg6ceg2h5puvhuzyvka9ajll",
-          //         "timeout_height": {},
-          //         "timeout_timestamp": "1661492880000000000"
-          //       }
-          //     }
-          //   ],
-          //   "memo": ""
-          // }
           const result = await CosmJs.sendMultipleAmino({
             msgs: [...executeContractMsgs, msgTransfer],
             walletAddr: keplrAddress,
