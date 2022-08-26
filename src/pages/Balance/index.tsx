@@ -52,6 +52,7 @@ import {
   ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
 import CosmJs, {
+  getAminoExecuteContractMsgs,
   getExecuteContractMsgs,
   HandleOptions,
   parseExecuteContractMultiple,
@@ -481,33 +482,32 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAddress,
         amount
       );
-      const executeContractMsgs = getExecuteContractMsgs(
-        fromAddress,
-        parseExecuteContractMultiple(
-          buildMultipleMessages(undefined, msgConvertReverses)
-        )
-      );
-
-      // get raw ibc tx
-      const msgTransfer = {
-        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-        value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: amount,
-          sender: fromAddress,
-          receiver: toAddress,
-          timeoutTimestamp: Long.fromNumber(
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          ).multiply(1000000000),
-        }),
-      };
 
       try {
         const key = await window.Keplr.getKeplrKey();
+
         if (key.isNanoLedger) {
+          const executeContractMsgs = getAminoExecuteContractMsgs(
+            fromAddress,
+            parseExecuteContractMultiple(
+              buildMultipleMessages(undefined, msgConvertReverses)
+            )
+          );
+          const msgTransfer = {
+            type: 'cosmos-sdk/MsgTransfer',
+            value: {
+              sourcePort: ibcInfo.source,
+              sourceChannel: ibcInfo.channel,
+              token: amount,
+              sender: fromAddress,
+              receiver: toAddress,
+              timeoutTimestamp: Long.fromNumber(
+                Math.floor(Date.now() / 1000) + ibcInfo.timeout
+              ).multiply(1000000000),
+            },
+          };
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs],
+            msgs: [...executeContractMsgs, msgTransfer],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });
@@ -520,6 +520,27 @@ const Balance: React.FC<BalanceProps> = () => {
             );
           }
         } else {
+          const executeContractMsgs = getExecuteContractMsgs(
+            fromAddress,
+            parseExecuteContractMultiple(
+              buildMultipleMessages(undefined, msgConvertReverses)
+            )
+          );
+
+          // get raw ibc tx
+          const msgTransfer = {
+            typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+            value: MsgTransfer.fromPartial({
+              sourcePort: ibcInfo.source,
+              sourceChannel: ibcInfo.channel,
+              token: amount,
+              sender: fromAddress,
+              receiver: toAddress,
+              timeoutTimestamp: Long.fromNumber(
+                Math.floor(Date.now() / 1000) + ibcInfo.timeout
+              ).multiply(1000000000),
+            }),
+          };
           const offlineSigner = await window.Keplr.getOfflineSigner(
             fromToken.chainId
           );
