@@ -269,11 +269,16 @@ const Pools: React.FC<PoolsProps> = () => {
     () => fetchAllPoolApr(),
     useQueryConfig
   );
-  useQuery(
-    ['fetchPairInfoDataList'],
-    () => fetchPairInfoDataList(),
-    useQueryConfig
-  );
+  // useQuery(
+  //   ['fetchPairInfoDataList'],
+  //   () => fetchPairInfoDataList(),
+  //   useQueryConfig
+  // );
+
+  useEffect(() => {
+    fetchPairInfoDataList();
+    return () => {};
+  }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
 

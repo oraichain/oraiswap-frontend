@@ -52,37 +52,43 @@ const collectWallet = async (chainId?: string) => {
 };
 
 const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
-  console.log("messages in parse execute contract: ", msgs);
-  return msgs.map(
-    ({ handleMsg, handleOptions, contractAddress }) => {
-      return {
-        handleMsg: JSON.parse(handleMsg),
-        transferAmount: handleOptions?.funds,
-        contractAddress,
-      };
-    }
-  )
-}
+  console.log('messages in parse execute contract: ', msgs);
+  return msgs.map(({ handleMsg, handleOptions, contractAddress }) => {
+    return {
+      handleMsg: JSON.parse(handleMsg),
+      transferAmount: handleOptions?.funds,
+      contractAddress,
+    };
+  });
+};
 
-const getExecuteContractMsgs = (
-  senderAddress: string,
-  msgs: Msg[],
-) => {
+const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+  return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
+    return {
+      typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
+      value: tx_4.MsgExecuteContract.fromPartial({
+        sender: senderAddress,
+        contract: contractAddress,
+        msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
+        funds: [...(transferAmount || [])],
+      }),
+    };
+  });
+};
 
-  return msgs.map(
-    ({ handleMsg, transferAmount, contractAddress }) => {
-      return {
-        typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
-        value: tx_4.MsgExecuteContract.fromPartial({
-          sender: senderAddress,
-          contract: contractAddress,
-          msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
-          funds: [...(transferAmount || [])],
-        }),
-      };
-    }
-  );
-}
+const getAminoExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+  return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
+    return {
+      type: 'wasm/MsgExecuteContract',
+      value: {
+        sender: senderAddress,
+        contract: contractAddress,
+        msg: handleMsg,
+        sent_funds: [...(transferAmount || [])],
+      },
+    };
+  });
+};
 
 const executeMultipleDirectClient = async (
   senderAddress: string,
@@ -188,6 +194,40 @@ class CosmJs {
       console.log('error in executing contract: ' + error);
       throw error;
     }
+  }
+
+  static async sendMultipleAmino({
+    msgs,
+    gasAmount,
+    gasLimits = { exec: 2000000 },
+    walletAddr,
+  }: {
+    walletAddr: string;
+    msgs: any[];
+    gasAmount: { amount: string; denom: string };
+    gasLimits?: { exec: number };
+  }) {
+    await window.Keplr.suggestChain(network.chainId);
+    const wallet = await collectWallet();
+
+    const client = new SigningCosmWasmClient(
+      network.lcd,
+      walletAddr,
+      wallet as OfflineSigner,
+      GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+      gasLimits
+    );
+
+    const result = await client.signAndBroadcast(msgs, client.fees.exec, '');
+    if (isBroadcastTxFailure(result)) {
+      throw new Error(
+        `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
+      );
+    }
+    return {
+      logs: result.logs,
+      transactionHash: result.transactionHash,
+    };
   }
 
   static async executeAmino({
@@ -381,6 +421,11 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple };
+export {
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs,
+};
 
 export default CosmJs;

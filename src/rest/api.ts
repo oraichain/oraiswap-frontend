@@ -130,10 +130,15 @@ async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`
-  );
-  return data.data;
+  try {
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`
+    );
+    return data.data;
+  } catch (error) {
+    console.log(error);
+    return 0;
+  }
 }
 
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
@@ -397,7 +402,7 @@ async function generateConvertCw20Erc20Message(
       await fetchNativeTokenBalance(sender, sendCoin.denom, null, true)
     ).toFixed(0);
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
-    if (balance >= sendCoin.amount) break;
+    if (+balance >= +sendCoin.amount) break;
 
     if (!tokenInfo.contractAddress)
       balance = new Big(
@@ -407,7 +412,7 @@ async function generateConvertCw20Erc20Message(
       balance = new Big(
         await fetchTokenBalance(tokenInfo.contractAddress, sender, null, true)
       ).toFixed(0);
-    if (balance > '0') {
+    if (+balance > 0) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
         denom: mapping.erc20Denom,
