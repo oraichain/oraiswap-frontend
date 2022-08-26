@@ -144,7 +144,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         denom: 'uosmo',
         coinType: 118,
         chainId: 'osmosis-1',
-        rpc: 'https://osmosis-rpc-global.orai.io/',
+        rpc: 'https://rpc.osmosis.interbloc.org',
         lcd: 'https://lcd-osmosis.keplr.app',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
