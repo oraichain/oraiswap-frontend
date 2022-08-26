@@ -493,6 +493,7 @@ const Balance: React.FC<BalanceProps> = () => {
               buildMultipleMessages(undefined, msgConvertReverses)
             )
           );
+
           const msgTransfer = {
             type: 'cosmos-sdk/MsgTransfer',
             value: {
@@ -501,11 +502,14 @@ const Balance: React.FC<BalanceProps> = () => {
               token: amount,
               sender: fromAddress,
               receiver: toAddress,
-              timeoutTimestamp: Long.fromNumber(
+              timeout_timestamp: Long.fromNumber(
                 Math.floor(Date.now() / 1000) + ibcInfo.timeout
-              ).multiply(1000000000),
+              )
+                .multiply(1000000000)
+                .toString(),
             },
           };
+          debugger;
           const result = await CosmJs.sendMultipleAmino({
             msgs: [...executeContractMsgs, msgTransfer],
             walletAddr: keplrAddress,
