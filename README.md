@@ -10,7 +10,7 @@ yarn && yarn start
 yarn build
 ```
 
-If there is problem releated to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again
+If there is a problem related to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again
 
 or add this into package.json
 
