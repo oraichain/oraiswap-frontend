@@ -4,6 +4,7 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 
 import {
+  AminoTypes,
   BroadcastTxResponse,
   isBroadcastTxFailure,
   SigningStargateClient,
@@ -58,7 +59,7 @@ import CosmJs, {
   HandleOptions,
   parseExecuteContractMultiple,
 } from 'libs/cosmjs';
-import gravityRegistry from 'libs/gravity-registry';
+import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -396,71 +397,37 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
+      let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: gravityRegistry }
+        { registry: gravityRegistry, aminoTypes }
       );
 
-      const key = await window.Keplr.getKeplrKey();
-      if (key.isNanoLedger) {
-        const msgSendToEth = {
-          type: 'gravity/MsgSendToEth',
-          value: {
-            sender: fromAddress,
-            eth_dest: metamaskAddress,
-            amount: {
-              denom: fromToken.denom,
-              amount: rawAmount,
-            },
-            bridge_fee: {
-              denom: fromToken.denom,
-              // just a number to make sure there is a friction
-              amount: ORAI_BRIDGE_EVM_FEE,
-            },
+      const message = {
+        typeUrl: '/gravity.v1.MsgSendToEth',
+        value: MsgSendToEth.fromPartial({
+          sender: fromAddress,
+          ethDest: metamaskAddress,
+          amount: {
+            denom: fromToken.denom,
+            amount: rawAmount,
           },
-        };
-        const result = await CosmJs.sendMultipleAmino({
-          msgs: [msgSendToEth],
-          walletAddr: fromAddress,
-          gasAmount: { denom: ORAI_BRIDGE_DENOM, amount: '0' },
-          lcd: fromToken.lcd,
-          chainId: fromToken.chainId,
-        });
+          bridgeFee: {
+            denom: fromToken.denom,
+            // just a number to make sure there is a friction
+            amount: ORAI_BRIDGE_EVM_FEE,
+          },
+        }),
+      };
+      const fee = {
+        amount: [],
+        gas: '200000',
+      };
+      const result = await client.signAndBroadcast(fromAddress, [message], fee);
 
-        if (result) {
-          processTxResult(fromToken, result as any);
-        }
-      } else {
-        const message = {
-          typeUrl: '/gravity.v1.MsgSendToEth',
-          value: MsgSendToEth.fromPartial({
-            sender: fromAddress,
-            ethDest: metamaskAddress,
-            amount: {
-              denom: fromToken.denom,
-              amount: rawAmount,
-            },
-            bridgeFee: {
-              denom: fromToken.denom,
-              // just a number to make sure there is a friction
-              amount: ORAI_BRIDGE_EVM_FEE,
-            },
-          }),
-        };
-        const fee = {
-          amount: [],
-          gas: '200000',
-        };
-        const result = await client.signAndBroadcast(
-          fromAddress,
-          [message],
-          fee
-        );
-
-        processTxResult(fromToken, result);
-      }
+      processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: `${ex}`,
