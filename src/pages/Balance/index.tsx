@@ -48,6 +48,7 @@ import {
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
@@ -403,32 +404,63 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const key = await window.Keplr.getKeplrKey();
-      // if (key.isNanoLedger)
-      //   throw 'This feature has not supported Ledger device yet!';
-
-      const message = {
-        typeUrl: '/gravity.v1.MsgSendToEth',
-        value: MsgSendToEth.fromPartial({
-          sender: fromAddress,
-          ethDest: metamaskAddress,
-          amount: {
-            denom: fromToken.denom,
-            amount: rawAmount,
+      if (key.isNanoLedger) {
+        const msgSendToEth = {
+          type: 'gravity/MsgSendToEth',
+          value: {
+            sender: fromAddress,
+            eth_dest: metamaskAddress,
+            amount: {
+              denom: fromToken.denom,
+              amount: rawAmount,
+            },
+            bridge_fee: {
+              denom: fromToken.denom,
+              // just a number to make sure there is a friction
+              amount: ORAI_BRIDGE_EVM_FEE,
+            },
           },
-          bridgeFee: {
-            denom: fromToken.denom,
-            // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_EVM_FEE,
-          },
-        }),
-      };
-      const fee = {
-        amount: [],
-        gas: '200000',
-      };
-      const result = await client.signAndBroadcast(fromAddress, [message], fee);
+        };
+        const result = await CosmJs.sendMultipleAmino({
+          msgs: [msgSendToEth],
+          walletAddr: fromAddress,
+          gasAmount: { denom: ORAI_BRIDGE_DENOM, amount: '0' },
+          lcd: fromToken.lcd,
+          chainId: fromToken.chainId,
+        });
 
-      processTxResult(fromToken, result);
+        if (result) {
+          processTxResult(fromToken, result as any);
+        }
+      } else {
+        const message = {
+          typeUrl: '/gravity.v1.MsgSendToEth',
+          value: MsgSendToEth.fromPartial({
+            sender: fromAddress,
+            ethDest: metamaskAddress,
+            amount: {
+              denom: fromToken.denom,
+              amount: rawAmount,
+            },
+            bridgeFee: {
+              denom: fromToken.denom,
+              // just a number to make sure there is a friction
+              amount: ORAI_BRIDGE_EVM_FEE,
+            },
+          }),
+        };
+        const fee = {
+          amount: [],
+          gas: '200000',
+        };
+        const result = await client.signAndBroadcast(
+          fromAddress,
+          [message],
+          fee
+        );
+
+        processTxResult(fromToken, result);
+      }
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: `${ex}`,
