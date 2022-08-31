@@ -201,17 +201,21 @@ class CosmJs {
     gasAmount,
     gasLimits = { exec: 2000000 },
     walletAddr,
+    lcd = network.lcd,
+    chainId = network.chainId,
   }: {
     walletAddr: string;
     msgs: any[];
     gasAmount: { amount: string; denom: string };
     gasLimits?: { exec: number };
+    lcd?: string;
+    chainId?: string;
   }) {
-    await window.Keplr.suggestChain(network.chainId);
-    const wallet = await collectWallet();
+    await window.Keplr.suggestChain(chainId);
+    const wallet = await collectWallet(chainId);
 
     const client = new SigningCosmWasmClient(
-      network.lcd,
+      lcd,
       walletAddr,
       wallet as OfflineSigner,
       GasPrice.fromString(gasAmount.amount + gasAmount.denom),
