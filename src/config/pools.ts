@@ -42,13 +42,13 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
       contract_addr: 'orai1ynmd2cemryhcwtjq3adhcwayrm89l2cr4tws4v',
       asset_denoms: [ORAI, 'kwt'],
     },
-    // {
-    //   contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
-    //   asset_denoms: [
-    //     ORAI,
-    //     process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
-    //   ]
-    // }
+    {
+      contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
+      asset_denoms: [
+        ORAI,
+        process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
+      ]
+    }
   ],
 };
 

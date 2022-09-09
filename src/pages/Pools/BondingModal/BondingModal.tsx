@@ -27,7 +27,7 @@ interface ModalProps {
   lpTokenBalance: number;
   liquidityValue: number;
   assetToken: any;
-  setTxHash: any;
+  onBondingAction: any;
   pairInfoData: any;
 }
 
@@ -39,7 +39,7 @@ const BondingModal: FC<ModalProps> = ({
   lpTokenBalance,
   liquidityValue,
   assetToken,
-  setTxHash,
+  onBondingAction,
   pairInfoData,
 }) => {
   const [bondAmount, setBondAmount] = useState('');
@@ -69,18 +69,7 @@ const BondingModal: FC<ModalProps> = ({
         assetToken,
       });
 
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.WITHDRAW_LIQUIDITY_MINING,
-      //   sender: `${walletAddr}`,
-      // })
-
       const msg = msgs[0];
-
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
-
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: address,
@@ -95,7 +84,7 @@ const BondingModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
-        setTxHash(result.transactionHash);
+        onBondingAction();
       }
     } catch (error) {
       console.log('error in bond form: ', error);

@@ -15,7 +15,6 @@ import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_ETHER_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
@@ -34,7 +33,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0
+    tracesSampleRate: 1.0,
   });
 }
 
@@ -50,31 +49,30 @@ const startApp = async () => {
           window.Keplr.suggestChain(network.chainId),
           window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
           window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID),
-          window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID)
+          // window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID),
         ]),
         new Promise((resolve) => {
           setTimeout(resolve, 10000);
-        })
+        }),
       ]);
     }
   } catch (ex) {
     console.log(ex);
   }
-
-  render(
-    <StrictMode>
-      <ToastProvider>
-        <Router>
-          <ScrollToTop />
-          <QueryClientProvider client={queryClient}>
-            <App />
-          </QueryClientProvider>
-        </Router>
-        <ToastContainer transition={Bounce} />
-      </ToastProvider>
-    </StrictMode>,
-    document.getElementById('oraiswap')
-  );
 };
 
 startApp();
+render(
+  <StrictMode>
+    <ToastProvider>
+      <Router>
+        <ScrollToTop />
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </Router>
+      <ToastContainer transition={Bounce} />
+    </ToastProvider>
+  </StrictMode>,
+  document.getElementById('oraiswap')
+);

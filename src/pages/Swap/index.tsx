@@ -15,16 +15,26 @@ import {
   generateConvertMsgs,
   simulateSwap,
   SwapQuery,
-  generateConvertErc20Cw20Message
+  generateConvertErc20Cw20Message,
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
-import { buildMultipleMessages, parseAmount, parseAmountToWithDecimal, parseDisplayAmount } from 'libs/utils';
+import {
+  buildMultipleMessages,
+  parseAmount,
+  parseAmountToWithDecimal,
+  parseDisplayAmount,
+} from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType, tokens, cw20Tokens } from 'config/bridgeTokens';
+import {
+  filteredTokens,
+  TokenItemType,
+  tokens,
+  cw20Tokens,
+} from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
@@ -36,21 +46,24 @@ const Swap: React.FC = () => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
-  const [isSelectFee, setIsSelectFee] = useState(false);
+  // const [isSelectFee, setIsSelectFee] = useState(false);
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
     [string, string]
   >(['orai', 'usdt']);
   // const [feeToken, setFeeToken] = useState<string>('airi');
-  const [[fromAmount, toAmount], setSwapAmount] = useState([0, 0]);
+  const [[fromAmount, toAmount], setSwapAmount] = useState([
+    undefined,
+    undefined,
+  ]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
-  const [txHash, setTxHash] = useState<String>();
   const [refresh, setRefresh] = useState(false);
 
-  const onChangeFromAmount = (amount: number) => {
+  const onChangeFromAmount = (amount: number | undefined) => {
+    if (!amount) return setSwapAmount([undefined, toAmount]);
     setSwapAmount([amount, toAmount]);
   };
 
@@ -71,21 +84,14 @@ const Swap: React.FC = () => {
   );
   const toToken = filteredTokens.find((token) => token.denom === toTokenDenom);
 
-  const {
-    data: fromTokenInfoData,
-    error: fromTokenInfoError,
-    isError: isFromTokenInfoError,
-    isLoading: isFromTokenInfoLoading
-  } = useQuery(['from-token-info', fromToken], () =>
-    fetchTokenInfo(fromToken!)
+  const { data: fromTokenInfoData } = useQuery(
+    ['from-token-info', fromToken],
+    () => fetchTokenInfo(fromToken!)
   );
 
-  const {
-    data: toTokenInfoData,
-    error: toTokenInfoError,
-    isError: isToTokenInfoError,
-    isLoading: isToTokenInfoLoading
-  } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
+  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () =>
+    fetchTokenInfo(toToken!)
+  );
 
   // suggest tokens
   useEffect(() => {
@@ -95,65 +101,48 @@ const Swap: React.FC = () => {
     }
   }, [fromToken, toToken]);
 
-  const {
-    data: fromTokenBalance = 0,
-    error: fromTokenBalanceError,
-    isError: isFromTokenBalanceError,
-    isLoading: isFromTokenBalanceLoading
-  } = useQuery(
-    ['from-token-balance', fromToken, txHash],
-    async () =>
-      fromToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, fromToken)).amount :
-        fetchBalance(
-          address,
-          fromToken!.denom,
-          fromToken!.contractAddress,
-          fromToken!.lcd,
-        ),
-    { enabled: !!address && !!fromToken }
-  );
+  const { data: fromTokenBalance = 0, refetch: refetchFromTokenBalance } =
+    useQuery(
+      ['balance', fromToken.denom, address],
+      async () =>
+        fromToken.erc20Cw20Map
+          ? (await fetchBalanceWithMapping(address, fromToken)).amount
+          : fetchBalance(
+              address,
+              fromToken!.denom,
+              fromToken!.contractAddress,
+              fromToken!.lcd
+            ),
+      { enabled: !!address && !!fromToken }
+    );
 
-  const {
-    data: toTokenBalance,
-    error: toTokenBalanceError,
-    isError: isToTokenBalanceError,
-    isLoading: isLoadingToTokenBalance
-  } = useQuery(
-    ['to-token-balance', toToken, txHash],
+  const { data: toTokenBalance, refetch: refetchToTokenBalance } = useQuery(
+    ['balance', toToken.denom, address],
     async () =>
-      toToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, toToken)).amount :
-        fetchBalance(
-          address,
-          toToken!.denom,
-          toToken!.contractAddress,
-          toToken!.lcd,
-        ),
+      toToken.erc20Cw20Map
+        ? (await fetchBalanceWithMapping(address, toToken)).amount
+        : fetchBalance(
+            address,
+            toToken!.denom,
+            toToken!.contractAddress,
+            toToken!.lcd
+          ),
     { enabled: !!address && !!toToken }
   );
 
-  const {
-    data: exchangeRate,
-    error: exchangeRateError,
-    isError: isExchangeRateError,
-    isLoading: isExchangeRateLoading
-  } = useQuery(
+  useQuery(
     ['exchange-rate', fromTokenInfoData, toTokenInfoData],
     () => fetchExchangeRate(toTokenInfoData!.denom, fromTokenInfoData!.denom),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
 
-  const {
-    data: simulateData,
-    error: simulateDataError,
-    isError: isSimulateDataError,
-    isLoading: isSimulateDataLoading
-  } = useQuery(
+  const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
     () =>
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
+        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals),
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
@@ -165,7 +154,7 @@ const Swap: React.FC = () => {
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData!.decimals)
+          amount: parseAmount('1', fromTokenInfoData!.decimals),
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -187,32 +176,45 @@ const Swap: React.FC = () => {
       fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-      )
+      ),
     ]);
   }, [simulateData]);
+
+  const refetchTokenBalances = () => {
+    refetchFromTokenBalance();
+    refetchToTokenBalance();
+  };
 
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
+        message: 'From amount should be higher than 0!',
       });
 
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-
-      var _fromAmount = parseAmountToWithDecimal(fromAmount, fromTokenInfoData.decimals).toFixed(0);
+      var _fromAmount = parseAmountToWithDecimal(
+        fromAmount,
+        fromTokenInfoData.decimals
+      ).toFixed(0);
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(fromTokenInfoData)), address);
-      const msgConvertTo = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(toTokenInfoData)), address);
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(
+        JSON.parse(JSON.stringify(fromTokenInfoData)),
+        address
+      );
+      const msgConvertTo = await generateConvertErc20Cw20Message(
+        JSON.parse(JSON.stringify(toTokenInfoData)),
+        address
+      );
 
       const msgs = await generateContractMessages({
         type: Type.SWAP,
         sender: address,
         amount: _fromAmount,
         fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!
+        toInfo: toTokenInfoData!,
       } as SwapQuery);
 
       const msg = msgs[0];
@@ -230,9 +232,9 @@ const Swap: React.FC = () => {
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
+          customLink: `${network.explorer}/txs/${result.transactionHash}`,
         });
-        setTxHash(result.transactionHash);
+        refetchTokenBalances();
         setSwapLoading(false);
       }
     } catch (error) {
@@ -242,7 +244,7 @@ const Swap: React.FC = () => {
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError
+        message: finalError,
       });
     } finally {
       setSwapLoading(false);
@@ -259,7 +261,7 @@ const Swap: React.FC = () => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center'
+          justifyContent: 'center',
         }}
       >
         <div className={cx('container')}>
@@ -283,7 +285,7 @@ const Swap: React.FC = () => {
                 balance={{
                   amount: fromTokenBalance,
                   decimals: fromTokenInfoData?.decimals,
-                  denom: fromTokenInfoData?.symbol ?? ''
+                  denom: fromTokenInfoData?.symbol ?? '',
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -323,13 +325,14 @@ const Swap: React.FC = () => {
               </div>
 
               <NumberFormat
+                placeholder="0"
                 className={cx('amount')}
                 thousandSeparator
                 decimalScale={6}
                 type="text"
                 value={fromAmount}
                 onValueChange={({ floatValue }) => {
-                  onChangeFromAmount(floatValue ?? 0);
+                  onChangeFromAmount(floatValue);
                 }}
               />
 
@@ -370,7 +373,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenBalance ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.symbol ?? ''
+                  denom: toTokenInfoData?.symbol ?? '',
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -393,9 +396,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -429,7 +432,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: simulateData ? simulateData?.amount : 0,
-                  denom: toTokenInfoData?.symbol ?? ''
+                  denom: toTokenInfoData?.symbol ?? '',
                 }}
                 decimalScale={6}
               />

@@ -33,17 +33,15 @@ export const WECHAT = '';
 export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
-export const ETHEREUM_CHAIN_ID = '0x5';
+export const ETHEREUM_CHAIN_ID = '0x1';
 export const ETHEREUM_RPC =
-  'https://goerli.infura.io/v3/c311195fa53249c4a7f8d5364044c151';
+  'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
-export const ORAI_BRIDGE_ETHER_CHAIN_ID='oraibridge-subnet-kovan'
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
-export const ETH_ORG = 'Ethereum'
 
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
@@ -52,10 +50,8 @@ export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
-export const ORAI_BRIDGE_ETHER_RPC = 'https://bridge-ethereum.rpc.orai.io';
-export const ORAI_BRIDGE_ETHER_LCD = 'https://bridge-ethereum.lcd.orai.io';
 
-export const ORAI_ETH_CONTRACT = '0x7af963cF6D228E564e2A0aA0DdBF06210B38615D';
+export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179cf06e71ac328c1b5';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
