@@ -35,7 +35,8 @@ export const embedChainInfos: ChainInfo[] = [
       return [this.stakeCurrency];
     },
     get feeCurrencies() {
-      return [this.stakeCurrency];
+      return [{ ...this.stakeCurrency, gasPriceStep: this.gasPriceStep }];
+      // return [this.stakeCurrency];
     },
     walletUrlForStaking: 'https://scan.orai.io/validators',
     gasPriceStep: {
@@ -66,7 +67,8 @@ export const embedChainInfos: ChainInfo[] = [
       return [this.stakeCurrency];
     },
     get feeCurrencies() {
-      return [this.stakeCurrency];
+      return [{ ...this.stakeCurrency, gasPriceStep: this.gasPriceStep }];
+      // return [this.stakeCurrency];
     },
     gasPriceStep: {
       low: 0,
@@ -94,7 +96,8 @@ export const embedChainInfos: ChainInfo[] = [
       return [this.stakeCurrency];
     },
     get feeCurrencies() {
-      return [this.stakeCurrency];
+      return [{ ...this.stakeCurrency, gasPriceStep: this.gasPriceStep }];
+      // return [this.stakeCurrency];
     },
     gasPriceStep: {
       low: 0,
