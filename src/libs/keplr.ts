@@ -14,7 +14,7 @@ const hash160 = (buffer: Uint8Array) => {
 };
 
 export default class Keplr {
-  constructor() { }
+  constructor() {}
 
   disconnect() {
     // clear data?
@@ -25,7 +25,9 @@ export default class Keplr {
     return window.keplr;
   }
 
-  async getOfflineSigner(chainId: string): Promise<OfflineSigner | OfflineDirectSigner> {
+  async getOfflineSigner(
+    chainId: string
+  ): Promise<OfflineSigner | OfflineDirectSigner> {
     return this.keplr.getOfflineSignerAuto(chainId);
   }
 
@@ -34,6 +36,9 @@ export default class Keplr {
     const chainInfo = embedChainInfos.find(
       (chainInfo) => chainInfo.chainId === chainId
     );
+
+    // do nothing without chainInfo
+    if (!chainInfo) return;
 
     // if there is chainInfo try to suggest, otherwise enable it
     if (!isMobile() && chainInfo) {
