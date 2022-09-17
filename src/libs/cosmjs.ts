@@ -76,6 +76,20 @@ const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
   });
 };
 
+const getAminoExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+  return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
+    return {
+      type: 'wasm/MsgExecuteContract',
+      value: {
+        sender: senderAddress,
+        contract: contractAddress,
+        msg: handleMsg,
+        sent_funds: [...(transferAmount || [])],
+      },
+    };
+  });
+};
+
 const executeMultipleDirectClient = async (
   senderAddress: string,
   msgs: Msg[],
@@ -187,17 +201,21 @@ class CosmJs {
     gasAmount,
     gasLimits = { exec: 2000000 },
     walletAddr,
+    lcd = network.lcd,
+    chainId = network.chainId,
   }: {
     walletAddr: string;
     msgs: any[];
     gasAmount: { amount: string; denom: string };
     gasLimits?: { exec: number };
+    lcd?: string;
+    chainId?: string;
   }) {
-    await window.Keplr.suggestChain(network.chainId);
-    const wallet = await collectWallet();
+    await window.Keplr.suggestChain(chainId);
+    const wallet = await collectWallet(chainId);
 
     const client = new SigningCosmWasmClient(
-      network.lcd,
+      lcd,
       walletAddr,
       wallet as OfflineSigner,
       GasPrice.fromString(gasAmount.amount + gasAmount.denom),
@@ -407,6 +425,11 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple };
+export {
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs,
+};
 
 export default CosmJs;

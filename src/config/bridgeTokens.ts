@@ -37,7 +37,7 @@ import {
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT,
   STABLE_DENOM,
-  USDT_BSC_CONTRACT,
+  USDT_BSC_CONTRACT
 } from './constants';
 
 export type Erc20Cw20Map = {
@@ -54,14 +54,14 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -75,17 +75,17 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands';
   cosmosBased: Boolean;
 };
 
@@ -103,10 +103,11 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'cosmoshub-4',
         rpc: 'https://rpc-cosmos.oraidex.io',
-        lcd: 'https://lcd-cosmoshub.keplr.app',
+        // lcd: 'https://lcd-cosmoshub.keplr.app',
+        lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'LUNA',
@@ -121,7 +122,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: 'https://lcd-columbus.keplr.app',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
-        Icon: LUNA,
+        Icon: LUNA
       },
       {
         name: 'UST',
@@ -135,7 +136,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc-terra.orai.io',
         lcd: 'https://lcd-columbus.keplr.app',
         cosmosBased: true,
-        Icon: UST,
+        Icon: UST
       },
       {
         name: 'OSMO',
@@ -144,13 +145,14 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         denom: 'uosmo',
         coinType: 118,
         chainId: 'osmosis-1',
-        rpc: 'https://osmosis.rpc.orai.io',
-        lcd: 'https://lcd-osmosis.keplr.app',
+        rpc: 'https://rpc.osmosis.interbloc.org',
+        // lcd: 'https://lcd-osmosis.keplr.app',
+        lcd: 'https://lcd.osmosis.zone',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,
         maxGas: 20000 * 0.025,
-        Icon: OSMO,
+        Icon: OSMO
       },
       // {
       //   name: 'ORAI',
@@ -180,7 +182,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'oraichain-token',
         cosmosBased: true,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'AIRI',
@@ -195,7 +197,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'airight',
         cosmosBased: true,
-        Icon: AIRI,
+        Icon: AIRI
       },
       {
         name: 'USDT',
@@ -210,7 +212,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'tether',
         cosmosBased: true,
-        Icon: USDT,
+        Icon: USDT
       },
       {
         name: 'KWT',
@@ -225,7 +227,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: true,
-        Icon: KWT,
+        Icon: KWT
       },
       // {
       //   name: 'ERC20 ORAI',
@@ -249,7 +251,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'oraichain-token',
         cosmosBased: false,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'AIRI',
@@ -261,7 +263,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'airight',
         cosmosBased: false,
-        Icon: AIRI,
+        Icon: AIRI
       },
       {
         name: 'USDT',
@@ -273,7 +275,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'tether',
         cosmosBased: false,
-        Icon: USDT,
+        Icon: USDT
       },
       {
         name: 'KWT',
@@ -285,7 +287,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: false,
-        Icon: KWT,
+        Icon: KWT
       },
       {
         name: 'KWT',
@@ -298,7 +300,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: KAWAII_LCD,
         cosmosBased: true,
         maxGas: 200000 * 2,
-        Icon: KWT,
+        Icon: KWT
       },
       {
         name: 'ERC20 KWT',
@@ -311,8 +313,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: false,
-        Icon: KWT,
-      },
+        Icon: KWT
+      }
     ],
     [
       {
@@ -339,7 +341,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI,
+        Icon: ORAI
       },
       {
         name: 'ATOM',
@@ -353,7 +355,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ATOMCOSMOS,
+        Icon: ATOMCOSMOS
       },
       {
         name: 'LUNA',
@@ -367,7 +369,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: LUNA,
+        Icon: LUNA
       },
       {
         name: 'UST',
@@ -381,7 +383,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: UST,
+        Icon: UST
       },
       {
         name: 'AIRI',
@@ -397,10 +399,10 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
-              cw20Decimals: COSMOS_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS
             },
-            erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
-          },
+            erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
+          }
         ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
@@ -408,7 +410,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: AIRI,
+        Icon: AIRI
       },
       {
         name: 'USDT',
@@ -424,10 +426,10 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
-              cw20Decimals: COSMOS_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS
             },
-            erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
-          },
+            erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM
+          }
         ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
@@ -435,22 +437,22 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: USDT,
+        Icon: USDT
       },
-      // {
-      //   name: 'OSMO',
-      //   org: 'Oraichain',
-      //   denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
-      //   prefix: 'orai',
-      //   coinType: 118,
-      //   chainId: 'Oraichain',
-      //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
-      //   decimals:COSMOS_DECIMALS,
-      //   coingeckoId: 'osmosis',
-      //   cosmosBased: true,
-      //   Icon: OSMO
-      // },
+      {
+        name: 'OSMO',
+        org: 'Oraichain',
+        denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+        prefix: 'orai',
+        coinType: 118,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        decimals: COSMOS_DECIMALS,
+        coingeckoId: 'osmosis',
+        cosmosBased: true,
+        Icon: OSMO
+      },
       // {
       //   name: 'Erc20 ORAI',
       //   org: 'Oraichain',
@@ -476,7 +478,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI,
+        Icon: ORAI
       },
       // {
       //   name: 'AIRI',
@@ -531,10 +533,10 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
             erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
-              cw20Decimals: COSMOS_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS
             },
-            erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
-          },
+            erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM
+          }
         ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
@@ -542,7 +544,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: KWT,
+        Icon: KWT
       },
       {
         name: 'ORAIX',
@@ -557,10 +559,10 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI,
-      },
-    ],
-  ],
+        Icon: ORAI
+      }
+    ]
+  ]
 };
 
 // filter with deprecated
@@ -569,8 +571,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 
@@ -614,5 +616,5 @@ export const kawaiiTokens = _.uniqBy(
 
 export const gravityContracts: { [key: string]: string } = {
   [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
-  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT,
+  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
 };

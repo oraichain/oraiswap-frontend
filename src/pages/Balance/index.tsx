@@ -4,6 +4,7 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 
 import {
+  AminoTypes,
   BroadcastTxResponse,
   isBroadcastTxFailure,
   SigningStargateClient,
@@ -48,15 +49,17 @@ import {
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
 import CosmJs, {
+  getAminoExecuteContractMsgs,
   getExecuteContractMsgs,
   HandleOptions,
   parseExecuteContractMultiple,
 } from 'libs/cosmjs';
-import gravityRegistry from 'libs/gravity-registry';
+import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -394,16 +397,13 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
+      let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: gravityRegistry }
+        { registry: gravityRegistry, aminoTypes }
       );
-
-      const key = await window.Keplr.getKeplrKey();
-      // if (key.isNanoLedger)
-      //   throw 'This feature has not supported Ledger device yet!';
 
       const message = {
         typeUrl: '/gravity.v1.MsgSendToEth',
@@ -481,31 +481,35 @@ const Balance: React.FC<BalanceProps> = () => {
         fromAddress,
         amount
       );
-      const executeContractMsgs = getExecuteContractMsgs(
-        fromAddress,
-        parseExecuteContractMultiple(
-          buildMultipleMessages(undefined, msgConvertReverses)
-        )
-      );
-
-      // get raw ibc tx
-      const msgTransfer = {
-        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-        value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: amount,
-          sender: fromAddress,
-          receiver: toAddress,
-          timeoutTimestamp: Long.fromNumber(
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          ).multiply(1000000000),
-        }),
-      };
 
       try {
         const key = await window.Keplr.getKeplrKey();
+
         if (key.isNanoLedger) {
+          const executeContractMsgs = getAminoExecuteContractMsgs(
+            fromAddress,
+            parseExecuteContractMultiple(
+              buildMultipleMessages(undefined, msgConvertReverses)
+            )
+          );
+
+          const msgTransfer = {
+            type: 'cosmos-sdk/MsgTransfer',
+            value: {
+              source_port: ibcInfo.source,
+              source_channel: ibcInfo.channel,
+              token: amount,
+              sender: fromAddress,
+              receiver: toAddress,
+              timeout_height: {},
+              timeout_timestamp: Long.fromNumber(
+                Math.floor(Date.now() / 1000) + ibcInfo.timeout
+              )
+                .multiply(1000000000)
+                .toString(),
+            },
+          };
+
           const result = await CosmJs.sendMultipleAmino({
             msgs: [...executeContractMsgs],
             walletAddr: keplrAddress,
@@ -520,6 +524,27 @@ const Balance: React.FC<BalanceProps> = () => {
             );
           }
         } else {
+          const executeContractMsgs = getExecuteContractMsgs(
+            fromAddress,
+            parseExecuteContractMultiple(
+              buildMultipleMessages(undefined, msgConvertReverses)
+            )
+          );
+
+          // get raw ibc tx
+          const msgTransfer = {
+            typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+            value: MsgTransfer.fromPartial({
+              sourcePort: ibcInfo.source,
+              sourceChannel: ibcInfo.channel,
+              token: amount,
+              sender: fromAddress,
+              receiver: toAddress,
+              timeoutTimestamp: Long.fromNumber(
+                Math.floor(Date.now() / 1000) + ibcInfo.timeout
+              ).multiply(1000000000),
+            }),
+          };
           const offlineSigner = await window.Keplr.getOfflineSigner(
             fromToken.chainId
           );
