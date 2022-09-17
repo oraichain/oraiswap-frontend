@@ -511,7 +511,7 @@ const Balance: React.FC<BalanceProps> = () => {
           };
 
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs, msgTransfer],
+            msgs: [...executeContractMsgs],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });
