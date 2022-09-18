@@ -46,7 +46,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [address, setAddress] = useGlobalState('address');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
-
+  const [chainId] = useGlobalState('chainId');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -142,7 +142,15 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={address}
                     className={styles.token_avatar}
                   />
-                  <ORAIIcon className={styles.network_icon} />
+                  {chainId === '0x38' && (
+                    <BNBIcon className={styles.network_icon} />
+                  )}
+                  {chainId === '0x01' && (
+                    <img src={ethIcon} className={styles.network_icon} />
+                  )}
+                  {chainId !== '0x01' && chainId !== '0x38' && (
+                    <ORAIIcon className={styles.network_icon} />
+                  )}
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
                       size={6}

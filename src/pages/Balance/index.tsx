@@ -4,6 +4,7 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 
 import {
+  AminoTypes,
   BroadcastTxResponse,
   isBroadcastTxFailure,
   SigningStargateClient,
@@ -48,6 +49,7 @@ import {
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
 } from 'config/constants';
@@ -57,7 +59,7 @@ import CosmJs, {
   HandleOptions,
   parseExecuteContractMultiple,
 } from 'libs/cosmjs';
-import gravityRegistry from 'libs/gravity-registry';
+import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
 import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -71,7 +73,7 @@ import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -395,16 +397,13 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
+      let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: gravityRegistry }
+        { registry: gravityRegistry, aminoTypes }
       );
-
-      const key = await window.Keplr.getKeplrKey();
-      // if (key.isNanoLedger)
-      //   throw 'This feature has not supported Ledger device yet!';
 
       const message = {
         typeUrl: '/gravity.v1.MsgSendToEth',
@@ -1067,7 +1066,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -1152,11 +1151,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}
