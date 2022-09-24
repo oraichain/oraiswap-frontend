@@ -13,6 +13,7 @@ export const injected = new InjectedConnector({
 export function useEagerConnect(isInactive) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
+  const [chainInfo] = useGlobalState('chainInfo');
   const [metamaskAddress, setMetamaskAddress] =
     useGlobalState('metamaskAddress');
 
@@ -45,7 +46,7 @@ export function useEagerConnect(isInactive) {
 
       setMetamaskAddress(web3React.account || accounts?.[0]);
     })();
-  }, [web3React.account]);
+  }, [web3React.account, chainInfo]);
 }
 
 export function useInactiveListener() {

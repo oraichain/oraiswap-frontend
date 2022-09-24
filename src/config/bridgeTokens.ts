@@ -7,7 +7,7 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
-import { ReactComponent as ORAIX } from 'assets/icons/OraiDEX.svg';
+import { ReactComponent as ORAIX } from 'assets/icons/OraidexSVG.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -559,7 +559,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAIX
       }
     ]
   ]

@@ -1,15 +1,22 @@
 import { createGlobalState } from 'react-hooks-global-state';
 
+export type ChainInfoType = {
+  networkType?: string;
+  chainId?: string;
+  rpc?: string;
+};
 export type GlobalState = {
   address: string;
   metamaskAddress: string | null;
   chainId: string;
+  chainInfo?: ChainInfoType;
 };
 
 const initialState: GlobalState = {
   address: '',
   metamaskAddress: '',
   chainId: '',
+  chainInfo: {},
 };
 const { useGlobalState } = createGlobalState(initialState);
 

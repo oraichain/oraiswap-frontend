@@ -86,6 +86,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
+  const [chainInfo] = useGlobalState('chainInfo');
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
     0, 0,
   ]);
@@ -126,13 +127,13 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, pendingTokens, keplrAddress]);
+  }, [prices, txHash, pendingTokens, keplrAddress, chainInfo]);
 
   useEffect(() => {
-    if (!!metamaskAddress) {
+    if (!!metamaskAddress || !!keplrAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, prices, txHash]);
+  }, [metamaskAddress, prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
@@ -218,7 +219,8 @@ const Balance: React.FC<BalanceProps> = () => {
       evmTokens.map(async (token) => {
         const amount = await window.Metamask.getOraiBalance(
           metamaskAddress,
-          token
+          token,
+          chainInfo?.networkType == 'evm' ? chainInfo?.rpc : undefined
         );
 
         return [
@@ -299,7 +301,7 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-
+      
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens

@@ -95,7 +95,8 @@ export default class Metamask {
 
   public async getOraiBalance(
     address: string | null,
-    inputToken?: TokenItemType
+    inputToken?: TokenItemType,
+    rpc?: string
   ) {
     // must has chainId and contractAddress
     const token = inputToken || this.getOraiToken();
@@ -104,8 +105,9 @@ export default class Metamask {
     try {
       const provider =
         token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
-
-      const web3 = new Web3(provider);
+   
+      
+      const web3 = new Web3(rpc || provider);
       const tokenInst = new web3.eth.Contract(
         tokenABI as AbiItem[],
         token.contractAddress

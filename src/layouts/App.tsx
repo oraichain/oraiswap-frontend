@@ -13,6 +13,7 @@ import { ETH } from '@hanchon/ethermint-address-converter';
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
+  const [chainInfo, setChainInfo] = useGlobalState('chainInfo');
   const updateAddress = async (chainInfos) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -25,20 +26,14 @@ const App = () => {
         { toastId: 'install_keplr' }
       );
     }
-    
+
     let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
 
     if (chainInfos) {
-      const addressEvm = await window.Keplr.getKeplrKey(chainInfos?.chainId);
       setChainId(chainInfos.chainId);
-      newAddress =
-        chainInfos.networkType === 'evm'
-          ? ETH.encoder(
-              Buffer.from(
-                fromWords(bech32.decode(addressEvm.bech32Address).words)
-              )
-            )
-          : addressEvm.bech32Address;
+      setChainInfo({
+        ...chainInfos,
+      });
     }
 
     if (newAddress) {
