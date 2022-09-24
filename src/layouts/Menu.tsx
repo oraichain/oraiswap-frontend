@@ -29,7 +29,7 @@ import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'config/constants';
+import { BSC_RPC, ORAI } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';
@@ -44,6 +44,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
+  const [chainInfo] = useGlobalState('chainInfo');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
   const [chainId] = useGlobalState('chainId');
@@ -71,7 +72,11 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   useEffect(() => {
     // we use default Orai token
-    window.Metamask.getOraiBalance(metamaskAddress!).then(setMetamaskBalance);
+    window.Metamask.getOraiBalance(
+      metamaskAddress,
+      undefined,
+      (chainInfo?.networkType === 'cosmos' ? BSC_RPC : chainInfo?.rpc) || BSC_RPC
+    ).then(setMetamaskBalance);
   });
 
   const renderLink = (
@@ -142,15 +147,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={address}
                     className={styles.token_avatar}
                   />
-                  {chainId === '0x38' && (
-                    <BNBIcon className={styles.network_icon} />
-                  )}
-                  {chainId === '0x01' && (
-                    <img src={ethIcon} className={styles.network_icon} />
-                  )}
-                  {chainId !== '0x01' && chainId !== '0x38' && (
-                    <ORAIIcon className={styles.network_icon} />
-                  )}
+                  <ORAIIcon className={styles.network_icon} />
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
                       size={6}
