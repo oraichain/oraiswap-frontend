@@ -73,7 +73,7 @@ import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -513,7 +513,7 @@ const Balance: React.FC<BalanceProps> = () => {
           };
 
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs],
+            msgs: [...executeContractMsgs, msgTransfer],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });
@@ -1068,7 +1068,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -1153,11 +1153,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}

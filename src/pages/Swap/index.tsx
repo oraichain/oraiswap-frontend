@@ -94,12 +94,12 @@ const Swap: React.FC = () => {
   );
 
   // suggest tokens
-  useEffect(() => {
-    if (fromToken && toToken) {
-      window.Keplr.suggestToken(fromToken);
-      window.Keplr.suggestToken(toToken);
-    }
-  }, [fromToken, toToken]);
+  // useEffect(() => {
+  //   if (fromToken && toToken) {
+  //     window.Keplr.suggestToken(fromToken);
+  //     window.Keplr.suggestToken(toToken);
+  //   }
+  // }, [fromToken, toToken]);
 
   const { data: fromTokenBalance = 0, refetch: refetchFromTokenBalance } =
     useQuery(
@@ -108,11 +108,11 @@ const Swap: React.FC = () => {
         fromToken.erc20Cw20Map
           ? (await fetchBalanceWithMapping(address, fromToken)).amount
           : fetchBalance(
-              address,
-              fromToken!.denom,
-              fromToken!.contractAddress,
-              fromToken!.lcd
-            ),
+            address,
+            fromToken!.denom,
+            fromToken!.contractAddress,
+            fromToken!.lcd
+          ),
       { enabled: !!address && !!fromToken }
     );
 
@@ -122,11 +122,11 @@ const Swap: React.FC = () => {
       toToken.erc20Cw20Map
         ? (await fetchBalanceWithMapping(address, toToken)).amount
         : fetchBalance(
-            address,
-            toToken!.denom,
-            toToken!.contractAddress,
-            toToken!.lcd
-          ),
+          address,
+          toToken!.denom,
+          toToken!.contractAddress,
+          toToken!.lcd
+        ),
     { enabled: !!address && !!toToken }
   );
 
@@ -396,9 +396,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input

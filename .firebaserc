@@ -19,6 +19,9 @@
         ],
         "oraiswap-staging-v1": [
           "oraiswap-staging-v1"
+        ],
+        "oraiswap-legacy": [
+          "oraiswap-legacy"
         ]
       }
     }
