@@ -103,8 +103,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'cosmoshub-4',
         rpc: 'https://rpc-cosmos.oraidex.io',
-        // lcd: 'https://lcd-cosmoshub.keplr.app',
-        lcd: 'https://lcd-cosmoshub.blockapsis.com',
+        lcd: 'https://lcd-cosmos.oraidex.io/',
+        // lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
         Icon: ATOMCOSMOS
