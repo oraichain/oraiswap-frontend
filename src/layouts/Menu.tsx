@@ -75,7 +75,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
     window.Metamask.getOraiBalance(
       metamaskAddress,
       undefined,
-      (chainInfo?.networkType === 'cosmos' ? BSC_RPC : chainInfo?.rpc) || BSC_RPC
+      (chainInfo?.networkType === 'cosmos' ? BSC_RPC : chainInfo?.rpc) ??
+        BSC_RPC
     ).then(setMetamaskBalance);
   });
 
