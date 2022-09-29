@@ -42,6 +42,7 @@ import {
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
+  BSC_RPC,
   ERC20_ORAI,
   KAWAII_API_DEV,
   KWT,
@@ -87,6 +88,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
+  const [infoEvm] = useGlobalState('infoEvm');
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
     0, 0,
   ]);
@@ -220,7 +222,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const amount = await window.Metamask.getOraiBalance(
           metamaskAddress,
           token,
-          chainInfo?.networkType == 'evm' ? chainInfo?.rpc : undefined
+          chainInfo?.networkType == 'evm' ? chainInfo?.rpc : infoEvm?.rpc ?? BSC_RPC
         );
 
         return [

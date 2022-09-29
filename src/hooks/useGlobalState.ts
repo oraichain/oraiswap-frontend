@@ -9,7 +9,9 @@ export type GlobalState = {
   address: string;
   metamaskAddress: string | null;
   chainId: string;
-  chainInfo?: ChainInfoType;
+  chainInfo: ChainInfoType;
+  infoEvm: ChainInfoType;
+  infoCosmos: ChainInfoType;
 };
 
 const initialState: GlobalState = {
@@ -17,6 +19,8 @@ const initialState: GlobalState = {
   metamaskAddress: '',
   chainId: '',
   chainInfo: {},
+  infoEvm: {},
+  infoCosmos: {},
 };
 const { useGlobalState } = createGlobalState(initialState);
 

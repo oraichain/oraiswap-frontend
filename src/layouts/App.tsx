@@ -7,13 +7,13 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
-import bech32, { fromWords } from 'bech32';
-import { ETH } from '@hanchon/ethermint-address-converter';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
-  const [chainInfo, setChainInfo] = useGlobalState('chainInfo');
+  const [_$, setChainInfo] = useGlobalState('chainInfo');
+  const [_$$, setInfoEvm] = useGlobalState('infoEvm');
+  const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -31,9 +31,9 @@ const App = () => {
 
     if (chainInfos) {
       setChainId(chainInfos.chainId);
-      setChainInfo({
-        ...chainInfos,
-      });
+      setChainInfo(chainInfos);
+      if (chainInfos?.networkType === 'evm') setInfoEvm(chainInfos);
+      if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
     }
 
     if (newAddress) {
