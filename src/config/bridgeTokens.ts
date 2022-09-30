@@ -7,7 +7,7 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
-import { ReactComponent as ORAIX } from 'assets/icons/OraiDEX.svg';
+import { ReactComponent as ORAIX } from 'assets/icons/OraidexSVG.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -103,8 +103,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'cosmoshub-4',
         rpc: 'https://rpc-cosmos.oraidex.io',
-        // lcd: 'https://lcd-cosmoshub.keplr.app',
-        lcd: 'https://lcd-cosmoshub.blockapsis.com',
+        lcd: 'https://lcd-cosmos.oraidex.io/',
+        // lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
         Icon: ATOMCOSMOS
@@ -559,7 +559,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAIX
       }
     ]
   ]

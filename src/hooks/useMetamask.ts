@@ -13,12 +13,22 @@ export const injected = new InjectedConnector({
 export function useEagerConnect(isInactive) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
+  const [chainInfo] = useGlobalState('chainInfo');
   const [metamaskAddress, setMetamaskAddress] =
     useGlobalState('metamaskAddress');
 
+  // useEffect(() => {
+  //   eagerConnectBsc();
+  // }, [pathname]);
+
   useEffect(() => {
+    eagerConnectBsc();
+  });
+
+  const eagerConnectBsc = () => {
     if (!window.ethereum) return;
-    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(window.ethereum.chainId)) return;
+    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(window.ethereum.chainId))
+      return;
     if (
       !web3React.account &&
       !isInactive &&
@@ -27,7 +37,7 @@ export function useEagerConnect(isInactive) {
       console.log('activate');
       web3React.activate(injected);
     }
-  }, [pathname]);
+  };
 
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
@@ -45,7 +55,7 @@ export function useEagerConnect(isInactive) {
 
       setMetamaskAddress(web3React.account || accounts?.[0]);
     })();
-  }, [web3React.account]);
+  }, [web3React.account, chainInfo]);
 }
 
 export function useInactiveListener() {

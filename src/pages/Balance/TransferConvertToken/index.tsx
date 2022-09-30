@@ -24,6 +24,7 @@ import {
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
+import useGlobalState from 'hooks/useGlobalState';
 
 type AmountDetail = {
   amount: number;
@@ -58,7 +59,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [convertLoading, setConvertLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferIbcLoading, setTransferIbcLoading] = useState(false);
+  const [chainInfo] = useGlobalState('chainInfo');
 
+  useEffect(() => {
+    if (chainInfo) {
+      setConvertAmount([undefined,0])
+    }
+  }, [chainInfo])
+  
 
   // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const name = token.name;
