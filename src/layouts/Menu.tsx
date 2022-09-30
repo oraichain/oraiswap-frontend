@@ -33,6 +33,7 @@ import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
+  BEP20_ORAI,
   BSC_CHAIN_ID,
   BSC_RPC,
   COSMOS_CHAIN_ID,
@@ -90,7 +91,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
     window.Metamask.getOraiBalance(
       metamaskAddress,
       undefined,
-      infoEvm?.rpc ?? BSC_RPC
+      infoEvm?.rpc ?? BSC_RPC,
+      BEP20_ORAI
     ).then(setMetamaskBalance);
   });
 

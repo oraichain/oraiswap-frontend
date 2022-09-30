@@ -87,19 +87,20 @@ export default class Metamask {
     return result;
   }
 
-  public getOraiToken(): TokenItemType | undefined {
+  public getOraiToken(denom?: string): TokenItemType | undefined {
     return evmTokens.find(
-      (token) => token.denom === (this.isBsc() ? BEP20_ORAI : ERC20_ORAI)
+      (token) => token.denom === (denom ?? this.isBsc() ? BEP20_ORAI : ERC20_ORAI)
     );
   }
 
   public async getOraiBalance(
     address: string | null,
     inputToken?: TokenItemType,
-    rpc?: string
+    rpc?: string,
+    denom?: string
   ) {
     // must has chainId and contractAddress
-    const token = inputToken || this.getOraiToken();
+    const token = inputToken || this.getOraiToken(denom);
     if (!token || !token.contractAddress) return '0';
 
     try {
