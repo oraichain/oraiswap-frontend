@@ -76,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     data: balance,
   } = useQuery(
     ['balance', ORAI, address],
-    () => fetchNativeTokenBalance(address),
+    () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
     {
       enabled: address?.length > 0,
       refetchOnWindowFocus: false,
@@ -212,10 +212,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={address}
                       className={styles.token_address}
                     />
-                    {!!balance && (
+                    {(
                       <TokenBalance
                         balance={{
-                          amount: balance,
+                          amount: balance ?? '0',
                           decimals: 6,
                           denom: ORAI,
                         }}
