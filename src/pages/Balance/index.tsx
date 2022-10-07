@@ -110,7 +110,6 @@ const Balance: React.FC<BalanceProps> = () => {
     }, {
       position: 'top-center',
       autoClose: false,
-      rtl: false
     });
   }, []);
   
