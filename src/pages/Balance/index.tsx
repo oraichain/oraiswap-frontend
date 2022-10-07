@@ -109,6 +109,17 @@ const Balance: React.FC<BalanceProps> = () => {
   useInactiveListener();
 
   useEffect(() => {
+    displayToast(TToastType.TX_INFO, {
+      message:
+        'Due to the suspension of BNB Chain following its cross-chain bridge exploit, DO NOT use any bridges between BNB Chain and Oraichain or any other networks until our next announcement.',
+    }, {
+      position: 'top-center',
+      autoClose: false,
+      rtl: false
+    });
+  }, []);
+
+  useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
     setTokens(
@@ -222,7 +233,9 @@ const Balance: React.FC<BalanceProps> = () => {
         const amount = await window.Metamask.getOraiBalance(
           metamaskAddress,
           token,
-          chainInfo?.networkType == 'evm' ? chainInfo?.rpc : infoEvm?.rpc ?? BSC_RPC
+          chainInfo?.networkType == 'evm'
+            ? chainInfo?.rpc
+            : infoEvm?.rpc ?? BSC_RPC
         );
 
         return [
@@ -303,7 +316,7 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-      
+
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
@@ -1070,7 +1083,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, from, to)
+                                onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
@@ -1155,11 +1168,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                onClickTransfer(
-                                  fromAmount,
-                                  to,
-                                  transferToToken
-                                )
+                                  onClickTransfer(
+                                    fromAmount,
+                                    to,
+                                    transferToToken
+                                  )
                               : undefined
                           }
                           toToken={transferToToken}
