@@ -103,15 +103,15 @@ const Balance: React.FC<BalanceProps> = () => {
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
 
-  useEffect(() => {
-    displayToast(TToastType.TX_INFO, {
-      message:
-        'Due to the suspension of BNB Chain following its cross-chain bridge exploit, DO NOT use any bridges between BNB Chain and Oraichain or any other networks until our next announcement.',
-    }, {
-      position: 'top-center',
-      autoClose: false,
-    });
-  }, []);
+  // useEffect(() => {
+  //   displayToast(TToastType.TX_INFO, {
+  //     message:
+  //       'Due to the suspension of BNB Chain following its cross-chain bridge exploit, DO NOT use any bridges between BNB Chain and Oraichain or any other networks until our next announcement.',
+  //   }, {
+  //     position: 'top-center',
+  //     autoClose: false,
+  //   });
+  // }, []);
   
   useInactiveListener();
 
