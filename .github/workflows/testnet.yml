@@ -34,13 +34,15 @@ jobs:
       - uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
       - name: Install Dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn
       - name: Copy testnet env
-        run: cp .env.oraix.test .env
+        run: |
+          cp .env.oraix.test .env
+          echo BANNER_URL_DATA=${{ secrets.BANNER_URL_DATA }} >> .env
       - name: Build
         run: yarn build
         env:
