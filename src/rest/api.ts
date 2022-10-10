@@ -10,6 +10,7 @@ import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
+import { Banner } from 'types/banner'
 import {
   parseAmountFromWithDecimal,
   parseAmountToWithDecimal,
@@ -909,6 +910,16 @@ function generateClaimMsg(msg: Claim) {
   };
 }
 
+async function getBanners(): Promise<Banner[]>  {
+  const url = process.env.BANNER_URL_DATA
+  try {
+    const res = await axios.get(url)
+    return res.data
+  } catch (err) {
+    throw new Error(err.message)
+  }
+}
+
 export {
   querySmart,
   fetchTaxRate,
@@ -938,4 +949,5 @@ export {
   fetchBalanceWithMapping,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
+  getBanners,
 };
