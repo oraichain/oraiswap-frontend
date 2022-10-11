@@ -17,13 +17,9 @@ export function useEagerConnect(isInactive) {
   const [metamaskAddress, setMetamaskAddress] =
     useGlobalState('metamaskAddress');
 
-  // useEffect(() => {
-  //   eagerConnectBsc();
-  // }, [pathname]);
-
   useEffect(() => {
     eagerConnectBsc();
-  });
+  }, [pathname]);
 
   const eagerConnectBsc = () => {
     if (!window.ethereum) return;

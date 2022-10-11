@@ -4,6 +4,7 @@ export type ChainInfoType = {
   networkType?: string;
   chainId?: string;
   rpc?: string;
+  lcd?: string;
 };
 export type GlobalState = {
   address: string;

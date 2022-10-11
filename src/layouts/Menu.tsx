@@ -33,9 +33,11 @@ import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
+  BEP20_ORAI,
   BSC_CHAIN_ID,
   BSC_RPC,
   COSMOS_CHAIN_ID,
+  ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
@@ -74,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     data: balance,
   } = useQuery(
     ['balance', ORAI, address],
-    () => fetchNativeTokenBalance(address),
+    () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
     {
       enabled: address?.length > 0,
       refetchOnWindowFocus: false,
@@ -90,7 +92,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
     window.Metamask.getOraiBalance(
       metamaskAddress,
       undefined,
-      infoEvm?.rpc ?? BSC_RPC
+      infoEvm?.rpc ?? BSC_RPC,
+      (!infoEvm || infoEvm.chainId === BSC_CHAIN_ID) ? BEP20_ORAI : ERC20_ORAI
     ).then(setMetamaskBalance);
   });
 
@@ -209,10 +212,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={address}
                       className={styles.token_address}
                     />
-                    {!!balance && (
+                    {(
                       <TokenBalance
                         balance={{
-                          amount: balance,
+                          amount: balance ?? '0',
                           decimals: 6,
                           denom: ORAI,
                         }}
@@ -262,7 +265,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               {!address && !metamaskAddress && (
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
-            </RequireAuthButton>           
+            </RequireAuthButton>
             {renderLink(
               '/swap',
               'Swap',
