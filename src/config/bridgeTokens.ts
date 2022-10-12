@@ -31,6 +31,7 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   MILKY_BSC_CONTRACT,
   MILKY_DENOM,
+  MILKY_ERC_CONTRACT,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_LCD,
@@ -321,6 +322,34 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: MILKY
       },
       {
+        name: 'MILKY',
+        org: 'Kawaiiverse',
+        coingeckoId: 'kawaii-islands',
+        denom: process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM,
+        contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
+        decimals: COSMOS_DECIMALS,
+        chainId: KWT_SUBNETWORK_CHAIN_ID,
+        rpc: KAWAII_RPC,
+        lcd: KAWAII_LCD,
+        cosmosBased: true,
+        maxGas: 200000 * 2,
+        Icon: MILKY,
+      },
+      {
+        name: 'ERC20 MILKY',
+        org: 'Kawaiiverse',
+        chainId: KWT_SUBNETWORK_CHAIN_ID,
+        denom: 'erc20_milky',
+        contractAddress: MILKY_ERC_CONTRACT,
+        rpc: KAWAII_SUBNET_RPC,
+        lcd: KAWAII_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'kawaii-islands',
+        cosmosBased: true,
+        maxGas: 200000 * 2,
+        Icon: MILKY,
+      },
+      {
         name: 'KWT',
         org: 'Kawaiiverse',
         chainId: KWT_SUBNETWORK_CHAIN_ID,
@@ -594,7 +623,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
               cw20Decimals: COSMOS_DECIMALS
             },
             erc20Denom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM
-          }
+          },
         ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
