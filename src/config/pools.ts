@@ -48,6 +48,13 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
         ORAI,
         process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
       ]
+    },
+    {
+      contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
+      asset_denoms: [
+        'milky',
+        STABLE_DENOM,
+      ]
     }
   ],
 };
