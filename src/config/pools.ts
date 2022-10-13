@@ -52,8 +52,8 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     {
       contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
       asset_denoms: [
-        STABLE_DENOM,
         'milky',
+        STABLE_DENOM,
       ]
     }
   ],

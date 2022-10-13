@@ -13,6 +13,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
+import Banner from 'components/Banner';
 import { ibcInfos, oraicbain2atom } from 'config/ibcInfos';
 import {
   evmTokens,
@@ -981,6 +982,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   return (
     <Content nonBackground>
+      <Banner className={''} />
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
