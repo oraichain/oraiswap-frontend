@@ -7,6 +7,7 @@ export const AIRI = 'AIRI';
 export const ATOM = 'ATOM';
 export const LP = 'LP';
 export const KWT = 'oraie';
+export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
 export const BEP20_ORAI = 'bep20_orai';
 export const ERC20_ORAI = 'erc20_orai';

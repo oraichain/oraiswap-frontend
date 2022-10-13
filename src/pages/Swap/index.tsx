@@ -449,6 +449,16 @@ const Swap: React.FC = () => {
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
+            {(fromToken?.denom == 'milky' ||
+              toToken?.denom == 'milky') && (
+              <div className={cx('row')}>
+                <div className={cx('title')}>
+                  <span>
+                    *Additional: 5% entry tax rate for MILKY transactions
+                  </span>
+                </div>
+              </div>
+            )}
             {/* <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Exchange rate</span>

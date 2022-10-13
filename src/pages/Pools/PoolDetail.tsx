@@ -28,7 +28,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
-import { ORAI, STABLE_DENOM } from 'config/constants';
+import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 
 const cx = cn.bind(styles);
 
@@ -75,14 +75,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     let oraiPrice = Fraction.ZERO;
 
     const poolData = await fetchPoolInfoAmount(token1!, token2!);
-
+    let _poolData: any = {};
     if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
       oraiPrice = new Fraction(
         poolData.askPoolAmount,
         poolData.offerPoolAmount
       );
+    }
+    if (token1?.denom === MILKY && token2?.denom === STABLE_DENOM) {
+      _poolData = await fetchPoolInfoAmount(
+        poolTokens.find((token) => token.denom === MILKY)!,
+        poolTokens.find((token) => token.denom === STABLE_DENOM)!
+      );
+      oraiPrice = new Fraction(
+        _poolData.askPoolAmount,
+        _poolData.offerPoolAmount
+      );
     } else {
-      const _poolData = await fetchPoolInfoAmount(
+      _poolData = await fetchPoolInfoAmount(
         poolTokens.find((token) => token.denom === ORAI)!,
         poolTokens.find((token) => token.denom === STABLE_DENOM)!
       );
@@ -102,6 +112,20 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     } else if (token2?.denom === ORAI) {
       const oraiValue = getUsd(
         poolData.askPoolAmount,
+        oraiPrice,
+        token2.decimals
+      );
+      halfValue = oraiValue;
+    } else if (token1?.denom === MILKY) {
+      const oraiValue = getUsd(
+        _poolData.offerPoolAmount,
+        oraiPrice,
+        token1.decimals
+      );
+      halfValue = oraiValue;
+    } else if (token2?.denom === MILKY) {
+      const oraiValue = getUsd(
+        _poolData.askPoolAmount,
         oraiPrice,
         token2.decimals
       );
