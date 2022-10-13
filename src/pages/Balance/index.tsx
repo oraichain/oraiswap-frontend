@@ -982,7 +982,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   return (
     <Content nonBackground>
-      <Banner className={''} />
+      <Banner  />
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>

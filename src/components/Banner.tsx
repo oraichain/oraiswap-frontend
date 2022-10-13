@@ -4,7 +4,7 @@ import ReactModal from 'react-modal';
 import styles from './Banner.module.scss';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 
-const Banner: FC<{}> = ({ children }) => {
+const Banner: FC<{}> = () => {
   const [open, setOpen] = React.useState(true);
   return (
     <ReactModal
@@ -31,7 +31,9 @@ const Banner: FC<{}> = ({ children }) => {
         <span
           onClick={() =>
             window.open(
-              'https://blog.orai.io/road-to-1-000-000-delegated-orai-on-oraichain-mainnet-2-0-8da7600a9055'
+              'https://blog.orai.io/road-to-1-000-000-delegated-orai-on-oraichain-mainnet-2-0-8da7600a9055',
+              'blogOrai',
+              'noopener'
             )
           }
         >
