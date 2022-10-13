@@ -51,7 +51,7 @@ export function useEagerConnect(isInactive) {
 
       setMetamaskAddress(web3React.account || accounts?.[0]);
     })();
-  }, [web3React.account, chainInfo]);
+  }, [web3React.account, chainInfo, pathname]);
 }
 
 export function useInactiveListener() {

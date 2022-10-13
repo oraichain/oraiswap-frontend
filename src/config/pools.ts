@@ -44,18 +44,12 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
-      asset_denoms: [
-        ORAI,
-        process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
-      ]
+      asset_denoms: [ORAI, process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM],
     },
     {
       contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
-      asset_denoms: [
-        'milky',
-        STABLE_DENOM,
-      ]
-    }
+      asset_denoms: ['milky', STABLE_DENOM],
+    },
   ],
 };
 
@@ -63,17 +57,17 @@ export const pairs =
   process.env.REACT_APP_DEPRECATED === 'true'
     ? pairsMap[network.id]
     : pairsMap[network.id].filter(
-      // filter out LUNA and UST pool
-      (p) =>
-        !_.isEqual(p.asset_denoms, [
-          ORAI,
-          process.env.REACT_APP_UST_ORAICHAIN_DENOM,
-        ]) &&
-        !_.isEqual(p.asset_denoms, [
-          ORAI,
-          process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
-        ])
-    );
+        // filter out LUNA and UST pool
+        (p) =>
+          !_.isEqual(p.asset_denoms, [
+            ORAI,
+            process.env.REACT_APP_UST_ORAICHAIN_DENOM,
+          ]) &&
+          !_.isEqual(p.asset_denoms, [
+            ORAI,
+            process.env.REACT_APP_LUNA_ORAICHAIN_DENOM,
+          ])
+      );
 
 export const pairDenoms = _.uniq(
   _.flatten(pairs.map((pair) => pair.asset_denoms))
@@ -96,7 +90,9 @@ export const getPair = (
 
   return pairs.find(
     (pair) =>
-      pair.asset_denoms[0] === asset_denoms[0] &&
-      pair.asset_denoms[1] === asset_denoms[1]
+      (pair.asset_denoms[0] === asset_denoms[0] &&
+        pair.asset_denoms[1] === asset_denoms[1]) ||
+      (pair.asset_denoms[0] === asset_denoms[1] &&
+        pair.asset_denoms[1] === asset_denoms[0])
   );
 };
