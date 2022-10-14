@@ -18,7 +18,7 @@ import {
   generateConvertErc20Cw20Message,
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { ORAI } from 'config/constants';
+import { MILKY, ORAI } from 'config/constants';
 import {
   buildMultipleMessages,
   parseAmount,
@@ -449,8 +449,8 @@ const Swap: React.FC = () => {
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
-            {(fromToken?.denom == 'milky' ||
-              toToken?.denom == 'milky') && (
+            {(fromToken?.denom == MILKY ||
+              toToken?.denom == MILKY) && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
                   <span>
