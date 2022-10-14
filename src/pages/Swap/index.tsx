@@ -18,7 +18,7 @@ import {
   generateConvertErc20Cw20Message,
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { MILKY, ORAI } from 'config/constants';
+import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import {
   buildMultipleMessages,
   parseAmount,
@@ -449,8 +449,7 @@ const Swap: React.FC = () => {
               </div>
               <span>{parseFloat(taxRate?.rate) * 100} %</span>
             </div>
-            {(fromToken?.denom == MILKY ||
-              toToken?.denom == MILKY) && (
+            {(fromToken?.denom == MILKY || toToken?.denom == MILKY) && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
                   <span>
@@ -480,20 +479,34 @@ const Swap: React.FC = () => {
               isOpen={isSelectFrom}
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
-              listToken={poolTokens.filter(
-                (token) => token.denom !== toTokenDenom
+              listToken={poolTokens.filter((token) =>
+                toTokenDenom === MILKY
+                  ? token.denom === STABLE_DENOM
+                  : token.denom !== toTokenDenom
               )}
-              setToken={(denom) => setSwapTokens([denom, toTokenDenom])}
+              setToken={(denom) => {
+                setSwapTokens([
+                  denom,
+                  denom === MILKY ? STABLE_DENOM : toTokenDenom,
+                ]);
+              }}
             />
           ) : (
             <SelectTokenModal
               isOpen={isSelectTo}
               open={() => setIsSelectTo(true)}
               close={() => setIsSelectTo(false)}
-              listToken={poolTokens.filter(
-                (token) => token.denom !== fromTokenDenom
+              listToken={poolTokens.filter((token) =>
+                fromTokenDenom === MILKY
+                  ? token.denom === STABLE_DENOM
+                  : token.denom !== fromTokenDenom
               )}
-              setToken={(denom) => setSwapTokens([fromTokenDenom, denom])}
+              setToken={(denom) => {
+                setSwapTokens([
+                  denom === MILKY ? STABLE_DENOM : fromTokenDenom,
+                  denom,
+                ]);
+              }}
             />
           )}
         </div>
