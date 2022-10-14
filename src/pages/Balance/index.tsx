@@ -223,7 +223,9 @@ const Balance: React.FC<BalanceProps> = () => {
         const amount = await window.Metamask.getOraiBalance(
           metamaskAddress,
           token,
-          chainInfo?.networkType == 'evm' ? chainInfo?.rpc : infoEvm?.rpc ?? BSC_RPC
+          chainInfo?.networkType == 'evm'
+            ? chainInfo?.rpc
+            : infoEvm?.rpc ?? BSC_RPC
         );
 
         return [
@@ -722,7 +724,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const amount = coin(
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
-        process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
+        fromToken.denom == 'erc20_milky'
+          ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
+          : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
@@ -739,6 +743,8 @@ const Balance: React.FC<BalanceProps> = () => {
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
         },
         amount: amount.amount,
+        contractAddr:
+          fromToken.denom == "erc20_milky" ? fromToken.contractAddress : undefined,
       });
 
       processTxResult(
@@ -961,6 +967,10 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
+          contractAddr:
+            fromToken?.denom == 'erc20_milky'
+              ? fromToken?.contractAddress
+              : undefined,
         });
       }
       processTxResult(
@@ -979,10 +989,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   const navigate = useNavigate();
-
+  
   return (
     <Content nonBackground>
-      <Banner  />
+      {window.location.pathname === '/' && <Banner  />}
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -1157,11 +1167,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                onClickTransfer(
-                                  fromAmount,
-                                  to,
-                                  transferToToken
-                                )
+                                  onClickTransfer(
+                                    fromAmount,
+                                    to,
+                                    transferToToken
+                                  )
                               : undefined
                           }
                           toToken={transferToToken}
