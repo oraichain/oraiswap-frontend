@@ -80,14 +80,26 @@ async function submit({
   return result;
 }
 
-function createTxIBCMsgTransferStrategy(data: { chainId: number, cosmosChainId: string, senderInfo: any, fee: any, params: any }, isCustom: { customMessages?: any[] }) {
+function createTxIBCMsgTransferStrategy(
+  data: {
+    chainId: number;
+    cosmosChainId: string;
+    senderInfo: any;
+    fee: any;
+    params: any;
+  },
+  isCustom: { customMessages?: any[] }
+) {
   const { chainId, cosmosChainId, senderInfo, fee, params } = data;
-  if (isCustom.customMessages) return createMsgIbcCustom({ chainId, cosmosChainId },
-    senderInfo,
-    fee,
-    `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
-    params, isCustom.customMessages
-  );
+  if (isCustom.customMessages)
+    return createMsgIbcCustom(
+      { chainId, cosmosChainId },
+      senderInfo,
+      fee,
+      `sender - ${senderInfo.accountAddress}; receiver - ${params.receiver}`,
+      params,
+      isCustom.customMessages
+    );
   return createTxIBCMsgTransfer(
     { chainId, cosmosChainId },
     senderInfo,
@@ -167,11 +179,13 @@ export default class KawaiiverseJs {
     gasAmount,
     gasLimits = { exec: 2400000 },
     amount,
+    contractAddr,
   }: {
     sender: string;
     gasAmount: { amount: string; denom: string };
     gasLimits?: { exec: number };
     amount: string;
+    contractAddr?: string;
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -184,7 +198,7 @@ export default class KawaiiverseJs {
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
-        contractAddress: KAWAII_CONTRACT,
+        contractAddress: contractAddr ?? KAWAII_CONTRACT,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
       };
@@ -237,7 +251,7 @@ export default class KawaiiverseJs {
       receiver: string;
       timeoutTimestamp: number;
     };
-    customMessages?: any[],
+    customMessages?: any[];
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -258,11 +272,15 @@ export default class KawaiiverseJs {
         revisionHeight: 0,
       };
 
-
-      const { signDirect } = createTxIBCMsgTransferStrategy({
-        chainId: chainIdNumber, cosmosChainId: subnetwork.chainId, fee, params, senderInfo
-      },
-        { customMessages },
+      const { signDirect } = createTxIBCMsgTransferStrategy(
+        {
+          chainId: chainIdNumber,
+          cosmosChainId: subnetwork.chainId,
+          fee,
+          params,
+          senderInfo,
+        },
+        { customMessages }
       );
 
       return submit({
@@ -285,6 +303,7 @@ export default class KawaiiverseJs {
     gasLimits = { exec: 2400000 },
     amount,
     ibcInfo,
+    contractAddr,
   }: {
     sender: string;
     gasAmount: { amount: string; denom: string };
@@ -299,6 +318,7 @@ export default class KawaiiverseJs {
       receiver: string;
       timeoutTimestamp: number;
     };
+    contractAddr?: string;
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -312,7 +332,7 @@ export default class KawaiiverseJs {
 
       const params = {
         ...ibcInfo,
-        contractAddress: KAWAII_CONTRACT,
+        contractAddress: contractAddr ?? KAWAII_CONTRACT,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
         timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp)

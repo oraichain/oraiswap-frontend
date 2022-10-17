@@ -11,6 +11,9 @@ import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
+import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
+import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
 import ethIcon from 'assets/icons/eth.svg';
 
 import { ThemeContext, Themes } from 'context/theme-context';
@@ -29,7 +32,19 @@ import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from 'react-query';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'config/constants';
+import {
+  BEP20_ORAI,
+  BSC_CHAIN_ID,
+  BSC_RPC,
+  COSMOS_CHAIN_ID,
+  ERC20_ORAI,
+  ETHEREUM_CHAIN_ID,
+  KWT_SUBNETWORK_CHAIN_ID,
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
+  ORAI,
+  ORAICHAIN_ID,
+  OSMOSIS_CHAIN_ID,
+} from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';
@@ -44,6 +59,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
+  const [infoEvm] = useGlobalState('infoEvm');
+  const [infoCosmos] = useGlobalState('infoCosmos');
+  const [chainInfo] = useGlobalState('chainInfo');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
   const [chainId] = useGlobalState('chainId');
@@ -58,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     data: balance,
   } = useQuery(
     ['balance', ORAI, address],
-    () => fetchNativeTokenBalance(address),
+    () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
     {
       enabled: address?.length > 0,
       refetchOnWindowFocus: false,
@@ -71,7 +89,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   useEffect(() => {
     // we use default Orai token
-    window.Metamask.getOraiBalance(metamaskAddress!).then(setMetamaskBalance);
+    window.Metamask.getOraiBalance(
+      metamaskAddress,
+      undefined,
+      infoEvm?.rpc ?? BSC_RPC,
+      (!infoEvm || infoEvm.chainId === BSC_CHAIN_ID) ? BEP20_ORAI : ERC20_ORAI
+    ).then(setMetamaskBalance);
   });
 
   const renderLink = (
@@ -117,6 +140,35 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
+  const handleCheckChain = (chainId: string) => {
+    switch (chainId) {
+      case BSC_CHAIN_ID:
+        return window.Metamask.isBsc() || infoEvm.chainId === BSC_CHAIN_ID;
+      case ETHEREUM_CHAIN_ID:
+        return (
+          window.Metamask.isEth() ||
+          infoEvm.chainId === ETHEREUM_CHAIN_ID ||
+          infoEvm.chainId === '0x01'
+        );
+      case KWT_SUBNETWORK_EVM_CHAIN_ID:
+        return infoEvm.chainId === KWT_SUBNETWORK_EVM_CHAIN_ID;
+      case KWT_SUBNETWORK_CHAIN_ID:
+        return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
+      case COSMOS_CHAIN_ID:
+        return infoCosmos.chainId === COSMOS_CHAIN_ID;
+      case OSMOSIS_CHAIN_ID:
+        return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
+      case ORAICHAIN_ID:
+        return (
+          infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
+          infoCosmos.chainId !== COSMOS_CHAIN_ID &&
+          infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
+        );
+      default:
+        return false;
+    }
+  };
+
   return (
     <>
       {mobileMode && (
@@ -142,13 +194,16 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={address}
                     className={styles.token_avatar}
                   />
-                  {chainId === '0x38' && (
-                    <BNBIcon className={styles.network_icon} />
+                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID) && (
+                    <KwtIcon className={styles.network_icon} />
                   )}
-                  {chainId === '0x01' && (
-                    <img src={ethIcon} className={styles.network_icon} />
+                  {handleCheckChain(COSMOS_CHAIN_ID) && (
+                    <AtomCosmosIcon className={styles.network_icon} />
                   )}
-                  {chainId !== '0x01' && chainId !== '0x38' && (
+                  {handleCheckChain(OSMOSIS_CHAIN_ID) && (
+                    <OsmosisIcon className={styles.network_icon} />
+                  )}
+                  {handleCheckChain(ORAICHAIN_ID) && (
                     <ORAIIcon className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
@@ -157,10 +212,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={address}
                       className={styles.token_address}
                     />
-                    {!!balance && (
+                    {(
                       <TokenBalance
                         balance={{
-                          amount: balance,
+                          amount: balance ?? '0',
                           decimals: 6,
                           denom: ORAI,
                         }}
@@ -177,11 +232,14 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={metamaskAddress}
                     className={styles.token_avatar}
                   />
-                  {window.Metamask.isBsc() && (
+                  {handleCheckChain(BSC_CHAIN_ID) && (
                     <BNBIcon className={styles.network_icon} />
                   )}
-                  {window.Metamask.isEth() && (
+                  {handleCheckChain(ETHEREUM_CHAIN_ID) && (
                     <img src={ethIcon} className={styles.network_icon} />
+                  )}
+                  {handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && (
+                    <KwtIcon className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
@@ -207,7 +265,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               {!address && !metamaskAddress && (
                 <Text className={styles.connect}>Connect wallet</Text>
               )}
-            </RequireAuthButton>           
+            </RequireAuthButton>
             {renderLink(
               '/swap',
               'Swap',

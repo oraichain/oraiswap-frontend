@@ -4,7 +4,8 @@
 
 # Oraichain
 
-![Banner!](https://cdn.discordapp.com/attachments/1014117272132010017/1014117366407381073/Full_Logo_Horizontal_BG-white.png)
+![Banner!](./doc/logo-full-h-light.png#gh-light-mode-only)
+![Banner!](./doc/logo-full-h-dark.png#gh-dark-mode-only)
 
 ## Overview
 This repository provides frontend code for Oraidex of [Oraichain](https://orai.io).
@@ -33,7 +34,7 @@ yarn start
 yarn build
 ```
 
-If there is problem releated to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again
+If there is a problem related to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again
 
 or add this into package.json
 
