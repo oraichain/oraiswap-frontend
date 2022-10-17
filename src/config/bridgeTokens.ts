@@ -92,6 +92,7 @@ export type TokenItemType = {
   | 'kawaii-islands'
   | 'milky-token';
   cosmosBased: Boolean;
+  type?: string;
 };
 
 const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
@@ -331,6 +332,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: KAWAII_RPC,
         lcd: KAWAII_LCD,
         cosmosBased: true,
+        type: 'milky',
         maxGas: 200000 * 2,
         Icon: MILKY,
       },
@@ -346,6 +348,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'milky-token',
         cosmosBased: false,
         maxGas: 200000 * 2,
+        type: 'milky',
         Icon: MILKY,
       },
       {
@@ -359,6 +362,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: KAWAII_LCD,
         cosmosBased: true,
         maxGas: 200000 * 2,
+        type: 'kawaii',
         Icon: KWT
       },
       {
@@ -372,6 +376,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: false,
+        type: 'kawaii',
         Icon: KWT
       }
     ],
