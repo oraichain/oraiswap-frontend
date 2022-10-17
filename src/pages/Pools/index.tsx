@@ -16,7 +16,7 @@ import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { STABLE_DENOM } from 'config/constants';
+import { MILKY, STABLE_DENOM } from 'config/constants';
 import { useQuery } from 'react-query';
 
 const { Search } = Input;
@@ -247,15 +247,22 @@ const Pools: React.FC<PoolsProps> = () => {
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
     if (!oraiUsdtPool) throw Error('Ust pool not found');
+    const oraiUsdtPoolMilky = poolList.find(
+      (pool) => pool.pair.asset_denoms[0] === MILKY
+    );
     const oraiPrice = new Fraction(
       oraiUsdtPool?.askPoolAmount,
       oraiUsdtPool?.offerPoolAmount
     );
 
+    const milkyPrice = new Fraction(
+      oraiUsdtPoolMilky.askPoolAmount,
+      oraiUsdtPoolMilky?.offerPoolAmount
+    );
     poolList.forEach((pool) => {
       pool.amount = getUsd(
         2 * pool.offerPoolAmount,
-        oraiPrice,
+        pool?.fromToken?.denom === MILKY ? milkyPrice : oraiPrice,
         pool.fromToken.decimals
       );
     });

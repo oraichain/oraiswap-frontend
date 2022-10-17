@@ -85,6 +85,21 @@
                     "destination": "/index.html"
                 }
             ]
+        },
+        {
+            "target": "oraiswap-legacy",
+            "public": "build",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+            ],
+            "rewrites": [
+                {
+                    "source": "**",
+                    "destination": "/index.html"
+                }
+            ]
         }
     ]
 }

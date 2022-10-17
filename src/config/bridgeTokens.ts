@@ -7,7 +7,8 @@ import { ReactComponent as UST } from 'assets/icons/luna_ust.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
-import { ReactComponent as ORAIX } from 'assets/icons/OraiDEX.svg';
+import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
+import { ReactComponent as ORAIX } from 'assets/icons/OraidexSVG.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -28,6 +29,9 @@ import {
   KWT_BSC_CONTRACT,
   KWT_DENOM,
   KWT_SUBNETWORK_CHAIN_ID,
+  MILKY_BSC_CONTRACT,
+  MILKY_DENOM,
+  MILKY_ERC_CONTRACT,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_LCD,
@@ -54,14 +58,14 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Terra'
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse';
+  | 'Terra'
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -75,17 +79,18 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'terrausd'
-    | 'terra-luna'
-    | 'oraix'
-    | 'tether'
-    | 'kawaii-islands';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'terrausd'
+  | 'terra-luna'
+  | 'oraix'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token';
   cosmosBased: Boolean;
 };
 
@@ -229,6 +234,21 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: true,
         Icon: KWT
       },
+      {
+        name: 'MILKY',
+        prefix: ORAI_BRIDGE_PREFIX,
+        org: 'OraiBridge',
+        chainId: ORAI_BRIDGE_CHAIN_ID,
+        bridgeNetworkIdentifier: BSC_ORG,
+        coinType: 118,
+        denom: MILKY_DENOM,
+        rpc: ORAI_BRIDGE_RPC,
+        lcd: ORAI_BRIDGE_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'milky-token',
+        cosmosBased: true,
+        Icon: MILKY
+      },
       // {
       //   name: 'ERC20 ORAI',
       //   org: 'Ethereum',
@@ -288,6 +308,45 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'kawaii-islands',
         cosmosBased: false,
         Icon: KWT
+      },
+      {
+        name: 'MILKY',
+        org: BSC_ORG,
+        chainId: BSC_CHAIN_ID,
+        denom: 'bep20_milky',
+        contractAddress: MILKY_BSC_CONTRACT,
+        rpc: BSC_RPC,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'milky-token',
+        cosmosBased: false,
+        Icon: MILKY
+      },
+      {
+        name: 'MILKY',
+        org: 'Kawaiiverse',
+        coingeckoId: 'milky-token',
+        denom: process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM,
+        decimals: EVM_DECIMALS,
+        chainId: KWT_SUBNETWORK_CHAIN_ID,
+        rpc: KAWAII_RPC,
+        lcd: KAWAII_LCD,
+        cosmosBased: true,
+        maxGas: 200000 * 2,
+        Icon: MILKY,
+      },
+      {
+        name: 'ERC20 MILKY',
+        org: 'Kawaiiverse',
+        chainId: KWT_SUBNETWORK_CHAIN_ID,
+        denom: 'erc20_milky',
+        contractAddress: MILKY_ERC_CONTRACT,
+        rpc: KAWAII_SUBNET_RPC,
+        lcd: KAWAII_LCD,
+        decimals: EVM_DECIMALS,
+        coingeckoId: 'milky-token',
+        cosmosBased: false,
+        maxGas: 200000 * 2,
+        Icon: MILKY,
       },
       {
         name: 'KWT',
@@ -547,6 +606,33 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         Icon: KWT
       },
       {
+        name: 'MILKY',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coingeckoId: 'milky-token',
+        denom: 'milky',
+        contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
+        erc20Cw20Map: [
+          {
+            prefix: 'BEP20',
+            description: 'Ibc token from BNB chain',
+            erc20Type: BSC_CHAIN_ID,
+            decimals: {
+              erc20Decimals: EVM_DECIMALS,
+              cw20Decimals: COSMOS_DECIMALS
+            },
+            erc20Denom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM
+          },
+        ],
+        decimals: COSMOS_DECIMALS,
+        coinType: 118,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: MILKY
+      },
+      {
         name: 'ORAIX',
         org: 'Oraichain',
         prefix: 'orai',
@@ -559,7 +645,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAIX
       }
     ]
   ]
@@ -571,8 +657,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 

@@ -7,12 +7,13 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
-import bech32, { fromWords } from 'bech32';
-import { ETH } from '@hanchon/ethermint-address-converter';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
+  const [_$, setChainInfo] = useGlobalState('chainInfo');
+  const [_$$, setInfoEvm] = useGlobalState('infoEvm');
+  const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -25,20 +26,14 @@ const App = () => {
         { toastId: 'install_keplr' }
       );
     }
-    
+
     let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
 
     if (chainInfos) {
-      const addressEvm = await window.Keplr.getKeplrKey(chainInfos?.chainId);
       setChainId(chainInfos.chainId);
-      newAddress =
-        chainInfos.networkType === 'evm'
-          ? ETH.encoder(
-              Buffer.from(
-                fromWords(bech32.decode(addressEvm.bech32Address).words)
-              )
-            )
-          : addressEvm.bech32Address;
+      setChainInfo(chainInfos);
+      if (chainInfos?.networkType === 'evm') setInfoEvm(chainInfos);
+      if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
     }
 
     if (newAddress) {

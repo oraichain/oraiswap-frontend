@@ -13,6 +13,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
+import Banner from 'components/Banner';
 import { ibcInfos, oraicbain2atom } from 'config/ibcInfos';
 import {
   evmTokens,
@@ -42,6 +43,7 @@ import {
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
+  BSC_RPC,
   ERC20_ORAI,
   KAWAII_API_DEV,
   KWT,
@@ -73,7 +75,7 @@ import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -86,6 +88,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
+  const [chainInfo] = useGlobalState('chainInfo');
+  const [infoEvm] = useGlobalState('infoEvm');
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
     0, 0,
   ]);
@@ -136,13 +140,13 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, pendingTokens, keplrAddress]);
+  }, [prices, txHash, pendingTokens, keplrAddress, chainInfo]);
 
   useEffect(() => {
-    if (!!metamaskAddress) {
+    if (!!metamaskAddress || !!keplrAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, prices, txHash]);
+  }, [metamaskAddress, prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
@@ -228,7 +232,10 @@ const Balance: React.FC<BalanceProps> = () => {
       evmTokens.map(async (token) => {
         const amount = await window.Metamask.getOraiBalance(
           metamaskAddress,
-          token
+          token,
+          chainInfo?.networkType == 'evm'
+            ? chainInfo?.rpc
+            : infoEvm?.rpc ?? BSC_RPC
         );
 
         return [
@@ -309,7 +316,7 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-
+      
       setAmounts((old) => ({ ...old, ...amountDetails }));
 
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
@@ -521,7 +528,7 @@ const Balance: React.FC<BalanceProps> = () => {
           };
 
           const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs],
+            msgs: [...executeContractMsgs, msgTransfer],
             walletAddr: keplrAddress,
             gasAmount: { denom: ORAI, amount: '0' },
           });
@@ -727,7 +734,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const amount = coin(
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
-        process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
+        fromToken.denom == 'erc20_milky'
+          ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
+          : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
@@ -744,6 +753,8 @@ const Balance: React.FC<BalanceProps> = () => {
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
         },
         amount: amount.amount,
+        contractAddr:
+          fromToken.denom == "erc20_milky" ? fromToken.contractAddress : undefined,
       });
 
       processTxResult(
@@ -966,6 +977,10 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
+          contractAddr:
+            fromToken?.denom == 'erc20_milky'
+              ? fromToken?.contractAddress
+              : undefined,
         });
       }
       processTxResult(
@@ -984,9 +999,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   const navigate = useNavigate();
-
+  
   return (
     <Content nonBackground>
+      {window.location.pathname === '/' && <Banner  />}
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -1076,7 +1092,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) =>
-                                onClickTransfer(fromAmount, from, to)
+                              onClickTransfer(fromAmount, from, to)
                             : undefined
                         }
                         convertKwt={
