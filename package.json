@@ -6,10 +6,10 @@
   "author": "Thanh Tu <tu@orai.io>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "0.25.0",
-    "@cosmjs/crypto": "0.26.5",
-    "@cosmjs/proto-signing": "0.26.5",
-    "@cosmjs/stargate": "0.26.5",
+    "@cosmjs/cosmwasm-stargate": "^0.29.3",
+    "@cosmjs/crypto": "^0.29.3",
+    "@cosmjs/proto-signing": "^0.29.3",
+    "@cosmjs/stargate": "^0.29.3",
     "@hanchon/ethermint-address-converter": "^1.1.0",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/cosmos": "^0.9.12",
@@ -58,7 +58,6 @@
     "start": "cross-env GENERATE_SOURCEMAP=false react-app-rewired start",
     "build": "cross-env GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
     "test": "react-app-rewired test",
-    "postinstall": "node -e 'require(\"fs\").copyFileSync(\"patches/cosmwasmclient.js\",\"node_modules/@cosmjs/cosmwasm-launchpad/build/cosmwasmclient.js\")'",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {

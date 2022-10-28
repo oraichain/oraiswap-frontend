@@ -404,7 +404,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: ORAI
       },
@@ -418,7 +418,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: ATOMCOSMOS
       },
@@ -432,7 +432,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: LUNA
       },
@@ -446,7 +446,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: UST
       },
@@ -473,7 +473,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: AIRI
       },
@@ -500,7 +500,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: USDT
       },
@@ -512,7 +512,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,
@@ -527,7 +527,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   decimals:COSMOS_DECIMALS,
       //   chainId: 'Oraichain',
       //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
+      //   lcd: 'https://pre.lcd.orai.io',
       //   cosmosBased: true,
       //   Icon: ETH
       // },
@@ -541,7 +541,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: ORAI
       },
@@ -554,7 +554,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   decimals: EVM_DECIMALS,
       //   chainId: 'Oraichain',
       //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
+      //   lcd: 'https://pre.lcd.orai.io',
       //   cosmosBased: true,
       //   Icon: AIRI,
       // },
@@ -567,7 +567,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   decimals: EVM_DECIMALS,
       //   chainId: 'Oraichain',
       //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
+      //   lcd: 'https://pre.lcd.orai.io',
       //   cosmosBased: true,
       //   Icon: USDT,
       // },
@@ -580,7 +580,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       //   decimals: EVM_DECIMALS,
       //   chainId: 'Oraichain',
       //   rpc: 'https://rpc.orai.io',
-      //   lcd: 'https://lcd.orai.io',
+      //   lcd: 'https://pre.lcd.orai.io',
       //   cosmosBased: true,
       //   Icon: KWT,
       // },
@@ -607,7 +607,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: KWT
       },
@@ -634,7 +634,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: MILKY
       },
@@ -649,7 +649,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
-        lcd: 'https://lcd.orai.io',
+        lcd: 'https://pre.lcd.orai.io',
         cosmosBased: true,
         Icon: ORAIX
       }
