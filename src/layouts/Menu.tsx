@@ -272,12 +272,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
               setLink,
               <Swap style={{ width: 30, height: 30 }} />
             )}
-            {renderLink(
+            {/* {renderLink(
               '/transfer',
               'Transfer CW20 Tokens',
               setLink,
               <Transfer style={{ width: 30, height: 30 }} />
-            )}
+            )} */}
             {renderLink(
               '/pools',
               'Pools',
