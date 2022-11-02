@@ -349,7 +349,7 @@ const ClaimOraiX: FunctionComponent = () => {
       await axios.get(
         `${
           network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        }/wasm/v1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
         { cache: false }
       )
     ).data;
@@ -363,7 +363,7 @@ const ClaimOraiX: FunctionComponent = () => {
       await axios.get(
         `${
           network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        }/wasm/v1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
         { cache: false }
       )
     ).data;

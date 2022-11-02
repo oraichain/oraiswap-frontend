@@ -1,14 +1,17 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
+// import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
+import { OfflineSigner, isBroadcastTxFailure } from '@cosmjs/launchpad';
 import {
-  OfflineSigner,
-  GasPrice as GasPriceAmino,
-  isBroadcastTxFailure,
-} from '@cosmjs/launchpad';
+  isDeliverTxFailure,
+  DeliverTxResponse,
+  logs,
+  GasPrice,
+} from '@cosmjs/stargate';
 import * as encoding_1 from '@cosmjs/encoding';
-import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
+// import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 
 /**
  * The options of an .instantiate() call.
@@ -63,13 +66,13 @@ const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
 const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
   return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
     return {
-      typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
-      value: {
+      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+      value: MsgExecuteContract.fromPartial({
         sender: senderAddress,
         contract: contractAddress,
         msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
         funds: [...(transferAmount || [])],
-      },
+      }),
     };
   });
 };
@@ -102,13 +105,13 @@ const executeMultipleDirectClient = async (
     'auto',
     memo
   );
-  if (stargate_1.isBroadcastTxFailure(result)) {
+  if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Raw log: ${result.rawLog}`
     );
   }
   return {
-    logs: stargate_1.logs.parseRawLog(result.rawLog),
+    logs: logs.parseRawLog(result.rawLog),
     transactionHash: result.transactionHash,
   };
 };
@@ -133,14 +136,19 @@ const executeMultipleAminoClient = async (
     }
   );
 
-  const result = await client.signAndBroadcast(walletAddr, executeMsgs, 'auto', memo);
-  if (isBroadcastTxFailure(result)) {
+  const result = await client.signAndBroadcast(
+    walletAddr,
+    executeMsgs,
+    'auto',
+    memo
+  );
+  if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
     );
   }
   return {
-    logs: result.logs,
+    logs: result?.logs,
     transactionHash: result.transactionHash,
   };
 };
@@ -217,7 +225,7 @@ class CosmJs {
     );
 
     const result = await client.signAndBroadcast(walletAddr, msgs, 'auto');
-    if (isBroadcastTxFailure(result)) {
+    if (isDeliverTxFailure(result)) {
       throw new Error(
         `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
       );
@@ -254,13 +262,20 @@ class CosmJs {
         wallet as OfflineSigner,
         {
           gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-          prefix: 'orai',
+          prefix,
         }
       );
 
       const input = JSON.parse(handleMsg);
 
-      const result = await client.execute(address, contractAddr, input, 'auto');
+      const result = await client.execute(
+        address,
+        contractAddr,
+        input,
+        'auto',
+        undefined,
+        handleOptions?.funds
+      );
 
       return result;
     } catch (error) {
@@ -289,7 +304,7 @@ class CosmJs {
         wallet as OfflineSigner,
         {
           gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-          prefix: 'orai',
+          prefix,
         }
       );
 
@@ -355,7 +370,9 @@ class CosmJs {
         walletAddr,
         address,
         input,
-        undefined,
+        'auto',
+        '',
+        handleOptions?.funds
       );
       return result;
     } catch (error) {
