@@ -51,7 +51,7 @@ const querySmart = async (
       : Buffer.from(JSON.stringify(msg)).toString('base64');
   const url = `${
     lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  }/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);

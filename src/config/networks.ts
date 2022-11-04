@@ -12,7 +12,7 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     denom: 'orai',
     coinType: 118,
     lcd: 'https://pre.lcd.orai.io',
-    rpc: 'https://rpc.orai.io',
+    rpc: 'https://pre.rpc.orai.io',
     id: NetworkKey.MAINNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
     factory: process.env.REACT_APP_FACTORY_CONTRACT,

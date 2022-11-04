@@ -15,7 +15,7 @@ import {
  */
 export const embedChainInfos: ChainInfo[] = [
   {
-    rpc: 'https://rpc.orai.io',
+    rpc: 'https://pre.rpc.orai.io',
     rest: 'https://pre.lcd.orai.io',
     chainId: 'Oraichain',
     chainName: 'Oraichain',

@@ -8,7 +8,6 @@ import {
   // BroadcastTxResponse,
   // isBroadcastTxFailure,
   DeliverTxResponse,
-  isDeliverTxFailure,
   SigningStargateClient,
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -337,7 +336,8 @@ const Balance: React.FC<BalanceProps> = () => {
     result: DeliverTxResponse,
     customLink?: string
   ) => {
-    if (isDeliverTxFailure(result)) {
+    // if (isDeliverTxFailure(result)) {
+    if (result.code !== 0) {
       displayToast(TToastType.TX_FAILED, {
         message: result.rawLog,
       });
