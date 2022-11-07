@@ -23,8 +23,8 @@
         "oraiswap-legacy": [
           "oraiswap-legacy"
         ],
-        "oraiscan-pre-mainnet": [
-          "oraiscan-pre-mainnet"
+        "oraiswap-pre-mainnet": [
+          "oraiswap-pre-mainnet"
         ]
       }
     }

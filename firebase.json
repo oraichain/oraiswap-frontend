@@ -102,7 +102,7 @@
             ]
         },
         {
-            "target": "oraiscan-pre-mainnet",
+            "target": "oraiswap-pre-mainnet",
             "public": "build",
             "ignore": [
                 "firebase.json",
