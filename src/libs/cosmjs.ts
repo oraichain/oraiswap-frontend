@@ -49,7 +49,9 @@ const collectWallet = async (chainId?: string) => {
     throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
   }
   // use keplr instead
-  return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
+  // return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
+  return await keplr.getOfflineSignerAuto('Oraichain-fork');
+
 };
 
 const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
