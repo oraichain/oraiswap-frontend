@@ -8,6 +8,7 @@ import {
   // BroadcastTxResponse,
   // isBroadcastTxFailure,
   DeliverTxResponse,
+  isDeliverTxFailure,
   SigningStargateClient,
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -317,7 +318,7 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-      
+
       setAmounts((old) => ({ ...old, ...amountDetails }));
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
@@ -336,8 +337,7 @@ const Balance: React.FC<BalanceProps> = () => {
     result: DeliverTxResponse,
     customLink?: string
   ) => {
-    // if (isDeliverTxFailure(result)) {
-    if (result.code !== 0) {
+    if (isDeliverTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
         message: result.rawLog,
       });
@@ -418,7 +418,8 @@ const Balance: React.FC<BalanceProps> = () => {
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        // fromToken.chainId,
+        'Oraichain-fork'
       );
       let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
@@ -569,9 +570,12 @@ const Balance: React.FC<BalanceProps> = () => {
               ).multiply(1000000000),
             }),
           };
+
           const offlineSigner = await window.Keplr.getOfflineSigner(
-            fromToken.chainId
+            // fromToken.chainId
+            'Oraichain-fork'
           );
+          
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
           const client = await SigningStargateClient.connectWithSigner(
             fromToken.rpc,
@@ -612,7 +616,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        // fromToken.chainId
+        'Oraichain-fork'
       );
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
