@@ -38,6 +38,7 @@ import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { poolTokens } from 'config/pools';
 import { contracts } from 'libs/contracts';
+import { Contract } from 'config/contracts';
 
 const cx = cn.bind(style);
 
@@ -61,12 +62,6 @@ const Swap: React.FC = () => {
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
-  const oracleClient = new contracts.OraiswapOracle.OraiswapOracleClient(
-    window.client,
-    address,
-    network.oracle
-  );
-
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
     setSwapAmount([amount, toAmount]);
@@ -79,9 +74,11 @@ const Swap: React.FC = () => {
     setSwapAmount([finalAmount, toAmount]);
   };
 
+  Contract.sender = address;
+
   const { data: taxRate, isLoading: isTaxRateLoading } =
     contracts.OraiswapOracle.useOraiswapOracleTaxRateQuery({
-      client: oracleClient
+      client: Contract.oracle
     });
 
   const fromToken = filteredTokens.find(

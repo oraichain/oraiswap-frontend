@@ -466,13 +466,6 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
   return sent_funds;
 };
 
-async function fetchExchangeRate(base_denom: string, quote_denom: string) {
-  const data = await querySmart(network.oracle, {
-    exchange: { exchange_rate: { base_denom, quote_denom } }
-  });
-  return data?.item?.exchange_rate;
-}
-
 const generateSwapOperationMsgs = (
   denoms: [string, string],
   offerInfo: any,
@@ -930,7 +923,6 @@ export {
   fetchTokenInfo,
   generateContractMessages,
   generateClaimMsg,
-  fetchExchangeRate,
   simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,
