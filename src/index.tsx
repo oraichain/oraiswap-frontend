@@ -10,14 +10,16 @@ import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { collectWallet } from 'libs/cosmjs';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -33,13 +35,14 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 1.0
   });
 }
 
 const startApp = async () => {
   try {
     const keplr = await window.Keplr.getKeplr();
+
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
@@ -48,31 +51,42 @@ const startApp = async () => {
         Promise.all([
           window.Keplr.suggestChain(network.chainId),
           window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
-          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID),
+          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID)
           // window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID),
         ]),
         new Promise((resolve) => {
           setTimeout(resolve, 10000);
-        }),
+        })
       ]);
+
+      const wallet = await collectWallet(network.chainId);
+
+      window.client = await SigningCosmWasmClient.connectWithSigner(
+        network.rpc,
+        wallet,
+        {
+          prefix: network.prefix
+        }
+      );
     }
   } catch (ex) {
     console.log(ex);
+  } finally {
+    render(
+      <StrictMode>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
+      </StrictMode>,
+      document.getElementById('oraiswap')
+    );
   }
 };
 
 startApp();
-render(
-  <StrictMode>
-    <ToastProvider>
-      <Router>
-        <ScrollToTop />
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </Router>
-      <ToastContainer transition={Bounce} />
-    </ToastProvider>
-  </StrictMode>,
-  document.getElementById('oraiswap')
-);

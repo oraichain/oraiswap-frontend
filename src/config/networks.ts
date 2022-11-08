@@ -7,7 +7,7 @@ export enum NetworkKey {
 
 const networks: Record<NetworkKey, NetworkConfig> = {
   [NetworkKey.MAINNET]: {
-    chainId: 'Oraichain',
+    chainId: 'Oraichain-fork',
     prefix: 'orai',
     denom: 'orai',
     coinType: 118,

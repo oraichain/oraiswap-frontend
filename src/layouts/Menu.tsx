@@ -23,14 +23,14 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement,
+  ReactElement
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
   BEP20_ORAI,
@@ -43,7 +43,7 @@ import {
   KWT_SUBNETWORK_EVM_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
-  OSMOSIS_CHAIN_ID,
+  OSMOSIS_CHAIN_ID
 } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
@@ -73,13 +73,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balance,
+    data: balance
   } = useQuery(
     ['balance', ORAI, address],
     () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
     {
       enabled: address?.length > 0,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -93,7 +93,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       metamaskAddress,
       undefined,
       infoEvm?.rpc ?? BSC_RPC,
-      (!infoEvm || infoEvm.chainId === BSC_CHAIN_ID) ? BEP20_ORAI : ERC20_ORAI
+      !infoEvm || infoEvm.chainId === BSC_CHAIN_ID ? BEP20_ORAI : ERC20_ORAI
     ).then(setMetamaskBalance);
   });
 
@@ -212,17 +212,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
                       text={address}
                       className={styles.token_address}
                     />
-                    {(
+                    {
                       <TokenBalance
                         balance={{
                           amount: balance ?? '0',
                           decimals: 6,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
                       />
-                    )}
+                    }
                   </div>
                 </div>
               )}
@@ -252,7 +252,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
@@ -304,7 +304,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark,
+                [styles.active]: theme === Themes.dark
               })}
               onClick={() => {
                 setTheme(Themes.dark);
@@ -315,7 +315,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light,
+                [styles.active]: theme === Themes.light
               })}
               onClick={() => {
                 setTheme(Themes.light);
