@@ -1,4 +1,4 @@
-import {AllowMsg, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
+import {AllowMsg, Uint128, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
 export interface InstantiateMsg {
   allowlist: AllowMsg[];
   default_timeout: number;
@@ -31,7 +31,6 @@ export type ExecuteMsg = {
     admin: string;
   };
 };
-export type Uint128 = string;
 export type QueryMsg = {
   list_channels: {};
 } | {
@@ -77,11 +76,6 @@ export interface ChannelResponse {
   balances: Amount[];
   info: ChannelInfo;
   total_sent: Amount[];
-}
-export interface Coin {
-  amount: Uint128;
-  denom: string;
-  [k: string]: unknown;
 }
 export interface ConfigResponse {
   default_timeout: number;

@@ -1,35 +1,8 @@
-export type Addr = string;
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
-  };
-};
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
-}
-export type Decimal = string;
-export type Uint128 = string;
-export interface ExchangeRateItem {
-  exchange_rate: Decimal;
-  quote_denom: string;
-}
-export interface Coin {
-  amount: Uint128;
-  denom: string;
-  [k: string]: unknown;
-}
 export interface AllowMsg {
   contract: string;
   gas_limit?: number | null;
 }
+export type Uint128 = string;
 export type Binary = string;
 export type Uint64 = string;
 export interface Cw20ReceiveMsg {
@@ -89,6 +62,11 @@ export type Amount = {
 } | {
   cw20: Cw20Coin;
 };
+export interface Coin {
+  amount: Uint128;
+  denom: string;
+  [k: string]: unknown;
+}
 export interface Cw20Coin {
   address: string;
   amount: Uint128;
@@ -111,10 +89,64 @@ export interface AllowedTokenInfo {
   contract: string;
   denom: string;
 }
+export type Addr = string;
+export type Decimal = string;
+export type OracleTreasuryQuery = {
+  tax_rate: {};
+} | {
+  tax_cap: {
+    denom: string;
+  };
+};
+export type OracleExchangeQuery = {
+  exchange_rate: {
+    base_denom?: string | null;
+    quote_denom: string;
+  };
+} | {
+  exchange_rates: {
+    base_denom?: string | null;
+    quote_denoms: string[];
+  };
+};
+export type OracleContractQuery = {
+  contract_info: {};
+} | {
+  reward_pool: {
+    denom: string;
+  };
+};
+export type Null = null;
+export interface ExchangeRateItem {
+  exchange_rate: Decimal;
+  quote_denom: string;
+}
+export type AssetInfo = {
+  token: {
+    contract_addr: Addr;
+  };
+} | {
+  native_token: {
+    denom: string;
+  };
+};
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
+}
 export interface Asset {
   amount: Uint128;
   info: AssetInfo;
 }
+export type SwapOperation = {
+  orai_swap: {
+    ask_asset_info: AssetInfo;
+    offer_asset_info: AssetInfo;
+  };
+};
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
@@ -123,12 +155,13 @@ export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
 }
-export type SwapOperation = {
-  orai_swap: {
-    ask_asset_info: AssetInfo;
-    offer_asset_info: AssetInfo;
-  };
-};
+export interface RewardInfoResponseItem {
+  asset_info: AssetInfo;
+  bond_amount: Uint128;
+  pending_reward: Uint128;
+  pending_withdraw: Asset[];
+  should_migrate?: boolean | null;
+}
 export type Logo = {
   url: string;
 } | {
@@ -166,10 +199,3 @@ export interface SpenderAllowanceInfo {
 export type LogoInfo = {
   url: string;
 } | "embedded";
-export interface RewardInfoResponseItem {
-  asset_info: AssetInfo;
-  bond_amount: Uint128;
-  pending_reward: Uint128;
-  pending_withdraw: Asset[];
-  should_migrate?: boolean | null;
-}

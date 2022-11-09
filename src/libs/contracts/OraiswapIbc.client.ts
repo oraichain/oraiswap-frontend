@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {AllowMsg, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
-import {InstantiateMsg, ExecuteMsg, Uint128, QueryMsg, AdminResponse, AllowedResponse, ChannelResponse, Coin, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
+import {AllowMsg, Uint128, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
 export interface OraiswapIbcReadOnlyInterface {
   contractAddress: string;
   listChannels: () => Promise<ListChannelsResponse>;

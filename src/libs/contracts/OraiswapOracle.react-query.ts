@@ -7,14 +7,41 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {Decimal, Uint128, ExchangeRateItem, Coin} from "./types";
-import {Addr, InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ContractInfoResponse, ExchangeRateResponse, ExchangeRatesResponse, RewardPoolResponse, TaxCapResponse, TaxRateResponse} from "./OraiswapOracle.types";
+import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, Null, ExchangeRateItem, Coin} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ContractInfoResponse, ExchangeRateResponse, ExchangeRatesResponse, RewardPoolResponse, TaxCapResponse, TaxRateResponse} from "./OraiswapOracle.types";
 import { OraiswapOracleQueryClient, OraiswapOracleClient } from "./OraiswapOracle.client";
 export interface OraiswapOracleReactQuery<TResponse, TData = TResponse> {
   client: OraiswapOracleQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
     initialData?: undefined;
   };
+}
+export interface OraiswapOracleContractQuery<TData> extends OraiswapOracleReactQuery<Null, TData> {}
+export function useOraiswapOracleContractQuery<TData = Null>({
+  client,
+  options
+}: OraiswapOracleContractQuery<TData>) {
+  return useQuery<Null, Error, TData>(["oraiswapOracleContract", client?.contractAddress], () => client ? client.contract() : Promise.reject(new Error("Invalid client")), { ...options,
+    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+  });
+}
+export interface OraiswapOracleExchangeQuery<TData> extends OraiswapOracleReactQuery<Null, TData> {}
+export function useOraiswapOracleExchangeQuery<TData = Null>({
+  client,
+  options
+}: OraiswapOracleExchangeQuery<TData>) {
+  return useQuery<Null, Error, TData>(["oraiswapOracleExchange", client?.contractAddress], () => client ? client.exchange() : Promise.reject(new Error("Invalid client")), { ...options,
+    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+  });
+}
+export interface OraiswapOracleTreasuryQuery<TData> extends OraiswapOracleReactQuery<Null, TData> {}
+export function useOraiswapOracleTreasuryQuery<TData = Null>({
+  client,
+  options
+}: OraiswapOracleTreasuryQuery<TData>) {
+  return useQuery<Null, Error, TData>(["oraiswapOracleTreasury", client?.contractAddress], () => client ? client.treasury() : Promise.reject(new Error("Invalid client")), { ...options,
+    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+  });
 }
 export interface OraiswapOracleRewardPoolQuery<TData> extends OraiswapOracleReactQuery<RewardPoolResponse, TData> {
   args: {

@@ -7,8 +7,8 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {AllowMsg, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
-import {InstantiateMsg, ExecuteMsg, Uint128, QueryMsg, AdminResponse, AllowedResponse, ChannelResponse, Coin, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
+import {AllowMsg, Uint128, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
 import { OraiswapIbcQueryClient, OraiswapIbcClient } from "./OraiswapIbc.client";
 export interface OraiswapIbcReactQuery<TResponse, TData = TResponse> {
   client: OraiswapIbcQueryClient | undefined;

@@ -1,4 +1,5 @@
-import {Addr, AssetInfo, PairInfo} from "./types";
+import {AssetInfo, PairInfo} from "./types";
+export type Addr = string;
 export interface InstantiateMsg {
   commission_rate?: string | null;
   oracle_addr: Addr;

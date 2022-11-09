@@ -7,8 +7,8 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {RewardInfoResponseItem} from "./types";
-import {Addr, InstantiateMsg, ExecuteMsg, Uint128, Binary, AssetInfo, Decimal, Cw20ReceiveMsg, Asset, QueryMsg, MigrateMsg, ConfigResponse, PoolInfoResponse, RewardInfoResponse, ArrayOfRewardInfoResponse, RewardsPerSecResponse} from "./OraiswapStaking.types";
+import {Addr, Uint128, Binary, AssetInfo, Decimal, Cw20ReceiveMsg, Asset, RewardInfoResponseItem} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, PoolInfoResponse, RewardInfoResponse, ArrayOfRewardInfoResponse, RewardsPerSecResponse} from "./OraiswapStaking.types";
 import { OraiswapStakingQueryClient, OraiswapStakingClient } from "./OraiswapStaking.client";
 export interface OraiswapStakingReactQuery<TResponse, TData = TResponse> {
   client: OraiswapStakingQueryClient | undefined;

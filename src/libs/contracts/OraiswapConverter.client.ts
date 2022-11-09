@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import {TokenInfo, TokenRatio} from "./types";
-import {InstantiateMsg, ExecuteMsg, Uint128, Binary, Addr, AssetInfo, Cw20ReceiveMsg, QueryMsg, MigrateMsg, ConfigResponse, Decimal, ConvertInfoResponse} from "./OraiswapConverter.types";
+import {Uint128, Binary, Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo, Decimal, TokenRatio} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, ConvertInfoResponse} from "./OraiswapConverter.types";
 export interface OraiswapConverterReadOnlyInterface {
   contractAddress: string;
   config: () => Promise<ConfigResponse>;

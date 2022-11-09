@@ -7,8 +7,8 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {} from "./types";
-import {Addr, InstantiateMsg, ExecuteMsg, AssetInfo, QueryMsg, MigrateMsg, ConfigResponse, DistributionInfoResponse, Uint128, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
+import {Addr, AssetInfo, Uint128} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, DistributionInfoResponse, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
 import { OraiswapRewarderQueryClient, OraiswapRewarderClient } from "./OraiswapRewarder.client";
 export interface OraiswapRewarderReactQuery<TResponse, TData = TResponse> {
   client: OraiswapRewarderQueryClient | undefined;

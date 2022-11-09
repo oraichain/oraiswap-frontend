@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {Decimal, Uint128, ExchangeRateItem, Coin} from "./types";
-import {Addr, InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ContractInfoResponse, ExchangeRateResponse, ExchangeRatesResponse, RewardPoolResponse, TaxCapResponse, TaxRateResponse} from "./OraiswapOracle.types";
+import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, Null, ExchangeRateItem, Coin} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ContractInfoResponse, ExchangeRateResponse, ExchangeRatesResponse, RewardPoolResponse, TaxCapResponse, TaxRateResponse} from "./OraiswapOracle.types";
 export interface OraiswapOracleReadOnlyInterface {
   contractAddress: string;
   taxRate: () => Promise<TaxRateResponse>;
@@ -36,6 +36,9 @@ export interface OraiswapOracleReadOnlyInterface {
   }: {
     denom: string;
   }) => Promise<RewardPoolResponse>;
+  treasury: () => Promise<Null>;
+  exchange: () => Promise<Null>;
+  contract: () => Promise<Null>;
 }
 export class OraiswapOracleQueryClient implements OraiswapOracleReadOnlyInterface {
   client: CosmWasmClient;
@@ -50,6 +53,9 @@ export class OraiswapOracleQueryClient implements OraiswapOracleReadOnlyInterfac
     this.exchangeRates = this.exchangeRates.bind(this);
     this.contractInfo = this.contractInfo.bind(this);
     this.rewardPool = this.rewardPool.bind(this);
+    this.treasury = this.treasury.bind(this);
+    this.exchange = this.exchange.bind(this);
+    this.contract = this.contract.bind(this);
   }
 
   taxRate = async (): Promise<TaxRateResponse> => {
@@ -110,6 +116,21 @@ export class OraiswapOracleQueryClient implements OraiswapOracleReadOnlyInterfac
       reward_pool: {
         denom
       }
+    });
+  };
+  treasury = async (): Promise<Null> => {
+    return this.client.queryContractSmart(this.contractAddress, {
+      treasury: {}
+    });
+  };
+  exchange = async (): Promise<Null> => {
+    return this.client.queryContractSmart(this.contractAddress, {
+      exchange: {}
+    });
+  };
+  contract = async (): Promise<Null> => {
+    return this.client.queryContractSmart(this.contractAddress, {
+      contract: {}
     });
   };
 }
