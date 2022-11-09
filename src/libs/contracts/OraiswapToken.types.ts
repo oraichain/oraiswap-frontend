@@ -1,6 +1,4 @@
-import {Logo, EmbeddedLogo, InstantiateMarketingInfo, Expiration, Timestamp, AllowanceInfo, SpenderAllowanceInfo, LogoInfo} from "./types";
-export type Uint128 = string;
-export type Binary = string;
+import {Uint128, Logo, EmbeddedLogo, Binary, Cw20Coin, InstantiateMarketingInfo, Expiration, Timestamp, Uint64, AllowanceInfo, SpenderAllowanceInfo, LogoInfo, Addr} from "./types";
 export interface InstantiateMsg {
   decimals: number;
   initial_balances: Cw20Coin[];
@@ -8,10 +6,6 @@ export interface InstantiateMsg {
   mint?: MinterResponse | null;
   name: string;
   symbol: string;
-}
-export interface Cw20Coin {
-  address: string;
-  amount: Uint128;
 }
 export interface MinterResponse {
   cap?: Uint128 | null;
@@ -80,7 +74,6 @@ export type ExecuteMsg = {
 } | {
   upload_logo: Logo;
 };
-export type Uint64 = string;
 export type QueryMsg = {
   balance: {
     address: string;
@@ -140,7 +133,6 @@ export interface DownloadLogoResponse {
   data: Binary;
   mime_type: string;
 }
-export type Addr = string;
 export interface MarketingInfoResponse {
   description?: string | null;
   logo?: LogoInfo | null;

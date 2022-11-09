@@ -1,4 +1,4 @@
-import {TokenInfo, TokenRatio} from "./types";
+import {Uint128, Binary, Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo, Decimal, TokenRatio} from "./types";
 export interface InstantiateMsg {}
 export type ExecuteMsg = {
   receive: Cw20ReceiveMsg;
@@ -26,23 +26,6 @@ export type ExecuteMsg = {
     asset_infos: AssetInfo[];
   };
 };
-export type Uint128 = string;
-export type Binary = string;
-export type Addr = string;
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
-  };
-};
-export interface Cw20ReceiveMsg {
-  amount: Uint128;
-  msg: Binary;
-  sender: string;
-}
 export type QueryMsg = {
   config: {};
 } | {
@@ -54,7 +37,6 @@ export interface MigrateMsg {}
 export interface ConfigResponse {
   owner: Addr;
 }
-export type Decimal = string;
 export interface ConvertInfoResponse {
   token_ratio: TokenRatio;
 }

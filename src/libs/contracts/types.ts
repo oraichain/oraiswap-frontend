@@ -1,15 +1,34 @@
-export interface AllowMsg {
-  contract: string;
-  gas_limit?: number | null;
-}
 export type Uint128 = string;
 export type Binary = string;
-export type Uint64 = string;
+export type Addr = string;
+export type AssetInfo = {
+  token: {
+    contract_addr: Addr;
+  };
+} | {
+  native_token: {
+    denom: string;
+  };
+};
 export interface Cw20ReceiveMsg {
   amount: Uint128;
   msg: Binary;
   sender: string;
 }
+export interface TokenInfo {
+  decimals: number;
+  info: AssetInfo;
+}
+export type Decimal = string;
+export interface TokenRatio {
+  info: AssetInfo;
+  ratio: Decimal;
+}
+export interface AllowMsg {
+  contract: string;
+  gas_limit?: number | null;
+}
+export type Uint64 = string;
 export interface TransferMsg {
   channel: string;
   remote_address: string;
@@ -89,8 +108,6 @@ export interface AllowedTokenInfo {
   contract: string;
   denom: string;
 }
-export type Addr = string;
-export type Decimal = string;
 export type OracleTreasuryQuery = {
   tax_rate: {};
 } | {
@@ -121,15 +138,10 @@ export interface ExchangeRateItem {
   exchange_rate: Decimal;
   quote_denom: string;
 }
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
-  };
-};
+export interface Asset {
+  amount: Uint128;
+  info: AssetInfo;
+}
 export interface PairInfo {
   asset_infos: [AssetInfo, AssetInfo];
   commission_rate: string;
@@ -137,24 +149,12 @@ export interface PairInfo {
   liquidity_token: Addr;
   oracle_addr: Addr;
 }
-export interface Asset {
-  amount: Uint128;
-  info: AssetInfo;
-}
 export type SwapOperation = {
   orai_swap: {
     ask_asset_info: AssetInfo;
     offer_asset_info: AssetInfo;
   };
 };
-export interface TokenInfo {
-  decimals: number;
-  info: AssetInfo;
-}
-export interface TokenRatio {
-  info: AssetInfo;
-  ratio: Decimal;
-}
 export interface RewardInfoResponseItem {
   asset_info: AssetInfo;
   bond_amount: Uint128;

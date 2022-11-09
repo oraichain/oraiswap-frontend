@@ -1,5 +1,4 @@
-import {} from "./types";
-export type Addr = string;
+import {Addr, AssetInfo, Uint128} from "./types";
 export interface InstantiateMsg {
   distribution_interval?: number | null;
   staking_contract: Addr;
@@ -13,15 +12,6 @@ export type ExecuteMsg = {
 } | {
   distribute: {
     asset_infos: AssetInfo[];
-  };
-};
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
   };
 };
 export type QueryMsg = {
@@ -44,7 +34,6 @@ export interface ConfigResponse {
 export interface DistributionInfoResponse {
   last_distributed: number;
 }
-export type Uint128 = string;
 export interface RewardAmountPerSecondResponse {
   reward_amount: Uint128;
 }
