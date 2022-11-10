@@ -1,10 +1,7 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
-import {
-  AllPoolAprResponse,
-  PoolResponse
-} from 'types/oraiswap_pair/pool_response';
+import { AssetInfo } from 'types/oraiswap_pair/pair_info';
+import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
@@ -15,6 +12,15 @@ import {
   parseAmountToWithDecimal
 } from 'libs/utils';
 import Big from 'big.js';
+import { Contract } from 'config/contracts';
+import { PairInfo, SwapOperation } from 'libs/contracts';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import {
+  PoolInfoResponse,
+  RewardInfoResponse,
+  RewardsPerSecResponse
+} from 'libs/contracts/OraiswapStaking.types';
+import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -57,27 +63,6 @@ const querySmart = async (
   if (res.code) throw new Error(res.message);
   return res.data;
 };
-
-async function fetchPairs() {
-  const data = await querySmart(network.factory, { pairs: {} });
-  return data;
-}
-
-function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
-  let { info: token_asset } = parseTokenInfo(tokenInfo);
-  if (token_asset.token)
-    return querySmart(network.staking, {
-      pool_info: { asset_token: token_asset.token.contract_addr }
-    });
-  // currently ibc pool is not supported
-  else throw 'IBC native pool is not supported';
-}
-
-function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
-  return querySmart(network.staking, {
-    reward_info: { staker_addr: address, asset_info }
-  });
-}
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
@@ -127,11 +112,6 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   return tokenInfo;
 }
 
-async function fetchPool(pairAddr: string): Promise<PoolResponse> {
-  const data = await querySmart(pairAddr, { pool: {} });
-  return data;
-}
-
 async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
   const { data } = await axios.get(
     `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr/all`
@@ -171,15 +151,15 @@ async function fetchPoolInfoAmount(
   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
 
   if (pair) {
-    const poolInfo = await fetchPool(pair.contract_addr);
+    const poolInfo = await Contract.pair(pair.contract_addr).pool();
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
     const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
     const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
-    const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
-    const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
+    const fromPoolInfo = await Contract.pair(fromPairInfo.contract_addr).pool();
+    const toPoolInfo = await Contract.pair(toPairInfo.contract_addr).pool();
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
@@ -193,13 +173,8 @@ async function fetchPairInfo(
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  const data = await fetchPairInfoRaw([firstAsset, secondAsset]);
-  return data;
-}
-
-async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
-  const data = await querySmart(network.factory, {
-    pair: { asset_infos: assetInfos }
+  const data = await Contract.factory.pair({
+    assetInfos: [firstAsset, secondAsset]
   });
   return data;
 }
@@ -207,16 +182,9 @@ async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
 async function fetchTokenBalance(
   tokenAddr: string,
   walletAddr: string,
-  lcd?: string,
   shouldKeepOriginal?: boolean
 ): Promise<number | string> {
-  const data = await querySmart(
-    tokenAddr,
-    {
-      balance: { address: walletAddr }
-    },
-    lcd
-  );
+  const data = await Contract.token(tokenAddr).balance({ address: walletAddr });
   if (shouldKeepOriginal) return data.balance;
   return parseInt(data.balance);
 }
@@ -224,83 +192,47 @@ async function fetchTokenBalance(
 async function fetchTokenAllowance(
   tokenAddr: string,
   walletAddr: string,
-  spender: string,
-  lcd?: string
+  spender: string
 ) {
-  const data = await querySmart(
-    tokenAddr,
-    {
-      allowance: {
-        owner: walletAddr,
-        spender
-      }
-    },
-    lcd
-  );
+  const data = await Contract.token(tokenAddr).allowance({
+    owner: walletAddr,
+    spender
+  });
   return data.allowance;
 }
 
 async function fetchRewardInfo(
-  staker_addr: string,
-  asset_token: TokenItemType,
-  lcd?: string
-) {
-  let { info: asset_info } = parseTokenInfo(asset_token);
-  const data = await querySmart(
-    network.staking,
-    {
-      reward_info: {
-        staker_addr,
-        asset_info
-      }
-    },
-    lcd
-  );
+  stakerAddr: string,
+  assetToken: TokenItemType
+): Promise<RewardInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.rewardInfo({ assetInfo, stakerAddr });
+  return data;
+}
+
+async function fetchRewardPerSecInfo(
+  assetToken: TokenItemType
+): Promise<RewardsPerSecResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.rewardsPerSec({ assetInfo });
 
   return data;
 }
 
-async function fetchRewardPerSecInfo(assetToken: TokenItemType, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.staking,
-    {
-      rewards_per_sec: {
-        asset_info
-      }
-    },
-    lcd
-  );
+async function fetchStakingPoolInfo(
+  assetToken: TokenItemType
+): Promise<PoolInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.poolInfo({ assetInfo });
 
   return data;
 }
 
-async function fetchStakingPoolInfo(assetToken: TokenItemType, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.staking,
-    {
-      pool_info: {
-        asset_info
-      }
-    },
-    lcd
-  );
-
-  return data;
-}
-
-async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.rewarder,
-    {
-      distribution_info: {
-        asset_info
-      }
-    },
-    lcd
-  );
+async function fetchDistributionInfo(
+  assetToken: TokenInfo
+): Promise<DistributionInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.rewarder.distributionInfo({ assetInfo });
 
   return data;
 }
@@ -328,7 +260,7 @@ async function fetchBalance(
 ): Promise<number> {
   if (!tokenAddr)
     return (await fetchNativeTokenBalance(walletAddr, denom, lcd)) as number;
-  else return (await fetchTokenBalance(tokenAddr, walletAddr, lcd)) as number;
+  else return (await fetchTokenBalance(tokenAddr, walletAddr)) as number;
 }
 
 async function fetchBalanceWithMapping(
@@ -420,7 +352,7 @@ async function generateConvertCw20Erc20Message(
       ).toFixed(0);
     else
       balance = new Big(
-        await fetchTokenBalance(tokenInfo.contractAddress, sender, null, true)
+        await fetchTokenBalance(tokenInfo.contractAddress, sender, true)
       ).toFixed(0);
     if (+balance > 0) {
       const outputToken: TokenItemType = {
@@ -470,7 +402,7 @@ const generateSwapOperationMsgs = (
   denoms: [string, string],
   offerInfo: any,
   askInfo: any
-) => {
+): SwapOperation[] => {
   const pair = getPair(denoms);
 
   return pair
@@ -509,20 +441,16 @@ async function simulateSwap(query: {
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
-  let operations = generateSwapOperationMsgs(
+  const operations = generateSwapOperationMsgs(
     [fromInfo.denom, toInfo.denom],
     offerInfo,
     askInfo
   );
 
-  let msg = {
-    simulate_swap_operations: {
-      operations,
-      offer_amount: amount.toString()
-    }
-  };
-
-  const data = await querySmart(network.router, msg);
+  const data = Contract.router.simulateSwapOperations({
+    offerAmount: amount.toString(),
+    operations
+  });
   return data;
 }
 
@@ -916,18 +844,14 @@ export {
   querySmart,
   fetchNativeTokenBalance,
   fetchPairInfo,
-  fetchPool,
   fetchTokenBalance,
   fetchBalance,
-  fetchPairs,
   fetchTokenInfo,
   generateContractMessages,
   generateClaimMsg,
   simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,
-  fetchPoolMiningInfo,
-  fetchRewardMiningInfo,
   generateMiningMsgs,
   generateConvertMsgs,
   fetchRewardInfo,

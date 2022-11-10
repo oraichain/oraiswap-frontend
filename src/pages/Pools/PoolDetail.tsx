@@ -16,10 +16,9 @@ import {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchDistributionInfo,
   fetchPoolApr
 } from 'rest/api';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+
 import { TokenItemType } from 'config/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
 import { useQuery } from '@tanstack/react-query';
