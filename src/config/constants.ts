@@ -76,7 +76,7 @@ export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
 
 export const ORAICHAIN_ARR_LCD = [
   'https://lcd.orai.io',
-  'http://lcd.mainnet.orai.io',
+  'https://lcd.mainnet.orai.io',
 ];
 
 export const COSMOS_ARR_LCD = [
