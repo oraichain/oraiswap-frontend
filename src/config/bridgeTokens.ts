@@ -41,7 +41,10 @@ import {
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT,
   STABLE_DENOM,
-  USDT_BSC_CONTRACT
+  USDT_BSC_CONTRACT,
+  COSMOS_ARR_LCD,
+  OSMOSIS_ARR_LCD,
+  ORAICHAIN_ARR_LCD,
 } from './constants';
 
 export type Erc20Cw20Map = {
@@ -58,14 +61,14 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -92,6 +95,7 @@ export type TokenItemType = {
   | 'kawaii-islands'
   | 'milky-token';
   cosmosBased: Boolean;
+  lcdArr?: Array<string>;
 };
 
 const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
@@ -112,7 +116,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         // lcd: 'https://lcd-cosmoshub.blockapsis.com',
         cosmosBased: true,
         maxGas: 20000 * 0.16,
-        Icon: ATOMCOSMOS
+        Icon: ATOMCOSMOS,
+        lcdArr: COSMOS_ARR_LCD,
       },
       {
         name: 'LUNA',
@@ -150,14 +155,16 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         denom: 'uosmo',
         coinType: 118,
         chainId: 'osmosis-1',
-        rpc: 'https://rpc.osmosis.interbloc.org',
+        // rpc: 'https://rpc.osmosis.interbloc.org',
+        rpc: 'https://rpc.osmosis.zone',
         // lcd: 'https://lcd-osmosis.keplr.app',
         lcd: 'https://lcd.osmosis.zone',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,
         maxGas: 20000 * 0.025,
-        Icon: OSMO
+        Icon: OSMO,
+        lcdArr: OSMOSIS_ARR_LCD,
       },
       // {
       //   name: 'ORAI',
@@ -400,7 +407,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAI,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       {
         name: 'ATOM',
@@ -414,7 +422,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ATOMCOSMOS
+        Icon: ATOMCOSMOS,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       {
         name: 'LUNA',
@@ -469,7 +478,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: AIRI
+        Icon: AIRI,
+        lcdArr: ORAICHAIN_ARR_LCD
       },
       {
         name: 'USDT',
@@ -496,7 +506,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: USDT
+        Icon: USDT,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       {
         name: 'OSMO',
@@ -510,7 +521,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,
-        Icon: OSMO
+        Icon: OSMO,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       // {
       //   name: 'Erc20 ORAI',
@@ -537,7 +549,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAI
+        Icon: ORAI,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       // {
       //   name: 'AIRI',
@@ -603,7 +616,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: KWT
+        Icon: KWT,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       {
         name: 'MILKY',
@@ -630,7 +644,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: MILKY
+        Icon: MILKY,
+        lcdArr: ORAICHAIN_ARR_LCD,
       },
       {
         name: 'ORAIX',
@@ -645,7 +660,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: 'https://rpc.orai.io',
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
-        Icon: ORAIX
+        Icon: ORAIX,
+        lcdArr: ORAICHAIN_ARR_LCD,
       }
     ]
   ]

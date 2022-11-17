@@ -15,6 +15,7 @@ import {
   parseAmountToWithDecimal,
 } from 'libs/utils';
 import Big from 'big.js';
+import { pingUrl } from 'script';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -314,10 +315,20 @@ async function fetchNativeTokenBalance(
   walletAddr: string,
   denom: string = ORAI,
   lcd?: string,
-  shouldKeepOriginal?: boolean
-): Promise<number | string> {
+  shouldKeepOriginal?: boolean,
+  lcdArr?: Array<string>
+) {
+  let baseURLstring = lcd;
+  if (lcd && lcdArr) {
+    for (const baseURL of lcdArr) {
+      if (await pingUrl(baseURL)) {
+        baseURLstring = baseURL;
+        break;
+      }
+    }
+  }
   const url = `${
-    lcd ?? network.lcd
+    baseURLstring ?? network.lcd
   }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
   const amount = res.balance.amount;
@@ -329,10 +340,17 @@ async function fetchBalance(
   walletAddr: string,
   denom: string,
   tokenAddr?: string,
-  lcd?: string
+  lcd?: string,
+  lcdArr?: Array<string>
 ): Promise<number> {
   if (!tokenAddr)
-    return (await fetchNativeTokenBalance(walletAddr, denom, lcd)) as number;
+    return (await fetchNativeTokenBalance(
+      walletAddr,
+      denom,
+      lcd,
+      false,
+      lcdArr
+    )) as number;
   else return (await fetchTokenBalance(tokenAddr, walletAddr, lcd)) as number;
 }
 
@@ -364,7 +382,9 @@ async function fetchBalanceWithMapping(
     mainBalance = await fetchBalance(
       walletAddr,
       tokenInfo.denom,
-      tokenInfo.contractAddress
+      tokenInfo.contractAddress,
+      tokenInfo.lcd,
+      tokenInfo.lcdArr
     );
   finalBalance += mainBalance;
   subAmounts[`${tokenInfo.name}`] = mainBalance;

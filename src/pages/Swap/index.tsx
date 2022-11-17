@@ -111,7 +111,8 @@ const Swap: React.FC = () => {
             address,
             fromToken!.denom,
             fromToken!.contractAddress,
-            fromToken!.lcd
+            fromToken!.lcd,
+            fromToken!.lcdArr
           ),
       { enabled: !!address && !!fromToken }
     );
@@ -125,7 +126,8 @@ const Swap: React.FC = () => {
           address,
           toToken!.denom,
           toToken!.contractAddress,
-          toToken!.lcd
+          toToken!.lcd,
+          toToken!.lcdArr
         ),
     { enabled: !!address && !!toToken }
   );

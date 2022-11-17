@@ -78,7 +78,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         address,
         tokenObj1!.denom,
         tokenObj1!.contractAddress,
-        tokenObj1!.lcd
+        tokenObj1!.lcd,
+        tokenObj1!.lcdArr
       ),
     { enabled: !!address && !!tokenObj1 }
   );
@@ -95,7 +96,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         address,
         tokenObj2!.denom,
         tokenObj2!.contractAddress,
-        tokenObj2!.lcd
+        tokenObj2!.lcd,
+        tokenObj2!.lcdArr
       ),
     { enabled: !!address && !!tokenObj2 }
   );

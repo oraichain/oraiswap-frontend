@@ -85,7 +85,8 @@ const Transfer: React.FC = () => {
         address,
         fromToken!.denom,
         fromToken!.contractAddress,
-        fromToken!.lcd
+        fromToken!.lcd,
+        fromToken!.lcdArr
       )
     ,
     { enabled: !!address && !!fromToken }

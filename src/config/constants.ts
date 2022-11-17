@@ -73,3 +73,32 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
+
+export const ORAICHAIN_ARR_LCD = [
+  'https://lcd.orai.io',
+  'http://lcd.mainnet.orai.io',
+];
+
+export const COSMOS_ARR_LCD = [
+  'https://lcd-cosmoshub.blockapsis.com',
+  'https://cosmos-lcd.quickapi.com:443',
+  'https://lcd-cosmoshub.whispernode.com',
+  'https://cosmoshub-api.lavenderfive.com:443',
+  'https://rest-cosmoshub.ecostake.com',
+  'https://api.cosmoshub.pupmos.network',
+  'https://api-cosmoshub-ia.cosmosia.notional.ventures',
+  'https://cosmos-api.polkachu.com',
+  'https://cosmoshub.rest.interchain.ivaldilabs.xyz',
+];
+
+export const OSMOSIS_ARR_LCD = [
+  'https://lcd.osmosis.zone',
+  'https://osmosis-lcd.quickapi.com:443',
+  'https://lcd-osmosis.whispernode.com',
+  'https://lcd-osmosis.blockapsis.com',
+  'https://osmosis-api.lavenderfive.com:443',
+  'https://rest-osmosis.ecostake.com',
+  'https://api-osmosis-ia.cosmosia.notional.ventures',
+  'https://api.osmosis.interbloc.org',
+  'https://osmosis-api.polkachu.com',
+];

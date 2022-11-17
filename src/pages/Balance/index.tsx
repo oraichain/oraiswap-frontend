@@ -202,7 +202,8 @@ const Balance: React.FC<BalanceProps> = () => {
           addr,
           token.denom,
           token.contractAddress,
-          token.lcd
+          token.lcd,
+          token.lcdArr
         );
         amountDetail = {
           amount,
