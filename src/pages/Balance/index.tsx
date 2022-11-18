@@ -419,7 +419,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
         // fromToken.chainId,
-        'Oraichain-fork'
+        'Oraichain'
       );
       let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
@@ -573,7 +573,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
           const offlineSigner = await window.Keplr.getOfflineSigner(
             // fromToken.chainId
-            'Oraichain-fork'
+            'Oraichain'
           );
           
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
@@ -617,7 +617,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         // fromToken.chainId
-        'Oraichain-fork'
+        'Oraichain'
       );
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(

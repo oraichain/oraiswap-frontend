@@ -7,12 +7,12 @@ export enum NetworkKey {
 
 const networks: Record<NetworkKey, NetworkConfig> = {
   [NetworkKey.MAINNET]: {
-    chainId: 'Oraichain-fork',
+    chainId: 'Oraichain',
     prefix: 'orai',
     denom: 'orai',
     coinType: 118,
-    lcd: 'https://pre.lcd.orai.io',
-    rpc: 'https://pre.rpc.orai.io',
+    lcd: 'https://lcd.orai.io',
+    rpc: 'https://rpc.orai.io',
     id: NetworkKey.MAINNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
     factory: process.env.REACT_APP_FACTORY_CONTRACT,
