@@ -14,12 +14,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID
+  ORAI_BRIDGE_CHAIN_ID,
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { collectWallet } from 'libs/cosmjs';
+import Banner from 'components/Banner';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -35,7 +36,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0
+    tracesSampleRate: 1.0,
   });
 }
 
@@ -78,7 +79,8 @@ const startApp = async () => {
           <Router>
             <ScrollToTop />
             <QueryClientProvider client={queryClient}>
-              <App />
+              {/* <App /> */}
+              <Banner />
             </QueryClientProvider>
           </Router>
           <ToastContainer transition={Bounce} />
