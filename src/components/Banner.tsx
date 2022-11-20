@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import MainnetImg from 'assets/images/mainnet.png';
+import Under from 'assets/images/undermaintenance.jpeg';
 import ReactModal from 'react-modal';
 import styles from './Banner.module.scss';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
@@ -11,34 +12,20 @@ const Banner: FC<{}> = () => {
       className={`${styles.modalBanner}`}
       overlayClassName={`${styles.overlayBanner}`}
       isOpen={open}
-      onRequestClose={() => setOpen(false)}
+      // onRequestClose={() => setOpen(false)}
     >
-      <div className={styles.closeBanner}>
+      {/* <div className={styles.closeBanner}>
         <span onClick={() => setOpen(false)}>
           <CloseIcon color={'#ffffff'} width={20} height={20} />
         </span>
-      </div>
+      </div> */}
       <img
-        width={'100%'}
-        style={{
-          borderRadius: 16,
-          border: '0.5px solid gray',
-        }}
-        height={'100%'}
-        src={MainnetImg}
+        className={`${styles.imagesBanner}`}
+        src={Under}
       ></img>
-      <div className={styles.contentBanner}>
-        <span
-          onClick={() =>
-            window.open(
-              'https://blog.orai.io/road-to-1-000-000-delegated-orai-on-oraichain-mainnet-2-0-8da7600a9055',
-              'blogOrai',
-              'noopener'
-            )
-          }
-        >
-          500 ORAI TO BE SHARED!
-        </span>
+      <div>
+        <span>To prepare for v0.41.0 Upgrade, services on Oraichain network will be temporarily suspended until our next official announcement.</span>
+        <p>Time (estimated): From 2022-11-20 23:59 to 2022-11-20 09:00 (UTC)</p>
       </div>
     </ReactModal>
   );

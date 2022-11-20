@@ -1015,7 +1015,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   return (
     <Content nonBackground>
-      {window.location.pathname === '/' && <Banner />}
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
