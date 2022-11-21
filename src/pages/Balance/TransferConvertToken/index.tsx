@@ -251,8 +251,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           }
 
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-            const to = kawaiiTokens.find((t) => t.denom != token.denom);
-
+            const to = kawaiiTokens.find(
+              (t) => t.denom != token.denom && t.type === token.type
+            );
             return (
               <>
                 <button

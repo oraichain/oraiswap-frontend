@@ -4,7 +4,7 @@ import style from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchBalance, fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';

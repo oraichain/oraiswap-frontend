@@ -58,14 +58,14 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -79,19 +79,20 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token';
   cosmosBased: Boolean;
+  type?: string;
 };
 
 const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
@@ -152,7 +153,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         chainId: 'osmosis-1',
         rpc: 'https://rpc.osmosis.interbloc.org',
         // lcd: 'https://lcd-osmosis.keplr.app',
-        lcd: 'https://lcd.osmosis.zone',
+        // lcd: 'https://lcd.osmosis.zone',
+        lcd: 'https://lcd-osmosis.blockapsis.com',
         decimals: COSMOS_DECIMALS,
         coingeckoId: 'osmosis',
         cosmosBased: true,
@@ -331,8 +333,9 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         rpc: KAWAII_RPC,
         lcd: KAWAII_LCD,
         cosmosBased: true,
+        type: 'milky',
         maxGas: 200000 * 2,
-        Icon: MILKY,
+        Icon: MILKY
       },
       {
         name: 'ERC20 MILKY',
@@ -346,7 +349,8 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coingeckoId: 'milky-token',
         cosmosBased: false,
         maxGas: 200000 * 2,
-        Icon: MILKY,
+        type: 'milky',
+        Icon: MILKY
       },
       {
         name: 'KWT',
@@ -359,6 +363,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: KAWAII_LCD,
         cosmosBased: true,
         maxGas: 200000 * 2,
+        type: 'kawaii',
         Icon: KWT
       },
       {
@@ -372,6 +377,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         decimals: EVM_DECIMALS,
         coingeckoId: 'kawaii-islands',
         cosmosBased: false,
+        type: 'kawaii',
         Icon: KWT
       }
     ],
@@ -622,7 +628,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
               cw20Decimals: COSMOS_DECIMALS
             },
             erc20Denom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM
-          },
+          }
         ],
         decimals: COSMOS_DECIMALS,
         coinType: 118,
@@ -657,8 +663,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 

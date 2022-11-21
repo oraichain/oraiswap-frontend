@@ -16,13 +16,12 @@ import {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchDistributionInfo,
-  fetchPoolApr,
+  fetchPoolApr
 } from 'rest/api';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+
 import { TokenItemType } from 'config/bridgeTokens';
 import { getUsd, parseAmount } from 'libs/utils';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
@@ -42,7 +41,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
-  const [assetToken, setAssetToken] = useState<TokenItemType>();  
+  const [assetToken, setAssetToken] = useState<TokenItemType>();
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
@@ -64,7 +63,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       ...pairInfo,
       token1,
       token2,
-      apr,
+      apr
     };
   };
 
@@ -138,7 +137,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       token1Usd: halfValue,
       token2Usd: halfValue,
       usdAmount: 2 * halfValue,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount,
+      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
     };
   };
 
@@ -152,7 +151,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     () => getPairInfo(),
     {
       // enabled: !!token1! && !!token2!,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -164,7 +163,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     {
       enabled: !!pairInfoData,
       refetchOnWindowFocus: false,
-      refetchInterval: 15000,
+      refetchInterval: 15000
     }
   );
 
@@ -173,7 +172,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     () => fetchBalance(address, '', pairInfoData?.liquidity_token),
     {
       enabled: !!address && !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -181,11 +180,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ['token-info', pairInfoData],
     () =>
       fetchTokenInfo({
-        contractAddress: pairInfoData?.liquidity_token,
+        contractAddress: pairInfoData?.liquidity_token
       } as TokenItemType),
     {
       enabled: !!pairInfoData,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -288,7 +287,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: lpTokenBalance ?? 0,
-                              denom: `${lpTokenInfoData?.symbol}`,
+                              denom: `${lpTokenInfoData?.symbol}`
                             }}
                             decimalScale={6}
                             className={cx('amount')}
@@ -318,7 +317,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity1 ?? 0,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -345,7 +344,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity2 ?? 0,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -381,7 +380,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData?.token1Amount,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -404,7 +403,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData?.token2Amount,
-                              denom: '',
+                              denom: ''
                             }}
                             className={cx('amount')}
                             decimalScale={6}
