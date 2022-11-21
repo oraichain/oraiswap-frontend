@@ -20,7 +20,6 @@ import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { collectWallet } from 'libs/cosmjs';
-import Banner from 'components/Banner';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -79,8 +78,7 @@ const startApp = async () => {
           <Router>
             <ScrollToTop />
             <QueryClientProvider client={queryClient}>
-              {/* <App /> */}
-              <Banner />
+              <App />
             </QueryClientProvider>
           </Router>
           <ToastContainer transition={Bounce} />
