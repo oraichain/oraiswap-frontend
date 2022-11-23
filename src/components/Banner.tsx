@@ -24,8 +24,7 @@ const Banner: FC<{}> = () => {
         src={Under}
       ></img>
       <div>
-        <span>To prepare for v0.41.0 Upgrade, services on Oraichain network will be temporarily suspended until our next official announcement.</span>
-        <p>Time (estimated): From 2022-11-20 23:59 to 2022-11-21 09:00 (UTC)</p>
+        <span>v0.41.0 Upgrade is being processed. Thank you for your patience.</span>
       </div>
     </ReactModal>
   );

@@ -616,8 +616,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        // fromToken.chainId
-        'Oraichain'
+        fromToken.chainId
       );
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
