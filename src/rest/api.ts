@@ -57,7 +57,7 @@ const querySmart = async (
       : Buffer.from(JSON.stringify(msg)).toString('base64');
   const url = `${
     lcd ?? network.lcd
-  }/wasm/v1/contract/${contract}/smart/${params}`;
+  }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -194,6 +194,8 @@ async function fetchTokenAllowance(
   walletAddr: string,
   spender: string
 ) {
+  // hard code with token orai
+  if (!tokenAddr) return '999999999999999999999999999999';
   const data = await Contract.token(tokenAddr).allowance({
     owner: walletAddr,
     spender
