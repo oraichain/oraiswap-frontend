@@ -6,7 +6,7 @@
   max-width: 1000px;
   outline: 0;
   position: relative;
-
+  text-align: center;
   @include mobile {
     margin: 0 auto;
   }
@@ -47,7 +47,7 @@
   text-align: right;
   color: white;
   background-color: black;
-  border: 1px solid rgba(142,128,91,255);
+  border: 1px solid rgba(142, 128, 91, 255);
   font-weight: 700;
   border-radius: 36px;
   font-size: 24px;
@@ -56,12 +56,21 @@
 
   @include mobile {
     right: 16px;
-    bottom:16px;
+    bottom: 16px;
     font-size: 8px;
     padding: 4px;
   }
 
   span {
     cursor: pointer;
+  }
+}
+
+.imagesBanner {
+  border-radius: 16px;
+  border: 0.5 solid gray;
+  @include mobile {
+    width: 100%;
+    height: 100%;
   }
 }

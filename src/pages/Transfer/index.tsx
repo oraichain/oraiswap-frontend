@@ -3,7 +3,7 @@ import style from './index.module.scss';
 import cn from 'classnames/bind';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
@@ -15,7 +15,11 @@ import {
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
-import { buildMultipleMessages, parseAmount, parseDisplayAmount } from 'libs/utils';
+import {
+  buildMultipleMessages,
+  parseAmount,
+  parseDisplayAmount
+} from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
@@ -81,13 +85,14 @@ const Transfer: React.FC = () => {
   } = useQuery(
     ['from-token-balance', fromToken, txHash],
     async () =>
-      fromToken.erc20Cw20Map ? (await fetchBalanceWithMapping(address, fromToken)).amount : fetchBalance(
-        address,
-        fromToken!.denom,
-        fromToken!.contractAddress,
-        fromToken!.lcd
-      )
-    ,
+      fromToken.erc20Cw20Map
+        ? (await fetchBalanceWithMapping(address, fromToken)).amount
+        : fetchBalance(
+            address,
+            fromToken!.denom,
+            fromToken!.contractAddress,
+            fromToken!.lcd
+          ),
     { enabled: !!address && !!fromToken }
   );
 
@@ -108,7 +113,10 @@ const Transfer: React.FC = () => {
         recipientAddress
       } as TransferQuery);
 
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(JSON.parse(JSON.stringify(fromTokenInfoData)), address);
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(
+        JSON.parse(JSON.stringify(fromTokenInfoData)),
+        address
+      );
 
       const msg = msgs[0];
 
@@ -118,7 +126,7 @@ const Transfer: React.FC = () => {
         prefix: ORAI,
         msgs: messages,
         walletAddr: address,
-        gasAmount: { denom: ORAI, amount: '0' },
+        gasAmount: { denom: ORAI, amount: '0' }
       });
       if (result) {
         console.log('in correct result');

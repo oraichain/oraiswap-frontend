@@ -22,6 +22,9 @@
         ],
         "oraiswap-legacy": [
           "oraiswap-legacy"
+        ],
+        "oraiswap-pre-mainnet": [
+          "oraiswap-pre-mainnet"
         ]
       }
     }
