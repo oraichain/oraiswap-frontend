@@ -127,7 +127,8 @@ const LiquidityModal: FC<ModalProps> = ({
       );
     },
     {
-      enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
+      // enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
+      enabled: !!address  && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
@@ -146,7 +147,7 @@ const LiquidityModal: FC<ModalProps> = ({
       );
     },
     {
-      enabled: !!address && !!token2InfoData.contractAddress && !!pairInfoData,
+      enabled: !!address  && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
