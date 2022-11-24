@@ -195,7 +195,7 @@ async function fetchTokenAllowance(
   spender: string
 ) {
   // hard code with token orai
-  if (!tokenAddr) return '999999999999999999999999999999';
+  // if (!tokenAddr) return '999999999999999999999999999999';
   const data = await Contract.token(tokenAddr).allowance({
     owner: walletAddr,
     spender
