@@ -137,7 +137,7 @@ const executeMultipleAminoClient = async (
     );
   }
   return {
-    logs: result?.logs,
+    logs: result?.rawLog,
     transactionHash: result.transactionHash
   };
 };
