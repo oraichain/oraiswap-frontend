@@ -122,19 +122,8 @@ const executeMultipleAminoClient = async (
   client: cosmwasm.SigningCosmWasmClient,
   walletAddr: string
 ) => {
-  const executeMsgs = msgs.map(
-    ({ handleMsg, transferAmount, contractAddress }) => {
-      return {
-        typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-        value: {
-          sender: walletAddr,
-          contract: contractAddress,
-          msg: handleMsg,
-          sent_funds: transferAmount || []
-        }
-      };
-    }
-  );
+
+  const executeMsgs = getExecuteContractMsgs(walletAddr,msgs)
 
   const result = await client.signAndBroadcast(
     walletAddr,
@@ -203,7 +192,7 @@ class CosmJs {
     msgs,
     gasAmount,
     walletAddr,
-    lcd = network.lcd,
+    lcd = network.rpc,
     chainId = network.chainId
   }: {
     walletAddr: string;
@@ -231,7 +220,7 @@ class CosmJs {
       );
     }
     return {
-      logs: result.logs,
+      logs: result.rawLog,
       transactionHash: result.transactionHash
     };
   }
@@ -300,7 +289,7 @@ class CosmJs {
       const wallet = await collectWallet();
 
       const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.lcd,
+        network.rpc,
         wallet as OfflineSigner,
         {
           gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
