@@ -1,10 +1,7 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import { AssetInfo, PairInfo } from 'types/oraiswap_pair/pair_info';
-import {
-  AllPoolAprResponse,
-  PoolResponse,
-} from 'types/oraiswap_pair/pool_response';
+import { AssetInfo } from 'types/oraiswap_pair/pair_info';
+import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'config/constants';
 import { getPair, Pair, pairs } from 'config/pools';
@@ -12,9 +9,18 @@ import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
   parseAmountFromWithDecimal,
-  parseAmountToWithDecimal,
+  parseAmountToWithDecimal
 } from 'libs/utils';
 import Big from 'big.js';
+import { Contract } from 'config/contracts';
+import { PairInfo, SwapOperation } from 'libs/contracts';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import {
+  PoolInfoResponse,
+  RewardInfoResponse,
+  RewardsPerSecResponse
+} from 'libs/contracts/OraiswapStaking.types';
+import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -27,7 +33,7 @@ export enum Type {
   'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
   'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens',
   'CLAIM_ORAIX' = 'Claim ORAIX tokens',
-  'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens',
+  'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens'
 }
 
 const oraiInfo = { native_token: { denom: ORAI } };
@@ -51,38 +57,12 @@ const querySmart = async (
       : Buffer.from(JSON.stringify(msg)).toString('base64');
   const url = `${
     lcd ?? network.lcd
-  }/wasm/v1beta1/contract/${contract}/smart/${params}`;
+  }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
   return res.data;
 };
-
-async function fetchPairs() {
-  const data = await querySmart(network.factory, { pairs: {} });
-  return data;
-}
-
-async function fetchTaxRate() {
-  const data = await querySmart(network.oracle, { treasury: { tax_rate: {} } });
-  return data;
-}
-
-function fetchPoolMiningInfo(tokenInfo: TokenInfo) {
-  let { info: token_asset } = parseTokenInfo(tokenInfo);
-  if (token_asset.token)
-    return querySmart(network.staking, {
-      pool_info: { asset_token: token_asset.token.contract_addr },
-    });
-  // currently ibc pool is not supported
-  else throw 'IBC native pool is not supported';
-}
-
-function fetchRewardMiningInfo(address: string, asset_info: AssetInfo) {
-  return querySmart(network.staking, {
-    reward_info: { staker_addr: address, asset_info },
-  });
-}
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
@@ -94,14 +74,14 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     icon: '',
     denom: tokenSwap.denom,
     verified: false,
-    total_supply: '',
+    total_supply: ''
   };
   if (!tokenSwap.contractAddress) {
     tokenInfo.symbol = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
     const data = await querySmart(tokenSwap.contractAddress, {
-      token_info: {},
+      token_info: {}
     });
 
     if (tokenSwap.contractAddress !== process.env.REACT_APP_MILKY_CONTRACT) {
@@ -113,7 +93,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
         decimals: data.decimals,
         icon: data.icon,
         verified: data.verified,
-        total_supply: data.total_supply,
+        total_supply: data.total_supply
       };
     } else {
       const { token_info_response } = data;
@@ -125,16 +105,11 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
         decimals: token_info_response.decimals,
         icon: token_info_response.icon,
         verified: token_info_response.verified,
-        total_supply: token_info_response.total_supply,
+        total_supply: token_info_response.total_supply
       };
     }
   }
   return tokenInfo;
-}
-
-async function fetchPool(pairAddr: string): Promise<PoolResponse> {
-  const data = await querySmart(pairAddr, { pool: {} });
-  return data;
 }
 
 async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
@@ -176,15 +151,15 @@ async function fetchPoolInfoAmount(
   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
 
   if (pair) {
-    const poolInfo = await fetchPool(pair.contract_addr);
+    const poolInfo = await Contract.pair(pair.contract_addr).pool();
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
     const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
     const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
-    const fromPoolInfo = await fetchPool(fromPairInfo.contract_addr);
-    const toPoolInfo = await fetchPool(toPairInfo.contract_addr);
+    const fromPoolInfo = await Contract.pair(fromPairInfo.contract_addr).pool();
+    const toPoolInfo = await Contract.pair(toPairInfo.contract_addr).pool();
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
@@ -198,13 +173,8 @@ async function fetchPairInfo(
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  const data = await fetchPairInfoRaw([firstAsset, secondAsset]);
-  return data;
-}
-
-async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
-  const data = await querySmart(network.factory, {
-    pair: { asset_infos: assetInfos },
+  const data = await Contract.factory.pair({
+    assetInfos: [firstAsset, secondAsset]
   });
   return data;
 }
@@ -212,16 +182,9 @@ async function fetchPairInfoRaw(assetInfos: [any, any]): Promise<PairInfo> {
 async function fetchTokenBalance(
   tokenAddr: string,
   walletAddr: string,
-  lcd?: string,
   shouldKeepOriginal?: boolean
 ): Promise<number | string> {
-  const data = await querySmart(
-    tokenAddr,
-    {
-      balance: { address: walletAddr },
-    },
-    lcd
-  );
+  const data = await Contract.token(tokenAddr).balance({ address: walletAddr });
   if (shouldKeepOriginal) return data.balance;
   return parseInt(data.balance);
 }
@@ -229,83 +192,49 @@ async function fetchTokenBalance(
 async function fetchTokenAllowance(
   tokenAddr: string,
   walletAddr: string,
-  spender: string,
-  lcd?: string
+  spender: string
 ) {
-  const data = await querySmart(
-    tokenAddr,
-    {
-      allowance: {
-        owner: walletAddr,
-        spender,
-      },
-    },
-    lcd
-  );
+  // hard code with token orai
+  // if (!tokenAddr) return '999999999999999999999999999999';
+  const data = await Contract.token(tokenAddr).allowance({
+    owner: walletAddr,
+    spender
+  });
   return data.allowance;
 }
 
 async function fetchRewardInfo(
-  staker_addr: string,
-  asset_token: TokenItemType,
-  lcd?: string
-) {
-  let { info: asset_info } = parseTokenInfo(asset_token);
-  const data = await querySmart(
-    network.staking,
-    {
-      reward_info: {
-        staker_addr,
-        asset_info,
-      },
-    },
-    lcd
-  );
+  stakerAddr: string,
+  assetToken: TokenItemType
+): Promise<RewardInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.rewardInfo({ assetInfo, stakerAddr });
+  return data;
+}
+
+async function fetchRewardPerSecInfo(
+  assetToken: TokenItemType
+): Promise<RewardsPerSecResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.rewardsPerSec({ assetInfo });
 
   return data;
 }
 
-async function fetchRewardPerSecInfo(assetToken: TokenItemType, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.staking,
-    {
-      rewards_per_sec: {
-        asset_info,
-      },
-    },
-    lcd
-  );
+async function fetchStakingPoolInfo(
+  assetToken: TokenItemType
+): Promise<PoolInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.staking.poolInfo({ assetInfo });
 
   return data;
 }
 
-async function fetchStakingPoolInfo(assetToken: TokenItemType, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.staking,
-    {
-      pool_info: {
-        asset_info,
-      },
-    },
-    lcd
-  );
-
-  return data;
-}
-
-async function fetchDistributionInfo(assetToken: TokenInfo, lcd?: string) {
-  let { info: asset_info } = parseTokenInfo(assetToken);
-  const data = await querySmart(
-    network.rewarder,
-    {
-      distribution_info: {
-        asset_info,
-      },
-    },
-    lcd
-  );
+async function fetchDistributionInfo(
+  assetToken: TokenInfo
+): Promise<DistributionInfoResponse> {
+  const { info: assetInfo } = parseTokenInfo(assetToken);
+  const data = await Contract.rewarder.distributionInfo({ assetInfo });
 
   return data;
 }
@@ -333,7 +262,7 @@ async function fetchBalance(
 ): Promise<number> {
   if (!tokenAddr)
     return (await fetchNativeTokenBalance(walletAddr, denom, lcd)) as number;
-  else return (await fetchTokenBalance(tokenAddr, walletAddr, lcd)) as number;
+  else return (await fetchTokenBalance(tokenAddr, walletAddr)) as number;
 }
 
 async function fetchBalanceWithMapping(
@@ -392,7 +321,7 @@ async function generateConvertErc20Cw20Message(
           type: Type.CONVERT_TOKEN,
           sender,
           inputAmount: balance,
-          inputToken: tokenInfo,
+          inputToken: tokenInfo
         })
       )[0];
       msgConverts.push(msgConvert);
@@ -425,14 +354,14 @@ async function generateConvertCw20Erc20Message(
       ).toFixed(0);
     else
       balance = new Big(
-        await fetchTokenBalance(tokenInfo.contractAddress, sender, null, true)
+        await fetchTokenBalance(tokenInfo.contractAddress, sender, true)
       ).toFixed(0);
     if (+balance > 0) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
         denom: mapping.erc20Denom,
         contractAddress: undefined,
-        decimals: mapping.decimals.erc20Decimals,
+        decimals: mapping.decimals.erc20Decimals
       };
       const msgConvert = (
         await generateConvertMsgs({
@@ -440,7 +369,7 @@ async function generateConvertCw20Erc20Message(
           sender,
           inputAmount: balance,
           inputToken: tokenInfo,
-          outputToken,
+          outputToken
         })
       )[0];
       msgConverts.push(msgConvert);
@@ -454,7 +383,7 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
     if (amount)
       return {
         fund: { denom: tokenInfo.denom, amount: amount.toString() },
-        info: { native_token: { denom: tokenInfo.denom } },
+        info: { native_token: { denom: tokenInfo.denom } }
       };
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
@@ -471,18 +400,11 @@ const handleSentFunds = (...funds: (Fund | undefined)[]): Funds | null => {
   return sent_funds;
 };
 
-async function fetchExchangeRate(base_denom: string, quote_denom: string) {
-  const data = await querySmart(network.oracle, {
-    exchange: { exchange_rate: { base_denom, quote_denom } },
-  });
-  return data?.item?.exchange_rate;
-}
-
 const generateSwapOperationMsgs = (
   denoms: [string, string],
   offerInfo: any,
   askInfo: any
-) => {
+): SwapOperation[] => {
   const pair = getPair(denoms);
 
   return pair
@@ -490,23 +412,23 @@ const generateSwapOperationMsgs = (
         {
           orai_swap: {
             offer_asset_info: offerInfo,
-            ask_asset_info: askInfo,
-          },
-        },
+            ask_asset_info: askInfo
+          }
+        }
       ]
     : [
         {
           orai_swap: {
             offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo,
-          },
+            ask_asset_info: oraiInfo
+          }
         },
         {
           orai_swap: {
             offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo,
-          },
-        },
+            ask_asset_info: askInfo
+          }
+        }
       ];
 };
 
@@ -521,20 +443,16 @@ async function simulateSwap(query: {
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo, undefined);
 
-  let operations = generateSwapOperationMsgs(
+  const operations = generateSwapOperationMsgs(
     [fromInfo.denom, toInfo.denom],
     offerInfo,
     askInfo
   );
 
-  let msg = {
-    simulate_swap_operations: {
-      operations,
-      offer_amount: amount.toString(),
-    },
-  };
-
-  const data = await querySmart(network.router, msg);
+  const data = Contract.router.simulateSwapOperations({
+    offerAmount: amount.toString(),
+    operations
+  });
   return data;
 }
 
@@ -615,8 +533,8 @@ async function generateContractMessages(
             [swapQuery.fromInfo.denom, swapQuery.toInfo.denom],
             offerInfo,
             askInfo
-          ),
-        },
+          )
+        }
       };
       // if cw20 => has to send through cw20 contract
       if (!swapQuery.fromInfo.contractAddress) {
@@ -626,8 +544,8 @@ async function generateContractMessages(
           send: {
             contract: contractAddr,
             amount: swapQuery.amount.toString(),
-            msg: btoa(JSON.stringify(inputTemp)),
-          },
+            msg: btoa(JSON.stringify(inputTemp))
+          }
         };
         contractAddr = swapQuery.fromInfo.contractAddress;
       }
@@ -648,11 +566,11 @@ async function generateContractMessages(
           assets: [
             {
               info: toInfoData,
-              amount: provideQuery.toAmount.toString(),
+              amount: provideQuery.toAmount.toString()
             },
-            { info: fromInfoData, amount: provideQuery.fromAmount.toString() },
-          ],
-        },
+            { info: fromInfoData, amount: provideQuery.fromAmount.toString() }
+          ]
+        }
       };
       contractAddr = provideQuery.pair;
       break;
@@ -664,8 +582,8 @@ async function generateContractMessages(
           owner: sender,
           contract: withdrawQuery.pair,
           amount: withdrawQuery.amount.toString(),
-          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==', // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
-        },
+          msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+        }
       };
       contractAddr = withdrawQuery.lpAddr;
       break;
@@ -674,8 +592,8 @@ async function generateContractMessages(
       input = {
         increase_allowance: {
           amount: increaseAllowanceQuery.amount.toString(),
-          spender: increaseAllowanceQuery.spender,
-        },
+          spender: increaseAllowanceQuery.spender
+        }
       };
       contractAddr = increaseAllowanceQuery.token;
       break;
@@ -684,8 +602,8 @@ async function generateContractMessages(
       input = {
         transfer: {
           recipient: transferQuery.recipientAddress,
-          amount: transferQuery.amount,
-        },
+          amount: transferQuery.amount
+        }
       };
       contractAddr = transferQuery.token;
       break;
@@ -698,8 +616,8 @@ async function generateContractMessages(
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds,
-    },
+      sent_funds
+    }
   ];
 
   return msgs;
@@ -748,11 +666,11 @@ async function generateMiningMsgs(
           msg: btoa(
             JSON.stringify({
               bond: {
-                asset_info,
-              },
+                asset_info
+              }
             })
-          ), // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
-        },
+          ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+        }
       };
       contractAddr = bondMsg.lpToken;
       break;
@@ -770,8 +688,8 @@ async function generateMiningMsgs(
       input = {
         unbond: {
           asset_info: unbond_asset,
-          amount: unbondMsg.amount.toString(),
-        },
+          amount: unbondMsg.amount.toString()
+        }
       };
       contractAddr = network.staking;
       break;
@@ -784,8 +702,8 @@ async function generateMiningMsgs(
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds,
-    },
+      sent_funds
+    }
   ];
 
   return msgs;
@@ -819,7 +737,7 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
       // native case
       if (assetInfo.native_token) {
         input = {
-          convert: {},
+          convert: {}
         };
         sent_funds = handleSentFunds(fund as Fund);
       } else {
@@ -830,10 +748,10 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
             amount: inputAmount,
             msg: btoa(
               JSON.stringify({
-                convert: {},
+                convert: {}
               })
-            ),
-          },
+            )
+          }
         };
         contractAddr = assetInfo.token.contract_addr;
       }
@@ -849,8 +767,8 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
       if (assetInfo.native_token) {
         input = {
           convert_reverse: {
-            from_asset: outputAssetInfo,
-          },
+            from_asset: outputAssetInfo
+          }
         };
         sent_funds = handleSentFunds(fund as Fund);
       } else {
@@ -862,11 +780,11 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
             msg: btoa(
               JSON.stringify({
                 convert_reverse: {
-                  from: outputAssetInfo,
-                },
+                  from: outputAssetInfo
+                }
               })
-            ),
-          },
+            )
+          }
         };
         contractAddr = assetInfo.token.contract_addr;
       }
@@ -881,8 +799,8 @@ async function generateConvertMsgs(msg: Convert | ConvertReverse) {
       contract: contractAddr,
       msg: Buffer.from(JSON.stringify(input)),
       sender,
-      sent_funds,
-    },
+      sent_funds
+    }
   ];
 
   return msgs;
@@ -908,8 +826,8 @@ function generateClaimMsg(msg: Claim) {
         claim: {
           stage,
           amount: amount.toString(),
-          proof: proofs,
-        },
+          proof: proofs
+        }
       };
       break;
     default:
@@ -920,28 +838,22 @@ function generateClaimMsg(msg: Claim) {
     contract: contractAddr,
     msg: Buffer.from(JSON.stringify(input)),
     sender,
-    sent_funds,
+    sent_funds
   };
 }
 
 export {
   querySmart,
-  fetchTaxRate,
   fetchNativeTokenBalance,
   fetchPairInfo,
-  fetchPool,
   fetchTokenBalance,
   fetchBalance,
-  fetchPairs,
   fetchTokenInfo,
   generateContractMessages,
   generateClaimMsg,
-  fetchExchangeRate,
   simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,
-  fetchPoolMiningInfo,
-  fetchRewardMiningInfo,
   generateMiningMsgs,
   generateConvertMsgs,
   fetchRewardInfo,
@@ -952,5 +864,5 @@ export {
   fetchPoolApr,
   fetchBalanceWithMapping,
   generateConvertErc20Cw20Message,
-  generateConvertCw20Erc20Message,
+  generateConvertCw20Erc20Message
 };

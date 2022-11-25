@@ -6,6 +6,7 @@ import { Keplr as keplr } from '@keplr-wallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 declare global {
   type MetaMaskEthereumProvider = AbstractProvider & {
@@ -105,6 +106,7 @@ declare global {
       postMessage(msg: string): void;
     };
     keplr: keplr;
+    client: SigningCosmWasmClient;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
@@ -162,4 +164,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export { };
+export {};

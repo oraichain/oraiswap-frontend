@@ -1,16 +1,17 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
+// import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
+import { OfflineSigner, isBroadcastTxFailure } from '@cosmjs/launchpad';
 import {
-  OfflineSigner,
-  GasPrice as GasPriceAmino,
-  isBroadcastTxFailure,
-} from '@cosmjs/launchpad';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-launchpad';
-import * as tx_4 from '@cosmjs/cosmwasm-stargate/build/codec/cosmwasm/wasm/v1beta1/tx';
+  isDeliverTxFailure,
+  DeliverTxResponse,
+  logs,
+  GasPrice
+} from '@cosmjs/stargate';
 import * as encoding_1 from '@cosmjs/encoding';
-import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
+// import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 
 /**
  * The options of an .instantiate() call.
@@ -57,7 +58,7 @@ const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
     return {
       handleMsg: JSON.parse(handleMsg),
       transferAmount: handleOptions?.funds,
-      contractAddress,
+      contractAddress
     };
   });
 };
@@ -65,13 +66,13 @@ const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
 const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
   return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
     return {
-      typeUrl: '/cosmwasm.wasm.v1beta1.MsgExecuteContract',
-      value: tx_4.MsgExecuteContract.fromPartial({
+      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+      value: MsgExecuteContract.fromPartial({
         sender: senderAddress,
         contract: contractAddress,
         msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
-        funds: [...(transferAmount || [])],
-      }),
+        funds: [...(transferAmount || [])]
+      })
     };
   });
 };
@@ -84,8 +85,8 @@ const getAminoExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
         sender: senderAddress,
         contract: contractAddress,
         msg: handleMsg,
-        sent_funds: [...(transferAmount || [])],
-      },
+        sent_funds: [...(transferAmount || [])]
+      }
     };
   });
 };
@@ -101,52 +102,54 @@ const executeMultipleDirectClient = async (
   const result = await client.signAndBroadcast(
     senderAddress,
     executeContractMsgs,
-    client.fees.exec,
+    'auto',
     memo
   );
-  if (stargate_1.isBroadcastTxFailure(result)) {
+  if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Raw log: ${result.rawLog}`
     );
   }
   return {
-    logs: stargate_1.logs.parseRawLog(result.rawLog),
-    transactionHash: result.transactionHash,
+    logs: logs.parseRawLog(result.rawLog),
+    transactionHash: result.transactionHash
   };
 };
 
 const executeMultipleAminoClient = async (
   msgs: Msg[],
   memo = '',
-  client: SigningCosmWasmClient
+  client: cosmwasm.SigningCosmWasmClient,
+  walletAddr: string
 ) => {
   const executeMsgs = msgs.map(
     ({ handleMsg, transferAmount, contractAddress }) => {
       return {
-        type: 'wasm/MsgExecuteContract',
+        typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
         value: {
-          sender: client.signerAddress,
+          sender: walletAddr,
           contract: contractAddress,
           msg: handleMsg,
-          sent_funds: transferAmount || [],
-        },
+          sent_funds: transferAmount || []
+        }
       };
     }
   );
 
   const result = await client.signAndBroadcast(
+    walletAddr,
     executeMsgs,
-    client.fees.exec,
+    'auto',
     memo
   );
-  if (isBroadcastTxFailure(result)) {
+  if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
     );
   }
   return {
-    logs: result.logs,
-    transactionHash: result.transactionHash,
+    logs: result?.logs,
+    transactionHash: result.transactionHash
   };
 };
 class CosmJs {
@@ -199,38 +202,37 @@ class CosmJs {
   static async sendMultipleAmino({
     msgs,
     gasAmount,
-    gasLimits = { exec: 2000000 },
     walletAddr,
     lcd = network.lcd,
-    chainId = network.chainId,
+    chainId = network.chainId
   }: {
     walletAddr: string;
     msgs: any[];
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: number };
     lcd?: string;
     chainId?: string;
   }) {
     await window.Keplr.suggestChain(chainId);
     const wallet = await collectWallet(chainId);
 
-    const client = new SigningCosmWasmClient(
+    const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
       lcd,
-      walletAddr,
       wallet as OfflineSigner,
-      GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-      gasLimits
+      {
+        gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+        prefix: 'orai'
+      }
     );
 
-    const result = await client.signAndBroadcast(msgs, client.fees.exec, '');
-    if (isBroadcastTxFailure(result)) {
+    const result = await client.signAndBroadcast(walletAddr, msgs, 'auto');
+    if (isDeliverTxFailure(result)) {
       throw new Error(
         `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
       );
     }
     return {
       logs: result.logs,
-      transactionHash: result.transactionHash,
+      transactionHash: result.transactionHash
     };
   }
 
@@ -239,9 +241,9 @@ class CosmJs {
     handleMsg,
     handleOptions,
     gasAmount,
-    gasLimits = { exec: 2000000 },
     prefix,
     walletAddr,
+    contractAddr
   }: {
     prefix?: string;
     walletAddr: string;
@@ -249,26 +251,29 @@ class CosmJs {
     handleMsg: string;
     handleOptions?: HandleOptions;
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: number };
+    contractAddr?: string;
   }) {
     try {
       await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
 
-      const client = new SigningCosmWasmClient(
-        network.lcd,
-        walletAddr,
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
+        network.rpc,
         wallet as OfflineSigner,
-        GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-        gasLimits
+        {
+          gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+          prefix
+        }
       );
 
       const input = JSON.parse(handleMsg);
 
       const result = await client.execute(
+        walletAddr,
         address,
         input,
-        '',
+        'auto',
+        undefined,
         handleOptions?.funds
       );
 
@@ -282,26 +287,25 @@ class CosmJs {
   static async executeMultipleAmino({
     msgs,
     gasAmount,
-    gasLimits = { exec: 2000000 },
     prefix,
-    walletAddr,
+    walletAddr
   }: {
     prefix?: string;
     walletAddr: string;
     msgs: ExecuteMultipleMsg[];
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: number };
   }) {
     try {
       await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
 
-      const client = new SigningCosmWasmClient(
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
         network.lcd,
-        walletAddr,
         wallet as OfflineSigner,
-        GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-        gasLimits
+        {
+          gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+          prefix
+        }
       );
 
       const input: Msg[] = msgs.map(
@@ -309,12 +313,17 @@ class CosmJs {
           return {
             handleMsg: JSON.parse(handleMsg),
             transferAmount: handleOptions?.funds,
-            contractAddress,
+            contractAddress
           };
         }
       );
 
-      const result = await executeMultipleAminoClient(input, '', client);
+      const result = await executeMultipleAminoClient(
+        input,
+        '',
+        client,
+        walletAddr
+      );
 
       return result;
     } catch (error) {
@@ -333,9 +342,8 @@ class CosmJs {
     handleMsg,
     handleOptions,
     gasAmount,
-    gasLimits = { exec: 2000000 },
     prefix,
-    walletAddr,
+    walletAddr
   }: {
     prefix?: string;
     walletAddr: string;
@@ -343,7 +351,6 @@ class CosmJs {
     handleMsg: string;
     handleOptions?: HandleOptions;
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: number };
   }) {
     try {
       const wallet = await collectWallet();
@@ -355,8 +362,7 @@ class CosmJs {
             Decimal.fromUserInput(gasAmount.amount, 6),
             gasAmount.denom
           ),
-          prefix,
-          gasLimits,
+          prefix
         }
       );
       const input = JSON.parse(handleMsg);
@@ -364,7 +370,8 @@ class CosmJs {
         walletAddr,
         address,
         input,
-        undefined,
+        'auto',
+        '',
         handleOptions?.funds
       );
       return result;
@@ -377,15 +384,13 @@ class CosmJs {
   static async executeMultipleDirect({
     msgs,
     gasAmount,
-    gasLimits = { exec: 2000000 },
     prefix,
-    walletAddr,
+    walletAddr
   }: {
     prefix?: string;
     walletAddr: string;
     msgs: ExecuteMultipleMsg[];
     gasAmount: { amount: string; denom: string };
-    gasLimits?: { exec: number };
   }) {
     try {
       const wallet = await collectWallet();
@@ -397,8 +402,7 @@ class CosmJs {
             Decimal.fromUserInput(gasAmount.amount, 6),
             gasAmount.denom
           ),
-          prefix,
-          gasLimits,
+          prefix
         }
       );
 
@@ -407,7 +411,7 @@ class CosmJs {
           return {
             handleMsg: JSON.parse(handleMsg),
             transferAmount: handleOptions?.funds,
-            contractAddress,
+            contractAddress
           };
         }
       );
@@ -429,7 +433,7 @@ export {
   collectWallet,
   getExecuteContractMsgs,
   parseExecuteContractMultiple,
-  getAminoExecuteContractMsgs,
+  getAminoExecuteContractMsgs
 };
 
 export default CosmJs;

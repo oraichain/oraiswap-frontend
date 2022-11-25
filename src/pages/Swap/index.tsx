@@ -3,19 +3,17 @@ import style from './index.module.scss';
 import cn from 'classnames/bind';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
-  fetchExchangeRate,
-  fetchTaxRate,
   fetchTokenInfo,
   fetchBalanceWithMapping,
   generateContractMessages,
   generateConvertMsgs,
   simulateSwap,
   SwapQuery,
-  generateConvertErc20Cw20Message,
+  generateConvertErc20Cw20Message
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
@@ -23,7 +21,7 @@ import {
   buildMultipleMessages,
   parseAmount,
   parseAmountToWithDecimal,
-  parseDisplayAmount,
+  parseDisplayAmount
 } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
@@ -33,12 +31,14 @@ import {
   filteredTokens,
   TokenItemType,
   tokens,
-  cw20Tokens,
+  cw20Tokens
 } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { poolTokens } from 'config/pools';
+import { contracts } from 'libs/contracts';
+import { Contract } from 'config/contracts';
 
 const cx = cn.bind(style);
 
@@ -53,7 +53,7 @@ const Swap: React.FC = () => {
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([
     undefined,
-    undefined,
+    undefined
   ]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState('0');
@@ -74,10 +74,12 @@ const Swap: React.FC = () => {
     setSwapAmount([finalAmount, toAmount]);
   };
 
-  const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(
-    ['tax-rate'],
-    () => fetchTaxRate()
-  );
+  Contract.sender = address;
+
+  const { data: taxRate, isLoading: isTaxRateLoading } =
+    contracts.OraiswapOracle.useOraiswapOracleTaxRateQuery({
+      client: Contract.oracle
+    });
 
   const fromToken = filteredTokens.find(
     (token) => token.denom === fromTokenDenom
@@ -108,11 +110,11 @@ const Swap: React.FC = () => {
         fromToken.erc20Cw20Map
           ? (await fetchBalanceWithMapping(address, fromToken)).amount
           : fetchBalance(
-            address,
-            fromToken!.denom,
-            fromToken!.contractAddress,
-            fromToken!.lcd
-          ),
+              address,
+              fromToken!.denom,
+              fromToken!.contractAddress,
+              fromToken!.lcd
+            ),
       { enabled: !!address && !!fromToken }
     );
 
@@ -122,18 +124,12 @@ const Swap: React.FC = () => {
       toToken.erc20Cw20Map
         ? (await fetchBalanceWithMapping(address, toToken)).amount
         : fetchBalance(
-          address,
-          toToken!.denom,
-          toToken!.contractAddress,
-          toToken!.lcd
-        ),
+            address,
+            toToken!.denom,
+            toToken!.contractAddress,
+            toToken!.lcd
+          ),
     { enabled: !!address && !!toToken }
-  );
-
-  useQuery(
-    ['exchange-rate', fromTokenInfoData, toTokenInfoData],
-    () => fetchExchangeRate(toTokenInfoData!.denom, fromTokenInfoData!.denom),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
 
   const { data: simulateData } = useQuery(
@@ -142,7 +138,7 @@ const Swap: React.FC = () => {
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals),
+        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
@@ -154,7 +150,7 @@ const Swap: React.FC = () => {
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData!.decimals),
+          amount: parseAmount('1', fromTokenInfoData!.decimals)
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -176,7 +172,7 @@ const Swap: React.FC = () => {
       fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-      ),
+      )
     ]);
   }, [simulateData]);
 
@@ -188,7 +184,7 @@ const Swap: React.FC = () => {
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!',
+        message: 'From amount should be higher than 0!'
       });
 
     setSwapLoading(true);
@@ -214,7 +210,7 @@ const Swap: React.FC = () => {
         sender: address,
         amount: _fromAmount,
         fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!,
+        toInfo: toTokenInfoData!
       } as SwapQuery);
 
       const msg = msgs[0];
@@ -225,14 +221,14 @@ const Swap: React.FC = () => {
         prefix: ORAI,
         walletAddr: address,
         msgs: messages,
-        gasAmount: { denom: ORAI, amount: '0' },
+        gasAmount: { denom: ORAI, amount: '0' }
       });
       console.log('result swap tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         refetchTokenBalances();
         setSwapLoading(false);
@@ -244,7 +240,7 @@ const Swap: React.FC = () => {
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setSwapLoading(false);
@@ -261,7 +257,7 @@ const Swap: React.FC = () => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <div className={cx('container')}>
@@ -285,7 +281,7 @@ const Swap: React.FC = () => {
                 balance={{
                   amount: fromTokenBalance,
                   decimals: fromTokenInfoData?.decimals,
-                  denom: fromTokenInfoData?.symbol ?? '',
+                  denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -373,7 +369,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenBalance ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.symbol ?? '',
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -396,9 +392,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input
@@ -432,7 +428,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: simulateData ? simulateData?.amount : 0,
-                  denom: toTokenInfoData?.symbol ?? '',
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 decimalScale={6}
               />
@@ -487,7 +483,7 @@ const Swap: React.FC = () => {
               setToken={(denom) => {
                 setSwapTokens([
                   denom,
-                  denom === MILKY ? STABLE_DENOM : toTokenDenom,
+                  denom === MILKY ? STABLE_DENOM : toTokenDenom
                 ]);
               }}
             />
@@ -504,7 +500,7 @@ const Swap: React.FC = () => {
               setToken={(denom) => {
                 setSwapTokens([
                   denom === MILKY ? STABLE_DENOM : fromTokenDenom,
-                  denom,
+                  denom
                 ]);
               }}
             />

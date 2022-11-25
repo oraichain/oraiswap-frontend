@@ -19,7 +19,7 @@ export default () => {
       <Routes>
         <Route path="/" element={<Balance />} />
         <Route path="/swap" element={<Swap />} />
-        <Route path="/transfer" element={<Transfer />} />
+        {/* <Route path="/transfer" element={<Transfer />} /> */}
         <Route path="/pools" element={<Pools />} />
         <Route path="/airdrop/:chain" element={<AirDrop />} />
         <Route path="/ethereum" element={<EthereumTest />} />        

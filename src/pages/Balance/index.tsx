@@ -5,8 +5,10 @@ import styles from './Balance.module.scss';
 
 import {
   AminoTypes,
-  BroadcastTxResponse,
-  isBroadcastTxFailure,
+  // BroadcastTxResponse,
+  // isBroadcastTxFailure,
+  DeliverTxResponse,
+  isDeliverTxFailure,
   SigningStargateClient,
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -70,12 +72,12 @@ import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem, { AmountDetail } from './TokenItem';
 import KwtModal from './KwtModal';
-import { MsgTransfer } from '../../../node_modules/cosmjs-types/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -105,7 +107,18 @@ const Balance: React.FC<BalanceProps> = () => {
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
+  const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
+
+  // useEffect(() => {
+  //   displayToast(TToastType.TX_INFO, {
+  //     message:
+  //       'Due to the suspension of BNB Chain following its cross-chain bridge exploit, DO NOT use any bridges between BNB Chain and Oraichain or any other networks until our next announcement.',
+  //   }, {
+  //     position: 'top-center',
+  //     autoClose: false,
+  //   });
+  // }, []);
 
   useInactiveListener();
 
@@ -277,7 +290,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokenAmounts = async () => {
-    if (pendingTokens.length == 0) return;
+    if (pendingTokens.length == 0 || pendingCount > 2) return;
     try {
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
@@ -292,7 +305,6 @@ const Balance: React.FC<BalanceProps> = () => {
         );
       }
       const pendingList: TokenItemType[] = [];
-
       const amountDetails = Object.fromEntries(
         await Promise.all(
           pendingTokens.map(async (token) => {
@@ -306,12 +318,14 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         )
       );
-      
-      setAmounts((old) => ({ ...old, ...amountDetails }));
 
+      setAmounts((old) => ({ ...old, ...amountDetails }));
       // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
       if (pendingList.length > 0) {
-        setTimeout(() => setPendingTokens(pendingList), 3000);
+        setTimeout(() => {
+          setPendingTokens(pendingList);
+          setPendingCount(pendingCount + 1);
+        }, 3000);
       }
     } catch (ex) {
       console.log(ex);
@@ -320,10 +334,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const processTxResult = (
     token: TokenItemType,
-    result: BroadcastTxResponse,
+    result: DeliverTxResponse,
     customLink?: string
   ) => {
-    if (isBroadcastTxFailure(result)) {
+    if (isDeliverTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
         message: result.rawLog,
       });
@@ -367,6 +381,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickTokenFrom = useCallback(
     (token: TokenItemType) => {
+      console.log('onClickTokenFrom');
       onClickToken('from', token);
     },
     [onClickToken]
@@ -384,6 +399,7 @@ const Balance: React.FC<BalanceProps> = () => {
     amount: number
   ) => {
     try {
+      console.log('transferFromGravity');
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
 
@@ -402,9 +418,10 @@ const Balance: React.FC<BalanceProps> = () => {
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        fromToken.chainId,
       );
       let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
+      // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
@@ -552,9 +569,11 @@ const Balance: React.FC<BalanceProps> = () => {
               ).multiply(1000000000),
             }),
           };
+
           const offlineSigner = await window.Keplr.getOfflineSigner(
             fromToken.chainId
           );
+          
           // Initialize the gaia api with the offline signer that is injected by Keplr extension.
           const client = await SigningStargateClient.connectWithSigner(
             fromToken.rpc,
@@ -744,7 +763,9 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         amount: amount.amount,
         contractAddr:
-          fromToken.denom == "erc20_milky" ? fromToken.contractAddress : undefined,
+          fromToken.denom == 'erc20_milky'
+            ? fromToken.contractAddress
+            : undefined,
       });
 
       processTxResult(
@@ -818,7 +839,6 @@ const Balance: React.FC<BalanceProps> = () => {
     to: TokenItemType
   ) => {
     // disable send amount < 0
-
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please choose both from and to tokens',
@@ -865,6 +885,7 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const _fromAmount = parseAmountTo(amount, token.decimals).toFixed(0);
+      console.log('convertToken');
 
       let msgs;
       if (type === 'nativeToCw20') {
@@ -883,7 +904,6 @@ const Balance: React.FC<BalanceProps> = () => {
           outputToken,
         });
       }
-
       const msg = msgs[0];
       console.log(
         'msgs: ',
@@ -954,7 +974,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.denom
       );
 
-      let result: BroadcastTxResponse;
+      let result: DeliverTxResponse;
 
       if (!fromToken.contractAddress) {
         result = await KawaiiverseJs.convertCoin({
@@ -989,10 +1009,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   const navigate = useNavigate();
-  
+
   return (
     <Content nonBackground>
-      {window.location.pathname === '/' && <Banner  />}
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -1081,8 +1100,9 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClick={onClickTokenFrom}
                         onClickTransfer={
                           !!to
-                            ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, from, to)
+                            ? (fromAmount: number) => {
+                                onClickTransfer(fromAmount, from, to);
+                              }
                             : undefined
                         }
                         convertKwt={
