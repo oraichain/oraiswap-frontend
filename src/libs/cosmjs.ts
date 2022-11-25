@@ -258,7 +258,7 @@ class CosmJs {
       const wallet = await collectWallet();
 
       const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.lcd,
+        network.rpc,
         wallet as OfflineSigner,
         {
           gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
@@ -269,8 +269,8 @@ class CosmJs {
       const input = JSON.parse(handleMsg);
 
       const result = await client.execute(
+        walletAddr,
         address,
-        contractAddr,
         input,
         'auto',
         undefined,
