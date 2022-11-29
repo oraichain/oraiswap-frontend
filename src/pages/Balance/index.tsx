@@ -76,6 +76,8 @@ import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
+import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
+import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 
 interface BalanceProps {}
 
@@ -418,9 +420,9 @@ const Balance: React.FC<BalanceProps> = () => {
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId,
+        fromToken.chainId
       );
-      let aminoTypes = new AminoTypes({ additions: sendToEthAminoTypes });
+      let aminoTypes = new AminoTypes({ ...sendToEthAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
@@ -507,93 +509,55 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       try {
-        const key = await window.Keplr.getKeplrKey();
+        const executeContractMsgs = getExecuteContractMsgs(
+          fromAddress,
+          parseExecuteContractMultiple(
+            buildMultipleMessages(undefined, msgConvertReverses)
+          )
+        );
 
-        if (key.isNanoLedger) {
-          const executeContractMsgs = getAminoExecuteContractMsgs(
-            fromAddress,
-            parseExecuteContractMultiple(
-              buildMultipleMessages(undefined, msgConvertReverses)
-            )
-          );
+        // get raw ibc tx
+        const msgTransfer = {
+          typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+          value: MsgTransfer.fromPartial({
+            sourcePort: ibcInfo.source,
+            sourceChannel: ibcInfo.channel,
+            token: amount,
+            sender: fromAddress,
+            receiver: toAddress,
+            timeoutTimestamp: Long.fromNumber(
+              Math.floor(Date.now() / 1000) + ibcInfo.timeout
+            ).multiply(1000000000),
+          }),
+        };
 
-          const msgTransfer = {
-            type: 'cosmos-sdk/MsgTransfer',
-            value: {
-              source_port: ibcInfo.source,
-              source_channel: ibcInfo.channel,
-              token: amount,
-              sender: fromAddress,
-              receiver: toAddress,
-              timeout_height: {},
-              timeout_timestamp: Long.fromNumber(
-                Math.floor(Date.now() / 1000) + ibcInfo.timeout
-              )
-                .multiply(1000000000)
-                .toString(),
-            },
-          };
-
-          const result = await CosmJs.sendMultipleAmino({
-            msgs: [...executeContractMsgs, msgTransfer],
-            walletAddr: keplrAddress,
-            gasAmount: { denom: ORAI, amount: '0' },
-          });
-
-          if (result) {
-            processTxResult(
-              fromToken,
-              result as any,
-              `${network.explorer}/txs/${result.transactionHash}`
-            );
+        const offlineSigner = await window.Keplr.getOfflineSigner(
+          fromToken.chainId
+        );
+        const aminoTypes = new AminoTypes({
+          ...createIbcAminoConverters(),
+          ...createWasmAminoConverters(),
+        });
+        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+        const client = await SigningStargateClient.connectWithSigner(
+          fromToken.rpc,
+          offlineSigner,
+          { registry: cosmwasmRegistry, aminoTypes }
+        );
+        const result = await client.signAndBroadcast(
+          fromAddress,
+          [...executeContractMsgs, msgTransfer],
+          {
+            gas: '300000',
+            amount: [],
           }
-        } else {
-          const executeContractMsgs = getExecuteContractMsgs(
-            fromAddress,
-            parseExecuteContractMultiple(
-              buildMultipleMessages(undefined, msgConvertReverses)
-            )
-          );
-
-          // get raw ibc tx
-          const msgTransfer = {
-            typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-            value: MsgTransfer.fromPartial({
-              sourcePort: ibcInfo.source,
-              sourceChannel: ibcInfo.channel,
-              token: amount,
-              sender: fromAddress,
-              receiver: toAddress,
-              timeoutTimestamp: Long.fromNumber(
-                Math.floor(Date.now() / 1000) + ibcInfo.timeout
-              ).multiply(1000000000),
-            }),
-          };
-
-          const offlineSigner = await window.Keplr.getOfflineSigner(
-            fromToken.chainId
-          );
-          
-          // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-          const client = await SigningStargateClient.connectWithSigner(
-            fromToken.rpc,
-            offlineSigner,
-            { registry: cosmwasmRegistry }
-          );
-          const result = await client.signAndBroadcast(
-            fromAddress,
-            [...executeContractMsgs, msgTransfer],
-            {
-              gas: '300000',
-              amount: [],
-            }
-          );
-          processTxResult(
-            fromToken,
-            result,
-            `${network.explorer}/txs/${result.transactionHash}`
-          );
-        }
+        );
+        processTxResult(
+          fromToken,
+          result,
+          `${network.explorer}/txs/${result.transactionHash}`
+        );
+        // }
       } catch (ex: any) {
         console.log('error in transfer ibc custom: ', ex);
         displayToast(TToastType.TX_FAILED, {
