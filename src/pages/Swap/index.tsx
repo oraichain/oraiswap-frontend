@@ -39,6 +39,7 @@ import Content from 'layouts/Content';
 import { poolTokens } from 'config/pools';
 import { contracts } from 'libs/contracts';
 import { Contract } from 'config/contracts';
+import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 
 const cx = cn.bind(style);
 
@@ -77,8 +78,11 @@ const Swap: React.FC = () => {
   Contract.sender = address;
 
   const { data: taxRate, isLoading: isTaxRateLoading } =
-    contracts.OraiswapOracle.useOraiswapOracleTaxRateQuery({
-      client: Contract.oracle
+    contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
+      client: Contract.oracle,
+      input: {
+        tax_rate: {}
+      }
     });
 
   const fromToken = filteredTokens.find(
@@ -443,7 +447,9 @@ const Swap: React.FC = () => {
                 <span>Tax rate</span>
                 {/* <TooltipIcon /> */}
               </div>
-              <span>{parseFloat(taxRate?.rate) * 100} %</span>
+              <span>
+                {parseFloat((taxRate as TaxRateResponse)?.rate) * 100} %
+              </span>
             </div>
             {(fromToken?.denom == MILKY || toToken?.denom == MILKY) && (
               <div className={cx('row')}>
