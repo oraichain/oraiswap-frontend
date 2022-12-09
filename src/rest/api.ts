@@ -84,8 +84,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       token_info: {}
     });
 
-    if (tokenSwap.contractAddress !== process.env.REACT_APP_MILKY_CONTRACT) {
-      tokenInfo = {
+    tokenInfo = {
         ...tokenInfo,
         symbol: data.symbol,
         name: data.name,
@@ -94,20 +93,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
         icon: data.icon,
         verified: data.verified,
         total_supply: data.total_supply
-      };
-    } else {
-      const { token_info_response } = data;
-      tokenInfo = {
-        ...tokenInfo,
-        symbol: token_info_response.symbol,
-        name: token_info_response.name,
-        contractAddress: tokenSwap.contractAddress,
-        decimals: token_info_response.decimals,
-        icon: token_info_response.icon,
-        verified: token_info_response.verified,
-        total_supply: token_info_response.total_supply
-      };
-    }
+    };
   }
   return tokenInfo;
 }
