@@ -404,6 +404,14 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('transferFromGravity');
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
+      // disable Oraibridge -> BNB Chain Ledger
+      const key = await keplr.getKey(network.chainId);
+      if (key.isNanoLedger) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Ethereum signing with Ledger is not yet supported!',
+        });
+        return;
+      }
 
       await window.Keplr.suggestChain(fromToken.chainId);
       const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
@@ -471,6 +479,15 @@ const Balance: React.FC<BalanceProps> = () => {
     if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) return;
+    // disable Oraichain -> Oraibridge Ledger
+    const key = await keplr.getKey(network.chainId);
+    if (key.isNanoLedger && toToken.org == 'OraiBridge' ) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Ethereum signing with Ledger is not yet supported!',
+      });
+      return;
+    }
+
     await window.Keplr.suggestChain(toToken.chainId);
     // enable from to send transaction
     await window.Keplr.suggestChain(fromToken.chainId);
