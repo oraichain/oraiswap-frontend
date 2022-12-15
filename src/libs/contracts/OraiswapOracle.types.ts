@@ -1,4 +1,4 @@
-import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, Null, ExchangeRateItem, Coin} from "./types";
+import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, ExchangeRateItem, Coin} from "./types";
 export interface InstantiateMsg {
   admin?: Addr | null;
   max_rate?: Decimal | null;
@@ -30,28 +30,6 @@ export type ExecuteMsg = {
   };
 };
 export type QueryMsg = {
-  tax_rate: {};
-} | {
-  tax_cap: {
-    denom: string;
-  };
-} | {
-  exchange_rate: {
-    base_denom?: string | null;
-    quote_denom: string;
-  };
-} | {
-  exchange_rates: {
-    base_denom?: string | null;
-    quote_denoms: string[];
-  };
-} | {
-  contract_info: {};
-} | {
-  reward_pool: {
-    denom: string;
-  };
-} | {
   treasury: OracleTreasuryQuery;
 } | {
   exchange: OracleExchangeQuery;
@@ -75,12 +53,12 @@ export interface ExchangeRatesResponse {
   base_denom: string;
   items: ExchangeRateItem[];
 }
-export interface RewardPoolResponse {
-  balance: Coin;
-}
 export interface TaxCapResponse {
   cap: Uint128;
 }
 export interface TaxRateResponse {
   rate: Decimal;
 }
+export type TreasuryResponse = TaxRateResponse | TaxCapResponse;
+export type ExchangeResponse = ExchangeRateResponse | ExchangeRatesResponse;
+export type ContractResponse = ContractInfoResponse | Coin;
