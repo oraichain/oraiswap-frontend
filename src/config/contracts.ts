@@ -72,7 +72,7 @@ export class Contract {
   }
 
   static token(contractAddress: string): OraiswapTokenClient {
-    return new OraiswapTokenClient(window.client, this._sender, contractAddress);
+    return this.getContract('token', contractAddress);
   }
   static ibcwasm(contractAddress: string): Cw20Ics20Client {
     return new Cw20Ics20Client(window.client, this._sender, contractAddress);
