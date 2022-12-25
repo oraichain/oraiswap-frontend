@@ -80,6 +80,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Contract } from 'config/contracts';
 import { TransferBackMsg } from 'libs/contracts';
+import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
 
 interface BalanceProps { }
 
@@ -476,6 +477,10 @@ const Balance: React.FC<BalanceProps> = () => {
     const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
     if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
     if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
+
+    // query if the cw20 mapping has been registered for this pair or not. If not => throw error
+    await Contract.ibcwasm(ibcWasmContractAddress).cw20MappingFromCw20Denom({ cw20Denom: `:${fromToken.contractAddress}` });
+
     const transferBackMsg: TransferBackMsg = {
       local_channel_id: ibcInfo.channel,
       remote_address: toAddress,
@@ -504,68 +509,69 @@ const Balance: React.FC<BalanceProps> = () => {
     toToken: TokenItemType,
     transferAmount: number
   ) => {
-    console.log('from token: ', fromToken);
-    console.log('to token: ', toToken);
-    if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) return;
-    // disable Oraichain -> Oraibridge Ledger
-    const key = await keplr.getKey(network.chainId);
-    if (key.isNanoLedger && toToken.org == 'OraiBridge') {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Ethereum signing with Ledger is not yet supported!',
-      });
-      return;
-    }
-
-    await window.Keplr.suggestChain(toToken.chainId);
-    // enable from to send transaction
-    await window.Keplr.suggestChain(fromToken.chainId);
-    const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-    const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-    if (!fromAddress || !toAddress) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please login keplr!',
-      });
-      return;
-    }
-
-    var amount = coin(
-      parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
-      fromToken.denom
-    );
-
-    const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-
-    // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
-    if (!fromToken.erc20Cw20Map) {
-      await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
-      return;
-    }
-
-    // if it includes wasm in source => ibc wasm case
-    if (ibcInfo.source.includes("wasm")) {
-      await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
-      return;
-    }
-
-    amount = coin(
-      parseAmountToWithDecimal(
-        transferAmount,
-        fromToken.erc20Cw20Map[0].decimals.erc20Decimals
-      ).toFixed(0),
-      fromToken.erc20Cw20Map[0].erc20Denom
-    );
-
-    console.log("ibc info: ", ibcInfo);
-
-    const msgConvertReverses = await generateConvertCw20Erc20Message(
-      fromToken,
-      fromAddress,
-      amount
-    );
-
     try {
+      console.log('from token: ', fromToken);
+      console.log('to token: ', toToken);
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      // disable Oraichain -> Oraibridge Ledger
+      const key = await keplr.getKey(network.chainId);
+      if (key.isNanoLedger && toToken.org == 'OraiBridge') {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Ethereum signing with Ledger is not yet supported!',
+        });
+        return;
+      }
+
+      await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login keplr!',
+        });
+        return;
+      }
+
+      var amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        fromToken.denom
+      );
+
+      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+
+      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
+      if (!fromToken.erc20Cw20Map) {
+        await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
+        return;
+      }
+
+      // if it includes wasm in source => ibc wasm case
+      if (ibcInfo.source.includes("wasm")) {
+        // query if the cw20 mapping has been registered for this pair or not. If not => throw error
+        await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
+        return;
+      }
+
+      amount = coin(
+        parseAmountToWithDecimal(
+          transferAmount,
+          fromToken.erc20Cw20Map[0].decimals.erc20Decimals
+        ).toFixed(0),
+        fromToken.erc20Cw20Map[0].erc20Denom
+      );
+
+      console.log("ibc info: ", ibcInfo);
+
+      const msgConvertReverses = await generateConvertCw20Erc20Message(
+        fromToken,
+        fromAddress,
+        amount
+      );
+
       const executeContractMsgs = getExecuteContractMsgs(
         fromAddress,
         parseExecuteContractMultiple(
