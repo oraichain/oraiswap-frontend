@@ -78,8 +78,10 @@ import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
+import { Contract } from 'config/contracts';
+import { TransferBackMsg } from 'libs/contracts';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -469,6 +471,34 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const transferToRemoteChainIbcWasm = async (ibcInfo: IBCInfo, fromToken: TokenItemType, fromAddress: string, toAddress: string, amount: string) => {
+    // format: wasm.oraiaxv13....
+    const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
+    if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
+    if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
+    const transferBackMsg: TransferBackMsg = {
+      local_channel_id: ibcInfo.channel,
+      remote_address: toAddress,
+      timeout: ibcInfo.timeout,
+      memo: "",
+    }
+    // happy case
+    Contract.sender = fromAddress;
+    const cw20Token = Contract.token(fromToken.contractAddress);
+    const result = await cw20Token.send({
+      amount: amount,
+      contract: ibcWasmContractAddress,
+      msg: Buffer.from(JSON.stringify(transferBackMsg)).toString('base64')
+    }, 'auto')
+    console.log("result: ", result);
+
+    displayToast(TToastType.TX_SUCCESSFUL, {
+      customLink: `${network.explorer}/txs/${result.transactionHash}`,
+    });
+    setTxHash(result.transactionHash)
+    return;
+  }
+
   const transferIbcCustom = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
@@ -481,7 +511,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!keplr) return;
     // disable Oraichain -> Oraibridge Ledger
     const key = await keplr.getKey(network.chainId);
-    if (key.isNanoLedger && toToken.org == 'OraiBridge' ) {
+    if (key.isNanoLedger && toToken.org == 'OraiBridge') {
       displayToast(TToastType.TX_FAILED, {
         message: 'Ethereum signing with Ledger is not yet supported!',
       });
@@ -508,79 +538,88 @@ const Balance: React.FC<BalanceProps> = () => {
     const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
     // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
-    if (!fromToken.erc20Cw20Map)
+    if (!fromToken.erc20Cw20Map) {
       await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
-    else {
-      // TODO: need to have filter to check denom & decimal of appropirate network (ERC20 or BEP20)
-      amount = coin(
-        parseAmountToWithDecimal(
-          transferAmount,
-          fromToken.erc20Cw20Map[0].decimals.erc20Decimals
-        ).toFixed(0),
-        fromToken.erc20Cw20Map[0].erc20Denom
-      );
-      const msgConvertReverses = await generateConvertCw20Erc20Message(
-        fromToken,
+      return;
+    }
+
+    // if it includes wasm in source => ibc wasm case
+    if (ibcInfo.source.includes("wasm")) {
+      await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
+      return;
+    }
+
+    amount = coin(
+      parseAmountToWithDecimal(
+        transferAmount,
+        fromToken.erc20Cw20Map[0].decimals.erc20Decimals
+      ).toFixed(0),
+      fromToken.erc20Cw20Map[0].erc20Denom
+    );
+
+    console.log("ibc info: ", ibcInfo);
+
+    const msgConvertReverses = await generateConvertCw20Erc20Message(
+      fromToken,
+      fromAddress,
+      amount
+    );
+
+    try {
+      const executeContractMsgs = getExecuteContractMsgs(
         fromAddress,
-        amount
+        parseExecuteContractMultiple(
+          buildMultipleMessages(undefined, msgConvertReverses)
+        )
       );
 
-      try {
-        const executeContractMsgs = getExecuteContractMsgs(
-          fromAddress,
-          parseExecuteContractMultiple(
-            buildMultipleMessages(undefined, msgConvertReverses)
-          )
-        );
+      // get raw ibc tx
+      const msgTransfer = {
+        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+        value: MsgTransfer.fromPartial({
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          token: amount,
+          sender: fromAddress,
+          receiver: toAddress,
+          timeoutTimestamp: Long.fromNumber(
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout
+          ).multiply(1000000000),
+        }),
+      };
 
-        // get raw ibc tx
-        const msgTransfer = {
-          typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-          value: MsgTransfer.fromPartial({
-            sourcePort: ibcInfo.source,
-            sourceChannel: ibcInfo.channel,
-            token: amount,
-            sender: fromAddress,
-            receiver: toAddress,
-            timeoutTimestamp: Long.fromNumber(
-              Math.floor(Date.now() / 1000) + ibcInfo.timeout
-            ).multiply(1000000000),
-          }),
-        };
-
-        const offlineSigner = await window.Keplr.getOfflineSigner(
-          fromToken.chainId
-        );
-        const aminoTypes = new AminoTypes({
-          ...createIbcAminoConverters(),
-          ...createWasmAminoConverters(),
-        });
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          fromToken.rpc,
-          offlineSigner,
-          { registry: cosmwasmRegistry, aminoTypes }
-        );
-        const result = await client.signAndBroadcast(
-          fromAddress,
-          [...executeContractMsgs, msgTransfer],
-          {
-            gas: '300000',
-            amount: [],
-          }
-        );
-        processTxResult(
-          fromToken,
-          result,
-          `${network.explorer}/txs/${result.transactionHash}`
-        );
-        // }
-      } catch (ex: any) {
-        console.log('error in transfer ibc custom: ', ex);
-        displayToast(TToastType.TX_FAILED, {
-          message: ex.message,
-        });
-      }
+      const offlineSigner = await window.Keplr.getOfflineSigner(
+        fromToken.chainId
+      );
+      const aminoTypes = new AminoTypes({
+        ...createIbcAminoConverters(),
+        ...createWasmAminoConverters(),
+      });
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner,
+        { registry: cosmwasmRegistry, aminoTypes }
+      );
+      const result = await client.signAndBroadcast(
+        fromAddress,
+        [...executeContractMsgs, msgTransfer],
+        {
+          gas: '300000',
+          amount: [],
+        }
+      );
+      processTxResult(
+        fromToken,
+        result,
+        `${network.explorer}/txs/${result.transactionHash}`
+      );
+      // }
+    } catch (ex: any) {
+      console.log('error in transfer ibc custom: ', ex);
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
     }
   };
 
@@ -603,7 +642,6 @@ const Balance: React.FC<BalanceProps> = () => {
         offlineSigner
       );
 
-      // if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
       const result = await client.sendIbcTokens(
         fromAddress,
         toAddress,
@@ -1082,8 +1120,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                                onClickTransfer(fromAmount, from, to);
-                              }
+                              onClickTransfer(fromAmount, from, to);
+                            }
                             : undefined
                         }
                         convertKwt={
@@ -1168,11 +1206,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}

@@ -20,6 +20,7 @@ import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { collectWallet } from 'libs/cosmjs';
+import { GasPrice } from '@cosmjs/stargate';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -65,7 +66,8 @@ const startApp = async () => {
         network.rpc,
         wallet,
         {
-          prefix: network.prefix
+          prefix: network.prefix,
+          gasPrice: GasPrice.fromString(`0${network.denom}`)
         }
       );
     }

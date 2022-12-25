@@ -15,6 +15,14 @@ export interface TransferMsg {
   remote_address: string;
   timeout?: number | null;
 }
+
+export interface TransferBackMsg {
+  local_channel_id: string;
+  remote_address: string;
+  timeout?: number | null;
+  memo?: string | null;
+}
+
 export interface Cw20PairMsg {
   cw20_decimals: number;
   cw20_denom: string;

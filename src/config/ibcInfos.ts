@@ -69,7 +69,7 @@ const ibcInfosMap: Record<NetworkKey, IBCInfoMap> = {
         timeout: IBC_TRANSFER_TIMEOUT
       },
       [ORAI_BRIDGE_CHAIN_ID]: {
-        source: 'transfer',
+        source: `wasm.${process.env.REACT_APP_IBC_WASM_CONTRACT}`,
         channel: oraichain2oraib,
         timeout: IBC_TRANSFER_TIMEOUT
       },
