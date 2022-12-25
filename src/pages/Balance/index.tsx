@@ -28,6 +28,7 @@ import { network } from 'config/networks';
 import {
   fetchBalance,
   fetchBalanceWithMapping,
+  fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   Type,
@@ -79,7 +80,6 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Contract } from 'config/contracts';
 import { TransferBackMsg } from 'libs/contracts';
-import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
 
 interface BalanceProps { }
 
@@ -471,13 +471,35 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferToRemoteChainIbcWasm = async (ibcWasmContractAddress: string, ibcInfo: IBCInfo, fromToken: TokenItemType, toAddress: string, amount: string) => {
+  const transferToRemoteChainIbcWasm = async (ibcInfo: IBCInfo, fromToken: TokenItemType, fromAddress: string, toAddress: string, amount: string): Promise<boolean> => {
+    // format: wasm.oraiaxv13....
+    const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
+    if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
+    if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
+
+    try {
+      // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
+      await Contract.ibcwasm(ibcWasmContractAddress).cw20MappingFromCw20Denom({ cw20Denom: `cw20:${fromToken.contractAddress}` });
+    } catch (error) {
+      console.log("error ibc wasm transfer back to remote chain: ", error)
+      console.log("We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC");
+      // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+      return false;
+    }
+
+    // if the sender still can convert to IBC native balance => we prioritize it to be bridged back to OraiBridge first.
+    const ibcBalances = await fetchNativeTokenBalance(network.converter, fromToken.erc20Cw20Map[0].erc20Denom, undefined, true);
+    const parsedIbcBalances = parseInt(parseAmountFrom(ibcBalances as number, fromToken.erc20Cw20Map[0].decimals.erc20Decimals).toFixed(0));
+    if (parsedIbcBalances > 0) return false;
+
+    // happy case
     const transferBackMsg: TransferBackMsg = {
       local_channel_id: ibcInfo.channel,
       remote_address: toAddress,
       timeout: ibcInfo.timeout,
       memo: "",
     }
+    Contract.sender = fromAddress;
     const cw20Token = Contract.token(fromToken.contractAddress);
     const result = await cw20Token.send({
       amount: amount,
@@ -489,8 +511,8 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_SUCCESSFUL, {
       customLink: `${network.explorer}/txs/${result.transactionHash}`,
     });
-    setTxHash(result.transactionHash)
-    return;
+    setTxHash(result.transactionHash);
+    return true;
   }
 
   const transferIbcCustom = async (
@@ -540,24 +562,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // if it includes wasm in source => ibc wasm case
       if (ibcInfo.source.includes("wasm")) {
-        // format: wasm.oraiaxv13....
-        const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
-        if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
-        if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
+        const isSuccessful = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
+        if (isSuccessful) return;
 
-        try {
-          // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
-          await Contract.ibcwasm(ibcWasmContractAddress).cw20MappingFromCw20Denom({ cw20Denom: `cw20:${fromToken.contractAddress}` });
-          // happy case
-          Contract.sender = fromAddress;
-          await transferToRemoteChainIbcWasm(ibcWasmContractAddress, ibcInfo, fromToken, toAddress, amount.amount);
-          return;
-        } catch (error) {
-          console.log("error ibc wasm transfer back to remote chain: ", error)
-          console.log("We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC");
-          // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-        }
+        // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
       }
 
       console.log("ibc info: ", ibcInfo)
@@ -569,8 +578,6 @@ const Balance: React.FC<BalanceProps> = () => {
         ).toFixed(0),
         fromToken.erc20Cw20Map[0].erc20Denom
       );
-
-      console.log("ibc info: ", ibcInfo);
 
       const msgConvertReverses = await generateConvertCw20Erc20Message(
         fromToken,
