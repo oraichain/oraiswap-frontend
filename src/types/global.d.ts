@@ -125,6 +125,7 @@ declare global {
       REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
       REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
+      REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD: string;
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
@@ -158,10 +159,13 @@ declare global {
       REACT_APP_SENTRY_ENVIRONMENT: string;
       REACT_APP_KWT_CONTRACT: string;
       REACT_APP_MILKY_CONTRACT: string;
+
+      // config for ibc wasm contract (cw20-ics20)
+      REACT_APP_IBC_WASM_CONTRACT: string;
     }
   }
 }
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

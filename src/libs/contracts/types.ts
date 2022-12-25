@@ -1,6 +1,73 @@
+export interface AllowMsg {
+  contract: string;
+  gas_limit?: number | null;
+}
 export type Uint128 = string;
 export type Binary = string;
+export interface Cw20ReceiveMsg {
+  amount: Uint128;
+  msg: Binary;
+  sender: string;
+}
+export interface TransferMsg {
+  channel: string;
+  memo?: string | null;
+  remote_address: string;
+  timeout?: number | null;
+}
+
+export interface TransferBackMsg {
+  local_channel_id: string;
+  remote_address: string;
+  timeout?: number | null;
+  memo?: string | null;
+}
+
+export interface Cw20PairMsg {
+  cw20_decimals: number;
+  cw20_denom: string;
+  denom: string;
+  local_channel_id: string;
+  remote_decimals: number;
+}
+export type Amount = {
+  native: Coin;
+} | {
+  cw20: Cw20Coin;
+};
+export interface Coin {
+  amount: Uint128;
+  denom: string;
+  [k: string]: unknown;
+}
+export interface Cw20Coin {
+  address: string;
+  amount: Uint128;
+}
+export interface ChannelInfo {
+  connection_id: string;
+  counterparty_endpoint: IbcEndpoint;
+  id: string;
+}
+export interface IbcEndpoint {
+  channel_id: string;
+  port_id: string;
+  [k: string]: unknown;
+}
 export type Addr = string;
+export interface Cw20PairQuery {
+  cw20_map: Cw20MappingMetadata;
+  key: string;
+}
+export interface Cw20MappingMetadata {
+  cw20_decimals: number;
+  cw20_denom: string;
+  remote_decimals: number;
+}
+export interface AllowedInfo {
+  contract: string;
+  gas_limit?: number | null;
+}
 export type AssetInfo = {
   token: {
     contract_addr: Addr;
@@ -10,11 +77,6 @@ export type AssetInfo = {
     denom: string;
   };
 };
-export interface Cw20ReceiveMsg {
-  amount: Uint128;
-  msg: Binary;
-  sender: string;
-}
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
@@ -24,16 +86,14 @@ export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
 }
-export interface AllowMsg {
-  contract: string;
-  gas_limit?: number | null;
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
 }
 export type Uint64 = string;
-export interface TransferMsg {
-  channel: string;
-  remote_address: string;
-  timeout?: number | null;
-}
 export interface SwapMsg {
   channel: string;
   min_amount_out: Uint128;
@@ -76,38 +136,20 @@ export interface ExternalTokenMsg {
   contract: string;
   denom: string;
 }
-export type Amount = {
-  native: Coin;
-} | {
-  cw20: Cw20Coin;
-};
-export interface Coin {
-  amount: Uint128;
-  denom: string;
-  [k: string]: unknown;
-}
-export interface Cw20Coin {
-  address: string;
-  amount: Uint128;
-}
-export interface ChannelInfo {
-  connection_id: string;
-  counterparty_endpoint: IbcEndpoint;
-  id: string;
-}
-export interface IbcEndpoint {
-  channel_id: string;
-  port_id: string;
-  [k: string]: unknown;
-}
-export interface AllowedInfo {
-  contract: string;
-  gas_limit?: number | null;
-}
 export interface AllowedTokenInfo {
   contract: string;
   denom: string;
 }
+export type OrderDirection = "buy" | "sell";
+export interface Asset {
+  amount: Uint128;
+  info: AssetInfo;
+}
+export type OrderFilter = ("tick" | "none") | {
+  bidder: string;
+} | {
+  price: Decimal;
+};
 export type OracleTreasuryQuery = {
   tax_rate: {};
 } | {
@@ -133,21 +175,9 @@ export type OracleContractQuery = {
     denom: string;
   };
 };
-export type Null = null;
 export interface ExchangeRateItem {
   exchange_rate: Decimal;
   quote_denom: string;
-}
-export interface Asset {
-  amount: Uint128;
-  info: AssetInfo;
-}
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
 }
 export type SwapOperation = {
   orai_swap: {
