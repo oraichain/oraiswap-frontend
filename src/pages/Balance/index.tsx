@@ -15,8 +15,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
-import Banner from 'components/Banner';
-import { ibcInfos, oraicbain2atom } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
@@ -472,23 +471,13 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferToRemoteChainIbcWasm = async (ibcInfo: IBCInfo, fromToken: TokenItemType, fromAddress: string, toAddress: string, amount: string) => {
-    // format: wasm.oraiaxv13....
-    const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
-    if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
-    if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
-
-    // query if the cw20 mapping has been registered for this pair or not. If not => throw error
-    await Contract.ibcwasm(ibcWasmContractAddress).cw20MappingFromCw20Denom({ cw20Denom: `:${fromToken.contractAddress}` });
-
+  const transferToRemoteChainIbcWasm = async (ibcWasmContractAddress: string, ibcInfo: IBCInfo, fromToken: TokenItemType, toAddress: string, amount: string) => {
     const transferBackMsg: TransferBackMsg = {
       local_channel_id: ibcInfo.channel,
       remote_address: toAddress,
       timeout: ibcInfo.timeout,
       memo: "",
     }
-    // happy case
-    Contract.sender = fromAddress;
     const cw20Token = Contract.token(fromToken.contractAddress);
     const result = await cw20Token.send({
       amount: amount,
@@ -536,12 +525,12 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      var amount = coin(
+      let amount = coin(
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
 
-      const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
@@ -551,10 +540,27 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // if it includes wasm in source => ibc wasm case
       if (ibcInfo.source.includes("wasm")) {
-        // query if the cw20 mapping has been registered for this pair or not. If not => throw error
-        await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
-        return;
+        // format: wasm.oraiaxv13....
+        const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
+        if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
+        if (!fromToken.contractAddress) throw { message: "The transferred token is not a CW20 token. Cannot transfer through IBC Wasm!" };
+
+        try {
+          // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
+          await Contract.ibcwasm(ibcWasmContractAddress).cw20MappingFromCw20Denom({ cw20Denom: `cw20:${fromToken.contractAddress}` });
+          // happy case
+          Contract.sender = fromAddress;
+          await transferToRemoteChainIbcWasm(ibcWasmContractAddress, ibcInfo, fromToken, toAddress, amount.amount);
+          return;
+        } catch (error) {
+          console.log("error ibc wasm transfer back to remote chain: ", error)
+          console.log("We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC");
+          // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+        }
       }
+
+      console.log("ibc info: ", ibcInfo)
 
       amount = coin(
         parseAmountToWithDecimal(
