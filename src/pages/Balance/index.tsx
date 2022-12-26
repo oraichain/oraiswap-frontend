@@ -489,8 +489,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
     // if the sender still can convert to IBC native balance => we prioritize it to be bridged back to OraiBridge first.
     const ibcBalances = await fetchNativeTokenBalance(network.converter, fromToken.erc20Cw20Map[0].erc20Denom, undefined, true);
-    const parsedIbcBalances = parseInt(parseAmountFrom(ibcBalances as number, fromToken.erc20Cw20Map[0].decimals.erc20Decimals).toFixed(0));
-    if (parsedIbcBalances > 0) return false;
+    // we convert the ibc balance decimal to the same decimal of the cw20 token and compare
+    const parsedIbcBalances = parseInt(parseAmountFrom(ibcBalances as number, fromToken.erc20Cw20Map[0].decimals.erc20Decimals - fromToken.erc20Cw20Map[0].decimals.cw20Decimals).toFixed(0));
+    if (parsedIbcBalances > parseInt(amount)) return false;
 
     // happy case
     const transferBackMsg: TransferBackMsg = {
