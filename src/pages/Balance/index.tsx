@@ -563,8 +563,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // if it includes wasm in source => ibc wasm case
       if (ibcInfo.source.includes("wasm")) {
-        const isSuccessful = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
-        if (isSuccessful) return;
+        // const isSuccessful = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, fromAddress, toAddress, amount.amount);
+        // if (isSuccessful) return;
 
         // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
         ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
