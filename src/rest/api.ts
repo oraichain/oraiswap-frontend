@@ -55,9 +55,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -85,14 +84,14 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     });
 
     tokenInfo = {
-        ...tokenInfo,
-        symbol: data.symbol,
-        name: data.name,
-        contractAddress: tokenSwap.contractAddress,
-        decimals: data.decimals,
-        icon: data.icon,
-        verified: data.verified,
-        total_supply: data.total_supply
+      ...tokenInfo,
+      symbol: data.symbol,
+      name: data.name,
+      contractAddress: tokenSwap.contractAddress,
+      decimals: data.decimals,
+      icon: data.icon,
+      verified: data.verified,
+      total_supply: data.total_supply
     };
   }
   return tokenInfo;
@@ -120,7 +119,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-      '0'
+    '0'
   );
 }
 
@@ -159,7 +158,23 @@ async function fetchPairInfo(
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  const data = await Contract.factory.pair({
+  try {
+    const data = await Contract.factory.pair({
+      assetInfos: [firstAsset, secondAsset]
+    });
+    return data;
+  } catch (error) {
+    return fetchPairInfoV2(assetInfos);
+  }
+}
+
+async function fetchPairInfoV2(
+  assetInfos: [TokenItemType, TokenItemType]
+): Promise<PairInfo> {
+  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
+  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+
+  const data = await Contract.factory_v2.pair({
     assetInfos: [firstAsset, secondAsset]
   });
   return data;
@@ -231,9 +246,8 @@ async function fetchNativeTokenBalance(
   lcd?: string,
   shouldKeepOriginal?: boolean
 ): Promise<number | string> {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
   const amount = res.balance.amount;
   if (shouldKeepOriginal) return amount;
@@ -395,27 +409,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {

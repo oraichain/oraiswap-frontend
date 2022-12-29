@@ -146,6 +146,7 @@ declare global {
 
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
+      REACT_APP_FACTORY_V2_CONTRACT: string;
       REACT_APP_ROUTER_CONTRACT: string;
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_BSC_CONTRACT: string;
@@ -159,6 +160,7 @@ declare global {
       REACT_APP_SENTRY_ENVIRONMENT: string;
       REACT_APP_KWT_CONTRACT: string;
       REACT_APP_MILKY_CONTRACT: string;
+      REACT_APP_SCORAI_CONTRACT: string;
 
       // config for ibc wasm contract (cw20-ics20)
       REACT_APP_IBC_WASM_CONTRACT: string;

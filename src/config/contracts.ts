@@ -13,6 +13,7 @@ import { network } from './networks';
 type ContractName =
   | 'oracle'
   | 'factory'
+  | 'factory_v2'
   | 'router'
   | 'staking'
   | 'rewarder'
@@ -49,6 +50,10 @@ export class Contract {
 
   static get factory(): OraiswapFactoryClient {
     return this.getContract('factory', network.factory);
+  }
+
+  static get factory_v2(): OraiswapFactoryClient {
+    return new OraiswapFactoryClient(window.client, this._sender, network.factory_v2);
   }
 
   static get router(): OraiswapRouterClient {
