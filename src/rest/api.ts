@@ -449,11 +449,17 @@ async function simulateSwap(query: {
     askInfo
   );
 
-  const data = Contract.router.simulateSwapOperations({
-    offerAmount: amount.toString(),
-    operations
-  });
-  return data;
+  try {
+    const data = await Contract.router.simulateSwapOperations({
+      offerAmount: amount.toString(),
+      operations
+    });
+    return data;
+  } catch (error) {
+    throw {
+      message: `Error when trying to simulate swap using router v2: ${error}`
+    }
+  }
 }
 
 export type SwapQuery = {
