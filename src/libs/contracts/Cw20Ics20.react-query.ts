@@ -6,10 +6,9 @@
 
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
-import { StdFee } from "@cosmjs/amino";
 import { Uint128, Binary,Coin, Addr, Cw20PairQuery} from "./types";
 import { AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse} from "./Cw20Ics20.types";
-import { Cw20Ics20QueryClient, Cw20Ics20Client } from "./Cw20Ics20.client";
+import { Cw20Ics20QueryClient, Cw20Ics20Client, FeesInterface } from "./Cw20Ics20.client";
 export interface Cw20Ics20ReactQuery<TResponse, TData = TResponse> {
   client: Cw20Ics20QueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
@@ -162,7 +161,7 @@ export interface Cw20Ics20UpdateAdminMutation {
     admin: string;
   };
   args?: {
-    $fee?: number | StdFee | "auto";
+    $fee?: FeesInterface["fees"];
     $memo?: string;
     $funds?: Coin[];
   };
@@ -185,7 +184,7 @@ export interface Cw20Ics20AllowMutation {
     gasLimit?: number;
   };
   args?: {
-    $fee?: number | StdFee | "auto";
+    $fee?: FeesInterface["fees"];
     $memo?: string;
     $funds?: Coin[];
   };
@@ -211,7 +210,7 @@ export interface Cw20Ics20UpdateCw20MappingPairMutation {
     remoteDecimals: number;
   };
   args?: {
-    $fee?: number | StdFee | "auto";
+    $fee?: FeesInterface["fees"];
     $memo?: string;
     $funds?: Coin[];
   };
@@ -236,7 +235,7 @@ export interface Cw20Ics20TransferMutation {
     timeout?: number;
   };
   args?: {
-    $fee?: number | StdFee | "auto";
+    $fee?: FeesInterface["fees"];
     $memo?: string;
     $funds?: Coin[];
   };
@@ -260,7 +259,7 @@ export interface Cw20Ics20ReceiveMutation {
     sender: string;
   };
   args?: {
-    $fee?: number | StdFee | "auto";
+    $fee?: FeesInterface["fees"];
     $memo?: string;
     $funds?: Coin[];
   };
