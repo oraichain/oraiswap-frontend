@@ -1,4 +1,4 @@
-import {AllowMsg, Uint128, Binary, Cw20ReceiveMsg, TransferMsg, Cw20PairMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, Addr, Cw20PairQuery, Cw20MappingMetadata, AllowedInfo} from "./types";
+import {AllowMsg, Cw20ReceiveMsg, TransferMsg, Cw20PairMsg, Amount, ChannelInfo, AllowedInfo} from "./types";
 export interface InstantiateMsg {
   allowlist: AllowMsg[];
   default_gas_limit?: number | null;

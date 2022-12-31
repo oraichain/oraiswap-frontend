@@ -1,4 +1,4 @@
-import {Addr, Uint128, Binary, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
+import {Addr, Uint128, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
 export interface InstantiateMsg {
   factory_addr: Addr;
 }

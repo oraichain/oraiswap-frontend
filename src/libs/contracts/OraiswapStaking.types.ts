@@ -1,4 +1,4 @@
-import {Addr, Uint128, Binary, AssetInfo, Decimal, Cw20ReceiveMsg, Asset, RewardInfoResponseItem} from "./types";
+import {Addr, Uint128, AssetInfo, Decimal, Cw20ReceiveMsg, Asset, RewardInfoResponseItem} from "./types";
 export interface InstantiateMsg {
   base_denom?: string | null;
   factory_addr: Addr;

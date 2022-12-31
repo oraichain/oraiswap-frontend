@@ -1,5 +1,5 @@
 import { contracts } from 'libs/contracts';
-import { Cw20Ics20Client, Cw20Ics20QueryClient } from 'libs/contracts/Cw20Ics20.client';
+import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
 import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
 import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
 import { OraiswapOracleClient } from 'libs/contracts/OraiswapOracle.client';
