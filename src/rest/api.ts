@@ -1,10 +1,9 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import { AssetInfo } from 'types/oraiswap_pair/pair_info';
 import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'config/constants';
-import { getPair, Pair, pairs } from 'config/pools';
+import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
@@ -127,8 +126,8 @@ async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType
 ): Promise<PoolInfo> {
-  const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
-  const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
+  const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
+  const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount = 0,
     askPoolAmount = 0;
@@ -269,7 +268,7 @@ async function fetchBalanceWithMapping(
   walletAddr: string,
   tokenInfo: TokenItemType
 ): Promise<{ amount: number; subAmounts: { [key: string]: number } }> {
-  var finalBalance = 0;
+  let finalBalance = 0;
   // get all native balances that are from oraibridge (ibc/...)
   let subAmounts = {},
     mainBalance = 0;
@@ -305,7 +304,7 @@ async function generateConvertErc20Cw20Message(
   tokenInfo: TokenItemType,
   sender: string
 ) {
-  var msgConverts: any[] = [];
+  let msgConverts: any[] = [];
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
@@ -335,11 +334,11 @@ async function generateConvertCw20Erc20Message(
   sender: string,
   sendCoin: Coin
 ) {
-  var msgConverts: any[] = [];
+  let msgConverts: any[] = [];
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    var balance: string;
+    let balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
     balance = new Big(
@@ -441,7 +440,7 @@ async function simulateSwap(query: {
   // check if they have pairs. If not then we go through ORAI
 
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
-  const { info: askInfo } = parseTokenInfo(toInfo, undefined);
+  const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs(
     [fromInfo.denom, toInfo.denom],
@@ -456,9 +455,7 @@ async function simulateSwap(query: {
     });
     return data;
   } catch (error) {
-    throw {
-      message: `Error when trying to simulate swap using router v2: ${error}`
-    }
+    throw new Error(`Error when trying to simulate swap using router v2: ${error}`)
   }
 }
 
@@ -474,8 +471,6 @@ export type SwapQuery = {
 
 export type ProvideQuery = {
   type: Type.PROVIDE;
-  // from: string;
-  // to: string;
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   fromAmount: number | string;
@@ -631,8 +626,6 @@ async function generateContractMessages(
 
 export type BondMining = {
   type: Type.BOND_LIQUIDITY;
-  // from: string;
-  // to: string;
   lpToken: string;
   amount: number | string;
   assetToken: TokenInfo;

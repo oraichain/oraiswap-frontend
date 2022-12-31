@@ -13,7 +13,7 @@ import { OraiswapFactoryQueryClient, OraiswapFactoryClient } from "./OraiswapFac
 export interface OraiswapFactoryReactQuery<TResponse, TData = TResponse> {
   client: OraiswapFactoryQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapFactoryPairsQuery<TData> extends OraiswapFactoryReactQuery<PairsResponse, TData> {

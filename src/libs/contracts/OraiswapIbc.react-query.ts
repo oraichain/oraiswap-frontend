@@ -13,7 +13,7 @@ import { OraiswapIbcQueryClient, OraiswapIbcClient } from "./OraiswapIbc.client"
 export interface OraiswapIbcReactQuery<TResponse, TData = TResponse> {
   client: OraiswapIbcQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapIbcLockupQuery<TData> extends OraiswapIbcReactQuery<LockupResponse, TData> {

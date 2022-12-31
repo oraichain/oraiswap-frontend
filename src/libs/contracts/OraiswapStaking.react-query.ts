@@ -13,7 +13,7 @@ import { OraiswapStakingQueryClient, OraiswapStakingClient } from "./OraiswapSta
 export interface OraiswapStakingReactQuery<TResponse, TData = TResponse> {
   client: OraiswapStakingQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapStakingRewardInfosQuery<TData> extends OraiswapStakingReactQuery<ArrayOfRewardInfoResponse, TData> {

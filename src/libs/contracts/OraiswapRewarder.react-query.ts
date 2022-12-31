@@ -13,7 +13,7 @@ import { OraiswapRewarderQueryClient, OraiswapRewarderClient } from "./OraiswapR
 export interface OraiswapRewarderReactQuery<TResponse, TData = TResponse> {
   client: OraiswapRewarderQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapRewarderRewardAmountPerSecQuery<TData> extends OraiswapRewarderReactQuery<RewardAmountPerSecondResponse, TData> {

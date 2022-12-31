@@ -13,7 +13,7 @@ import { OraiswapConverterQueryClient, OraiswapConverterClient } from "./Oraiswa
 export interface OraiswapConverterReactQuery<TResponse, TData = TResponse> {
   client: OraiswapConverterQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapConverterConvertInfoQuery<TData> extends OraiswapConverterReactQuery<ConvertInfoResponse, TData> {
