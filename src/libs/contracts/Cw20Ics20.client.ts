@@ -248,7 +248,7 @@ export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20In
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       receive: {
         amount,
@@ -267,7 +267,7 @@ export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20In
     memo?: string;
     remoteAddress: string;
     timeout?: number;
-  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       transfer: {
         channel,
@@ -289,7 +289,7 @@ export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20In
     denom: string;
     localChannelId: string;
     remoteDecimals: number;
-  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       update_cw20_mapping_pair: {
         cw20_decimals: cw20Decimals,
@@ -306,7 +306,7 @@ export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20In
   }: {
     contract: string;
     gasLimit?: number;
-  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       allow: {
         contract,
@@ -318,7 +318,7 @@ export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20In
     admin
   }: {
     admin: string;
-  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       update_admin: {
         admin
