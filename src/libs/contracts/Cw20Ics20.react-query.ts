@@ -7,8 +7,8 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {AllowMsg, Uint128, Binary, Cw20ReceiveMsg, TransferMsg, Cw20PairMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, Addr, Cw20PairQuery, Cw20MappingMetadata, AllowedInfo} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse} from "./Cw20Ics20.types";
+import { Uint128, Binary,Coin, Addr, Cw20PairQuery} from "./types";
+import { AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse} from "./Cw20Ics20.types";
 import { Cw20Ics20QueryClient, Cw20Ics20Client } from "./Cw20Ics20.client";
 export interface Cw20Ics20ReactQuery<TResponse, TData = TResponse> {
   client: Cw20Ics20QueryClient | undefined;

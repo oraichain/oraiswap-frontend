@@ -1,4 +1,4 @@
-import {AllowMsg, Uint128, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
+import {AllowMsg, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, ChannelInfo, AllowedInfo, AllowedTokenInfo} from "./types";
 export interface InstantiateMsg {
   allowlist: AllowMsg[];
   default_timeout: number;
