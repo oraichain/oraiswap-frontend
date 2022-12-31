@@ -53,6 +53,9 @@ export interface Cw20Ics20ReadOnlyInterface {
     cw20Denom: string;
   }) => Promise<Cw20PairQuery>;
 }
+export interface FeesInterface {
+  fees: number | StdFee | "auto"
+}
 export class Cw20Ics20QueryClient implements Cw20Ics20ReadOnlyInterface {
   client: CosmWasmClient;
   contractAddress: string;
@@ -182,7 +185,7 @@ export interface Cw20Ics20Interface extends Cw20Ics20ReadOnlyInterface {
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   transfer: ({
     channel,
     memo,
@@ -193,7 +196,7 @@ export interface Cw20Ics20Interface extends Cw20Ics20ReadOnlyInterface {
     memo?: string;
     remoteAddress: string;
     timeout?: number;
-  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   updateCw20MappingPair: ({
     cw20Decimals,
     cw20Denom,
@@ -206,19 +209,19 @@ export interface Cw20Ics20Interface extends Cw20Ics20ReadOnlyInterface {
     denom: string;
     localChannelId: string;
     remoteDecimals: number;
-  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   allow: ({
     contract,
     gasLimit
   }: {
     contract: string;
     gasLimit?: number;
-  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   updateAdmin: ({
     admin
   }: {
     admin: string;
-  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20Interface {
   client: SigningCosmWasmClient;
