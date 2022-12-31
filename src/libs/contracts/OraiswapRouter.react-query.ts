@@ -13,7 +13,7 @@ import { OraiswapRouterQueryClient, OraiswapRouterClient } from "./OraiswapRoute
 export interface OraiswapRouterReactQuery<TResponse, TData = TResponse> {
   client: OraiswapRouterQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapRouterSimulateSwapOperationsQuery<TData> extends OraiswapRouterReactQuery<SimulateSwapOperationsResponse, TData> {

@@ -13,7 +13,7 @@ import { OraiswapOracleQueryClient, OraiswapOracleClient } from "./OraiswapOracl
 export interface OraiswapOracleReactQuery<TResponse, TData = TResponse> {
   client: OraiswapOracleQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapOracleContractQuery<TData> extends OraiswapOracleReactQuery<ContractResponse, TData> {input: OracleContractQuery}

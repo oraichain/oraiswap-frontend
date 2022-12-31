@@ -29,9 +29,6 @@ import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
 import {
   filteredTokens,
-  TokenItemType,
-  tokens,
-  cw20Tokens
 } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';

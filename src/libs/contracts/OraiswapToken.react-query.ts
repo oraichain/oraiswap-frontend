@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Uint128, Logo, EmbeddedLogo, Binary, Cw20Coin, InstantiateMarketingInfo, Expiration, Timestamp, Uint64, AllowanceInfo, SpenderAllowanceInfo, LogoInfo, Addr} from "./types";
-import {InstantiateMsg, MinterResponse, ExecuteMsg, QueryMsg, AllAccountsResponse, AllAllowancesResponse, AllSpenderAllowancesResponse, AllowanceResponse, BalanceResponse, DownloadLogoResponse, MarketingInfoResponse, TokenInfoResponse} from "./OraiswapToken.types";
+import {Uint128, Logo, Binary, Expiration} from "./types";
+import { MinterResponse, AllAccountsResponse, AllAllowancesResponse, AllSpenderAllowancesResponse, AllowanceResponse, BalanceResponse, DownloadLogoResponse, MarketingInfoResponse, TokenInfoResponse} from "./OraiswapToken.types";
 import { OraiswapTokenQueryClient, OraiswapTokenClient } from "./OraiswapToken.client";
 export interface OraiswapTokenReactQuery<TResponse, TData = TResponse> {
   client: OraiswapTokenQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapTokenDownloadLogoQuery<TData> extends OraiswapTokenReactQuery<DownloadLogoResponse, TData> {}
@@ -162,7 +162,7 @@ export function useOraiswapTokenUploadLogoMutation(options?: Omit<UseMutationOpt
       memo,
       funds
     } = {}
-  }) => client.uploadLogo(msg, fee, memo, funds), options);
+  }) => client.uploadLogo(fee, memo, funds), options);
 }
 export interface OraiswapTokenUpdateMarketingMutation {
   client: OraiswapTokenClient;

@@ -13,7 +13,7 @@ import { Cw20Ics20QueryClient, Cw20Ics20Client } from "./Cw20Ics20.client";
 export interface Cw20Ics20ReactQuery<TResponse, TData = TResponse> {
   client: Cw20Ics20QueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface Cw20Ics20Cw20MappingFromCw20DenomQuery<TData> extends Cw20Ics20ReactQuery<Cw20PairQuery, TData> {

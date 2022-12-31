@@ -13,7 +13,7 @@ import { OraiswapPairQueryClient, OraiswapPairClient } from "./OraiswapPair.clie
 export interface OraiswapPairReactQuery<TResponse, TData = TResponse> {
   client: OraiswapPairQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapPairReverseSimulationQuery<TData> extends OraiswapPairReactQuery<ReverseSimulationResponse, TData> {

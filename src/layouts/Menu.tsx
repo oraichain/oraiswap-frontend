@@ -50,7 +50,6 @@ import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchNativeTokenBalance } from 'rest/api';
-import { useWeb3React } from '@web3-react/core';
 
 const { Text } = Typography;
 

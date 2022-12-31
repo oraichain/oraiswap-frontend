@@ -28,7 +28,7 @@ import { network } from 'config/networks';
 import {
   fetchBalance,
   fetchBalanceWithMapping,
-  fetchNativeTokenBalance,
+  // fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   Type,
@@ -78,8 +78,6 @@ import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
-import { Contract } from 'config/contracts';
-import { TransferBackMsg } from 'libs/contracts';
 
 interface BalanceProps { }
 
