@@ -19,6 +19,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   oracle: string;
   staking: string;
   router: string;
+  router_v2: string;
   denom: string;
   prefix: string;
   rewarder: string;
