@@ -15,7 +15,6 @@ type ContractName =
   | 'factory'
   | 'factory_v2'
   | 'router'
-  | 'router_v2'
   | 'staking'
   | 'rewarder'
   | 'converter'
@@ -59,10 +58,6 @@ export class Contract {
 
   static get router(): OraiswapRouterClient {
     return this.getContract('router', network.router);
-  }
-
-  static get router_v2(): OraiswapRouterClient {
-    return new OraiswapRouterClient(window.client, this._sender, network.router_v2);
   }
 
   static get staking(): OraiswapStakingClient {
