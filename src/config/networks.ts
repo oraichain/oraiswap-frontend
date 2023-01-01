@@ -16,7 +16,8 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     id: NetworkKey.MAINNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
     factory: process.env.REACT_APP_FACTORY_CONTRACT,
-    router: process.env.REACT_APP_ROUTER_CONTRACT,
+    factory_v2: process.env.REACT_APP_FACTORY_V2_CONTRACT,
+    router: process.env.REACT_APP_ROUTER_V2_CONTRACT,
     oracle: process.env.REACT_APP_ORACLE_CONTRACT,
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
@@ -33,6 +34,7 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     id: NetworkKey.TESTNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.050000 ORAI
     factory: 'orai1d5g77f27jg8wvrrdval36dd5q97rfgn7lmnmra',
+    factory_v2: process.env.REACT_APP_FACTORY_V2_CONTRACT,
     router: 'orai1g0pwp3rgzqywvt0xdut08gknyj5q37rtn5aecx',
     oracle: 'orai1pnujlcvcqwawclat8xrhw80rvjx2yynanpevpn',
     staking: process.env.REACT_APP_STAKING_CONTRACT,

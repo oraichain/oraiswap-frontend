@@ -1,6 +1,7 @@
-import {AllowMsg, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, ChannelInfo, AllowedInfo, AllowedTokenInfo} from "./types";
+import {AllowMsg, Cw20ReceiveMsg, TransferMsg, Cw20PairMsg, Amount, ChannelInfo, AllowedInfo} from "./types";
 export interface InstantiateMsg {
   allowlist: AllowMsg[];
+  default_gas_limit?: number | null;
   default_timeout: number;
   gov_contract: string;
 }
@@ -9,29 +10,17 @@ export type ExecuteMsg = {
 } | {
   transfer: TransferMsg;
 } | {
-  swap: SwapMsg;
-} | {
-  join_pool: JoinPoolMsg;
-} | {
-  exit_pool: ExitPoolMsg;
-} | {
-  create_lockup: CreateLockupMsg;
-} | {
-  lock_tokens: LockTokensMsg;
-} | {
-  claim_tokens: ClaimTokensMsg;
-} | {
-  unlock_tokens: UnlockTokensMsg;
+  update_cw20_mapping_pair: Cw20PairMsg;
 } | {
   allow: AllowMsg;
-} | {
-  allow_external_token: ExternalTokenMsg;
 } | {
   update_admin: {
     admin: string;
   };
 };
 export type QueryMsg = {
+  port: {};
+} | {
   list_channels: {};
 } | {
   channel: {
@@ -46,25 +35,29 @@ export type QueryMsg = {
     contract: string;
   };
 } | {
-  external_token: {
-    denom: string;
-  };
-} | {
   list_allowed: {
     limit?: number | null;
+    order?: number | null;
     start_after?: string | null;
   };
 } | {
-  list_external_tokens: {
+  cw20_mapping: {
     limit?: number | null;
+    order?: number | null;
     start_after?: string | null;
   };
 } | {
-  lockup: {
-    channel: string;
-    owner: string;
+  cw20_mapping_from_key: {
+    key: string;
+  };
+} | {
+  cw20_mapping_from_cw20_denom: {
+    cw20_denom: string;
   };
 };
+export interface MigrateMsg {
+  default_gas_limit?: number | null;
+}
 export interface AdminResponse {
   admin?: string | null;
 }
@@ -78,12 +71,9 @@ export interface ChannelResponse {
   total_sent: Amount[];
 }
 export interface ConfigResponse {
+  default_gas_limit?: number | null;
   default_timeout: number;
   gov_contract: string;
-}
-export interface AllowedTokenResponse {
-  contract?: string | null;
-  is_allowed: boolean;
 }
 export interface ListAllowedResponse {
   allow: AllowedInfo[];
@@ -91,10 +81,6 @@ export interface ListAllowedResponse {
 export interface ListChannelsResponse {
   channels: ChannelInfo[];
 }
-export interface ListExternalTokensResponse {
-  tokens: AllowedTokenInfo[];
-}
-export interface LockupResponse {
-  address: string;
-  owner: string;
+export interface PortResponse {
+  port_id: string;
 }

@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Addr, AssetInfo, PairInfo} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
+import {  AssetInfo, PairInfo} from "./types";
+import { ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
 import { OraiswapFactoryQueryClient, OraiswapFactoryClient } from "./OraiswapFactory.client";
 export interface OraiswapFactoryReactQuery<TResponse, TData = TResponse> {
   client: OraiswapFactoryQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapFactoryPairsQuery<TData> extends OraiswapFactoryReactQuery<PairsResponse, TData> {

@@ -15,8 +15,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
-import Banner from 'components/Banner';
-import { ibcInfos, oraicbain2atom } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
@@ -29,6 +28,7 @@ import { network } from 'config/networks';
 import {
   fetchBalance,
   fetchBalanceWithMapping,
+  // fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   Type,
@@ -79,7 +79,7 @@ import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -474,44 +474,54 @@ const Balance: React.FC<BalanceProps> = () => {
     toToken: TokenItemType,
     transferAmount: number
   ) => {
-    console.log('from token: ', fromToken);
-    console.log('to token: ', toToken);
-    if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) return;
-    // disable Oraichain -> Oraibridge Ledger
-    const key = await keplr.getKey(network.chainId);
-    if (key.isNanoLedger && toToken.org == 'OraiBridge' ) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Ethereum signing with Ledger is not yet supported!',
-      });
-      return;
-    }
+    try {
+      console.log('from token: ', fromToken);
+      console.log('to token: ', toToken);
+      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) return;
+      // disable Oraichain -> Oraibridge Ledger
+      const key = await keplr.getKey(network.chainId);
+      if (key.isNanoLedger && toToken.org == 'OraiBridge') {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Ethereum signing with Ledger is not yet supported!',
+        });
+        return;
+      }
 
-    await window.Keplr.suggestChain(toToken.chainId);
-    // enable from to send transaction
-    await window.Keplr.suggestChain(fromToken.chainId);
-    const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-    const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-    if (!fromAddress || !toAddress) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please login keplr!',
-      });
-      return;
-    }
+      await window.Keplr.suggestChain(toToken.chainId);
+      // enable from to send transaction
+      await window.Keplr.suggestChain(fromToken.chainId);
+      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      if (!fromAddress || !toAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login keplr!',
+        });
+        return;
+      }
 
-    var amount = coin(
-      parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
-      fromToken.denom
-    );
+      let amount = coin(
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        fromToken.denom
+      );
 
-    const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
-    // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
-    if (!fromToken.erc20Cw20Map)
-      await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
-    else {
-      // TODO: need to have filter to check denom & decimal of appropirate network (ERC20 or BEP20)
+      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
+      if (!fromToken.erc20Cw20Map) {
+        await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
+        return;
+      }
+
+      // if it includes wasm in source => ibc wasm case
+      if (ibcInfo.source.includes("wasm")) {
+        // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+      }
+
+      console.log("ibc info: ", ibcInfo)
+
       amount = coin(
         parseAmountToWithDecimal(
           transferAmount,
@@ -519,68 +529,67 @@ const Balance: React.FC<BalanceProps> = () => {
         ).toFixed(0),
         fromToken.erc20Cw20Map[0].erc20Denom
       );
+
       const msgConvertReverses = await generateConvertCw20Erc20Message(
         fromToken,
         fromAddress,
         amount
       );
 
-      try {
-        const executeContractMsgs = getExecuteContractMsgs(
-          fromAddress,
-          parseExecuteContractMultiple(
-            buildMultipleMessages(undefined, msgConvertReverses)
-          )
-        );
+      const executeContractMsgs = getExecuteContractMsgs(
+        fromAddress,
+        parseExecuteContractMultiple(
+          buildMultipleMessages(undefined, msgConvertReverses)
+        )
+      );
 
-        // get raw ibc tx
-        const msgTransfer = {
-          typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-          value: MsgTransfer.fromPartial({
-            sourcePort: ibcInfo.source,
-            sourceChannel: ibcInfo.channel,
-            token: amount,
-            sender: fromAddress,
-            receiver: toAddress,
-            timeoutTimestamp: Long.fromNumber(
-              Math.floor(Date.now() / 1000) + ibcInfo.timeout
-            ).multiply(1000000000),
-          }),
-        };
+      // get raw ibc tx
+      const msgTransfer = {
+        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+        value: MsgTransfer.fromPartial({
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          token: amount,
+          sender: fromAddress,
+          receiver: toAddress,
+          timeoutTimestamp: Long.fromNumber(
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout
+          ).multiply(1000000000),
+        }),
+      };
 
-        const offlineSigner = await window.Keplr.getOfflineSigner(
-          fromToken.chainId
-        );
-        const aminoTypes = new AminoTypes({
-          ...createIbcAminoConverters(),
-          ...createWasmAminoConverters(),
-        });
-        // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-        const client = await SigningStargateClient.connectWithSigner(
-          fromToken.rpc,
-          offlineSigner,
-          { registry: cosmwasmRegistry, aminoTypes }
-        );
-        const result = await client.signAndBroadcast(
-          fromAddress,
-          [...executeContractMsgs, msgTransfer],
-          {
-            gas: '300000',
-            amount: [],
-          }
-        );
-        processTxResult(
-          fromToken,
-          result,
-          `${network.explorer}/txs/${result.transactionHash}`
-        );
-        // }
-      } catch (ex: any) {
-        console.log('error in transfer ibc custom: ', ex);
-        displayToast(TToastType.TX_FAILED, {
-          message: ex.message,
-        });
-      }
+      const offlineSigner = await window.Keplr.getOfflineSigner(
+        fromToken.chainId
+      );
+      const aminoTypes = new AminoTypes({
+        ...createIbcAminoConverters(),
+        ...createWasmAminoConverters(),
+      });
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner,
+        { registry: cosmwasmRegistry, aminoTypes }
+      );
+      const result = await client.signAndBroadcast(
+        fromAddress,
+        [...executeContractMsgs, msgTransfer],
+        {
+          gas: '300000',
+          amount: [],
+        }
+      );
+      processTxResult(
+        fromToken,
+        result,
+        `${network.explorer}/txs/${result.transactionHash}`
+      );
+      // }
+    } catch (ex: any) {
+      console.log('error in transfer ibc custom: ', ex);
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
     }
   };
 
@@ -603,7 +612,6 @@ const Balance: React.FC<BalanceProps> = () => {
         offlineSigner
       );
 
-      // if (key.isNanoLedger && fromAddress.substring(0, 4) === ORAI) throw "This feature has not supported Ledger device yet!"
       const result = await client.sendIbcTokens(
         fromAddress,
         toAddress,
@@ -931,7 +939,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+        !from || (t.name === from.name)
     );
   };
 
@@ -1082,8 +1090,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                                onClickTransfer(fromAmount, from, to);
-                              }
+                              onClickTransfer(fromAmount, from, to);
+                            }
                             : undefined
                         }
                         convertKwt={
@@ -1168,11 +1176,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}

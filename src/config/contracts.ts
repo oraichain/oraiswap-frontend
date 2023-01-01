@@ -1,4 +1,5 @@
 import { contracts } from 'libs/contracts';
+import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
 import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
 import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
 import { OraiswapOracleClient } from 'libs/contracts/OraiswapOracle.client';
@@ -12,12 +13,14 @@ import { network } from './networks';
 type ContractName =
   | 'oracle'
   | 'factory'
+  | 'factory_v2'
   | 'router'
   | 'staking'
   | 'rewarder'
   | 'converter'
   | 'pair'
-  | 'token';
+  | 'token'
+  | 'ibcwasm';
 
 export class Contract {
   private static _sender: string = null;
@@ -49,6 +52,10 @@ export class Contract {
     return this.getContract('factory', network.factory);
   }
 
+  static get factory_v2(): OraiswapFactoryClient {
+    return new OraiswapFactoryClient(window.client, this._sender, network.factory_v2);
+  }
+
   static get router(): OraiswapRouterClient {
     return this.getContract('router', network.router);
   }
@@ -71,5 +78,8 @@ export class Contract {
 
   static token(contractAddress: string): OraiswapTokenClient {
     return this.getContract('token', contractAddress);
+  }
+  static ibcwasm(contractAddress: string): Cw20Ics20Client {
+    return new Cw20Ics20Client(window.client, this._sender, contractAddress);
   }
 }

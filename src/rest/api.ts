@@ -1,10 +1,9 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import { AssetInfo } from 'types/oraiswap_pair/pair_info';
 import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
 import { ORAI } from 'config/constants';
-import { getPair, Pair, pairs } from 'config/pools';
+import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
@@ -55,9 +54,8 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -85,14 +83,14 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     });
 
     tokenInfo = {
-        ...tokenInfo,
-        symbol: data.symbol,
-        name: data.name,
-        contractAddress: tokenSwap.contractAddress,
-        decimals: data.decimals,
-        icon: data.icon,
-        verified: data.verified,
-        total_supply: data.total_supply
+      ...tokenInfo,
+      symbol: data.symbol,
+      name: data.name,
+      contractAddress: tokenSwap.contractAddress,
+      decimals: data.decimals,
+      icon: data.icon,
+      verified: data.verified,
+      total_supply: data.total_supply
     };
   }
   return tokenInfo;
@@ -120,7 +118,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-      '0'
+    '0'
   );
 }
 
@@ -128,8 +126,8 @@ async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType
 ): Promise<PoolInfo> {
-  const { info: fromInfo } = parseTokenInfo(fromTokenInfo, undefined);
-  const { info: toInfo } = parseTokenInfo(toTokenInfo, undefined);
+  const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
+  const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount = 0,
     askPoolAmount = 0;
@@ -159,7 +157,23 @@ async function fetchPairInfo(
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  const data = await Contract.factory.pair({
+  try {
+    const data = await Contract.factory.pair({
+      assetInfos: [firstAsset, secondAsset]
+    });
+    return data;
+  } catch (error) {
+    return fetchPairInfoV2(assetInfos);
+  }
+}
+
+async function fetchPairInfoV2(
+  assetInfos: [TokenItemType, TokenItemType]
+): Promise<PairInfo> {
+  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
+  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+
+  const data = await Contract.factory_v2.pair({
     assetInfos: [firstAsset, secondAsset]
   });
   return data;
@@ -231,9 +245,8 @@ async function fetchNativeTokenBalance(
   lcd?: string,
   shouldKeepOriginal?: boolean
 ): Promise<number | string> {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
+  const url = `${lcd ?? network.lcd
+    }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
   const amount = res.balance.amount;
   if (shouldKeepOriginal) return amount;
@@ -255,7 +268,7 @@ async function fetchBalanceWithMapping(
   walletAddr: string,
   tokenInfo: TokenItemType
 ): Promise<{ amount: number; subAmounts: { [key: string]: number } }> {
-  var finalBalance = 0;
+  let finalBalance = 0;
   // get all native balances that are from oraibridge (ibc/...)
   let subAmounts = {},
     mainBalance = 0;
@@ -291,7 +304,7 @@ async function generateConvertErc20Cw20Message(
   tokenInfo: TokenItemType,
   sender: string
 ) {
-  var msgConverts: any[] = [];
+  let msgConverts: any[] = [];
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
@@ -321,11 +334,11 @@ async function generateConvertCw20Erc20Message(
   sender: string,
   sendCoin: Coin
 ) {
-  var msgConverts: any[] = [];
+  let msgConverts: any[] = [];
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    var balance: string;
+    let balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
     balance = new Big(
@@ -395,27 +408,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {
@@ -427,7 +440,7 @@ async function simulateSwap(query: {
   // check if they have pairs. If not then we go through ORAI
 
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
-  const { info: askInfo } = parseTokenInfo(toInfo, undefined);
+  const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs(
     [fromInfo.denom, toInfo.denom],
@@ -435,11 +448,15 @@ async function simulateSwap(query: {
     askInfo
   );
 
-  const data = Contract.router.simulateSwapOperations({
-    offerAmount: amount.toString(),
-    operations
-  });
-  return data;
+  try {
+    const data = await Contract.router.simulateSwapOperations({
+      offerAmount: amount.toString(),
+      operations
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Error when trying to simulate swap using router v2: ${error}`)
+  }
 }
 
 export type SwapQuery = {
@@ -454,8 +471,6 @@ export type SwapQuery = {
 
 export type ProvideQuery = {
   type: Type.PROVIDE;
-  // from: string;
-  // to: string;
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   fromAmount: number | string;
@@ -611,8 +626,6 @@ async function generateContractMessages(
 
 export type BondMining = {
   type: Type.BOND_LIQUIDITY;
-  // from: string;
-  // to: string;
   lpToken: string;
   amount: number | string;
   assetToken: TokenInfo;

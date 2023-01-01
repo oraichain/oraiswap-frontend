@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Uint128, Binary, Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo, Decimal, TokenRatio} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, ConvertInfoResponse} from "./OraiswapConverter.types";
+import { Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo} from "./types";
+import { ConfigResponse, ConvertInfoResponse} from "./OraiswapConverter.types";
 import { OraiswapConverterQueryClient, OraiswapConverterClient } from "./OraiswapConverter.client";
 export interface OraiswapConverterReactQuery<TResponse, TData = TResponse> {
   client: OraiswapConverterQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapConverterConvertInfoQuery<TData> extends OraiswapConverterReactQuery<ConvertInfoResponse, TData> {

@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Addr, AssetInfo, Uint128} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, DistributionInfoResponse, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
+import {Addr, AssetInfo } from "./types";
+import { ConfigResponse, DistributionInfoResponse, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
 import { OraiswapRewarderQueryClient, OraiswapRewarderClient } from "./OraiswapRewarder.client";
 export interface OraiswapRewarderReactQuery<TResponse, TData = TResponse> {
   client: OraiswapRewarderQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapRewarderRewardAmountPerSecQuery<TData> extends OraiswapRewarderReactQuery<RewardAmountPerSecondResponse, TData> {

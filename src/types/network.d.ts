@@ -15,6 +15,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;
+  factory_v2: string;
   oracle: string;
   staking: string;
   router: string;

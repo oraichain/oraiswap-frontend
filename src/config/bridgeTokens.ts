@@ -9,6 +9,7 @@ import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
 import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
 import { ReactComponent as ORAIX } from 'assets/icons/OraidexSVG.svg';
+import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
 import { network, NetworkKey } from './networks';
 import _ from 'lodash';
 import {
@@ -90,7 +91,8 @@ export type TokenItemType = {
     | 'oraix'
     | 'tether'
     | 'kawaii-islands'
-    | 'milky-token';
+    | 'milky-token'
+    | 'scorai';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -652,6 +654,21 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         lcd: 'https://lcd.orai.io',
         cosmosBased: true,
         Icon: ORAIX
+      },
+      {
+        name: 'scORAI',
+        org: 'Oraichain',
+        prefix: 'orai',
+        coinType: 118,
+        denom: 'scorai',
+        contractAddress: process.env.REACT_APP_SCORAI_CONTRACT,
+        coingeckoId: 'scorai',
+        decimals: COSMOS_DECIMALS,
+        chainId: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        lcd: 'https://lcd.orai.io',
+        cosmosBased: true,
+        Icon: scORAI
       }
     ]
   ]

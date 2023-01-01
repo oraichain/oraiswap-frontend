@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, ExchangeRateItem, Coin} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ContractInfoResponse, ExchangeRateResponse, ExchangeRatesResponse, TaxCapResponse, TaxRateResponse, TreasuryResponse, ExchangeResponse, ContractResponse} from "./OraiswapOracle.types";
+import {Addr, Decimal, Uint128, OracleTreasuryQuery, OracleExchangeQuery, OracleContractQuery, Coin} from "./types";
+import { TreasuryResponse, ExchangeResponse, ContractResponse} from "./OraiswapOracle.types";
 import { OraiswapOracleQueryClient, OraiswapOracleClient } from "./OraiswapOracle.client";
 export interface OraiswapOracleReactQuery<TResponse, TData = TResponse> {
   client: OraiswapOracleQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapOracleContractQuery<TData> extends OraiswapOracleReactQuery<ContractResponse, TData> {input: OracleContractQuery}

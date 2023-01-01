@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import {AllowMsg, Uint128, Binary, Uint64, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, AllowedTokenInfo} from "./types";
-import {InstantiateMsg, ExecuteMsg, QueryMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
+import {AllowMsg, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Coin} from "./types";
+import { AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, AllowedTokenResponse, ListAllowedResponse, ListChannelsResponse, ListExternalTokensResponse, LockupResponse} from "./OraiswapIbc.types";
 import { OraiswapIbcQueryClient, OraiswapIbcClient } from "./OraiswapIbc.client";
 export interface OraiswapIbcReactQuery<TResponse, TData = TResponse> {
   client: OraiswapIbcQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData?: undefined;
+    initialData: undefined;
   };
 }
 export interface OraiswapIbcLockupQuery<TData> extends OraiswapIbcReactQuery<LockupResponse, TData> {
@@ -225,7 +225,9 @@ export function useOraiswapIbcUnlockTokensMutation(options?: Omit<UseMutationOpt
       memo,
       funds
     } = {}
-  }) => client.unlockTokens(msg, fee, memo, funds), options);
+  }) => client.unlockTokens({channel: msg.channel,
+    lockId: msg.lock_id,
+    timeout: msg.timeout}), options);
 }
 export interface OraiswapIbcClaimTokensMutation {
   client: OraiswapIbcClient;
@@ -305,7 +307,10 @@ export function useOraiswapIbcExitPoolMutation(options?: Omit<UseMutationOptions
       memo,
       funds
     } = {}
-  }) => client.exitPool(msg, fee, memo, funds), options);
+  }) => client.exitPool({ channel: msg.channel,
+    minAmountOut: msg.min_amount_out,
+    timeout: msg.timeout,
+    tokenOut: msg.token_out}), options);
 }
 export interface OraiswapIbcJoinPoolMutation {
   client: OraiswapIbcClient;
@@ -325,7 +330,10 @@ export function useOraiswapIbcJoinPoolMutation(options?: Omit<UseMutationOptions
       memo,
       funds
     } = {}
-  }) => client.joinPool(msg, fee, memo, funds), options);
+  }) => client.joinPool({channel: msg.channel,
+    pool: msg.pool,
+    shareMinOut: msg.share_min_out,
+    timeout: msg.timeout }), options);
 }
 export interface OraiswapIbcSwapMutation {
   client: OraiswapIbcClient;
@@ -345,7 +353,11 @@ export function useOraiswapIbcSwapMutation(options?: Omit<UseMutationOptions<Exe
       memo,
       funds
     } = {}
-  }) => client.swap(msg, fee, memo, funds), options);
+  }) => client.swap({channel: msg.channel,
+    minAmountOut: msg.min_amount_out,
+    pool: msg.pool,
+    timeout: msg.timeout,
+    tokenOut: msg.token_out}), options);
 }
 export interface OraiswapIbcTransferMutation {
   client: OraiswapIbcClient;
@@ -365,7 +377,9 @@ export function useOraiswapIbcTransferMutation(options?: Omit<UseMutationOptions
       memo,
       funds
     } = {}
-  }) => client.transfer(msg, fee, memo, funds), options);
+  }) => client.transfer({ channel: msg.channel,
+    remoteAddress: msg.remote_address,
+    timeout: msg.timeout}), options);
 }
 export interface OraiswapIbcReceiveMutation {
   client: OraiswapIbcClient;
