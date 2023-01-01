@@ -1,5 +1,6 @@
 import { Button, Typography } from 'antd';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
+import { ReactComponent as LogoFullXmas } from 'assets/images/OraiDEX_xmas_light.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Transfer } from 'assets/icons/transfer.svg';
@@ -173,7 +174,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
       {mobileMode && (
         <div className={styles.logo}>
           <Link to={'/'} onClick={() => setLink('/')}>
-            <LogoFull />
+            {/* <LogoFull /> */}
+            <div style={{ width: 160 }}>
+              <LogoFullXmas />
+            </div>
           </Link>
           <ToggleIcon onClick={handleToggle} />
         </div>
@@ -182,7 +186,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <LogoFull />
+              {/* <LogoFull /> */}
+              <div style={{ width: 160 }}>
+                <LogoFullXmas />
+              </div>
             </Link>
           )}
           <div className={styles.menu_items}>
