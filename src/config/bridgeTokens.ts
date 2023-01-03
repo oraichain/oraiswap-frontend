@@ -727,3 +727,8 @@ export const gravityContracts: { [key: string]: string } = {
   [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
   [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
 };
+
+export const usdtToken = _.uniqBy(
+  _.flatten(tokens).filter((token) => token.denom === STABLE_DENOM),
+  (c) => c.denom
+);
