@@ -226,7 +226,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token.lcd
         );
         let amountTokens;
-        if (token.denom === scORAI_DENOM || token.denom.toUpperCase() == ORAIX_DENOM.toUpperCase()) {
+        if (token.denom === scORAI_DENOM) {
           amountTokens = await simulateSwap({
             fromInfo: token,
             toInfo: usdtToken?.[0],

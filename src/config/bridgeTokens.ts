@@ -92,7 +92,8 @@ export type TokenItemType = {
     | 'tether'
     | 'kawaii-islands'
     | 'milky-token'
-    | 'scorai';
+    | 'scorai'
+    | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -647,7 +648,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'oraix',
         contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
-        coingeckoId: 'oraix',
+        coingeckoId: 'oraidex',
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
