@@ -23,6 +23,7 @@ import {
   kawaiiTokens,
   TokenItemType,
   tokens,
+  usdtToken
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import {
@@ -31,12 +32,14 @@ import {
   // fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
+  simulateSwap,
   Type,
 } from 'rest/api';
 import Content from 'layouts/Content';
 import {
   buildMultipleMessages,
   getUsd,
+  parseAmount,
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
   parseAmountToWithDecimal,
@@ -56,6 +59,7 @@ import {
   ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
+  scORAI_DENOM,
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
@@ -78,6 +82,7 @@ import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
+import { Fraction } from '@saberhq/token-utils';
 
 interface BalanceProps { }
 
@@ -219,9 +224,22 @@ const Balance: React.FC<BalanceProps> = () => {
           token.contractAddress,
           token.lcd
         );
+        let amountTokens;
+        if (token.denom === scORAI_DENOM) {
+          amountTokens = await simulateSwap({
+            fromInfo: token,
+            toInfo: usdtToken?.[0],
+            amount: parseAmount('1', token?.decimals),
+          });
+        }
+        
         amountDetail = {
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals),
+          usd: getUsd(
+            amount,
+            prices[token.coingeckoId].price ?? new Fraction(amountTokens?.amount, Math.pow(10,token?.decimals)),
+            token.decimals
+          ),
         };
       }
 

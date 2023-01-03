@@ -92,7 +92,8 @@ export type TokenItemType = {
     | 'tether'
     | 'kawaii-islands'
     | 'milky-token'
-    | 'scorai';
+    | 'scorai'
+    | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -647,7 +648,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         coinType: 118,
         denom: 'oraix',
         contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
-        coingeckoId: 'oraix',
+        coingeckoId: 'oraidex',
         decimals: COSMOS_DECIMALS,
         chainId: 'Oraichain',
         rpc: 'https://rpc.orai.io',
@@ -727,3 +728,8 @@ export const gravityContracts: { [key: string]: string } = {
   [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
   [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
 };
+
+export const usdtToken = _.uniqBy(
+  _.flatten(tokens).filter((token) => token.denom === STABLE_DENOM),
+  (c) => c.denom
+);

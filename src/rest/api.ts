@@ -580,7 +580,7 @@ async function generateContractMessages(
 
       input = {
         send: {
-          owner: sender,
+          // owner: sender,
           contract: withdrawQuery.pair,
           amount: withdrawQuery.amount.toString(),
           msg: 'eyJ3aXRoZHJhd19saXF1aWRpdHkiOnt9fQ==' // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
