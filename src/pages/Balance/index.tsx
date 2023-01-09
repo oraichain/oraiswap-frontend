@@ -528,6 +528,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
+        if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId]
+        }
         await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
         return;
       }
