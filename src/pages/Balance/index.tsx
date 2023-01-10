@@ -960,7 +960,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || (t.name === from.name)
+        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
     );
   };
 
