@@ -3,9 +3,21 @@ import Content from 'layouts/Content';
 import styles from './index.module.scss';
 
 const Maintenance: FunctionComponent = () => {
-  const MaintenanceBox = memo<Object>(({}) => {
-    return (
-      <>
+  return (
+    <Content>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          textAlign: 'center',
+          margin: 'auto 0',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          fontSize: 30,
+        }}
+      >
         <div className={styles.maintenance}>
           <div className={styles.maintenance_content}>
             OraiBridge is upgrading to new version. Please use the Bridge later
@@ -29,25 +41,6 @@ const Maintenance: FunctionComponent = () => {
           </a>
           )
         </div>
-      </>
-    );
-  });
-  return (
-    <Content>
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          textAlign: 'center',
-          margin: 'auto 0',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          fontSize: 30,
-        }}
-      >
-        <MaintenanceBox />
       </div>
     </Content>
   );
