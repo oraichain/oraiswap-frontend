@@ -12,18 +12,19 @@ const Transfer = React.lazy(() => import('pages/Transfer'));
 const Pools = React.lazy(() => import('pages/Pools'));
 const Balance = React.lazy(() => import('pages/Balance'));
 const PoolDetail = React.lazy(() => import('pages/Pools/PoolDetail'));
+const Maintenance = React.lazy(() => import('pages/Maintenance'));
 
 export default () => {
   return (
     <Suspense fallback={<Spin className="spin" />}>
       <Routes>
-        <Route path="/" element={<Balance />} />
+        <Route path="/" element={<Maintenance />} />
         <Route path="/swap" element={<Swap />} />
         {/* <Route path="/transfer" element={<Transfer />} /> */}
         <Route path="/pools" element={<Pools />} />
         <Route path="/airdrop/:chain" element={<AirDrop />} />
         <Route path="/ethereum" element={<EthereumTest />} />        
-        <Route path="/bridge" element={<Balance />} />
+        <Route path="/bridge" element={<Maintenance />} />
         <Route path="/pool/:poolUrl" element={<PoolDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
