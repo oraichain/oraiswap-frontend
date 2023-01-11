@@ -647,25 +647,54 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
+      
+      const msgTransfer = {
+        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+        value: MsgTransfer.fromPartial({
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          token: amount,
+          sender: fromAddress,
+          receiver: toAddress,
+          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          timeoutTimestamp: Long.fromNumber(
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout
+          )
+            .multiply(1000000000)
+            .toString()
+        })
+      };
+
+      let aminoTypes = new AminoTypes({ ...customAminoTypes });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
-        offlineSigner
+        offlineSigner,
+        { registry: customRegistry, aminoTypes }
       );
 
-      const result = await client.sendIbcTokens(
+      const result = await client.signAndBroadcast(
         fromAddress,
-        toAddress,
-        amount,
-        ibcInfo.source,
-        ibcInfo.channel,
-        undefined,
-        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        [msgTransfer],
         {
-          gas: '200000',
+          gas: '300000',
           amount: []
         }
       );
+
+      // const result = await client.sendIbcTokens(
+      //   fromAddress,
+      //   toAddress,
+      //   amount,
+      //   ibcInfo.source,
+      //   ibcInfo.channel,
+      //   undefined,
+      //   Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+      //   {
+      //     gas: '200000',
+      //     amount: []
+      //   },
+      // );
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
