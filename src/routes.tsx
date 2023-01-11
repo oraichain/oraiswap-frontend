@@ -11,6 +11,7 @@ const Swap = React.lazy(() => import('pages/Swap/index'));
 const Transfer = React.lazy(() => import('pages/Transfer'));
 const Pools = React.lazy(() => import('pages/Pools'));
 const Balance = React.lazy(() => import('pages/Balance'));
+const BalanceNew = React.lazy(() => import('pages/BalanceNew'));
 const PoolDetail = React.lazy(() => import('pages/Pools/PoolDetail'));
 
 export default () => {
@@ -24,6 +25,7 @@ export default () => {
         <Route path="/airdrop/:chain" element={<AirDrop />} />
         <Route path="/ethereum" element={<EthereumTest />} />        
         <Route path="/bridge" element={<Balance />} />
+        <Route path="/bridgeNew" element={<BalanceNew />} />
         <Route path="/pool/:poolUrl" element={<PoolDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

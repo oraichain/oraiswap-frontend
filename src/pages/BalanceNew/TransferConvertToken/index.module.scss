@@ -1,0 +1,239 @@
+@import 'src/styles/mixins';
+
+.transferTab {
+  width: 100%;
+  margin-top: 20px;
+  // @include flex(space-between);
+  .tfBtn {
+    background: #612fca;
+    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    border-radius: 8px;
+    padding: 16px;
+    @include flex();
+    align-content: center;
+    margin-top: 24px;
+    cursor: pointer;
+    svg {
+      margin-right: 5px !important;
+    }
+  }
+  .tfTxt {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  @include mobile {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+.balanceDescription {
+  width: 100%;
+  text-align: left !important;
+  @include mobile {
+    padding-top: 10px;
+  }
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+  text-align: center;
+  color: #777e90;
+  align-self: flex-start;
+  margin: 8px 8px 8px 0;
+}
+.token {
+  @include flex();
+  margin-right: 10px;
+  .tokenInfo {
+    padding-left: 16px;
+    .tokenName {
+      font-weight: 600;
+      font-size: 22px;
+    }
+    .tokenOrg {
+      padding-left: 4px;
+      padding-right: 4px;
+      border-radius: 4px;
+      background: #612fca;
+      float: left;
+    }
+    .tokenOrgTxt {
+      font-weight: 600;
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      float: left;
+      white-space: nowrap;
+    }
+  }
+}
+.table {
+  .tableDes {
+    padding: 24px;
+    padding-top: 0px;
+    justify-content: space-between;
+    display: flex;
+  }
+}
+.subLabel {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 100%;
+  color: #777e90;
+  &.token {
+    align-self: flex-end;
+  }
+}
+.fromBalanceDes {
+  @include flex(space-between);
+}
+.balanceFromGroup {
+  @include flex(space-between);
+  padding-left: 24px;
+  .balanceBtn {
+    cursor: pointer;
+    background: #191b21;
+    border-radius: 8px;
+    width: 66px;
+    padding: 8px;
+    margin-left: 16px;
+    color: #a871df;
+  }
+}
+.amount {
+  text-align: left;
+  background: #2B2D3B;
+  border-radius: 8px;
+  height: 48px;
+  width: 180px;
+  padding: 12px;
+  box-sizing: border-box;
+  color: #ebebeb;
+  font-weight: 600;
+  font-size: 24px;
+  @include mobile {
+    width: 100%;
+    font-size: 20px;
+  }
+}
+.tokenFromGroup {
+  margin: 5px 0;
+
+  &.small {
+    .amount {
+      height: 36px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    .balanceBtn {
+      background: #2e283d;
+      font-size: 12px;
+      border-radius: 8px;
+      width: 50%;
+      @include mobile {
+        width: 100%;
+      }
+      padding: 10px 24px;
+      text-align: center;
+    }
+    .tfBtn {
+      margin-top: 15px;
+      width: 100%;
+      border-radius: 8px;
+    }
+  }
+}
+.tokenIcon {
+  width: 44px;
+  height: 44px;
+}
+.network {
+  @include desktop {
+    @include flex(space-between);
+  }
+  @include mobile {
+    width: 100%;
+  }
+  .box {
+    .transfer {
+      .content {
+        @include flex(space-between);
+        @include mobile {
+          padding-top: 20px;
+          justify-content: flex-start;
+        }
+        .title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #ebebeb;
+        }
+        .address {
+          margin-left: 10px;
+          border-radius: 8px;
+          border: 1px solid #777e90;
+          padding: 2px 8px;
+          color: #777e90;
+          font-size: 13px;
+        }
+      }
+    }
+    .search {
+      position: relative;
+      padding-top: 16px;
+      cursor: pointer;
+      background: #191b21;
+      &_filter {
+        background: #2b2d3b;
+        text-align: center;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      &_box {
+        @include flex(space-between);
+        padding: 0 16px;
+      }
+      &_logo {
+        display: flex;
+        align-items: center;
+      }
+      &_text {
+        font-size: 16px;
+        font-weight: 600;
+        padding-left: 10px;
+      }
+    }
+  }
+}
+.loading {
+  @include desktop {
+    width: 50%;
+    height: 180px;
+  }
+  @include flex();
+}
+.tokenFromGroupBalance {
+  @include mobile {
+    @include flex(center, center, column-reverse);
+  }
+}
+
+.items {
+  position: absolute;
+  width: 100%;
+  background: #2B2D3B;
+  border: 1.5px solid #5A5270;
+  border-radius: 8px;
+  margin-top: 10px;
+  li {
+    padding: 12px 24px 12px 24px;
+  }
+  li:hover {
+    background-color: #703CDE;
+  }
+  &_title {
+    padding-left: 10px;
+    color: #EBEBEB;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+  }
+}
