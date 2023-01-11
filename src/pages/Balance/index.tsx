@@ -455,6 +455,12 @@ const Balance: React.FC<BalanceProps> = () => {
         { registry: gravityRegistry, aminoTypes }
       );
 
+      const chainFeeAmount = parseAmountToWithDecimal(
+        amount * 0.01,
+        fromToken.decimals
+      )
+        .minus(ORAI_BRIDGE_EVM_FEE)
+        .toFixed(0);
       const message = {
         typeUrl: '/gravity.v1.MsgSendToEth',
         value: MsgSendToEth.fromPartial({
@@ -470,8 +476,9 @@ const Balance: React.FC<BalanceProps> = () => {
             amount: ORAI_BRIDGE_EVM_FEE
           },
           chainFee: {
+            denom: fromToken.denom,
             // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_CHAIN_FEE
+            amount: chainFeeAmount,
           },
           evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX
         })
@@ -607,7 +614,8 @@ const Balance: React.FC<BalanceProps> = () => {
         {
           gas: '300000',
           amount: []
-        }
+        },
+        ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress
       );
       processTxResult(
         fromToken,
