@@ -541,6 +541,14 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!fromToken.erc20Cw20Map) {
         if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+          await transferIBCOrai({
+            fromToken,
+            fromAddress,
+            toAddress,
+            amount,
+            ibcInfo
+          });
+          return;
         }
         await transferIBC({
           fromToken,
@@ -647,7 +655,46 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
-      
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner
+      );
+      const result = await client.sendIbcTokens(
+        fromAddress,
+        toAddress,
+        amount,
+        ibcInfo.source,
+        ibcInfo.channel,
+        undefined,
+        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        {
+          gas: '200000',
+          amount: [],
+        }
+      );
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
+    }
+  };
+
+
+  // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
+  const transferIBCOrai = async (data: {
+    fromToken: TokenItemType;
+    fromAddress: string;
+    toAddress: string;
+    amount: Coin;
+    ibcInfo: IBCInfo;
+  }) => {
+    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+
+    try {
+      const offlineSigner = await window.Keplr.getOfflineSigner(
+        fromToken.chainId
+      );
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
         value: MsgTransfer.fromPartial({
@@ -672,30 +719,10 @@ const Balance: React.FC<BalanceProps> = () => {
         offlineSigner,
         { registry: customRegistry, aminoTypes }
       );
-
-      const result = await client.signAndBroadcast(
-        fromAddress,
-        [msgTransfer],
-        {
-          gas: '300000',
-          amount: []
-        }
-      );
-
-      // const result = await client.sendIbcTokens(
-      //   fromAddress,
-      //   toAddress,
-      //   amount,
-      //   ibcInfo.source,
-      //   ibcInfo.channel,
-      //   undefined,
-      //   Math.floor(Date.now() / 1000) + ibcInfo.timeout,
-      //   {
-      //     gas: '200000',
-      //     amount: []
-      //   },
-      // );
-
+      const result = await client.signAndBroadcast(fromAddress, [msgTransfer], {
+        gas: '300000',
+        amount: [],
+      });
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
