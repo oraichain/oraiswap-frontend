@@ -9,7 +9,7 @@ import {
   // isBroadcastTxFailure,
   DeliverTxResponse,
   isDeliverTxFailure,
-  SigningStargateClient,
+  SigningStargateClient
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
@@ -33,7 +33,7 @@ import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   simulateSwap,
-  Type,
+  Type
 } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -43,7 +43,7 @@ import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
   parseAmountToWithDecimal,
-  parseBep20Erc20Name,
+  parseBep20Erc20Name
 } from 'libs/utils';
 import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
@@ -55,20 +55,21 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
+  ORAI_BRIDGE_CHAIN_FEE,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
-  scORAI_DENOM,
+  scORAI_DENOM
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
   getExecuteContractMsgs,
   HandleOptions,
-  parseExecuteContractMultiple,
+  parseExecuteContractMultiple
 } from 'libs/cosmjs';
 import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
-import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
+import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -84,7 +85,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Fraction } from '@saberhq/token-utils';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -100,13 +101,13 @@ const Balance: React.FC<BalanceProps> = () => {
   const [chainInfo] = useGlobalState('chainInfo');
   const [infoEvm] = useGlobalState('infoEvm');
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
-    0, 0,
+    0, 0
   ]);
   const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
-    [],
+    []
   ]);
   const [txHash, setTxHash] = useState('');
   const { prices } = useCoinGeckoPrices(
@@ -181,7 +182,7 @@ const Balance: React.FC<BalanceProps> = () => {
       setKwtSubnetAddress(address_eth);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
-        message: error.message,
+        message: error.message
       });
     }
   };
@@ -215,7 +216,7 @@ const Balance: React.FC<BalanceProps> = () => {
         amountDetail = {
           subAmounts,
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals),
+          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
         };
       } else {
         const amount = await fetchBalance(
@@ -229,17 +230,18 @@ const Balance: React.FC<BalanceProps> = () => {
           amountTokens = await simulateSwap({
             fromInfo: token,
             toInfo: usdtToken?.[0],
-            amount: parseAmount('1', token?.decimals),
+            amount: parseAmount('1', token?.decimals)
           });
         }
-        
+
         amountDetail = {
           amount,
           usd: getUsd(
             amount,
-            prices[token.coingeckoId].price ?? new Fraction(amountTokens?.amount, Math.pow(10,token?.decimals)),
+            prices[token.coingeckoId].price ??
+              new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
             token.decimals
-          ),
+          )
         };
       }
 
@@ -265,12 +267,8 @@ const Balance: React.FC<BalanceProps> = () => {
           token.denom,
           {
             amount,
-            usd: getUsd(
-              amount,
-              prices[token.coingeckoId].price,
-              token.decimals
-            ),
-          },
+            usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+          }
         ];
       })
     );
@@ -298,8 +296,8 @@ const Balance: React.FC<BalanceProps> = () => {
                 amount,
                 prices[token.coingeckoId].price,
                 token.decimals
-              ),
-            },
+              )
+            }
           ];
         })
     );
@@ -319,7 +317,7 @@ const Balance: React.FC<BalanceProps> = () => {
         return displayToast(
           TToastType.TX_INFO,
           {
-            message: 'You must install Keplr to continue',
+            message: 'You must install Keplr to continue'
           },
           { toastId: 'install_keplr' }
         );
@@ -359,13 +357,13 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     if (isDeliverTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
-        message: result.rawLog,
+        message: result.rawLog
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
         customLink: customLink
           ? customLink
-          : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`,
+          : `${token.lcd}/cosmos/tx/v1beta1/txs/${result.transactionHash}`
       });
     }
     setTxHash(result.transactionHash);
@@ -375,7 +373,7 @@ const Balance: React.FC<BalanceProps> = () => {
     (type: string, token: TokenItemType) => {
       if (token.denom === ERC20_ORAI) {
         displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`,
+          message: `Token ${token.name} on ${token.org} is currently not supported`
         });
         return;
       }
@@ -426,7 +424,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const key = await keplr.getKey(network.chainId);
       if (key.isNanoLedger) {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Ethereum signing with Ledger is not yet supported!',
+          message: 'Ethereum signing with Ledger is not yet supported!'
         });
         return;
       }
@@ -436,7 +434,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       if (!metamaskAddress || !fromAddress) {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!',
+          message: 'Please login both metamask and keplr!'
         });
         return;
       }
@@ -464,25 +462,30 @@ const Balance: React.FC<BalanceProps> = () => {
           ethDest: metamaskAddress,
           amount: {
             denom: fromToken.denom,
-            amount: rawAmount,
+            amount: rawAmount
           },
           bridgeFee: {
             denom: fromToken.denom,
             // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_EVM_FEE,
+            amount: ORAI_BRIDGE_EVM_FEE
           },
-        }),
+          chainFee: {
+            // just a number to make sure there is a friction
+            amount: ORAI_BRIDGE_CHAIN_FEE
+          },
+          evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX
+        })
       };
       const fee = {
         amount: [],
-        gas: '200000',
+        gas: '200000'
       };
       const result = await client.signAndBroadcast(fromAddress, [message], fee);
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: `${ex}`,
+        message: `${ex}`
       });
     }
   };
@@ -502,7 +505,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const key = await keplr.getKey(network.chainId);
       if (key.isNanoLedger && toToken.org == 'OraiBridge') {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Ethereum signing with Ledger is not yet supported!',
+          message: 'Ethereum signing with Ledger is not yet supported!'
         });
         return;
       }
@@ -514,7 +517,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Please login keplr!',
+          message: 'Please login keplr!'
         });
         return;
       }
@@ -529,19 +532,25 @@ const Balance: React.FC<BalanceProps> = () => {
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
         if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
-          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId]
+          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
         }
-        await transferIBC({ fromToken, fromAddress, toAddress, amount, ibcInfo });
+        await transferIBC({
+          fromToken,
+          fromAddress,
+          toAddress,
+          amount,
+          ibcInfo
+        });
         return;
       }
 
       // if it includes wasm in source => ibc wasm case
-      if (ibcInfo.source.includes("wasm")) {
+      if (ibcInfo.source.includes('wasm')) {
         // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
         ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
       }
 
-      console.log("ibc info: ", ibcInfo)
+      console.log('ibc info: ', ibcInfo);
 
       amount = coin(
         parseAmountToWithDecimal(
@@ -575,8 +584,8 @@ const Balance: React.FC<BalanceProps> = () => {
           receiver: toAddress,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          ).multiply(1000000000),
-        }),
+          ).multiply(1000000000)
+        })
       };
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
@@ -584,7 +593,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
       const aminoTypes = new AminoTypes({
         ...createIbcAminoConverters(),
-        ...createWasmAminoConverters(),
+        ...createWasmAminoConverters()
       });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
@@ -597,7 +606,7 @@ const Balance: React.FC<BalanceProps> = () => {
         [...executeContractMsgs, msgTransfer],
         {
           gas: '300000',
-          amount: [],
+          amount: []
         }
       );
       processTxResult(
@@ -609,7 +618,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex: any) {
       console.log('error in transfer ibc custom: ', ex);
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -643,14 +652,14 @@ const Balance: React.FC<BalanceProps> = () => {
         Math.floor(Date.now() / 1000) + ibcInfo.timeout,
         {
           gas: '200000',
-          amount: [],
+          amount: []
         }
       );
 
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -671,7 +680,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Please login keplr!',
+          message: 'Please login keplr!'
         });
         return;
       }
@@ -699,7 +708,7 @@ const Balance: React.FC<BalanceProps> = () => {
         );
         customMessages = executeContractMsgs.map((msg) => ({
           message: msg.value,
-          path: msg.typeUrl.substring(1),
+          path: msg.typeUrl.substring(1)
         }));
       }
 
@@ -713,9 +722,9 @@ const Balance: React.FC<BalanceProps> = () => {
           denom: amount.denom,
           sender: fromAddress,
           receiver: toAddress,
-          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
         },
-        customMessages,
+        customMessages
       });
 
       processTxResult(
@@ -725,7 +734,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -746,7 +755,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
-          message: 'Please login keplr!',
+          message: 'Please login keplr!'
         });
         return;
       }
@@ -769,13 +778,13 @@ const Balance: React.FC<BalanceProps> = () => {
           denom: amount.denom,
           sender: fromAddress,
           receiver: toAddress,
-          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
         },
         amount: amount.amount,
         contractAddr:
           fromToken.denom == 'erc20_milky'
             ? fromToken.contractAddress
-            : undefined,
+            : undefined
       });
 
       processTxResult(
@@ -785,7 +794,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -800,12 +809,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: from!.chainId }],
+      params: [{ chainId: from!.chainId }]
     });
 
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Please login both metamask and keplr!',
+        message: 'Please login both metamask and keplr!'
       });
       return;
     }
@@ -838,7 +847,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -851,7 +860,7 @@ const Balance: React.FC<BalanceProps> = () => {
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Please choose both from and to tokens',
+        message: 'Please choose both from and to tokens'
       });
       return;
     }
@@ -889,7 +898,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     if (amount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!',
+        message: 'From amount should be higher than 0!'
       });
 
     displayToast(TToastType.TX_BROADCASTING);
@@ -903,7 +912,7 @@ const Balance: React.FC<BalanceProps> = () => {
           type: Type.CONVERT_TOKEN,
           sender: keplrAddress,
           inputAmount: _fromAmount,
-          inputToken: token,
+          inputToken: token
         });
       } else if (type === 'cw20ToNative') {
         msgs = await generateConvertMsgs({
@@ -911,7 +920,7 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: keplrAddress,
           inputAmount: _fromAmount,
           inputToken: token,
-          outputToken,
+          outputToken
         });
       }
       const msg = msgs[0];
@@ -925,7 +934,7 @@ const Balance: React.FC<BalanceProps> = () => {
         walletAddr: keplrAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds } as HandleOptions,
+        handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
 
       if (result) {
@@ -944,7 +953,7 @@ const Balance: React.FC<BalanceProps> = () => {
         finalError = `${error}`;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     }
   };
@@ -990,7 +999,7 @@ const Balance: React.FC<BalanceProps> = () => {
         result = await KawaiiverseJs.convertCoin({
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
-          coin: amount,
+          coin: amount
         });
       } else {
         result = await KawaiiverseJs.convertERC20({
@@ -1000,7 +1009,7 @@ const Balance: React.FC<BalanceProps> = () => {
           contractAddr:
             fromToken?.denom == 'erc20_milky'
               ? fromToken?.contractAddress
-              : undefined,
+              : undefined
         });
       }
       processTxResult(
@@ -1011,7 +1020,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex: any) {
       console.log(ex);
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message,
+        message: ex.message
       });
     }
   };
@@ -1043,7 +1052,7 @@ const Balance: React.FC<BalanceProps> = () => {
               width: 420,
               background: '#1E1E21',
               borderRadius: '8px',
-              padding: '10px',
+              padding: '10px'
             }}
           />
         </div>
@@ -1063,7 +1072,7 @@ const Balance: React.FC<BalanceProps> = () => {
                             ? amounts[from.denom].amount
                             : 0,
                         denom: from?.name ?? '',
-                        decimals: from?.decimals,
+                        decimals: from?.decimals
                       }}
                       className={styles.balanceDescription}
                       prefix="Balance: "
@@ -1111,8 +1120,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                              onClickTransfer(fromAmount, from, to);
-                            }
+                                onClickTransfer(fromAmount, from, to);
+                              }
                             : undefined
                         }
                         convertKwt={
@@ -1139,7 +1148,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     amount:
                       to && amounts[to.denom] ? amounts[to.denom].amount : 0,
                     denom: to?.name ?? '',
-                    decimals: to?.decimals,
+                    decimals: to?.decimals
                   }}
                   className={styles.balanceDescription}
                   prefix="Balance: "
@@ -1197,11 +1206,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                onClickTransfer(
-                                  fromAmount,
-                                  to,
-                                  transferToToken
-                                )
+                                  onClickTransfer(
+                                    fromAmount,
+                                    to,
+                                    transferToToken
+                                  )
                               : undefined
                           }
                           toToken={transferToToken}
