@@ -77,7 +77,7 @@ import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem, { AmountDetail } from './TokenItem';
 import KwtModal from './KwtModal';
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
 import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
@@ -478,7 +478,7 @@ const Balance: React.FC<BalanceProps> = () => {
           chainFee: {
             denom: fromToken.denom,
             // just a number to make sure there is a friction
-            amount: chainFeeAmount,
+            amount: chainFeeAmount
           },
           evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX
         })
@@ -589,9 +589,12 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
+          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          ).multiply(1000000000)
+          )
+            .multiply(1000000000)
+            .toString()
         })
       };
 
@@ -614,8 +617,7 @@ const Balance: React.FC<BalanceProps> = () => {
         {
           gas: '300000',
           amount: []
-        },
-        ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress
+        }
       );
       processTxResult(
         fromToken,
