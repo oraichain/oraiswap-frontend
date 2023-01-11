@@ -68,7 +68,7 @@ import CosmJs, {
   HandleOptions,
   parseExecuteContractMultiple
 } from 'libs/cosmjs';
-import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
+// import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
 import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -79,11 +79,12 @@ import TokenItem, { AmountDetail } from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
-import cosmwasmRegistry from 'libs/cosmwasm-registry';
+// import cosmwasmRegistry from 'libs/cosmwasm-registry';
 import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
-import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
+// import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Fraction } from '@saberhq/token-utils';
+import customRegistry, { customAminoTypes } from 'libs/registry';
 
 interface BalanceProps {}
 
@@ -446,13 +447,13 @@ const Balance: React.FC<BalanceProps> = () => {
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
-      let aminoTypes = new AminoTypes({ ...sendToEthAminoTypes });
+      let aminoTypes = new AminoTypes({ ...customAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: gravityRegistry, aminoTypes }
+        { registry: customRegistry, aminoTypes }
       );
 
       const chainFeeAmount = parseAmountToWithDecimal(
@@ -602,14 +603,14 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.chainId
       );
       const aminoTypes = new AminoTypes({
-        ...createIbcAminoConverters(),
-        ...createWasmAminoConverters()
+        ...createWasmAminoConverters(),
+        ...customAminoTypes,
       });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: cosmwasmRegistry, aminoTypes }
+        { registry: customRegistry, aminoTypes }
       );
       const result = await client.signAndBroadcast(
         fromAddress,
