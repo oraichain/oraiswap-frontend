@@ -442,6 +442,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const rawAmount = parseAmountToWithDecimal(amount, fromToken.decimals)
         .minus(ORAI_BRIDGE_EVM_FEE)
+        .minus(ORAI_BRIDGE_CHAIN_FEE)
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
