@@ -13,6 +13,7 @@ const Pools = React.lazy(() => import('pages/Pools'));
 const Balance = React.lazy(() => import('pages/Balance'));
 const BalanceNew = React.lazy(() => import('pages/BalanceNew'));
 const PoolDetail = React.lazy(() => import('pages/Pools/PoolDetail'));
+const Maintenance = React.lazy(() => import('pages/Maintenance'));
 
 export default () => {
   return (
