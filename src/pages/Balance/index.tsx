@@ -589,6 +589,8 @@ const Balance: React.FC<BalanceProps> = () => {
         )
       );
 
+      // note need refactor 
+      const memo = toToken.org === 'OraiBridge' ? ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress : "";
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -598,7 +600,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
-          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          memo,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
           )
