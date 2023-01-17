@@ -55,6 +55,7 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
+  ORAI_BRIDGE_CHAIN_FEE,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
@@ -67,8 +68,8 @@ import CosmJs, {
   HandleOptions,
   parseExecuteContractMultiple,
 } from 'libs/cosmjs';
-import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
-import { MsgSendToEth } from 'libs/proto/gravity/v1/msgs';
+// import gravityRegistry, { sendToEthAminoTypes } from 'libs/gravity-registry';
+import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -76,15 +77,16 @@ import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem, { AmountDetail } from './TokenItem';
 import KwtModal from './KwtModal';
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
-import cosmwasmRegistry from 'libs/cosmwasm-registry';
-import { Dropdown, Input, Menu } from 'antd';
+// import cosmwasmRegistry from 'libs/cosmwasm-registry';
+import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
-import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
+// import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Fraction } from '@saberhq/token-utils';
+import customRegistry, { customAminoTypes } from 'libs/registry';
 import SelectTokenModal from './Modals/SelectTokenModal';
-import { listNetwork, renderLogoNetwork } from 'helpers';
+import { networks, renderLogoNetwork } from 'helpers';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 
 interface BalanceProps {}
@@ -102,6 +104,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
   const [infoEvm] = useGlobalState('infoEvm');
+  const [filterNetwork, setFilterNetwork] = useState('Oraichain');
+  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
     0, 0,
   ]);
@@ -119,8 +123,16 @@ const Balance: React.FC<BalanceProps> = () => {
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
-  const [filterNetwork, setFilterNetwork] = useState('Oraichain');
-  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+
+  // useEffect(() => {
+  //   displayToast(TToastType.TX_INFO, {
+  //     message:
+  //       'Due to the suspension of BNB Chain following its cross-chain bridge exploit, DO NOT use any bridges between BNB Chain and Oraichain or any other networks until our next announcement.',
+  //   }, {
+  //     position: 'top-center',
+  //     autoClose: false,
+  //   });
+  // }, []);
 
   useInactiveListener();
   useEffect(() => {
@@ -438,18 +450,19 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const rawAmount = parseAmountToWithDecimal(amount, fromToken.decimals)
         .minus(ORAI_BRIDGE_EVM_FEE)
+        .minus(ORAI_BRIDGE_CHAIN_FEE)
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
         fromToken.chainId
       );
-      let aminoTypes = new AminoTypes({ ...sendToEthAminoTypes });
+      let aminoTypes = new AminoTypes({ ...customAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: gravityRegistry, aminoTypes }
+        { registry: customRegistry, aminoTypes }
       );
 
       const message = {
@@ -466,6 +479,12 @@ const Balance: React.FC<BalanceProps> = () => {
             // just a number to make sure there is a friction
             amount: ORAI_BRIDGE_EVM_FEE,
           },
+          chainFee: {
+            denom: fromToken.denom,
+            // just a number to make sure there is a friction
+            amount: ORAI_BRIDGE_CHAIN_FEE,
+          },
+          evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         }),
       };
       const fee = {
@@ -523,6 +542,20 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
+        if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+          // BEP20 ORAI
+          await transferIBCOrai({
+            fromToken,
+            fromAddress,
+            toAddress,
+            amount,
+            ibcInfo,
+          });
+          return;
+        }
+
+        // ATOM , OSMOSIS
         await transferIBC({
           fromToken,
           fromAddress,
@@ -562,6 +595,11 @@ const Balance: React.FC<BalanceProps> = () => {
         )
       );
 
+      // note need refactor
+      const memo =
+        toToken.org === 'OraiBridge'
+          ? ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress
+          : '';
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -571,9 +609,12 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
+          memo,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          ).multiply(1000000000),
+          )
+            .multiply(1000000000)
+            .toString(),
         }),
       };
 
@@ -581,14 +622,14 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.chainId
       );
       const aminoTypes = new AminoTypes({
-        ...createIbcAminoConverters(),
         ...createWasmAminoConverters(),
+        ...customAminoTypes,
       });
       // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner,
-        { registry: cosmwasmRegistry, aminoTypes }
+        { registry: customRegistry, aminoTypes }
       );
       const result = await client.signAndBroadcast(
         fromAddress,
@@ -644,7 +685,56 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: [],
         }
       );
+      processTxResult(fromToken, result);
+    } catch (ex: any) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
+    }
+  };
 
+  // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
+  const transferIBCOrai = async (data: {
+    fromToken: TokenItemType;
+    fromAddress: string;
+    toAddress: string;
+    amount: Coin;
+    ibcInfo: IBCInfo;
+  }) => {
+    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+
+    try {
+      const offlineSigner = await window.Keplr.getOfflineSigner(
+        fromToken.chainId
+      );
+      const msgTransfer = {
+        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+        value: MsgTransfer.fromPartial({
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          token: amount,
+          sender: fromAddress,
+          receiver: toAddress,
+          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          timeoutTimestamp: Long.fromNumber(
+            Math.floor(Date.now() / 1000) + ibcInfo.timeout
+          )
+            .multiply(1000000000)
+            .toString(),
+        }),
+      };
+
+      let aminoTypes = new AminoTypes({ ...customAminoTypes });
+      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      const client = await SigningStargateClient.connectWithSigner(
+        fromToken.rpc,
+        offlineSigner,
+        { registry: customRegistry, aminoTypes }
+      );
+      const result = await client.signAndBroadcast(fromAddress, [msgTransfer], {
+        gas: '300000',
+        amount: [],
+      });
       processTxResult(fromToken, result);
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -956,7 +1046,10 @@ const Balance: React.FC<BalanceProps> = () => {
       return toTokens.find((t) => t.name.includes(name));
     }
 
-    return toTokens.find((t) => !from || t.name === from.name);
+    return toTokens.find(
+      (t) =>
+        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+    );
   };
 
   const convertKwt = async (
@@ -1083,6 +1176,11 @@ const Balance: React.FC<BalanceProps> = () => {
                               onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                       }
+                      convertKwt={
+                        t.chainId === KWT_SUBNETWORK_CHAIN_ID
+                          ? convertKwt
+                          : undefined
+                      }
                       toToken={transferToToken}
                     />
                   </div>
@@ -1095,8 +1193,10 @@ const Balance: React.FC<BalanceProps> = () => {
           isOpen={isSelectNetwork}
           open={() => setIsSelectNetwork(true)}
           close={() => setIsSelectNetwork(false)}
-          listToken={listNetwork}
-          setToken={(chainId) => setFilterNetwork(chainId)}
+          listToken={networks}
+          setToken={(chainId) => {
+            setFilterNetwork(chainId)
+          }}
           icon={true}
         />
       </div>

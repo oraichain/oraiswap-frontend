@@ -17,17 +17,29 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
+  BEP20_ORAI,
   BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  STABLE_DENOM,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
 import useGlobalState from 'hooks/useGlobalState';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
-import { listNetwork, renderContractAddress, renderLogoNetwork } from 'helpers';
+import {
+  filterChainBridge,
+  networks,
+  renderLogoNetwork,
+  updateTokenDenom,
+} from 'helpers';
 import loadingGif from 'assets/gif/loading.gif';
+
+const AMOUNT_BALANCE_25 = '25%';
+const AMOUNT_BALANCE_50 = '50%';
+const AMOUNT_BALANCE_75 = '75%';
+const AMOUNT_BALANCE_MAX = 'MAX';
 
 type AmountDetail = {
   amount: number;
@@ -59,18 +71,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     undefined,
     0,
   ]);
-  const [convertLoading, setConvertLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
-  const [transferIbcLoading, setTransferIbcLoading] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useState('BNB Chain');
+  const [filterNetwork, setFilterNetwork] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [addressTransfer,setAddressTransfer] = useState("12312") 
   const [chainInfo] = useGlobalState('chainInfo');
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
     }
   }, [chainInfo]);
+
+  useEffect(() => {
+    updateTokenDenom(setFilterNetwork, token);
+  }, [token?.chainId]);
 
   // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const name = token.name;
@@ -104,6 +117,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     !onClickTransfer
   )
     return <></>;
+
+  const filterChain = (item) => {
+    return filterChainBridge(token, item, filterNetwork);
+  };
+
   return (
     <div
       className={classNames(styles.tokenFromGroup, styles.small)}
@@ -112,7 +130,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       <div className={styles.tokenFromGroupBalance}>
         <div className={styles.network}>
           <div className={styles.loading}>
-            {transferLoading || convertLoading && (
+            {transferLoading && (
               <img src={loadingGif} width={180} height={180} />
             )}
           </div>
@@ -120,9 +138,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             <div className={styles.transfer}>
               <div className={styles.content}>
                 <div className={styles.title}>Transfer to</div>
-                <div className={styles.address}>
-                  {"" ?? 'bnb1g4h64yi...jl67nlm'}
-                </div>
+                <div className={styles.address}>{'bnb1g4h64yi...jl67nlm'}</div>
               </div>
             </div>
             <div className={styles.search}>
@@ -148,9 +164,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               {isOpen && (
                 <div>
                   <ul className={styles.items}>
-                    {listNetwork &&
-                      listNetwork
-                        .filter((net) => net.title !== filterNetwork)
+                    {networks &&
+                      networks
+                        .filter((item) => filterChain(item))
                         .map((network) => {
                           return (
                             <li
@@ -180,42 +196,44 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             </div>
           </div>
         </div>
-        <div>
+        <div style={{ width: '100%' }}>
           <div className={styles.balanceDescription}>Convert Amount:</div>
-          <div style={{ display: 'flex', paddingTop: 8 }}>
-            <NumberFormat
-              placeholder="0"
-              thousandSeparator
-              decimalScale={Math.min(6, token.decimals)}
-              customInput={Input}
-              value={convertAmount}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              onValueChange={({ floatValue }) => {
-                if (!floatValue) return setConvertAmount([undefined, 0]);
-                const _floatValue = parseAmountTo(
-                  floatValue!,
-                  token.decimals
-                ).toNumber();
-                const usdValue =
-                  (_floatValue / (amountDetail?.amount ?? 0)) *
-                  (amountDetail?.usd ?? 0);
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <NumberFormat
+                placeholder="0"
+                thousandSeparator
+                decimalScale={Math.min(6, token.decimals)}
+                customInput={Input}
+                value={convertAmount}
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onValueChange={({ floatValue }) => {
+                  if (!floatValue) return setConvertAmount([undefined, 0]);
+                  const _floatValue = parseAmountTo(
+                    floatValue!,
+                    token.decimals
+                  ).toNumber();
+                  const usdValue =
+                    (_floatValue / (amountDetail?.amount ?? 0)) *
+                    (amountDetail?.usd ?? 0);
 
-                setConvertAmount([floatValue!, usdValue]);
-              }}
-              className={styles.amount}
-            />
-            <div className={styles.balanceFromGroup} style={{ flexGrow: 1 }}>
+                  setConvertAmount([floatValue!, usdValue]);
+                }}
+                className={styles.amount}
+              />
+            </div>
+            <div className={styles.balanceFromGroup}>
               <button
                 className={styles.balanceBtn}
                 onClick={(event) => {
                   event.stopPropagation();
                   if (!amountDetail) return;
-                  setConvertAmount([maxAmount, amountDetail.usd]);
+                  setConvertAmount([maxAmount / 4, amountDetail.usd]);
                 }}
               >
-                MAX
+                {AMOUNT_BALANCE_25}
               </button>
               <button
                 className={styles.balanceBtn}
@@ -225,7 +243,27 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   setConvertAmount([maxAmount / 2, amountDetail.usd / 2]);
                 }}
               >
-                HALF
+                {AMOUNT_BALANCE_50}
+              </button>
+              <button
+                className={styles.balanceBtn}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!amountDetail) return;
+                  setConvertAmount([maxAmount * 0.75, amountDetail.usd]);
+                }}
+              >
+                {AMOUNT_BALANCE_75}
+              </button>
+              <button
+                className={styles.balanceBtn}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!amountDetail) return;
+                  setConvertAmount([maxAmount, amountDetail.usd]);
+                }}
+              >
+                {AMOUNT_BALANCE_MAX}
               </button>
             </div>
           </div>
@@ -241,7 +279,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         </div>
       </div>
       <div className={styles.transferTab}>
-        {onClickTransfer && (
+        {/* {onClickTransfer && (
           <Tooltip
             content={
               toToken.chainId === KWT_SUBNETWORK_CHAIN_ID && (
@@ -282,209 +320,84 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               </span>
             </button>
           </Tooltip>
-        )}
-        {(() => {
-          if (
-            token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
-            token.cosmosBased &&
-            name
-          ) {
-            return (
-              <>
-                <button
-                  disabled={transferLoading}
-                  className={styles.tfBtn}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
-                      );
-                      await transferIBC(token, to, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To <strong>OraiBridge</strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
+        )} */}
+        <button
+          disabled={transferLoading}
+          className={styles.tfBtn}
+          onClick={async (event) => {
+            event.stopPropagation();
+            try {
+              const isValid = checkValidAmount();
+              if (!isValid) return;
+              setTransferLoading(true);
+              const transferIbcConvert =
+                token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken;
+              const transferOraibridge = token.chainId === ORAI_BRIDGE_CHAIN_ID;
+              const transferKwt = token.chainId === KWT_SUBNETWORK_CHAIN_ID;
+              const transferIbc =
+                token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
+                token.cosmosBased &&
+                name;
+              const transferIbcBridge =
+                token.cosmosBased &&
+                token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+                (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+                name;
 
-          if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-            const to = kawaiiTokens.find(
-              (t) => t.denom != token.denom && t.type === token.type
-            );
-            return (
-              <>
-                <button
-                  className={styles.tfBtn}
-                  disabled={transferLoading}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      await convertKwt(convertAmount, token);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Convert to <strong>{to.name}</strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
+              if (transferKwt) {
+                await convertKwt(convertAmount, token);
+              }
 
-          if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
-            return (
-              <>
-                <button
-                  className={styles.tfBtn}
-                  disabled={transferLoading}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      await transferFromGravity(token, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To
-                    <strong>
-                      {token.bridgeNetworkIdentifier &&
-                      token.bridgeNetworkIdentifier === BSC_ORG
-                        ? 'Binance Smart Chain'
-                        : 'Ethereum'}
-                    </strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
+              if (transferIbc) {
+                const to = filteredTokens.find(
+                  (t) =>
+                    t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+                    t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                );
+                await transferIBC(token, to, convertAmount);
+              }
 
-          if (
-            token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-            (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
-            name
-          ) {
-            return (
-              <>
-                {token.bridgeNetworkIdentifier && (
-                  <button
-                    className={styles.tfBtn}
-                    disabled={convertLoading}
-                    onClick={async (event) => {
-                      event.stopPropagation();
-                      try {
-                        const isValid = checkValidAmount();
-                        if (!isValid) return;
-                        setConvertLoading(true);
-                        await convertToken(
-                          convertAmount,
-                          token,
-                          'nativeToCw20'
-                        );
-                      } finally {
-                        setConvertLoading(false);
-                      }
-                    }}
-                  >
-                    {convertLoading && <Loader width={20} height={20} />}
-                    <span>
-                      Convert To
-                      <strong style={{ marginLeft: 5 }}>
-                        {parseBep20Erc20Name(name)}
-                      </strong>
-                    </span>
-                  </button>
-                )}
-                <button
-                  disabled={transferLoading}
-                  className={styles.tfBtn}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      const name = parseBep20Erc20Name(token.name);
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
-                      );
+              if (transferIbcConvert) {
+                await convertToken(
+                  convertAmount,
+                  token,
+                  'cw20ToNative',
+                  ibcConvertToken
+                );
+              }
 
-                      // convert reverse before transferring
-                      await transferIBC(token, to, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To <strong>OraiBridge</strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
+              if (onClickTransfer) {
+                await onClickTransfer(convertAmount);
+              }
 
-          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken) {
-            return (
-              <button
-                className={styles.tfBtn}
-                disabled={convertLoading}
-                onClick={async (event) => {
-                  event.stopPropagation();
-                  try {
-                    const isValid = checkValidAmount();
-                    if (!isValid) return;
-                    setConvertLoading(true);
-                    await convertToken(
-                      convertAmount,
-                      token,
-                      'cw20ToNative',
-                      ibcConvertToken
-                    );
-                  } finally {
-                    setConvertLoading(false);
-                  }
-                }}
-              >
-                {convertLoading && <Loader width={20} height={20} />}
-                <span>
-                  Convert To
-                  <strong style={{ marginLeft: 5 }}>
-                    {ibcConvertToken.name}
-                  </strong>
-                </span>
-              </button>
-            );
-          }
-        })()}
+              if (transferOraibridge) {
+                await transferFromGravity(token, convertAmount);
+              }
+
+              if (transferIbcBridge) {
+                if (token.bridgeNetworkIdentifier) {
+                  await convertToken(convertAmount, token, 'nativeToCw20');
+                } else {
+                  const name = parseBep20Erc20Name(token.name);
+                  const to = filteredTokens.find(
+                    (t) =>
+                      t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+                      t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                  );
+                  // convert reverse before transferring
+                  await transferIBC(token, to, convertAmount);
+                }
+              }
+            } finally {
+              setTransferLoading(false);
+            }
+          }}
+        >
+          {transferLoading && <Loader width={20} height={20} />}
+          <span>
+            Transfer To <strong>{filterNetwork}</strong>
+          </span>
+        </button>
       </div>
     </div>
   );

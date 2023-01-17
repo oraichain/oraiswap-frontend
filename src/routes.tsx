@@ -19,7 +19,7 @@ export default () => {
   return (
     <Suspense fallback={<Spin className="spin" />}>
       <Routes>
-        <Route path="/" element={<Balance />} />
+        <Route path="/" element={<BalanceNew />} />
         <Route path="/swap" element={<Swap />} />
         {/* <Route path="/transfer" element={<Transfer />} /> */}
         <Route path="/pools" element={<Pools />} />

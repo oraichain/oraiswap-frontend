@@ -88,20 +88,25 @@
 }
 .balanceFromGroup {
   @include flex(space-between);
-  padding-left: 24px;
+  // padding-left: 24px;
+  // padding-left: 12px;
   .balanceBtn {
     cursor: pointer;
     background: #191b21;
     border-radius: 8px;
     width: 66px;
-    padding: 8px;
-    margin-left: 16px;
+    padding: 10px;
+    margin-left: 12px;
+    @include mobile {
+      margin-left: 8px;
+      padding: 6px;
+    }
     color: #a871df;
   }
 }
 .amount {
   text-align: left;
-  background: #2B2D3B;
+  background: #2b2d3b;
   border-radius: 8px;
   height: 48px;
   width: 180px;
@@ -120,19 +125,28 @@
 
   &.small {
     .amount {
-      height: 36px;
+      height: 48px;
       font-size: 16px;
+      @include mobile {
+        // width: 106px;
+      }
       border-radius: 8px;
     }
     .balanceBtn {
       background: #2e283d;
-      font-size: 12px;
+      font-weight: 500;
       border-radius: 8px;
-      width: 50%;
-      @include mobile {
-        width: 100%;
+      @include desktop {
+        width: 66px;
+        font-size: 16px;
       }
-      padding: 10px 24px;
+
+      @include mobile {
+        width: 44px;
+        font-size: 12px;
+      }
+      height: 48px;
+      color: #a871df;
       text-align: center;
     }
     .tfBtn {
@@ -212,26 +226,26 @@
 }
 .tokenFromGroupBalance {
   @include mobile {
-    @include flex(center, center, column-reverse);
+    @include flex(space-between, center, column-reverse);
   }
 }
 
 .items {
   position: absolute;
   width: 100%;
-  background: #2B2D3B;
-  border: 1.5px solid #5A5270;
+  background: #2b2d3b;
+  border: 1.5px solid #5a5270;
   border-radius: 8px;
   margin-top: 10px;
   li {
     padding: 12px 24px 12px 24px;
   }
   li:hover {
-    background-color: #703CDE;
+    background-color: #703cde;
   }
   &_title {
     padding-left: 10px;
-    color: #EBEBEB;
+    color: #ebebeb;
     font-weight: 600;
     font-size: 16px;
     line-height: 100%;

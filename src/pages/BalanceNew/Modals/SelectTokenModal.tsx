@@ -37,7 +37,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 className={cx('item')}
                 key={idx}
                 onClick={() => {
-                  setToken(option.denom);
+                  setToken(option.chainId);
                   close();
                 }}
               >

@@ -9,9 +9,14 @@ export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
+export const UOSMOS_DENOM = "uosmo";
+export const UATOM_DENOM = "uatom";
 export const BEP20_ORAI = 'bep20_orai';
+export const BEP20_USDT = 'bep20_usdt';
+export const BEP20_AIRI = 'bep20_airi';
+export const BEP20_KWT = 'bep20_kwt';
+export const BEP20_MILKY = 'bep20_milky';
 export const ERC20_ORAI = 'erc20_orai';
-
 export const NATIVE_TOKENS = [ORAI];
 export const EVM_DECIMALS = 18;
 export const COSMOS_DECIMALS = 6;
@@ -66,6 +71,7 @@ export const MILKY_BSC_CONTRACT = '0x6fE3d0F096FC932A905accd1EB1783F6e4cEc717';
 export const MILKY_ERC_CONTRACT = '0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75';
 export const ORAIX_DENOM = 'ORAIX';
 export const scORAI_DENOM = 'scorai';
+export const AIRI_DENOM = 'airi';
 export const KWT_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT;
 export const MILKY_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + MILKY_BSC_CONTRACT;
 
@@ -75,3 +81,8 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
+
+export const KAWAII_CHAINID = 'Kawaiiverse';
+export const OSMOSIS_CHAINID = 'Osmosis';
+export const COSMOS_CHAINID = 'Cosmos Hub';
+export const ORAI_BRIDGE_CHAINID = 'OraiBridge';
