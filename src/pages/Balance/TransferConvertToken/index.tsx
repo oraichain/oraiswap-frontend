@@ -95,7 +95,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   if (
     !name &&
-    !ibcConvertToken &&
+    !ibcConvertToken?.length &&
     token.chainId !== KWT_SUBNETWORK_CHAIN_ID &&
     !onClickTransfer
   )
@@ -384,7 +384,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken) {
+          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken.length) {
             return (
               ibcConvertToken.map((ibcConvert,i) =>  
                 <button
