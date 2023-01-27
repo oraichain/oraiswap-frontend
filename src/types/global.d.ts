@@ -139,6 +139,9 @@ declare global {
       REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
 
+      // config for eth ibc denom
+      REACT_APP_ORAIETH_ORAICHAIN_DENOM: string;
+
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
       REACT_APP_ORAIX_CONTRACT: string;

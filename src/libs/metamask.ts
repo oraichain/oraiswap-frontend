@@ -89,7 +89,7 @@ export default class Metamask {
 
   public getOraiToken(denom?: string): TokenItemType | undefined {
     return evmTokens.find(
-      (token) => token.denom === (denom ?? this.isBsc() ? BEP20_ORAI : ERC20_ORAI)
+      (token) => token.denom === (denom ? denom : (this.isBsc() ? BEP20_ORAI : ERC20_ORAI))
     );
   }
 
