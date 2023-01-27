@@ -93,7 +93,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       metamaskAddress,
       undefined,
       infoEvm?.rpc ?? window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC,
-      !infoEvm || infoEvm.chainId === BSC_CHAIN_ID ? BEP20_ORAI : ERC20_ORAI
+      !infoEvm || infoEvm.chainId === BSC_CHAIN_ID ? BEP20_ORAI : (window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI)
     ).then(setMetamaskBalance);
   });
 
