@@ -50,6 +50,7 @@ import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
   ERC20_ORAI,
+  ETHEREUM_RPC,
   KAWAII_API_DEV,
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -261,7 +262,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token,
           chainInfo?.networkType == 'evm'
             ? chainInfo?.rpc
-            : infoEvm?.rpc ?? BSC_RPC
+            : window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC
         );
 
         return [
