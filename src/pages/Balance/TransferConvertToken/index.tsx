@@ -63,10 +63,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   useEffect(() => {
     if (chainInfo) {
-      setConvertAmount([undefined,0])
+      setConvertAmount([undefined, 0])
     }
   }, [chainInfo])
-  
+
 
   // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const name = token.name;
@@ -302,9 +302,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <span>
                     Transfer To{' '}
                     <strong>
-                      {token.bridgeNetworkIdentifier && token.bridgeNetworkIdentifier === BSC_ORG
-                        ? 'Binance Smart Chain'
-                        : 'Ethereum'}
+                      {token.bridgeNetworkIdentifier}
                     </strong>
                   </span>
                 </button>
