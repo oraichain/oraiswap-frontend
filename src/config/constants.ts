@@ -36,8 +36,10 @@ export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 // bsc and eth information
 export const ETHEREUM_CHAIN_ID = '0x1';
 export const ETHEREUM_RPC = 'https://1rpc.io/eth';
+export const ETHEREUM_SCAN = 'https://etherscan.io';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
+export const BSC_SCAN = 'https://bscscan.com';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const KWT_SUBNETWORK_EVM_CHAIN_ID = '0x1ae6';
