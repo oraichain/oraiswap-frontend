@@ -198,7 +198,7 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
       },
       {
         name: 'ORAI',
-        prefix: ORAI_BRIDGE_PREFIX,
+        prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         org: 'OraiBridge',
         chainId: ORAI_BRIDGE_CHAIN_ID,
         coinType: 118,
