@@ -60,7 +60,6 @@ import {
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_FEE,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
   scORAI_DENOM
@@ -479,7 +478,7 @@ const Balance: React.FC<BalanceProps> = () => {
             // just a number to make sure there is a friction
             amount: ORAI_BRIDGE_CHAIN_FEE
           },
-          evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX
+          evmChainPrefix: fromToken.prefix
         })
       };
       const fee = {
@@ -537,10 +536,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
-        if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+        if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
           await transferIBCOrai({
             fromToken,
+            toTokenPrefix: toToken.prefix,
             fromAddress,
             toAddress,
             amount,
@@ -588,7 +588,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       // note need refactor 
-      const memo = toToken.org === 'OraiBridge' ? ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress : "";
+      const memo = toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : "";
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -684,12 +684,13 @@ const Balance: React.FC<BalanceProps> = () => {
   // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
   const transferIBCOrai = async (data: {
     fromToken: TokenItemType;
+    toTokenPrefix: string;
     fromAddress: string;
     toAddress: string;
     amount: Coin;
     ibcInfo: IBCInfo;
   }) => {
-    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+    const { fromToken, fromAddress, toAddress, amount, ibcInfo, toTokenPrefix } = data;
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
@@ -703,7 +704,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
-          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          memo: toTokenPrefix + metamaskAddress,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
           )
