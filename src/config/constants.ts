@@ -35,8 +35,7 @@ export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
 export const ETHEREUM_CHAIN_ID = '0x1';
-export const ETHEREUM_RPC =
-  'https://mainnet.infura.io/v3/648e041e75924b5c9d0254e4a76c9978';
+export const ETHEREUM_RPC = 'https://1rpc.io/eth';
 export const BSC_CHAIN_ID = '0x38';
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
@@ -44,6 +43,7 @@ export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const KWT_SUBNETWORK_EVM_CHAIN_ID = '0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
+export const ETHEREUM_ORG = 'Ethereum';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
 export const JUNO_CHAIN_ID = 'juno-1';
@@ -51,18 +51,21 @@ export const JUNO_CHAIN_ID = 'juno-1';
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
+export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
-export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179cf06e71ac328c1b5';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
 export const KWT_BSC_CONTRACT = '0x257a8d1E03D17B8535a182301f15290F11674b53';
 export const MILKY_BSC_CONTRACT = '0x6fE3d0F096FC932A905accd1EB1783F6e4cEc717';
+
+// erc20 contracts
+export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179cf06e71ac328c1b5';
 export const MILKY_ERC_CONTRACT = '0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75';
 export const ORAIX_DENOM = 'ORAIX';
 export const scORAI_DENOM = 'scorai';

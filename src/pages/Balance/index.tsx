@@ -86,7 +86,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -240,7 +240,7 @@ const Balance: React.FC<BalanceProps> = () => {
           usd: getUsd(
             amount,
             prices[token.coingeckoId].price ??
-              new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
+            new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
             token.decimals
           )
         };
@@ -372,12 +372,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      if (token.denom === ERC20_ORAI) {
-        displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`
-        });
-        return;
-      }
+      // if (token.denom === ERC20_ORAI) {
+      //   displayToast(TToastType.TX_INFO, {
+      //     message: `Token ${token.name} on ${token.org} is currently not supported`
+      //   });
+      //   return;
+      // }
 
       if (type === 'to') {
         if (_.isEqual(to, token)) {
@@ -1184,8 +1184,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                                onClickTransfer(fromAmount, from, to);
-                              }
+                              onClickTransfer(fromAmount, from, to);
+                            }
                             : undefined
                         }
                         convertKwt={
@@ -1270,11 +1270,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}
