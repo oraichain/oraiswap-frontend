@@ -9,6 +9,7 @@ import EthereumTest from 'pages/EthereumTest';
 
 const Swap = React.lazy(() => import('pages/Swap/index'));
 const Transfer = React.lazy(() => import('pages/Transfer'));
+const SwapNew = React.lazy(() => import('pages/SwapNew/index'));
 const Pools = React.lazy(() => import('pages/Pools'));
 const Balance = React.lazy(() => import('pages/Balance'));
 const BalanceNew = React.lazy(() => import('pages/BalanceNew'));
@@ -21,6 +22,7 @@ export default () => {
       <Routes>
         <Route path="/" element={<BalanceNew />} />
         <Route path="/swap" element={<Swap />} />
+        <Route path="/swapNew" element={<SwapNew />} />
         {/* <Route path="/transfer" element={<Transfer />} /> */}
         <Route path="/pools" element={<Pools />} />
         <Route path="/airdrop/:chain" element={<AirDrop />} />
