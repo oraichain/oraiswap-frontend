@@ -49,7 +49,10 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
+  BSC_SCAN,
   ERC20_ORAI,
+  ETHEREUM_RPC,
+  ETHEREUM_SCAN,
   KAWAII_API_DEV,
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -261,7 +264,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token,
           chainInfo?.networkType == 'evm'
             ? chainInfo?.rpc
-            : infoEvm?.rpc ?? BSC_RPC
+            : infoEvm?.rpc ?? window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC
         );
 
         return [
@@ -906,8 +909,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         from,
         result,
-        `
-      https://bscscan.com/tx/${result?.transactionHash}`
+        window.Metamask.isEth() ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}` : `${BSC_SCAN}/tx/${result?.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {

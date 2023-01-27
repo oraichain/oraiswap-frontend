@@ -39,6 +39,7 @@ import {
   COSMOS_CHAIN_ID,
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
+  ETHEREUM_RPC,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
   ORAI,
@@ -91,7 +92,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     window.Metamask.getOraiBalance(
       metamaskAddress,
       undefined,
-      infoEvm?.rpc ?? BSC_RPC,
+      infoEvm?.rpc ?? window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC,
       !infoEvm || infoEvm.chainId === BSC_CHAIN_ID ? BEP20_ORAI : ERC20_ORAI
     ).then(setMetamaskBalance);
   });
@@ -292,7 +293,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => {},
+              () => { },
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
