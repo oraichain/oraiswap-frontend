@@ -32,7 +32,10 @@ const App = () => {
     if (chainInfos) {
       setChainId(chainInfos.chainId);
       setChainInfo(chainInfos);
-      if (chainInfos?.networkType === 'evm') setInfoEvm(chainInfos);
+      if (chainInfos?.networkType === 'evm') {
+        window.ethereum.chainId = chainInfos.chainId;
+        setInfoEvm(chainInfos);
+      };
       if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
     }
 

@@ -8,17 +8,18 @@ import {
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
-import { BEP20_ORAI, BSC_CHAIN_ID, ERC20_ORAI, ETHEREUM_CHAIN_ID } from 'config/constants';
+import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
+import { getDenomEvm } from 'helper';
 
 export default class Metamask {
   constructor() {}
 
   public isBsc() {
-    return window.ethereum?.chainId === BSC_CHAIN_ID;
+    return new Number(window.ethereum?.chainId) == BSC_CHAIN_ID;
   }
 
   public isEth() {
-    return window.ethereum?.chainId === ETHEREUM_CHAIN_ID;
+    return new Number(window.ethereum?.chainId) == ETHEREUM_CHAIN_ID;
   }
 
   public async transferToGravity(
@@ -89,7 +90,7 @@ export default class Metamask {
 
   public getOraiToken(denom?: string): TokenItemType | undefined {
     return evmTokens.find(
-      (token) => token.denom === (denom ? denom : (this.isBsc() ? BEP20_ORAI : ERC20_ORAI))
+      (token) => token.denom === (denom ? denom : getDenomEvm())
     );
   }
 
