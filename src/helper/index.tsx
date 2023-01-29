@@ -53,7 +53,7 @@ export const getDenomEvm = () => {
   }
 };
 
-export const getRpcEvm = (infoEvm) => {
+export const getRpcEvm = (infoEvm?: ChainInfoType) => {
   switch (true) {
     case window.Metamask.isEth():
       return ETHEREUM_RPC;
