@@ -33,13 +33,9 @@ import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
-  BEP20_ORAI,
   BSC_CHAIN_ID,
-  BSC_RPC,
   COSMOS_CHAIN_ID,
-  ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
-  ETHEREUM_RPC,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
   ORAI,
@@ -51,6 +47,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchNativeTokenBalance } from 'rest/api';
+import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 
 const { Text } = Typography;
 
@@ -59,12 +56,11 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
-  const [infoEvm] = useGlobalState('infoEvm');
   const [infoCosmos] = useGlobalState('infoCosmos');
+  const [infoEvm] = useGlobalState('infoEvm');
   const [chainInfo] = useGlobalState('chainInfo');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
-  const [chainId] = useGlobalState('chainId');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -92,8 +88,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
     window.Metamask.getOraiBalance(
       metamaskAddress,
       undefined,
-      infoEvm?.rpc ?? window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC,
-      !infoEvm || infoEvm.chainId === BSC_CHAIN_ID ? BEP20_ORAI : (window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI)
+      getRpcEvm(infoEvm),
+      getDenomEvm(),
     ).then(setMetamaskBalance);
   });
 
@@ -140,35 +136,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
-  const handleCheckChain = (chainId: string) => {
-    switch (chainId) {
-      case BSC_CHAIN_ID:
-        return window.Metamask.isBsc() || infoEvm.chainId === BSC_CHAIN_ID;
-      case ETHEREUM_CHAIN_ID:
-        return (
-          window.Metamask.isEth() ||
-          infoEvm.chainId === ETHEREUM_CHAIN_ID ||
-          infoEvm.chainId === '0x01'
-        );
-      case KWT_SUBNETWORK_EVM_CHAIN_ID:
-        return infoEvm.chainId === KWT_SUBNETWORK_EVM_CHAIN_ID;
-      case KWT_SUBNETWORK_CHAIN_ID:
-        return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
-      case COSMOS_CHAIN_ID:
-        return infoCosmos.chainId === COSMOS_CHAIN_ID;
-      case OSMOSIS_CHAIN_ID:
-        return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
-      case ORAICHAIN_ID:
-        return (
-          infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
-          infoCosmos.chainId !== COSMOS_CHAIN_ID &&
-          infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
-        );
-      default:
-        return false;
-    }
-  };
-
   return (
     <>
       {mobileMode && (
@@ -194,16 +161,16 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={address}
                     className={styles.token_avatar}
                   />
-                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID) && (
+                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
                     <KwtIcon className={styles.network_icon} />
                   )}
-                  {handleCheckChain(COSMOS_CHAIN_ID) && (
+                  {handleCheckChain(COSMOS_CHAIN_ID,infoCosmos) && (
                     <AtomCosmosIcon className={styles.network_icon} />
                   )}
-                  {handleCheckChain(OSMOSIS_CHAIN_ID) && (
+                  {handleCheckChain(OSMOSIS_CHAIN_ID, infoCosmos) && (
                     <OsmosisIcon className={styles.network_icon} />
                   )}
-                  {handleCheckChain(ORAICHAIN_ID) && (
+                  {handleCheckChain(ORAICHAIN_ID, infoCosmos) && (
                     <ORAIIcon className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
