@@ -59,6 +59,8 @@ export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
+export const ORAI_LCD = 'https://lcd.orai.io';
+export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
