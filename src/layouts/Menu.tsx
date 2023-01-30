@@ -84,12 +84,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
   }, []);
 
   useEffect(() => {
-    alert(JSON.stringify({
-      window: window?.ethereum?.chainId,
-      infoEvm,
-      getDenomEvm: getDenomEvm(),
-    }))
-    
     // we use default Orai token
     window.Metamask.getOraiBalance(
       metamaskAddress,
