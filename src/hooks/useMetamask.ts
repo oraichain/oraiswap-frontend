@@ -10,7 +10,7 @@ export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
 });
 
-export function useEagerConnect(isInactive) {
+export function useEagerConnect(isInactive, isInterval) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
   const [chainInfo] = useGlobalState('chainInfo');
@@ -18,12 +18,17 @@ export function useEagerConnect(isInactive) {
     useGlobalState('metamaskAddress');
 
   useEffect(() => {
+    if(isInterval) return;
     eagerConnectBsc();
   }, [pathname]);
 
   const eagerConnectBsc = () => {
     if (!window.ethereum) return;
-    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(window.ethereum.chainId))
+    if (
+      ![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(
+        Number(window.ethereum.chainId)
+      )
+    )
       return;
     if (
       !web3React.account &&
@@ -38,11 +43,7 @@ export function useEagerConnect(isInactive) {
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
     (async function () {
-      if (isMobile())
-        await window.ethereum.request!({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BSC_CHAIN_ID }]
-        });
+      if (isMobile()) await window.Metamask.switchNetwork(BSC_CHAIN_ID);
       // passe cointype 60 for ethereum or let it use default param
       const accounts = await window.ethereum.request({
         method: 'eth_accounts',

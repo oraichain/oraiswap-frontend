@@ -7,7 +7,11 @@ import {
   ORAI_BRIDGE_LCD,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
-  ORAI_BRIDGE_UDENOM
+  ORAI_BRIDGE_UDENOM,
+  ORAI_RPC,
+  ORAI_LCD,
+  ORAICHAIN_ID,
+  ORAI_SCAN
 } from './constants';
 
 /**
@@ -15,10 +19,10 @@ import {
  */
 export const embedChainInfos: ChainInfo[] = [
   {
-    rpc: 'https://rpc.orai.io',
-    rest: 'https://lcd.orai.io',
-    chainId: 'Oraichain',
-    chainName: 'Oraichain',
+    rpc: ORAI_RPC,
+    rest: ORAI_LCD,
+    chainId: ORAICHAIN_ID,
+    chainName: ORAICHAIN_ID,
     stakeCurrency: {
       coinDenom: 'ORAI',
       coinMinimalDenom: 'orai',
@@ -38,7 +42,7 @@ export const embedChainInfos: ChainInfo[] = [
     get feeCurrencies() {
       return [this.stakeCurrency];
     },
-    walletUrlForStaking: 'https://scan.orai.io/validators',
+    walletUrlForStaking: `${ORAI_SCAN}/validators`,
     gasPriceStep: {
       low: 0,
       average: 0.000025,

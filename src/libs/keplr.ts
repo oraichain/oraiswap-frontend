@@ -48,7 +48,8 @@ export default class Keplr {
   }
 
   async suggestToken(token: TokenItemType) {
-    if (token.contractAddress) {
+    // suggestToken is for cosmosBased only
+    if (token.cosmosBased && token.contractAddress) {
       const keplr = await this.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.KEPLR_FAILED, {
@@ -56,7 +57,7 @@ export default class Keplr {
         });
       }
 
-      await keplr.suggestToken(token.chainId, token.contractAddress);
+      await keplr.suggestToken(String(token.chainId), token.contractAddress);
     }
   }
 
