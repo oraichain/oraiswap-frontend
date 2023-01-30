@@ -3,7 +3,7 @@ import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
-  TokenItemType,
+  TokenItemType
 } from 'config/bridgeTokens';
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
@@ -14,12 +14,13 @@ import { getDenomEvm } from 'helper';
 export default class Metamask {
   constructor() {}
 
+  // compare in number type
   public isBsc() {
-    return new Number(window.ethereum?.chainId) == BSC_CHAIN_ID;
+    return Number(window.ethereum?.chainId) === Number(BSC_CHAIN_ID);
   }
 
   public isEth() {
-    return new Number(window.ethereum?.chainId) == ETHEREUM_CHAIN_ID;
+    return Number(window.ethereum?.chainId) === Number(ETHEREUM_CHAIN_ID);
   }
 
   public async transferToGravity(
@@ -33,7 +34,7 @@ export default class Metamask {
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId }],
+      params: [{ chainId }]
     });
 
     const web3 = new Web3(window.ethereum);
@@ -46,7 +47,7 @@ export default class Metamask {
     const result = await gravityContract.methods
       .sendToCosmos(tokenContract, to, balance)
       .send({
-        from,
+        from
       });
     return result;
   }
@@ -60,7 +61,7 @@ export default class Metamask {
   ) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId }],
+      params: [{ chainId }]
     });
     const weiAmount = Web3.utils.toWei(amount);
     const web3 = new Web3(window.ethereum);
@@ -76,14 +77,14 @@ export default class Metamask {
 
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId }],
+      params: [{ chainId }]
     });
     const allowance = Web3.utils.toWei('99999999999999999');
 
     const result = await tokenContract.methods
       .approve(spender, allowance)
       .send({
-        from: owner,
+        from: owner
       });
     return result;
   }
@@ -107,8 +108,7 @@ export default class Metamask {
     try {
       const provider =
         token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
-   
-      
+
       const web3 = new Web3(rpc || provider);
       const tokenInst = new web3.eth.Contract(
         tokenABI as AbiItem[],

@@ -10,7 +10,7 @@ import {
   BEP20_ORAI,
   KAWAII_ORAI,
   ETHEREUM_RPC,
-  BSC_RPC,
+  BSC_RPC
 } from 'config/constants';
 import { ChainInfoType } from 'hooks/useGlobalState';
 
@@ -24,7 +24,9 @@ export const handleCheckChain = (
     case ETHEREUM_CHAIN_ID:
       return window.Metamask.isEth();
     case KWT_SUBNETWORK_EVM_CHAIN_ID:
-      return new Number(window.ethereum.chainId) == KWT_SUBNETWORK_EVM_CHAIN_ID;
+      return (
+        Number(window.ethereum.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID)
+      );
     case KWT_SUBNETWORK_CHAIN_ID:
       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
     case COSMOS_CHAIN_ID:

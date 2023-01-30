@@ -21,7 +21,7 @@ const App = () => {
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue',
+          message: 'You must install Keplr to continue'
         },
         { toastId: 'install_keplr' }
       );
@@ -35,7 +35,7 @@ const App = () => {
       if (chainInfos?.networkType === 'evm') {
         window.ethereum.chainId = chainInfos.chainId;
         setInfoEvm(chainInfos);
-      };
+      }
       if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
     }
 
@@ -71,7 +71,7 @@ const App = () => {
     } catch (error) {
       console.log('Error: ', error.message);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`,
+        message: `There is an unexpected error with Keplr wallet. Please try again!`
       });
     }
   };
