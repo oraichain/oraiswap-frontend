@@ -50,7 +50,6 @@ import {
 export type Erc20Cw20Map = {
   prefix: string;
   description: string;
-  erc20Type: string;
   decimals: {
     erc20Decimals: number;
     cw20Decimals: number;
@@ -61,41 +60,41 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Terra'
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Terra'
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
   erc20Cw20Map?: Erc20Cw20Map[];
   bridgeNetworkIdentifier?: string;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
-  chainId: string;
+  chainId: string | number;
   coinType?: number;
   rpc: string;
   lcd?: string;
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'terrausd'
-  | 'terra-luna'
-  | 'oraix'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'terrausd'
+    | 'terra-luna'
+    | 'oraix'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -425,7 +424,6 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         //   {
         //     prefix: 'BEP20',
         //     description: 'Ibc token from BNB chain',
-        //     erc20Type: BSC_CHAIN_ID,
         //     decimals: {
         //       erc20Decimals: EVM_DECIMALS,
         //       cw20Decimals: COSMOS_DECIMALS,
@@ -493,7 +491,6 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
               cw20Decimals: COSMOS_DECIMALS
@@ -520,7 +517,6 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
               cw20Decimals: COSMOS_DECIMALS
@@ -641,7 +637,6 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
               cw20Decimals: COSMOS_DECIMALS
@@ -668,7 +663,6 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
           {
             prefix: 'BEP20',
             description: 'Ibc token from BNB chain',
-            erc20Type: BSC_CHAIN_ID,
             decimals: {
               erc20Decimals: EVM_DECIMALS,
               cw20Decimals: COSMOS_DECIMALS
@@ -724,8 +718,8 @@ export const tokens = tokensMap[network.id].map((tokens) =>
     process.env.REACT_APP_DEPRECATED === 'true'
       ? true
       : token.org !== 'Terra' &&
-      token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
-      token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
+        token.denom !== process.env.REACT_APP_LUNA_ORAICHAIN_DENOM &&
+        token.denom !== process.env.REACT_APP_UST_ORAICHAIN_DENOM
   )
 );
 

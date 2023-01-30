@@ -33,15 +33,15 @@ const RequireAuthButton: React.FC<any> = ({
       if (!window.ethereum.chainId) {
         await window.ethereum.request!({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BSC_CHAIN_ID }]
+          params: [{ chainId: Number(BSC_CHAIN_ID) }]
         });
       }
       await activate(injected, (ex) => {
-        console.log("error: ", ex)
+        console.log('error: ', ex);
         displayToast(TToastType.METAMASK_FAILED, { message: ex.message });
       });
     } catch (ex) {
-      console.log("error in connecting metamask: ", ex);
+      console.log('error in connecting metamask: ', ex);
     }
   };
 
@@ -60,7 +60,7 @@ const RequireAuthButton: React.FC<any> = ({
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue',
+          message: 'You must install Keplr to continue'
         },
         { toastId: 'install_keplr' }
       );
