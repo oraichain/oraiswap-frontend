@@ -45,23 +45,13 @@ export const handleCheckChain = (
 };
 
 export const getDenomEvm = () => {
-  switch (true) {
-    case window.Metamask.isEth():
-      return ERC20_ORAI;
-    case window.Metamask.isBsc():
-      return BEP20_ORAI;
-    default:
-      return KAWAII_ORAI;
-  }
+  if (window.Metamask.isEth()) return ERC20_ORAI;
+  if (window.Metamask.isBsc()) return BEP20_ORAI;
+  return KAWAII_ORAI;
 };
 
 export const getRpcEvm = (infoEvm?: ChainInfoType) => {
-  switch (true) {
-    case window.Metamask.isEth():
-      return ETHEREUM_RPC;
-    case window.Metamask.isBsc():
-      return BSC_RPC;
-    default:
-      return infoEvm?.rpc;
-  }
+  if (window.Metamask.isEth()) return ETHEREUM_RPC;
+  if (window.Metamask.isBsc()) return BSC_RPC;
+  return infoEvm?.rpc;
 };
