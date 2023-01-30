@@ -49,7 +49,10 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
+  BSC_SCAN,
   ERC20_ORAI,
+  ETHEREUM_RPC,
+  ETHEREUM_SCAN,
   KAWAII_API_DEV,
   KWT,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -57,7 +60,6 @@ import {
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_FEE,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
   scORAI_DENOM
@@ -86,7 +88,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 type AmountDetails = { [key: string]: AmountDetail };
 
@@ -240,7 +242,7 @@ const Balance: React.FC<BalanceProps> = () => {
           usd: getUsd(
             amount,
             prices[token.coingeckoId].price ??
-              new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
+            new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
             token.decimals
           )
         };
@@ -261,7 +263,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token,
           chainInfo?.networkType == 'evm'
             ? chainInfo?.rpc
-            : infoEvm?.rpc ?? BSC_RPC
+            : infoEvm?.rpc ?? window.Metamask.isEth() ? ETHEREUM_RPC : BSC_RPC
         );
 
         return [
@@ -372,12 +374,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      if (token.denom === ERC20_ORAI) {
-        displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`
-        });
-        return;
-      }
+      // if (token.denom === ERC20_ORAI) {
+      //   displayToast(TToastType.TX_INFO, {
+      //     message: `Token ${token.name} on ${token.org} is currently not supported`
+      //   });
+      //   return;
+      // }
 
       if (type === 'to') {
         if (_.isEqual(to, token)) {
@@ -476,7 +478,7 @@ const Balance: React.FC<BalanceProps> = () => {
             // just a number to make sure there is a friction
             amount: ORAI_BRIDGE_CHAIN_FEE
           },
-          evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX
+          evmChainPrefix: fromToken.prefix
         })
       };
       const fee = {
@@ -534,10 +536,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
-        if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+        if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
           await transferIBCOrai({
             fromToken,
+            toTokenPrefix: toToken.prefix,
             fromAddress,
             toAddress,
             amount,
@@ -585,7 +588,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       // note need refactor 
-      const memo = toToken.org === 'OraiBridge' ? ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress : "";
+      const memo = toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : "";
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -681,12 +684,13 @@ const Balance: React.FC<BalanceProps> = () => {
   // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
   const transferIBCOrai = async (data: {
     fromToken: TokenItemType;
+    toTokenPrefix: string;
     fromAddress: string;
     toAddress: string;
     amount: Coin;
     ibcInfo: IBCInfo;
   }) => {
-    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+    const { fromToken, fromAddress, toAddress, amount, ibcInfo, toTokenPrefix } = data;
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
@@ -700,7 +704,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
-          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          memo: toTokenPrefix + metamaskAddress,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
           )
@@ -906,8 +910,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         from,
         result,
-        `
-      https://bscscan.com/tx/${result?.transactionHash}`
+        window.Metamask.isEth() ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}` : `${BSC_SCAN}/tx/${result?.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -1184,8 +1187,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                                onClickTransfer(fromAmount, from, to);
-                              }
+                              onClickTransfer(fromAmount, from, to);
+                            }
                             : undefined
                         }
                         convertKwt={
@@ -1270,11 +1273,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(
-                                    fromAmount,
-                                    to,
-                                    transferToToken
-                                  )
+                                onClickTransfer(
+                                  fromAmount,
+                                  to,
+                                  transferToToken
+                                )
                               : undefined
                           }
                           toToken={transferToToken}
