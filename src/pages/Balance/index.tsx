@@ -88,6 +88,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 // import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
+import { getRpcEvm } from 'helper';
 
 interface BalanceProps {}
 
@@ -264,9 +265,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token,
           chainInfo?.networkType == 'evm'
             ? chainInfo?.rpc
-            : infoEvm?.rpc ?? window.Metamask.isEth()
-            ? ETHEREUM_RPC
-            : BSC_RPC
+            : infoEvm?.rpc ?? getRpcEvm()
         );
 
         return [
