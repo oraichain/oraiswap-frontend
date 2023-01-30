@@ -55,6 +55,7 @@ import {
   ETHEREUM_SCAN,
   KAWAII_API_DEV,
   KWT,
+  KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
@@ -817,7 +818,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -881,7 +882,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -1109,7 +1110,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       console.log(ex);

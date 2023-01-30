@@ -42,8 +42,10 @@ export const BSC_CHAIN_ID = 56;
 export const BSC_RPC = 'https://bsc-dataseed.binance.org';
 export const BSC_SCAN = 'https://bscscan.com';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
+
+export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
-export const KWT_SUBNETWORK_EVM_CHAIN_ID = 6886 //'0x1ae6';
+export const KWT_SUBNETWORK_EVM_CHAIN_ID = 6886; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';
@@ -57,9 +59,11 @@ export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
 export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
+export const ORAI_SCAN = 'https://scan.orai.io';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
 export const ORAI_LCD = 'https://lcd.orai.io';
+export const ORAI_RPC = 'https://rpc.orai.io';
 export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 

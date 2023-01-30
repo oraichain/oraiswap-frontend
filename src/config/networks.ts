@@ -1,4 +1,5 @@
 import { NetworkConfig } from 'types/network';
+import { ORAI_LCD, ORAI_RPC, ORAI_SCAN } from './constants';
 
 export enum NetworkKey {
   MAINNET = 'mainnet',
@@ -11,8 +12,8 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     prefix: 'orai',
     denom: 'orai',
     coinType: 118,
-    lcd: 'https://lcd.orai.io',
-    rpc: 'https://rpc.orai.io',
+    lcd: ORAI_LCD,
+    rpc: ORAI_RPC,
     id: NetworkKey.MAINNET,
     fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
     factory: process.env.REACT_APP_FACTORY_CONTRACT,
@@ -22,7 +23,7 @@ const networks: Record<NetworkKey, NetworkConfig> = {
     staking: process.env.REACT_APP_STAKING_CONTRACT,
     rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
     converter: process.env.REACT_APP_CONVERTER_CONTRACT,
-    explorer: 'https://scan.orai.io'
+    explorer: ORAI_SCAN
   },
   [NetworkKey.TESTNET]: {
     chainId: 'Oraichain-testnet',
