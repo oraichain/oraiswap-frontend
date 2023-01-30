@@ -20,7 +20,7 @@ const RequireAuthButton: React.FC<any> = ({
     useGlobalState('metamaskAddress');
   const { activate, deactivate } = useWeb3React();
 
-  useEagerConnect(isInactiveMetamask);
+  useEagerConnect(isInactiveMetamask,false);
   const onClick = () => {
     setOpenConnectWalletModal(true);
   };

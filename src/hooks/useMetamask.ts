@@ -10,7 +10,7 @@ export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
 });
 
-export function useEagerConnect(isInactive) {
+export function useEagerConnect(isInactive, isInterval) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
   const [chainInfo] = useGlobalState('chainInfo');
@@ -18,6 +18,7 @@ export function useEagerConnect(isInactive) {
     useGlobalState('metamaskAddress');
 
   useEffect(() => {
+    if(isInterval) return;
     eagerConnectBsc();
   }, [pathname]);
 

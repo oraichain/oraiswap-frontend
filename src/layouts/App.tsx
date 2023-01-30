@@ -7,12 +7,14 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
+import { useEagerConnect } from 'hooks/useMetamask';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
   const [_$, setChainInfo] = useGlobalState('chainInfo');
-  const [_$$, setInfoEvm] = useGlobalState('infoEvm');
+  const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
   const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
     // automatically update. If user is also using Oraichain wallet => dont update
@@ -28,6 +30,13 @@ const App = () => {
     }
 
     let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
+
+    if (isMobile()) {
+      setInfoEvm({
+        ...infoEvm,
+        chainId: window.ethereum.chainId,
+      });
+    }
 
     if (chainInfos) {
       setChainId(chainInfos.chainId);
@@ -48,7 +57,7 @@ const App = () => {
       setAddress(newAddress as string);
     }
   };
-
+  useEagerConnect(false, true);
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
