@@ -103,8 +103,11 @@ export default class Metamask {
     if (!token || !token.contractAddress) return '0';
 
     try {
+      // if the same chain id using window.ethereum
       const provider =
-        token.chainId !== window.ethereum.chainId ? token.rpc : window.ethereum;
+        Number(token.chainId) !== Number(window.ethereum.chainId)
+          ? token.rpc
+          : window.ethereum;
 
       const web3 = new Web3(rpc || provider);
       const tokenInst = new web3.eth.Contract(
