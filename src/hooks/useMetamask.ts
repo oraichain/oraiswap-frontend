@@ -42,11 +42,7 @@ export function useEagerConnect(isInactive) {
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
     (async function () {
-      if (isMobile())
-        await window.ethereum.request!({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: Number(BSC_CHAIN_ID) }]
-        });
+      if (isMobile()) await window.Metamask.switchNetwork(BSC_CHAIN_ID);
       // passe cointype 60 for ethereum or let it use default param
       const accounts = await window.ethereum.request({
         method: 'eth_accounts',

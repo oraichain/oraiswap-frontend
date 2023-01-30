@@ -27,9 +27,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import {
-  filteredTokens,
-} from 'config/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
@@ -97,12 +95,12 @@ const Swap: React.FC = () => {
   );
 
   // suggest tokens
-  // useEffect(() => {
-  //   if (fromToken && toToken) {
-  //     window.Keplr.suggestToken(fromToken);
-  //     window.Keplr.suggestToken(toToken);
-  //   }
-  // }, [fromToken, toToken]);
+  useEffect(() => {
+    if (fromToken && toToken) {
+      window.Keplr.suggestToken(fromToken);
+      window.Keplr.suggestToken(toToken);
+    }
+  }, [fromToken, toToken]);
 
   const { data: fromTokenBalance = 0, refetch: refetchFromTokenBalance } =
     useQuery(

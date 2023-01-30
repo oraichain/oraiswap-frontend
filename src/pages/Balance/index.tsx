@@ -899,10 +899,7 @@ const Balance: React.FC<BalanceProps> = () => {
     //   return;
     // }
 
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: from!.chainId }]
-    });
+    await window.Metamask.switchNetwork(from!.chainId);
 
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
@@ -964,21 +961,27 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     setIBCLoading(true);
-    if (
-      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
-      to.chainId === ORAICHAIN_ID &&
-      !!from.contractAddress
-    ) {
-      await convertTransferIBCErc20Kwt(from, to, fromAmount);
-    } else if (
-      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
-      to.chainId === ORAICHAIN_ID
-    ) {
-      await transferIBCKwt(from, to, fromAmount);
-    } else if (from.cosmosBased) {
-      await transferIbcCustom(from, to, fromAmount);
-    } else {
-      await transferEvmToIBC(fromAmount);
+    try {
+      if (
+        from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+        to.chainId === ORAICHAIN_ID &&
+        !!from.contractAddress
+      ) {
+        await convertTransferIBCErc20Kwt(from, to, fromAmount);
+      } else if (
+        from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+        to.chainId === ORAICHAIN_ID
+      ) {
+        await transferIBCKwt(from, to, fromAmount);
+      } else if (from.cosmosBased) {
+        await transferIbcCustom(from, to, fromAmount);
+      } else {
+        await transferEvmToIBC(fromAmount);
+      }
+    } catch (ex) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message
+      });
     }
     setIBCLoading(false);
   };

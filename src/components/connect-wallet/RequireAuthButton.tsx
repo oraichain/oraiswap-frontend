@@ -31,10 +31,7 @@ const RequireAuthButton: React.FC<any> = ({
 
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
-        await window.ethereum.request!({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: Number(BSC_CHAIN_ID) }]
-        });
+        await window.Metamask.switchNetwork(BSC_CHAIN_ID);
       }
       await activate(injected, (ex) => {
         console.log('error: ', ex);

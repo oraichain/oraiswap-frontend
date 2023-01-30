@@ -8,19 +8,19 @@ import NumberFormat from 'react-number-format';
 import {
   filteredTokens,
   kawaiiTokens,
-  TokenItemType,
+  TokenItemType
 } from 'config/bridgeTokens';
 import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
-  parseBep20Erc20Name,
+  parseBep20Erc20Name
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
   BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -50,11 +50,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   transferFromGravity,
   convertKwt,
   onClickTransfer,
-  toToken,
+  toToken
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([
     undefined,
-    0,
+    0
   ]);
   const [convertLoading, setConvertLoading] = useState(false);
   const [convertLoadingOrai, setConvertLoadingOrai] = useState(0);
@@ -64,17 +64,17 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   useEffect(() => {
     if (chainInfo) {
-      setConvertAmount([undefined, 0])
+      setConvertAmount([undefined, 0]);
     }
-  }, [chainInfo])
-
+  }, [chainInfo]);
 
   // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const name = token.name;
   const ibcConvertToken = filteredTokens.filter(
     (t) =>
       t.cosmosBased &&
-      (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) && token.chainId === ORAICHAIN_ID &&
+      (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
+      token.chainId === ORAICHAIN_ID &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
@@ -86,7 +86,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Invalid amount!',
+        message: 'Invalid amount!'
       });
       return false;
     }
@@ -169,7 +169,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         style={{
           marginTop: '0px',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'center'
         }}
       >
         {onClickTransfer && (
@@ -301,10 +301,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To{' '}
-                    <strong>
-                      {token.bridgeNetworkIdentifier}
-                    </strong>
+                    Transfer To <strong>{token.bridgeNetworkIdentifier}</strong>
                   </span>
                 </button>
                 {/* <small
@@ -323,7 +320,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID && (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+            (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
             name
           ) {
             return (
@@ -338,7 +336,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                         const isValid = checkValidAmount();
                         if (!isValid) return;
                         setConvertLoading(true);
-                        await convertToken(convertAmount, token, 'nativeToCw20');
+                        await convertToken(
+                          convertAmount,
+                          token,
+                          'nativeToCw20'
+                        );
                       } finally {
                         setConvertLoading(false);
                       }
@@ -347,7 +349,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     {convertLoading && <Loader width={20} height={20} />}
                     <span>
                       Convert To
-                      <strong style={{ marginLeft: 5 }}>{parseBep20Erc20Name(name)}</strong>
+                      <strong style={{ marginLeft: 5 }}>
+                        {parseBep20Erc20Name(name)}
+                      </strong>
                     </span>
                   </button>
                 )}
@@ -364,8 +368,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const tokenBridge = token?.bridgeNetworkIdentifier;
                       const to = filteredTokens.find(
                         (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          tokenBridge ? t.bridgeNetworkIdentifier.includes(token.bridgeNetworkIdentifier) : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                          t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
+                            ? t.bridgeNetworkIdentifier.includes(
+                                token.bridgeNetworkIdentifier
+                              )
+                            : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
                       );
 
                       // convert reverse before transferring
@@ -384,39 +391,41 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken.length) {
-            return (
-              ibcConvertToken.map((ibcConvert,i) =>  
-                <button
-                  className={styles.tfBtn}
-                  disabled={convertLoadingOrai === i + 1}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setConvertLoadingOrai(i + 1);
-                      await convertToken(
-                        convertAmount,
-                        token,
-                        'cw20ToNative',
-                        ibcConvert
-                      );
-                    } finally {
-                      setConvertLoadingOrai(0);
-                    }
-                  }}
-                >
-                  {convertLoadingOrai === i + 1 && <Loader width={20} height={20} />}
-                  <span>
-                    Convert To
-                    <strong style={{ marginLeft: 5 }}>
-                      {ibcConvert.name}
-                    </strong>
-                  </span>
-                </button>
-              )
-            );
+          if (
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+            ibcConvertToken.length
+          ) {
+            return ibcConvertToken.map((ibcConvert, i) => (
+              <button
+                key={ibcConvert.denom}
+                className={styles.tfBtn}
+                disabled={convertLoadingOrai === i + 1}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  try {
+                    const isValid = checkValidAmount();
+                    if (!isValid) return;
+                    setConvertLoadingOrai(i + 1);
+                    await convertToken(
+                      convertAmount,
+                      token,
+                      'cw20ToNative',
+                      ibcConvert
+                    );
+                  } finally {
+                    setConvertLoadingOrai(0);
+                  }
+                }}
+              >
+                {convertLoadingOrai === i + 1 && (
+                  <Loader width={20} height={20} />
+                )}
+                <span>
+                  Convert To
+                  <strong style={{ marginLeft: 5 }}>{ibcConvert.name}</strong>
+                </span>
+              </button>
+            ));
           }
         })()}
       </div>

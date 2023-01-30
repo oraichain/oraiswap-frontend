@@ -23,6 +23,13 @@ export default class Metamask {
     return Number(window.ethereum?.chainId) === Number(ETHEREUM_CHAIN_ID);
   }
 
+  public async switchNetwork(chainId: string | number) {
+    await window.ethereum.request!({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x' + Number(chainId).toString(16) }]
+    });
+  }
+
   public async transferToGravity(
     chainId: string,
     amountVal: string,
@@ -32,10 +39,7 @@ export default class Metamask {
   ) {
     const balance = Web3.utils.toWei(amountVal);
 
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
-    });
+    await this.switchNetwork(chainId);
 
     const web3 = new Web3(window.ethereum);
     const gravityContractAddr = gravityContracts[chainId] as string;
@@ -59,10 +63,7 @@ export default class Metamask {
     spender: string,
     amount: string
   ) {
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
-    });
+    await this.switchNetwork(chainId);
     const weiAmount = Web3.utils.toWei(amount);
     const web3 = new Web3(window.ethereum);
     const tokenContract = new web3.eth.Contract(
@@ -75,10 +76,6 @@ export default class Metamask {
 
     if (+currentAllowance >= +weiAmount) return;
 
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId }]
-    });
     const allowance = Web3.utils.toWei('99999999999999999');
 
     const result = await tokenContract.methods
