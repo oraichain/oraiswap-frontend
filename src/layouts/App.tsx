@@ -14,6 +14,7 @@ const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
   const [_$, setChainInfo] = useGlobalState('chainInfo');
+  const [_$$,setStatusChangeAccount] = useGlobalState('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
   const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
@@ -39,6 +40,7 @@ const App = () => {
     }
 
     if (chainInfos) {
+      setStatusChangeAccount(false);
       setChainId(chainInfos.chainId);
       setChainInfo(chainInfos);
       if (chainInfos?.networkType === 'evm') {
@@ -54,6 +56,9 @@ const App = () => {
         setAddress('');
       }
       // finally update new address
+      if (!chainInfos?.chainId) {
+        setStatusChangeAccount(true);
+      }
       setAddress(newAddress as string);
     }
   };
@@ -79,6 +84,7 @@ const App = () => {
       // window.location.reload();
     } catch (error) {
       console.log('Error: ', error.message);
+      setStatusChangeAccount(false);
       displayToast(TToastType.TX_INFO, {
         message: `There is an unexpected error with Keplr wallet. Please try again!`
       });
