@@ -100,6 +100,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
+  const [statusChangeAccount] = useGlobalState('statusChangeAccount');
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
@@ -153,6 +154,11 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!keplrAddress) return;
     getKwtSubnetAddress();
   }, [keplrAddress]);
+
+  useEffect(() => {
+    if (!statusChangeAccount) return;
+    setPendingTokens(filteredTokens);
+  }, [statusChangeAccount, keplrAddress]);
 
   useEffect(() => {
     loadTokenAmounts();
