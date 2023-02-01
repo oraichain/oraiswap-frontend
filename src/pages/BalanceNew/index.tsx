@@ -49,15 +49,18 @@ import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
+  BSC_SCAN,
   ERC20_ORAI,
+  ETHEREUM_RPC,
+  ETHEREUM_SCAN,
   KAWAII_API_DEV,
   KWT,
+  KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_FEE,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
   scORAI_DENOM,
@@ -85,9 +88,10 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 // import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import SelectTokenModal from './Modals/SelectTokenModal';
-import { networks, renderLogoNetwork } from 'helpers';
+import { getRpcEvm, networksFilterChain } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { renderLogoNetwork } from 'helper';
+import SelectTokenModal from './Modals/SelectTokenModal';
 
 interface BalanceProps {}
 
@@ -99,17 +103,13 @@ const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useGlobalState('address');
+  const [statusChangeAccount] = useGlobalState('statusChangeAccount');
   const [kwtSubnetAddress, setKwtSubnetAddress] = useState<string>();
+  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
   const [infoEvm] = useGlobalState('infoEvm');
-  const [filterNetwork, setFilterNetwork] = useState('Oraichain');
-  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
-  const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
-    0, 0,
-  ]);
-  const [ibcLoading, setIBCLoading] = useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
@@ -123,7 +123,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
-
+  const [filterNetwork, setFilterNetwork] = useState('Oraichain');
   // useEffect(() => {
   //   displayToast(TToastType.TX_INFO, {
   //     message:
@@ -153,6 +153,11 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!keplrAddress) return;
     getKwtSubnetAddress();
   }, [keplrAddress]);
+
+  useEffect(() => {
+    if (!statusChangeAccount) return;
+    setPendingTokens(filteredTokens);
+  }, [statusChangeAccount, keplrAddress]);
 
   useEffect(() => {
     loadTokenAmounts();
@@ -265,7 +270,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token,
           chainInfo?.networkType == 'evm'
             ? chainInfo?.rpc
-            : infoEvm?.rpc ?? BSC_RPC
+            : infoEvm?.rpc ?? getRpcEvm()
         );
 
         return [
@@ -336,7 +341,7 @@ const Balance: React.FC<BalanceProps> = () => {
         await Promise.all(
           pendingTokens.map(async (token) => {
             const address = await window.Keplr.getKeplrAddr(
-              token.chainId
+              token.chainId as string
             ).catch((error) => {
               console.log(error);
               return undefined;
@@ -380,12 +385,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      if (token.denom === ERC20_ORAI) {
-        displayToast(TToastType.TX_INFO, {
-          message: `Token ${token.name} on ${token.org} is currently not supported`,
-        });
-        return;
-      }
+      // if (token.denom === ERC20_ORAI) {
+      //   displayToast(TToastType.TX_INFO, {
+      //     message: `Token ${token.name} on ${token.org} is currently not supported`
+      //   });
+      //   return;
+      // }
 
       if (type === 'to') {
         if (_.isEqual(to, token)) {
@@ -397,7 +402,6 @@ const Balance: React.FC<BalanceProps> = () => {
           setTo(undefined);
         } else {
           setFrom(token);
-          setFromAmount([0, 0]);
           const toToken = findDefaultToToken(toTokens, token);
           setTo(toToken);
         }
@@ -408,7 +412,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickTokenFrom = useCallback(
     (token: TokenItemType) => {
-      console.log('onClickTokenFrom');
       onClickToken('from', token);
     },
     [onClickToken]
@@ -438,8 +441,10 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      await window.Keplr.suggestChain(fromToken.chainId as string);
+      const fromAddress = await window.Keplr.getKeplrAddr(
+        fromToken.chainId as string
+      );
 
       if (!metamaskAddress || !fromAddress) {
         displayToast(TToastType.TX_FAILED, {
@@ -454,7 +459,7 @@ const Balance: React.FC<BalanceProps> = () => {
         .toFixed(0);
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        fromToken.chainId as string
       );
       let aminoTypes = new AminoTypes({ ...customAminoTypes });
       // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
@@ -484,7 +489,7 @@ const Balance: React.FC<BalanceProps> = () => {
             // just a number to make sure there is a friction
             amount: ORAI_BRIDGE_CHAIN_FEE,
           },
-          evmChainPrefix: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+          evmChainPrefix: fromToken.prefix,
         }),
       };
       const fee = {
@@ -521,11 +526,15 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      await window.Keplr.suggestChain(toToken.chainId);
+      await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      await window.Keplr.suggestChain(fromToken.chainId as string);
+      const fromAddress = await window.Keplr.getKeplrAddr(
+        fromToken.chainId as string
+      );
+      const toAddress = await window.Keplr.getKeplrAddr(
+        toToken.chainId as string
+      );
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please login keplr!',
@@ -542,11 +551,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
-        if (fromToken.denom === process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM) {
+        if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-          // BEP20 ORAI
           await transferIBCOrai({
             fromToken,
+            toTokenPrefix: toToken.prefix,
             fromAddress,
             toAddress,
             amount,
@@ -554,8 +563,6 @@ const Balance: React.FC<BalanceProps> = () => {
           });
           return;
         }
-
-        // ATOM , OSMOSIS
         await transferIBC({
           fromToken,
           fromAddress,
@@ -567,7 +574,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       // if it includes wasm in source => ibc wasm case
-      if (ibcInfo.source.includes('wasm')) {
+      if (ibcInfo?.source?.includes('wasm')) {
         // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
         ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
       }
@@ -597,21 +604,19 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // note need refactor
       const memo =
-        toToken.org === 'OraiBridge'
-          ? ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress
-          : '';
+        toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
       // get raw ibc tx
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
         value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
+          sourcePort: ibcInfo?.source,
+          sourceChannel: ibcInfo?.channel,
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
           memo,
           timeoutTimestamp: Long.fromNumber(
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout
+            Math.floor(Date.now() / 1000) + ibcInfo?.timeout
           )
             .multiply(1000000000)
             .toString(),
@@ -619,7 +624,7 @@ const Balance: React.FC<BalanceProps> = () => {
       };
 
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        fromToken.chainId as string
       );
       const aminoTypes = new AminoTypes({
         ...createWasmAminoConverters(),
@@ -639,6 +644,8 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: [],
         }
       );
+      console.log({ result });
+
       processTxResult(
         fromToken,
         result,
@@ -664,22 +671,20 @@ const Balance: React.FC<BalanceProps> = () => {
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        fromToken.chainId as string
       );
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(
         fromToken.rpc,
         offlineSigner
       );
-
       const result = await client.sendIbcTokens(
         fromAddress,
         toAddress,
         amount,
-        ibcInfo.source,
-        ibcInfo.channel,
+        ibcInfo?.source,
+        ibcInfo?.channel,
         undefined,
-        Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+        Math.floor(Date.now() / 1000) + ibcInfo?.timeout,
         {
           gas: '200000',
           amount: [],
@@ -696,16 +701,24 @@ const Balance: React.FC<BalanceProps> = () => {
   // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
   const transferIBCOrai = async (data: {
     fromToken: TokenItemType;
+    toTokenPrefix: string;
     fromAddress: string;
     toAddress: string;
     amount: Coin;
     ibcInfo: IBCInfo;
   }) => {
-    const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
+    const {
+      fromToken,
+      fromAddress,
+      toAddress,
+      amount,
+      ibcInfo,
+      toTokenPrefix,
+    } = data;
 
     try {
       const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId
+        fromToken.chainId as string
       );
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -715,7 +728,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token: amount,
           sender: fromAddress,
           receiver: toAddress,
-          memo: ORAI_BRIDGE_EVM_DENOM_PREFIX + metamaskAddress,
+          memo: toTokenPrefix + metamaskAddress,
           timeoutTimestamp: Long.fromNumber(
             Math.floor(Date.now() / 1000) + ibcInfo.timeout
           )
@@ -752,11 +765,15 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(toToken.chainId);
+      await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      await window.Keplr.suggestChain(fromToken.chainId as string);
+      const fromAddress = await window.Keplr.getKeplrAddr(
+        fromToken.chainId as string
+      );
+      const toAddress = await window.Keplr.getKeplrAddr(
+        toToken.chainId as string
+      );
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please login keplr!',
@@ -795,13 +812,13 @@ const Balance: React.FC<BalanceProps> = () => {
         sender: fromAddress,
         gasAmount: { denom: '200000', amount: '0' },
         ibcInfo: {
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
+          sourcePort: ibcInfo?.source,
+          sourceChannel: ibcInfo?.channel,
           amount: amount.amount,
           denom: amount.denom,
           sender: fromAddress,
           receiver: toAddress,
-          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo?.timeout,
         },
         customMessages,
       });
@@ -809,7 +826,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -827,11 +844,15 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(toToken.chainId);
+      await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+      await window.Keplr.suggestChain(fromToken.chainId as string);
+      const fromAddress = await window.Keplr.getKeplrAddr(
+        fromToken.chainId as string
+      );
+      const toAddress = await window.Keplr.getKeplrAddr(
+        toToken.chainId as string
+      );
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please login keplr!',
@@ -846,18 +867,17 @@ const Balance: React.FC<BalanceProps> = () => {
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-
       const result = await KawaiiverseJs.convertIbcTransferERC20({
         sender: fromAddress,
         gasAmount: { denom: '200000', amount: '0' },
         ibcInfo: {
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
+          sourcePort: ibcInfo?.source,
+          sourceChannel: ibcInfo?.channel,
           amount: amount.amount,
           denom: amount.denom,
           sender: fromAddress,
           receiver: toAddress,
-          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+          timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo?.timeout,
         },
         amount: amount.amount,
         contractAddr:
@@ -869,7 +889,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -879,17 +899,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
-    // if (isMobile()) {
-    //   displayToast(TToastType.TX_FAILED, {
-    //     message: 'Metamask mobile app is not supported yet!',
-    //   });
-    //   return;
-    // }
-
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: from!.chainId }],
-    });
+    await window.Metamask.switchNetwork(from!.chainId);
 
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
@@ -904,14 +914,14 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       await window.Metamask.checkOrIncreaseAllowance(
-        from!.chainId,
+        from!.chainId as string,
         from!.contractAddress!,
         metamaskAddress,
         gravityContractAddr,
         fromAmount.toString()
       );
       const result = await window.Metamask.transferToGravity(
-        from!.chainId,
+        from!.chainId as string,
         fromAmount.toString(),
         from!.contractAddress!,
         metamaskAddress,
@@ -921,8 +931,9 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         from,
         result,
-        `
-      https://bscscan.com/tx/${result?.transactionHash}`
+        window.Metamask.isEth()
+          ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}`
+          : `${BSC_SCAN}/tx/${result?.transactionHash}`
       );
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
@@ -949,24 +960,28 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     displayToast(TToastType.TX_BROADCASTING);
-    setIBCLoading(true);
-    if (
-      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
-      to.chainId === ORAICHAIN_ID &&
-      !!from.contractAddress
-    ) {
-      await convertTransferIBCErc20Kwt(from, to, fromAmount);
-    } else if (
-      from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
-      to.chainId === ORAICHAIN_ID
-    ) {
-      await transferIBCKwt(from, to, fromAmount);
-    } else if (from.cosmosBased) {
-      await transferIbcCustom(from, to, fromAmount);
-    } else {
-      await transferEvmToIBC(fromAmount);
+    try {
+      if (
+        from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+        to.chainId === ORAICHAIN_ID &&
+        !!from.contractAddress
+      ) {
+        await convertTransferIBCErc20Kwt(from, to, fromAmount);
+      } else if (
+        from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
+        to.chainId === ORAICHAIN_ID
+      ) {
+        await transferIBCKwt(from, to, fromAmount);
+      } else if (from.cosmosBased) {
+        await transferIbcCustom(from, to, fromAmount);
+      } else {
+        await transferEvmToIBC(fromAmount);
+      }
+    } catch (ex) {
+      displayToast(TToastType.TX_FAILED, {
+        message: ex.message,
+      });
     }
-    setIBCLoading(false);
   };
 
   const convertToken = async (
@@ -1060,8 +1075,10 @@ const Balance: React.FC<BalanceProps> = () => {
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
-      await window.Keplr.suggestChain(fromToken.chainId);
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+      await window.Keplr.suggestChain(fromToken.chainId as string);
+      const fromAddress = await window.Keplr.getKeplrAddr(
+        fromToken.chainId as string
+      );
 
       if (!fromAddress) {
         return;
@@ -1094,7 +1111,7 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(
         fromToken,
         result,
-        `https://scan.kawaii.global/tx/${result.transactionHash}`
+        `${KWT_SCAN}/tx/${result.transactionHash}`
       );
     } catch (ex: any) {
       console.log(ex);
@@ -1107,6 +1124,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
 
   const navigate = useNavigate();
+
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -1154,35 +1172,56 @@ const Balance: React.FC<BalanceProps> = () => {
               .filter((token) => token?.org === filterNetwork)
               .map((t: TokenItemType) => {
                 const name = parseBep20Erc20Name(t.name);
-                const transferToToken = fromTokens.find(
-                  (t) =>
-                    t.cosmosBased &&
-                    t.name.includes(name) &&
-                    t.chainId !== ORAI_BRIDGE_CHAIN_ID
+                const transferToToken = toTokens.find(
+                  (token) =>
+                    token.cosmosBased &&
+                    token.name.includes(name) &&
+                    token.chainId !== ORAI_BRIDGE_CHAIN_ID
                 );
                 return (
                   <div className={styles.tokens_element}>
-                    <TokenItem
-                      key={t.denom}
-                      amountDetail={amounts[t.denom]}
-                      active={to?.denom === t.denom}
-                      token={t}
-                      onClick={onClickTokenTo}
-                      convertToken={convertToken}
-                      transferIBC={transferIbcCustom}
-                      onClickTransfer={
-                        !!transferToToken
-                          ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, to, transferToToken)
-                          : undefined
-                      }
-                      convertKwt={
-                        t.chainId === KWT_SUBNETWORK_CHAIN_ID
-                          ? convertKwt
-                          : undefined
-                      }
-                      toToken={transferToToken}
-                    />
+                    {filterNetwork === 'Oraichain' ? (
+                      <TokenItem
+                        key={t.denom}
+                        amountDetail={amounts[t.denom]}
+                        active={to?.denom === t.denom}
+                        token={t}
+                        onClick={onClickTokenTo}
+                        convertToken={convertToken}
+                        transferIBC={transferIbcCustom}
+                        onClickTransfer={
+                          !!transferToToken
+                            ? (fromAmount: number) =>
+                                onClickTransfer(fromAmount, to, transferToToken)
+                            : undefined
+                        }
+                        toToken={transferToToken}
+                      />
+                    ) : (
+                      <TokenItem
+                        key={t.denom}
+                        amountDetail={amounts[t.denom]}
+                        className={styles.token_from}
+                        active={from?.denom === t.denom}
+                        token={t}
+                        transferFromGravity={transferFromGravity}
+                        convertToken={convertToken}
+                        onClick={onClickTokenFrom}
+                        onClickTransfer={
+                          !!to
+                            ? (fromAmount: number) => {
+                                onClickTransfer(fromAmount, from, to);
+                              }
+                            : undefined
+                        }
+                        convertKwt={
+                          t.chainId === KWT_SUBNETWORK_CHAIN_ID
+                            ? convertKwt
+                            : undefined
+                        }
+                        toToken={to}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -1193,9 +1232,9 @@ const Balance: React.FC<BalanceProps> = () => {
           isOpen={isSelectNetwork}
           open={() => setIsSelectNetwork(true)}
           close={() => setIsSelectNetwork(false)}
-          listToken={networks}
+          listToken={networksFilterChain}
           setToken={(chainId) => {
-            setFilterNetwork(chainId)
+            setFilterNetwork(chainId);
           }}
           icon={true}
         />

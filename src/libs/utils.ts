@@ -2,8 +2,6 @@ import { is } from 'ramda';
 import bech32 from 'bech32';
 import Big from 'big.js';
 import { Fraction } from '@saberhq/token-utils';
-import { TokenItemType } from 'config/bridgeTokens';
-import { COSMOS_DECIMALS } from 'config/constants';
 
 /* object */
 export const record = <T, V>(
@@ -135,7 +133,7 @@ export const parseAmountFromWithDecimal = (
 };
 
 export const reduceString = (str: string, from: number, end: number) => {
-  return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
+  return str ? str.substring(0, from) + "..." + str.substring(str.length - end) : "-";
 };
 
 export const parseBep20Erc20Name = (name: string) => {

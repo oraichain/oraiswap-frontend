@@ -95,7 +95,7 @@ export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
 
-export const KAWAII_CHAINID = 'Kawaiiverse';
-export const OSMOSIS_CHAINID = 'Osmosis';
-export const COSMOS_CHAINID = 'Cosmos Hub';
-export const ORAI_BRIDGE_CHAINID = 'OraiBridge';
+export const KAWAII_ORG = 'Kawaiiverse';
+export const OSMOSIS_ORG = 'Osmosis';
+export const COSMOS_ORG = 'Cosmos Hub';
+export const ORAI_BRIDGE_ORG = 'OraiBridge';
