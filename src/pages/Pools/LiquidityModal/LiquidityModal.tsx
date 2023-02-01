@@ -65,7 +65,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [address] = useGlobalState('address');
 
   const { prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
+    [...new Set(filteredTokens.map((t) => t.coingeckoId).filter(item => item != 'scorai'))]
   );
 
   type PriceKey = keyof typeof prices;
