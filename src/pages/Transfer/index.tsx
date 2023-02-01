@@ -71,11 +71,11 @@ const Transfer: React.FC = () => {
   );
 
   // suggest tokens
-  // useEffect(() => {
-  //   if (fromToken) {
-  //     window.Keplr.suggestToken(fromToken);
-  //   }
-  // }, [fromToken]);
+  useEffect(() => {
+    if (fromToken) {
+      window.Keplr.suggestToken(fromToken);
+    }
+  }, [fromToken]);
 
   const {
     data: fromTokenBalance = 0,

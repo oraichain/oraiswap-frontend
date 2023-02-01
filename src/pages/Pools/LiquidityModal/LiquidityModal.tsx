@@ -14,7 +14,7 @@ import {
   fetchBalanceWithMapping,
   generateConvertErc20Cw20Message
 } from 'rest/api';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { buildMultipleMessages, getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
@@ -64,8 +64,8 @@ const LiquidityModal: FC<ModalProps> = ({
   const token2 = token2InfoData;
   const [address] = useGlobalState('address');
 
-  const { prices } = useCoinGeckoPrices(
-    [...new Set(filteredTokens.map((t) => t.coingeckoId).filter(item => item != 'scorai'))]
+  const { data: prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
   );
 
   type PriceKey = keyof typeof prices;
@@ -128,7 +128,7 @@ const LiquidityModal: FC<ModalProps> = ({
     },
     {
       // enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
-      enabled: !!address  && !!pairInfoData,
+      enabled: !!address && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
@@ -147,7 +147,7 @@ const LiquidityModal: FC<ModalProps> = ({
       );
     },
     {
-      enabled: !!address  && !!pairInfoData,
+      enabled: !!address && !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
@@ -163,7 +163,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const getValueUsd = (token: any, amount: number) => {
     let t = getUsd(
       amount,
-      prices[token!.coingeckoId as PriceKey].price,
+      prices[token!.coingeckoId as PriceKey],
       token!.decimals
     );
     return t;
@@ -207,12 +207,12 @@ const LiquidityModal: FC<ModalProps> = ({
 
     const fromAmount = getUsd(
       poolData.offerPoolAmount,
-      prices[token1!.coingeckoId as PriceKey].price,
+      prices[token1!.coingeckoId as PriceKey],
       token1!.decimals
     );
     const toAmount = getUsd(
       poolData.askPoolAmount,
-      prices[token2!.coingeckoId as PriceKey].price,
+      prices[token2!.coingeckoId as PriceKey],
       token2!.decimals
     );
 

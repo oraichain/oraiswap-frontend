@@ -121,7 +121,7 @@ if (typeof BigInt === 'undefined') {
 export const initEthereum = async () => {
   // support only https
   if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
-    const chainId = parseInt(BSC_CHAIN_ID, 16);
+    const chainId = Number(BSC_CHAIN_ID);
     const provider = new WalletConnectProvider({
       chainId,
       storageId: 'metamask',
