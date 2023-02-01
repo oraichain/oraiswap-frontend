@@ -13,7 +13,6 @@ import {
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import {
@@ -89,6 +88,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { getRpcEvm } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 interface BalanceProps {}
 
@@ -116,9 +116,11 @@ const Balance: React.FC<BalanceProps> = () => {
     []
   ]);
   const [txHash, setTxHash] = useState('');
-  const { prices } = useCoinGeckoPrices(
+
+  const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
+
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);
   const [pendingCount, setPendingCount] = useState(0);
@@ -227,7 +229,7 @@ const Balance: React.FC<BalanceProps> = () => {
         amountDetail = {
           subAmounts,
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+          usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
         };
       } else {
         const amount = await fetchBalance(
@@ -249,7 +251,7 @@ const Balance: React.FC<BalanceProps> = () => {
           amount,
           usd: getUsd(
             amount,
-            prices[token.coingeckoId].price ??
+            prices[token.coingeckoId] ??
               new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
             token.decimals
           )
@@ -278,7 +280,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token.denom,
           {
             amount,
-            usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals)
+            usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
           }
         ];
       })
@@ -303,11 +305,7 @@ const Balance: React.FC<BalanceProps> = () => {
             token.denom,
             {
               amount,
-              usd: getUsd(
-                amount,
-                prices[token.coingeckoId].price,
-                token.decimals
-              )
+              usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
             }
           ];
         })
