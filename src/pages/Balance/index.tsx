@@ -117,7 +117,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ]);
   const [txHash, setTxHash] = useState('');
   const { prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
+    [...new Set(filteredTokens.map((t) => t.coingeckoId).filter(item => item != 'scorai'))]
   );
   // this help to retry loading and show something in processing
   const [pendingTokens, setPendingTokens] = useState(filteredTokens);

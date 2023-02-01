@@ -28,7 +28,7 @@ interface ModalProps {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const { prices } = useCoinGeckoPrices(poolTokens.map((t) => t.coingeckoId));
+  const { prices } = useCoinGeckoPrices([...new Set(poolTokens.map((t) => t.coingeckoId).filter(item => item != 'scorai'))]);
   const [step, setStep] = useState(1);
   const [isSelectingToken, setIsSelectingToken] = useState<
     'token1' | 'token2' | null
