@@ -1,5 +1,5 @@
 import { createChart } from 'lightweight-charts';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo, useCallback } from 'react';
 
 const ChartComponent = (props) => {
   const {
@@ -11,17 +11,12 @@ const ChartComponent = (props) => {
       areaTopColor,
       areaBottomColor,
     },
+    setInfoMove,
   } = props;
   const chartContainerRef = useRef();
 
   useEffect(() => {
-    // const handleResize = () => {
-    //   chart.applyOptions({ width: 1000 });
-    // };
-
     const chart = createChart(chartContainerRef.current, {
-      //   width: 500,
-      //   height: 300,
       rightPriceScale: {
         scaleMargins: {
           top: 0.1,
@@ -67,18 +62,30 @@ const ChartComponent = (props) => {
     });
     chart.timeScale().fitContent();
 
-    const newSeries = chart.addAreaSeries({
+    const series = chart.addAreaSeries({
       lineColor,
       topColor: areaTopColor,
       bottomColor: areaBottomColor,
     });
-    newSeries.setData(data);
+    series.setData(data);
 
-    // window.addEventListener('resize', handleResize);
+    chart.subscribeCrosshairMove((param) => {
+      if (
+        param === undefined ||
+        param.time === undefined ||
+        param.point.x < 0 ||
+        param.point.y < 0
+      ) {
+        setValueChartMove(
+          data[data.length - 1].value,
+          data[data.length - 1].time
+        );
+      } else {
+        setValueChartMove(param.seriesPrices.get(series), param.time);
+      }
+    });
 
     return () => {
-    //   window.removeEventListener('resize', handleResize);
-
       chart.remove();
     };
   }, [
@@ -90,27 +97,39 @@ const ChartComponent = (props) => {
     areaBottomColor,
   ]);
 
+  useEffect(() => {
+    setValueChartMove(
+      data[data.length - 1]?.value,
+      data[data.length - 1]?.time
+    );
+  }, [data]);
+
+  const setValueChartMove = useCallback(
+    (value, time) => {
+      if (setInfoMove) {
+        setInfoMove({
+          value,
+          time,
+        });
+      }
+    },
+    [setInfoMove]
+  );
+
   return (
     <div
       style={{
+        position: 'absolute',
+        top: '0',
+        right: '0',
+        bottom: '0',
+        left: '0',
         height: '100%',
         width: '100%',
       }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          bottom: '0',
-          left: '0',
-          height: '100%',
-          width: '100%',
-        }}
-        ref={chartContainerRef}
-      />
-    </div>
+      ref={chartContainerRef}
+    />
   );
-}
+};
 
-export default ChartComponent;
+export default memo(ChartComponent);
