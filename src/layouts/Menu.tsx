@@ -2,7 +2,7 @@ import { Button, Typography } from 'antd';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
-import { ReactComponent as Transfer } from 'assets/icons/transfer.svg';
+import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
@@ -239,12 +239,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               setLink,
               <Swap style={{ width: 30, height: 30 }} />
             )}
-            {/* {renderLink(
-              '/transfer',
-              'Transfer CW20 Tokens',
-              setLink,
-              <Transfer style={{ width: 30, height: 30 }} />
-            )} */}
             {renderLink(
               '/pools',
               'Pools',
@@ -256,6 +250,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
               'Bridge',
               setLink,
               <Wallet style={{ width: 30, height: 30 }} />
+            )}
+            {renderLink(
+              'https://payment.orai.io/',
+              'Buy ORAI (Fiat)',
+              () => { },
+              <BuyFiat style={{ width: 30, height: 30 }} />,
+              true
             )}
             {renderLink(
               'https://info.oraidex.io/',
@@ -293,7 +294,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
           </div>
 
-          <div className={styles.menu_footer}>© 2022 Powered by Oraichain</div>
+          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation.</div>
         </div>
       </div>
     </>

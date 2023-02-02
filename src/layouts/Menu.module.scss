@@ -21,6 +21,7 @@
   @include mobile {
     margin-left: calc(-1 * var(--menu-width));
     padding-top: 75px;
+    overflow: auto;
     &.open {
       margin-left: 0;
     }
