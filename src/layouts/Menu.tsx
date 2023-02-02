@@ -294,7 +294,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
           </div>
 
-          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation.</div>
+          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation</div>
         </div>
       </div>
     </>
