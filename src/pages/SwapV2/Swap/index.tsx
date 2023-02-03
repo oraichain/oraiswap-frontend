@@ -236,9 +236,6 @@ const SwapComponent: React.FC<{
   const FromIcon = fromToken?.Icon;
   const ToIcon = toToken?.Icon;
 
-  console.log('FROM', fromTokenDenom);
-  console.log('TO', ToIcon);
-
   return (
     <div className={cx('swap-box')}>
       <div className={cx('from')}>

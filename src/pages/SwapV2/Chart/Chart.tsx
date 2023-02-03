@@ -1,3 +1,4 @@
+import { formatCash } from 'libs/utils';
 import { createChart } from 'lightweight-charts';
 import { useEffect, useRef, memo, useCallback } from 'react';
 
@@ -20,19 +21,17 @@ const ChartComponent = (props) => {
       rightPriceScale: {
         scaleMargins: {
           top: 0.1,
-          bottom: 0.05,
+          bottom: 0,
         },
       },
       layout: {
         backgroundColor: 'rgba(31, 33, 40,0)',
         textColor: '#c3c5cb',
-        fontFamily: "'Inter'",
+        fontFamily: 'Roboto, sans-serif',
       },
-      //   localization: {
-      //     priceFormatter: (price) => {
-      //       return price;
-      //     },
-      //   },
+      localization: {
+        priceFormatter: (price) => formatCash(price),
+      },
       grid: {
         horzLines: {
           visible: false,
@@ -84,6 +83,17 @@ const ChartComponent = (props) => {
         setValueChartMove(param.seriesPrices.get(series), param.time);
       }
     });
+
+    new ResizeObserver((entries) => {
+      if (
+        entries.length === 0 ||
+        entries[0].target !== chartContainerRef.current
+      ) {
+        return;
+      }
+      const newRect = entries[0].contentRect;
+      chart.applyOptions({ height: newRect.height, width: newRect.width });
+    }).observe(chartContainerRef.current);
 
     return () => {
       chart.remove();

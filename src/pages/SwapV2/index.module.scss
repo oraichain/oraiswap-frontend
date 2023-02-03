@@ -1,3 +1,5 @@
+@import 'src/styles/mixins';
+
 .swap-container {
   display: flex;
   flex-wrap: wrap;
@@ -10,6 +12,20 @@
     }
     &.w40 {
       width: 40%;
+    }
+  }
+}
+
+@include mobile {
+  .swap-container {
+    padding: 0;
+    .swap-col {
+      &.w60 {
+        width: 100%;
+      }
+      &.w40 {
+        width: 100%;
+      }
     }
   }
 }
