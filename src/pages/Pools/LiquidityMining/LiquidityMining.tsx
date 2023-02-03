@@ -42,7 +42,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   totalRewardInfoData,
   rewardPerSecInfoData,
   stakingPoolInfoData,
-  pairInfoData,
+  pairInfoData
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<[any]>();
@@ -57,7 +57,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   }, [
     JSON.stringify(totalRewardInfoData),
     JSON.stringify(rewardPerSecInfoData),
-    JSON.stringify(stakingPoolInfoData),
+    JSON.stringify(stakingPoolInfoData)
   ]);
 
   const setNewReward = () => {
@@ -91,7 +91,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           ...token,
           amount,
           rewardPerSec: +r.amount,
-          pendingWithdraw,
+          pendingWithdraw
           // usdValue
         };
       } else {
@@ -107,7 +107,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           ...token,
           amount,
           rewardPerSec: +r.amount,
-          pendingWithdraw,
+          pendingWithdraw
           // usdValue
         };
       }
@@ -131,7 +131,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        assetToken: assetToken,
+        assetToken: assetToken
       } as WithdrawMining);
 
       const msg = msgs[0];
@@ -141,14 +141,14 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setActionLoading(false);
         onBondingAction();
@@ -161,7 +161,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     }
     setActionLoading(false);
@@ -207,7 +207,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
                           ? lpTokenInfoData?.symbol.substring(1)
                           : lpTokenInfoData?.symbol
-                      }`, // symbol should not be minimal
+                      }` // symbol should not be minimal
                     }}
                     className={cx('amount')}
                     decimalScale={6}
@@ -232,7 +232,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   style={{
                     background: '#2D2938',
                     width: '100%',
-                    height: '1px',
+                    height: '1px'
                     // margin: '16px 0'
                   }}
                 />
@@ -264,7 +264,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         balance={{
                           amount: r.amount,
                           denom: r.denom.toUpperCase(),
-                          decimals: 6,
+                          decimals: 6
                         }}
                         decimalScale={6}
                       />

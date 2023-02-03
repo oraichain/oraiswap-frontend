@@ -112,12 +112,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   ).toNumber();
 
   const checkValidAmount = () => {
-    // if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
-    //   displayToast(TToastType.TX_FAILED, {
-    //     message: 'Invalid amount!',
-    //   });
-    //   return false;
-    // }
+    if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Invalid amount!',
+      });
+      return false;
+    }
     return true;
   };
 

@@ -38,7 +38,7 @@ const UnbondModal: FC<ModalProps> = ({
   bondAmountUsd,
   lpTokenInfoData,
   assetToken,
-  onBondingAction,
+  onBondingAction
 }) => {
   const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState(0);
@@ -53,7 +53,7 @@ const UnbondModal: FC<ModalProps> = ({
 
     if (parsedAmount <= 0 || parsedAmount > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Amount is invalid!',
+        message: 'Amount is invalid!'
       });
 
     setActionLoading(true);
@@ -63,24 +63,24 @@ const UnbondModal: FC<ModalProps> = ({
         type: Type.UNBOND_LIQUIDITY,
         sender: address,
         amount: parsedAmount,
-        assetToken,
+        assetToken
       });
       const msg = msgs[0];
-      
+
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
 
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         onBondingAction();
       }
@@ -91,7 +91,7 @@ const UnbondModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setActionLoading(false);
@@ -120,7 +120,7 @@ const UnbondModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: bondAmount ? bondAmount : 0,
-                denom: lpTokenInfoData.symbol,
+                denom: lpTokenInfoData.symbol
               }}
               prefix="Bonded Token Balance: "
               decimalScale={6}
@@ -148,7 +148,7 @@ const UnbondModal: FC<ModalProps> = ({
             {[25, 50, 75, 100].map((option, idx) => (
               <div
                 className={cx('item', {
-                  isChosen: chosenOption === idx,
+                  isChosen: chosenOption === idx
                 })}
                 key={idx}
                 onClick={() => {
@@ -161,7 +161,7 @@ const UnbondModal: FC<ModalProps> = ({
             ))}
             <div
               className={cx('item', 'border', {
-                isChosen: chosenOption === 4,
+                isChosen: chosenOption === 4
               })}
               onClick={() => setChosenOption(4)}
             >
