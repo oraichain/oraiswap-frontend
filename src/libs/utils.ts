@@ -104,12 +104,15 @@ export const numberToFraction = function (_decimal: number) {
 
 export const getUsd = (
   amount: number,
-  price: Fraction | null,
+  price: Fraction | number | null,
   decimals: number
 ) => {
   if (!amount || !price) return 0;
 
-  return price.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
+  const fragPrice =
+    typeof price === 'number' ? Fraction.fromNumber(price) : price;
+
+  return fragPrice.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
     .asNumber;
 };
 
@@ -138,11 +141,15 @@ export const reduceString = (str: string, from: number, end: number) => {
 
 export const parseBep20Erc20Name = (name: string) => {
   return name.replace(/(BEP20|ERC20)\s+/, '');
-}
+};
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   var messages: any[] = mainMsg ? [mainMsg] : [];
   messages.unshift(...preMessages.flat(1));
-  messages = messages.map(msg => ({ contractAddress: msg.contract, handleMsg: msg.msg.toString(), handleOptions: { funds: msg.sent_funds } }));
+  messages = messages.map((msg) => ({
+    contractAddress: msg.contract,
+    handleMsg: msg.msg.toString(),
+    handleOptions: { funds: msg.sent_funds }
+  }));
   return messages;
-}
+};

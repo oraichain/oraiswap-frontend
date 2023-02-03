@@ -3,13 +3,14 @@ import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
-  TokenItemType
+  TokenItemType,
 } from 'config/bridgeTokens';
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import { getDenomEvm } from 'helper';
+import { publicToAddress } from "@ethereumjs/util";
 
 export default class Metamask {
   constructor() {}
@@ -26,8 +27,31 @@ export default class Metamask {
   public async switchNetwork(chainId: string | number) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: Number(chainId).toString(16).padStart(4, '0x0') }]
+      params: [{ chainId: '0x' + Number(chainId).toString(16) }],
     });
+  }
+
+  public async getPulbicKey() {
+    return await window.ethereum!.request({
+      method: 'public_key',
+      params: [],
+    });
+  }
+
+  public async convertPublicToAddress() {
+    const res = await this.getPulbicKey();
+    try {
+      const pubkeyEvm = JSON.parse(res?.result);
+      if(!pubkeyEvm) return 'Invalid address';
+      const postAddress = publicToAddress(
+        Buffer.from(pubkeyEvm, 'hex'),
+        true
+      ).toString('hex');
+      return '0x' + postAddress;
+    } catch (error) {
+      console.log(error);
+      return 'Invalid address';
+    }
   }
 
   public async transferToGravity(
@@ -51,7 +75,7 @@ export default class Metamask {
     const result = await gravityContract.methods
       .sendToCosmos(tokenContract, to, balance)
       .send({
-        from
+        from,
       });
     return result;
   }
@@ -81,7 +105,7 @@ export default class Metamask {
     const result = await tokenContract.methods
       .approve(spender, allowance)
       .send({
-        from: owner
+        from: owner,
       });
     return result;
   }

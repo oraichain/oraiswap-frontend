@@ -10,7 +10,6 @@ import {
   kawaiiTokens,
   TokenItemType,
 } from 'config/bridgeTokens';
-import bech32, { fromWords } from 'bech32';
 import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
@@ -21,9 +20,12 @@ import Loader from 'components/Loader';
 import {
   BEP20_ORAI,
   BSC_ORG,
+  COSMOS_ORG,
+  ETHEREUM_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  OSMOSIS_ORG,
   STABLE_DENOM,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -37,7 +39,6 @@ import {
   getTokenChain,
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
-import { ETH } from '@hanchon/ethermint-address-converter';
 
 const AMOUNT_BALANCE_25 = '25%';
 const AMOUNT_BALANCE_50 = '50%';
@@ -133,20 +134,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const getAddressTransfer = async (network) => {
-    let address = '';
-    if (network.networkType == 'evm') {
-      address = ETH.encoder(
-        Buffer.from(
-          fromWords(bech32.decode(await window.Keplr.getKeplrAddr()).words)
-        )
-      );
+    try {
+      let address: string = '';
+      if (network.networkType == 'evm') {
+        address = await window.Metamask!.convertPublicToAddress()
+      }
+      if (network.networkType == 'cosmos') {
+        address = await window.Keplr.getKeplrAddr(
+          network.chainId.replace(' BEP20', '').replace(' ERC20', '')
+        );
+      }
+      setAddressTransfer(address);
+    } catch (error) {
+      setAddressTransfer('');
     }
-    if (network.networkType == 'cosmos') {
-      address = await window.Keplr.getKeplrAddr(
-        network.chainId.replace(' BEP20', '').replace(' ERC20', '')
-      );
-    }
-    setAddressTransfer(address);
   };
 
   return (
@@ -202,7 +203,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                               key={network.chainId}
                               onClick={async (e) => {
                                 e.stopPropagation();
-                                setFilterNetwork(network?.chainId);
+                                setFilterNetwork(network?.title);
                                 await getAddressTransfer(network);
                                 setIsOpen(false);
                               }}
@@ -213,7 +214,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                   alignItems: 'center',
                                 }}
                               >
-                                <div>{renderLogoNetwork(network.chainId)}</div>
+                                <div>{renderLogoNetwork(network.title)}</div>
                                 <div className={styles.items_title}>
                                   {network.title}
                                 </div>
@@ -310,26 +311,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         </div>
       </div>
       <div className={styles.transferTab}>
-        {onClickTransfer && (
-          <Tooltip
-            content={
-              toToken.chainId === KWT_SUBNETWORK_CHAIN_ID && (
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ marginBottom: '6px' }}>
-                    [Notice] Keplr recently sent out an update that affected the
-                    current flow of Kawaiiverse, please delete Kawaiiverse in
-                    Keplr and add it again (make sure you have no token left in
-                    Kawaiiverse before deleting). Also remember to set your gas
-                    fee for free transactions.
-                  </div>
-                  <i>
-                    Skip this message if you added Kawaiiverse after July 8,
-                    2022.
-                  </i>
-                </div>
-              )
-            }
-          >
+        {onClickTransfer &&
+          (token?.org === BSC_ORG ||
+            token?.org === ETHEREUM_ORG ||
+            token?.org === OSMOSIS_ORG ||
+            token?.org === COSMOS_ORG ||
+            (token?.org == ORAICHAIN_ID &&
+              (token?.name === 'ATOM' || token?.name === 'OSMO'))) && (
             <button
               className={styles.tfBtn}
               disabled={transferIbcLoading}
@@ -347,13 +335,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             >
               {transferIbcLoading && <Loader width={20} height={20} />}
               <span>
-                Transfer to <strong>{filterNetwork} 2</strong>
-                {/* toToken.org */}
+                Transfer to <strong>{filterNetwork}</strong>
               </span>
             </button>
-          </Tooltip>
-        )}
-         {(() => {
+          )}
+        {(() => {
           if (
             token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
             token.cosmosBased &&
@@ -391,9 +377,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           }
 
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-            const to = kawaiiTokens.find(
-              (t) => t.denom != token.denom && t.type === token.type
-            );
             return (
               <>
                 <button
@@ -405,6 +388,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
+                      console.log({ filterNetwork });
+                      
+                      if (filterNetwork === ORAICHAIN_ID) {
+                        return await onClickTransfer(convertAmount);
+                      }
                       await convertKwt(convertAmount, token);
                     } finally {
                       setTransferLoading(false);
@@ -413,7 +401,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Convert to <strong>{to.name}</strong>
+                    {'Transfer To'}{' '}
+                      <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -447,6 +436,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
+          // erc20 oraichain
           if (
             token.cosmosBased &&
             token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
@@ -455,67 +445,72 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <>
-                {token.bridgeNetworkIdentifier && (
+                <Tooltip
+                  content={
+                    toToken?.chainId === KWT_SUBNETWORK_CHAIN_ID && (
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ marginBottom: '6px' }}>
+                          [Notice] Keplr recently sent out an update that
+                          affected the current flow of Kawaiiverse, please
+                          delete Kawaiiverse in Keplr and add it again (make
+                          sure you have no token left in Kawaiiverse before
+                          deleting). Also remember to set your gas fee for free
+                          transactions.
+                        </div>
+                        <i>
+                          Skip this message if you added Kawaiiverse after July
+                          8, 2022.
+                        </i>
+                      </div>
+                    )
+                  }
+                >
                   <button
+                    disabled={transferLoading}
                     className={styles.tfBtn}
-                    disabled={convertLoading}
                     onClick={async (event) => {
                       event.stopPropagation();
                       try {
                         const isValid = checkValidAmount();
                         if (!isValid) return;
-                        setConvertLoading(true);
-                        await convertToken(
-                          convertAmount,
-                          token,
-                          'nativeToCw20'
+                        setTransferLoading(true);
+                        if (token.bridgeNetworkIdentifier) {
+                          return await convertToken(
+                            convertAmount,
+                            token,
+                            'nativeToCw20'
+                          );
+                        }
+                        if (onClickTransfer && filterNetwork == 'Kawaiiverse') {
+                          return await onClickTransfer(convertAmount);
+                        }
+                        const name = parseBep20Erc20Name(token.name);
+                        const tokenBridge = token?.bridgeNetworkIdentifier;
+                        const to = filteredTokens.find(
+                          (t) =>
+                            t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
+                              ? t.bridgeNetworkIdentifier.includes(
+                                  token.bridgeNetworkIdentifier
+                                )
+                              : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
                         );
+
+                        // convert reverse before transferring
+                        await transferIBC(token, to, convertAmount);
                       } finally {
-                        setConvertLoading(false);
+                        setTransferLoading(false);
                       }
                     }}
                   >
-                    {convertLoading && <Loader width={20} height={20} />}
+                    {transferLoading && <Loader width={20} height={20} />}
                     <span>
-                      Convert To
-                      <strong style={{ marginLeft: 5 }}>
-                        {parseBep20Erc20Name(name)}
-                      </strong>
+                      {token.bridgeNetworkIdentifier
+                        ? 'Convert To'
+                        : 'Transfer To'}{' '}
+                      <strong>{filterNetwork}</strong>
                     </span>
                   </button>
-                )}
-                <button
-                  disabled={transferLoading}
-                  className={styles.tfBtn}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      const name = parseBep20Erc20Name(token.name);
-                      const tokenBridge = token?.bridgeNetworkIdentifier;
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
-                            ? t.bridgeNetworkIdentifier.includes(
-                                token.bridgeNetworkIdentifier
-                              )
-                            : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
-                      );
-
-                      // convert reverse before transferring
-                      await transferIBC(token, to, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer To <strong>OraiBridge</strong>
-                  </span>
-                </button>
+                </Tooltip>
               </>
             );
           }
@@ -524,17 +519,23 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
             ibcConvertToken.length
           ) {
-            return ibcConvertToken.map((ibcConvert, i) => (
+            return (
               <button
-                key={ibcConvert.denom}
                 className={styles.tfBtn}
-                disabled={convertLoadingOrai === i + 1}
+                disabled={transferLoading}
                 onClick={async (event) => {
                   event.stopPropagation();
                   try {
                     const isValid = checkValidAmount();
                     if (!isValid) return;
-                    setConvertLoadingOrai(i + 1);
+                    setTransferLoading(true);
+                    const name =
+                      filterNetwork === ORAICHAIN_ID + ' BEP20'
+                        ? 'BEP20 ORAI'
+                        : 'ERC20 ORAI';
+                    const ibcConvert = ibcConvertToken.find(
+                      (ibc) => ibc.name === name
+                    );
                     await convertToken(
                       convertAmount,
                       token,
@@ -542,19 +543,17 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       ibcConvert
                     );
                   } finally {
-                    setConvertLoadingOrai(0);
+                    setTransferLoading(false);
                   }
                 }}
               >
-                {convertLoadingOrai === i + 1 && (
-                  <Loader width={20} height={20} />
-                )}
+                {transferLoading && <Loader width={20} height={20} />}
                 <span>
                   Convert To
-                  <strong style={{ marginLeft: 5 }}>{ibcConvert.name}</strong>
+                  <strong style={{ marginLeft: 5 }}>{filterNetwork}</strong>
                 </span>
               </button>
-            ));
+            );
           }
         })()}
       </div>

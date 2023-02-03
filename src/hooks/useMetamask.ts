@@ -19,10 +19,10 @@ export function useEagerConnect(isInactive, isInterval) {
 
   useEffect(() => {
     if(isInterval) return;
-    eagerConnectBsc();
-  }, [pathname]);
+    connectEvm();
+  }, [pathname, isInterval]);
 
-  const eagerConnectBsc = () => {
+  const connectEvm = () => {
     if (!window.ethereum) return;
     if (
       ![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(

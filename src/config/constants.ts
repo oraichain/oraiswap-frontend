@@ -17,6 +17,8 @@ export const BEP20_AIRI = 'bep20_airi';
 export const BEP20_KWT = 'bep20_kwt';
 export const BEP20_MILKY = 'bep20_milky';
 export const ERC20_ORAI = 'erc20_orai';
+export const ERC20_KWT = 'erc20_kwt';
+export const ERC20_MILKY = 'erc20_milky';
 export const KAWAII_ORAI = 'kawaii_orai';
 
 export const NATIVE_TOKENS = [ORAI];

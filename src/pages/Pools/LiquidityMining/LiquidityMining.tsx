@@ -84,7 +84,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         );
         // const usdValue = getUsd(
         //   amount,
-        //   prices[token!.coingeckoId].price,
+        //   prices[token!.coingeckoId],
         //   token!.decimals
         // );
         return {
@@ -100,7 +100,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         );
         // const usdValue = getUsd(
         //   amount,
-        //   prices[token!.coingeckoId].price,
+        //   prices[token!.coingeckoId],
         //   token!.decimals
         // );
         return {

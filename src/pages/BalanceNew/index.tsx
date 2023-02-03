@@ -13,7 +13,7 @@ import {
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+// import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
 import TokenBalance from 'components/TokenBalance';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import {
@@ -92,6 +92,7 @@ import { getRpcEvm, networksFilterChain } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { renderLogoNetwork } from 'helper';
 import SelectTokenModal from './Modals/SelectTokenModal';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 interface BalanceProps {}
 
@@ -116,7 +117,7 @@ const Balance: React.FC<BalanceProps> = () => {
     [],
   ]);
   const [txHash, setTxHash] = useState('');
-  const { prices } = useCoinGeckoPrices(
+  const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
   // this help to retry loading and show something in processing
@@ -226,7 +227,7 @@ const Balance: React.FC<BalanceProps> = () => {
         amountDetail = {
           subAmounts,
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId].price, token.decimals),
+          usd: getUsd(amount, prices[token.coingeckoId], token.decimals),
         };
       } else {
         const amount = await fetchBalance(
@@ -248,7 +249,7 @@ const Balance: React.FC<BalanceProps> = () => {
           amount,
           usd: getUsd(
             amount,
-            prices[token.coingeckoId].price ??
+            prices[token.coingeckoId] ??
               new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
             token.decimals
           ),
@@ -277,11 +278,7 @@ const Balance: React.FC<BalanceProps> = () => {
           token.denom,
           {
             amount,
-            usd: getUsd(
-              amount,
-              prices[token.coingeckoId].price,
-              token.decimals
-            ),
+            usd: getUsd(amount, prices[token.coingeckoId], token.decimals),
           },
         ];
       })
@@ -306,11 +303,7 @@ const Balance: React.FC<BalanceProps> = () => {
             token.denom,
             {
               amount,
-              usd: getUsd(
-                amount,
-                prices[token.coingeckoId].price,
-                token.decimals
-              ),
+              usd: getUsd(amount, prices[token.coingeckoId], token.decimals),
             },
           ];
         })
@@ -1170,58 +1163,67 @@ const Balance: React.FC<BalanceProps> = () => {
           <div className={styles.tokens_form}>
             {[...fromTokens, ...toTokens]
               .filter((token) => token?.org === filterNetwork)
+              // .filter((t) => {
+              //   if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
+              //     const name = parseBep20Erc20Name(from.name);
+              //     return t.name.includes(name);
+              //   }
+              //   return (
+              //     !from ||
+              //     (from.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+              //       t.name === from.name)
+              //   );
+              // })
               .map((t: TokenItemType) => {
                 const name = parseBep20Erc20Name(t.name);
-                const transferToToken = toTokens.find(
-                  (token) =>
-                    token.cosmosBased &&
-                    token.name.includes(name) &&
-                    token.chainId !== ORAI_BRIDGE_CHAIN_ID
-                );
+                const tokenOraichain = filterNetwork == ORAICHAIN_ID;
+                const transferToToken =
+                  tokenOraichain &&
+                  fromTokens.find(
+                    (token) =>
+                      token.cosmosBased &&
+                      token.name.includes(name) &&
+                      token.chainId !== ORAI_BRIDGE_CHAIN_ID
+                  );
+
                 return (
                   <div className={styles.tokens_element}>
-                    {filterNetwork === 'Oraichain' ? (
-                      <TokenItem
-                        key={t.denom}
-                        amountDetail={amounts[t.denom]}
-                        active={to?.denom === t.denom}
-                        token={t}
-                        onClick={onClickTokenTo}
-                        convertToken={convertToken}
-                        transferIBC={transferIbcCustom}
-                        onClickTransfer={
-                          !!transferToToken
+                    <TokenItem
+                      key={t.denom}
+                      amountDetail={amounts[t.denom]}
+                      active={
+                        tokenOraichain
+                          ? to?.denom === t.denom
+                          : from?.denom === t.denom
+                      }
+                      token={t}
+                      onClick={
+                        tokenOraichain ? onClickTokenTo : onClickTokenFrom
+                      }
+                      convertToken={convertToken}
+                      transferIBC={tokenOraichain && transferIbcCustom}
+                      onClickTransfer={
+                        tokenOraichain
+                          ? !!transferToToken
                             ? (fromAmount: number) =>
                                 onClickTransfer(fromAmount, to, transferToToken)
                             : undefined
-                        }
-                        toToken={transferToToken}
-                      />
-                    ) : (
-                      <TokenItem
-                        key={t.denom}
-                        amountDetail={amounts[t.denom]}
-                        className={styles.token_from}
-                        active={from?.denom === t.denom}
-                        token={t}
-                        transferFromGravity={transferFromGravity}
-                        convertToken={convertToken}
-                        onClick={onClickTokenFrom}
-                        onClickTransfer={
-                          !!to
-                            ? (fromAmount: number) => {
-                                onClickTransfer(fromAmount, from, to);
-                              }
-                            : undefined
-                        }
-                        convertKwt={
-                          t.chainId === KWT_SUBNETWORK_CHAIN_ID
-                            ? convertKwt
-                            : undefined
-                        }
-                        toToken={to}
-                      />
-                    )}
+                          : !!to
+                          ? (fromAmount: number) => {
+                              onClickTransfer(fromAmount, from, to);
+                            }
+                          : undefined
+                      }
+                      toToken={tokenOraichain ? transferToToken : to}
+                      transferFromGravity={
+                        tokenOraichain ? undefined : transferFromGravity
+                      }
+                      convertKwt={
+                        t.chainId === KWT_SUBNETWORK_CHAIN_ID
+                          ? convertKwt
+                          : undefined
+                      }
+                    />
                   </div>
                 );
               })}

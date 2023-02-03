@@ -27,6 +27,8 @@ import {
   ORAI_BRIDGE_ORG,
   ETHEREUM_ORG,
   ORAI_BRIDGE_CHAIN_ID,
+  ERC20_KWT,
+  ERC20_MILKY,
 } from 'config/constants';
 
 import {
@@ -49,7 +51,8 @@ interface Items {
   title?: string;
 }
 interface Tokens {
-  denom: string;
+  denom?: string;
+  chainId?: string | number;
 }
 
 export const networks = [
@@ -109,8 +112,10 @@ export const networks = [
   },
 ];
 
-export const networksFilterChain = networks.filter((token) =>
-    token.chainId != ORAICHAIN_ID + ' BEP20' && token.chainId != ORAICHAIN_ID + ' ERC20'
+export const networksFilterChain = networks.filter(
+  (token) =>
+    token.chainId != ORAICHAIN_ID + ' BEP20' &&
+    token.chainId != ORAICHAIN_ID + ' ERC20'
 );
 
 export const renderLogoNetwork = (network: string) => {
@@ -144,73 +149,109 @@ export const filterChainBridge = (
   filterNetwork: string
 ) => {
   const denom = token.denom.toLowerCase() ?? ORAI;
+
+  if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
+    return item.title === BSC_ORG
+  }
+
   switch (denom) {
     // Oraichain
     case ORAI:
       return (
-        item.chainId === ORAICHAIN_ID + ' BEP20' ||
-        item.chainId === ORAICHAIN_ID + ' ERC20'
+        item.title !== filterNetwork &&
+        (item.title === ORAICHAIN_ID + ' BEP20' ||
+          item.title === ORAICHAIN_ID + ' ERC20')
       );
-    case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM:
-      return item.chainId === COSMOS_ORG;
+    case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM.toLowerCase():
+      return item.title === COSMOS_ORG;
+    case process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM.toLowerCase():
+      return item.title === OSMOSIS_ORG;
     case AIRI_DENOM:
-      return item.chainId === BSC_ORG;
+      return item.title === BSC_ORG;
     case STABLE_DENOM:
-      return item.chainId === BSC_ORG;
-    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM:
+      return item.title === BSC_ORG;
+    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM.toLowerCase():
       return (
-        item.chainId !== filterNetwork &&
-        (item.chainId === BSC_ORG || item.chainId === ORAICHAIN_ID)
+        item.title !== filterNetwork &&
+        (item.title === BSC_ORG || item.title === ORAICHAIN_ID)
       );
     case KWT_DENOM:
       return (
-        item.chainId !== filterNetwork &&
-        (item.chainId === KAWAII_ORG || item.chainId === BSC_ORG)
+        item.title !== filterNetwork &&
+        (item.title === KAWAII_ORG || item.title === BSC_ORG)
       );
     case MILKY:
       return (
-        item.chainId !== filterNetwork &&
-        (item.chainId === KAWAII_ORG || item.chainId === BSC_ORG)
+        item.title !== filterNetwork &&
+        (item.title === KAWAII_ORG || item.title === BSC_ORG)
       );
     case ORAIX_DENOM.toLowerCase():
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
     case scORAI_DENOM:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
 
     // Kawaiiverse
-    case process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM:
+    case process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM.toLowerCase():
       return (
-        item.chainId !== filterNetwork &&
-        (item.chainId === ORAICHAIN_ID || item.chainId === BSC_ORG)
+        item.title !== filterNetwork &&
+        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
       );
-
+    case process.env.REACT_APP_KWT_SUB_NETWORK_DENOM.toLowerCase():
+      return (
+        item.title !== filterNetwork &&
+        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
+      );
+    case ERC20_MILKY:
+      return (
+        item.title !== filterNetwork &&
+        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
+      );
+    case ERC20_KWT:
+      return (
+        item.title !== filterNetwork &&
+        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
+      );
+       
     // Osmosis`
     case UOSMOS_DENOM:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
 
     // Cosmos Hub
     case UATOM_DENOM:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
 
     // BNB Chain
     case BEP20_USDT:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
     case BEP20_AIRI:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
     case BEP20_KWT:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
     case BEP20_ORAI:
-      return (
-        item.chainId !== filterNetwork &&
-        (item.chainId === ORAICHAIN_ID || item.chainId === BSC_ORG)
-      );
+      return item.title === ORAICHAIN_ID;
     case BEP20_MILKY:
-      return item.chainId === ORAICHAIN_ID;
+      return item.title === ORAICHAIN_ID;
+
+    // ethereum 
+    case ERC20_ORAI:
+      return item.title === ORAICHAIN_ID;
+    
+    // oraibridge
+
+    default:
+      return item;
   }
 };
 
-export const getTokenChain = (token?: { org?: string; denom?: string }) => {
+export const getTokenChain = (token?: {
+  chainId: string | number; org?: string; denom?: string 
+}) => {
   let chainId = token?.org;
+  
+  if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
+    return BSC_ORG
+  }
+
   switch (token?.denom) {
     // Oraichain
     case ORAI:
@@ -273,6 +314,10 @@ export const getTokenChain = (token?: { org?: string; denom?: string }) => {
       chainId = ORAICHAIN_ID;
       break;
     case BEP20_MILKY:
+      chainId = ORAICHAIN_ID;
+      break;
+    // ethereum
+    case ERC20_ORAI:
       chainId = ORAICHAIN_ID;
       break;
   }
