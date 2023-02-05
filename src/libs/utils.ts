@@ -87,23 +87,6 @@ export const parseDisplayAmount = (
   return '0';
 };
 
-const gcd = (a: any, b: any): any => {
-  return b ? gcd(b, a % b) : a;
-};
-
-export const numberToFraction = function (_decimal: number) {
-  const top = _decimal.toString().replace(/\d+[.]/, '');
-  const bottom = Math.pow(10, top.length);
-  let topNumber = parseInt(top);
-  if (_decimal > 1) {
-    topNumber += Math.floor(_decimal) * bottom;
-  }
-  var x = gcd(top, bottom);
-  return new Fraction(topNumber / x, bottom / x);
-};
-
-(window as any).numberToFraction = numberToFraction;
-
 export const getUsd = (
   amount: number,
   price: Fraction | number | null,

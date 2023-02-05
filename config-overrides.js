@@ -114,7 +114,7 @@ module.exports = {
       });
     }
 
-    if (process.env.SENTRY_AUTH_TOKEN) {
+    if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
       config.devtool = 'source-map';
       config.plugins.push(
         new SentryWebpackPlugin({
