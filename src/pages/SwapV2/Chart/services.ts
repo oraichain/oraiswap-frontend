@@ -1,5 +1,5 @@
 import axios from "rest/request";
-import { BASE_API_URL } from "./constaints";
+import { BASE_API_URL } from "./constants";
 import { GetPoolLiquidity } from "./type";
 
 export const getPoolAllSv = async () => await axios.get(`${BASE_API_URL}/pools/v2/all`);

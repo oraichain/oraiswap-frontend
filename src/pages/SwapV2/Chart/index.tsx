@@ -8,7 +8,7 @@ import { poolTokens, getPair } from 'config/pools';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
 import notFound from 'assets/images/notFound.svg';
-import { INTERVALS } from './constaints';
+import { INTERVALS } from './constants';
 import { InfoMove, InfoPool } from './type';
 import { getPoolAllSv, getPoolLiquiditySv, getPoolSv } from './services';
 const cx = cn.bind(styles);
