@@ -1,0 +1,145 @@
+import { formatCash } from 'libs/utils';
+import { createChart } from 'lightweight-charts';
+import { useEffect, useRef, memo, useCallback } from 'react';
+
+const ChartComponent = (props) => {
+  const {
+    data,
+    colors: {
+      backgroundColor,
+      lineColor,
+      textColor,
+      areaTopColor,
+      areaBottomColor,
+    },
+    setInfoMove,
+  } = props;
+  const chartContainerRef = useRef();
+
+  useEffect(() => {
+    const chart = createChart(chartContainerRef.current, {
+      rightPriceScale: {
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0,
+        },
+      },
+      layout: {
+        backgroundColor: 'rgba(31, 33, 40,0)',
+        textColor: '#c3c5cb',
+        fontFamily: 'Roboto, sans-serif',
+      },
+      localization: {
+        priceFormatter: (price) => formatCash(price),
+      },
+      grid: {
+        horzLines: {
+          visible: false,
+        },
+        vertLines: {
+          visible: false,
+        },
+      },
+      crosshair: {
+        horzLine: {
+          visible: false,
+          labelVisible: false,
+        },
+        vertLine: {
+          visible: true,
+          style: 0,
+          width: 2,
+          color: '#A871DF',
+          labelVisible: false,
+        },
+      },
+      timeScale: {
+        rightOffset: 1,
+        barSpacing: 28,
+        lockVisibleTimeRangeOnResize: true,
+      },
+    });
+    chart.timeScale().fitContent();
+
+    const series = chart.addAreaSeries({
+      lineColor,
+      topColor: areaTopColor,
+      bottomColor: areaBottomColor,
+    });
+    series.setData(data);
+
+    chart.subscribeCrosshairMove((param) => {
+      if (
+        param === undefined ||
+        param.time === undefined ||
+        param.point.x < 0 ||
+        param.point.y < 0
+      ) {
+        setValueChartMove(
+          data[data.length - 1].value,
+          data[data.length - 1].time
+        );
+      } else {
+        setValueChartMove(param.seriesPrices.get(series), param.time);
+      }
+    });
+
+    new ResizeObserver((entries) => {
+      if (
+        entries.length === 0 ||
+        entries[0].target !== chartContainerRef.current
+      ) {
+        return;
+      }
+      const newRect = entries[0].contentRect;
+      chart.applyOptions({ height: newRect.height, width: newRect.width });
+    }).observe(chartContainerRef.current);
+
+    return () => {
+      chart.remove();
+    };
+  }, [
+    data,
+    backgroundColor,
+    lineColor,
+    textColor,
+    areaTopColor,
+    areaBottomColor,
+  ]);
+
+  useEffect(() => {
+    setValueChartMove(
+      data[data.length - 1]?.value,
+      data[data.length - 1]?.time
+    );
+  }, [data]);
+
+  const setValueChartMove = useCallback(
+    (value, time) => {
+      if (setInfoMove) {
+        setInfoMove({
+          value,
+          time,
+        });
+      }
+    },
+    [setInfoMove]
+  );
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: '0',
+        right: '0',
+        bottom: '0',
+        left: '0',
+        height: '100%',
+        width: '100%',
+      }}
+      ref={chartContainerRef}
+    />
+  );
+};
+
+export default memo(ChartComponent);

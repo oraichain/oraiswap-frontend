@@ -39,6 +39,7 @@
     "create-hash": "^1.2.0",
     "https-browserify": "^1.0.0",
     "jsbi": "^4.3.0",
+    "lightweight-charts": "^3.8.0",
     "ramda": "^0.27.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
