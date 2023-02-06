@@ -89,7 +89,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       metamaskAddress,
       undefined,
       getRpcEvm(infoEvm),
-      getDenomEvm(),
+      getDenomEvm()
     ).then(setMetamaskBalance);
   });
 
@@ -164,7 +164,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
                     <KwtIcon className={styles.network_icon} />
                   )}
-                  {handleCheckChain(COSMOS_CHAIN_ID,infoCosmos) && (
+                  {handleCheckChain(COSMOS_CHAIN_ID, infoCosmos) && (
                     <AtomCosmosIcon className={styles.network_icon} />
                   )}
                   {handleCheckChain(OSMOSIS_CHAIN_ID, infoCosmos) && (
@@ -182,7 +182,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     {
                       <TokenBalance
                         balance={{
-                          amount: balance ?? '0',
+                          amount: balance || '0',
                           decimals: 6,
                           denom: ORAI
                         }}
@@ -254,14 +254,14 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://payment.orai.io/',
               'Buy ORAI (Fiat)',
-              () => { },
+              () => {},
               <BuyFiat style={{ width: 30, height: 30 }} />,
               true
             )}
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => { },
+              () => {},
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
@@ -294,7 +294,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
           </div>
 
-          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation</div>
+          <div className={styles.menu_footer}>
+            © 2020 - 2023 Oraichain Foundation
+          </div>
         </div>
       </div>
     </>

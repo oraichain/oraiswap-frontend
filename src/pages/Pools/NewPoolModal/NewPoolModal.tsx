@@ -277,7 +277,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken1 ? amountToken1 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken1(floatValue?.toString() ?? '0');
+              setAmountToken1(floatValue?.toString() || '0');
             }}
           />
         </div>
@@ -342,7 +342,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken2 ? amountToken2 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken2(floatValue?.toString() ?? '0');
+              setAmountToken2(floatValue?.toString() || '0');
             }}
           />
         </div>

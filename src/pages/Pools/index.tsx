@@ -246,23 +246,24 @@ const Pools: React.FC<PoolsProps> = () => {
     const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
-    if (!oraiUsdtPool) throw Error('Ust pool not found');
+    if (!oraiUsdtPool) throw Error('usdt pool not found');
     const oraiUsdtPoolMilky = poolList.find(
       (pool) => pool.pair.asset_denoms[0] === MILKY
     );
+    if (!oraiUsdtPoolMilky) throw Error('milky pool not found');
     const oraiPrice = new Fraction(
-      oraiUsdtPool?.askPoolAmount,
-      oraiUsdtPool?.offerPoolAmount
+      oraiUsdtPool.askPoolAmount,
+      oraiUsdtPool.offerPoolAmount
     );
 
     const milkyPrice = new Fraction(
       oraiUsdtPoolMilky.askPoolAmount,
-      oraiUsdtPoolMilky?.offerPoolAmount
+      oraiUsdtPoolMilky.offerPoolAmount
     );
     poolList.forEach((pool) => {
       pool.amount = getUsd(
         2 * pool.offerPoolAmount,
-        pool?.fromToken?.denom === MILKY ? milkyPrice : oraiPrice,
+        pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice,
         pool.fromToken.decimals
       );
     });
