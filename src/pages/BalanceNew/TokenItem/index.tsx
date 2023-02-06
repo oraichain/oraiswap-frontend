@@ -21,9 +21,11 @@ interface TokenItemProps {
   name?: string;
   onClickTransfer?: any;
   toToken?: TokenItemType;
+  fromToken?: TokenItemType;
   active: Boolean;
   className?: string;
   onClick?: Function;
+  onClickFrom?: Function;
   onBlur?: Function;
   convertKwt?: any;
 }
@@ -34,12 +36,14 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
+  onClickFrom,
   convertToken,
   transferFromGravity,
   transferIBC,
   onClickTransfer,
   toToken,
   convertKwt,
+  fromToken,
 }) => {
   return (
     <div
@@ -51,6 +55,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
       onClick={(event) => {
         event.stopPropagation();
         onClick?.(token);
+        // fromToken && onClickFrom?.(fromToken);
       }}
     >
       <div className={styles.balanceAmountInfo}>
@@ -79,35 +84,42 @@ const TokenItem: React.FC<TokenItemProps> = ({
               decimalScale={Math.min(6, token.decimals)}
             />
 
-            {!!amountDetail?.subAmounts && <TooltipIcon
-              content={
-                <div className={styles.tooltipAmount}>
-                  {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
-                    let description: string
-                    if (name !== token.name) description = token.erc20Cw20Map[0]?.description
+            {!!amountDetail?.subAmounts && (
+              <TooltipIcon
+                content={
+                  <div className={styles.tooltipAmount}>
+                    {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
+                      let description: string;
+                      if (name !== token.name)
+                        description = token.erc20Cw20Map[0]?.description;
 
-                    return (
-                      <div key={idx} className={styles.row}>
-                        <div>
-                          <div>{name}</div>
-                          {!!description && <div className={styles.description}>({description})</div>}
+                      return (
+                        <div key={idx} className={styles.row}>
+                          <div>
+                            <div>{name}</div>
+                            {!!description && (
+                              <div className={styles.description}>
+                                ({description})
+                              </div>
+                            )}
+                          </div>
+                          <TokenBalance
+                            balance={{
+                              amount: amountDetail.subAmounts[name],
+                              denom: '',
+                              decimals: token.decimals,
+                            }}
+                            className={styles.tokenAmount}
+                            decimalScale={Math.min(6, token.decimals)}
+                          />
                         </div>
-                        <TokenBalance
-                          balance={{
-                            amount: amountDetail.subAmounts[name],
-                            denom: '',
-                            decimals: token.decimals,
-                          }}
-                          className={styles.tokenAmount}
-                          decimalScale={Math.min(6, token.decimals)}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              }
-              placement="bottom-end"
-            />}
+                      );
+                    })}
+                  </div>
+                }
+                placement="bottom-end"
+              />
+            )}
           </div>
           <TokenBalance
             balance={amountDetail ? amountDetail.usd : 0}

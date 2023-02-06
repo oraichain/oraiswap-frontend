@@ -2,7 +2,7 @@ import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
 import _ from 'lodash';
-import { ORAI } from 'config/constants';
+import { ORAI, ORAI_LCD, ORAI_NETWORK_LCD } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
