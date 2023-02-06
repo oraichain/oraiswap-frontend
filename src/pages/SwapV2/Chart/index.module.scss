@@ -11,6 +11,17 @@
     position: relative;
     height: 240px;
   }
+  .no-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 30px);
+    width: 100%;
+    img {
+      max-width: 100%;
+    }
+  }
   .head-info {
     &-top {
       display: flex;

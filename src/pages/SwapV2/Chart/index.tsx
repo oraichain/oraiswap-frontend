@@ -5,10 +5,10 @@ import styles from './index.module.scss';
 import ChartComponent from './Chart';
 import moment from 'moment';
 import { poolTokens, getPair } from 'config/pools';
-import axios from 'rest/request';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
-import { BASE_API_URL, INTERVALS } from './constaints';
+import notFound from 'assets/images/notFound.svg';
+import { INTERVALS } from './constaints';
 import { InfoMove, InfoPool } from './type';
 import { getPoolAllSv, getPoolLiquiditySv, getPoolSv } from './services';
 const cx = cn.bind(styles);
@@ -35,8 +35,8 @@ const SwapChart: React.FC<{
 
   useEffect(() => {
     if (poolId) {
-      getPoolLiquidity();
       getPool();
+      getPoolLiquidity();
     } else {
       setInitialData([]);
       setLiquidity24h(null);
@@ -100,58 +100,62 @@ const SwapChart: React.FC<{
                 <span
                   className={cx('percent', liquidity24h >= 0 ? 'up' : 'down')}
                 >
-                  {liquidity24h > 0 ? `+${liquidity24h}` : liquidity24h + '%'}
+                  {liquidity24h >= 0 ? `+${liquidity24h}%` : `${liquidity24h}%`}
                 </span>
               )}
             </div>
           </div>
-          <div className={cx('head-info-content')}>
-            <div>
-              <div className={cx('content-price')}>
-                <SYMBOLIcon />
-                {poolId ? (
+          {poolId && (
+            <div className={cx('head-info-content')}>
+              <div>
+                <div className={cx('content-price')}>
+                  <SYMBOLIcon />
                   <TokenBalance balance={infoMove?.value} decimalScale={2} />
-                ) : (
-                  <span>$0</span>
-                )}
+                </div>
+                <p className={cx('content-date')}>
+                  {infoMove?.time
+                    ? moment(
+                        `${infoMove?.time?.year}-${infoMove?.time?.month}-${infoMove?.time?.day}`
+                      ).format('ll')
+                    : moment().format('ll')}
+                </p>
               </div>
-              <p className={cx('content-date')}>
-                {infoMove?.time
-                  ? moment(
-                      `${infoMove?.time?.year}-${infoMove?.time?.month}-${infoMove?.time?.day}`
-                    ).format('ll')
-                  : moment().format('ll')}
-              </p>
-            </div>
-            <div>
-              <div className={cx('date-select')}>
-                {INTERVALS.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setTypeData(item.key)}
-                    className={cx(item.key === typeData ? 'active' : '')}
-                  >
-                    {item.text}
-                  </button>
-                ))}
+              <div>
+                <div className={cx('date-select')}>
+                  {INTERVALS.map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => setTypeData(item.key)}
+                      className={cx(item.key === typeData ? 'active' : '')}
+                    >
+                      {item.text}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
+          )}
+        </div>
+        {poolId ? (
+          <div className={cx('chart-box')}>
+            <ChartComponent
+              data={initialData}
+              setInfoMove={setInfoMove}
+              colors={{
+                backgroundColor: 'rgba(31, 33, 40,0)',
+                lineColor: '#A871DF',
+                textColor: 'black',
+                areaTopColor: '#612fca',
+                // areaTopColor: 'rgba(168, 113, 223, 0.5)',
+                areaBottomColor: 'rgba(86, 42, 209, 0)',
+              }}
+            />
           </div>
-        </div>
-        <div className={cx('chart-box')}>
-          <ChartComponent
-            data={initialData}
-            setInfoMove={setInfoMove}
-            colors={{
-              backgroundColor: 'rgba(31, 33, 40,0)',
-              lineColor: '#A871DF',
-              textColor: 'black',
-              areaTopColor: '#612fca',
-              // areaTopColor: 'rgba(168, 113, 223, 0.5)',
-              areaBottomColor: 'rgba(86, 42, 209, 0)',
-            }}
-          />
-        </div>
+        ) : (
+          <div className={cx('no-data')}>
+            <img src={notFound} alt="nodata" />
+          </div>
+        )}
       </LoadingBox>
     </div>
   );

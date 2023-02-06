@@ -4,7 +4,7 @@ import cn from 'classnames/bind';
 import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
-const BlocLoaderOsmosis: React.FC<{
+const BlocLoaderDex: React.FC<{
   open: boolean;
   borderRadius?: boolean;
   classNameLoading?: string;
@@ -50,4 +50,4 @@ const BlocLoaderOsmosis: React.FC<{
   );
 };
 
-export default BlocLoaderOsmosis;
+export default BlocLoaderDex;

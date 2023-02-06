@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
-import BlocLoaderOsmosis from 'components/BlocLoaderOsmosis';
+import BlocLoaderDex from 'components/BlocLoaderDex';
 const cx = cn.bind(styles);
 
 const LoadingBox: React.FC<{
@@ -13,7 +13,7 @@ const LoadingBox: React.FC<{
     <>
       {loading ? (
         <div style={styles} className={cx('loading-wrap')}>
-          <BlocLoaderOsmosis open={true} />
+          <BlocLoaderDex open={true} />
         </div>
       ) : (
         children

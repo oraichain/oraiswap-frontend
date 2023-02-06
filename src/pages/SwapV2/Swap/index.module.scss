@@ -207,6 +207,7 @@
       .amount {
         flex-grow: 1;
         text-align: right;
+        max-width: calc(100% - 118px);
         @include mobile {
           width: 100%;
         }
