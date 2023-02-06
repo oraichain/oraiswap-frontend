@@ -45,8 +45,8 @@ export const embedChainInfos: ChainInfo[] = [
     walletUrlForStaking: `${ORAI_SCAN}/validators`,
     gasPriceStep: {
       low: 0,
-      average: 0.000025,
-      high: 0.00004
+      average: 0.01,
+      high: 0.03
     },
     features: ['stargate', 'ibc-transfer', 'cosmwasm']
   },
