@@ -28,7 +28,11 @@
 
 .action {
   display: flex;
-  justify-content: center;
+  @include desktop {
+    @media (min-width: 1440px) {
+      justify-content: center;
+    }
+  }
 }
 
 .search {
@@ -39,7 +43,12 @@
     flex-direction: column;
   }
   @include desktop {
-    width: 50%;
+    @media (max-width: 1024px) {
+      width: 100%;
+    }
+    @media (min-width: 1440px) {
+      width: 50%;
+    }
     align-items: center;
     justify-content: space-between;
   }
@@ -139,11 +148,17 @@
   display: flex;
   justify-content: center;
   &_form {
+    @include desktop {
+      @media (max-width: 1024px ) {
+        width: 100%;
+      }
+      @media (max-width: 1440px) {
+        width: 100%;
+      }
+      width: 50%;
+    }
     @include mobile {
       width: 100%;
-    }
-    @include desktop {
-      width: 50%;
     }
   }
   &_element {
