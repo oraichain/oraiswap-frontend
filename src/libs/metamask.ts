@@ -24,6 +24,10 @@ export default class Metamask {
     return Number(window.ethereum?.chainId) === Number(ETHEREUM_CHAIN_ID);
   }
 
+  public isWindowEthereum() {
+    return !!window.ethereum;
+  }
+
   public async switchNetwork(chainId: string | number) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',

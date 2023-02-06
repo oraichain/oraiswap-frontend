@@ -238,7 +238,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ? totalRewardInfoData?.reward_infos[0]
     : 0;
   const bondAmountUsd = rewardInfoFirst
-    ? (rewardInfoFirst.bond_amount * (pairAmountInfoData?.usdAmount ?? 0)) /
+    ? (Number(rewardInfoFirst.bond_amount) *
+        (pairAmountInfoData?.usdAmount ?? 0)) /
       +(lpTokenInfoData?.total_supply ?? 0)
     : 0;
 
@@ -474,7 +475,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               open={() => setIsOpenUnbondModal(true)}
               close={() => setIsOpenUnbondModal(false)}
               bondAmount={
-                rewardInfoFirst ? rewardInfoFirst.bond_amount ?? 0 : 0
+                rewardInfoFirst ? Number(rewardInfoFirst.bond_amount) ?? 0 : 0
               }
               bondAmountUsd={bondAmountUsd}
               lpTokenInfoData={lpTokenInfoData}

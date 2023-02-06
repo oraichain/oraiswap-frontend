@@ -18,6 +18,7 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
+  ATOM,
   BEP20_ORAI,
   BSC_ORG,
   COSMOS_ORG,
@@ -25,6 +26,7 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
+  OSMO,
   OSMOSIS_ORG,
   STABLE_DENOM,
 } from 'config/constants';
@@ -61,6 +63,7 @@ interface TransferConvertProps {
   toToken: TokenItemType;
 }
 
+const onClickTransferList = [BSC_ORG, ETHEREUM_ORG, OSMOSIS_ORG, COSMOS_ORG];
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
@@ -137,7 +140,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     try {
       let address: string = '';
       if (network.networkType == 'evm') {
-        address = await window.Metamask!.convertPublicToAddress()
+        if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
+        address = await window.Metamask!.convertPublicToAddress();
       }
       if (network.networkType == 'cosmos') {
         address = await window.Keplr.getKeplrAddr(
@@ -230,7 +234,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         </div>
         <div style={{ width: '100%' }}>
           <div className={styles.balanceDescription}>Convert Amount:</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className={styles.balanceAmount}>
             <div>
               <NumberFormat
                 placeholder="0"
@@ -312,15 +316,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {onClickTransfer &&
-          (token?.org === BSC_ORG ||
-            token?.org === ETHEREUM_ORG ||
-            token?.org === OSMOSIS_ORG ||
-            token?.org === COSMOS_ORG ||
-            (token?.org == ORAICHAIN_ID &&
-              (token?.name === 'ATOM' || token?.name === 'OSMO'))) && (
+          (onClickTransferList.includes(token?.org) ||
+            (token?.org === ORAICHAIN_ID &&
+              (token?.name === ATOM || token?.name === OSMO ))) && (
             <button
               className={styles.tfBtn}
-              disabled={transferIbcLoading}
+              disabled={transferLoading}
               onClick={async (event) => {
                 event.stopPropagation();
                 try {
@@ -333,7 +334,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }
               }}
             >
-              {transferIbcLoading && <Loader width={20} height={20} />}
+              {transferLoading && <Loader width={20} height={20} />}
               <span>
                 Transfer to <strong>{filterNetwork}</strong>
               </span>

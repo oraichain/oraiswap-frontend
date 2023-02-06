@@ -40,6 +40,11 @@
   align-self: flex-start;
   margin: 8px 8px 8px 0;
 }
+.balanceAmount {
+  display: flex;
+  justify-content: space-between;
+}
+
 .token {
   @include flex();
   margin-right: 10px;
@@ -88,6 +93,9 @@
 }
 .balanceFromGroup {
   @include flex(space-between);
+  @include mobile {
+    width: 50%;
+  }
   // padding-left: 24px;
   // padding-left: 12px;
   .balanceBtn {
@@ -142,7 +150,7 @@
       }
 
       @include mobile {
-        width: 44px;
+        width: 25%;
         font-size: 12px;
       }
       height: 48px;
@@ -168,6 +176,9 @@
     width: 100%;
   }
   .box {
+    @include desktop {
+      width: 50%;
+    }
     .transfer {
       .content {
         @include flex(space-between);
@@ -179,6 +190,10 @@
           font-size: 16px;
           font-weight: 600;
           color: #ebebeb;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 1;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
         }
         .address {
           margin-left: 10px;
