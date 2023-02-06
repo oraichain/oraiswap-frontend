@@ -32,7 +32,10 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
     integrations: [new BrowserTracing()],
-
+    denyUrls: [
+      /extensions\//i,
+      /^chrome:\/\//i,
+    ],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
