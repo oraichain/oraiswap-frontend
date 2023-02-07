@@ -5,6 +5,7 @@ export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
 export const ATOM = 'ATOM';
+export const OSMO = 'OSMO';
 export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
