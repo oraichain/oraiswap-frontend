@@ -32,10 +32,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
     integrations: [new BrowserTracing()],
-    denyUrls: [
-      /extensions\//i,
-      /^chrome:\/\//i,
-    ],
+    denyUrls: [/extensions\//i, /^chrome:\/\//i],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -50,18 +47,17 @@ const startApp = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-
-      await Promise.race([
-        Promise.all([
-          window.Keplr.suggestChain(network.chainId),
-          window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
-          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID)
-          // window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID),
-        ]),
-        new Promise((resolve) => {
-          setTimeout(resolve, 10000);
-        })
-      ]);
+      for (const networkId of [
+        network.chainId,
+        ORAI_BRIDGE_CHAIN_ID,
+        KWT_SUBNETWORK_CHAIN_ID,
+      ]) {
+        try {
+          await window.Keplr.suggestChain(networkId);
+        } catch (error) {
+          console.log({ error });
+        }
+      }
 
       const wallet = await collectWallet(network.chainId);
 
