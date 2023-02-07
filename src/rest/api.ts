@@ -54,8 +54,9 @@ const querySmart = async (
     typeof msg === 'string'
       ? toQueryMsg(msg)
       : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
 
   const res = (await axios.get(url)).data;
   if (res.code) throw new Error(res.message);
@@ -117,8 +118,8 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
-    poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ??
-    '0'
+    poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ||
+      '0'
   );
 }
 
@@ -186,7 +187,7 @@ async function fetchTokenBalance(
 ): Promise<number | string> {
   const data = await Contract.token(tokenAddr).balance({ address: walletAddr });
   if (shouldKeepOriginal) return data.balance;
-  return parseInt(data.balance);
+  return parseInt(data.balance || '0');
 }
 
 async function fetchTokenAllowance(
@@ -245,12 +246,13 @@ async function fetchNativeTokenBalance(
   lcd?: string,
   shouldKeepOriginal?: boolean
 ): Promise<number | string> {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
   const res: any = (await axios.get(url)).data;
   const amount = res.balance.amount;
   if (shouldKeepOriginal) return amount;
-  return parseInt(amount);
+  return parseInt(amount || '0');
 }
 
 async function fetchBalance(
@@ -408,27 +410,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -455,7 +457,9 @@ async function simulateSwap(query: {
     });
     return data;
   } catch (error) {
-    throw new Error(`Error when trying to simulate swap using router v2: ${error}`)
+    throw new Error(
+      `Error when trying to simulate swap using router v2: ${error}`
+    );
   }
 }
 
