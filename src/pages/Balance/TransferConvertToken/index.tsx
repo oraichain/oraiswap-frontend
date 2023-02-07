@@ -19,6 +19,7 @@ import Loader from 'components/Loader';
 import {
   BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
+  ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
@@ -321,7 +322,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (
             token.cosmosBased &&
             token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-            (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            (token.erc20Cw20Map || token.bridgeNetworkIdentifier || token.denom === ORAI) && // TODO: Remove ORAI harcode
             name
           ) {
             return (

@@ -12,7 +12,7 @@ const [terra2oraichain, oraicbain2terra] =
   process.env.REACT_APP_TERRA_ORAICHAIN_CHANNELS.split(/\s+/);
 const [osmosis2oraichain, oraicbain2osmosis] =
   process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
-const [oraib2oraichain, oraichain2oraib] =
+export const [oraib2oraichain, oraichain2oraib] =
   process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
 const [oraib2oraichain_old, oraichain2oraib_old] =
   process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD.split(/\s+/);

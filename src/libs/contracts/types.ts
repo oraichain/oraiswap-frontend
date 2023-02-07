@@ -4,6 +4,16 @@ export interface AllowMsg {
 }
 export type Uint128 = string;
 export type Binary = string;
+export type AssetInfo = {
+  token: {
+    contract_addr: Addr;
+  };
+} | {
+  native_token: {
+    denom: string;
+  };
+};
+export type Addr = string;
 export interface Cw20ReceiveMsg {
   amount: Uint128;
   msg: Binary;
@@ -15,20 +25,23 @@ export interface TransferMsg {
   remote_address: string;
   timeout?: number | null;
 }
-
 export interface TransferBackMsg {
   local_channel_id: string;
-  remote_address: string;
-  timeout?: number | null;
   memo?: string | null;
+  remote_address: string;
+  remote_denom: string;
+  timeout?: number | null;
 }
-
-export interface Cw20PairMsg {
-  cw20_decimals: number;
-  cw20_denom: string;
+export interface UpdatePairMsg {
+  asset_info: AssetInfo;
+  asset_info_decimals: number;
   denom: string;
   local_channel_id: string;
   remote_decimals: number;
+}
+export interface DeletePairMsg {
+  denom: string;
+  local_channel_id: string;
 }
 export type Amount = {
   native: Coin;
@@ -54,29 +67,20 @@ export interface IbcEndpoint {
   port_id: string;
   [k: string]: unknown;
 }
-export type Addr = string;
-export interface Cw20PairQuery {
-  cw20_map: Cw20MappingMetadata;
-  key: string;
-}
-export interface Cw20MappingMetadata {
-  cw20_decimals: number;
-  cw20_denom: string;
-  remote_decimals: number;
-}
 export interface AllowedInfo {
   contract: string;
   gas_limit?: number | null;
 }
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
-  };
-};
+export interface PairQuery {
+  key: string;
+  pair_mapping: MappingMetadata;
+}
+export interface MappingMetadata {
+  asset_info: AssetInfo;
+  asset_info_decimals: number;
+  remote_decimals: number;
+}
+export type ArrayOfPairQuery = PairQuery[];
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
