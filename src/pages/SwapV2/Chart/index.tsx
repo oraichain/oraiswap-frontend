@@ -57,10 +57,16 @@ const SwapChart: React.FC<{
   }, []);
 
   const getPoolLiquidity = useCallback(async () => {
-    setLoading(true);
-    const res = await getPoolLiquiditySv({ poolId, typeData, range: 30 });
-    setLoading(false);
-    if (res?.data) setInitialData(res?.data);
+    try {
+      setLoading(true);
+      const res = await getPoolLiquiditySv({ poolId, typeData, range: 30 });
+      setLoading(false);
+      if (res?.data) setInitialData(res?.data);
+    } catch (error) {
+      console.log({ error });
+      setLoading(false);
+    }
+  
   }, [typeData, poolId]);
 
   const getPool = useCallback(async () => {
