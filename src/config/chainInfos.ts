@@ -44,11 +44,11 @@ export const embedChainInfos: ChainInfo[] = [
     },
     walletUrlForStaking: `${ORAI_SCAN}/validators`,
     gasPriceStep: {
-      low: 0,
-      average: 0.01,
-      high: 0.03
+      low: 0.01,
+      average: 0.03,
+      high: 0.05
     },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm']
+    features: ['stargate', 'ibc-transfer', 'cosmwasm','wasmd_0.24+']
   },
   {
     rpc: ORAI_BRIDGE_RPC,
