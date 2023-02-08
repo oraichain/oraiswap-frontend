@@ -3,7 +3,7 @@ import { embedChainInfos } from 'config/chainInfos';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key, Keplr as keplr } from '@keplr-wallet/types';
+import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
@@ -29,6 +29,13 @@ export default class Keplr {
     chainId: string
   ): Promise<OfflineSigner | OfflineDirectSigner> {
     return this.keplr.getOfflineSignerAuto(chainId);
+  }
+
+  async getChainInfosWithoutEndpoints(): Promise<Array<{
+    chainId: string,
+    feeCurrencies: FeeCurrency[]
+  }>> {
+    return this.keplr.getChainInfosWithoutEndpoints();
   }
 
   async suggestChain(chainId: string) {
