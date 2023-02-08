@@ -40,7 +40,7 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn
       - name: Copy testnet env
-        run: cp .env.oraix.test .env
+        run: cp .env.example .env
       - name: Build
         run: yarn build
         env:
