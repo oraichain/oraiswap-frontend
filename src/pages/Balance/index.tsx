@@ -539,7 +539,7 @@ const Balance: React.FC<BalanceProps> = () => {
       remoteAddress: toAddress,
       remoteDenom: toToken.denom,
       timeout: ibcInfo.timeout,
-      memo: undefined,
+      memo,
     };
     let result: ExecuteResult;
     if (assetInfo.native_token) {
