@@ -638,12 +638,12 @@ const Balance: React.FC<BalanceProps> = () => {
       // if it includes wasm in source => ibc wasm case
       if (ibcInfo.source.includes('wasm')) {
         // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-        // ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-        const canTransfer = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, fromAddress, toAddress, amount.amount, ibcMemo);
-        if (!canTransfer) {
-          throw "Cannot transfer to remote chain because cannot find mapping pair";
-        }
-        else return;
+        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+        // const canTransfer = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, fromAddress, toAddress, amount.amount, ibcMemo);
+        // if (!canTransfer) {
+        //   throw "Cannot transfer to remote chain because cannot find mapping pair";
+        // }
+        // else return;
       }
 
       console.log('ibc info: ', ibcInfo);
