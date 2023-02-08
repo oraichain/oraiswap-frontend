@@ -89,6 +89,7 @@ import { Fraction } from '@saberhq/token-utils';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { getRpcEvm } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import CheckBox from 'components/CheckBox';
 
 interface BalanceProps {}
 
@@ -106,10 +107,9 @@ const Balance: React.FC<BalanceProps> = () => {
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
   const [infoEvm] = useGlobalState('infoEvm');
-  const [[fromAmount, fromUsd], setFromAmount] = useState<[number, number]>([
-    0, 0
-  ]);
-  const [ibcLoading, setIBCLoading] = useState(false);
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
+  const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
+    useState(false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
@@ -397,7 +397,6 @@ const Balance: React.FC<BalanceProps> = () => {
           setTo(undefined);
         } else {
           setFrom(token);
-          setFromAmount([0, 0]);
           const toToken = findDefaultToToken(toTokens, token);
           setTo(toToken);
         }
@@ -963,7 +962,7 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     displayToast(TToastType.TX_BROADCASTING);
-    setIBCLoading(true);
+
     try {
       if (
         from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
@@ -986,7 +985,6 @@ const Balance: React.FC<BalanceProps> = () => {
         message: ex.message
       });
     }
-    setIBCLoading(false);
   };
 
   const convertToken = async (
@@ -1164,42 +1162,11 @@ const Balance: React.FC<BalanceProps> = () => {
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
                 <span className={styles.label}>Other chains</span>
-                <div className={styles.fromBalanceDes}>
-                  <div className={styles.balanceFromGroup}>
-                    <TokenBalance
-                      balance={{
-                        amount:
-                          from && amounts[from.denom]
-                            ? amounts[from.denom].amount
-                            : 0,
-                        denom: from?.name ?? '',
-                        decimals: from?.decimals
-                      }}
-                      className={styles.balanceDescription}
-                      prefix="Balance: "
-                      decimalScale={Math.min(6, from?.decimals || 0)}
-                    />
-                  </div>
-                  <TokenBalance
-                    balance={fromUsd}
-                    className={styles.balanceDescription}
-                    prefix="~$"
-                    decimalScale={2}
-                  />
-                </div>
-                {from?.name ? (
-                  <div className={styles.tokenFromGroup}>
-                    <div className={styles.token}>
-                      {from.Icon && <from.Icon />}
-                      <div className={styles.tokenInfo}>
-                        <div className={styles.tokenName}>{from.name}</div>
-                        <div className={styles.tokenOrg}>
-                          <span className={styles.tokenOrgTxt}>{from.org}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
+                <CheckBox
+                  label="Hide small balances"
+                  checked={hideOtherSmallAmount}
+                  onCheck={setHideOtherSmallAmount}
+                />
               </div>
               <div className={styles.table}>
                 <div className={styles.tableDes}>
@@ -1208,6 +1175,13 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {fromTokens.map((t: TokenItemType) => {
+                    if (
+                      hideOtherSmallAmount &&
+                      !Number(amounts[t.denom]?.amount)
+                    ) {
+                      return false;
+                    }
+
                     return (
                       <TokenItem
                         key={t.denom}
@@ -1243,30 +1217,11 @@ const Balance: React.FC<BalanceProps> = () => {
             <div className={styles.balance_block}>
               <div className={styles.tableHeader}>
                 <span className={styles.label}>Oraichain</span>
-
-                <TokenBalance
-                  balance={{
-                    amount:
-                      to && amounts[to.denom] ? amounts[to.denom].amount : 0,
-                    denom: to?.name ?? '',
-                    decimals: to?.decimals
-                  }}
-                  className={styles.balanceDescription}
-                  prefix="Balance: "
-                  decimalScale={Math.min(6, to?.decimals || 0)}
+                <CheckBox
+                  label="Hide small balances"
+                  checked={hideOraichainSmallAmount}
+                  onCheck={setHideOraichainSmallAmount}
                 />
-
-                {to ? (
-                  <div className={styles.token} style={{ marginBottom: 10 }}>
-                    {to.Icon && <to.Icon />}
-                    <div className={styles.tokenInfo}>
-                      <div className={styles.tokenName}>{to.name}</div>
-                      <div className={styles.tokenOrg}>
-                        <span className={styles.tokenOrgTxt}>{to.org}</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
               </div>
               <div className={styles.table}>
                 <div className={styles.tableDes}>
@@ -1276,6 +1231,13 @@ const Balance: React.FC<BalanceProps> = () => {
                 <div className={styles.tableContent}>
                   {toTokens
                     .filter((t) => {
+                      if (
+                        hideOtherSmallAmount &&
+                        !Number(amounts[t.denom]?.amount)
+                      ) {
+                        return false;
+                      }
+
                       if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
                         const name = parseBep20Erc20Name(from.name);
                         return t.name.includes(name);
