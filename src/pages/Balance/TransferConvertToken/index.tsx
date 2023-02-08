@@ -235,7 +235,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                          t.name.includes(token.name)
                       );
                       await transferIBC(token, to, convertAmount);
                     } finally {
@@ -371,9 +371,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
                             ? t.bridgeNetworkIdentifier.includes(
-                                token.bridgeNetworkIdentifier
-                              )
-                            : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                              token.bridgeNetworkIdentifier
+                            )
+                            : t.name.includes(name)
                       );
 
                       // convert reverse before transferring

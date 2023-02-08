@@ -539,7 +539,7 @@ const Balance: React.FC<BalanceProps> = () => {
       remoteAddress: toAddress,
       remoteDenom: toToken.denom,
       timeout: ibcInfo.timeout,
-      memo,
+      memo: undefined,
     };
     let result: ExecuteResult;
     if (assetInfo.native_token) {
@@ -605,7 +605,6 @@ const Balance: React.FC<BalanceProps> = () => {
       let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
       const ibcMemo = toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
 
-      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
         if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
           if (fromToken.denom === ORAI) { // TODO: Remove ORAI hardcode
@@ -1144,7 +1143,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+        !from || ((from.chainId !== ORAI_BRIDGE_CHAIN_ID || t.denom === ORAI) && t.name === from.name) // TODO: Remove hardcode for ORAI BEP20
     );
   };
 

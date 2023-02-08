@@ -131,15 +131,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             convertKwt={convertKwt}
           />
         )}
-
-        {/* // TODO: {active && token.contractAddress && token.cosmosBased && (
-          <ConvertToNative
-            name={evmName}
-            token={token}
-            amountDetail={amountDetail}
-            convertToken={convertToken}
-          />
-        )} */}
       </div>
     </div>
   );
