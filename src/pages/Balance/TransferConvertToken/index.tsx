@@ -363,6 +363,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     event.stopPropagation();
                     try {
                       const isValid = checkValidAmount();
+                      if (!window.ethereum) {
+                        displayToast(TToastType.TX_FAILED, {
+                          message: `Please install Metamask to continue.`,
+                        });
+                        return;
+                      }
                       if (!isValid) return;
                       setTransferLoading(true);
                       const name = parseBep20Erc20Name(token.name);
