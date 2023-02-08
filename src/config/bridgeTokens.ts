@@ -309,18 +309,18 @@ const tokensMap: Record<NetworkKey, [TokenItemType[], TokenItemType[]]> = {
         cosmosBased: false,
         Icon: OraiIcon
       },
-      {
-        name: 'ORAI',
-        org: ETHEREUM_ORG,
-        chainId: ETHEREUM_CHAIN_ID,
-        denom: ERC20_ORAI,
-        contractAddress: ORAI_ETH_CONTRACT,
-        rpc: ETHEREUM_RPC,
-        decimals: EVM_DECIMALS,
-        coingeckoId: 'oraichain-token',
-        cosmosBased: false,
-        Icon: OraiIcon
-      },
+      // {
+      //   name: 'ORAI',
+      //   org: ETHEREUM_ORG,
+      //   chainId: ETHEREUM_CHAIN_ID,
+      //   denom: ERC20_ORAI,
+      //   contractAddress: ORAI_ETH_CONTRACT,
+      //   rpc: ETHEREUM_RPC,
+      //   decimals: EVM_DECIMALS,
+      //   coingeckoId: 'oraichain-token',
+      //   cosmosBased: false,
+      //   Icon: OraiIcon
+      // },
       {
         name: 'AIRI',
         org: BSC_ORG,
