@@ -385,7 +385,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>{token.denom === ORAI ? BSC_ORG : "OraiBridge"}</strong> {/** TODO: remove ORAI hardcode */}
+                    Transfer To <strong>{BSC_ORG}</strong> {/** TODO: Remove BSC ORG hardcode */}
                   </span>
                 </button>
               </>
