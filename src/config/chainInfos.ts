@@ -17,7 +17,15 @@ import {
 /**
  * A list of Cosmos chain infos. If we need to add / remove any chains, just directly update this variable.
  */
-export const embedChainInfos: ChainInfo[] = [
+export interface ChainInfoCustom extends ChainInfo {
+  gasPriceStep: {
+    low: number,
+    average: number,
+    high: number
+  }
+}
+
+export const embedChainInfos: ChainInfoCustom[] = [
   {
     rpc: ORAI_RPC,
     rest: ORAI_LCD,
@@ -44,11 +52,11 @@ export const embedChainInfos: ChainInfo[] = [
     },
     walletUrlForStaking: `${ORAI_SCAN}/validators`,
     gasPriceStep: {
-      low: 0,
-      average: 0.000025,
-      high: 0.00004
+      low: 0.003,
+      average: 0.005,
+      high: 0.007
     },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm']
+    features: ['stargate', 'ibc-transfer', 'cosmwasm','wasmd_0.24+']
   },
   {
     rpc: ORAI_BRIDGE_RPC,
