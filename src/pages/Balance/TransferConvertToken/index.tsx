@@ -62,6 +62,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferIbcLoading, setTransferIbcLoading] = useState(false);
   const [chainInfo] = useGlobalState('chainInfo');
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
 
   useEffect(() => {
     if (chainInfo) {
@@ -363,7 +364,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     event.stopPropagation();
                     try {
                       const isValid = checkValidAmount();
-                      if (!window.ethereum) {
+                      if (!window.ethereum || !metamaskAddress) {
                         displayToast(TToastType.TX_FAILED, {
                           message: `Please install Metamask to continue.`,
                         });
