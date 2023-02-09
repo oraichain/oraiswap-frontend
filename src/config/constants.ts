@@ -90,7 +90,7 @@ export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
 
 // noti install owallet chorme extensions
 export const NOTI_INSTALL_OWALLET = {
-  message: 'You must install Owallet or Keplr to continue',
+  message: 'You need to install OWallet or Keplr to continue.',
   customLink:
     'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
   textLink: 'View on store',
