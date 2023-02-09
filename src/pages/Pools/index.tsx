@@ -246,11 +246,15 @@ const Pools: React.FC<PoolsProps> = () => {
     const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
-    if (!oraiUsdtPool) throw Error('usdt pool not found');
     const oraiUsdtPoolMilky = poolList.find(
       (pool) => pool.pair.asset_denoms[0] === MILKY
     );
-    if (!oraiUsdtPoolMilky) throw Error('milky pool not found');
+    if (!oraiUsdtPoolMilky || !oraiUsdtPool) {
+      console.warn('pool not found');
+      // retry after
+      return setTimeout(fetchPairInfoDataList, 5000);
+    }
+
     const oraiPrice = new Fraction(
       oraiUsdtPool.askPoolAmount,
       oraiUsdtPool.offerPoolAmount
