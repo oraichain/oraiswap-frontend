@@ -15,10 +15,7 @@ const Swap: React.FC = () => {
     <Content>
       <div className={cx('swap-container')}>
         <div className={cx('swap-col', 'w60')}>
-          <SwapChart
-            fromTokenDenom={fromTokenDenom}
-            toTokenDenom={toTokenDenom}
-          />
+          <SwapChart fromTokenDenom={fromTokenDenom} />
         </div>
         <div className={cx('swap-col', 'w40')}>
           <SwapComponent

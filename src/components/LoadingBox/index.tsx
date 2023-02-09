@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, memo } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import BlocLoaderDex from 'components/BlocLoaderDex';
@@ -22,4 +22,4 @@ const LoadingBox: React.FC<{
   );
 };
 
-export default LoadingBox;
+export default memo(LoadingBox);
