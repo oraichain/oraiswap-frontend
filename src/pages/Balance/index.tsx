@@ -90,6 +90,7 @@ import customRegistry, { customAminoTypes } from 'libs/registry';
 import { getRpcEvm } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 interface BalanceProps {}
 
@@ -107,9 +108,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
   const [infoEvm] = useGlobalState('infoEvm');
-  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] =
+    useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
-    useState(false);
+    useLocalStorage<boolean>('hideOraichainSmallAmount', false);
   const [amounts, setAmounts] = useState<AmountDetails>({});
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
