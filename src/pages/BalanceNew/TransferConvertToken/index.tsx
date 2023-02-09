@@ -259,6 +259,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 className={styles.amount}
               />
+              <div style={{ paddingTop: 8 }}>
+                <TokenBalance
+                  balance={convertUsd}
+                  className={styles.balanceDescription}
+                  prefix="~$"
+                  decimalScale={2}
+                />
+              </div>
             </div>
             <div className={styles.balanceFromGroup}>
               <button
@@ -303,22 +311,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               </button>
             </div>
           </div>
-
-          <div style={{ paddingTop: 8 }}>
-            <TokenBalance
-              balance={convertUsd}
-              className={styles.balanceDescription}
-              prefix="~$"
-              decimalScale={2}
-            />
-          </div>
         </div>
       </div>
       <div className={styles.transferTab}>
         {onClickTransfer &&
           (onClickTransferList.includes(token?.org) ||
             (token?.org === ORAICHAIN_ID &&
-              (token?.name === ATOM || token?.name === OSMO ))) && (
+              (token?.name === ATOM || token?.name === OSMO))) && (
             <button
               className={styles.tfBtn}
               disabled={transferLoading}
@@ -390,7 +389,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       if (!isValid) return;
                       setTransferLoading(true);
                       console.log({ filterNetwork });
-                      
+
                       if (filterNetwork === ORAICHAIN_ID) {
                         return await onClickTransfer(convertAmount);
                       }
@@ -402,8 +401,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {'Transfer To'}{' '}
-                      <strong>{filterNetwork}</strong>
+                    {'Transfer To'} <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>

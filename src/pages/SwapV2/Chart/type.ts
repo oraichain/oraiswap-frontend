@@ -1,10 +1,6 @@
 export interface InfoMove {
   value: number;
-  time: {
-    day: number;
-    month: number;
-    year: number;
-  };
+  time: number;
 }
 
 export interface InfoPool {
@@ -20,8 +16,27 @@ export interface InfoPool {
   volumeChange24h: number;
 }
 
-export interface GetPoolLiquidity {
-  poolId: number,
-  typeData: string,
-  range: number,
+export interface InfoToken {
+  circulatingSupply: number,
+  decimals: number,
+  derivedETH: number,
+  id: number,
+  image: string,
+  liquidity: number,
+  liquidity24hChange: number,
+  marketCap: number,
+  name: string,
+  price: number,
+  price24hChange: number,
+  symbol: string,
+  totalSupply: number,
+  tradeVolume: number,
+  txCount24h: string,
+  untrackedVolumeUSD: number,
+  volume24hChange: number,
+}
+
+export interface DataChart {
+  time: string,
+  value: string,
 }

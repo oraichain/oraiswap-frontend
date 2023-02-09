@@ -4,76 +4,72 @@ import { ReactComponent as SYMBOLIcon } from 'assets/icons/symbols_swap.svg';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
 import moment from 'moment';
-import { poolTokens, getPair } from 'config/pools';
+import { poolTokens } from 'config/pools';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
 import notFound from 'assets/images/notFound.svg';
 import { INTERVALS } from './constants';
-import { InfoMove, InfoPool } from './type';
-import { getPoolAllSv, getPoolLiquiditySv, getPoolSv } from './services';
+import { DataChart, InfoMove, InfoToken } from './type';
+import { getInfoTokenSv, getPriceTokenWithTF } from './services';
 const cx = cn.bind(styles);
 
 const SwapChart: React.FC<{
   fromTokenDenom: string;
-  toTokenDenom: string;
-}> = ({ fromTokenDenom, toTokenDenom }) => {
-  const [initialData, setInitialData] = useState([]);
-  const [typeData, setTypeData] = useState(INTERVALS[0].key);
+}> = ({ fromTokenDenom }) => {
+  const [initialData, setInitialData] = useState<DataChart[] | []>([]);
+  const [typeData, setTypeData] = useState(INTERVALS[1].tf);
   const [infoMove, setInfoMove] = useState<InfoMove>();
-  const [listPools, setListPool] = useState<InfoPool[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [liquidity24h, setLiquidity24h] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [price24hChange, setPrice24hChange] = useState<number | null>(null);
+  const [infoToken, setInfoToken] = useState<InfoToken | null>(null);
 
-  const pairInfo = getPair(fromTokenDenom, toTokenDenom);
-  const poolId = listPools.find(
-    (el) => el?.contract_address === pairInfo?.contract_addr
-  )?.id;
+  const tokenName = poolTokens.find((el) => el.denom === fromTokenDenom)?.name;
 
   useEffect(() => {
-    getPoolAll();
-  }, []);
+    if (infoToken?.price24hChange) {
+      setPrice24hChange(infoToken?.price24hChange);
+    }
+  }, [infoToken]);
 
   useEffect(() => {
-    if (poolId) {
-      getPool();
-      getPoolLiquidity();
+    if (tokenName) {
+      getInfoToken();
+      getPriceToken();
     } else {
       setInitialData([]);
-      setLiquidity24h(null);
+      setInfoToken(null);
     }
-  }, [typeData, poolId]);
+  }, [typeData, tokenName]);
 
   const IconFromToken = useMemo(() => {
     return poolTokens.find((el) => el.denom === fromTokenDenom)?.Icon;
   }, [fromTokenDenom]);
 
-  const IconToToken = useMemo(() => {
-    return poolTokens.find((el) => el.denom === toTokenDenom)?.Icon;
-  }, [toTokenDenom]);
+  const getInfoToken = useCallback(async () => {
+    try {
+      const res = await getInfoTokenSv(tokenName);
+      if (res?.data) setInfoToken(res?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [tokenName]);
 
-  const getPoolAll = useCallback(async () => {
-    const res = await getPoolAllSv();
-    if (res?.data) setListPool(res?.data);
-  }, []);
-
-  const getPoolLiquidity = useCallback(async () => {
+  const getPriceToken = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getPoolLiquiditySv({ poolId, typeData, range: 30 });
+      const res = await getPriceTokenWithTF(tokenName, typeData);
       setLoading(false);
-      if (res?.data) setInitialData(res?.data);
+      if (res?.data) {
+        const dataPrice = res?.data?.map((item) => {
+          return { time: item?.time, value: item?.close };
+        });
+        setInitialData(dataPrice);
+      }
     } catch (error) {
-      console.log({ error });
+      console.log(error);
       setLoading(false);
     }
-  
-  }, [typeData, poolId]);
-
-  const getPool = useCallback(async () => {
-    const res = await getPoolSv(poolId);
-    const price = res?.data?.[0]?.price_24h_change;
-    if (price) setLiquidity24h(price.toFixed(2));
-  }, [poolId]);
+  }, [tokenName, typeData]);
 
   return (
     <div className={cx('chart-container')}>
@@ -91,27 +87,18 @@ const SwapChart: React.FC<{
                     ?.name?.toUpperCase()}
                 </span>
               </div>
-              <span className={cx('wall')}>/</span>
-              <div className={cx('item')}>
-                <div className={cx('item-logo')}>
-                  <IconToToken />
-                </div>
-                <span className={cx('item-text')}>
-                  {poolTokens
-                    .find((el) => el.denom === toTokenDenom)
-                    ?.name?.toUpperCase()}
-                </span>
-              </div>
-              {liquidity24h && (
+              {price24hChange && (
                 <span
-                  className={cx('percent', liquidity24h >= 0 ? 'up' : 'down')}
+                  className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}
                 >
-                  {liquidity24h >= 0 ? `+${liquidity24h}%` : `${liquidity24h}%`}
+                  {price24hChange >= 0
+                    ? `+${price24hChange.toFixed(2)}%`
+                    : `${price24hChange.toFixed(2)}%`}
                 </span>
               )}
             </div>
           </div>
-          {poolId && (
+          {initialData.length > 0 && (
             <div className={cx('head-info-content')}>
               <div>
                 <div className={cx('content-price')}>
@@ -120,9 +107,7 @@ const SwapChart: React.FC<{
                 </div>
                 <p className={cx('content-date')}>
                   {infoMove?.time
-                    ? moment(
-                        `${infoMove?.time?.year}-${infoMove?.time?.month}-${infoMove?.time?.day}`
-                      ).format('ll')
+                    ? moment(infoMove?.time * 1000).format('ll')
                     : moment().format('ll')}
                 </p>
               </div>
@@ -131,8 +116,8 @@ const SwapChart: React.FC<{
                   {INTERVALS.map((item) => (
                     <button
                       key={item.key}
-                      onClick={() => setTypeData(item.key)}
-                      className={cx(item.key === typeData ? 'active' : '')}
+                      onClick={() => setTypeData(item.tf)}
+                      className={cx(item.tf === typeData ? 'active' : '')}
                     >
                       {item.text}
                     </button>
@@ -142,7 +127,7 @@ const SwapChart: React.FC<{
             </div>
           )}
         </div>
-        {poolId ? (
+        {initialData.length ? (
           <div className={cx('chart-box')}>
             <ChartComponent
               data={initialData}
