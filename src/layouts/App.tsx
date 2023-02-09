@@ -9,7 +9,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import { ORAICHAIN_ID } from 'config/constants';
+import { NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
@@ -24,9 +24,7 @@ const App = () => {
     if (!keplr) {
       return displayToast(
         TToastType.TX_INFO,
-        {
-          message: 'You must install Keplr to continue'
-        },
+        NOTI_INSTALL_OWALLET,
         { toastId: 'install_keplr' }
       );
     }

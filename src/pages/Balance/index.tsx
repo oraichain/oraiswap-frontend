@@ -56,6 +56,7 @@ import {
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
+  NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_FEE,
@@ -327,9 +328,7 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!keplr) {
         return displayToast(
           TToastType.TX_INFO,
-          {
-            message: 'You must install Keplr to continue'
-          },
+          NOTI_INSTALL_OWALLET,
           { toastId: 'install_keplr' }
         );
       }

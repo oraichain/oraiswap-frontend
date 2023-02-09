@@ -7,7 +7,7 @@ import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import useGlobalState from 'hooks/useGlobalState';
-import { BSC_CHAIN_ID } from 'config/constants';
+import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
 
 const RequireAuthButton: React.FC<any> = ({
   address,
@@ -56,9 +56,7 @@ const RequireAuthButton: React.FC<any> = ({
     if (!(await window.Keplr.getKeplr())) {
       return displayToast(
         TToastType.TX_INFO,
-        {
-          message: 'You must install Keplr to continue'
-        },
+        NOTI_INSTALL_OWALLET,
         { toastId: 'install_keplr' }
       );
     }

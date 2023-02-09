@@ -87,3 +87,11 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
+
+// noti install owallet chorme extensions
+export const NOTI_INSTALL_OWALLET = {
+  message: 'You must install Owallet or Keplr to continue',
+  customLink:
+    'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+  textLink: 'View on store',
+};

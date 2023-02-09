@@ -50,6 +50,7 @@ export enum TToastType {
 interface IToastExtra {
   message: string;
   customLink: string;
+  textLink: string;
 }
 
 export type DisplayToastFn = ((
@@ -83,7 +84,7 @@ export type DisplayToastFn = ((
   ) => void) &
   ((
     type: TToastType.TX_INFO,
-    extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink'>>,
+    extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink' | 'textLink' >>,
     options?: Partial<ToastOptions>
   ) => void);
 
@@ -114,6 +115,7 @@ export const displayToast: DisplayToastFn = (
         <ToastInfo
           message={inputExtraData.message}
           link={inputExtraData.customLink}
+          textLink={inputExtraData.textLink}
         />,
         inputOptions
       );
@@ -154,9 +156,10 @@ const ToastTxBroadcasting: FunctionComponent = () => (
   </div>
 );
 
-const ToastInfo: FunctionComponent<{ message: string; link: string }> = ({
+const ToastInfo: FunctionComponent<{ message: string; link: string , textLink: string }> = ({
   message,
   link,
+  textLink,
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_info)}>
     <InfoIcon />
@@ -164,7 +167,7 @@ const ToastInfo: FunctionComponent<{ message: string; link: string }> = ({
       <p>{message}</p>
       {link && (
         <a target="__blank" href={link}>
-          View on Instructions <LinkIcon />
+         {textLink ?? 'View on Instructions'} <LinkIcon />
         </a>
       )}
     </section>
