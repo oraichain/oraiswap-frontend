@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import OraidexSVG from './OraidexSVG.svg';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
@@ -50,4 +50,4 @@ const BlocLoaderDex: React.FC<{
   );
 };
 
-export default BlocLoaderDex;
+export default memo(BlocLoaderDex);
