@@ -93,6 +93,8 @@ import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { renderLogoNetwork } from 'helper';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import CheckBox from 'components/CheckBox';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 interface BalanceProps {}
 
@@ -125,6 +127,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [filterNetwork, setFilterNetwork] = useState('Oraichain');
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] =
+    useLocalStorage<boolean>('hideOtherSmallAmount', false);
   // useEffect(() => {
   //   displayToast(TToastType.TX_INFO, {
   //     message:
@@ -1158,11 +1162,26 @@ const Balance: React.FC<BalanceProps> = () => {
             />
           </div>
         </div>
+        <div className={styles.checkbox}>
+          <div className={styles.checkbox_hide}>
+            <CheckBox
+              label="Hide small balances"
+              checked={hideOtherSmallAmount}
+              onCheck={setHideOtherSmallAmount}
+            />
+          </div>
+          <div />
+        </div>
         <br />
         <div className={styles.tokens}>
           <div className={styles.tokens_form}>
             {[...fromTokens, ...toTokens]
-              .filter((token) => token?.org === filterNetwork)
+              .filter((token) => {
+                if (hideOtherSmallAmount && !Number(amounts[token.denom]?.amount)) {
+                  return false;
+                }
+                return token?.org === filterNetwork;
+              })
               // .filter((t) => {
               //   if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
               //     const name = parseBep20Erc20Name(from.name);
