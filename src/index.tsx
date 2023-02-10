@@ -14,11 +14,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import {
+  CosmWasmClient,
+  SigningCosmWasmClient
+} from '@cosmjs/cosmwasm-stargate';
 import { collectWallet } from 'libs/cosmjs';
 import { GasPrice } from '@cosmjs/stargate';
 
@@ -32,11 +35,18 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
     integrations: [new BrowserTracing()],
-    denyUrls: [/extensions\//i, /^chrome:\/\//i],
+    denyUrls: [
+      /extensions\//i,
+      /extension/i,
+      /^chrome:\/\//i,
+      /^chrome-extension:\/\//i,
+      /^moz-extension:\/\//i,
+    ],
+    ignoreErrors: ['Request rejected'],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 1.0
   });
 }
 
@@ -50,7 +60,7 @@ const startApp = async () => {
       for (const networkId of [
         network.chainId,
         ORAI_BRIDGE_CHAIN_ID,
-        KWT_SUBNETWORK_CHAIN_ID,
+        KWT_SUBNETWORK_CHAIN_ID
       ]) {
         try {
           await window.Keplr.suggestChain(networkId);
@@ -60,7 +70,6 @@ const startApp = async () => {
       }
 
       const wallet = await collectWallet(network.chainId);
-
       window.client = await SigningCosmWasmClient.connectWithSigner(
         network.rpc,
         wallet,
@@ -69,8 +78,12 @@ const startApp = async () => {
           gasPrice: GasPrice.fromString(`0${network.denom}`)
         }
       );
+    } else {
+      // can not signer
+      window.client = await CosmWasmClient.connect(network.rpc);
     }
   } catch (ex) {
+    window.client = await CosmWasmClient.connect(network.rpc);
     console.log(ex);
   } finally {
     render(

@@ -102,3 +102,11 @@ export const KAWAII_ORG = 'Kawaiiverse';
 export const OSMOSIS_ORG = 'Osmosis';
 export const COSMOS_ORG = 'Cosmos Hub';
 export const ORAI_BRIDGE_ORG = 'OraiBridge';
+
+// noti install owallet chorme extensions
+export const NOTI_INSTALL_OWALLET = {
+  message: 'You need to install OWallet or Keplr to continue.',
+  customLink:
+    'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+  textLink: 'View on store',
+};

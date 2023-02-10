@@ -9,6 +9,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
+import { NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
@@ -23,9 +24,7 @@ const App = () => {
     if (!keplr) {
       return displayToast(
         TToastType.TX_INFO,
-        {
-          message: 'You must install Keplr to continue'
-        },
+        NOTI_INSTALL_OWALLET,
         { toastId: 'install_keplr' }
       );
     }
@@ -74,6 +73,27 @@ const App = () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
   }, []);
+
+  useEffect(() => {
+    if(window.keplr) {
+      keplrGasPriceCheck();
+    }
+  },[])
+
+  const keplrGasPriceCheck = async () => {
+    try {
+      const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
+      const gasPriceStep = chainInfosWithoutEndpoints.find(e => e.chainId == ORAICHAIN_ID)?.feeCurrencies[0]?.gasPriceStep
+      if (gasPriceStep && !gasPriceStep.low) {
+        displayToast(TToastType.TX_INFO, {
+          message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
+          customLink: "https://www.youtube.com/watch?v=QMqCVUfxDAk"
+        });
+      }
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+  }
 
   const keplrHandler = async (event?: CustomEvent) => {
     try {
