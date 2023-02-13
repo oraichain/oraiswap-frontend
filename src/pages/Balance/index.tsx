@@ -22,7 +22,6 @@ import {
   kawaiiTokens,
   TokenItemType,
   tokens,
-  usdtToken
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import {
@@ -50,6 +49,8 @@ import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
   BSC_SCAN,
+  COSMOS_CHAIN_ID,
+  COSMOS_NETWORK_LCD,
   ERC20_ORAI,
   ETHEREUM_RPC,
   ETHEREUM_SCAN,
@@ -64,7 +65,9 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
-  scORAI_DENOM
+  ORAI_BRIDGE_LCD,
+  OSMOSIS_CHAIN_ID,
+  OSMOSIS_NETWORK_LCD,
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
@@ -104,6 +107,7 @@ interface BalanceProps {}
 
 const { Search } = Input;
 
+const arrayLoadToken = [{ chainId: ORAI_BRIDGE_CHAIN_ID,lcd: ORAI_BRIDGE_LCD },{ chainId: OSMOSIS_CHAIN_ID,lcd: OSMOSIS_NETWORK_LCD },{ chainId: COSMOS_CHAIN_ID,lcd: COSMOS_NETWORK_LCD }] 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
@@ -167,6 +171,10 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
+    loadTokens();
+  }, [prices, txHash, keplrAddress, chainInfo]);
+
+  useEffect(() => {
     if (!!metamaskAddress || !!keplrAddress) {
       loadEvmOraiAmounts();
     }
@@ -177,6 +185,23 @@ const Balance: React.FC<BalanceProps> = () => {
       loadKawaiiSubnetAmount();
     }
   }, [kwtSubnetAddress, prices, txHash]);
+
+  const handleCheckWallet = async () => {
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr',
+      });
+    }
+  }
+
+  const loadTokens = async () => {
+    await handleCheckWallet();
+    for (const tokenBridgeOsmosisCosmos of arrayLoadToken) {
+      const address = await window.Keplr.getKeplrAddr(tokenBridgeOsmosisCosmos.chainId);
+      setNativeBalance(address, tokenBridgeOsmosisCosmos.lcd);
+    }
+  }
 
   const getKwtSubnetAddress = async () => {
     try {
@@ -207,55 +232,6 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log(error);
     }
   };
-  // const loadAmountDetail = async (
-  //   address: Bech32Address | string | undefined,
-  //   token: TokenItemType,
-  //   pendingList: TokenItemType[]
-  // ) => {
-  //   let addr =
-  //     address instanceof Bech32Address
-  //       ? address.toBech32(token.prefix!)
-  //       : address;
-
-  //   try {
-  //     if (!addr) throw new Error('Addr is undefined');
-  //     // using this way we no need to enable other network
-  //     let amountDetail: AmountDetail;
-  //     if (!!token.erc20Cw20Map) {
-  //       const { amount, subAmounts } = await fetchBalanceWithMapping(
-  //         addr,
-  //         token
-  //       );
-  //       amountDetail = {
-  //         subAmounts,
-  //         amount,
-  //         usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-  //       };
-  //     } else {
-  //       const amount = await fetchBalance(
-  //         addr,
-  //         token.denom,
-  //         token.contractAddress,
-  //         token.lcd
-  //       );
-  //       let amountTokens;
-  //       amountDetail = {
-  //         amount,
-  //         usd: getUsd(
-  //           amount,
-  //           prices[token.coingeckoId] ??
-  //             new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
-  //           token.decimals
-  //         )
-  //       };
-  //     }
-
-  //     return [token.denom, amountDetail];
-  //   } catch (ex) {
-  //     pendingList.push(token);
-  //     return [token.denom, { amount: 0, usd: 0 }];
-  //   }
-  // };
 
   const loadEvmOraiAmounts = async () => {
     const entries = await Promise.all(
@@ -308,8 +284,8 @@ const Balance: React.FC<BalanceProps> = () => {
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
-  const setNativeBalance = async (address: string) => {
-    const amountAll = (await fetchTokenBalanceAll(address))?.balances;
+  const setNativeBalance = async (address: string, lcd?: string) => {
+    const amountAll = (await fetchTokenBalanceAll(address, lcd))?.balances;
     const amountDetails = amountAll?.reduce(
       (acc, cur) => {
         const token = filteredTokens?.find(
@@ -1262,7 +1238,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   {toTokens
                     .filter((t) => {
                       if (
-                        hideOtherSmallAmount &&
+                        hideOraichainSmallAmount &&
                         !Number(amounts[t.denom]?.amount)
                       ) {
                         return false;
