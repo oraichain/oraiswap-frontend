@@ -62,8 +62,8 @@ export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_SCAN = 'https://scan.orai.io';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
-export const ORAI_LCD = 'https://lcd.orai.io';
-export const ORAI_RPC = 'https://rpc.orai.io';
+export const ORAI_LCD = 'https://lcd-balance.orai.io';
+export const ORAI_RPC = 'https://rpc-balance.orai.io';
 export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
@@ -93,5 +93,5 @@ export const NOTI_INSTALL_OWALLET = {
   message: 'You need to install OWallet or Keplr to continue.',
   customLink:
     'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
-  textLink: 'View on store',
+  textLink: 'View on store'
 };

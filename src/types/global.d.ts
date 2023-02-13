@@ -9,6 +9,7 @@ import { AbstractProvider } from 'web3-core';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 declare global {
+  type AmountDetails = { [key: string]: AmountDetail };
   type MetaMaskEthereumProvider = AbstractProvider & {
     chainId: string;
     isMetaMask?: boolean;

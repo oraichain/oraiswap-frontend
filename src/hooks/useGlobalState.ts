@@ -14,6 +14,7 @@ export type GlobalState = {
   infoEvm: ChainInfoType;
   infoCosmos: ChainInfoType;
   statusChangeAccount: boolean;
+  amounts: AmountDetails;
 };
 
 const initialState: GlobalState = {
@@ -23,7 +24,8 @@ const initialState: GlobalState = {
   chainInfo: {},
   infoEvm: {},
   infoCosmos: {},
-  statusChangeAccount: false,
+  amounts: {},
+  statusChangeAccount: false
 };
 const { useGlobalState } = createGlobalState(initialState);
 

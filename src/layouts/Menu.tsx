@@ -30,7 +30,6 @@ import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
-import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
   BSC_CHAIN_ID,
@@ -59,6 +58,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [infoCosmos] = useGlobalState('infoCosmos');
   const [infoEvm] = useGlobalState('infoEvm');
   const [chainInfo] = useGlobalState('chainInfo');
+  const [amounts] = useGlobalState('amounts');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
   const [open, setOpen] = useState(false);
@@ -66,18 +66,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const handleToggle = () => {
     setOpen(!open);
   };
-  const {
-    isLoading,
-    error,
-    data: balance
-  } = useQuery(
-    ['balance', ORAI, address],
-    () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
-    {
-      enabled: address?.length > 0,
-      refetchOnWindowFocus: false
-    }
-  );
+
+  const balance = amounts[ORAI]?.amount ?? 0;
 
   useEffect(() => {
     setLink(location.pathname);

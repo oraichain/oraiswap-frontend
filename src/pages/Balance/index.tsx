@@ -93,10 +93,14 @@ import { getRpcEvm } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { Contract } from 'config/contracts';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import {
+  BalanceResponse,
+  QueryMsg as TokenQueryMsg
+} from 'libs/contracts/OraiswapToken.types';
 
 interface BalanceProps {}
-
-type AmountDetails = { [key: string]: AmountDetail };
 
 const { Search } = Input;
 
@@ -114,7 +118,7 @@ const Balance: React.FC<BalanceProps> = () => {
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
     useLocalStorage<boolean>('hideOraichainSmallAmount', false);
-  const [amounts, setAmounts] = useState<AmountDetails>({});
+  const [amounts, setAmounts] = useGlobalState('amounts');
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
     []
@@ -125,9 +129,6 @@ const Balance: React.FC<BalanceProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
 
-  // this help to retry loading and show something in processing
-  const [pendingTokens, setPendingTokens] = useState(filteredTokens);
-  const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
 
   // useEffect(() => {
@@ -162,13 +163,8 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [keplrAddress]);
 
   useEffect(() => {
-    if (!statusChangeAccount) return;
-    setPendingTokens(filteredTokens);
-  }, [statusChangeAccount, keplrAddress]);
-
-  useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, pendingTokens, keplrAddress, chainInfo]);
+  }, [prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
     if (!!metamaskAddress || !!keplrAddress) {
@@ -211,63 +207,55 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log(error);
     }
   };
-  const loadAmountDetail = async (
-    address: Bech32Address | string | undefined,
-    token: TokenItemType,
-    pendingList: TokenItemType[]
-  ) => {
-    let addr =
-      address instanceof Bech32Address
-        ? address.toBech32(token.prefix!)
-        : address;
+  // const loadAmountDetail = async (
+  //   address: Bech32Address | string | undefined,
+  //   token: TokenItemType,
+  //   pendingList: TokenItemType[]
+  // ) => {
+  //   let addr =
+  //     address instanceof Bech32Address
+  //       ? address.toBech32(token.prefix!)
+  //       : address;
 
-    try {
-      if (!addr) throw new Error('Addr is undefined');
-      // using this way we no need to enable other network
-      let amountDetail: AmountDetail;
-      if (!!token.erc20Cw20Map) {
-        const { amount, subAmounts } = await fetchBalanceWithMapping(
-          addr,
-          token
-        );
-        amountDetail = {
-          subAmounts,
-          amount,
-          usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-        };
-      } else {
-        const amount = await fetchBalance(
-          addr,
-          token.denom,
-          token.contractAddress,
-          token.lcd
-        );
-        let amountTokens;
-        if (token.denom === scORAI_DENOM) {
-          amountTokens = await simulateSwap({
-            fromInfo: token,
-            toInfo: usdtToken?.[0],
-            amount: parseAmount('1', token?.decimals)
-          });
-        }
+  //   try {
+  //     if (!addr) throw new Error('Addr is undefined');
+  //     // using this way we no need to enable other network
+  //     let amountDetail: AmountDetail;
+  //     if (!!token.erc20Cw20Map) {
+  //       const { amount, subAmounts } = await fetchBalanceWithMapping(
+  //         addr,
+  //         token
+  //       );
+  //       amountDetail = {
+  //         subAmounts,
+  //         amount,
+  //         usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
+  //       };
+  //     } else {
+  //       const amount = await fetchBalance(
+  //         addr,
+  //         token.denom,
+  //         token.contractAddress,
+  //         token.lcd
+  //       );
+  //       let amountTokens;
+  //       amountDetail = {
+  //         amount,
+  //         usd: getUsd(
+  //           amount,
+  //           prices[token.coingeckoId] ??
+  //             new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
+  //           token.decimals
+  //         )
+  //       };
+  //     }
 
-        amountDetail = {
-          amount,
-          usd: getUsd(
-            amount,
-            prices[token.coingeckoId] ??
-              new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
-            token.decimals
-          )
-        };
-      }
-
-      return [token.denom, amountDetail];
-    } catch (ex) {
-      pendingList.push(token);
-      return [token.denom, { amount: 0, usd: 0 }];
-    }
-  };
+  //     return [token.denom, amountDetail];
+  //   } catch (ex) {
+  //     pendingList.push(token);
+  //     return [token.denom, { amount: 0, usd: 0 }];
+  //   }
+  // };
 
   const loadEvmOraiAmounts = async () => {
     const entries = await Promise.all(
@@ -309,7 +297,7 @@ const Balance: React.FC<BalanceProps> = () => {
             token.denom,
             {
               amount,
-              usd: getUsd(amount, prices[token.coingeckoId], token.decimals),
+              usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
             }
           ];
         })
@@ -320,8 +308,75 @@ const Balance: React.FC<BalanceProps> = () => {
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
+  const setNativeBalance = async (address: string) => {
+    const amountAll = (await fetchTokenBalanceAll(address))?.balances;
+    const amountDetails = amountAll?.reduce(
+      (acc, cur) => {
+        const token = filteredTokens?.find(
+          (token) => token.denom === cur.denom
+        );
+        return {
+          ...acc,
+          [cur.denom]: {
+            amount: parseInt(cur.amount),
+            usd: !token
+              ? 0
+              : getUsd(
+                  parseInt(cur.amount),
+                  prices[token.coingeckoId] ??
+                    new Fraction(cur.amount, Math.pow(10, token.decimals)),
+                  token.decimals
+                )
+          }
+        };
+      },
+      { ...amounts }
+    );
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+  };
+
+  const setCw20Balance = async (address: string) => {
+    // get all cw20 token contract
+    const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
+    const data = toBinary({
+      balance: { address }
+    } as TokenQueryMsg);
+    console.log(Contract.multicall);
+    const res = await Contract.multicall.aggregate({
+      queries: cw20Tokens.map((t) => ({
+        address: t.contractAddress,
+        data
+      }))
+    });
+
+    const amountDetails = Object.fromEntries(
+      cw20Tokens.map((t, ind) => {
+        if (!res.return_data[ind].success) {
+          return [t.denom, { amount: 0, usd: 0 }];
+        }
+        const balanceRes = fromBinary(
+          res.return_data[ind].data
+        ) as BalanceResponse;
+        const amount = parseInt(balanceRes.balance);
+        return [
+          t.denom,
+          {
+            amount,
+            usd: getUsd(
+              amount,
+              prices[t.coingeckoId] ??
+                new Fraction(amount, Math.pow(10, t.decimals)),
+              t.decimals
+            )
+          }
+        ];
+      })
+    );
+
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+  };
+
   const loadTokenAmounts = async () => {
-    if (pendingTokens.length == 0 || pendingCount > 2) return;
     try {
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
@@ -332,30 +387,8 @@ const Balance: React.FC<BalanceProps> = () => {
         });
       }
       const address = await window.Keplr.getKeplrAddr();
-      const amountAll = (await fetchTokenBalanceAll(address))?.balances;
-      const amountDetails = amountAll?.reduce(
-        (acc, cur) => {
-          const token = filteredTokens?.find(
-            (token) => token.denom === cur.denom
-          );
-          return {
-            ...acc,
-            [cur.denom]: {
-              amount: parseInt(cur.amount),
-              usd: !token
-                ? 0
-                : getUsd(
-                    parseInt(cur.amount),
-                    prices[token.coingeckoId] ??
-                      new Fraction(cur.amount, Math.pow(10, token.decimals)),
-                    token.decimals
-                  ),
-            },
-          };
-        },
-        { ...amounts }
-      ) ?? { ...amounts };
-      setAmounts({ ...amountDetails });
+
+      await Promise.all([setCw20Balance(address), setNativeBalance(address)]);
     } catch (ex) {
       console.log(ex);
     }
