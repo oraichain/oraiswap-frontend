@@ -115,8 +115,6 @@ declare global {
   type keplrType = keplr;
   namespace NodeJS {
     interface ProcessEnv {
-      REACT_APP_NETWORK: 'testnet' | 'mainnet';
-
       REACT_APP_SITE_TITLE: string;
       REACT_APP_SITE_DESC: string;
 
@@ -129,8 +127,6 @@ declare global {
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
-      REACT_APP_LUNA_ORAICHAIN_DENOM: string;
-      REACT_APP_UST_ORAICHAIN_DENOM: string;
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
       REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
@@ -158,7 +154,6 @@ declare global {
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
-      REACT_APP_DEPRECATED: string;
       REACT_APP_ORAIX_CLAIM_URL: string;
       REACT_APP_ORAIX_CLAIM_CONTRACT: string;
       REACT_APP_SENTRY_ENVIRONMENT: string;
@@ -168,6 +163,7 @@ declare global {
 
       // config for ibc wasm contract (cw20-ics20)
       REACT_APP_IBC_WASM_CONTRACT: string;
+      REACT_APP_MULTICALL_CONTRACT: string;
     }
   }
 }
