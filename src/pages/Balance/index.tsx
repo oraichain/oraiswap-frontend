@@ -21,7 +21,7 @@ import {
   gravityContracts,
   kawaiiTokens,
   TokenItemType,
-  tokens,
+  tokens
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import {
@@ -44,7 +44,7 @@ import {
   parseAmountToWithDecimal,
   parseBep20Erc20Name
 } from 'libs/utils';
-import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
+// import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_RPC,
@@ -67,7 +67,7 @@ import {
   ORAI_BRIDGE_EVM_FEE,
   ORAI_BRIDGE_LCD,
   OSMOSIS_CHAIN_ID,
-  OSMOSIS_NETWORK_LCD,
+  OSMOSIS_NETWORK_LCD
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
@@ -107,7 +107,11 @@ interface BalanceProps {}
 
 const { Search } = Input;
 
-const arrayLoadToken = [{ chainId: ORAI_BRIDGE_CHAIN_ID,lcd: ORAI_BRIDGE_LCD },{ chainId: OSMOSIS_CHAIN_ID,lcd: OSMOSIS_NETWORK_LCD },{ chainId: COSMOS_CHAIN_ID,lcd: COSMOS_NETWORK_LCD }] 
+const arrayLoadToken = [
+  { chainId: ORAI_BRIDGE_CHAIN_ID, lcd: ORAI_BRIDGE_LCD },
+  { chainId: OSMOSIS_CHAIN_ID, lcd: OSMOSIS_NETWORK_LCD },
+  { chainId: COSMOS_CHAIN_ID, lcd: COSMOS_NETWORK_LCD }
+];
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
@@ -175,33 +179,35 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
-    if (!!metamaskAddress || !!keplrAddress) {
+    if (!!metamaskAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, prices, txHash, keplrAddress, chainInfo]);
+  }, [metamaskAddress, txHash]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
       loadKawaiiSubnetAmount();
     }
-  }, [kwtSubnetAddress, prices, txHash]);
+  }, [kwtSubnetAddress, txHash]);
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
       return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr',
+        toastId: 'install_keplr'
       });
     }
-  }
+  };
 
   const loadTokens = async () => {
     await handleCheckWallet();
     for (const tokenBridgeOsmosisCosmos of arrayLoadToken) {
-      const address = await window.Keplr.getKeplrAddr(tokenBridgeOsmosisCosmos.chainId);
+      const address = await window.Keplr.getKeplrAddr(
+        tokenBridgeOsmosisCosmos.chainId
+      );
       setNativeBalance(address, tokenBridgeOsmosisCosmos.lcd);
     }
-  }
+  };
 
   const getKwtSubnetAddress = async () => {
     try {

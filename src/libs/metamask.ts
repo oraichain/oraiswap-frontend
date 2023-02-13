@@ -26,7 +26,7 @@ export default class Metamask {
   public async switchNetwork(chainId: string | number) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: "0x" + Number(chainId).toString(16) }]
+      params: [{ chainId: '0x' + Number(chainId).toString(16) }]
     });
   }
 

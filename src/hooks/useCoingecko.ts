@@ -1,5 +1,6 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import useLocalStorage from './useLocalStorage';
 
 /**
  * Performs a GET request, returning `null` if 404.
@@ -30,52 +31,11 @@ export const buildCoinGeckoPricesURL = (tokens: readonly string[]): string =>
     '%2C'
   )}&vs_currencies=usd`;
 
-const createEmptyResult = <T extends string>(
-  tokens: readonly T[]
-): CoinGeckoPrices<T> => {
-  const ret = {} as CoinGeckoPrices<T>;
-  tokens.forEach((token) => {
-    ret[token] = null;
-  });
-  return ret;
-};
-
 /**
  * Prices of each token.
  */
 export type CoinGeckoPrices<T extends string> = {
   [C in T]: number | null;
-};
-
-export const makeCoinGeckoPricesQuery = <T extends string>(
-  tokens: readonly T[]
-): UseQueryOptions<
-  CoinGeckoPrices<T>,
-  unknown,
-  CoinGeckoPrices<T>,
-  string[]
-> => {
-  return {
-    queryKey: ['coinGeckoPrices', ...tokens],
-    queryFn: async ({ signal }) => {
-      const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
-      const rawData = await fetchNullable<{
-        [C in T]?: {
-          usd: number;
-        };
-      }>(coingeckoPricesURL, signal);
-      if (!rawData) {
-        return createEmptyResult(tokens);
-      }
-
-      const ret = {} as CoinGeckoPrices<T>;
-      tokens.forEach((token) => {
-        const priceInfo = rawData[token];
-        ret[token] = priceInfo ? priceInfo.usd : null;
-      });
-      return ret;
-    }
-  };
 };
 
 /**
@@ -91,10 +51,38 @@ export const useCoinGeckoPrices = <T extends string>(
 ): UseQueryResult<CoinGeckoPrices<T>, unknown> => {
   const filteredTokens = [...new Set(tokens)];
   filteredTokens.sort();
+
+  // use cached first then update by query, if is limited then return cached version
+  const [cachePrices, setCachePrices] = useLocalStorage<
+    CoinGeckoPrices<string>
+  >('cg_prices', {});
+
   return useQuery({
     initialData: [],
     ...options,
     // make unique
-    ...makeCoinGeckoPricesQuery(filteredTokens)
+    queryKey: ['coinGeckoPrices', ...tokens],
+    queryFn: async ({ signal }) => {
+      const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
+
+      // by default not return data then use cached version
+      const rawData =
+        (await fetchNullable<{
+          [C in T]?: {
+            usd: number;
+          };
+        }>(coingeckoPricesURL, signal)) || {};
+
+      // update cached
+      for (const key in rawData) {
+        cachePrices[key] = rawData[key].usd;
+      }
+
+      setCachePrices(cachePrices);
+
+      return Object.fromEntries(
+        tokens.map((token) => [token, cachePrices[token]])
+      ) as CoinGeckoPrices<T>;
+    }
   });
 };
