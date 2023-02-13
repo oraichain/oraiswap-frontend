@@ -255,6 +255,17 @@ async function fetchNativeTokenBalance(
   return parseInt(amount || '0');
 }
 
+async function fetchTokenBalanceAll(
+  walletAddr: string,
+  lcd?: string,
+) {
+  const url = `${
+    lcd ?? network.lcd
+  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
+  const res: any = (await axios.get(url)).data; 
+  return res;
+}
+
 async function fetchBalance(
   walletAddr: string,
   denom: string,
@@ -848,6 +859,7 @@ function generateClaimMsg(msg: Claim) {
 export {
   querySmart,
   fetchNativeTokenBalance,
+  fetchTokenBalanceAll,
   fetchPairInfo,
   fetchTokenBalance,
   fetchBalance,
