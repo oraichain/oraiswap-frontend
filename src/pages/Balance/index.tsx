@@ -28,6 +28,7 @@ import { network } from 'config/networks';
 import {
   fetchBalance,
   fetchBalanceWithMapping,
+  fetchTokenBalanceAll,
   // fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -308,7 +309,7 @@ const Balance: React.FC<BalanceProps> = () => {
             token.denom,
             {
               amount,
-              usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
+              usd: getUsd(amount, prices[token.coingeckoId], token.decimals),
             }
           ];
         })
@@ -326,35 +327,35 @@ const Balance: React.FC<BalanceProps> = () => {
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
-        return displayToast(
-          TToastType.TX_INFO,
-          NOTI_INSTALL_OWALLET,
-          { toastId: 'install_keplr' }
-        );
+        return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+          toastId: 'install_keplr'
+        });
       }
-      const pendingList: TokenItemType[] = [];
-      const amountDetails = Object.fromEntries(
-        await Promise.all(
-          pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrAddr(
-              token.chainId as string
-            ).catch((error) => {
-              console.log(error);
-              return undefined;
-            });
-            return loadAmountDetail(address, token, pendingList);
-          })
-        )
-      );
-
-      setAmounts((old) => ({ ...old, ...amountDetails }));
-      // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
-      if (pendingList.length > 0) {
-        setTimeout(() => {
-          setPendingTokens(pendingList);
-          setPendingCount(pendingCount + 1);
-        }, 3000);
-      }
+      const address = await window.Keplr.getKeplrAddr();
+      const amountAll = (await fetchTokenBalanceAll(address))?.balances;
+      const amountDetails = amountAll?.reduce(
+        (acc, cur) => {
+          const token = filteredTokens?.find(
+            (token) => token.denom === cur.denom
+          );
+          return {
+            ...acc,
+            [cur.denom]: {
+              amount: parseInt(cur.amount),
+              usd: !token
+                ? 0
+                : getUsd(
+                    parseInt(cur.amount),
+                    prices[token.coingeckoId] ??
+                      new Fraction(cur.amount, Math.pow(10, token.decimals)),
+                    token.decimals
+                  ),
+            },
+          };
+        },
+        { ...amounts }
+      ) ?? { ...amounts };
+      setAmounts({ ...amountDetails });
     } catch (ex) {
       console.log(ex);
     }
