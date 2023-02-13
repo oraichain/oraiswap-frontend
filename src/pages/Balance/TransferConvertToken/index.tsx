@@ -26,11 +26,6 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
 import useGlobalState from 'hooks/useGlobalState';
 
-type AmountDetail = {
-  amount: number;
-  usd: number;
-};
-
 interface TransferConvertProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;

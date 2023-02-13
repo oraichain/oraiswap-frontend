@@ -2,7 +2,13 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
-
+import tokenABI from 'config/abi/erc20.json';
+import Big from 'big.js';
+import {
+  Multicall,
+  ContractCallResults,
+  ContractCallContext
+} from 'ethereum-multicall';
 import {
   AminoTypes,
   // BroadcastTxResponse,
@@ -37,6 +43,7 @@ import {
 import Content from 'layouts/Content';
 import {
   buildMultipleMessages,
+  getFunctionExecution,
   getUsd,
   parseAmount,
   parseAmountFromWithDecimal as parseAmountFrom,
@@ -47,14 +54,17 @@ import {
 // import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
+  BSC_CHAIN_ID,
   BSC_RPC,
   BSC_SCAN,
   COSMOS_CHAIN_ID,
   COSMOS_NETWORK_LCD,
   ERC20_ORAI,
+  ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
   ETHEREUM_SCAN,
   KAWAII_API_DEV,
+  KAWAII_SUBNET_RPC,
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -82,7 +92,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
-import TokenItem, { AmountDetail } from './TokenItem';
+import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
@@ -121,7 +131,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
-  const [infoEvm] = useGlobalState('infoEvm');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
@@ -239,53 +248,76 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const loadEvmEntries = async (
+    address: string,
+    tokens: TokenItemType[],
+    rpc: string,
+    multicallContractAddress: string
+  ): Promise<[string, AmountDetail][]> => {
+    const multicall = new Multicall({
+      nodeUrl: rpc,
+      multicallCustomContractAddress: multicallContractAddress
+    });
+    const input = tokens.map((token) => ({
+      reference: token.denom,
+      contractAddress: token.contractAddress,
+      abi: tokenABI,
+      calls: [
+        {
+          reference: token.denom,
+          methodName: 'balanceOf(address)',
+          methodParameters: [address]
+        }
+      ]
+    }));
+
+    const results: ContractCallResults = await multicall.call(input);
+    return tokens.map((token) => {
+      const amount = Number(
+        results.results[token.denom].callsReturnContext[0].returnValues[0].hex
+      );
+
+      return [
+        token.denom,
+        {
+          amount,
+          usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
+        } as AmountDetail
+      ];
+    });
+  };
+
   const loadEvmOraiAmounts = async () => {
-    const entries = await Promise.all(
-      evmTokens.map(async (token) => {
-        const amount = await window.Metamask.getOraiBalance(
-          metamaskAddress,
-          token,
-          chainInfo?.networkType == 'evm'
-            ? chainInfo?.rpc
-            : infoEvm?.rpc ?? getRpcEvm()
-        );
-
-        return [
-          token.denom,
-          {
-            amount,
-            usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-          }
-        ];
-      })
+    let amountDetails = Object.fromEntries(
+      await loadEvmEntries(
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
+        BSC_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      )
     );
+    setAmounts((old) => ({ ...old, ...amountDetails }));
 
-    const amountDetails = Object.fromEntries(entries);
-    // update amounts
+    amountDetails = Object.fromEntries(
+      await loadEvmEntries(
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
+        ETHEREUM_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      )
+    );
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
   const loadKawaiiSubnetAmount = async () => {
-    const entries = await Promise.all(
-      kawaiiTokens
-        .filter((t) => !!t.contractAddress)
-        .map(async (token) => {
-          const amount = await window.Metamask.getOraiBalance(
-            kwtSubnetAddress,
-            token
-          );
-
-          return [
-            token.denom,
-            {
-              amount,
-              usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-            }
-          ];
-        })
+    let amountDetails = Object.fromEntries(
+      await loadEvmEntries(
+        kwtSubnetAddress,
+        kawaiiTokens.filter((t) => !!t.contractAddress),
+        KAWAII_SUBNET_RPC,
+        '0x74876644692e02459899760B8b9747965a6D3f90'
+      )
     );
-
-    const amountDetails = Object.fromEntries(entries);
     // update amounts
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
@@ -322,13 +354,17 @@ const Balance: React.FC<BalanceProps> = () => {
     const data = toBinary({
       balance: { address }
     } as TokenQueryMsg);
-    console.log(Contract.multicall);
-    const res = await Contract.multicall.aggregate({
-      queries: cw20Tokens.map((t) => ({
-        address: t.contractAddress,
-        data
-      }))
-    });
+    console.log(address, Contract.multicall);
+    const res = await getFunctionExecution(
+      'multicall',
+      Contract.multicall.aggregate,
+      {
+        queries: cw20Tokens.map((t) => ({
+          address: t.contractAddress,
+          data
+        }))
+      }
+    );
 
     const amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {

@@ -2,8 +2,6 @@ import { is } from 'ramda';
 import bech32 from 'bech32';
 import Big from 'big.js';
 import { Fraction } from '@saberhq/token-utils';
-import { TokenItemType } from 'config/bridgeTokens';
-import { COSMOS_DECIMALS } from 'config/constants';
 
 /* object */
 export const record = <T, V>(
@@ -140,3 +138,41 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   }));
   return messages;
 };
+
+export const delay = (timeout: number) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
+
+let cache = {};
+export async function getFunctionExecution(
+  key: string,
+  method: Function,
+  args: any,
+  expiredIn = 10000
+) {
+  if (cache[key] !== undefined) {
+    while (cache[key].pending) {
+      await delay(500);
+    }
+    return cache[key].value;
+  }
+  console.log('run again', key);
+  cache[key] = { expired: Date.now() + expiredIn, pending: true };
+  const value = await method(args);
+  cache[key].pending = false;
+  cache[key].value = value;
+
+  return cache[key].value;
+}
+
+// Interval to clear cache;
+setInterval(function () {
+  if (Object.keys(cache).length > 0) {
+    let currentTime = Date.now();
+    Object.keys(cache).forEach((key) => {
+      if (currentTime > cache[key].expired) {
+        delete cache[key];
+        console.log(`${key}'s cache deleted`);
+      }
+    });
+  }
+}, 1000);
