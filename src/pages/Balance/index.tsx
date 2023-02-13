@@ -323,8 +323,7 @@ const Balance: React.FC<BalanceProps> = () => {
               ? 0
               : getUsd(
                   parseInt(cur.amount),
-                  prices[token.coingeckoId] ??
-                    new Fraction(cur.amount, Math.pow(10, token.decimals)),
+                  prices[token.coingeckoId] ?? 0,
                   token.decimals
                 )
           }
@@ -358,16 +357,12 @@ const Balance: React.FC<BalanceProps> = () => {
           res.return_data[ind].data
         ) as BalanceResponse;
         const amount = parseInt(balanceRes.balance);
+
         return [
           t.denom,
           {
             amount,
-            usd: getUsd(
-              amount,
-              prices[t.coingeckoId] ??
-                new Fraction(amount, Math.pow(10, t.decimals)),
-              t.decimals
-            )
+            usd: getUsd(amount, prices[t.coingeckoId] ?? 0, t.decimals)
           }
         ];
       })

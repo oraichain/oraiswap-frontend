@@ -87,7 +87,7 @@ export type TokenItemType = {
     | 'ethereum'
     | 'bnb'
     | 'airight'
-    | 'oraix'
+    | 'oraidex'
     | 'tether'
     | 'kawaii-islands'
     | 'milky-token'
