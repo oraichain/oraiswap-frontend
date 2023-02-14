@@ -48,6 +48,7 @@ import {
   getUsd,
   parseAmount,
   parseAmountFromWithDecimal as parseAmountFrom,
+  parseAmountFromWithDecimal,
   parseAmountToWithDecimal as parseAmountTo,
   parseAmountToWithDecimal,
   parseBep20Erc20Name
@@ -1233,7 +1234,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   <span className={styles.subLabel}>Balance</span>
                 </div>
                 <div className={styles.tableContent}>
-                  {fromTokens.map((t: TokenItemType) => {
+                  {fromTokens
+                  .sort((a, b) => hideOtherSmallAmount && (Number(parseAmountFromWithDecimal(amounts?.[b.denom]?.amount ?? 0,b.decimals))) - (Number(parseAmountFromWithDecimal(amounts[a.denom]?.amount ?? 0,a.decimals))))
+                  .map((t: TokenItemType) => {
                     if (
                       hideOtherSmallAmount &&
                       !Number(amounts[t.denom]?.amount)
@@ -1289,6 +1292,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {toTokens
+                    .sort((a, b) => hideOraichainSmallAmount && (Number(parseAmountFromWithDecimal(amounts?.[b.denom]?.amount ?? 0,b.decimals))) - (Number(parseAmountFromWithDecimal(amounts[a.denom]?.amount ?? 0,a.decimals))))
                     .filter((t) => {
                       if (
                         hideOraichainSmallAmount &&
