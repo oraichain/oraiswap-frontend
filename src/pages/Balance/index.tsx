@@ -1235,7 +1235,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {fromTokens
-                  .sort((a, b) => hideOtherSmallAmount && (Number(parseAmountFromWithDecimal(amounts?.[b.denom]?.amount ?? 0,b.decimals))) - (Number(parseAmountFromWithDecimal(amounts[a.denom]?.amount ?? 0,a.decimals))))
+                  .sort((a, b) => hideOtherSmallAmount && (amounts?.[b.denom]?.usd - amounts?.[a.denom]?.usd))
                   .map((t: TokenItemType) => {
                     if (
                       hideOtherSmallAmount &&
@@ -1292,7 +1292,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
                 <div className={styles.tableContent}>
                   {toTokens
-                    .sort((a, b) => hideOraichainSmallAmount && (Number(parseAmountFromWithDecimal(amounts?.[b.denom]?.amount ?? 0,b.decimals))) - (Number(parseAmountFromWithDecimal(amounts[a.denom]?.amount ?? 0,a.decimals))))
+                    .sort((a, b) => hideOraichainSmallAmount && (amounts?.[b.denom]?.usd - amounts?.[a.denom]?.usd))
                     .filter((t) => {
                       if (
                         hideOraichainSmallAmount &&
