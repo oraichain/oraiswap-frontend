@@ -289,34 +289,46 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const loadEvmOraiAmounts = async () => {
     let amountDetails = Object.fromEntries(
-      await getFunctionExecution(loadEvmEntries, [
-        metamaskAddress,
-        evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-        BSC_RPC,
-        '0xcA11bde05977b3631167028862bE2a173976CA11'
-      ])
+      await getFunctionExecution(
+        loadEvmEntries,
+        [
+          metamaskAddress,
+          evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
+          BSC_RPC,
+          '0xcA11bde05977b3631167028862bE2a173976CA11'
+        ],
+        'loadEthEntries'
+      )
     );
     setAmounts((old) => ({ ...old, ...amountDetails }));
 
     amountDetails = Object.fromEntries(
-      await getFunctionExecution(loadEvmEntries, [
-        metamaskAddress,
-        evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-        ETHEREUM_RPC,
-        '0xcA11bde05977b3631167028862bE2a173976CA11'
-      ])
+      await getFunctionExecution(
+        loadEvmEntries,
+        [
+          metamaskAddress,
+          evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
+          ETHEREUM_RPC,
+          '0xcA11bde05977b3631167028862bE2a173976CA11'
+        ],
+        'loadBscEntries'
+      )
     );
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
   const loadKawaiiSubnetAmount = async () => {
     let amountDetails = Object.fromEntries(
-      await getFunctionExecution(loadEvmEntries, [
-        kwtSubnetAddress,
-        kawaiiTokens.filter((t) => !!t.contractAddress),
-        KAWAII_SUBNET_RPC,
-        '0x74876644692e02459899760B8b9747965a6D3f90'
-      ])
+      await getFunctionExecution(
+        loadEvmEntries,
+        [
+          kwtSubnetAddress,
+          kawaiiTokens.filter((t) => !!t.contractAddress),
+          KAWAII_SUBNET_RPC,
+          '0x74876644692e02459899760B8b9747965a6D3f90'
+        ],
+        'loadKawaiiEntries'
+      )
     );
     // update amounts
     setAmounts((old) => ({ ...old, ...amountDetails }));
