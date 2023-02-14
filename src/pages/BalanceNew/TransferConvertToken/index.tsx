@@ -29,6 +29,7 @@ import {
   OSMO,
   OSMOSIS_ORG,
   STABLE_DENOM,
+  KAWAII_ORG
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -326,16 +327,16 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 try {
                   const isValid = checkValidAmount();
                   if (!isValid) return;
-                  setTransferIbcLoading(true);
+                  setTransferLoading(true);
                   await onClickTransfer(convertAmount);
                 } finally {
-                  setTransferIbcLoading(false);
+                  setTransferLoading(false);
                 }
               }}
             >
               {transferLoading && <Loader width={20} height={20} />}
               <span>
-                Transfer to <strong>{filterNetwork}</strong>
+                Transfer <strong>{filterNetwork}</strong>
               </span>
             </button>
           )}
@@ -369,7 +370,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>OraiBridge</strong>
+                    Transfer <strong>OraiBridge</strong>
                   </span>
                 </button>
               </>
@@ -401,7 +402,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {'Transfer To'} <strong>{filterNetwork}</strong>
+                    Transfer <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -428,7 +429,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>{token.bridgeNetworkIdentifier}</strong>
+                    Transfer <strong>{token.bridgeNetworkIdentifier}</strong>
                   </span>
                 </button>
               </>
@@ -473,14 +474,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                         const isValid = checkValidAmount();
                         if (!isValid) return;
                         setTransferLoading(true);
-                        if (token.bridgeNetworkIdentifier) {
+                        if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
                           return await convertToken(
                             convertAmount,
                             token,
                             'nativeToCw20'
                           );
                         }
-                        if (onClickTransfer && filterNetwork == 'Kawaiiverse') {
+                        if (onClickTransfer && filterNetwork == KAWAII_ORG) {
                           return await onClickTransfer(convertAmount);
                         }
                         const name = parseBep20Erc20Name(token.name);
@@ -503,9 +504,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   >
                     {transferLoading && <Loader width={20} height={20} />}
                     <span>
-                      {token.bridgeNetworkIdentifier
-                        ? 'Convert To'
-                        : 'Transfer To'}{' '}
+                      {filterNetwork !== BSC_ORG
+                        ? 'Convert'
+                        : 'Transfer'}{' '}
                       <strong>{filterNetwork}</strong>
                     </span>
                   </button>
@@ -548,7 +549,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               >
                 {transferLoading && <Loader width={20} height={20} />}
                 <span>
-                  Convert To
+                  Convert
                   <strong style={{ marginLeft: 5 }}>{filterNetwork}</strong>
                 </span>
               </button>

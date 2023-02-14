@@ -1679,7 +1679,7 @@
     async "^3.2.4"
     ethereum-cryptography "^1.1.2"
 
-"@ethersproject/abi@^5.6.3":
+"@ethersproject/abi@5.7.0", "@ethersproject/abi@^5.6.3", "@ethersproject/abi@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/abi/-/abi-5.7.0.tgz#b3f3e045bbbeed1af3947335c247ad625a44e449"
   integrity sha512-351ktp42TiRcYB3H1OP8yajPeAQstMW/yCFokj/AthP9bLHzQFPlOrxOcwYEDkUAICmOHljvN4K39OMTMUa9RA==
@@ -7918,6 +7918,7 @@ ethereum-cryptography@^1.1.2:
     "@noble/secp256k1" "1.6.3"
     "@scure/bip32" "1.1.0"
     "@scure/bip39" "1.1.0"
+
 ethereum-multicall@^2.15.0:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/ethereum-multicall/-/ethereum-multicall-2.15.0.tgz#31706ab90fde3c4a204e9e2b094871619e6dbff8"
