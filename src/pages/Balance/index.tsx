@@ -43,6 +43,7 @@ import {
 import Content from 'layouts/Content';
 import {
   buildMultipleMessages,
+  getEvmAddress,
   getFunctionExecution,
   getUsd,
   parseAmount,
@@ -226,13 +227,10 @@ const Balance: React.FC<BalanceProps> = () => {
         setKwtSubnetAddress('');
         return;
       }
-      let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
-      const { address_eth } = (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
-        )
-      ).data;
-      setKwtSubnetAddress(address_eth);
+      const evmAddress = getEvmAddress(
+        await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
+      );
+      setKwtSubnetAddress(evmAddress);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: error.message

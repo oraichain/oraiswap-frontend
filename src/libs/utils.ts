@@ -65,6 +65,13 @@ export const checkPrefixAndLength = (
   }
 };
 
+export const getEvmAddress = (bech32Address: string) => {
+  const decoded = bech32.decode(bech32Address);
+  const evmAddress =
+    '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
+  return evmAddress;
+};
+
 export const parseAmount = (value: string | number, decimal: number = 6) => {
   if (!value) return '0';
   return `${(
