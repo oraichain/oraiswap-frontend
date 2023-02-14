@@ -2,7 +2,13 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
-
+import tokenABI from 'config/abi/erc20.json';
+import Big from 'big.js';
+import {
+  Multicall,
+  ContractCallResults,
+  ContractCallContext
+} from 'ethereum-multicall';
 import {
   AminoTypes,
   // BroadcastTxResponse,
@@ -21,13 +27,13 @@ import {
   gravityContracts,
   kawaiiTokens,
   TokenItemType,
-  tokens,
-  usdtToken
+  tokens
 } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import {
   fetchBalance,
   fetchBalanceWithMapping,
+  fetchTokenBalanceAll,
   // fetchNativeTokenBalance,
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -37,6 +43,8 @@ import {
 import Content from 'layouts/Content';
 import {
   buildMultipleMessages,
+  getEvmAddress,
+  getFunctionExecution,
   getUsd,
   parseAmount,
   parseAmountFromWithDecimal as parseAmountFrom,
@@ -44,15 +52,20 @@ import {
   parseAmountToWithDecimal,
   parseBep20Erc20Name
 } from 'libs/utils';
-import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
+// import { Bech32Address, ibc } from '@keplr-wallet/cosmos';
 import useGlobalState from 'hooks/useGlobalState';
 import {
+  BSC_CHAIN_ID,
   BSC_RPC,
   BSC_SCAN,
+  COSMOS_CHAIN_ID,
+  COSMOS_NETWORK_LCD,
   ERC20_ORAI,
+  ETHEREUM_CHAIN_ID,
   ETHEREUM_RPC,
   ETHEREUM_SCAN,
   KAWAII_API_DEV,
+  KAWAII_SUBNET_RPC,
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -63,7 +76,9 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_FEE,
-  scORAI_DENOM
+  ORAI_BRIDGE_LCD,
+  OSMOSIS_CHAIN_ID,
+  OSMOSIS_NETWORK_LCD
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
@@ -78,7 +93,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
-import TokenItem, { AmountDetail } from './TokenItem';
+import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
@@ -92,13 +107,22 @@ import { getRpcEvm } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { Contract } from 'config/contracts';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import {
+  BalanceResponse,
+  QueryMsg as TokenQueryMsg
+} from 'libs/contracts/OraiswapToken.types';
 
 interface BalanceProps {}
 
-type AmountDetails = { [key: string]: AmountDetail };
-
 const { Search } = Input;
 
+const arrayLoadToken = [
+  { chainId: ORAI_BRIDGE_CHAIN_ID, lcd: ORAI_BRIDGE_LCD },
+  { chainId: OSMOSIS_CHAIN_ID, lcd: OSMOSIS_NETWORK_LCD },
+  { chainId: COSMOS_CHAIN_ID, lcd: COSMOS_NETWORK_LCD }
+];
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
@@ -108,12 +132,11 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
-  const [infoEvm] = useGlobalState('infoEvm');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
     useLocalStorage<boolean>('hideOraichainSmallAmount', false);
-  const [amounts, setAmounts] = useState<AmountDetails>({});
+  const [amounts, setAmounts] = useGlobalState('amounts');
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
     []
@@ -124,9 +147,6 @@ const Balance: React.FC<BalanceProps> = () => {
     filteredTokens.map((t) => t.coingeckoId)
   );
 
-  // this help to retry loading and show something in processing
-  const [pendingTokens, setPendingTokens] = useState(filteredTokens);
-  const [pendingCount, setPendingCount] = useState(0);
   const [metamaskAddress] = useGlobalState('metamaskAddress');
 
   // useEffect(() => {
@@ -161,25 +181,43 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [keplrAddress]);
 
   useEffect(() => {
-    if (!statusChangeAccount) return;
-    setPendingTokens(filteredTokens);
-  }, [statusChangeAccount, keplrAddress]);
-
-  useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, pendingTokens, keplrAddress, chainInfo]);
+  }, [prices, txHash, keplrAddress, chainInfo]);
 
   useEffect(() => {
-    if (!!metamaskAddress || !!keplrAddress) {
+    loadTokens();
+  }, [prices, txHash, keplrAddress, chainInfo]);
+
+  useEffect(() => {
+    if (!!metamaskAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, prices, txHash, keplrAddress, chainInfo]);
+  }, [prices, metamaskAddress, txHash]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
       loadKawaiiSubnetAmount();
     }
-  }, [kwtSubnetAddress, prices, txHash]);
+  }, [prices, kwtSubnetAddress, txHash]);
+
+  const handleCheckWallet = async () => {
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
+    }
+  };
+
+  const loadTokens = async () => {
+    await handleCheckWallet();
+    for (const tokenBridgeOsmosisCosmos of arrayLoadToken) {
+      const address = await window.Keplr.getKeplrAddr(
+        tokenBridgeOsmosisCosmos.chainId
+      );
+      setNativeBalance(address, tokenBridgeOsmosisCosmos.lcd);
+    }
+  };
 
   const getKwtSubnetAddress = async () => {
     try {
@@ -189,13 +227,10 @@ const Balance: React.FC<BalanceProps> = () => {
         setKwtSubnetAddress('');
         return;
       }
-      let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
-      const { address_eth } = (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
-        )
-      ).data;
-      setKwtSubnetAddress(address_eth);
+      const evmAddress = getEvmAddress(
+        await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
+      );
+      setKwtSubnetAddress(evmAddress);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: error.message
@@ -210,151 +245,174 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log(error);
     }
   };
-  const loadAmountDetail = async (
-    address: Bech32Address | string | undefined,
-    token: TokenItemType,
-    pendingList: TokenItemType[]
-  ) => {
-    let addr =
-      address instanceof Bech32Address
-        ? address.toBech32(token.prefix!)
-        : address;
 
-    try {
-      if (!addr) throw new Error('Addr is undefined');
-      // using this way we no need to enable other network
-      let amountDetail: AmountDetail;
-      if (!!token.erc20Cw20Map) {
-        const { amount, subAmounts } = await fetchBalanceWithMapping(
-          addr,
-          token
-        );
-        amountDetail = {
-          subAmounts,
+  const loadEvmEntries = async (
+    address: string,
+    tokens: TokenItemType[],
+    rpc: string,
+    multicallContractAddress: string
+  ): Promise<[string, AmountDetail][]> => {
+    const multicall = new Multicall({
+      nodeUrl: rpc,
+      multicallCustomContractAddress: multicallContractAddress
+    });
+    const input = tokens.map((token) => ({
+      reference: token.denom,
+      contractAddress: token.contractAddress,
+      abi: tokenABI,
+      calls: [
+        {
+          reference: token.denom,
+          methodName: 'balanceOf(address)',
+          methodParameters: [address]
+        }
+      ]
+    }));
+
+    const results: ContractCallResults = await multicall.call(input);
+    return tokens.map((token) => {
+      const amount = Number(
+        results.results[token.denom].callsReturnContext[0].returnValues[0].hex
+      );
+
+      return [
+        token.denom,
+        {
           amount,
           usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-        };
-      } else {
-        const amount = await fetchBalance(
-          addr,
-          token.denom,
-          token.contractAddress,
-          token.lcd
-        );
-        let amountTokens;
-      if (token.denom === scORAI_DENOM) {
-          amountTokens = await simulateSwap({
-            fromInfo: token,
-            toInfo: usdtToken?.[0],
-            amount: parseAmount('1', token?.decimals)
-          });
-        }
-
-        amountDetail = {
-          amount,
-          usd: getUsd(
-            amount,
-            prices[token.coingeckoId] ??
-              new Fraction(amountTokens?.amount, Math.pow(10, token?.decimals)),
-            token.decimals
-          )
-        };
-      }
-
-      return [token.denom, amountDetail];
-    } catch (ex) {
-      pendingList.push(token);
-      return [token.denom, { amount: 0, usd: 0 }];
-    }
+        } as AmountDetail
+      ];
+    });
   };
 
-  const loadEvmOraiAmounts = async () => {
-    const entries = await Promise.all(
-      evmTokens.map(async (token) => {
-        const amount = await window.Metamask.getOraiBalance(
-          metamaskAddress,
-          token,
-          chainInfo?.networkType == 'evm'
-            ? chainInfo?.rpc
-            : infoEvm?.rpc ?? getRpcEvm()
+  // update concurrency
+  const loadEvmOraiAmounts = () => {
+    getFunctionExecution(
+      loadEvmEntries,
+      [
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
+        BSC_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      ],
+      'loadEthEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
+
+    getFunctionExecution(
+      loadEvmEntries,
+      [
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
+        ETHEREUM_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      ],
+      'loadBscEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
+  };
+
+  const loadKawaiiSubnetAmount = async () => {
+    let amountDetails = Object.fromEntries(
+      await getFunctionExecution(
+        loadEvmEntries,
+        [
+          kwtSubnetAddress,
+          kawaiiTokens.filter((t) => !!t.contractAddress),
+          KAWAII_SUBNET_RPC,
+          '0x74876644692e02459899760B8b9747965a6D3f90'
+        ],
+        'loadKawaiiEntries'
+      )
+    );
+    // update amounts
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+  };
+
+  const setNativeBalance = async (address: string, lcd?: string) => {
+    const amountAll = (await fetchTokenBalanceAll(address, lcd))?.balances;
+    const amountDetails = amountAll?.reduce(
+      (acc, cur) => {
+        const token = filteredTokens?.find(
+          (token) => token.denom === cur.denom
         );
+        return {
+          ...acc,
+          [cur.denom]: {
+            amount: parseInt(cur.amount),
+            usd: !token
+              ? 0
+              : getUsd(
+                  parseInt(cur.amount),
+                  prices[token.coingeckoId] ?? 0,
+                  token.decimals
+                )
+          }
+        };
+      },
+      { ...amounts }
+    );
+    setAmounts((old) => ({ ...old, ...amountDetails }));
+  };
+
+  const setCw20Balance = async (address: string) => {
+    // get all cw20 token contract
+    const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
+    const data = toBinary({
+      balance: { address }
+    } as TokenQueryMsg);
+    console.log(address, Contract.multicall);
+    const res = await getFunctionExecution(
+      Contract.multicall.aggregate,
+      [
+        {
+          queries: cw20Tokens.map((t) => ({
+            address: t.contractAddress,
+            data
+          }))
+        }
+      ],
+      'loadCw20Entries'
+    );
+
+    const amountDetails = Object.fromEntries(
+      cw20Tokens.map((t, ind) => {
+        if (!res.return_data[ind].success) {
+          return [t.denom, { amount: 0, usd: 0 }];
+        }
+        const balanceRes = fromBinary(
+          res.return_data[ind].data
+        ) as BalanceResponse;
+        const amount = parseInt(balanceRes.balance);
 
         return [
-          token.denom,
+          t.denom,
           {
             amount,
-            usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
+            usd: getUsd(amount, prices[t.coingeckoId] ?? 0, t.decimals)
           }
         ];
       })
     );
 
-    const amountDetails = Object.fromEntries(entries);
-    // update amounts
-    setAmounts((old) => ({ ...old, ...amountDetails }));
-  };
-
-  const loadKawaiiSubnetAmount = async () => {
-    const entries = await Promise.all(
-      kawaiiTokens
-        .filter((t) => !!t.contractAddress)
-        .map(async (token) => {
-          const amount = await window.Metamask.getOraiBalance(
-            kwtSubnetAddress,
-            token
-          );
-
-          return [
-            token.denom,
-            {
-              amount,
-              usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
-            }
-          ];
-        })
-    );
-
-    const amountDetails = Object.fromEntries(entries);
-    // update amounts
     setAmounts((old) => ({ ...old, ...amountDetails }));
   };
 
   const loadTokenAmounts = async () => {
-    if (pendingTokens.length == 0 || pendingCount > 2) return;
     try {
       // let chainId = network.chainId;
       // we enable oraichain then use pubkey to calculate other address
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
-        return displayToast(
-          TToastType.TX_INFO,
-          NOTI_INSTALL_OWALLET,
-          { toastId: 'install_keplr' }
-        );
+        return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+          toastId: 'install_keplr'
+        });
       }
-      const pendingList: TokenItemType[] = [];
-      const amountDetails = Object.fromEntries(
-        await Promise.all(
-          pendingTokens.map(async (token) => {
-            const address = await window.Keplr.getKeplrAddr(
-              token.chainId as string
-            ).catch((error) => {
-              console.log(error);
-              return undefined;
-            });
-            return loadAmountDetail(address, token, pendingList);
-          })
-        )
-      );
+      const address = await window.Keplr.getKeplrAddr();
 
-      setAmounts((old) => ({ ...old, ...amountDetails }));
-      // if there is pending tokens, then retry loadtokensAmounts with new pendingTokens
-      if (pendingList.length > 0) {
-        setTimeout(() => {
-          setPendingTokens(pendingList);
-          setPendingCount(pendingCount + 1);
-        }, 3000);
-      }
+      await Promise.all([setCw20Balance(address), setNativeBalance(address)]);
     } catch (ex) {
       console.log(ex);
     }
@@ -1233,7 +1291,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   {toTokens
                     .filter((t) => {
                       if (
-                        hideOtherSmallAmount &&
+                        hideOraichainSmallAmount &&
                         !Number(amounts[t.denom]?.amount)
                       ) {
                         return false;

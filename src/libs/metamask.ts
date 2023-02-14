@@ -114,38 +114,38 @@ export default class Metamask {
     return result;
   }
 
-  public getOraiToken(denom?: string): TokenItemType | undefined {
-    return evmTokens.find(
-      (token) => token.denom === (denom ? denom : getDenomEvm())
-    );
-  }
+  // public getOraiToken(denom?: string): TokenItemType | undefined {
+  //   return evmTokens.find(
+  //     (token) => token.denom === (denom ? denom : getDenomEvm())
+  //   );
+  // }
 
-  public async getOraiBalance(
-    address: string | null,
-    inputToken?: TokenItemType,
-    rpc?: string,
-    denom?: string
-  ) {
-    // must has chainId and contractAddress
-    const token = inputToken || this.getOraiToken(denom);
-    if (!token || !token.contractAddress) return '0';
+  // public async getOraiBalance(
+  //   address: string | null,
+  //   inputToken?: TokenItemType,
+  //   rpc?: string,
+  //   denom?: string
+  // ) {
+  //   // must has chainId and contractAddress
+  //   const token = inputToken || this.getOraiToken(denom);
+  //   if (!token || !token.contractAddress) return '0';
 
-    try {
-      // if the same chain id using window.ethereum
-      const provider =
-        Number(token.chainId) !== Number(window.ethereum.chainId)
-          ? token.rpc
-          : window.ethereum;
+  //   try {
+  //     // if the same chain id using window.ethereum
+  //     const provider =
+  //       Number(token.chainId) !== Number(window.ethereum.chainId)
+  //         ? token.rpc
+  //         : window.ethereum;
 
-      const web3 = new Web3(rpc || provider);
-      const tokenInst = new web3.eth.Contract(
-        tokenABI as AbiItem[],
-        token.contractAddress
-      );
-      const balance = await tokenInst.methods.balanceOf(address).call();
-      return balance;
-    } catch (ex) {
-      return '0';
-    }
-  }
+  //     const web3 = new Web3(rpc || provider);
+  //     const tokenInst = new web3.eth.Contract(
+  //       tokenABI as AbiItem[],
+  //       token.contractAddress
+  //     );
+  //     const balance = await tokenInst.methods.balanceOf(address).call();
+  //     return balance;
+  //   } catch (ex) {
+  //     return '0';
+  //   }
+  // }
 }

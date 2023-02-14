@@ -30,11 +30,12 @@ import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import CenterEllipsis from 'components/CenterEllipsis';
 import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
-import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import {
+  BEP20_ORAI,
   BSC_CHAIN_ID,
   COSMOS_CHAIN_ID,
+  ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
@@ -57,41 +58,21 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
   const [infoCosmos] = useGlobalState('infoCosmos');
-  const [infoEvm] = useGlobalState('infoEvm');
-  const [chainInfo] = useGlobalState('chainInfo');
+  const [amounts] = useGlobalState('amounts');
   const [metamaskAddress] = useGlobalState('metamaskAddress');
-  const [metamaskBalance, setMetamaskBalance] = useState('0');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
     setOpen(!open);
   };
-  const {
-    isLoading,
-    error,
-    data: balance
-  } = useQuery(
-    ['balance', ORAI, address],
-    () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
-    {
-      enabled: address?.length > 0,
-      refetchOnWindowFocus: false
-    }
-  );
+
+  const balance = amounts[ORAI]?.amount ?? 0;
+  const metamaskBalance =
+    amounts[window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI]?.amount ?? 0;
 
   useEffect(() => {
     setLink(location.pathname);
   }, []);
-
-  useEffect(() => {
-    // we use default Orai token
-    window.Metamask.getOraiBalance(
-      metamaskAddress,
-      undefined,
-      getRpcEvm(infoEvm),
-      getDenomEvm()
-    ).then(setMetamaskBalance);
-  });
 
   const renderLink = (
     to: string,

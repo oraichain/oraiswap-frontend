@@ -1,5 +1,7 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { contracts } from 'libs/contracts';
 import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
+import { MulticallQueryClient } from 'libs/contracts/Multicall.client';
 import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
 import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
 import { OraiswapOracleClient } from 'libs/contracts/OraiswapOracle.client';
@@ -20,7 +22,8 @@ type ContractName =
   | 'converter'
   | 'pair'
   | 'token'
-  | 'ibcwasm';
+  | 'cw20Ics20'
+  | 'multicall';
 
 export class Contract {
   private static _sender: string = null;
@@ -29,14 +32,21 @@ export class Contract {
     this._sender = sender;
   }
 
-  private static getContract(type: ContractName, address: string): any {
+  private static getContract(
+    type: ContractName,
+    address: string,
+    signing: boolean = true,
+    className?: string
+  ): any {
     const key = '_' + type;
-    const className = type.charAt(0).toUpperCase() + type.slice(1);
-
+    const name =
+      className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
     if (!this[key]) {
-      this[key] = new contracts[`Oraiswap${className}`][
-        `Oraiswap${className}Client`
-      ](window.client, this._sender, address);
+      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](
+        window.client,
+        this._sender,
+        address
+      );
     } else {
       this[key].sender = this._sender;
       this[key].contractAddress = address;
@@ -53,7 +63,11 @@ export class Contract {
   }
 
   static get factory_v2(): OraiswapFactoryClient {
-    return new OraiswapFactoryClient(window.client, this._sender, network.factory_v2);
+    return new OraiswapFactoryClient(
+      window.client as SigningCosmWasmClient,
+      this._sender,
+      network.factory_v2
+    );
   }
 
   static get router(): OraiswapRouterClient {
@@ -79,7 +93,12 @@ export class Contract {
   static token(contractAddress: string): OraiswapTokenClient {
     return this.getContract('token', contractAddress);
   }
+
   static ibcwasm(contractAddress: string): Cw20Ics20Client {
-    return new Cw20Ics20Client(window.client, this._sender, contractAddress);
+    return this.getContract('cw20Ics20', contractAddress, true, 'Cw20Ics20');
+  }
+
+  static get multicall(): MulticallQueryClient {
+    return this.getContract('multicall', network.multicall, false, 'Multicall');
   }
 }

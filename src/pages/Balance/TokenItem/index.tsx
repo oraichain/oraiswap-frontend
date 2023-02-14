@@ -6,12 +6,6 @@ import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
 
-export type AmountDetail = {
-  subAmounts?: { [key: string]: number };
-  amount: number;
-  usd: number;
-};
-
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
@@ -39,7 +33,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   transferIBC,
   onClickTransfer,
   toToken,
-  convertKwt,
+  convertKwt
 }) => {
   return (
     <div
@@ -73,42 +67,48 @@ const TokenItem: React.FC<TokenItemProps> = ({
               balance={{
                 amount: amountDetail ? amountDetail.amount.toString() : '0',
                 denom: '',
-                decimals: token.decimals,
+                decimals: token.decimals
               }}
               className={styles.tokenAmount}
               decimalScale={Math.min(6, token.decimals)}
             />
 
-            {!!amountDetail?.subAmounts && <TooltipIcon
-              content={
-                <div className={styles.tooltipAmount}>
-                  {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
-                    let description: string
-                    if (name !== token.name) description = token.erc20Cw20Map[0]?.description
+            {!!amountDetail?.subAmounts && (
+              <TooltipIcon
+                content={
+                  <div className={styles.tooltipAmount}>
+                    {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
+                      let description: string;
+                      if (name !== token.name)
+                        description = token.erc20Cw20Map[0]?.description;
 
-                    return (
-                      <div key={idx} className={styles.row}>
-                        <div>
-                          <div>{name}</div>
-                          {!!description && <div className={styles.description}>({description})</div>}
+                      return (
+                        <div key={idx} className={styles.row}>
+                          <div>
+                            <div>{name}</div>
+                            {!!description && (
+                              <div className={styles.description}>
+                                ({description})
+                              </div>
+                            )}
+                          </div>
+                          <TokenBalance
+                            balance={{
+                              amount: amountDetail.subAmounts[name],
+                              denom: '',
+                              decimals: token.decimals
+                            }}
+                            className={styles.tokenAmount}
+                            decimalScale={Math.min(6, token.decimals)}
+                          />
                         </div>
-                        <TokenBalance
-                          balance={{
-                            amount: amountDetail.subAmounts[name],
-                            denom: '',
-                            decimals: token.decimals,
-                          }}
-                          className={styles.tokenAmount}
-                          decimalScale={Math.min(6, token.decimals)}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              }
-              placement="bottom-end"
-            />}
-
+                      );
+                    })}
+                  </div>
+                }
+                placement="bottom-end"
+              />
+            )}
           </div>
           <TokenBalance
             balance={amountDetail ? amountDetail.usd : 0}
@@ -116,7 +116,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             decimalScale={2}
           />
         </div>
-
       </div>
       <div>
         {active && (

@@ -65,6 +65,13 @@ export const checkPrefixAndLength = (
   }
 };
 
+export const getEvmAddress = (bech32Address: string) => {
+  const decoded = bech32.decode(bech32Address);
+  const evmAddress =
+    '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
+  return evmAddress;
+};
+
 export const parseAmount = (value: string | number, decimal: number = 6) => {
   if (!value) return '0';
   return `${(
@@ -144,3 +151,42 @@ export const formatCash = (n: number ) => {
   if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
   if (n >= 1e12) return +(n / 1e12).toFixed(1) + "T";
 };
+
+export const delay = (timeout: number) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
+
+let cache = {};
+export async function getFunctionExecution(
+  method: Function,
+  args: any[],
+  cacheKey: string = null,
+  expiredIn = 10000
+) {
+  const key = cacheKey || method.name;
+  if (cache[key] !== undefined) {
+    while (cache[key].pending) {
+      await delay(500);
+    }
+    return cache[key].value;
+  }
+
+  cache[key] = { expired: Date.now() + expiredIn, pending: true };
+  const value = await method(...args);
+  cache[key].pending = false;
+  cache[key].value = value;
+
+  return cache[key].value;
+}
+
+// Interval to clear cache;
+setInterval(function () {
+  if (Object.keys(cache).length > 0) {
+    let currentTime = Date.now();
+    Object.keys(cache).forEach((key) => {
+      if (currentTime > cache[key].expired) {
+        delete cache[key];
+        console.log(`${key}'s cache deleted`);
+      }
+    });
+  }
+}, 1000);
