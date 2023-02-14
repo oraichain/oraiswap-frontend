@@ -191,13 +191,13 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!!metamaskAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, txHash]);
+  }, [prices, metamaskAddress, txHash]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
       loadKawaiiSubnetAmount();
     }
-  }, [kwtSubnetAddress, txHash]);
+  }, [prices, kwtSubnetAddress, txHash]);
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();
