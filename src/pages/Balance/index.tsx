@@ -43,6 +43,7 @@ import {
 import Content from 'layouts/Content';
 import {
   buildMultipleMessages,
+  getEvmAddress,
   getFunctionExecution,
   getUsd,
   parseAmount,
@@ -191,13 +192,13 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!!metamaskAddress) {
       loadEvmOraiAmounts();
     }
-  }, [metamaskAddress, txHash]);
+  }, [prices, metamaskAddress, txHash]);
 
   useEffect(() => {
     if (!!kwtSubnetAddress) {
       loadKawaiiSubnetAmount();
     }
-  }, [kwtSubnetAddress, txHash]);
+  }, [prices, kwtSubnetAddress, txHash]);
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();
@@ -226,13 +227,10 @@ const Balance: React.FC<BalanceProps> = () => {
         setKwtSubnetAddress('');
         return;
       }
-      let address = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
-      const { address_eth } = (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${address}`
-        )
-      ).data;
-      setKwtSubnetAddress(address_eth);
+      const evmAddress = getEvmAddress(
+        await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
+      );
+      setKwtSubnetAddress(evmAddress);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: error.message
@@ -287,35 +285,46 @@ const Balance: React.FC<BalanceProps> = () => {
     });
   };
 
-  const loadEvmOraiAmounts = async () => {
-    let amountDetails = Object.fromEntries(
-      await loadEvmEntries(
+  // update concurrency
+  const loadEvmOraiAmounts = () => {
+    getFunctionExecution(
+      loadEvmEntries,
+      [
         metamaskAddress,
         evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
         BSC_RPC,
         '0xcA11bde05977b3631167028862bE2a173976CA11'
-      )
-    );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+      ],
+      'loadEthEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
 
-    amountDetails = Object.fromEntries(
-      await loadEvmEntries(
+    getFunctionExecution(
+      loadEvmEntries,
+      [
         metamaskAddress,
         evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
         ETHEREUM_RPC,
         '0xcA11bde05977b3631167028862bE2a173976CA11'
-      )
-    );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+      ],
+      'loadBscEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
   };
 
   const loadKawaiiSubnetAmount = async () => {
     let amountDetails = Object.fromEntries(
-      await loadEvmEntries(
-        kwtSubnetAddress,
-        kawaiiTokens.filter((t) => !!t.contractAddress),
-        KAWAII_SUBNET_RPC,
-        '0x74876644692e02459899760B8b9747965a6D3f90'
+      await getFunctionExecution(
+        loadEvmEntries,
+        [
+          kwtSubnetAddress,
+          kawaiiTokens.filter((t) => !!t.contractAddress),
+          KAWAII_SUBNET_RPC,
+          '0x74876644692e02459899760B8b9747965a6D3f90'
+        ],
+        'loadKawaiiEntries'
       )
     );
     // update amounts
@@ -356,14 +365,16 @@ const Balance: React.FC<BalanceProps> = () => {
     } as TokenQueryMsg);
     console.log(address, Contract.multicall);
     const res = await getFunctionExecution(
-      'multicall',
       Contract.multicall.aggregate,
-      {
-        queries: cw20Tokens.map((t) => ({
-          address: t.contractAddress,
-          data
-        }))
-      }
+      [
+        {
+          queries: cw20Tokens.map((t) => ({
+            address: t.contractAddress,
+            data
+          }))
+        }
+      ],
+      'loadCw20Entries'
     );
 
     const amountDetails = Object.fromEntries(

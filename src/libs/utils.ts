@@ -65,6 +65,13 @@ export const checkPrefixAndLength = (
   }
 };
 
+export const getEvmAddress = (bech32Address: string) => {
+  const decoded = bech32.decode(bech32Address);
+  const evmAddress =
+    '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
+  return evmAddress;
+};
+
 export const parseAmount = (value: string | number, decimal: number = 6) => {
   if (!value) return '0';
   return `${(
@@ -144,20 +151,21 @@ export const delay = (timeout: number) =>
 
 let cache = {};
 export async function getFunctionExecution(
-  key: string,
   method: Function,
-  args: any,
+  args: any[],
+  cacheKey: string = null,
   expiredIn = 10000
 ) {
+  const key = cacheKey || method.name;
   if (cache[key] !== undefined) {
     while (cache[key].pending) {
       await delay(500);
     }
     return cache[key].value;
   }
-  console.log('run again', key);
+
   cache[key] = { expired: Date.now() + expiredIn, pending: true };
-  const value = await method(args);
+  const value = await method(...args);
   cache[key].pending = false;
   cache[key].value = value;
 
