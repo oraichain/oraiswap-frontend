@@ -287,34 +287,33 @@ const Balance: React.FC<BalanceProps> = () => {
     });
   };
 
-  const loadEvmOraiAmounts = async () => {
-    let amountDetails = Object.fromEntries(
-      await getFunctionExecution(
-        loadEvmEntries,
-        [
-          metamaskAddress,
-          evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-          BSC_RPC,
-          '0xcA11bde05977b3631167028862bE2a173976CA11'
-        ],
-        'loadEthEntries'
-      )
-    );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+  // update concurrency
+  const loadEvmOraiAmounts = () => {
+    getFunctionExecution(
+      loadEvmEntries,
+      [
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
+        BSC_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      ],
+      'loadEthEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
 
-    amountDetails = Object.fromEntries(
-      await getFunctionExecution(
-        loadEvmEntries,
-        [
-          metamaskAddress,
-          evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-          ETHEREUM_RPC,
-          '0xcA11bde05977b3631167028862bE2a173976CA11'
-        ],
-        'loadBscEntries'
-      )
-    );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+    getFunctionExecution(
+      loadEvmEntries,
+      [
+        metamaskAddress,
+        evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
+        ETHEREUM_RPC,
+        '0xcA11bde05977b3631167028862bE2a173976CA11'
+      ],
+      'loadBscEntries'
+    ).then((data) => {
+      setAmounts((old) => ({ ...old, ...Object.fromEntries(data) }));
+    });
   };
 
   const loadKawaiiSubnetAmount = async () => {
