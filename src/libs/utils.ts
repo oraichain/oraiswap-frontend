@@ -156,7 +156,7 @@ export async function getFunctionExecution(
     }
     return cache[key].value;
   }
-  console.log('run again', key);
+
   cache[key] = { expired: Date.now() + expiredIn, pending: true };
   const value = await method(...args);
   cache[key].pending = false;
