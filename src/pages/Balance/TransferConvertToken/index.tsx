@@ -76,7 +76,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const maxAmount = parseAmountFrom(
     amountDetail?.amount ?? 0,
     token?.decimals
-  ).toNumber();
+  ).toFixed(2)
 
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
@@ -120,9 +120,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           const _floatValue = parseAmountTo(
             floatValue!,
             token.decimals
-          ).toNumber();
+          // ).toNumber();
+          ).toFixed(2);
           const usdValue =
-            (_floatValue / (amountDetail?.amount ?? 0)) *
+            (+_floatValue / (amountDetail?.amount ?? 0)) *
             (amountDetail?.usd ?? 0);
 
           setConvertAmount([floatValue!, usdValue]);
@@ -145,7 +146,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           onClick={(event) => {
             event.stopPropagation();
             if (!amountDetail) return;
-            setConvertAmount([maxAmount / 2, amountDetail.usd / 2]);
+            setConvertAmount([+maxAmount / 2, amountDetail.usd / 2]);
           }}
         >
           HALF
