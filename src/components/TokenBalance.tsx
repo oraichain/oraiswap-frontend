@@ -31,7 +31,8 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       bigBalance = parseBalanceNumber(balance.amount);
     return new Big(bigBalance)
       .div(new Big(10).pow(balance.decimals ?? 6))
-      .toNumber();
+      .toFixed(2)
+      // .toNumber();
   };
 
   const amount = parseBalance(balance);
