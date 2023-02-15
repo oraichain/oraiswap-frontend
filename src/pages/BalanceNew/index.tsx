@@ -3,7 +3,6 @@ import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import tokenABI from 'config/abi/erc20.json';
-import Big from 'big.js';
 import {
   Multicall,
   ContractCallResults,
@@ -452,13 +451,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      // if (token.denom === ERC20_ORAI) {
-      //   displayToast(TToastType.TX_INFO, {
-      //     message: `Token ${token.name} on ${token.org} is currently not supported`
-      //   });
-      //   return;
-      // }
-
       if (type === 'to') {
         if (_.isEqual(to, token)) {
           setTo(undefined);
@@ -1254,7 +1246,7 @@ const Balance: React.FC<BalanceProps> = () => {
         <div className={styles.tokens}>
           <div className={styles.tokens_form}>
             {[...fromTokens, ...toTokens]
-              .sort((a, b) => hideOtherSmallAmount && (Number(parseAmountFromWithDecimal(amounts?.[b.denom]?.amount ?? 0,b.decimals))) - (Number(parseAmountFromWithDecimal(amounts[a.denom]?.amount ?? 0,a.decimals))))
+              .sort((a, b) => hideOtherSmallAmount && amounts?.[b.denom]?.usd - amounts?.[a.denom]?.usd)
               .filter((token) => {
                 if (hideOtherSmallAmount && !Number(amounts[token.denom]?.amount)) {
                   return false;

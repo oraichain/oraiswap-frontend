@@ -29,7 +29,9 @@ import {
   OSMO,
   OSMOSIS_ORG,
   STABLE_DENOM,
-  KAWAII_ORG
+  KAWAII_ORG,
+  COSMOS_TYPE,
+  EVM_TYPE
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -142,11 +144,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network) => {
     try {
       let address: string = '';
-      if (network.networkType == 'evm') {
+      if (network.networkType == EVM_TYPE) {
         if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
         address = await window.Metamask!.convertPublicToAddress();
       }
-      if (network.networkType == 'cosmos') {
+      if (network.networkType == COSMOS_TYPE) {
         address = await window.Keplr.getKeplrAddr(
           network.chainId.replace(' BEP20', '').replace(' ERC20', '')
         );
@@ -506,9 +508,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   >
                     {transferLoading && <Loader width={20} height={20} />}
                     <span>
-                      {filterNetwork !== BSC_ORG
-                        ? 'Convert'
-                        : 'Transfer'}{' '}
+                      {'Transfer'}{' '}
                       <strong>{filterNetwork}</strong>
                     </span>
                   </button>

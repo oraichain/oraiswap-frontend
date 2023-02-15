@@ -62,6 +62,9 @@ export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
 export const JUNO_CHAIN_ID = 'juno-1';
 
+export const COSMOS_TYPE = 'cosmos';
+export const EVM_TYPE = 'evm';
+
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';

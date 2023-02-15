@@ -9,7 +9,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import { NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
+import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
@@ -42,11 +42,11 @@ const App = () => {
       setStatusChangeAccount(false);
       setChainId(chainInfos.chainId);
       setChainInfo(chainInfos);
-      if (chainInfos?.networkType === 'evm') {
+      if (chainInfos?.networkType === EVM_TYPE) {
         window.ethereum.chainId = chainInfos.chainId;
         setInfoEvm(chainInfos);
       }
-      if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
+      if (chainInfos?.networkType === COSMOS_TYPE) setInfoCosmos(chainInfos);
     }
 
     if (newAddress) {
