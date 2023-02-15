@@ -1276,8 +1276,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 // check balance cw20
                 let amount = amounts[t.denom];
-                let decimalsToken = t.decimals;
-                if (objConvertTokenIbc[t.denom] && amounts[objConvertTokenIbc[t.denom]]?.amount) {
+                if (objConvertTokenIbc[t.denom] && amounts[objConvertTokenIbc[t.denom]]?.amount && amounts[t.denom]) {
                   let parsedBalance = 0;
                   for (let mapping of t.erc20Cw20Map) {
                     // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
@@ -1290,8 +1289,8 @@ const Balance: React.FC<BalanceProps> = () => {
                     ).toNumber();
                   }
                   amount = {
-                    amount: parsedBalance + amounts[t.denom].amount,
-                    usd: getUsd(parsedBalance + amounts[t.denom].amount, prices[t.coingeckoId], decimalsToken),
+                    amount: parsedBalance + amounts[t.denom]?.amount,
+                    usd: getUsd(parsedBalance + amounts[t.denom]?.amount, prices[t.coingeckoId], t.decimals),
                   }
                 }
 
