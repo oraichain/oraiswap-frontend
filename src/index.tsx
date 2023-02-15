@@ -30,7 +30,7 @@ window.Keplr = new Keplr();
 window.Metamask = new Metamask();
 const queryClient = new QueryClient();
 
-if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
+if (process.env.REACT_APP_SENTRY_ENVIRONMENT == "production") {
   Sentry.init({
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',

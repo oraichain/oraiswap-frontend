@@ -65,6 +65,7 @@ import {
   ETHEREUM_RPC,
   ETHEREUM_SCAN,
   KAWAII_API_DEV,
+  KAWAII_LCD,
   KAWAII_SUBNET_RPC,
   KWT,
   KWT_SCAN,
@@ -121,7 +122,8 @@ const { Search } = Input;
 const arrayLoadToken = [
   { chainId: ORAI_BRIDGE_CHAIN_ID, lcd: ORAI_BRIDGE_LCD },
   { chainId: OSMOSIS_CHAIN_ID, lcd: OSMOSIS_NETWORK_LCD },
-  { chainId: COSMOS_CHAIN_ID, lcd: COSMOS_NETWORK_LCD }
+  { chainId: COSMOS_CHAIN_ID, lcd: COSMOS_NETWORK_LCD },
+  { chainId: KWT_SUBNETWORK_CHAIN_ID, lcd: KAWAII_LCD}
 ];
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
