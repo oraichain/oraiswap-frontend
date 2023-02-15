@@ -28,6 +28,7 @@ interface TokenItemProps {
   onClickFrom?: Function;
   onBlur?: Function;
   convertKwt?: any;
+  decimalToken?: number;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -44,7 +45,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
   toToken,
   convertKwt,
   fromToken,
+  decimalToken
 }) => {
+  const decimals = decimalToken ?? token.decimals;
   return (
     <div
       className={classNames(
@@ -78,10 +81,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
               balance={{
                 amount: amountDetail ? amountDetail.amount.toString() : '0',
                 denom: '',
-                decimals: token.decimals,
+                decimals,
               }}
               className={styles.tokenAmount}
-              decimalScale={Math.min(6, token.decimals)}
+              decimalScale={Math.min(6, decimals)}
             />
 
             {!!amountDetail?.subAmounts && (
@@ -107,10 +110,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
                             balance={{
                               amount: amountDetail.subAmounts[name],
                               denom: '',
-                              decimals: token.decimals,
+                              decimals,
                             }}
                             className={styles.tokenAmount}
-                            decimalScale={Math.min(6, token.decimals)}
+                            decimalScale={Math.min(6, decimals)}
                           />
                         </div>
                       );
@@ -139,6 +142,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             onClickTransfer={onClickTransfer}
             toToken={toToken}
             convertKwt={convertKwt}
+            decimalToken={decimals}
           />
         )}
 

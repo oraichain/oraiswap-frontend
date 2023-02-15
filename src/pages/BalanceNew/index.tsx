@@ -127,6 +127,16 @@ const arrayLoadToken = [
   { chainId: OSMOSIS_CHAIN_ID, lcd: OSMOSIS_NETWORK_LCD },
   { chainId: COSMOS_CHAIN_ID, lcd: COSMOS_NETWORK_LCD }
 ];
+
+const objConvertTokenIbc = {
+  usdt: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
+  kwt: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+  milky: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
+  airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+  uatom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
+  uosmo: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+}
+
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
@@ -1274,16 +1284,28 @@ const Balance: React.FC<BalanceProps> = () => {
                       token.chainId !== ORAI_BRIDGE_CHAIN_ID
                   );
 
+               // check balance cw20
+               let amount = amounts[t.denom];
+               let decimalsToken = t.decimals;
+               if (objConvertTokenIbc[t.denom] && !amounts[t.denom]?.amount && amounts[objConvertTokenIbc[t.denom]]?.amount) {
+                 decimalsToken = t?.erc20Cw20Map?.[0]?.decimals?.erc20Decimals ?? 18;
+                 amount = {
+                   amount: amounts[objConvertTokenIbc[t.denom]]?.amount,
+                   usd: getUsd(amounts[objConvertTokenIbc[t.denom]]?.amount, prices[t.coingeckoId], decimalsToken),
+                 }
+               }
+
                 return (
                   <div className={styles.tokens_element}>
                     <TokenItem
                       key={t.denom}
-                      amountDetail={amounts[t.denom]}
+                      amountDetail={amount}
                       active={
                         tokenOraichain
                           ? to?.denom === t.denom
                           : from?.denom === t.denom
                       }
+                      decimalToken={decimalsToken}
                       token={t}
                       onClick={
                         tokenOraichain ? onClickTokenTo : onClickTokenFrom
