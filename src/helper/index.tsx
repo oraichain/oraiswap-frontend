@@ -42,6 +42,8 @@ import {
   KAWAII_ORAI,
   ETHEREUM_RPC,
   BSC_RPC,
+  COSMOS_TYPE,
+  EVM_TYPE,
 } from 'config/constants';
 import { ChainInfoType } from 'hooks/useGlobalState';
 
@@ -60,55 +62,55 @@ export const networks = [
     title: ORAICHAIN_ID,
     chainId: ORAICHAIN_ID,
     icon: <ORAIIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: ORAICHAIN_ID + ' BEP20',
     chainId: ORAICHAIN_ID + ' BEP20',
     icon: <ORAIIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: ORAICHAIN_ID + ' ERC20',
     chainId: ORAICHAIN_ID + ' ERC20',
     icon: <ORAIIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     icon: <ORAIIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     icon: <KwtIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: OSMOSIS_ORG,
     chainId: OSMOSIS_CHAIN_ID,
     icon: <OsmosisIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: COSMOS_ORG,
     chainId: COSMOS_CHAIN_ID,
     icon: <AtomCosmosIcon />,
-    networkType: 'cosmos',
+    networkType: COSMOS_TYPE,
   },
   {
     title: BSC_ORG,
     chainId: BSC_ORG,
     icon: <BNBIcon />,
-    networkType: 'evm',
+    networkType: EVM_TYPE,
   },
   {
     title: ETHEREUM_ORG,
     chainId: ETHEREUM_ORG,
-    icon: <ORAIIcon />,
-    networkType: 'evm',
+    icon: <ETHIcon />,
+    networkType: EVM_TYPE,
   },
 ];
 
@@ -136,6 +138,9 @@ export const renderLogoNetwork = (network: string) => {
     case COSMOS_ORG:
       logo = <AtomCosmosIcon />;
       break;
+    case ETHEREUM_ORG:
+      logo = <ETHIcon />;
+      break;
     case BSC_ORG:
       logo = <BNBIcon />;
       break;
@@ -143,6 +148,7 @@ export const renderLogoNetwork = (network: string) => {
   return logo;
 };
 
+// filter chain support
 export const filterChainBridge = (
   token: Tokens,
   item: Items,
@@ -175,6 +181,11 @@ export const filterChainBridge = (
         item.title !== filterNetwork &&
         (item.title === BSC_ORG || item.title === ORAICHAIN_ID)
       );
+    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM.toLowerCase(): 
+        return (
+          item.title !== filterNetwork &&
+          (item.title === ETHEREUM_ORG || item.title === ORAICHAIN_ID)
+        )
     case KWT_DENOM:
       return (
         item.title !== filterNetwork &&
@@ -269,6 +280,9 @@ export const getTokenChain = (token?: {
     case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM:
       chainId = BSC_ORG;
       break;
+    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM:
+      chainId = ETHEREUM_ORG;
+      break; 
     case KWT_DENOM:
       chainId = KAWAII_ORG;
       break;
