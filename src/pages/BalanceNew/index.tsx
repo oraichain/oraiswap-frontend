@@ -131,9 +131,7 @@ const objConvertTokenIbc = {
   usdt: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
   kwt: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
   milky: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
-  airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
-  uatom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
-  uosmo: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+  airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
 }
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -144,7 +142,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [chainInfo] = useGlobalState('chainInfo');
-  const [filterNetwork, setFilterNetwork] = useState('Oraichain');
+  const [filterNetwork, setFilterNetwork] = useLocalStorage<string>('chainId', 'Oraichain');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
@@ -1276,16 +1274,26 @@ const Balance: React.FC<BalanceProps> = () => {
                       token.chainId !== ORAI_BRIDGE_CHAIN_ID
                   );
 
-               // check balance cw20
-               let amount = amounts[t.denom];
-               let decimalsToken = t.decimals;
-               if (objConvertTokenIbc[t.denom] && !amounts[t.denom]?.amount && amounts[objConvertTokenIbc[t.denom]]?.amount) {
-                 decimalsToken = t?.erc20Cw20Map?.[0]?.decimals?.erc20Decimals ?? 18;
-                 amount = {
-                   amount: amounts[objConvertTokenIbc[t.denom]]?.amount,
-                   usd: getUsd(amounts[objConvertTokenIbc[t.denom]]?.amount, prices[t.coingeckoId], decimalsToken),
-                 }
-               }
+                // check balance cw20
+                let amount = amounts[t.denom];
+                let decimalsToken = t.decimals;
+                if (objConvertTokenIbc[t.denom] && amounts[objConvertTokenIbc[t.denom]]?.amount) {
+                  let parsedBalance = 0;
+                  for (let mapping of t.erc20Cw20Map) {
+                    // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
+                    parsedBalance = parseAmountToWithDecimal(
+                      parseAmountFromWithDecimal(
+                        amounts[objConvertTokenIbc[t.denom]]?.amount,
+                        mapping.decimals.erc20Decimals
+                      ).toNumber(),
+                      mapping.decimals.cw20Decimals
+                    ).toNumber();
+                  }
+                  amount = {
+                    amount: parsedBalance + amounts[t.denom].amount,
+                    usd: getUsd(parsedBalance + amounts[t.denom].amount, prices[t.coingeckoId], decimalsToken),
+                  }
+                }
 
                 return (
                   <div className={styles.tokens_element}>
@@ -1297,7 +1305,6 @@ const Balance: React.FC<BalanceProps> = () => {
                           ? to?.denom === t.denom
                           : from?.denom === t.denom
                       }
-                      decimalToken={decimalsToken}
                       token={t}
                       onClick={
                         tokenOraichain ? onClickTokenTo : onClickTokenFrom

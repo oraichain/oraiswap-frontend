@@ -64,7 +64,6 @@ interface TransferConvertProps {
   convertKwt?: any;
   onClickTransfer?: any;
   toToken: TokenItemType;
-  decimalToken?: number;
 }
 
 const onClickTransferList = [BSC_ORG, ETHEREUM_ORG, OSMOSIS_ORG, COSMOS_ORG];
@@ -77,7 +76,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   convertKwt,
   onClickTransfer,
   toToken,
-  decimalToken,
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([
     undefined,
@@ -116,7 +114,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const maxAmount = parseAmountFrom(
     amountDetail?.amount ?? 0,
-    decimalToken
+    token?.decimals
   ).toNumber();
 
   const checkValidAmount = () => {
@@ -244,7 +242,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               <NumberFormat
                 placeholder="0"
                 thousandSeparator
-                decimalScale={Math.min(6, decimalToken)}
+                decimalScale={Math.min(6, token?.decimals)}
                 customInput={Input}
                 value={convertAmount}
                 onClick={(event) => {
@@ -254,7 +252,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   if (!floatValue) return setConvertAmount([undefined, 0]);
                   const _floatValue = parseAmountTo(
                     floatValue!,
-                    decimalToken
+                    token?.decimals
                   ).toNumber();
                   const usdValue =
                     (_floatValue / (amountDetail?.amount ?? 0)) *
