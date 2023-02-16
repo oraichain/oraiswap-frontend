@@ -4,11 +4,7 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import tokenABI from 'config/abi/erc20.json';
 import Big from 'big.js';
-import {
-  Multicall,
-  ContractCallResults,
-  ContractCallContext
-} from 'ethereum-multicall';
+import { Multicall, ContractCallResults } from 'ethereum-multicall';
 import {
   AminoTypes,
   // BroadcastTxResponse,
@@ -219,11 +215,11 @@ const Balance: React.FC<BalanceProps> = () => {
     address: string,
     tokens: TokenItemType[],
     rpc: string,
-    multicallContractAddress: string
+    multicallCustomContractAddress?: string
   ): Promise<[string, AmountDetail][]> => {
     const multicall = new Multicall({
       nodeUrl: rpc,
-      multicallCustomContractAddress: multicallContractAddress
+      multicallCustomContractAddress
     });
     const input = tokens.map((token) => ({
       reference: token.denom,
@@ -262,15 +258,13 @@ const Balance: React.FC<BalanceProps> = () => {
           loadEvmEntries(
             evmAddress,
             evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-            BSC_RPC,
-            '0xcA11bde05977b3631167028862bE2a173976CA11'
+            BSC_RPC
           ),
 
           loadEvmEntries(
             evmAddress,
             evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-            ETHEREUM_RPC,
-            '0xcA11bde05977b3631167028862bE2a173976CA11'
+            ETHEREUM_RPC
           )
         ])
       )
@@ -285,6 +279,7 @@ const Balance: React.FC<BalanceProps> = () => {
         kwtSubnetAddress,
         kawaiiTokens.filter((t) => !!t.contractAddress),
         KAWAII_SUBNET_RPC,
+        // kawaiiverse multicall contract
         '0x74876644692e02459899760B8b9747965a6D3f90'
       )
     );
