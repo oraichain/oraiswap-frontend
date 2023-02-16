@@ -132,17 +132,26 @@ const Balance: React.FC<BalanceProps> = () => {
   const [keplrAddress] = useGlobalState('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
-  const [chainInfo] = useGlobalState('chainInfo');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
     useLocalStorage<boolean>('hideOraichainSmallAmount', false);
-  const [amounts, setAmounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const [cacheAmounts, setAmounts] = useLocalStorage<AmountDetails>(
+    'amounts',
+    {}
+  );
+  window.amounts = cacheAmounts;
+
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
     []
   ]);
   const [txHash, setTxHash] = useState('');
+
+  const forceUpdate = (amountDetails: AmountDetails) => {
+    Object.assign(window.amounts, amountDetails);
+    setAmounts({ ...window.amounts });
+  };
 
   const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
@@ -178,7 +187,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     loadTokenAmounts();
-  });
+  }, [keplrAddress, metamaskAddress, txHash, prices]);
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();
@@ -190,10 +199,11 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokens = async () => {
+    console.log('loadTokens');
     await handleCheckWallet();
-    for (const tokenBridgeOsmosisCosmos of arrayLoadToken) {
-      window.Keplr.getKeplrAddr(tokenBridgeOsmosisCosmos.chainId).then(
-        (address) => getNativeBalance(address, tokenBridgeOsmosisCosmos.rpc)
+    for (const token of arrayLoadToken) {
+      window.Keplr.getKeplrAddr(token.chainId).then((address) =>
+        loadNativeBalance(address, token.rpc)
       );
     }
   };
@@ -239,117 +249,81 @@ const Balance: React.FC<BalanceProps> = () => {
         token.denom,
         {
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId], token.decimals)
+          usd: getUsd(amount, prices[token.coingeckoId] ?? 0, token.decimals)
         } as AmountDetail
       ];
     });
   };
 
   // update concurrency
-  const loadEvmOraiAmounts = async () => {
-    if (!metamaskAddress) return;
-    console.log('loadEvmOraiAmounts');
+  const loadEvmOraiAmounts = async (evmAddress: string) => {
     const amountDetails = Object.fromEntries(
       _.flatten(
         await Promise.all([
-          getFunctionExecution(
-            loadEvmEntries,
-            [
-              metamaskAddress,
-              evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-              BSC_RPC,
-              '0xcA11bde05977b3631167028862bE2a173976CA11'
-            ],
-            'loadEthEntries'
+          loadEvmEntries(
+            evmAddress,
+            evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
+            BSC_RPC,
+            '0xcA11bde05977b3631167028862bE2a173976CA11'
           ),
-          getFunctionExecution(
-            loadEvmEntries,
-            [
-              metamaskAddress,
-              evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-              ETHEREUM_RPC,
-              '0xcA11bde05977b3631167028862bE2a173976CA11'
-            ],
-            'loadBscEntries'
+
+          loadEvmEntries(
+            evmAddress,
+            evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
+            ETHEREUM_RPC,
+            '0xcA11bde05977b3631167028862bE2a173976CA11'
           )
         ])
       )
     );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+    console.log('loadEvmOraiAmounts');
+    forceUpdate(amountDetails);
   };
 
-  const loadKawaiiSubnetAmount = async () => {
-    const kwtSubnetAddress = getEvmAddress(
-      await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
-    );
-    if (!kwtSubnetAddress) return;
-
-    console.log('loadKawaiiSubnetAmount');
+  const loadKawaiiSubnetAmount = async (kwtSubnetAddress: string) => {
     let amountDetails = Object.fromEntries(
-      await getFunctionExecution(
-        loadEvmEntries,
-        [
-          kwtSubnetAddress,
-          kawaiiTokens.filter((t) => !!t.contractAddress),
-          KAWAII_SUBNET_RPC,
-          '0x74876644692e02459899760B8b9747965a6D3f90'
-        ],
-        'loadKawaiiEntries'
+      await loadEvmEntries(
+        kwtSubnetAddress,
+        kawaiiTokens.filter((t) => !!t.contractAddress),
+        KAWAII_SUBNET_RPC,
+        '0x74876644692e02459899760B8b9747965a6D3f90'
       )
     );
+    console.log('loadKawaiiSubnetAmount');
     // update amounts
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+    forceUpdate(amountDetails);
   };
 
-  const getNativeBalance = async (address: string, rpc: string) => {
-    if (!address) return;
+  const loadNativeBalance = async (address: string, rpc: string) => {
     const client = await StargateClient.connect(rpc);
     const amountAll = await client.getAllBalances(address);
-    const amountDetails = amountAll?.reduce(
-      (acc, cur) => {
-        const token = filteredTokens?.find(
-          (token) => token.denom === cur.denom
-        );
-        return {
-          ...acc,
-          [cur.denom]: {
-            amount: parseInt(cur.amount),
-            usd: !token
-              ? 0
-              : getUsd(
-                  parseInt(cur.amount),
-                  prices[token.coingeckoId] ?? 0,
-                  token.decimals
-                )
-          }
-        };
-      },
-      { ...amounts }
-    );
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+    const amountDetails: AmountDetails = {};
+    for (const token of filteredTokens) {
+      const foundToken = amountAll.find((t) => token.denom === t.denom);
+      if (!foundToken) continue;
+      const amount = parseInt(foundToken.amount);
+      amountDetails[token.denom] = {
+        amount,
+        usd: getUsd(amount, prices[token.coingeckoId] ?? 0, token.decimals)
+      };
+    }
+    console.log('loadNativeBalance', address);
+    forceUpdate(amountDetails);
   };
 
-  const loadCw20Balance = async () => {
-    if (!keplrAddress) return;
+  const loadCw20Balance = async (address: string) => {
     // get all cw20 token contract
-    console.log('loadCw20Balance');
     const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
     const data = toBinary({
-      balance: { address: keplrAddress }
+      balance: { address }
     } as TokenQueryMsg);
-    console.log(keplrAddress, Contract.multicall);
-    const res = await getFunctionExecution(
-      Contract.multicall.aggregate,
-      [
-        {
-          queries: cw20Tokens.map((t) => ({
-            address: t.contractAddress,
-            data
-          }))
-        }
-      ],
-      'loadCw20Entries'
-    );
+    console.log(address, Contract.multicall);
+    const res = await Contract.multicall.aggregate({
+      queries: cw20Tokens.map((t) => ({
+        address: t.contractAddress,
+        data
+      }))
+    });
 
     const amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {
@@ -359,12 +333,8 @@ const Balance: React.FC<BalanceProps> = () => {
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
-        const tokenAmount = parseInt(balanceRes.balance);
-
-        const subAmount = getSubAmount(amounts, t);
-        // update this token as well
-        subAmount[t.denom] = tokenAmount;
-        const amount = _.sum(Object.values(subAmount));
+        const amount = parseInt(balanceRes.balance);
+        const subAmount = getSubAmount(window.amounts, t);
         return [
           t.denom,
           {
@@ -376,7 +346,8 @@ const Balance: React.FC<BalanceProps> = () => {
       })
     );
 
-    setAmounts((old) => ({ ...old, ...amountDetails }));
+    console.log('loadCw20Balance');
+    forceUpdate(amountDetails);
   };
 
   const loadTokenAmounts = async () => {
@@ -390,14 +361,27 @@ const Balance: React.FC<BalanceProps> = () => {
         });
       }
 
-      await Promise.all([
-        getFunctionExecution(loadTokens),
-        getFunctionExecution(loadEvmOraiAmounts),
-        getFunctionExecution(loadKawaiiSubnetAmount),
-        getFunctionExecution(getNativeBalance, [keplrAddress, network.rpc]),
-        // run later ?
-        getFunctionExecution(loadCw20Balance)
-      ]);
+      const kwtSubnetAddress = getEvmAddress(
+        await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
+      );
+
+      await Promise.all(
+        [
+          getFunctionExecution(loadTokens),
+          metamaskAddress &&
+            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+          kwtSubnetAddress &&
+            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+          keplrAddress &&
+            getFunctionExecution(loadNativeBalance, [
+              keplrAddress,
+              network.rpc
+            ]),
+          keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
+        ].filter(Boolean)
+      );
+      // // run later ?
+      // await getFunctionExecution(loadCw20Balance);
     } catch (ex) {
       console.log(ex);
     }
@@ -629,7 +613,7 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const msgConvertReverses = await generateConvertCw20Erc20Message(
-        amounts,
+        window.amounts,
         fromToken,
         fromAddress,
         amount
@@ -830,7 +814,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (fromToken.erc20Cw20Map) {
         const msgConvertReverses = await generateConvertCw20Erc20Message(
-          amounts,
+          window.amounts,
           fromToken,
           fromAddress,
           amount
@@ -1002,7 +986,9 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     const fromBalance =
-      from && amounts[from.denom] ? amounts[from.denom].amount : 0;
+      from && window.amounts[from.denom]
+        ? window.amounts[from.denom].amount
+        : 0;
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
       return;
     }
@@ -1169,8 +1155,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const totalUsd = _.sumBy(Object.values(amounts), (c) => c.usd);
-
+  const totalUsd = _.sumBy(Object.values(window.amounts), (c) => c.usd);
   const navigate = useNavigate();
 
   return (
@@ -1222,7 +1207,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   {fromTokens.map((t: TokenItemType) => {
                     if (
                       hideOtherSmallAmount &&
-                      !Number(amounts[t.denom]?.amount)
+                      !Number(window.amounts[t.denom]?.amount)
                     ) {
                       return false;
                     }
@@ -1230,7 +1215,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     return (
                       <TokenItem
                         key={t.denom}
-                        amountDetail={amounts[t.denom]}
+                        amountDetail={window.amounts[t.denom]}
                         className={styles.token_from}
                         active={from?.denom === t.denom}
                         token={t}
@@ -1278,7 +1263,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     .filter((t) => {
                       if (
                         hideOraichainSmallAmount &&
-                        !Number(amounts[t.denom]?.amount)
+                        !Number(window.amounts[t.denom]?.amount)
                       ) {
                         return false;
                       }
@@ -1305,7 +1290,7 @@ const Balance: React.FC<BalanceProps> = () => {
                       return (
                         <TokenItem
                           key={t.denom}
-                          amountDetail={amounts[t.denom]}
+                          amountDetail={window.amounts[t.denom]}
                           active={to?.denom === t.denom}
                           token={t}
                           onClick={onClickTokenTo}
