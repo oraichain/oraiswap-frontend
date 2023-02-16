@@ -137,7 +137,7 @@ const Balance: React.FC<BalanceProps> = () => {
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   const [hideOraichainSmallAmount, setHideOraichainSmallAmount] =
     useLocalStorage<boolean>('hideOraichainSmallAmount', false);
-  const [amounts, setAmounts] = useGlobalState('amounts');
+  const [amounts, setAmounts] = useLocalStorage<AmountDetails>('amounts', {});
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
     []
@@ -182,7 +182,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, keplrAddress, metamaskAddress, chainInfo]);
+  }, [prices, txHash, amounts, chainInfo]);
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();

@@ -48,6 +48,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
 import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 const { Text } = Typography;
 
@@ -57,7 +58,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
   const [infoCosmos] = useGlobalState('infoCosmos');
-  const [amounts] = useGlobalState('amounts');
+  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [open, setOpen] = useState(false);
 

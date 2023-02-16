@@ -26,6 +26,7 @@ import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
 import { TokenInfo } from 'types/token';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 const cx = cn.bind(style);
 
@@ -76,7 +77,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [estimatedLP, setEstimatedLP] = useState(0);
-  const [amounts] = useGlobalState('amounts');
+  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
 
   const token1Balance = token1 ? amounts[token1.denom].amount : 0;
   const token2Balance = token2 ? amounts[token2.denom].amount : 0;

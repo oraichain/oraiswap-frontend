@@ -27,6 +27,7 @@ import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useGlobalState from 'hooks/useGlobalState';
 import { Fraction } from '@saberhq/token-utils';
 import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 const cx = cn.bind(styles);
 
@@ -40,7 +41,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
-  const [amounts] = useGlobalState('amounts');
+  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
   const [assetToken, setAssetToken] = useState<TokenItemType>();
 
   const getPairInfo = async () => {
