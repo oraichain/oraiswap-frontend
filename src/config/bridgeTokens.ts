@@ -36,7 +36,6 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_LCD,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
   ORAI_BRIDGE_UDENOM,
@@ -77,7 +76,6 @@ export type TokenItemType = {
   chainId: string | number;
   coinType?: number;
   rpc: string;
-  lcd?: string;
   decimals: number;
   maxGas?: number;
   coingeckoId:
@@ -109,7 +107,6 @@ const otherChainTokens: TokenItemType[] = [
     decimals: COSMOS_DECIMALS,
     chainId: 'cosmoshub-4',
     rpc: 'https://rpc-cosmos.oraidex.io',
-    lcd: 'https://lcd-cosmos.oraidex.io/',
     // lcd: 'https://lcd-cosmoshub.blockapsis.com',
     cosmosBased: true,
     maxGas: 20000 * 0.16,
@@ -126,7 +123,6 @@ const otherChainTokens: TokenItemType[] = [
     rpc: 'https://rpc.osmosis.interbloc.org',
     // lcd: 'https://lcd-osmosis.keplr.app',
     // lcd: 'https://lcd.osmosis.zone',
-    lcd: 'https://lcd-osmosis.blockapsis.com',
     decimals: COSMOS_DECIMALS,
     coingeckoId: 'osmosis',
     cosmosBased: true,
@@ -143,7 +139,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
     bridgeNetworkIdentifier: BSC_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'oraichain-token',
     cosmosBased: true,
@@ -158,7 +153,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + ORAI_ETH_CONTRACT,
     bridgeNetworkIdentifier: ETHEREUM_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'oraichain-token',
     cosmosBased: true,
@@ -173,7 +167,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
     bridgeNetworkIdentifier: BSC_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'airight',
     cosmosBased: true,
@@ -188,7 +181,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
     bridgeNetworkIdentifier: BSC_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'tether',
     cosmosBased: true,
@@ -203,7 +195,6 @@ const otherChainTokens: TokenItemType[] = [
     coinType: 118,
     denom: KWT_DENOM,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'kawaii-islands',
     cosmosBased: true,
@@ -218,7 +209,6 @@ const otherChainTokens: TokenItemType[] = [
     coinType: 118,
     denom: MILKY_DENOM,
     rpc: ORAI_BRIDGE_RPC,
-    lcd: ORAI_BRIDGE_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'milky-token',
     cosmosBased: true,
@@ -305,7 +295,7 @@ const otherChainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     rpc: KAWAII_RPC,
-    lcd: KAWAII_LCD,
+
     cosmosBased: true,
     type: 'milky',
     maxGas: 200000 * 2,
@@ -318,7 +308,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'erc20_milky',
     contractAddress: MILKY_ERC_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
-    lcd: KAWAII_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'milky-token',
     cosmosBased: false,
@@ -334,7 +323,6 @@ const otherChainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     coingeckoId: 'kawaii-islands',
     rpc: KAWAII_RPC,
-    lcd: KAWAII_LCD,
     cosmosBased: true,
     maxGas: 200000 * 2,
     type: 'kawaii',
@@ -347,7 +335,6 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'erc20_kwt',
     contractAddress: KAWAII_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
-    lcd: KAWAII_LCD,
     decimals: EVM_DECIMALS,
     coingeckoId: 'kawaii-islands',
     cosmosBased: false,
@@ -368,7 +355,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: OraiIcon
   },
@@ -382,7 +368,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: ATOMCOSMOS
   },
@@ -409,7 +394,6 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: AIRI
   },
@@ -435,7 +419,6 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: USDT
   },
@@ -447,7 +430,6 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     decimals: COSMOS_DECIMALS,
     coingeckoId: 'osmosis',
     cosmosBased: true,
@@ -464,7 +446,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: OraiIcon
   },
@@ -478,7 +459,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: OraiIcon
   },
@@ -505,7 +485,6 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: KWT
   },
@@ -531,7 +510,6 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: MILKY
   },
@@ -546,7 +524,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: ORAIX
   },
@@ -561,7 +538,6 @@ const oraichainTokens: TokenItemType[] = [
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
-    lcd: ORAI_LCD,
     cosmosBased: true,
     Icon: scORAI
   }

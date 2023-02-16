@@ -101,6 +101,7 @@ declare global {
   }
   interface Window {
     MSStream: String;
+    amounts: AmountDetails;
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;

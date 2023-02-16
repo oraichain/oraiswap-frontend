@@ -79,6 +79,8 @@ export const ORAI_RPC = 'https://rpc-balance.orai.io';
 export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
 export const OSMOSIS_NETWORK_LCD = 'https://lcd-osmosis.blockapsis.com';
 export const COSMOS_NETWORK_LCD = 'https://lcd-cosmos.oraidex.io';
+export const OSMOSIS_NETWORK_RPC = 'https://rpc-osmosis.blockapsis.com';
+export const COSMOS_NETWORK_RPC = 'https://rpc-cosmos.oraidex.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';

@@ -37,31 +37,6 @@ export enum Type {
 
 const oraiInfo = { native_token: { denom: ORAI } };
 
-const toQueryMsg = (msg: string) => {
-  try {
-    return Buffer.from(JSON.stringify(JSON.parse(msg))).toString('base64');
-  } catch (error) {
-    return '';
-  }
-};
-
-const querySmart = async (
-  contract: string,
-  msg: string | object,
-  lcd?: string
-) => {
-  const params =
-    typeof msg === 'string'
-      ? toQueryMsg(msg)
-      : Buffer.from(JSON.stringify(msg)).toString('base64');
-  const url = `${lcd ?? network.lcd
-    }/cosmwasm/wasm/v1/contract/${contract}/smart/${params}`;
-
-  const res = (await axios.get(url)).data;
-  if (res.code) throw new Error(res.message);
-  return res.data;
-};
-
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   let tokenInfo: TokenInfo = {
     ...tokenSwap,
@@ -78,9 +53,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     tokenInfo.symbol = tokenSwap.name;
     tokenInfo.verified = true;
   } else {
-    const data = await querySmart(tokenSwap.contractAddress, {
-      token_info: {}
-    });
+    const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
 
     tokenInfo = {
       ...tokenInfo,
@@ -88,8 +61,6 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
       name: data.name,
       contractAddress: tokenSwap.contractAddress,
       decimals: data.decimals,
-      icon: data.icon,
-      verified: data.verified,
       total_supply: data.total_supply
     };
   }
@@ -179,16 +150,6 @@ async function fetchPairInfoV2(
   return data;
 }
 
-async function fetchTokenBalance(
-  tokenAddr: string,
-  walletAddr: string,
-  shouldKeepOriginal?: boolean
-): Promise<number | string> {
-  const data = await Contract.token(tokenAddr).balance({ address: walletAddr });
-  if (shouldKeepOriginal) return data.balance;
-  return parseInt(data.balance || '0');
-}
-
 async function fetchTokenAllowance(
   tokenAddr: string,
   walletAddr: string,
@@ -239,52 +200,17 @@ async function fetchDistributionInfo(
   return data;
 }
 
-async function fetchNativeTokenBalance(
-  walletAddr: string,
-  denom: string = ORAI,
-  lcd?: string,
-  shouldKeepOriginal?: boolean
-): Promise<number | string> {
-  const url = `${lcd ?? network.lcd
-    }/cosmos/bank/v1beta1/balances/${walletAddr}/by_denom?denom=${denom}`;
-  const res: any = (await axios.get(url)).data;
-  const amount = res.balance.amount;
-  if (shouldKeepOriginal) return amount;
-  return parseInt(amount || '0');
-}
-
-async function fetchTokenBalanceAll(
-  walletAddr: string,
-  lcd?: string,
-) {
-  const url = `${
-    lcd ?? network.lcd
-  }/cosmos/bank/v1beta1/balances/${walletAddr}`;
-  const res: any = (await axios.get(url)).data; 
-  return res;
-}
-
-async function fetchBalance(
-  walletAddr: string,
-  denom: string,
-  tokenAddr?: string,
-  lcd?: string
-): Promise<number> {
-  if (!tokenAddr)
-    return (await fetchNativeTokenBalance(walletAddr, denom, lcd)) as number;
-  else return (await fetchTokenBalance(tokenAddr, walletAddr)) as number;
-}
-
-async function fetchBalanceWithMapping(
-  walletAddr: string,
+function getSubAmount(
+  amounts: AmountDetails,
   tokenInfo: TokenItemType
-): Promise<{ amount: number; subAmounts: { [key: string]: number } }> {
-  let finalBalance = 0;
+): { [key: string]: number } {
   // get all native balances that are from oraibridge (ibc/...)
-  let subAmounts = {},
-    mainBalance = 0;
+  const subAmounts = {};
+  if (!tokenInfo.erc20Cw20Map) return subAmounts;
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = await fetchBalance(walletAddr, mapping.erc20Denom);
+    // update later
+    if (!amounts[mapping.erc20Denom]) continue;
+    const balance = amounts[mapping.erc20Denom].amount;
     // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
     const parsedBalance = parseAmountToWithDecimal(
       parseAmountFromWithDecimal(
@@ -294,24 +220,12 @@ async function fetchBalanceWithMapping(
       mapping.decimals.cw20Decimals
     ).toNumber();
     subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = parsedBalance;
-    finalBalance += parsedBalance;
   }
-  // fetch original balance (can be cw20 or native like ORAI). No need to parse since these will have decimal = 6 automatically
-  if (!tokenInfo.contractAddress)
-    mainBalance = await fetchBalance(walletAddr, tokenInfo.denom);
-  else
-    mainBalance = await fetchBalance(
-      walletAddr,
-      tokenInfo.denom,
-      tokenInfo.contractAddress
-    );
-  finalBalance += mainBalance;
-  subAmounts[`${tokenInfo.name}`] = mainBalance;
-
-  return { amount: finalBalance, subAmounts };
+  return subAmounts;
 }
 
 async function generateConvertErc20Cw20Message(
+  amounts: AmountDetails,
   tokenInfo: TokenItemType,
   sender: string
 ) {
@@ -319,9 +233,7 @@ async function generateConvertErc20Cw20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = new Big(
-      await fetchNativeTokenBalance(sender, mapping.erc20Denom, null, true)
-    ).toFixed(0);
+    const balance = new Big(amounts[mapping.erc20Denom].amount).toFixed(0);
     // reset so we convert using native first
     tokenInfo.contractAddress = undefined;
     tokenInfo.denom = mapping.erc20Denom;
@@ -341,6 +253,7 @@ async function generateConvertErc20Cw20Message(
 }
 
 async function generateConvertCw20Erc20Message(
+  amounts: AmountDetails,
   tokenInfo: TokenItemType,
   sender: string,
   sendCoin: Coin
@@ -352,20 +265,12 @@ async function generateConvertCw20Erc20Message(
     let balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
-    balance = new Big(
-      await fetchNativeTokenBalance(sender, sendCoin.denom, null, true)
-    ).toFixed(0);
+    balance = new Big(amounts[sendCoin.denom].amount).toFixed(0);
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
     if (+balance >= +sendCoin.amount) break;
 
-    if (!tokenInfo.contractAddress)
-      balance = new Big(
-        await fetchNativeTokenBalance(sender, tokenInfo.denom, null, true)
-      ).toFixed(0);
-    else
-      balance = new Big(
-        await fetchTokenBalance(tokenInfo.contractAddress, sender, true)
-      ).toFixed(0);
+    balance = new Big(amounts[tokenInfo.denom].amount).toFixed(0);
+
     if (+balance > 0) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
@@ -855,12 +760,7 @@ function generateClaimMsg(msg: Claim) {
 }
 
 export {
-  querySmart,
-  fetchNativeTokenBalance,
-  fetchTokenBalanceAll,
   fetchPairInfo,
-  fetchTokenBalance,
-  fetchBalance,
   fetchTokenInfo,
   generateContractMessages,
   generateClaimMsg,
@@ -875,7 +775,7 @@ export {
   fetchDistributionInfo,
   fetchAllPoolApr,
   fetchPoolApr,
-  fetchBalanceWithMapping,
+  getSubAmount,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
   parseTokenInfo,

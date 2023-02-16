@@ -19,10 +19,10 @@ import {
  */
 export interface ChainInfoCustom extends ChainInfo {
   gasPriceStep: {
-    low: number,
-    average: number,
-    high: number
-  }
+    low: number;
+    average: number;
+    high: number;
+  };
 }
 
 export const embedChainInfos: ChainInfoCustom[] = [
@@ -56,7 +56,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
       average: 0.005,
       high: 0.007
     },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm','wasmd_0.24+']
+    features: ['stargate', 'ibc-transfer', 'cosmwasm', 'wasmd_0.24+']
   },
   {
     rpc: ORAI_BRIDGE_RPC,

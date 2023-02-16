@@ -29,6 +29,10 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ERC20_KWT,
   ERC20_MILKY,
+  ORAI_BRIDGE_RPC,
+  OSMOSIS_NETWORK_RPC,
+  COSMOS_NETWORK_RPC,
+  KAWAII_RPC,
 } from 'config/constants';
 
 import {
@@ -379,3 +383,17 @@ export const getRpcEvm = (infoEvm?: ChainInfoType) => {
   if (window.Metamask.isBsc()) return BSC_RPC;
   return infoEvm?.rpc;
 };
+
+export const objConvertTokenIbc = {
+  usdt: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
+  kwt: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+  milky: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
+  airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
+}
+
+export const arrayLoadToken = [
+  { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
+  { chainId: OSMOSIS_CHAIN_ID, rpc: OSMOSIS_NETWORK_RPC },
+  { chainId: COSMOS_CHAIN_ID, rpc: COSMOS_NETWORK_RPC },
+  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC }
+];
