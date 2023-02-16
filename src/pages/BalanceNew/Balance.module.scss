@@ -169,11 +169,13 @@
   }
 }
 
-.checkbox {
-  padding-top: 12px;
+.balances {
   display: flex;
   justify-content: center;
-  &_hide {
+  padding-top: 12px;
+  width: 100%;
+  .box {
+    width: 100%;
     @include desktop {
       @media (max-width: 1024px) {
         width: 100%;
@@ -183,8 +185,18 @@
       }
       width: 50%;
     }
-    @include mobile {
-      width: 100%;
+    display: flex;
+    justify-content: space-between;
+    .refresh {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      span {
+        padding-right: 8px;
+      }
+      :hover {
+        color: #a871df;
+      }
     }
   }
 }

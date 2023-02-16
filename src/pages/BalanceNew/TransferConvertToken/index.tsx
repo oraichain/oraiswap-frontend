@@ -343,42 +343,41 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             </button>
           )}
         {(() => {
-          if (
-            token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
-            token.cosmosBased &&
-            name
-          ) {
-            return (
-              <>
-                <button
-                  disabled={transferLoading}
-                  className={styles.tfBtn}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
-                      );
-                      await transferIBC(token, to, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer <strong>OraiBridge</strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
-
+          // if (
+          //   token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
+          //   token.cosmosBased &&
+          //   name
+          // ) {
+          //   return (
+          //     <>
+          //       <button
+          //         disabled={transferLoading}
+          //         className={styles.tfBtn}
+          //         onClick={async (event) => {
+          //           event.stopPropagation();
+          //           try {
+          //             const isValid = checkValidAmount();
+          //             if (!isValid) return;
+          //             setTransferLoading(true);
+          //             const to = filteredTokens.find(
+          //               (t) =>
+          //                 t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+          //                 t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
+          //             );
+          //             await transferIBC(token, to, convertAmount);
+          //           } finally {
+          //             setTransferLoading(false);
+          //           }
+          //         }}
+          //       >
+          //         {transferLoading && <Loader width={20} height={20} />}
+          //         <span>
+          //           Transfer <strong>OraiBridge</strong>
+          //         </span>
+          //       </button>
+          //     </>
+          //   );
+          // }
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
             return (
               <>
@@ -391,8 +390,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
-                      console.log({ filterNetwork });
-
                       if (filterNetwork === ORAICHAIN_ID) {
                         return await onClickTransfer(convertAmount);
                       }

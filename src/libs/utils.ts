@@ -158,7 +158,7 @@ export const delay = (timeout: number) =>
 let cache = {};
 export async function getFunctionExecution(
   method: Function,
-  args: any[],
+  args: any[] = [],
   cacheKey: string = null,
   expiredIn = 10000
 ) {
@@ -185,7 +185,7 @@ setInterval(function () {
     Object.keys(cache).forEach((key) => {
       if (currentTime > cache[key].expired) {
         delete cache[key];
-        console.log(`${key}'s cache deleted`);
+        // console.log(`${key}'s cache deleted`);
       }
     });
   }
