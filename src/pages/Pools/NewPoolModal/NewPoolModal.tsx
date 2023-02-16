@@ -6,7 +6,7 @@ import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
-import { fetchBalance, fetchTokenInfo } from 'rest/api';
+import { fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
@@ -45,8 +45,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState('0');
   const [amountToken2, setAmountToken2] = useState('0');
-  const [address] = useGlobalState('address');
-
+  const [amounts] = useGlobalState('amounts');
   const tokenObj1 = poolTokens.find((token) => token.denom === token1);
   const tokenObj2 = poolTokens.find((token) => token.denom === token2);
 
@@ -68,39 +67,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     enabled: !!tokenObj2
   });
 
-  const {
-    data: token1Balance = 0,
-    error: token1BalanceError,
-    isError: isToken1BalanceError,
-    isLoading: isToken1BalanceLoading
-  } = useQuery(
-    ['token-balance', token1],
-    () =>
-      fetchBalance(
-        address,
-        tokenObj1!.denom,
-        tokenObj1!.contractAddress,
-        tokenObj1!.lcd
-      ),
-    { enabled: !!address && !!tokenObj1 }
-  );
-
-  const {
-    data: token2Balance = 0,
-    error: token2BalanceError,
-    isError: isToken2BalanceError,
-    isLoading: isLoadingToken2Balance
-  } = useQuery(
-    ['token-balance', token2],
-    () =>
-      fetchBalance(
-        address,
-        tokenObj2!.denom,
-        tokenObj2!.contractAddress,
-        tokenObj2!.lcd
-      ),
-    { enabled: !!address && !!tokenObj2 }
-  );
+  const token1Balance = tokenObj1 ? amounts[tokenObj1.denom].amount : 0;
+  const token2Balance = tokenObj2 ? amounts[tokenObj2.denom].amount : 0;
 
   const Token1Icon = tokenObj1?.Icon;
   const Token2Icon = tokenObj2?.Icon;

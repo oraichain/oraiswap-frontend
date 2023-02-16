@@ -47,7 +47,6 @@ import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';
 import useGlobalState from 'hooks/useGlobalState';
-import { fetchNativeTokenBalance } from 'rest/api';
 import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 
 const { Text } = Typography;

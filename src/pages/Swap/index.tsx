@@ -6,9 +6,7 @@ import SelectTokenModal from './Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
-  fetchBalance,
   fetchTokenInfo,
-  fetchBalanceWithMapping,
   generateContractMessages,
   generateConvertMsgs,
   simulateSwap,
@@ -57,6 +55,7 @@ const Swap: React.FC = () => {
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [amounts] = useGlobalState('amounts');
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
@@ -102,34 +101,8 @@ const Swap: React.FC = () => {
     }
   }, [fromToken, toToken]);
 
-  const { data: fromTokenBalance = 0, refetch: refetchFromTokenBalance } =
-    useQuery(
-      ['balance', fromToken.denom, address],
-      async () =>
-        fromToken.erc20Cw20Map
-          ? (await fetchBalanceWithMapping(address, fromToken)).amount
-          : fetchBalance(
-              address,
-              fromToken!.denom,
-              fromToken!.contractAddress,
-              fromToken!.lcd
-            ),
-      { enabled: !!address && !!fromToken }
-    );
-
-  const { data: toTokenBalance, refetch: refetchToTokenBalance } = useQuery(
-    ['balance', toToken.denom, address],
-    async () =>
-      toToken.erc20Cw20Map
-        ? (await fetchBalanceWithMapping(address, toToken)).amount
-        : fetchBalance(
-            address,
-            toToken!.denom,
-            toToken!.contractAddress,
-            toToken!.lcd
-          ),
-    { enabled: !!address && !!toToken }
-  );
+  const fromTokenBalance = fromToken ? amounts[fromToken.denom].amount : 0;
+  const toTokenBalance = toToken ? amounts[toToken.denom].amount : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
@@ -175,11 +148,6 @@ const Swap: React.FC = () => {
     ]);
   }, [simulateData]);
 
-  const refetchTokenBalances = () => {
-    refetchFromTokenBalance();
-    refetchToTokenBalance();
-  };
-
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -196,11 +164,13 @@ const Swap: React.FC = () => {
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
       const msgConvertsFrom = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(fromTokenInfoData)),
+        amounts,
+        fromTokenInfoData,
         address
       );
       const msgConvertTo = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(toTokenInfoData)),
+        amounts,
+        toTokenInfoData,
         address
       );
 
@@ -229,7 +199,7 @@ const Swap: React.FC = () => {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        refetchTokenBalances();
+
         setSwapLoading(false);
       }
     } catch (error) {

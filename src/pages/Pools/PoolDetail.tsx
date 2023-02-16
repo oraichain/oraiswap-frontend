@@ -9,7 +9,6 @@ import Content from 'layouts/Content';
 import Pie from 'components/Pie';
 import { getPair, Pair, pairs, poolTokens } from 'config/pools';
 import {
-  fetchBalance,
   fetchPairInfo,
   fetchPoolInfoAmount,
   fetchTokenInfo,
@@ -41,6 +40,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
+  const [amounts] = useGlobalState('amounts');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
 
   const getPairInfo = async () => {
@@ -142,7 +142,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const onBondingAction = () => {
-    refetchLpTokenBalance();
     refetchRewardInfo();
   };
 
@@ -167,14 +166,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const { data: lpTokenBalance, refetch: refetchLpTokenBalance } = useQuery(
-    ['token-balance', pairInfoData],
-    () => fetchBalance(address, '', pairInfoData?.liquidity_token),
-    {
-      enabled: !!address && !!pairInfoData,
-      refetchOnWindowFocus: false
-    }
-  );
+  const lpTokenBalance = pairInfoData
+    ? amounts[pairInfoData.liquidity_token].amount
+    : 0;
 
   const { data: lpTokenInfoData } = useQuery(
     ['token-info', pairInfoData],
@@ -453,7 +447,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData}
-                refetchLpTokenBalance={refetchLpTokenBalance}
               />
             )}
           {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (

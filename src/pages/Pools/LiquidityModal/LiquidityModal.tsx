@@ -5,13 +5,11 @@ import cn from 'classnames/bind';
 import { getPair } from 'config/pools';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchBalance,
   fetchPairInfo,
   fetchPoolInfoAmount,
   generateContractMessages,
   fetchTokenAllowance,
   ProvideQuery,
-  fetchBalanceWithMapping,
   generateConvertErc20Cw20Message
 } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -43,7 +41,7 @@ interface ModalProps {
   lpTokenBalance: any;
   pairAmountInfoData: any;
   refetchPairAmountInfo: any;
-  refetchLpTokenBalance: any;
+
   pairInfoData: any;
 }
 
@@ -57,7 +55,7 @@ const LiquidityModal: FC<ModalProps> = ({
   lpTokenBalance,
   pairAmountInfoData,
   refetchPairAmountInfo,
-  refetchLpTokenBalance,
+
   pairInfoData
 }) => {
   const token1 = token1InfoData;
@@ -78,40 +76,10 @@ const LiquidityModal: FC<ModalProps> = ({
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [estimatedLP, setEstimatedLP] = useState(0);
+  const [amounts] = useGlobalState('amounts');
 
-  const { data: token1Balance = 0, refetch: refetchToken1Balance } = useQuery(
-    ['balance', token1!.denom, address],
-    async () =>
-      token1?.erc20Cw20Map
-        ? (await fetchBalanceWithMapping(address, token1)).amount
-        : fetchBalance(
-            address,
-            token1!.denom,
-            token1!.contractAddress,
-            token1!.lcd
-          ),
-    {
-      enabled: !!address && !!token1,
-      refetchOnWindowFocus: false
-    }
-  );
-
-  const { data: token2Balance = 0, refetch: refetchToken2Balance } = useQuery(
-    ['balance', token2!.denom, address],
-    async () =>
-      token2?.erc20Cw20Map
-        ? (await fetchBalanceWithMapping(address, token2)).amount
-        : fetchBalance(
-            address,
-            token2!.denom,
-            token2!.contractAddress,
-            token2!.lcd
-          ),
-    {
-      enabled: !!address && !!token2,
-      refetchOnWindowFocus: false
-    }
-  );
+  const token1Balance = token1 ? amounts[token1.denom].amount : 0;
+  const token2Balance = token2 ? amounts[token2.denom].amount : 0;
 
   const {
     data: token1AllowanceToPair,
@@ -193,10 +161,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const onLiquidityChange = () => {
-    refetchToken1Balance();
-    refetchToken2Balance();
     refetchPairAmountInfo();
-    refetchLpTokenBalance();
   };
 
   const getPairAmountInfo = async () => {
@@ -292,11 +257,13 @@ const LiquidityModal: FC<ModalProps> = ({
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
       const firstTokenConverts = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(token1)),
+        amounts,
+        token1,
         address
       );
       const secTokenConverts = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(token2)),
+        amounts,
+        token2,
         address
       );
 
