@@ -396,11 +396,13 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await Promise.all([
         getFunctionExecution(loadEvmOraiAmounts),
-        getFunctionExecution(loadKawaiiSubnetAmount),
-        getFunctionExecution(getNativeBalance, [keplrAddress, network.rpc])
+        getFunctionExecution(loadKawaiiSubnetAmount)
       ]);
       // run later
-      await getFunctionExecution(loadCw20Balance);
+      await Promise.all([
+        getFunctionExecution(loadCw20Balance),
+        getFunctionExecution(getNativeBalance, [keplrAddress, network.rpc])
+      ]);
     } catch (ex) {
       console.log(ex);
     }
