@@ -949,10 +949,7 @@ const Balance: React.FC<BalanceProps> = () => {
       if(loadingRefresh) return;
       setLoadingRefresh(true);
       await loadTokenAmounts();
-      await loadTokens();
-      setTimeout(() => {
-        setLoadingRefresh(false)
-      }, 1000);
+      setLoadingRefresh(false)
     } catch (err) {
       console.log({ err });
       setLoadingRefresh(false);
