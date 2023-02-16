@@ -177,12 +177,8 @@ const Balance: React.FC<BalanceProps> = () => {
   }, []);
 
   useEffect(() => {
-    getFunctionExecution(loadTokens, [], 'loadTokens');
-  }, [prices, txHash, chainInfo]);
-
-  useEffect(() => {
     loadTokenAmounts();
-  }, [prices, txHash, amounts, chainInfo]);
+  });
 
   const handleCheckWallet = async () => {
     const keplr = await window.Keplr.getKeplr();
@@ -395,6 +391,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       await Promise.all([
+        getFunctionExecution(loadTokens),
         getFunctionExecution(loadEvmOraiAmounts),
         getFunctionExecution(loadKawaiiSubnetAmount),
         getFunctionExecution(getNativeBalance, [keplrAddress, network.rpc]),
