@@ -3,12 +3,7 @@ import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import tokenABI from 'config/abi/erc20.json';
-import Big from 'big.js';
-import {
-  Multicall,
-  ContractCallResults,
-  ContractCallContext
-} from 'ethereum-multicall';
+import { Multicall, ContractCallResults } from 'libs/ethereum-multicall';
 import {
   AminoTypes,
   // BroadcastTxResponse,
@@ -71,6 +66,7 @@ import {
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
   NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
@@ -95,7 +91,6 @@ import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
-import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
@@ -202,7 +197,6 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokens = async () => {
-    console.log('loadTokens');
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) =>
@@ -223,11 +217,13 @@ const Balance: React.FC<BalanceProps> = () => {
     address: string,
     tokens: TokenItemType[],
     rpc: string,
-    multicallContractAddress: string
+    chainId: number,
+    multicallCustomContractAddress?: string
   ): Promise<[string, AmountDetail][]> => {
     const multicall = new Multicall({
       nodeUrl: rpc,
-      multicallCustomContractAddress: multicallContractAddress
+      multicallCustomContractAddress,
+      chainId
     });
     const input = tokens.map((token) => ({
       reference: token.denom,
@@ -267,14 +263,14 @@ const Balance: React.FC<BalanceProps> = () => {
             evmAddress,
             evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
             BSC_RPC,
-            '0xcA11bde05977b3631167028862bE2a173976CA11'
+            BSC_CHAIN_ID
           ),
 
           loadEvmEntries(
             evmAddress,
             evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
             ETHEREUM_RPC,
-            '0xcA11bde05977b3631167028862bE2a173976CA11'
+            ETHEREUM_CHAIN_ID
           )
         ])
       )
@@ -289,6 +285,8 @@ const Balance: React.FC<BalanceProps> = () => {
         kwtSubnetAddress,
         kawaiiTokens.filter((t) => !!t.contractAddress),
         KAWAII_SUBNET_RPC,
+        KWT_SUBNETWORK_EVM_CHAIN_ID,
+        // kawaiiverse multicall contract
         '0x74876644692e02459899760B8b9747965a6D3f90'
       )
     );
@@ -337,12 +335,10 @@ const Balance: React.FC<BalanceProps> = () => {
           res.return_data[ind].data
         ) as BalanceResponse;
         const amount = parseInt(balanceRes.balance);
-        const subAmount = getSubAmount(window.amounts, t);
         return [
           t.denom,
           {
             amount,
-            subAmount,
             usd: getUsd(amount, prices[t.coingeckoId] ?? 0, t.decimals)
           }
         ];
@@ -383,8 +379,23 @@ const Balance: React.FC<BalanceProps> = () => {
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
-      // // run later ?
-      // await getFunctionExecution(loadCw20Balance);
+      // run later for erc20Map
+      const amountDetails = Object.fromEntries(
+        filteredTokens
+          .filter((c) => c.contractAddress)
+          .map((t) => {
+            const detail = window.amounts[t.denom];
+            const subAmount = getSubAmount(window.amounts, t);
+            return [
+              t.denom,
+              {
+                ...detail,
+                subAmount
+              }
+            ];
+          })
+      );
+      forceUpdate(amountDetails);
     } catch (ex) {
       console.log(ex);
     }

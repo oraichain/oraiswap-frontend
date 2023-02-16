@@ -7,7 +7,6 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import {
   filteredTokens,
-  kawaiiTokens,
   TokenItemType,
 } from 'config/bridgeTokens';
 import {
@@ -86,9 +85,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useGlobalState('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
-  const [transferIbcLoading, setTransferIbcLoading] = useState(false);
-  const [convertLoading, setConvertLoading] = useState(false);
-  const [convertLoadingOrai, setConvertLoadingOrai] = useState(0);
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
@@ -102,7 +98,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     getAddressTransfer(findNetwork);
   }, [token?.chainId]);
 
-  // const name = token.name.match(/^(?:ERC20|BEP20)\s+(.+?)$/i)?.[1];
   const name = token.name;
   const ibcConvertToken = filteredTokens.filter(
     (t) =>
@@ -343,41 +338,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             </button>
           )}
         {(() => {
-          // if (
-          //   token.denom === process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM &&
-          //   token.cosmosBased &&
-          //   name
-          // ) {
-          //   return (
-          //     <>
-          //       <button
-          //         disabled={transferLoading}
-          //         className={styles.tfBtn}
-          //         onClick={async (event) => {
-          //           event.stopPropagation();
-          //           try {
-          //             const isValid = checkValidAmount();
-          //             if (!isValid) return;
-          //             setTransferLoading(true);
-          //             const to = filteredTokens.find(
-          //               (t) =>
-          //                 t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-          //                 t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
-          //             );
-          //             await transferIBC(token, to, convertAmount);
-          //           } finally {
-          //             setTransferLoading(false);
-          //           }
-          //         }}
-          //       >
-          //         {transferLoading && <Loader width={20} height={20} />}
-          //         <span>
-          //           Transfer <strong>OraiBridge</strong>
-          //         </span>
-          //       </button>
-          //     </>
-          //   );
-          // }
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
             return (
               <>
@@ -401,7 +361,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer <strong>{filterNetwork}</strong>
+                   {filterNetwork === ORAICHAIN_ID ? "Transfer" : "Convert"} <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -526,12 +486,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     const isValid = checkValidAmount();
                     if (!isValid) return;
                     setTransferLoading(true);
-                    const name =
-                      filterNetwork === ORAICHAIN_ID + ' BEP20'
-                        ? 'BEP20 ORAI'
-                        : 'ERC20 ORAI';
                     const ibcConvert = ibcConvertToken.find(
-                      (ibc) => ibc.name === name
+                      (ibc) => ibc.bridgeNetworkIdentifier === filterNetwork
                     );
                     await convertToken(
                       convertAmount,
@@ -546,7 +502,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               >
                 {transferLoading && <Loader width={20} height={20} />}
                 <span>
-                  Convert
+                  Transfer
                   <strong style={{ marginLeft: 5 }}>{filterNetwork}</strong>
                 </span>
               </button>
