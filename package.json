@@ -6,6 +6,7 @@
   "author": "Thanh Tu <tu@orai.io>",
   "license": "Apache-2.0",
   "dependencies": {
+    "@cosmjs/tendermint-rpc": "^0.29.5",
     "@cosmjs/cosmwasm-stargate": "^0.29.5",
     "@cosmjs/crypto": "^0.29.5",
     "@cosmjs/proto-signing": "^0.29.5",
@@ -107,7 +108,6 @@
     "react-scripts": "^5.0.1",
     "sass": "^1.53.0",
     "source-map-explorer": "^2.5.0",
-    "typescript": "^4.2.4",
-    "@cosmjs/tendermint-rpc": "^0.29.5"
+    "typescript": "^4.2.4"
   }
 }
