@@ -81,12 +81,6 @@ export const networks = [
     networkType: COSMOS_TYPE,
   },
   {
-    title: ORAI_BRIDGE_ORG,
-    chainId: ORAI_BRIDGE_CHAIN_ID,
-    icon: <ORAIIcon />,
-    networkType: COSMOS_TYPE,
-  },
-  {
     title: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     icon: <KwtIcon />,
@@ -169,8 +163,8 @@ export const filterChainBridge = (
     case ORAI:
       return (
         item.title !== filterNetwork &&
-        (item.title === ORAICHAIN_ID + ' BEP20' ||
-          item.title === ORAICHAIN_ID + ' ERC20')
+        (item.title === BSC_ORG ||
+          item.title === ETHEREUM_ORG)
       );
     case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM.toLowerCase():
       return item.title === COSMOS_ORG;
@@ -270,7 +264,7 @@ export const getTokenChain = (token?: {
   switch (token?.denom) {
     // Oraichain
     case ORAI:
-      chainId = ORAICHAIN_ID + ' BEP20';
+      chainId = BSC_ORG
       break;
     case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM:
       chainId = COSMOS_ORG;
