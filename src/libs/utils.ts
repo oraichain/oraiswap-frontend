@@ -166,6 +166,7 @@ export async function getFunctionExecution(
   if (cache[key] !== undefined) {
     while (cache[key].pending) {
       await delay(500);
+      if (!cache[key]) return undefined;
     }
     return cache[key].value;
   }
