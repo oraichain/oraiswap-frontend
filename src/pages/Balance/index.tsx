@@ -3,8 +3,7 @@ import { coin } from '@cosmjs/proto-signing';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import tokenABI from 'config/abi/erc20.json';
-import Big from 'big.js';
-import { Multicall, ContractCallResults } from 'ethereum-multicall';
+import { Multicall, ContractCallResults } from 'libs/ethereum-multicall';
 import {
   AminoTypes,
   // BroadcastTxResponse,
@@ -66,6 +65,7 @@ import {
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
   NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
@@ -89,7 +89,6 @@ import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
-import axios from 'axios';
 import { useInactiveListener } from 'hooks/useMetamask';
 import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
@@ -215,11 +214,13 @@ const Balance: React.FC<BalanceProps> = () => {
     address: string,
     tokens: TokenItemType[],
     rpc: string,
+    chainId: number,
     multicallCustomContractAddress?: string
   ): Promise<[string, AmountDetail][]> => {
     const multicall = new Multicall({
       nodeUrl: rpc,
-      multicallCustomContractAddress
+      multicallCustomContractAddress,
+      chainId
     });
     const input = tokens.map((token) => ({
       reference: token.denom,
@@ -258,13 +259,15 @@ const Balance: React.FC<BalanceProps> = () => {
           loadEvmEntries(
             evmAddress,
             evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-            BSC_RPC
+            BSC_RPC,
+            BSC_CHAIN_ID
           ),
 
           loadEvmEntries(
             evmAddress,
             evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-            ETHEREUM_RPC
+            ETHEREUM_RPC,
+            ETHEREUM_CHAIN_ID
           )
         ])
       )
@@ -279,6 +282,7 @@ const Balance: React.FC<BalanceProps> = () => {
         kwtSubnetAddress,
         kawaiiTokens.filter((t) => !!t.contractAddress),
         KAWAII_SUBNET_RPC,
+        KWT_SUBNETWORK_EVM_CHAIN_ID,
         // kawaiiverse multicall contract
         '0x74876644692e02459899760B8b9747965a6D3f90'
       )
