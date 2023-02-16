@@ -199,7 +199,6 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokens = async () => {
-    console.log('loadTokens');
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) =>
@@ -334,12 +333,10 @@ const Balance: React.FC<BalanceProps> = () => {
           res.return_data[ind].data
         ) as BalanceResponse;
         const amount = parseInt(balanceRes.balance);
-        const subAmount = getSubAmount(window.amounts, t);
         return [
           t.denom,
           {
             amount,
-            subAmount,
             usd: getUsd(amount, prices[t.coingeckoId] ?? 0, t.decimals)
           }
         ];
@@ -380,8 +377,23 @@ const Balance: React.FC<BalanceProps> = () => {
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
-      // // run later ?
-      // await getFunctionExecution(loadCw20Balance);
+      // run later for erc20Map
+      const amountDetails = Object.fromEntries(
+        filteredTokens
+          .filter((c) => c.contractAddress)
+          .map((t) => {
+            const detail = window.amounts[t.denom];
+            const subAmount = getSubAmount(window.amounts, t);
+            return [
+              t.denom,
+              {
+                ...detail,
+                subAmount
+              }
+            ];
+          })
+      );
+      forceUpdate(amountDetails);
     } catch (ex) {
       console.log(ex);
     }
