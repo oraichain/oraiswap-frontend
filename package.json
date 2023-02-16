@@ -19,7 +19,7 @@
     "@saberhq/token-utils": "^1.12.69",
     "@sentry/react": "^7.7.0",
     "@sentry/tracing": "^7.7.0",
-    "@tanstack/react-query": "^4.14.5",
+    "@tanstack/react-query": "^4.24.6",
     "@tharsis/proto": "^0.1.17",
     "@tharsis/provider": "^0.2.4",
     "@tippyjs/react": "^4.2.0",
