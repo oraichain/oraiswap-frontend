@@ -78,7 +78,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               decimalScale={Math.min(6, token.decimals)}
             />
 
-            {!!amountDetail?.subAmounts && (
+            {!!amountDetail?.subAmounts && _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) > 0 && (
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>
