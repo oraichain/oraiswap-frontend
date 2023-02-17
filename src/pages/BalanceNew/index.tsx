@@ -1263,25 +1263,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
                   // check balance cw20
                   let amount = window.amounts[t.denom];
-
-                  // if (objConvertTokenIbc[t.denom] && window.amounts[objConvertTokenIbc[t.denom]]?.amount && window.amounts[t.denom]) {
-                  //   let parsedBalance = 0;
-                  //   for (let mapping of t.erc20Cw20Map) {
-                  //     // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
-                  //     parsedBalance = parseAmountToWithDecimal(
-                  //       parseAmountFromWithDecimal(
-                  //         window.amounts[objConvertTokenIbc[t.denom]]?.amount,
-                  //         mapping.decimals.erc20Decimals
-                  //       ).toNumber(),
-                  //       mapping.decimals.cw20Decimals
-                  //     ).toNumber();
-                  //   }
-                  //   amount = {
-                  //     amount: parsedBalance + window.amounts[t.denom]?.amount,
-                  //     usd: getUsd(parsedBalance + window.amounts[t.denom]?.amount, prices[t.coingeckoId], t.decimals),
-                  //   }
-                  // }
-
                   return (
                     <div className={styles.tokens_element}>
                       <TokenItem
