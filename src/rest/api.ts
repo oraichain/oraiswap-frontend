@@ -1,12 +1,13 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { ORAI, ORAI_LCD, ORAI_NETWORK_LCD } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
+  getUsd,
   parseAmountFromWithDecimal,
   parseAmountToWithDecimal
 } from 'libs/utils';
@@ -20,6 +21,7 @@ import {
   RewardsPerSecResponse
 } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -89,7 +91,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ||
-      '0'
+    '0'
   );
 }
 
@@ -202,11 +204,11 @@ async function fetchDistributionInfo(
 
 function getSubAmount(
   amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): { [key: string]: number } {
+  tokenInfo: TokenItemType,
+  prices: CoinGeckoPrices<any>,
+): { [key: string]: { amount: number, usd: number } } {
   // get all native balances that are from oraibridge (ibc/...)
   const subAmounts = {};
-  if (!tokenInfo.erc20Cw20Map) return subAmounts;
   for (let mapping of tokenInfo.erc20Cw20Map) {
     // update later
     if (!amounts[mapping.erc20Denom]) continue;
@@ -219,7 +221,7 @@ function getSubAmount(
       ).toNumber(),
       mapping.decimals.cw20Decimals
     ).toNumber();
-    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = parsedBalance;
+    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = { amount: parsedBalance, usd: getUsd(parsedBalance, prices[tokenInfo.coingeckoId] ?? 0, mapping.decimals.cw20Decimals) };
   }
   return subAmounts;
 }
@@ -324,27 +326,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {

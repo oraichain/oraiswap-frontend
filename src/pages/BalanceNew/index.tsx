@@ -19,10 +19,11 @@ import {
   StargateClient
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import _ from 'lodash';
+import _, { add } from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import {
+  Erc20Cw20Map,
   evmTokens,
   filteredTokens,
   gravityContracts,
@@ -100,7 +101,7 @@ import {
 } from 'libs/contracts/OraiswapToken.types';
 import LoadingBox from 'components/LoadingBox';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const { Search } = Input;
 
@@ -188,7 +189,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadEvmEntries = async (
     address: string,
     tokens: TokenItemType[],
-    rpc: string, 
+    rpc: string,
     chainId: number,
     multicallCustomContractAddress?: string
   ): Promise<[string, AmountDetail][]> => {
@@ -268,9 +269,16 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const loadNativeBalance = async (address: string, rpc: string) => {
     const client = await StargateClient.connect(rpc);
+    let erc20MapTokens = [];
+    for (let token of filteredTokens) {
+      if (token.contractAddress && token.erc20Cw20Map) {
+        erc20MapTokens = erc20MapTokens.concat(token.erc20Cw20Map.map(t => ({ denom: t.erc20Denom, coingeckoId: token.coingeckoId, decimals: t.decimals.erc20Decimals })));
+      }
+    }
+    const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
     const amountAll = await client.getAllBalances(address);
-    const amountDetails: AmountDetails = {};
-    for (const token of filteredTokens) {
+    let amountDetails: AmountDetails = {};
+    for (const token of filteredTokensWithErc20Map) {
       const foundToken = amountAll.find((t) => token.denom === t.denom);
       if (!foundToken) continue;
       const amount = parseInt(foundToken.amount);
@@ -297,7 +305,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }))
     });
 
-    const amountDetails = Object.fromEntries(
+    let amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {
         if (!res.return_data[ind].success) {
           return [t.denom, { amount: 0, usd: 0 }];
@@ -339,29 +347,29 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-          keplrAddress &&
-            getFunctionExecution(loadNativeBalance, [
-              keplrAddress,
-              network.rpc
-            ]),
+          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+          // keplrAddress &&
+          // getFunctionExecution(loadNativeBalance, [
+          //   keplrAddress,
+          //   network.rpc
+          // ]),
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
       // // run later 
       const amountDetails = Object.fromEntries(
         filteredTokens
-          .filter((c) => c.contractAddress)
+          .filter((c) => c.contractAddress && c.erc20Cw20Map)
           .map((t) => {
             const detail = window.amounts[t.denom];
-            const subAmount = getSubAmount(window.amounts, t);
+            const subAmounts = getSubAmount(window.amounts, t, prices);
             return [
               t.denom,
               {
                 ...detail,
-                subAmount
+                subAmounts
               }
             ];
           })
@@ -542,7 +550,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const toAddress = await window.Keplr.getKeplrAddr(
         toToken.chainId as string
       );
-      
+
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please login keplr!'
@@ -960,7 +968,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const refreshBalances = async () => {
     try {
-      if(loadingRefresh) return;
+      if (loadingRefresh) return;
       setLoadingRefresh(true);
       await loadTokenAmounts();
       setLoadingRefresh(false)
@@ -991,7 +999,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     console.log('1');
-    
+
     try {
       if (
         from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
@@ -1156,11 +1164,15 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const totalUsd = _.sumBy(Object.values(window.amounts), (c) => c.usd);
+  const totalUsd = _.sumBy(Object.values(window.amounts), (c) => {
+    if (!c.subAmounts)
+      return c.usd
+    return c.usd + _.sumBy(Object.values(c.subAmounts), (sub) => sub.usd)
+  });
   const navigate = useNavigate();
 
   return (
-      <Content nonBackground>
+    <Content nonBackground>
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <span className={styles.totalAssets}>Total Assets</span>
@@ -1251,28 +1263,24 @@ const Balance: React.FC<BalanceProps> = () => {
 
                   // check balance cw20
                   let amount = window.amounts[t.denom];
-                  console.log({
-                    amount,
-                    obj: objConvertTokenIbc[t.denom]
-                  });
-                  
-                  if (objConvertTokenIbc[t.denom] && window.amounts[objConvertTokenIbc[t.denom]]?.amount && window.amounts[t.denom]) {
-                    let parsedBalance = 0;
-                    for (let mapping of t.erc20Cw20Map) {
-                      // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
-                      parsedBalance = parseAmountToWithDecimal(
-                        parseAmountFromWithDecimal(
-                          window.amounts[objConvertTokenIbc[t.denom]]?.amount,
-                          mapping.decimals.erc20Decimals
-                        ).toNumber(),
-                        mapping.decimals.cw20Decimals
-                      ).toNumber();
-                    }
-                    amount = {
-                      amount: parsedBalance + window.amounts[t.denom]?.amount,
-                      usd: getUsd(parsedBalance + window.amounts[t.denom]?.amount, prices[t.coingeckoId], t.decimals),
-                    }
-                  }
+
+                  // if (objConvertTokenIbc[t.denom] && window.amounts[objConvertTokenIbc[t.denom]]?.amount && window.amounts[t.denom]) {
+                  //   let parsedBalance = 0;
+                  //   for (let mapping of t.erc20Cw20Map) {
+                  //     // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
+                  //     parsedBalance = parseAmountToWithDecimal(
+                  //       parseAmountFromWithDecimal(
+                  //         window.amounts[objConvertTokenIbc[t.denom]]?.amount,
+                  //         mapping.decimals.erc20Decimals
+                  //       ).toNumber(),
+                  //       mapping.decimals.cw20Decimals
+                  //     ).toNumber();
+                  //   }
+                  //   amount = {
+                  //     amount: parsedBalance + window.amounts[t.denom]?.amount,
+                  //     usd: getUsd(parsedBalance + window.amounts[t.denom]?.amount, prices[t.coingeckoId], t.decimals),
+                  //   }
+                  // }
 
                   return (
                     <div className={styles.tokens_element}>
@@ -1294,13 +1302,13 @@ const Balance: React.FC<BalanceProps> = () => {
                           tokenOraichain
                             ? !!transferToToken
                               ? (fromAmount: number) =>
-                                  onClickTransfer(fromAmount, to, transferToToken)
+                                onClickTransfer(fromAmount, to, transferToToken)
                               : undefined
                             : !!to
-                            ? (fromAmount: number) => {
+                              ? (fromAmount: number) => {
                                 onClickTransfer(fromAmount, from, to);
                               }
-                            : undefined
+                              : undefined
                         }
                         toToken={tokenOraichain ? transferToToken : to}
                         transferFromGravity={
