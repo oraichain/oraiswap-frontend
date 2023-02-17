@@ -10,7 +10,7 @@ import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 declare global {
   type AmountDetail = {
-    subAmounts?: { [key: string]: number };
+    subAmounts?: { [key: string]: { amount: number, usd: number } };
     amount: number;
     usd: number;
   };
@@ -177,4 +177,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

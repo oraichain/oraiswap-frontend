@@ -6,12 +6,6 @@ import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
 
-export type AmountDetail = {
-  subAmounts?: { [key: string]: number };
-  amount: number;
-  usd: number;
-};
-
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
@@ -76,7 +70,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail ? amountDetail.amount.toString() : '0',
+                amount: amountDetail ? amountDetail.amount + (!amountDetail.subAmounts ? 0 : _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount)) : '0',
                 denom: '',
                 decimals: token.decimals,
               }}
@@ -105,7 +99,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                           </div>
                           <TokenBalance
                             balance={{
-                              amount: amountDetail.subAmounts[name],
+                              amount: amountDetail.subAmounts[name].amount,
                               denom: '',
                               decimals: token.decimals,
                             }}
