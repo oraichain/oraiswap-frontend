@@ -50,6 +50,10 @@ const AMOUNT_BALANCE_75 = '75%';
 const AMOUNT_BALANCE_MAX = 'MAX';
 
 type AmountDetail = {
+  subAmounts: {
+    amount: number;
+    usd: number;
+  };
   amount: number;
   usd: number;
 };
@@ -106,9 +110,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       token.chainId === ORAICHAIN_ID &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
-
+  
+  const subAmount = amountDetail?.subAmounts ? (Object.values(amountDetail.subAmounts)?.[0]?.amount ?? 0) : 0;
   const maxAmount = parseAmountFrom(
-    amountDetail?.amount ?? 0,
+    (amountDetail?.amount + subAmount ?? 0) ?? 0,
     token?.decimals
   ).toNumber();
 
@@ -302,6 +307,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 onClick={(event) => {
                   event.stopPropagation();
                   if (!amountDetail) return;
+                  
                   setConvertAmount([maxAmount, amountDetail.usd]);
                 }}
               >

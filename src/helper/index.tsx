@@ -50,6 +50,7 @@ import {
   EVM_TYPE,
 } from 'config/constants';
 import { ChainInfoType } from 'hooks/useGlobalState';
+import { network } from 'config/networks';
 
 const KWT_DENOM = 'kwt';
 interface Items {
@@ -179,11 +180,11 @@ export const filterChainBridge = (
         item.title !== filterNetwork &&
         (item.title === BSC_ORG || item.title === ORAICHAIN_ID)
       );
-    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM.toLowerCase(): 
-        return (
-          item.title !== filterNetwork &&
-          (item.title === ETHEREUM_ORG || item.title === ORAICHAIN_ID)
-        )
+    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM.toLowerCase():
+      return (
+        item.title !== filterNetwork &&
+        (item.title === ETHEREUM_ORG || item.title === ORAICHAIN_ID)
+      )
     case KWT_DENOM:
       return (
         item.title !== filterNetwork &&
@@ -220,7 +221,7 @@ export const filterChainBridge = (
         item.title !== filterNetwork &&
         (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
       );
-       
+
     // Osmosis`
     case UOSMOS_DENOM:
       return item.title === ORAICHAIN_ID;
@@ -244,7 +245,7 @@ export const filterChainBridge = (
     // ethereum 
     case ERC20_ORAI:
       return item.title === ORAICHAIN_ID;
-    
+
     // oraibridge
 
     default:
@@ -253,10 +254,10 @@ export const filterChainBridge = (
 };
 
 export const getTokenChain = (token?: {
-  chainId: string | number; org?: string; denom?: string 
+  chainId: string | number; org?: string; denom?: string
 }) => {
   let chainId = token?.org;
-  
+
   if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
     return BSC_ORG
   }
@@ -280,7 +281,7 @@ export const getTokenChain = (token?: {
       break;
     case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM:
       chainId = ETHEREUM_ORG;
-      break; 
+      break;
     case KWT_DENOM:
       chainId = KAWAII_ORG;
       break;
@@ -389,5 +390,6 @@ export const arrayLoadToken = [
   { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
   { chainId: OSMOSIS_CHAIN_ID, rpc: OSMOSIS_NETWORK_RPC },
   { chainId: COSMOS_CHAIN_ID, rpc: COSMOS_NETWORK_RPC },
-  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC }
+  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC },
+  { chainId: network.chainId, rpc: network.rpc }
 ];

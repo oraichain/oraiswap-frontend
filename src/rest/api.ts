@@ -1,12 +1,13 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { ORAI, ORAI_LCD, ORAI_NETWORK_LCD } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
+  getUsd,
   parseAmountFromWithDecimal,
   parseAmountToWithDecimal
 } from 'libs/utils';
@@ -20,6 +21,7 @@ import {
   RewardsPerSecResponse
 } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -54,14 +56,14 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     tokenInfo.verified = true;
   } else {
     const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
-
+    const dataCheckMilkyToken = data?.token_info_response ?? data
     tokenInfo = {
       ...tokenInfo,
-      symbol: data.symbol,
-      name: data.name,
+      symbol: dataCheckMilkyToken.symbol,
+      name: dataCheckMilkyToken.name,
       contractAddress: tokenSwap.contractAddress,
-      decimals: data.decimals,
-      total_supply: data.total_supply
+      decimals: dataCheckMilkyToken.decimals,
+      total_supply: dataCheckMilkyToken.total_supply
     };
   }
   return tokenInfo;
@@ -202,11 +204,11 @@ async function fetchDistributionInfo(
 
 function getSubAmount(
   amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): { [key: string]: number } {
+  tokenInfo: TokenItemType,
+  prices: CoinGeckoPrices<any>,
+): { [key: string]: { amount: number, usd: number } } {
   // get all native balances that are from oraibridge (ibc/...)
   const subAmounts = {};
-  if (!tokenInfo.erc20Cw20Map) return subAmounts;
   for (let mapping of tokenInfo.erc20Cw20Map) {
     // update later
     if (!amounts[mapping.erc20Denom]) continue;
@@ -219,7 +221,7 @@ function getSubAmount(
       ).toNumber(),
       mapping.decimals.cw20Decimals
     ).toNumber();
-    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = parsedBalance;
+    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = { amount: parsedBalance, usd: getUsd(parsedBalance, prices[tokenInfo.coingeckoId] ?? 0, mapping.decimals.cw20Decimals) };
   }
   return subAmounts;
 }
@@ -233,7 +235,7 @@ async function generateConvertErc20Cw20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = new Big(amounts[mapping.erc20Denom].amount).toFixed(0);
+    const balance = new Big(amounts[mapping.erc20Denom]?.amount).toFixed(0);
     // reset so we convert using native first
     tokenInfo.contractAddress = undefined;
     tokenInfo.denom = mapping.erc20Denom;
@@ -265,11 +267,11 @@ async function generateConvertCw20Erc20Message(
     let balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
-    balance = new Big(amounts[sendCoin.denom].amount).toFixed(0);
+    balance = new Big(amounts[sendCoin.denom]?.amount ?? 0).toFixed(0);
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
     if (+balance >= +sendCoin.amount) break;
 
-    balance = new Big(amounts[tokenInfo.denom].amount).toFixed(0);
+    balance = new Big(amounts[tokenInfo.denom]?.amount).toFixed(0);
 
     if (+balance > 0) {
       const outputToken: TokenItemType = {
