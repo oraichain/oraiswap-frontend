@@ -41,6 +41,7 @@ import {
   networks,
   renderLogoNetwork,
   getTokenChain,
+  calculateSubAmounts,
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 
@@ -107,7 +108,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   )
 
-  const subAmount = amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0;
+  const subAmount = calculateSubAmounts(amountDetail);
   const maxAmount = parseAmountFrom(
     (amountDetail?.amount + subAmount ?? 0) ?? 0,
     token?.decimals

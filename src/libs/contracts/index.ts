@@ -37,6 +37,9 @@ import * as _29 from "./OraiswapStaking.react-query";
 import * as _30 from "./OraiswapToken.types";
 import * as _31 from "./OraiswapToken.client";
 import * as _32 from "./OraiswapToken.react-query";
+import * as _33 from './Multicall.types';
+import * as _34 from './Multicall.client';
+import * as _35 from './Multicall.react-query';
 export namespace contracts {
   export const Cw20Ics20 = {
     ..._0,
@@ -93,5 +96,6 @@ export namespace contracts {
     ..._31,
     ..._32
   };
+  export const Multicall = { ..._33, ..._34, ..._35 };
 }
 export * from "./types";

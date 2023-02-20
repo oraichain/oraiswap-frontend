@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
-import { arrayLoadToken, getNetworkGasPrice, networksFilterChain, objConvertTokenIbc } from 'helper';
+import { arrayLoadToken, calculateSubAmounts, getNetworkGasPrice, networksFilterChain, objConvertTokenIbc } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
 import { renderLogoNetwork } from 'helper';
@@ -1022,7 +1022,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const tokenAmountDetails = window.amounts[from.denom];
     const fromBalance =
       from && tokenAmountDetails
-        ? tokenAmountDetails.amount + (tokenAmountDetails.subAmounts ? _.sumBy(Object.values(window.amounts[from.denom].subAmounts), (sub) => sub.amount) : 0)
+        ? tokenAmountDetails.amount + calculateSubAmounts(tokenAmountDetails)
         : 0;
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
       displayToast(TToastType.TX_FAILED, {

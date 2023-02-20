@@ -22,6 +22,7 @@ import {
 } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { calculateSubAmounts } from 'helper';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -235,17 +236,16 @@ async function generateConvertErc20Cw20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = new Big(amounts[mapping.erc20Denom]?.amount).toFixed(0);
+    const balance = calculateSubAmounts(amounts[tokenInfo.denom]);
     // reset so we convert using native first
-    tokenInfo.contractAddress = undefined;
-    tokenInfo.denom = mapping.erc20Denom;
-    if (balance > '0') {
+    const erc20TokenInfo = { ...tokenInfo, contractAddress: undefined, denom: mapping.erc20Denom }
+    if (balance > 0) {
       const msgConvert = (
         await generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
           sender,
-          inputAmount: balance,
-          inputToken: tokenInfo
+          inputAmount: balance.toFixed(0),
+          inputToken: erc20TokenInfo
         })
       )[0];
       msgConverts.push(msgConvert);

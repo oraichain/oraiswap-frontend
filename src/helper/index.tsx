@@ -52,6 +52,7 @@ import {
 import { ChainInfoType } from 'hooks/useGlobalState';
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
+import _ from 'lodash';
 
 const KWT_DENOM = 'kwt';
 interface Items {
@@ -341,4 +342,8 @@ export const arrayLoadToken = [
 export const getNetworkGasPrice = async () => {
   const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
   return chainInfosWithoutEndpoints.find(e => e.chainId == network.chainId)?.feeCurrencies[0]?.gasPriceStep
+}
+
+export const calculateSubAmounts = (amountDetail: AmountDetail) => {
+  return (amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0)
 }
