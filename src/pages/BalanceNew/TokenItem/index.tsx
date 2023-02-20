@@ -12,15 +12,11 @@ interface TokenItemProps {
   amountDetail?: AmountDetail;
   convertToken?: any;
   transferIBC?: any;
-  transferFromGravity?: any;
   name?: string;
   onClickTransfer?: any;
-  toToken?: TokenItemType;
-  fromToken?: TokenItemType;
   active: Boolean;
   className?: string;
   onClick?: Function;
-  onClickFrom?: Function;
   onBlur?: Function;
   convertKwt?: any;
 }
@@ -31,14 +27,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  onClickFrom,
   convertToken,
-  transferFromGravity,
   transferIBC,
   onClickTransfer,
-  toToken,
   convertKwt,
-  fromToken,
 }) => {
   return (
     <div
@@ -50,7 +42,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
       onClick={(event) => {
         event.stopPropagation();
         onClick?.(token);
-        // fromToken && onClickFrom?.(fromToken);
       }}
     >
       <div className={styles.balanceAmountInfo}>
@@ -129,10 +120,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
-            transferFromGravity={transferFromGravity}
             transferIBC={transferIBC}
             onClickTransfer={onClickTransfer}
-            toToken={toToken}
             convertKwt={convertKwt}
           />
         )}

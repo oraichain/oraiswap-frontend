@@ -22,7 +22,9 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   KAWAII_ORG,
   COSMOS_TYPE,
-  EVM_TYPE
+  EVM_TYPE,
+  BSC_ORG,
+  ETHEREUM_ORG,
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -47,22 +49,18 @@ interface TransferConvertProps {
   amountDetail?: AmountDetail;
   convertToken?: any;
   transferIBC?: any;
-  transferFromGravity?: any;
   convertKwt?: any;
   onClickTransfer?: any;
-  toToken: TokenItemType;
 }
 
-// const onClickTransferList = [BSC_ORG, ETHEREUM_ORG, OSMOSIS_ORG, COSMOS_ORG];
+const onClickTransferList = [BSC_ORG, ETHEREUM_ORG];
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
   convertToken,
   transferIBC,
-  transferFromGravity,
   convertKwt,
   onClickTransfer,
-  toToken,
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([
     undefined,
@@ -123,10 +121,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     !onClickTransfer
   )
     return <></>;
-
-  const filterChain = (item) => {
-    return filterChainBridge(token, item, filterNetwork);
-  };
 
   const getAddressTransfer = async (network) => {
     try {
@@ -192,7 +186,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <ul className={styles.items}>
                     {networks &&
                       networks
-                        .filter((item) => filterChain(item))
+                        .filter((item) => filterChainBridge(token, item, filterNetwork))
                         .map((network) => {
                           return (
                             <li
@@ -307,31 +301,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         </div>
       </div>
       <div className={styles.transferTab}>
-        {/* {onClickTransfer &&
-          (onClickTransferList.includes(token?.org) ||
-            (token?.org === ORAICHAIN_ID &&
-              (token?.name === ATOM || token?.name === OSMO))) && (
-            <button
-              className={styles.tfBtn}
-              disabled={transferLoading}
-              onClick={async (event) => {
-                event.stopPropagation();
-                try {
-                  const isValid = checkValidAmount();
-                  if (!isValid) return;
-                  setTransferLoading(true);
-                  await onClickTransfer(convertAmount);
-                } finally {
-                  setTransferLoading(false);
-                }
-              }}
-            >
-              {transferLoading && <Loader width={20} height={20} />}
-              <span>
-                Transfer <strong>{filterNetwork}</strong>
-              </span>
-            </button>
-          )} */}
         {(() => {
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
             return (
@@ -363,37 +332,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          // if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
-          //   return (
-          //     <>
-          //       <button
-          //         className={styles.tfBtn}
-          //         disabled={transferLoading}
-          //         onClick={async (event) => {
-          //           event.stopPropagation();
-          //           try {
-          //             const isValid = checkValidAmount();
-          //             if (!isValid) return;
-          //             setTransferLoading(true);
-          //             await transferFromGravity(token, convertAmount);
-          //           } finally {
-          //             setTransferLoading(false);
-          //           }
-          //         }}
-          //       >
-          //         {transferLoading && <Loader width={20} height={20} />}
-          //         <span>
-          //           Transfer <strong>{token.bridgeNetworkIdentifier}</strong>
-          //         </span>
-          //       </button>
-          //     </>
-          //   );
-          // }
-
           if (
-            token.cosmosBased &&
+            (token.cosmosBased &&
             token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 &&
-            name
+            name) || (onClickTransferList.includes(token?.org))
           ) {
             return (
               <>
@@ -413,7 +355,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                           'nativeToCw20'
                         );
                       }
-                      if (onClickTransfer && filterNetwork == KAWAII_ORG) {
+                      if (onClickTransfer && (filterNetwork == KAWAII_ORG || onClickTransferList.includes(token?.org))) {
                         return await onClickTransfer(convertAmount);
                       }
                       const to = filteredTokens.find(
