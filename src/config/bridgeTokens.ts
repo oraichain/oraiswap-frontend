@@ -60,13 +60,13 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse';
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -79,18 +79,18 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -379,17 +379,6 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'airight',
     denom: 'airi',
     contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
-      }
-    ],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -404,17 +393,6 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'tether',
     denom: STABLE_DENOM,
     contractAddress: process.env.REACT_APP_USDT_CONTRACT,
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM
-      }
-    ],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -435,34 +413,6 @@ const oraichainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: OSMO
   },
-
-  {
-    name: 'BEP20 ORAI',
-    org: ORAICHAIN_ID,
-    prefix: 'orai',
-    coingeckoId: 'oraichain-token',
-    denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
-    bridgeNetworkIdentifier: BSC_ORG,
-    decimals: EVM_DECIMALS,
-    chainId: ORAICHAIN_ID,
-    rpc: ORAI_RPC,
-    cosmosBased: true,
-    Icon: OraiIcon
-  },
-  {
-    name: 'ERC20 ORAI',
-    org: ORAICHAIN_ID,
-    prefix: 'orai',
-    coingeckoId: 'oraichain-token',
-    denom: process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM,
-    bridgeNetworkIdentifier: ETHEREUM_ORG,
-    decimals: EVM_DECIMALS,
-    chainId: ORAICHAIN_ID,
-    rpc: ORAI_RPC,
-    cosmosBased: true,
-    Icon: OraiIcon
-  },
-
   {
     name: 'KWT',
     org: ORAICHAIN_ID,

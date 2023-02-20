@@ -32,6 +32,7 @@ import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { calculateSubAmounts } from 'helper';
 const cx = cn.bind(styles);
 
 const SwapComponent: React.FC<{
@@ -52,7 +53,7 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
-  
+
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
     setSwapAmount([amount, toAmount]);
@@ -89,8 +90,8 @@ const SwapComponent: React.FC<{
     fetchTokenInfo(toToken!)
   );
 
-  const fromTokenBalance = fromToken ? amounts[fromToken.denom].amount : 0;
-  const toTokenBalance = toToken ? amounts[toToken.denom].amount : 0;
+  const fromTokenBalance = fromToken ? amounts[fromToken.denom]?.amount + calculateSubAmounts(amounts[fromToken.denom]) ?? 0 : 0;
+  const toTokenBalance = toToken ? amounts[toToken.denom]?.amount + calculateSubAmounts(amounts[toToken.denom]) ?? 0 : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
@@ -151,7 +152,7 @@ const SwapComponent: React.FC<{
       ).toFixed(0);
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-    const msgConvertsFrom = await generateConvertErc20Cw20Message(
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(
         amounts,
         fromTokenInfoData,
         address

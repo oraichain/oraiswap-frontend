@@ -94,7 +94,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                           </div>
                           <TokenBalance
                             balance={{
-                              amount: amountDetail.subAmounts[name],
+                              amount: amountDetail.subAmounts[name].amount,
                               denom: '',
                               decimals: token.decimals
                             }}
