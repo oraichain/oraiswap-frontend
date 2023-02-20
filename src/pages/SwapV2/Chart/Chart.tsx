@@ -57,9 +57,10 @@ const ChartComponent = (props) => {
         rightOffset: 1,
         barSpacing: 28,
         lockVisibleTimeRangeOnResize: true,
+        timeVisible: true,
       },
     });
-    chart.timeScale().fitContent();
+    // chart.timeScale().fitContent();
 
     const series = chart.addAreaSeries({
       lineColor,

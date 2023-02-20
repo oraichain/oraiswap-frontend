@@ -17,17 +17,9 @@ import {
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
-  ATOM,
-  BEP20_ORAI,
-  BSC_ORG,
-  COSMOS_ORG,
-  ETHEREUM_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  OSMO,
-  OSMOSIS_ORG,
-  STABLE_DENOM,
   KAWAII_ORG,
   COSMOS_TYPE,
   EVM_TYPE
@@ -61,7 +53,7 @@ interface TransferConvertProps {
   toToken: TokenItemType;
 }
 
-const onClickTransferList = [BSC_ORG, ETHEREUM_ORG, OSMOSIS_ORG, COSMOS_ORG];
+// const onClickTransferList = [BSC_ORG, ETHEREUM_ORG, OSMOSIS_ORG, COSMOS_ORG];
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
@@ -145,7 +137,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       }
       if (network.networkType == COSMOS_TYPE) {
         address = await window.Keplr.getKeplrAddr(
-          network.chainId.replace(' BEP20', '').replace(' ERC20', '')
+          network.chainId
         );
       }
       setAddressTransfer(address);
@@ -371,32 +363,32 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
-            return (
-              <>
-                <button
-                  className={styles.tfBtn}
-                  disabled={transferLoading}
-                  onClick={async (event) => {
-                    event.stopPropagation();
-                    try {
-                      const isValid = checkValidAmount();
-                      if (!isValid) return;
-                      setTransferLoading(true);
-                      await transferFromGravity(token, convertAmount);
-                    } finally {
-                      setTransferLoading(false);
-                    }
-                  }}
-                >
-                  {transferLoading && <Loader width={20} height={20} />}
-                  <span>
-                    Transfer <strong>{token.bridgeNetworkIdentifier}</strong>
-                  </span>
-                </button>
-              </>
-            );
-          }
+          // if (token.chainId === ORAI_BRIDGE_CHAIN_ID) {
+          //   return (
+          //     <>
+          //       <button
+          //         className={styles.tfBtn}
+          //         disabled={transferLoading}
+          //         onClick={async (event) => {
+          //           event.stopPropagation();
+          //           try {
+          //             const isValid = checkValidAmount();
+          //             if (!isValid) return;
+          //             setTransferLoading(true);
+          //             await transferFromGravity(token, convertAmount);
+          //           } finally {
+          //             setTransferLoading(false);
+          //           }
+          //         }}
+          //       >
+          //         {transferLoading && <Loader width={20} height={20} />}
+          //         <span>
+          //           Transfer <strong>{token.bridgeNetworkIdentifier}</strong>
+          //         </span>
+          //       </button>
+          //     </>
+          //   );
+          // }
 
           if (
             token.cosmosBased &&
