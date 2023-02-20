@@ -5,6 +5,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
+import { calculateSubAmounts } from 'helper';
 
 interface TokenItemProps {
   token: TokenItemType;
@@ -70,7 +71,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail ? amountDetail.amount + (!amountDetail.subAmounts ? 0 : _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount)) : '0',
+                amount: amountDetail ? amountDetail.amount + calculateSubAmounts(amountDetail) : '0',
                 denom: '',
                 decimals: token.decimals,
               }}
@@ -78,7 +79,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               decimalScale={Math.min(6, token.decimals)}
             />
 
-            {!!amountDetail?.subAmounts && _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) > 0 && (
+            {calculateSubAmounts(amountDetail) > 0 && (
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>

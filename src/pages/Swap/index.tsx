@@ -34,6 +34,7 @@ import { contracts } from 'libs/contracts';
 import { Contract } from 'config/contracts';
 import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { calculateSubAmounts } from 'helper';
 
 const cx = cn.bind(style);
 
@@ -102,8 +103,8 @@ const Swap: React.FC = () => {
     }
   }, [fromToken, toToken]);
 
-  const fromTokenBalance = fromToken ? amounts[fromToken.denom].amount : 0;
-  const toTokenBalance = toToken ? amounts[toToken.denom].amount : 0;
+  const fromTokenBalance = fromToken ? amounts[fromToken.denom].amount + calculateSubAmounts(amounts[fromToken.denom]) : 0;
+  const toTokenBalance = toToken ? amounts[toToken.denom].amount + calculateSubAmounts(amounts[toToken.denom]) : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
@@ -154,6 +155,8 @@ const Swap: React.FC = () => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
       });
+
+    console.log("in handle submit");
 
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -362,9 +365,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-                // onValueChange={({ floatValue }) => {
-                //   onChangeToAmount(floatValue);
-                // }}
+              // onValueChange={({ floatValue }) => {
+              //   onChangeToAmount(floatValue);
+              // }}
               />
 
               {/* <input

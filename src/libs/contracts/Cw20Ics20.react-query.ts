@@ -6,272 +6,334 @@
 
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
-import { Uint128, Binary,Coin, Addr, Cw20PairQuery} from "./types";
-import { AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse} from "./Cw20Ics20.types";
-import { Cw20Ics20QueryClient, Cw20Ics20Client, FeesInterface } from "./Cw20Ics20.client";
+import { StdFee } from "@cosmjs/amino";
+import { AllowMsg, Uint128, Binary, AssetInfo, Addr, Cw20ReceiveMsg, TransferMsg, TransferBackMsg, UpdatePairMsg, DeletePairMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, PairQuery, MappingMetadata, ArrayOfPairQuery } from "./types";
+import { InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse } from "./Cw20Ics20.types";
+import { Cw20Ics20QueryClient, Cw20Ics20Client } from "./Cw20Ics20.client";
 export interface Cw20Ics20ReactQuery<TResponse, TData = TResponse> {
-  client: Cw20Ics20QueryClient | undefined;
-  options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
-  };
+    client: Cw20Ics20QueryClient | undefined;
+    options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
+        initialData?: undefined;
+    };
 }
-export interface Cw20Ics20Cw20MappingFromCw20DenomQuery<TData> extends Cw20Ics20ReactQuery<Cw20PairQuery, TData> {
-  args: {
-    cw20Denom: string;
-  };
+export interface Cw20Ics20PairMappingsFromAssetInfoQuery<TData> extends Cw20Ics20ReactQuery<ArrayOfPairQuery, TData> {
+    args: {
+        assetInfo: AssetInfo;
+    };
 }
-export function useCw20Ics20Cw20MappingFromCw20DenomQuery<TData = Cw20PairQuery>({
-  client,
-  args,
-  options
-}: Cw20Ics20Cw20MappingFromCw20DenomQuery<TData>) {
-  return useQuery<Cw20PairQuery, Error, TData>(["cw20Ics20Cw20MappingFromCw20Denom", client?.contractAddress, JSON.stringify(args)], () => client ? client.cw20MappingFromCw20Denom({
-    cw20Denom: args.cw20Denom
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+export function useCw20Ics20PairMappingsFromAssetInfoQuery<TData = ArrayOfPairQuery>({
+    client,
+    args,
+    options
+}: Cw20Ics20PairMappingsFromAssetInfoQuery<TData>) {
+    return useQuery<ArrayOfPairQuery, Error, TData>(["cw20Ics20PairMappingsFromAssetInfo", client?.contractAddress, JSON.stringify(args)], () => client ? client.pairMappingsFromAssetInfo({
+        assetInfo: args.assetInfo
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20Cw20MappingFromKeyQuery<TData> extends Cw20Ics20ReactQuery<Cw20PairQuery, TData> {
-  args: {
-    key: string;
-  };
+export interface Cw20Ics20PairMappingQuery<TData> extends Cw20Ics20ReactQuery<PairQuery, TData> {
+    args: {
+        key: string;
+    };
 }
-export function useCw20Ics20Cw20MappingFromKeyQuery<TData = Cw20PairQuery>({
-  client,
-  args,
-  options
-}: Cw20Ics20Cw20MappingFromKeyQuery<TData>) {
-  return useQuery<Cw20PairQuery, Error, TData>(["cw20Ics20Cw20MappingFromKey", client?.contractAddress, JSON.stringify(args)], () => client ? client.cw20MappingFromKey({
-    key: args.key
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+export function useCw20Ics20PairMappingQuery<TData = PairQuery>({
+    client,
+    args,
+    options
+}: Cw20Ics20PairMappingQuery<TData>) {
+    return useQuery<PairQuery, Error, TData>(["cw20Ics20PairMapping", client?.contractAddress, JSON.stringify(args)], () => client ? client.pairMapping({
+        key: args.key
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20Cw20MappingQuery<TData> extends Cw20Ics20ReactQuery<Addr, TData> {
-  args: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  };
+export interface Cw20Ics20PairMappingsQuery<TData> extends Cw20Ics20ReactQuery<Addr, TData> {
+    args: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    };
 }
-export function useCw20Ics20Cw20MappingQuery<TData = Addr>({
-  client,
-  args,
-  options
-}: Cw20Ics20Cw20MappingQuery<TData>) {
-  return useQuery<Addr, Error, TData>(["cw20Ics20Cw20Mapping", client?.contractAddress, JSON.stringify(args)], () => client ? client.cw20Mapping({
-    limit: args.limit,
-    order: args.order,
-    startAfter: args.startAfter
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+export function useCw20Ics20PairMappingsQuery<TData = Addr>({
+    client,
+    args,
+    options
+}: Cw20Ics20PairMappingsQuery<TData>) {
+    return useQuery<Addr, Error, TData>(["cw20Ics20PairMappings", client?.contractAddress, JSON.stringify(args)], () => client ? client.pairMappings({
+        limit: args.limit,
+        order: args.order,
+        startAfter: args.startAfter
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
 export interface Cw20Ics20ListAllowedQuery<TData> extends Cw20Ics20ReactQuery<ListAllowedResponse, TData> {
-  args: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  };
+    args: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    };
 }
 export function useCw20Ics20ListAllowedQuery<TData = ListAllowedResponse>({
-  client,
-  args,
-  options
+    client,
+    args,
+    options
 }: Cw20Ics20ListAllowedQuery<TData>) {
-  return useQuery<ListAllowedResponse, Error, TData>(["cw20Ics20ListAllowed", client?.contractAddress, JSON.stringify(args)], () => client ? client.listAllowed({
-    limit: args.limit,
-    order: args.order,
-    startAfter: args.startAfter
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<ListAllowedResponse, Error, TData>(["cw20Ics20ListAllowed", client?.contractAddress, JSON.stringify(args)], () => client ? client.listAllowed({
+        limit: args.limit,
+        order: args.order,
+        startAfter: args.startAfter
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
 export interface Cw20Ics20AllowedQuery<TData> extends Cw20Ics20ReactQuery<AllowedResponse, TData> {
-  args: {
-    contract: string;
-  };
+    args: {
+        contract: string;
+    };
 }
 export function useCw20Ics20AllowedQuery<TData = AllowedResponse>({
-  client,
-  args,
-  options
+    client,
+    args,
+    options
 }: Cw20Ics20AllowedQuery<TData>) {
-  return useQuery<AllowedResponse, Error, TData>(["cw20Ics20Allowed", client?.contractAddress, JSON.stringify(args)], () => client ? client.allowed({
-    contract: args.contract
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<AllowedResponse, Error, TData>(["cw20Ics20Allowed", client?.contractAddress, JSON.stringify(args)], () => client ? client.allowed({
+        contract: args.contract
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20AdminQuery<TData> extends Cw20Ics20ReactQuery<AdminResponse, TData> {}
+export interface Cw20Ics20AdminQuery<TData> extends Cw20Ics20ReactQuery<AdminResponse, TData> { }
 export function useCw20Ics20AdminQuery<TData = AdminResponse>({
-  client,
-  options
+    client,
+    options
 }: Cw20Ics20AdminQuery<TData>) {
-  return useQuery<AdminResponse, Error, TData>(["cw20Ics20Admin", client?.contractAddress], () => client ? client.admin() : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<AdminResponse, Error, TData>(["cw20Ics20Admin", client?.contractAddress], () => client ? client.admin() : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20ConfigQuery<TData> extends Cw20Ics20ReactQuery<ConfigResponse, TData> {}
+export interface Cw20Ics20ConfigQuery<TData> extends Cw20Ics20ReactQuery<ConfigResponse, TData> { }
 export function useCw20Ics20ConfigQuery<TData = ConfigResponse>({
-  client,
-  options
+    client,
+    options
 }: Cw20Ics20ConfigQuery<TData>) {
-  return useQuery<ConfigResponse, Error, TData>(["cw20Ics20Config", client?.contractAddress], () => client ? client.config() : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<ConfigResponse, Error, TData>(["cw20Ics20Config", client?.contractAddress], () => client ? client.config() : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
 export interface Cw20Ics20ChannelQuery<TData> extends Cw20Ics20ReactQuery<ChannelResponse, TData> {
-  args: {
-    id: string;
-  };
+    args: {
+        forward?: boolean;
+        id: string;
+    };
 }
 export function useCw20Ics20ChannelQuery<TData = ChannelResponse>({
-  client,
-  args,
-  options
+    client,
+    args,
+    options
 }: Cw20Ics20ChannelQuery<TData>) {
-  return useQuery<ChannelResponse, Error, TData>(["cw20Ics20Channel", client?.contractAddress, JSON.stringify(args)], () => client ? client.channel({
-    id: args.id
-  }) : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<ChannelResponse, Error, TData>(["cw20Ics20Channel", client?.contractAddress, JSON.stringify(args)], () => client ? client.channel({
+        forward: args.forward,
+        id: args.id
+    }) : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20ListChannelsQuery<TData> extends Cw20Ics20ReactQuery<ListChannelsResponse, TData> {}
+export interface Cw20Ics20ListChannelsQuery<TData> extends Cw20Ics20ReactQuery<ListChannelsResponse, TData> { }
 export function useCw20Ics20ListChannelsQuery<TData = ListChannelsResponse>({
-  client,
-  options
+    client,
+    options
 }: Cw20Ics20ListChannelsQuery<TData>) {
-  return useQuery<ListChannelsResponse, Error, TData>(["cw20Ics20ListChannels", client?.contractAddress], () => client ? client.listChannels() : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<ListChannelsResponse, Error, TData>(["cw20Ics20ListChannels", client?.contractAddress], () => client ? client.listChannels() : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
-export interface Cw20Ics20PortQuery<TData> extends Cw20Ics20ReactQuery<PortResponse, TData> {}
+export interface Cw20Ics20PortQuery<TData> extends Cw20Ics20ReactQuery<PortResponse, TData> { }
 export function useCw20Ics20PortQuery<TData = PortResponse>({
-  client,
-  options
+    client,
+    options
 }: Cw20Ics20PortQuery<TData>) {
-  return useQuery<PortResponse, Error, TData>(["cw20Ics20Port", client?.contractAddress], () => client ? client.port() : Promise.reject(new Error("Invalid client")), { ...options,
-    enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
-  });
+    return useQuery<PortResponse, Error, TData>(["cw20Ics20Port", client?.contractAddress], () => client ? client.port() : Promise.reject(new Error("Invalid client")), {
+        ...options,
+        enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
+    });
 }
 export interface Cw20Ics20UpdateAdminMutation {
-  client: Cw20Ics20Client;
-  msg: {
-    admin: string;
-  };
-  args?: {
-    $fee?: FeesInterface["fees"];
-    $memo?: string;
-    $funds?: Coin[];
-  };
+    client: Cw20Ics20Client;
+    msg: {
+        admin: string;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
 }
 export function useCw20Ics20UpdateAdminMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20UpdateAdminMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, Cw20Ics20UpdateAdminMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.updateAdmin(msg, $fee, $memo, $funds), options);
+    return useMutation<ExecuteResult, Error, Cw20Ics20UpdateAdminMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.updateAdmin(msg, $fee, $memo, $funds), options);
 }
 export interface Cw20Ics20AllowMutation {
-  client: Cw20Ics20Client;
-  msg: {
-    contract: string;
-    gasLimit?: number;
-  };
-  args?: {
-    $fee?: FeesInterface["fees"];
-    $memo?: string;
-    $funds?: Coin[];
-  };
+    client: Cw20Ics20Client;
+    msg: {
+        contract: string;
+        gasLimit?: number;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
 }
 export function useCw20Ics20AllowMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20AllowMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, Cw20Ics20AllowMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.allow(msg, $fee, $memo, $funds), options);
+    return useMutation<ExecuteResult, Error, Cw20Ics20AllowMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.allow(msg, $fee, $memo, $funds), options);
 }
-export interface Cw20Ics20UpdateCw20MappingPairMutation {
-  client: Cw20Ics20Client;
-  msg: {
-    cw20Decimals: number;
-    cw20Denom: string;
-    denom: string;
-    localChannelId: string;
-    remoteDecimals: number;
-  };
-  args?: {
-    $fee?: FeesInterface["fees"];
-    $memo?: string;
-    $funds?: Coin[];
-  };
+export interface Cw20Ics20DeleteMappingPairMutation {
+    client: Cw20Ics20Client;
+    msg: {
+        denom: string;
+        localChannelId: string;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
 }
-export function useCw20Ics20UpdateCw20MappingPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20UpdateCw20MappingPairMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, Cw20Ics20UpdateCw20MappingPairMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.updateCw20MappingPair(msg, $fee, $memo, $funds), options);
+export function useCw20Ics20DeleteMappingPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20DeleteMappingPairMutation>, "mutationFn">) {
+    return useMutation<ExecuteResult, Error, Cw20Ics20DeleteMappingPairMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.deleteMappingPair(msg, $fee, $memo, $funds), options);
+}
+export interface Cw20Ics20UpdateMappingPairMutation {
+    client: Cw20Ics20Client;
+    msg: {
+        assetInfo: AssetInfo;
+        assetInfoDecimals: number;
+        denom: string;
+        localChannelId: string;
+        remoteDecimals: number;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
+}
+export function useCw20Ics20UpdateMappingPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20UpdateMappingPairMutation>, "mutationFn">) {
+    return useMutation<ExecuteResult, Error, Cw20Ics20UpdateMappingPairMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.updateMappingPair(msg, $fee, $memo, $funds), options);
+}
+export interface Cw20Ics20TransferToRemoteMutation {
+    client: Cw20Ics20Client;
+    msg: {
+        localChannelId: string;
+        memo?: string;
+        remoteAddress: string;
+        remoteDenom: string;
+        timeout?: number;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
+}
+export function useCw20Ics20TransferToRemoteMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20TransferToRemoteMutation>, "mutationFn">) {
+    return useMutation<ExecuteResult, Error, Cw20Ics20TransferToRemoteMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.transferToRemote(msg, $fee, $memo, $funds), options);
 }
 export interface Cw20Ics20TransferMutation {
-  client: Cw20Ics20Client;
-  msg: {
-    channel: string;
-    memo?: string;
-    remoteAddress: string;
-    timeout?: number;
-  };
-  args?: {
-    $fee?: FeesInterface["fees"];
-    $memo?: string;
-    $funds?: Coin[];
-  };
+    client: Cw20Ics20Client;
+    msg: {
+        channel: string;
+        memo?: string;
+        remoteAddress: string;
+        timeout?: number;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
 }
 export function useCw20Ics20TransferMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20TransferMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, Cw20Ics20TransferMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.transfer(msg, $fee, $memo, $funds), options);
+    return useMutation<ExecuteResult, Error, Cw20Ics20TransferMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.transfer(msg, $fee, $memo, $funds), options);
 }
 export interface Cw20Ics20ReceiveMutation {
-  client: Cw20Ics20Client;
-  msg: {
-    amount: Uint128;
-    msg: Binary;
-    sender: string;
-  };
-  args?: {
-    $fee?: FeesInterface["fees"];
-    $memo?: string;
-    $funds?: Coin[];
-  };
+    client: Cw20Ics20Client;
+    msg: {
+        amount: Uint128;
+        msg: Binary;
+        sender: string;
+    };
+    args?: {
+        $fee?: number | StdFee | "auto";
+        $memo?: string;
+        $funds?: Coin[];
+    };
 }
 export function useCw20Ics20ReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, Cw20Ics20ReceiveMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, Cw20Ics20ReceiveMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.receive(msg, $fee, $memo, $funds), options);
+    return useMutation<ExecuteResult, Error, Cw20Ics20ReceiveMutation>(({
+        client,
+        msg,
+        args: {
+            $fee,
+            $memo,
+            $funds
+        } = {}
+    }) => client.receive(msg, $fee, $memo, $funds), options);
 }

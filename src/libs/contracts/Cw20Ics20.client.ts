@@ -6,323 +6,384 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee } from "@cosmjs/amino";
-import { Uint128, Binary, Coin, Addr, Cw20PairQuery} from "./types";
-import {AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse} from "./Cw20Ics20.types";
+import { AllowMsg, Uint128, Binary, AssetInfo, Addr, Cw20ReceiveMsg, TransferMsg, TransferBackMsg, UpdatePairMsg, DeletePairMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, PairQuery, MappingMetadata, ArrayOfPairQuery } from "./types";
+import { InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, AdminResponse, AllowedResponse, ChannelResponse, ConfigResponse, ListAllowedResponse, ListChannelsResponse, PortResponse } from "./Cw20Ics20.types";
 export interface Cw20Ics20ReadOnlyInterface {
-  contractAddress: string;
-  port: () => Promise<PortResponse>;
-  listChannels: () => Promise<ListChannelsResponse>;
-  channel: ({
-    id
-  }: {
-    id: string;
-  }) => Promise<ChannelResponse>;
-  config: () => Promise<ConfigResponse>;
-  admin: () => Promise<AdminResponse>;
-  allowed: ({
-    contract
-  }: {
-    contract: string;
-  }) => Promise<AllowedResponse>;
-  listAllowed: ({
-    limit,
-    order,
-    startAfter
-  }: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  }) => Promise<ListAllowedResponse>;
-  cw20Mapping: ({
-    limit,
-    order,
-    startAfter
-  }: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  }) => Promise<Addr>;
-  cw20MappingFromKey: ({
-    key
-  }: {
-    key: string;
-  }) => Promise<Cw20PairQuery>;
-  cw20MappingFromCw20Denom: ({
-    cw20Denom
-  }: {
-    cw20Denom: string;
-  }) => Promise<Cw20PairQuery>;
-}
-export interface FeesInterface {
-  fees: number | StdFee | "auto"
+    contractAddress: string;
+    port: () => Promise<PortResponse>;
+    listChannels: () => Promise<ListChannelsResponse>;
+    channel: ({
+        forward,
+        id
+    }: {
+        forward?: boolean;
+        id: string;
+    }) => Promise<ChannelResponse>;
+    config: () => Promise<ConfigResponse>;
+    admin: () => Promise<AdminResponse>;
+    allowed: ({
+        contract
+    }: {
+        contract: string;
+    }) => Promise<AllowedResponse>;
+    listAllowed: ({
+        limit,
+        order,
+        startAfter
+    }: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    }) => Promise<ListAllowedResponse>;
+    pairMappings: ({
+        limit,
+        order,
+        startAfter
+    }: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    }) => Promise<Addr>;
+    pairMapping: ({
+        key
+    }: {
+        key: string;
+    }) => Promise<PairQuery>;
+    pairMappingsFromAssetInfo: ({
+        assetInfo
+    }: {
+        assetInfo: AssetInfo;
+    }) => Promise<ArrayOfPairQuery>;
 }
 export class Cw20Ics20QueryClient implements Cw20Ics20ReadOnlyInterface {
-  client: CosmWasmClient;
-  contractAddress: string;
+    client: CosmWasmClient;
+    contractAddress: string;
 
-  constructor(client: CosmWasmClient, contractAddress: string) {
-    this.client = client;
-    this.contractAddress = contractAddress;
-    this.port = this.port.bind(this);
-    this.listChannels = this.listChannels.bind(this);
-    this.channel = this.channel.bind(this);
-    this.config = this.config.bind(this);
-    this.admin = this.admin.bind(this);
-    this.allowed = this.allowed.bind(this);
-    this.listAllowed = this.listAllowed.bind(this);
-    this.cw20Mapping = this.cw20Mapping.bind(this);
-    this.cw20MappingFromKey = this.cw20MappingFromKey.bind(this);
-    this.cw20MappingFromCw20Denom = this.cw20MappingFromCw20Denom.bind(this);
-  }
+    constructor(client: CosmWasmClient, contractAddress: string) {
+        this.client = client;
+        this.contractAddress = contractAddress;
+        this.port = this.port.bind(this);
+        this.listChannels = this.listChannels.bind(this);
+        this.channel = this.channel.bind(this);
+        this.config = this.config.bind(this);
+        this.admin = this.admin.bind(this);
+        this.allowed = this.allowed.bind(this);
+        this.listAllowed = this.listAllowed.bind(this);
+        this.pairMappings = this.pairMappings.bind(this);
+        this.pairMapping = this.pairMapping.bind(this);
+        this.pairMappingsFromAssetInfo = this.pairMappingsFromAssetInfo.bind(this);
+    }
 
-  port = async (): Promise<PortResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      port: {}
-    });
-  };
-  listChannels = async (): Promise<ListChannelsResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      list_channels: {}
-    });
-  };
-  channel = async ({
-    id
-  }: {
-    id: string;
-  }): Promise<ChannelResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      channel: {
+    port = async (): Promise<PortResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            port: {}
+        });
+    };
+    listChannels = async (): Promise<ListChannelsResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            list_channels: {}
+        });
+    };
+    channel = async ({
+        forward,
         id
-      }
-    });
-  };
-  config = async (): Promise<ConfigResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      config: {}
-    });
-  };
-  admin = async (): Promise<AdminResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      admin: {}
-    });
-  };
-  allowed = async ({
-    contract
-  }: {
-    contract: string;
-  }): Promise<AllowedResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      allowed: {
+    }: {
+        forward?: boolean;
+        id: string;
+    }): Promise<ChannelResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            channel: {
+                forward,
+                id
+            }
+        });
+    };
+    config = async (): Promise<ConfigResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            config: {}
+        });
+    };
+    admin = async (): Promise<AdminResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            admin: {}
+        });
+    };
+    allowed = async ({
         contract
-      }
-    });
-  };
-  listAllowed = async ({
-    limit,
-    order,
-    startAfter
-  }: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  }): Promise<ListAllowedResponse> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      list_allowed: {
+    }: {
+        contract: string;
+    }): Promise<AllowedResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            allowed: {
+                contract
+            }
+        });
+    };
+    listAllowed = async ({
         limit,
         order,
-        start_after: startAfter
-      }
-    });
-  };
-  cw20Mapping = async ({
-    limit,
-    order,
-    startAfter
-  }: {
-    limit?: number;
-    order?: number;
-    startAfter?: string;
-  }): Promise<Addr> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      cw20_mapping: {
+        startAfter
+    }: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    }): Promise<ListAllowedResponse> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            list_allowed: {
+                limit,
+                order,
+                start_after: startAfter
+            }
+        });
+    };
+    pairMappings = async ({
         limit,
         order,
-        start_after: startAfter
-      }
-    });
-  };
-  cw20MappingFromKey = async ({
-    key
-  }: {
-    key: string;
-  }): Promise<Cw20PairQuery> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      cw20_mapping_from_key: {
+        startAfter
+    }: {
+        limit?: number;
+        order?: number;
+        startAfter?: string;
+    }): Promise<Addr> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            pair_mappings: {
+                limit,
+                order,
+                start_after: startAfter
+            }
+        });
+    };
+    pairMapping = async ({
         key
-      }
-    });
-  };
-  cw20MappingFromCw20Denom = async ({
-    cw20Denom
-  }: {
-    cw20Denom: string;
-  }): Promise<Cw20PairQuery> => {
-    return this.client.queryContractSmart(this.contractAddress, {
-      cw20_mapping_from_cw20_denom: {
-        cw20_denom: cw20Denom
-      }
-    });
-  };
+    }: {
+        key: string;
+    }): Promise<PairQuery> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            pair_mapping: {
+                key
+            }
+        });
+    };
+    pairMappingsFromAssetInfo = async ({
+        assetInfo
+    }: {
+        assetInfo: AssetInfo;
+    }): Promise<ArrayOfPairQuery> => {
+        return this.client.queryContractSmart(this.contractAddress, {
+            pair_mappings_from_asset_info: {
+                asset_info: assetInfo
+            }
+        });
+    };
 }
 export interface Cw20Ics20Interface extends Cw20Ics20ReadOnlyInterface {
-  contractAddress: string;
-  sender: string;
-  receive: ({
-    amount,
-    msg,
-    sender
-  }: {
-    amount: Uint128;
-    msg: Binary;
+    contractAddress: string;
     sender: string;
-  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  transfer: ({
-    channel,
-    memo,
-    remoteAddress,
-    timeout
-  }: {
-    channel: string;
-    memo?: string;
-    remoteAddress: string;
-    timeout?: number;
-  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  updateCw20MappingPair: ({
-    cw20Decimals,
-    cw20Denom,
-    denom,
-    localChannelId,
-    remoteDecimals
-  }: {
-    cw20Decimals: number;
-    cw20Denom: string;
-    denom: string;
-    localChannelId: string;
-    remoteDecimals: number;
-  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  allow: ({
-    contract,
-    gasLimit
-  }: {
-    contract: string;
-    gasLimit?: number;
-  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  updateAdmin: ({
-    admin
-  }: {
-    admin: string;
-  }, $fee?: FeesInterface["fees"], $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-}
-export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20Interface {
-  client: SigningCosmWasmClient;
-  sender: string;
-  contractAddress: string;
-
-  constructor(client: SigningCosmWasmClient, sender: string, contractAddress: string) {
-    super(client, contractAddress);
-    this.client = client;
-    this.sender = sender;
-    this.contractAddress = contractAddress;
-    this.receive = this.receive.bind(this);
-    this.transfer = this.transfer.bind(this);
-    this.updateCw20MappingPair = this.updateCw20MappingPair.bind(this);
-    this.allow = this.allow.bind(this);
-    this.updateAdmin = this.updateAdmin.bind(this);
-  }
-
-  receive = async ({
-    amount,
-    msg,
-    sender
-  }: {
-    amount: Uint128;
-    msg: Binary;
-    sender: string;
-  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      receive: {
+    receive: ({
         amount,
         msg,
         sender
-      }
-    }, $fee, $memo, $funds);
-  };
-  transfer = async ({
-    channel,
-    memo,
-    remoteAddress,
-    timeout
-  }: {
-    channel: string;
-    memo?: string;
-    remoteAddress: string;
-    timeout?: number;
-  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      transfer: {
+    }: {
+        amount: Uint128;
+        msg: Binary;
+        sender: string;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    transfer: ({
         channel,
         memo,
-        remote_address: remoteAddress,
+        remoteAddress,
         timeout
-      }
-    }, $fee, $memo, $funds);
-  };
-  updateCw20MappingPair = async ({
-    cw20Decimals,
-    cw20Denom,
-    denom,
-    localChannelId,
-    remoteDecimals
-  }: {
-    cw20Decimals: number;
-    cw20Denom: string;
-    denom: string;
-    localChannelId: string;
-    remoteDecimals: number;
-  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      update_cw20_mapping_pair: {
-        cw20_decimals: cw20Decimals,
-        cw20_denom: cw20Denom,
+    }: {
+        channel: string;
+        memo?: string;
+        remoteAddress: string;
+        timeout?: number;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    transferToRemote: ({
+        localChannelId,
+        memo,
+        remoteAddress,
+        remoteDenom,
+        timeout
+    }: {
+        localChannelId: string;
+        memo?: string;
+        remoteAddress: string;
+        remoteDenom: string;
+        timeout?: number;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    updateMappingPair: ({
+        assetInfo,
+        assetInfoDecimals,
         denom,
-        local_channel_id: localChannelId,
-        remote_decimals: remoteDecimals
-      }
-    }, $fee, $memo, $funds);
-  };
-  allow = async ({
-    contract,
-    gasLimit
-  }: {
-    contract: string;
-    gasLimit?: number;
-  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      allow: {
+        localChannelId,
+        remoteDecimals
+    }: {
+        assetInfo: AssetInfo;
+        assetInfoDecimals: number;
+        denom: string;
+        localChannelId: string;
+        remoteDecimals: number;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    deleteMappingPair: ({
+        denom,
+        localChannelId
+    }: {
+        denom: string;
+        localChannelId: string;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    allow: ({
         contract,
-        gas_limit: gasLimit
-      }
-    }, $fee, $memo, $funds);
-  };
-  updateAdmin = async ({
-    admin
-  }: {
-    admin: string;
-  }, $fee: FeesInterface["fees"] = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
-    return await this.client.execute(this.sender, this.contractAddress, {
-      update_admin: {
+        gasLimit
+    }: {
+        contract: string;
+        gasLimit?: number;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+    updateAdmin: ({
         admin
-      }
-    }, $fee, $memo, $funds);
-  };
+    }: {
+        admin: string;
+    }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+}
+export class Cw20Ics20Client extends Cw20Ics20QueryClient implements Cw20Ics20Interface {
+    client: SigningCosmWasmClient;
+    sender: string;
+    contractAddress: string;
+
+    constructor(client: SigningCosmWasmClient, sender: string, contractAddress: string) {
+        super(client, contractAddress);
+        this.client = client;
+        this.sender = sender;
+        this.contractAddress = contractAddress;
+        this.receive = this.receive.bind(this);
+        this.transfer = this.transfer.bind(this);
+        this.transferToRemote = this.transferToRemote.bind(this);
+        this.updateMappingPair = this.updateMappingPair.bind(this);
+        this.deleteMappingPair = this.deleteMappingPair.bind(this);
+        this.allow = this.allow.bind(this);
+        this.updateAdmin = this.updateAdmin.bind(this);
+    }
+
+    receive = async ({
+        amount,
+        msg,
+        sender
+    }: {
+        amount: Uint128;
+        msg: Binary;
+        sender: string;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            receive: {
+                amount,
+                msg,
+                sender
+            }
+        }, $fee, $memo, $funds);
+    };
+    transfer = async ({
+        channel,
+        memo,
+        remoteAddress,
+        timeout
+    }: {
+        channel: string;
+        memo?: string;
+        remoteAddress: string;
+        timeout?: number;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            transfer: {
+                channel,
+                memo,
+                remote_address: remoteAddress,
+                timeout
+            }
+        }, $fee, $memo, $funds);
+    };
+    transferToRemote = async ({
+        localChannelId,
+        memo,
+        remoteAddress,
+        remoteDenom,
+        timeout
+    }: {
+        localChannelId: string;
+        memo?: string;
+        remoteAddress: string;
+        remoteDenom: string;
+        timeout?: number;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            transfer_to_remote: {
+                local_channel_id: localChannelId,
+                memo,
+                remote_address: remoteAddress,
+                remote_denom: remoteDenom,
+                timeout
+            }
+        }, $fee, $memo, $funds);
+    };
+    updateMappingPair = async ({
+        assetInfo,
+        assetInfoDecimals,
+        denom,
+        localChannelId,
+        remoteDecimals
+    }: {
+        assetInfo: AssetInfo;
+        assetInfoDecimals: number;
+        denom: string;
+        localChannelId: string;
+        remoteDecimals: number;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            update_mapping_pair: {
+                asset_info: assetInfo,
+                asset_info_decimals: assetInfoDecimals,
+                denom,
+                local_channel_id: localChannelId,
+                remote_decimals: remoteDecimals
+            }
+        }, $fee, $memo, $funds);
+    };
+    deleteMappingPair = async ({
+        denom,
+        localChannelId
+    }: {
+        denom: string;
+        localChannelId: string;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            delete_mapping_pair: {
+                denom,
+                local_channel_id: localChannelId
+            }
+        }, $fee, $memo, $funds);
+    };
+    allow = async ({
+        contract,
+        gasLimit
+    }: {
+        contract: string;
+        gasLimit?: number;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            allow: {
+                contract,
+                gas_limit: gasLimit
+            }
+        }, $fee, $memo, $funds);
+    };
+    updateAdmin = async ({
+        admin
+    }: {
+        admin: string;
+    }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+        return await this.client.execute(this.sender, this.contractAddress, {
+            update_admin: {
+                admin
+            }
+        }, $fee, $memo, $funds);
+    };
 }

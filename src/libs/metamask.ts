@@ -13,7 +13,7 @@ import { getDenomEvm } from 'helper';
 import { publicToAddress } from "@ethereumjs/util";
 
 export default class Metamask {
-  constructor() {}
+  constructor() { }
 
   // compare in number type
   public isBsc() {
@@ -35,27 +35,12 @@ export default class Metamask {
     });
   }
 
-  public async getPulbicKey() {
-    return await window.ethereum!.request({
-      method: 'public_key',
+  public async getEthAddress() {
+    const [address] = await window.ethereum!.request({
+      method: 'eth_requestAccounts',
       params: [],
     });
-  }
-
-  public async convertPublicToAddress() {
-    const res = await this.getPulbicKey();
-    try {
-      const pubkeyEvm = JSON.parse(res?.result);
-      if(!pubkeyEvm) return 'Invalid address';
-      const postAddress = publicToAddress(
-        Buffer.from(pubkeyEvm, 'hex'),
-        true
-      ).toString('hex');
-      return '0x' + postAddress;
-    } catch (error) {
-      console.log(error);
-      return 'Invalid address';
-    }
+    return address;
   }
 
   public async transferToGravity(
