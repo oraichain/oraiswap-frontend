@@ -19,6 +19,7 @@ import {
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
+  NOTI_INSTALL_OWALLET,
 } from 'config/constants';
 
 import {
@@ -39,6 +40,7 @@ import { ChainInfoType } from 'hooks/useGlobalState';
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import _ from 'lodash';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 
 interface Items {
   chainId?: string;
@@ -194,4 +196,13 @@ export const getNetworkGasPrice = async () => {
 
 export const calculateSubAmounts = (amountDetail: AmountDetail) => {
   return (amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0)
+}
+
+export const handleCheckWallet = async () => {
+  const keplr = await window.Keplr.getKeplr();
+  if (!keplr) {
+    return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+      toastId: 'install_keplr'
+    });
+  }
 }

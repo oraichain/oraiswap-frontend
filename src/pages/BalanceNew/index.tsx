@@ -4,6 +4,7 @@ import {
   arrayLoadToken,
   calculateSubAmounts,
   getNetworkGasPrice,
+  handleCheckWallet,
   networks
 } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -16,8 +17,6 @@ import tokenABI from 'config/abi/erc20.json';
 import { Multicall, ContractCallResults } from 'libs/ethereum-multicall';
 import {
   AminoTypes,
-  // BroadcastTxResponse,
-  // isBroadcastTxFailure,
   DeliverTxResponse,
   GasPrice,
   isDeliverTxFailure,
@@ -177,17 +176,7 @@ const Balance: React.FC<BalanceProps> = () => {
     loadTokenAmounts();
   }, [keplrAddress, metamaskAddress, txHash, prices]);
 
-  const handleCheckWallet = async () => {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
-    }
-  };
-
   const loadTokens = async () => {
-    console.log('loadTokens');
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) =>
@@ -424,13 +413,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
-      // if (token.denom === ERC20_ORAI) {
-      //   displayToast(TToastType.TX_INFO, {
-      //     message: `Token ${token.name} on ${token.org} is currently not supported`
-      //   });
-      //   return;
-      // }
-
       if (type === 'to') {
         if (_.isEqual(to, token)) {
           setTo(undefined);
@@ -463,88 +445,6 @@ const Balance: React.FC<BalanceProps> = () => {
     },
     [onClickToken]
   );
-
-  const transferFromGravity = async (
-    fromToken: TokenItemType,
-    amount: number
-  ) => {
-    try {
-      console.log('transferFromGravity');
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) return;
-      // disable Oraibridge -> BNB Chain Ledger
-      const key = await keplr.getKey(network.chainId);
-      if (key.isNanoLedger) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Ethereum signing with Ledger is not yet supported!'
-        });
-        return;
-      }
-
-      await window.Keplr.suggestChain(fromToken.chainId as string);
-      const fromAddress = await window.Keplr.getKeplrAddr(
-        fromToken.chainId as string
-      );
-
-      if (!metamaskAddress || !fromAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
-
-      const rawAmount = parseAmountToWithDecimal(amount, fromToken.decimals)
-        .minus(ORAI_BRIDGE_EVM_FEE)
-        .minus(ORAI_BRIDGE_CHAIN_FEE)
-        .toFixed(0);
-
-      const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId as string
-      );
-      let aminoTypes = new AminoTypes({ ...customAminoTypes });
-      // sendToEthAminoTypes['/gravity.v1.MsgSendToEth']
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-      const client = await SigningStargateClient.connectWithSigner(
-        fromToken.rpc,
-        offlineSigner,
-        { registry: customRegistry, aminoTypes }
-      );
-
-      const message = {
-        typeUrl: '/gravity.v1.MsgSendToEth',
-        value: MsgSendToEth.fromPartial({
-          sender: fromAddress,
-          ethDest: metamaskAddress,
-          amount: {
-            denom: fromToken.denom,
-            amount: rawAmount
-          },
-          bridgeFee: {
-            denom: fromToken.denom,
-            // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_EVM_FEE
-          },
-          chainFee: {
-            denom: fromToken.denom,
-            // just a number to make sure there is a friction
-            amount: ORAI_BRIDGE_CHAIN_FEE
-          },
-          evmChainPrefix: fromToken.prefix
-        })
-      };
-      const fee = {
-        amount: [],
-        gas: '200000'
-      };
-      const result = await client.signAndBroadcast(fromAddress, [message], fee);
-
-      processTxResult(fromToken, result);
-    } catch (ex: any) {
-      displayToast(TToastType.TX_FAILED, {
-        message: `${ex}`
-      });
-    }
-  };
 
   const transferToRemoteChainIbcWasm = async (
     ibcInfo: IBCInfo,
@@ -832,64 +732,6 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  // note: duplicate func need scale (transferIBCOrai,transferIBC, transferIBCKwt,...)
-  const transferIBCOrai = async (data: {
-    fromToken: TokenItemType;
-    toTokenPrefix: string;
-    fromAddress: string;
-    toAddress: string;
-    amount: Coin;
-    ibcInfo: IBCInfo;
-  }) => {
-    const {
-      fromToken,
-      fromAddress,
-      toAddress,
-      amount,
-      ibcInfo,
-      toTokenPrefix
-    } = data;
-
-    try {
-      const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId as string
-      );
-      const msgTransfer = {
-        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-        value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: amount,
-          sender: fromAddress,
-          receiver: toAddress,
-          memo: toTokenPrefix + metamaskAddress,
-          timeoutTimestamp: Long.fromNumber(
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          )
-            .multiply(1000000000)
-            .toString()
-        })
-      };
-
-      let aminoTypes = new AminoTypes({ ...customAminoTypes });
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-      const client = await SigningStargateClient.connectWithSigner(
-        fromToken.rpc,
-        offlineSigner,
-        { registry: customRegistry, aminoTypes }
-      );
-      const result = await client.signAndBroadcast(fromAddress, [msgTransfer], {
-        gas: '300000',
-        amount: []
-      });
-      processTxResult(fromToken, result);
-    } catch (ex: any) {
-      displayToast(TToastType.TX_FAILED, {
-        message: ex.message
-      });
-    }
-  };
-
   const transferIBCKwt = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
@@ -1121,7 +963,6 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     displayToast(TToastType.TX_BROADCASTING);
-    console.log('1');
 
     try {
       if (
@@ -1129,16 +970,13 @@ const Balance: React.FC<BalanceProps> = () => {
         to.chainId === ORAICHAIN_ID &&
         !!from.contractAddress
       ) {
-        console.log('55');
         await convertTransferIBCErc20Kwt(from, to, fromAmount);
       } else if (
         from.chainId === KWT_SUBNETWORK_CHAIN_ID &&
         to.chainId === ORAICHAIN_ID
       ) {
-        console.log('44');
         await transferIBCKwt(from, to, fromAmount);
       } else if (from.cosmosBased) {
-        console.log('33');
         return await transferIbcCustom(from, to, fromAmount);
       } else {
         await transferEvmToIBC(fromAmount);
@@ -1330,7 +1168,7 @@ const Balance: React.FC<BalanceProps> = () => {
               onClick={() => setIsSelectNetwork(true)}
             >
               <div className={styles.search_box}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className={styles.search_flex}>
                   <div className={styles.search_logo}>
                     {renderLogoNetwork(filterNetwork)}
                   </div>
@@ -1409,10 +1247,6 @@ const Balance: React.FC<BalanceProps> = () => {
                             onClickTransfer(fromAmount, from, to);
                           }
                         : undefined
-                    }
-                    toToken={tokenOraichain ? transferToToken : to}
-                    transferFromGravity={
-                      tokenOraichain ? undefined : transferFromGravity
                     }
                     convertKwt={
                       t.chainId === KWT_SUBNETWORK_CHAIN_ID
