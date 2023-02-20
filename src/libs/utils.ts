@@ -119,6 +119,9 @@ export const parseAmountFromWithDecimal = (
   sourceDecimals: number,
   desDecimals = 6
 ) => {
+  // guarding conditions to prevent crashing
+  if (Number.isNaN(amount)) amount = 0;
+  if (Number.isFinite(amount)) amount = 0;
   let t = new Big(amount)
     .div(new Big(10).pow(sourceDecimals))
     .round(desDecimals, 0);
@@ -144,7 +147,7 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   return messages;
 }
 
-export const formatCash = (n: number ) => {
+export const formatCash = (n: number) => {
   if (n < 1e3) return n.toFixed(2);
   if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
   if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";

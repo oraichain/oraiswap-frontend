@@ -62,6 +62,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
+      console.log("amount details: ", amountDetail);
     }
   }, [chainInfo]);
 
@@ -76,7 +77,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   );
 
   const maxAmount = parseAmountFrom(
-    amountDetail?.amount ?? 0,
+    0,
     token?.decimals
   ).toNumber();
 

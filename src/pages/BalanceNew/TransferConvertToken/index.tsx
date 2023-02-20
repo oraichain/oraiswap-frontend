@@ -100,7 +100,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const subAmount = calculateSubAmounts(amountDetail);
   const maxAmount = parseAmountFrom(
-    (amountDetail?.amount + subAmount ?? 0) ?? 0,
+    amountDetail ? amountDetail.amount + subAmount : 0, // amount detail here can be undefined
     token?.decimals
   ).toNumber();
 
@@ -334,8 +334,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             (token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 &&
-            name) || (onClickTransferList.includes(token?.org))
+              token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 &&
+              name) || (onClickTransferList.includes(token?.org))
           ) {
             return (
               <>
