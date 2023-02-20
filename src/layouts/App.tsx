@@ -10,12 +10,14 @@ import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
 import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
+import { network } from 'config/networks';
+import { getNetworkGasPrice } from 'helper';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
   const [_$, setChainInfo] = useGlobalState('chainInfo');
-  const [_$$,setStatusChangeAccount] = useGlobalState('statusChangeAccount');
+  const [_$$, setStatusChangeAccount] = useGlobalState('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
   const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
@@ -75,15 +77,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if(window.keplr) {
+    if (window.keplr) {
       keplrGasPriceCheck();
     }
-  },[])
+  }, [])
 
   const keplrGasPriceCheck = async () => {
     try {
-      const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
-      const gasPriceStep = chainInfosWithoutEndpoints.find(e => e.chainId == ORAICHAIN_ID)?.feeCurrencies[0]?.gasPriceStep
+      const gasPriceStep = await getNetworkGasPrice();
       if (gasPriceStep && !gasPriceStep.low) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,

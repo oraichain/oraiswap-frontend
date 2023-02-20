@@ -368,14 +368,14 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
           keplrAddress &&
-            getFunctionExecution(loadNativeBalance, [
-              keplrAddress,
-              network.rpc
-            ]),
+          getFunctionExecution(loadNativeBalance, [
+            keplrAddress,
+            network.rpc
+          ]),
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
@@ -385,7 +385,7 @@ const Balance: React.FC<BalanceProps> = () => {
           .filter((c) => c.contractAddress)
           .map((t) => {
             const detail = window.amounts[t.denom];
-            const subAmount = getSubAmount(window.amounts, t);
+            const subAmount = getSubAmount(window.amounts, t, prices);
             return [
               t.denom,
               {

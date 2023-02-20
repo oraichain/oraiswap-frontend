@@ -49,15 +49,6 @@ const AMOUNT_BALANCE_50 = '50%';
 const AMOUNT_BALANCE_75 = '75%';
 const AMOUNT_BALANCE_MAX = 'MAX';
 
-type AmountDetail = {
-  subAmounts: {
-    amount: number;
-    usd: number;
-  };
-  amount: number;
-  usd: number;
-};
-
 interface TransferConvertProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
@@ -110,8 +101,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       token.chainId === ORAICHAIN_ID &&
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
-  
-  const subAmount = amountDetail?.subAmounts ? (Object.values(amountDetail.subAmounts)?.[0]?.amount ?? 0) : 0;
+
+  // list of tokens where it exists in at least two different chains
+  const listedTokens = filteredTokens.filter(
+    (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
+  )
+
+  const subAmount = amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0;
   const maxAmount = parseAmountFrom(
     (amountDetail?.amount + subAmount ?? 0) ?? 0,
     token?.decimals
@@ -144,7 +140,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       let address: string = '';
       if (network.networkType == EVM_TYPE) {
         if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
-        address = await window.Metamask!.convertPublicToAddress();
+        address = await window.Metamask!.getEthAddress();
       }
       if (network.networkType == COSMOS_TYPE) {
         address = await window.Keplr.getKeplrAddr(
@@ -307,7 +303,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 onClick={(event) => {
                   event.stopPropagation();
                   if (!amountDetail) return;
-                  
+
                   setConvertAmount([maxAmount, amountDetail.usd]);
                 }}
               >
@@ -318,7 +314,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         </div>
       </div>
       <div className={styles.transferTab}>
-        {onClickTransfer &&
+        {/* {onClickTransfer &&
           (onClickTransferList.includes(token?.org) ||
             (token?.org === ORAICHAIN_ID &&
               (token?.name === ATOM || token?.name === OSMO))) && (
@@ -342,7 +338,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 Transfer <strong>{filterNetwork}</strong>
               </span>
             </button>
-          )}
+          )} */}
         {(() => {
           if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
             return (
@@ -367,7 +363,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                   {filterNetwork === ORAICHAIN_ID ? "Transfer" : "Convert"} <strong>{filterNetwork}</strong>
+                    {filterNetwork === ORAICHAIN_ID ? "Transfer" : "Convert"} <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -401,79 +397,51 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          // erc20 oraichain
           if (
             token.cosmosBased &&
-            token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-            (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 &&
             name
           ) {
             return (
               <>
-                <Tooltip
-                  content={
-                    toToken?.chainId === KWT_SUBNETWORK_CHAIN_ID && (
-                      <div style={{ textAlign: 'left' }}>
-                        <div style={{ marginBottom: '6px' }}>
-                          [Notice] Keplr recently sent out an update that
-                          affected the current flow of Kawaiiverse, please
-                          delete Kawaiiverse in Keplr and add it again (make
-                          sure you have no token left in Kawaiiverse before
-                          deleting). Also remember to set your gas fee for free
-                          transactions.
-                        </div>
-                        <i>
-                          Skip this message if you added Kawaiiverse after July
-                          8, 2022.
-                        </i>
-                      </div>
-                    )
-                  }
-                >
-                  <button
-                    disabled={transferLoading}
-                    className={styles.tfBtn}
-                    onClick={async (event) => {
-                      event.stopPropagation();
-                      try {
-                        const isValid = checkValidAmount();
-                        if (!isValid) return;
-                        setTransferLoading(true);
-                        if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
-                          return await convertToken(
-                            convertAmount,
-                            token,
-                            'nativeToCw20'
-                          );
-                        }
-                        if (onClickTransfer && filterNetwork == KAWAII_ORG) {
-                          return await onClickTransfer(convertAmount);
-                        }
-                        const name = parseBep20Erc20Name(token.name);
-                        const tokenBridge = token?.bridgeNetworkIdentifier;
-                        const to = filteredTokens.find(
-                          (t) =>
-                            t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
-                              ? t.bridgeNetworkIdentifier.includes(
-                                  token.bridgeNetworkIdentifier
-                                )
-                              : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                <button
+                  disabled={transferLoading}
+                  className={styles.tfBtn}
+                  onClick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      const isValid = checkValidAmount();
+                      if (!isValid) return;
+                      setTransferLoading(true);
+                      if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
+                        return await convertToken(
+                          convertAmount,
+                          token,
+                          'nativeToCw20'
                         );
-
-                        // convert reverse before transferring
-                        await transferIBC(token, to, convertAmount);
-                      } finally {
-                        setTransferLoading(false);
                       }
-                    }}
-                  >
-                    {transferLoading && <Loader width={20} height={20} />}
-                    <span>
-                      {'Transfer'}{' '}
-                      <strong>{filterNetwork}</strong>
-                    </span>
-                  </button>
-                </Tooltip>
+                      if (onClickTransfer && filterNetwork == KAWAII_ORG) {
+                        return await onClickTransfer(convertAmount);
+                      }
+                      const to = filteredTokens.find(
+                        (t) =>
+                          t.chainId === ORAI_BRIDGE_CHAIN_ID && t?.bridgeNetworkIdentifier
+                            ? t.bridgeNetworkIdentifier === filterNetwork && t.coingeckoId === token.coingeckoId
+                            : t.coingeckoId === token.coingeckoId && t.org === filterNetwork
+                      );
+                      // convert reverse before transferring
+                      await transferIBC(token, to, convertAmount);
+                    } finally {
+                      setTransferLoading(false);
+                    }
+                  }}
+                >
+                  {transferLoading && <Loader width={20} height={20} />}
+                  <span>
+                    {'Transfer'}{' '}
+                    <strong>{filterNetwork}</strong>
+                  </span>
+                </button>
               </>
             );
           }

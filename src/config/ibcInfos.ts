@@ -2,6 +2,7 @@ import { IBCInfo } from 'types/ibc';
 import {
   IBC_TRANSFER_TIMEOUT,
   KWT_SUBNETWORK_CHAIN_ID,
+  ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
 } from './constants';
 
@@ -93,6 +94,11 @@ export const ibcInfosOld: IBCInfoMap = {
       source: 'transfer',
       channel: oraichain2oraib_old,
       timeout: IBC_TRANSFER_TIMEOUT
+    },
+    [KWT_SUBNETWORK_CHAIN_ID]: {
+      source: 'transfer',
+      channel: oraichain2kwt,
+      timeout: IBC_TRANSFER_TIMEOUT
     }
   },
   [ORAI_BRIDGE_CHAIN_ID]: {
@@ -100,6 +106,13 @@ export const ibcInfosOld: IBCInfoMap = {
       source: 'transfer',
       channel: oraib2oraichain_old,
       timeout: IBC_TRANSFER_TIMEOUT
+    },
+  },
+  [KWT_SUBNETWORK_CHAIN_ID]: {
+    Oraichain: {
+      source: 'transfer',
+      channel: kwt2oraichain,
+      timeout: IBC_TRANSFER_TIMEOUT
     }
-  }
+  },
 };

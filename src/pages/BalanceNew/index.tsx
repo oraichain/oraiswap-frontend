@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
-import { arrayLoadToken, networksFilterChain, objConvertTokenIbc } from 'helper';
+import { arrayLoadToken, getNetworkGasPrice, networksFilterChain, objConvertTokenIbc } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
 import { renderLogoNetwork } from 'helper';
@@ -14,6 +14,7 @@ import {
   // BroadcastTxResponse,
   // isBroadcastTxFailure,
   DeliverTxResponse,
+  GasPrice,
   isDeliverTxFailure,
   SigningStargateClient,
   StargateClient
@@ -21,7 +22,7 @@ import {
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _, { add } from 'lodash';
 import TokenBalance from 'components/TokenBalance';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import {
   Erc20Cw20Map,
   evmTokens,
@@ -37,7 +38,8 @@ import {
   generateConvertMsgs,
   simulateSwap,
   Type,
-  getSubAmount
+  getSubAmount,
+  parseTokenInfo
 } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -61,9 +63,11 @@ import {
   ETHEREUM_SCAN,
   KAWAII_SUBNET_RPC,
   KWT,
+  KWT_BSC_CONTRACT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
+  MILKY_BSC_CONTRACT,
   NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
@@ -94,12 +98,13 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
 import useLocalStorage from 'hooks/useLocalStorage';
 import { Contract } from 'config/contracts';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import {
   BalanceResponse,
   QueryMsg as TokenQueryMsg
 } from 'libs/contracts/OraiswapToken.types';
 import LoadingBox from 'components/LoadingBox';
+import { TransferBackMsg } from 'libs/contracts';
 
 interface BalanceProps { }
 
@@ -522,6 +527,118 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const transferToRemoteChainIbcWasm = async (ibcInfo: IBCInfo, fromToken: TokenItemType, toToken: TokenItemType, fromAddress: string, toAddress: string, amount: string, ibcMemo: string): Promise<void> => {
+    const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
+    if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
+
+    const { info: assetInfo } = parseTokenInfo(fromToken);
+    Contract.sender = fromAddress;
+    const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
+    try {
+      // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
+      await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
+    } catch (error) {
+      console.log("error ibc wasm transfer back to remote chain: ", error)
+      console.log("We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC");
+      // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+      throw "Cannot transfer to remote chain because cannot find mapping pair";
+    }
+
+    // if asset info is native => send native way, else send cw20 way
+    const msg = {
+      localChannelId: ibcInfo.channel,
+      remoteAddress: toAddress,
+      remoteDenom: toToken.denom,
+      timeout: ibcInfo.timeout,
+      memo: ibcMemo,
+    };
+    let result: ExecuteResult;
+    if (assetInfo.native_token) {
+      result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
+    } else {
+      const transferBackMsgCw20Msg: TransferBackMsg = { local_channel_id: msg.localChannelId, remote_address: msg.remoteAddress, remote_denom: msg.remoteDenom, timeout: msg.timeout, memo: msg.memo };
+      const cw20Token = Contract.token(fromToken.contractAddress);
+      result = await cw20Token.send({
+        amount,
+        contract: ibcWasmContractAddress,
+        msg: Buffer.from(JSON.stringify(transferBackMsgCw20Msg)).toString('base64')
+      }, 'auto')
+      console.log("result: ", result);
+    }
+
+    displayToast(TToastType.TX_SUCCESSFUL, {
+      customLink: `${network.explorer}/txs/${result.transactionHash}`,
+    });
+    setTxHash(result.transactionHash);
+  }
+
+  const transferTokenErc20Cw20Map = async ({ amount, transferAmount, fromToken, fromAddress, toAddress, ibcInfo, ibcMemo }: { amount: Coin, transferAmount: number, fromToken: TokenItemType, fromAddress: string, toAddress: string, ibcInfo: IBCInfo, ibcMemo?: string }) => {
+    amount = coin(
+      parseAmountToWithDecimal(
+        transferAmount,
+        fromToken.erc20Cw20Map[0].decimals.erc20Decimals
+      ).toFixed(0),
+      fromToken.erc20Cw20Map[0].erc20Denom
+    );
+
+    const msgConvertReverses = await generateConvertCw20Erc20Message(
+      window.amounts,
+      fromToken,
+      fromAddress,
+      amount
+    );
+
+    const executeContractMsgs = getExecuteContractMsgs(
+      fromAddress,
+      parseExecuteContractMultiple(
+        buildMultipleMessages(undefined, msgConvertReverses)
+      )
+    );
+
+    // note need refactor
+    // get raw ibc tx
+    const msgTransfer = {
+      typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+      value: MsgTransfer.fromPartial({
+        sourcePort: ibcInfo.source,
+        sourceChannel: ibcInfo.channel,
+        token: amount,
+        sender: fromAddress,
+        receiver: toAddress,
+        memo: ibcMemo,
+        timeoutTimestamp: Long.fromNumber(
+          Math.floor(Date.now() / 1000) + ibcInfo.timeout
+        )
+          .multiply(1000000000)
+          .toString()
+      })
+    };
+
+    const offlineSigner = await window.Keplr.getOfflineSigner(
+      fromToken.chainId as string
+    );
+    const aminoTypes = new AminoTypes({
+      ...createWasmAminoConverters(),
+      ...customAminoTypes
+    });
+    // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+    const client = await SigningStargateClient.connectWithSigner(
+      fromToken.rpc,
+      offlineSigner,
+      { registry: customRegistry, aminoTypes, gasPrice: GasPrice.fromString(`${(await getNetworkGasPrice()).average}${network.denom}`) }
+    );
+    const result = await client.signAndBroadcast(
+      fromAddress,
+      [...executeContractMsgs, msgTransfer],
+      'auto'
+    );
+    processTxResult(
+      fromToken,
+      result,
+      `${network.explorer}/txs/${result.transactionHash}`
+    );
+  }
+
   const transferIbcCustom = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
@@ -562,110 +679,25 @@ const Balance: React.FC<BalanceProps> = () => {
         parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
         fromToken.denom
       );
-
+      const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
       let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-      console.log('ibcInfo');
-      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
-      if (!fromToken.erc20Cw20Map) {
-        if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
-          ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-          await transferIBCOrai({
-            fromToken,
-            toTokenPrefix: toToken.prefix,
-            fromAddress,
-            toAddress,
-            amount,
-            ibcInfo
-          });
-          return;
-        }
-        await transferIBC({
-          fromToken,
-          fromAddress,
-          toAddress,
-          amount,
-          ibcInfo
-        });
+      if (fromToken.erc20Cw20Map) {
+        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+        await transferTokenErc20Cw20Map({ amount, transferAmount, fromToken, fromAddress, toAddress, ibcInfo, ibcMemo });
         return;
       }
-
       // if it includes wasm in source => ibc wasm case
-      if (ibcInfo.source.includes('wasm')) {
-        // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+      if (ibcInfo.channel === oraichain2oraib) {
+        await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, fromAddress, toAddress, amount.amount, ibcMemo);
+        return;
       }
-
-      console.log('ibc info: ', ibcInfo);
-
-      amount = coin(
-        parseAmountToWithDecimal(
-          transferAmount,
-          fromToken.erc20Cw20Map[0].decimals.erc20Decimals
-        ).toFixed(0),
-        fromToken.erc20Cw20Map[0].erc20Denom
-      );
-
-      const msgConvertReverses = await generateConvertCw20Erc20Message(
-        window.amounts,
+      await transferIBC({
         fromToken,
         fromAddress,
-        amount
-      );
-
-      const executeContractMsgs = getExecuteContractMsgs(
-        fromAddress,
-        parseExecuteContractMultiple(
-          buildMultipleMessages(undefined, msgConvertReverses)
-        )
-      );
-
-      // note need refactor
-      const memo =
-        toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
-      // get raw ibc tx
-      const msgTransfer = {
-        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-        value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: amount,
-          sender: fromAddress,
-          receiver: toAddress,
-          memo,
-          timeoutTimestamp: Long.fromNumber(
-            Math.floor(Date.now() / 1000) + ibcInfo.timeout
-          )
-            .multiply(1000000000)
-            .toString()
-        })
-      };
-
-      const offlineSigner = await window.Keplr.getOfflineSigner(
-        fromToken.chainId as string
-      );
-      const aminoTypes = new AminoTypes({
-        ...createWasmAminoConverters(),
-        ...customAminoTypes
+        toAddress,
+        amount,
+        ibcInfo
       });
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-      const client = await SigningStargateClient.connectWithSigner(
-        fromToken.rpc,
-        offlineSigner,
-        { registry: customRegistry, aminoTypes }
-      );
-      const result = await client.signAndBroadcast(
-        fromAddress,
-        [...executeContractMsgs, msgTransfer],
-        {
-          gas: '300000',
-          amount: []
-        }
-      );
-      processTxResult(
-        fromToken,
-        result,
-        `${network.explorer}/txs/${result.transactionHash}`
-      );
       // }
     } catch (ex: any) {
       console.log('error in transfer ibc custom: ', ex);
@@ -916,15 +948,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const transferEvmToIBC = async (fromAmount: number) => {
-    // if (isMobile()) {
-    //   displayToast(TToastType.TX_FAILED, {
-    //     message: 'Metamask mobile app is not supported yet!',
-    //   });
-    //   return;
-    // }
-
     await window.Metamask.switchNetwork(from!.chainId);
-
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please login both metamask and keplr!'
@@ -944,12 +968,17 @@ const Balance: React.FC<BalanceProps> = () => {
         gravityContractAddr,
         fromAmount.toString()
       );
+      let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
+      // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
+      if (from.contractAddress === KWT_BSC_CONTRACT || from.contractAddress === MILKY_BSC_CONTRACT) {
+        oneStepKeplrAddr = keplrAddress;
+      }
       const result = await window.Metamask.transferToGravity(
         from!.chainId as string,
         fromAmount.toString(),
         from!.contractAddress!,
         metamaskAddress,
-        keplrAddress
+        oneStepKeplrAddr
       );
       console.log(result);
       processTxResult(
@@ -990,11 +1019,15 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
+    const tokenAmountDetails = window.amounts[from.denom];
     const fromBalance =
-      from && window.amounts[from.denom]
-        ? window.amounts[from.denom].amount
+      from && tokenAmountDetails
+        ? tokenAmountDetails.amount + (tokenAmountDetails.subAmounts ? _.sumBy(Object.values(window.amounts[from.denom].subAmounts), (sub) => sub.amount) : 0)
         : 0;
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Your balance is insufficient to make this transfer'
+      });
       return;
     }
     displayToast(TToastType.TX_BROADCASTING);
@@ -1278,7 +1311,7 @@ const Balance: React.FC<BalanceProps> = () => {
                           tokenOraichain ? onClickTokenTo : onClickTokenFrom
                         }
                         convertToken={convertToken}
-                        transferIBC={tokenOraichain && transferIbcCustom}
+                        transferIBC={transferIbcCustom}
                         onClickTransfer={
                           tokenOraichain
                             ? !!transferToToken

@@ -51,6 +51,7 @@ import {
 } from 'config/constants';
 import { ChainInfoType } from 'hooks/useGlobalState';
 import { network } from 'config/networks';
+import { TokenItemType } from 'config/bridgeTokens';
 
 const KWT_DENOM = 'kwt';
 interface Items {
@@ -147,7 +148,7 @@ export const renderLogoNetwork = (network: string) => {
   return logo;
 };
 
-// filter chain support
+// TODO: Need to filter from the list of bridgeTokens, not hardcode like this
 export const filterChainBridge = (
   token: Tokens,
   item: Items,
@@ -175,11 +176,6 @@ export const filterChainBridge = (
       return item.title === BSC_ORG;
     case STABLE_DENOM:
       return item.title === BSC_ORG;
-    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM.toLowerCase():
-      return (
-        item.title !== filterNetwork &&
-        (item.title === BSC_ORG || item.title === ORAICHAIN_ID)
-      );
     case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM.toLowerCase():
       return (
         item.title !== filterNetwork &&
@@ -253,9 +249,8 @@ export const filterChainBridge = (
   }
 };
 
-export const getTokenChain = (token?: {
-  chainId: string | number; org?: string; denom?: string
-}) => {
+// TODO: Cannot hardcode token chain like this. Need to filter from the bridgeTokens list
+export const getTokenChain = (token: TokenItemType) => {
   let chainId = token?.org;
 
   if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
@@ -265,72 +260,21 @@ export const getTokenChain = (token?: {
   switch (token?.denom) {
     // Oraichain
     case ORAI:
+    case AIRI_DENOM:
+    case STABLE_DENOM:
       chainId = BSC_ORG
       break;
     case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM:
       chainId = COSMOS_ORG;
       break;
-    case AIRI_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case STABLE_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM:
-      chainId = ETHEREUM_ORG;
-      break;
     case KWT_DENOM:
-      chainId = KAWAII_ORG;
-      break;
     case MILKY:
       chainId = KAWAII_ORG;
-      break;
-    case ORAIX_DENOM.toLowerCase():
-      chainId = ORAICHAIN_ID;
-      break;
-    case scORAI_DENOM:
-      chainId = ORAICHAIN_ID;
       break;
     case process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM:
       chainId = OSMOSIS_ORG;
       break;
-
-    // Kawaiiverse
-    case process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // Osmosis`
-    case UOSMOS_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // Cosmos Hub
-    case UATOM_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // BNB Chain
-    case BEP20_USDT:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_AIRI:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_KWT:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_ORAI:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_MILKY:
-      chainId = ORAICHAIN_ID;
-      break;
-    // ethereum
-    case ERC20_ORAI:
+    default:
       chainId = ORAICHAIN_ID;
       break;
   }
@@ -393,3 +337,8 @@ export const arrayLoadToken = [
   { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC },
   { chainId: network.chainId, rpc: network.rpc }
 ];
+
+export const getNetworkGasPrice = async () => {
+  const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
+  return chainInfosWithoutEndpoints.find(e => e.chainId == network.chainId)?.feeCurrencies[0]?.gasPriceStep
+}
