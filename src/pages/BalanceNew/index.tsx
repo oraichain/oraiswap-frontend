@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
-import { arrayLoadToken, calculateSubAmounts, getNetworkGasPrice, networksFilterChain, objConvertTokenIbc } from 'helper';
+import { arrayLoadToken, calculateSubAmounts, getNetworkGasPrice, networks } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
 import { renderLogoNetwork } from 'helper';
@@ -1345,7 +1345,7 @@ const Balance: React.FC<BalanceProps> = () => {
           isOpen={isSelectNetwork}
           open={() => setIsSelectNetwork(true)}
           close={() => setIsSelectNetwork(false)}
-          listToken={networksFilterChain}
+          listToken={networks}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}
