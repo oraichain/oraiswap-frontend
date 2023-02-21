@@ -177,10 +177,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
               )}
               {!!metamaskAddress && (
                 <div className={styles.token_info}>
-                  <AvatarPlaceholder
-                    address={metamaskAddress}
-                    className={styles.token_avatar}
-                  />
                   {handleCheckChain(BSC_CHAIN_ID) && (
                     <BNBIcon className={styles.token_avatar} />
                   )}
