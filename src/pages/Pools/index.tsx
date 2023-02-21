@@ -198,9 +198,16 @@ const Pools: React.FC<PoolsProps> = () => {
   const [cachedPairs, setCachedPairs] = useLocalStorage<{
     [key: string]: PoolResponse;
   }>('pairs');
+  const [cachedApr, setCachedApr] = useLocalStorage<{
+    [key: string]: PoolResponse;
+  }>('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
 
+  const fetchApr = async () => {
+    const data = await fetchAllPoolApr();
+    setCachedApr(data);
+  };
   const fetchCachedPairs = async () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
@@ -295,11 +302,6 @@ const Pools: React.FC<PoolsProps> = () => {
     setOraiPrice(oraiPrice);
   };
 
-  const { data: allPoolApr } = useQuery(
-    ['fetchAllPoolApr'],
-    () => fetchAllPoolApr(),
-    useQueryConfig
-  );
   // useQuery(
   //   ['fetchPairInfoDataList'],
   //   () => fetchPairInfoDataList(),
@@ -312,6 +314,7 @@ const Pools: React.FC<PoolsProps> = () => {
 
   useEffect(() => {
     fetchCachedPairs();
+    fetchApr();
   }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
@@ -322,7 +325,7 @@ const Pools: React.FC<PoolsProps> = () => {
         <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
         <ListPools
           pairInfos={pairInfos}
-          allPoolApr={allPoolApr}
+          allPoolApr={cachedApr}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal
