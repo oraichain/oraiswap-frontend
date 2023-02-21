@@ -14,6 +14,7 @@ const LoadingBox: React.FC<{
       {loading ? (
         <div style={styles} className={cx('loading-wrap')}>
           <BlocLoaderDex open={true} />
+          {children}
         </div>
       ) : (
         children

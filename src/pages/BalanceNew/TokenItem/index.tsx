@@ -62,7 +62,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail ? amountDetail.amount + calculateSubAmounts(amountDetail) : '0',
+                amount: amountDetail
+                  ? amountDetail?.amount + calculateSubAmounts(amountDetail)
+                  : '0',
                 denom: '',
                 decimals: token.decimals,
               }}
