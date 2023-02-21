@@ -7,7 +7,7 @@ import moment from 'moment';
 import { poolTokens } from 'config/pools';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
-import notFound from 'assets/images/notFound.svg';
+// import notFound from 'assets/images/notFound.svg';
 import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';
 import { getInfoTokenSv, getPriceTokenWithTF } from './services';
@@ -75,19 +75,19 @@ const SwapChart: React.FC<{
     <div className={cx('chart-container')}>
       <LoadingBox loading={loading}>
         <div className={cx('head-info')}>
-          <div>
-            <div className={cx('head-info-top')}>
-              <div className={cx('item')}>
-                <div className={cx('item-logo')}>
-                  <IconFromToken />
+          {price24hChange && (
+            <div>
+              <div className={cx('head-info-top')}>
+                <div className={cx('item')}>
+                  <div className={cx('item-logo')}>
+                    <IconFromToken />
+                  </div>
+                  <span className={cx('item-text')}>
+                    {poolTokens
+                      .find((el) => el.denom === fromTokenDenom)
+                      ?.name?.toUpperCase()}
+                  </span>
                 </div>
-                <span className={cx('item-text')}>
-                  {poolTokens
-                    .find((el) => el.denom === fromTokenDenom)
-                    ?.name?.toUpperCase()}
-                </span>
-              </div>
-              {price24hChange && (
                 <span
                   className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}
                 >
@@ -95,9 +95,9 @@ const SwapChart: React.FC<{
                     ? `+${price24hChange.toFixed(2)}%`
                     : `${price24hChange.toFixed(2)}%`}
                 </span>
-              )}
+              </div>
             </div>
-          </div>
+          )}
           {initialData.length > 0 && (
             <div className={cx('head-info-content')}>
               <div>
@@ -127,7 +127,7 @@ const SwapChart: React.FC<{
             </div>
           )}
         </div>
-        {initialData.length ? (
+        {initialData.length > 0 && (
           <div className={cx('chart-box')}>
             <ChartComponent
               data={initialData}
@@ -141,10 +141,6 @@ const SwapChart: React.FC<{
                 areaBottomColor: 'rgba(86, 42, 209, 0)',
               }}
             />
-          </div>
-        ) : (
-          <div className={cx('no-data')}>
-            <img src={notFound} alt="nodata" />
           </div>
         )}
       </LoadingBox>

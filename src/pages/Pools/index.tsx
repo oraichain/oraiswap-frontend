@@ -1,6 +1,6 @@
-import React, { FC, memo, useEffect, useState } from 'react';
+import React, { FC, memo, useEffect, useState, useMemo } from 'react';
 import styles from './index.module.scss';
-import { Button, Input } from 'antd';
+import { Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { getPair, Pair, pairs } from 'config/pools';
@@ -18,6 +18,11 @@ import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
 import { useQuery } from '@tanstack/react-query';
+import DropdownCustom from 'components/DropdownCustom';
+import FilterSvg from 'assets/icons/icon-filter.svg';
+import SearchSvg from 'assets/icons/search-svg.svg';
+import NoDataSvg from 'assets/icons/NoDataPool.svg';
+import useLocalStorage from 'hooks/useLocalStorage';
 
 const { Search } = Input;
 const useQueryConfig = {
@@ -28,6 +33,22 @@ const useQueryConfig = {
   refetchOnReconnect: false,
 };
 interface PoolsProps {}
+
+enum KeyFilter {
+  my_pool,
+  all_pool,
+}
+
+const LIST_FILTER = [
+  {
+    key: KeyFilter.my_pool,
+    text: 'My Pools',
+  },
+  {
+    key: KeyFilter.all_pool,
+    text: 'All Pools',
+  },
+];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
@@ -141,10 +162,37 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
+  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const [typeFilter, setTypeFilter] = useState(KeyFilter.all_pool);
+
+  const listMyPool = useMemo(() => {
+    return pairs
+      .map((item) => {
+        return {
+          asset_denoms: item.asset_denoms,
+          amount: amounts[item.liquidity_token]?.amount ?? 0,
+        };
+      })
+      .filter((item) => item.amount > 0);
+  }, [amounts]);
+
+  console.log('LIST', listMyPool);
+  console.log('LIST amount', amounts);
+  console.log('LIST pair', filteredPairInfos);
 
   useEffect(() => {
-    setFilteredPairInfos(pairInfos);
-  }, [pairInfos]);
+    if (typeFilter === KeyFilter.my_pool) {
+      if (listMyPool.length === 0) return setFilteredPairInfos([]);
+      const myPools = pairInfos.filter((pairInfo) =>
+        listMyPool.some((pool) =>
+          _.isEqual(pool.asset_denoms, pairInfo.pair.asset_denoms)
+        )
+      );
+      setFilteredPairInfos(myPools);
+    } else {
+      setFilteredPairInfos(pairInfos);
+    }
+  }, [listMyPool, typeFilter, pairInfos]);
 
   const filterPairs = (text: string) => {
     if (!text) {
@@ -163,35 +211,73 @@ const ListPools = memo<{
     setFilteredPairInfos(ret);
   };
 
+  const contentDropdown = useMemo(() => {
+    return (
+      <div className={styles.content_dropdown}>
+        {LIST_FILTER.map((item) => (
+          <div
+            key={item.key}
+            style={{ color: item.key === typeFilter ? '#a871df' : '#ebebeb' }}
+            className={styles.item_dropdown}
+            onClick={() => setTypeFilter(item.key)}
+          >
+            {item.text}
+          </div>
+        ))}
+      </div>
+    );
+  }, [typeFilter]);
+
+  const triggerDropdown = useMemo(() => {
+    return (
+      <div className={styles.trigger_dropdown}>
+        <img src={FilterSvg} alt="filter_icon" /> Sort by
+      </div>
+    );
+  }, []);
+
   return (
     <div className={styles.listpools}>
-      <div className={styles.listpools_title}>All pools</div>
-      <div className={styles.listpools_search}>
-        <Search
-          placeholder="Search by pools or tokens name"
-          onSearch={filterPairs}
-          style={{
-            width: 420,
-            background: '#1E1E21',
-            borderRadius: '8px',
-            padding: '10px',
-          }}
-        />
-        {/* <div
-          className={styles.listpools_btn}
-          onClick={() => setIsOpenNewPoolModal(true)}
-        >
-          Create new pool
-        </div> */}
+      <div className={styles.listpools_header}>
+        <div className={styles.listpools_filter}>
+          <DropdownCustom
+            triggerElement={triggerDropdown}
+            content={contentDropdown}
+            styles={{ top: 'calc(100% + 4px)' }}
+          />
+        </div>
+        <div className={styles.listpools_search}>
+          <Input
+            placeholder="Search by pools or tokens name"
+            prefix={<img src={SearchSvg} alt="icon-search" />}
+            onChange={_.debounce((e) => {
+              filterPairs(e.target.value);
+            }, 500)}
+            onPressEnter={(e: any) => filterPairs(e.target.value)}
+          />
+          {/* <div
+            className={styles.listpools_btn}
+            onClick={() => setIsOpenNewPoolModal(true)}
+          >
+            Create new pool
+          </div> */}
+        </div>
       </div>
       <div className={styles.listpools_list}>
-        {filteredPairInfos.map((info) => (
-          <PairBox
-            {...info}
-            apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
-            key={info.pair.contract_addr}
-          />
-        ))}
+        {filteredPairInfos.length > 0 ? (
+          filteredPairInfos.map((info) => (
+            <PairBox
+              {...info}
+              apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
+              key={info.pair.contract_addr}
+            />
+          ))
+        ) : (
+          <div className={styles.no_data}>
+            <img src={NoDataSvg} alt="nodata" />
+            <span>No data</span>
+          </div>
+        )}
       </div>
     </div>
   );

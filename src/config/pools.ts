@@ -6,6 +6,7 @@ import _ from 'lodash';
 export type Pair = {
   contract_addr: string;
   asset_denoms: [string, string];
+  liquidity_token: string;
 };
 
 export type TokensSwap = { [key: string]: TokenItemType };
@@ -13,40 +14,44 @@ export type TokensSwap = { [key: string]: TokenItemType };
 export const pairs: Pair[] = [
   {
     contract_addr: 'orai1wkhkazf88upf2dxqedggy3ldja342rzmfs2mep',
-    asset_denoms: [ORAI, 'airi']
+    asset_denoms: [ORAI, 'airi'],
+    liquidity_token: 'orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y',
   },
   {
     contract_addr: 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5',
-    asset_denoms: [ORAI, 'oraix']
+    asset_denoms: [ORAI, 'oraix'],
+    liquidity_token: 'orai1qmy3uuxktflvreanaqph6yua7stjn6j65rur62',
   },
   {
     contract_addr:
       'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
-    asset_denoms: [ORAI, 'scorai']
+    asset_denoms: [ORAI, 'scorai'],
+    liquidity_token: 'orai1ay689ltr57jt2snujarvakxrmtuq8fhuat5rnvq6rct89vjer9gqm2vde6',
   },
   {
     contract_addr: 'orai1jf74ry4m0jcy9emsaudkhe7vte9l8qy8enakvs',
-    asset_denoms: [ORAI, process.env.REACT_APP_ATOM_ORAICHAIN_DENOM]
-  },
-  {
-    contract_addr: 'orai14lpk5gnmj688f957xvd6c42w9dygl9c2dlxjzw',
-    asset_denoms: [ORAI, process.env.REACT_APP_UST_ORAICHAIN_DENOM]
+    asset_denoms: [ORAI, process.env.REACT_APP_ATOM_ORAICHAIN_DENOM],
+    liquidity_token: 'orai1g2prqry343kx566cp7uws9w7v78n5tejylvaz6',
   },
   {
     contract_addr: 'orai1c5s03c3l336dgesne7dylnmhszw8554tsyy9yt',
-    asset_denoms: [ORAI, STABLE_DENOM]
+    asset_denoms: [ORAI, STABLE_DENOM],
+    liquidity_token: 'orai1mav52eqhd07c3lwevcnqdykdzhh4733zf32jcn',
   },
   {
     contract_addr: 'orai1ynmd2cemryhcwtjq3adhcwayrm89l2cr4tws4v',
-    asset_denoms: [ORAI, 'kwt']
+    asset_denoms: [ORAI, 'kwt'],
+    liquidity_token: 'orai17rcfcrwltujfvx7w4l2ggyku8qrncy0hdvrzvc',
   },
   {
     contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
-    asset_denoms: [ORAI, process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM]
+    asset_denoms: [ORAI, process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM],
+    liquidity_token: 'orai19ltj97jmdqnz5mrd2amethetvcwsp0220kww3e'
   },
   {
     contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
-    asset_denoms: ['milky', STABLE_DENOM]
+    asset_denoms: ['milky', STABLE_DENOM],
+    liquidity_token: 'orai18ywllw03hvy720l06rme0apwyyq9plk64h9ccf',
   }
 ];
 

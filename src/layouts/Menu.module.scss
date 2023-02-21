@@ -1,19 +1,14 @@
 @import 'src/styles/mixins';
 
 .menu {
-  background: radial-gradient(
-    89.33% 89.33% at 50% 0%,
-    #352c47 0%,
-    rgba(28, 30, 37, 0) 100%
-  );
+  background: #191b21;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
-  --menu-width: 300px;
+  --menu-width: 280px;
+  width: var(--menu-width);
   min-width: var(--menu-width);
-  width: 23%;
-  max-width: 330px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -29,21 +24,19 @@
 }
 
 .token_info {
-  background: #612fca;
-  border:1px solid #A871DF;  
+  background: #2D2938;
   border-radius: 8px;
-  padding: 16px;
-  display: flex;    
-  align-items: center;  
+  padding: 8px;
+  display: flex;
+  align-items: center;
   margin: 32px 10px 0 0;
   width: 100%;
   position: relative;
-  &:last-child{    
+  &:last-child {
     margin-bottom: 32px;
     margin-top: 15px;
   }
 }
-
 
 .network_icon {
   position: absolute;
@@ -56,14 +49,14 @@
 .token_address {
   color: #bfa7f2;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .token_avatar {
-  border: 2px solid #ffffff;
   box-sizing: border-box;
-  border-radius: 24px;
-  width: 48px;
-  height: 48px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   margin-right: 12px;
 }
 
@@ -74,15 +67,16 @@
 }
 
 .token_balance {
-  font-size: 18px;
-  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  color: #EBEBEB;
+  margin-top: 3px;
 }
 
 .logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #443e55;
   padding-bottom: 20px;
 
   &_text {
@@ -108,7 +102,7 @@
 .menu_items {
   display: flex;
   flex-direction: column;
-  margin-top:20px;
+  margin-top: 20px;
 }
 
 .menu_item {
@@ -123,15 +117,15 @@
   }
 
   &.active {
-    background: #2d2938;
+    background: #612FCA;
   }
 
   &_text {
-    font-weight: 600;
-    font-size: 18px;
+    font-weight: 500;
+    font-size: 16px;
     line-height: 100%;
     color: #fff;
-    margin-left: 10px;
+    margin-left: 16px;
   }
 }
 
@@ -163,8 +157,8 @@
 
   &_text {
     font-style: normal;
-    font-weight: 600;
-    font-size: 16px;
+    font-weight: 500;
+    font-size: 14px;
     line-height: 100%;
     margin-left: 10px;
   }
@@ -179,5 +173,5 @@
 .connect {
   font-weight: 600;
   font-size: 16px;
-  color:#fff;    
+  color: #fff;
 }
