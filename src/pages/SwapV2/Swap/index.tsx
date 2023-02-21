@@ -92,8 +92,14 @@ const SwapComponent: React.FC<{
     fetchTokenInfo(toToken!)
   );
 
-  const fromTokenBalance = fromToken ? amounts[fromToken.denom]?.amount + calculateSubAmounts(amounts[fromToken.denom]) ?? 0 : 0;
-  const toTokenBalance = toToken ? amounts[toToken.denom]?.amount + calculateSubAmounts(amounts[toToken.denom]) ?? 0 : 0;
+  const fromTokenBalance = fromToken
+    ? amounts[fromToken.denom]?.amount +
+        calculateSubAmounts(amounts[fromToken.denom]) ?? 0
+    : 0;
+  const toTokenBalance = toToken
+    ? amounts[toToken.denom]?.amount +
+        calculateSubAmounts(amounts[toToken.denom]) ?? 0
+    : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
