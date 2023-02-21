@@ -120,16 +120,19 @@ export const parseAmountFromWithDecimal = (
   desDecimals = 6
 ) => {
   // guarding conditions to prevent crashing
-  if (Number.isNaN(amount)) amount = 0;
-  if (Number.isFinite(amount)) amount = 0;
+  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
+
   let t = new Big(amount)
     .div(new Big(10).pow(sourceDecimals))
     .round(desDecimals, 0);
+
   return t;
 };
 
 export const reduceString = (str: string, from: number, end: number) => {
-  return str ? str.substring(0, from) + "..." + str.substring(str.length - end) : "-";
+  return str
+    ? str.substring(0, from) + '...' + str.substring(str.length - end)
+    : '-';
 };
 
 export const parseBep20Erc20Name = (name: string) => {
@@ -145,14 +148,14 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
     handleOptions: { funds: msg.sent_funds }
   }));
   return messages;
-}
+};
 
 export const formatCash = (n: number) => {
   if (n < 1e3) return n.toFixed(2);
-  if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
-  if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
-  if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
-  if (n >= 1e12) return +(n / 1e12).toFixed(1) + "T";
+  if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + 'K';
+  if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e12) return +(n / 1e12).toFixed(1) + 'T';
 };
 
 export const delay = (timeout: number) =>
