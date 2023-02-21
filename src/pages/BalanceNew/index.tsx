@@ -5,6 +5,7 @@ import {
   calculateSubAmounts,
   getNetworkGasPrice,
   handleCheckWallet,
+  handleLedgerDevice,
   networks
 } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -114,6 +115,9 @@ import {
 } from 'libs/contracts/OraiswapToken.types';
 import LoadingBox from 'components/LoadingBox';
 import { TransferBackMsg } from 'libs/contracts';
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState } from 'store/configure';
+import { updateAmounts } from 'reducer/amount';
 
 interface BalanceProps {}
 
@@ -131,12 +135,9 @@ const Balance: React.FC<BalanceProps> = () => {
     'Oraichain'
   );
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+  const cacheAmounts = useSelector((state: RootState) => state.amount.amounts)
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
-  const [cacheAmounts, setAmounts] = useLocalStorage<AmountDetails>(
-    'amounts',
-    {}
-  );
   window.amounts = cacheAmounts;
 
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
@@ -144,12 +145,15 @@ const Balance: React.FC<BalanceProps> = () => {
     []
   ]);
   const [txHash, setTxHash] = useState('');
+  const dispatch = useDispatch();
 
   const forceUpdate = (amountDetails: AmountDetails) => {
-    Object.assign(window.amounts, amountDetails);
-    setAmounts({ ...window.amounts });
+    dispatch(updateAmounts({
+      ...amountDetails
+    }))
   };
 
+  
   const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
@@ -607,6 +611,7 @@ const Balance: React.FC<BalanceProps> = () => {
     );
   };
 
+  // Oraichain (Orai)
   const transferIbcCustom = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
@@ -616,26 +621,20 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('from token: ', fromToken);
       console.log('to token: ', toToken);
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) return;
+      await handleCheckWallet();
       // disable Oraichain -> Oraibridge Ledger
-      const key = await keplr.getKey(network.chainId);
-      if (key.isNanoLedger && toToken.org == 'OraiBridge') {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Ethereum signing with Ledger is not yet supported!'
-        });
-        return;
-      }
+      await handleLedgerDevice();
+     
       await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
       await window.Keplr.suggestChain(fromToken.chainId as string);
+      // check address
       const fromAddress = await window.Keplr.getKeplrAddr(
         fromToken.chainId as string
       );
       const toAddress = await window.Keplr.getKeplrAddr(
         toToken.chainId as string
       );
-
       if (!fromAddress || !toAddress) {
         displayToast(TToastType.TX_FAILED, {
           message: 'Please login keplr!'

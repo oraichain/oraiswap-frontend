@@ -31,8 +31,10 @@ import SettingModal from 'pages/Swap/Modals/SettingModal';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
-import useLocalStorage from 'hooks/useLocalStorage';
 import { calculateSubAmounts } from 'helper';
+import { RootState } from 'store/configure';
+import { useSelector } from 'react-redux';
+
 const cx = cn.bind(styles);
 
 const SwapComponent: React.FC<{
@@ -52,7 +54,7 @@ const SwapComponent: React.FC<{
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const amounts = useSelector((state: RootState) => state.amount.amounts);
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
