@@ -42,7 +42,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useGlobalState('address');
-  const amounts = useSelector((state: RootState) => state.amount.amounts);
+  const amounts = useSelector((state: RootState) => state.token.amounts);
   const [assetToken, setAssetToken] = useState<TokenItemType>();
 
   const getPairInfo = async () => {

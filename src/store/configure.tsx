@@ -1,9 +1,8 @@
 import {
   configureStore,
   combineReducers,
-  getDefaultMiddleware,
 } from '@reduxjs/toolkit';
-import amountReducer from '../reducer/amount';
+import tokenReducer from '../reducer/token';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -13,7 +12,7 @@ const rootPersistConfig = {
 };
 
 const rootReducer = combineReducers({
-  amount: amountReducer,
+  token: tokenReducer,
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

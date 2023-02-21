@@ -117,7 +117,7 @@ import LoadingBox from 'components/LoadingBox';
 import { TransferBackMsg } from 'libs/contracts';
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from 'store/configure';
-import { updateAmounts } from 'reducer/amount';
+import { updateAmounts } from 'reducer/token';
 
 interface BalanceProps {}
 
@@ -135,7 +135,7 @@ const Balance: React.FC<BalanceProps> = () => {
     'Oraichain'
   );
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
-  const cacheAmounts = useSelector((state: RootState) => state.amount.amounts)
+  const cacheAmounts = useSelector((state: RootState) => state.token.amounts)
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
   window.amounts = cacheAmounts;

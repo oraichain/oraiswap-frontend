@@ -1,16 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-export interface AmountState {
+export interface TokenState {
   amounts: Object;
 }
 
-const initialState: AmountState = {
+const initialState: TokenState = {
   amounts: {},
 };
 
-export const amountsSlice = createSlice({
-  name: 'amount',
+export const tokenSlice = createSlice({
+  name: 'token',
   initialState,
   reducers: {
     updateAmounts: (state, action: PayloadAction<any>) => {
@@ -25,6 +25,6 @@ export const amountsSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { updateAmounts } = amountsSlice.actions;
+export const { updateAmounts } = tokenSlice.actions;
 
-export default amountsSlice.reducer;
+export default tokenSlice.reducer;

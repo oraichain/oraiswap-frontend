@@ -58,7 +58,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useGlobalState('address');
   const [infoCosmos] = useGlobalState('infoCosmos');
-  const amounts = useSelector((state: RootState) => state.amount.amounts)
+  const amounts = useSelector((state: RootState) => state.token.amounts)
   const [metamaskAddress] = useGlobalState('metamaskAddress');
   const [open, setOpen] = useState(false);
 

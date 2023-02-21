@@ -54,7 +54,7 @@ const SwapComponent: React.FC<{
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const amounts = useSelector((state: RootState) => state.amount.amounts);
+  const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
