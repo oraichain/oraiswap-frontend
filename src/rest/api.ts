@@ -57,6 +57,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     tokenInfo.verified = true;
   } else {
     const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
+    console.log(data);
     const dataCheckMilkyToken = data?.token_info_response ?? data;
     tokenInfo = {
       ...tokenInfo,
@@ -128,26 +129,14 @@ async function fetchPoolInfoAmount(
 async function fetchPairInfo(
   assetInfos: [TokenItemType, TokenItemType]
 ): Promise<PairInfo> {
+  // scorai is in factory_v2
+  const factory = assetInfos.some((a) => a.denom === 'scorai')
+    ? Contract.factory_v2
+    : Contract.factory;
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  try {
-    const data = await Contract.factory.pair({
-      assetInfos: [firstAsset, secondAsset]
-    });
-    return data;
-  } catch (error) {
-    return fetchPairInfoV2(assetInfos);
-  }
-}
-
-async function fetchPairInfoV2(
-  assetInfos: [TokenItemType, TokenItemType]
-): Promise<PairInfo> {
-  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
-  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
-
-  const data = await Contract.factory_v2.pair({
+  const data = await factory.pair({
     assetInfos: [firstAsset, secondAsset]
   });
   return data;
