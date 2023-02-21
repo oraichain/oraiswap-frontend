@@ -129,32 +129,18 @@ const PairBox = memo<PairInfoData & { apr: number }>(
   }
 );
 
-const WatchList = memo(() => {
-  return (
-    <div className={styles.watchlist}>
-      <div className={styles.watchlist_title}></div>
-    </div>
-  );
-});
-
 const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: any;
   setIsOpenNewPoolModal: any;
 }>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr }) => {
-  const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
-    []
-  );
+  const [search, setSearch] = useState<string>();
 
-  useEffect(() => {
-    setFilteredPairInfos(pairInfos);
-  }, [pairInfos]);
-
-  const filterPairs = (text: string) => {
-    if (!text) {
-      return setFilteredPairInfos(pairInfos);
+  const filterPairs = () => {
+    if (!search) {
+      return pairInfos;
     }
-    const searchReg = new RegExp(text, 'i');
+    const searchReg = new RegExp(search, 'i');
     const ret = pairInfos.filter((pairInfo) =>
       pairInfo.pair.asset_denoms.some((denom) =>
         filteredTokens.find(
@@ -163,8 +149,6 @@ const ListPools = memo<{
         )
       )
     );
-
-    setFilteredPairInfos(ret);
   };
 
   return (
@@ -173,7 +157,7 @@ const ListPools = memo<{
       <div className={styles.listpools_search}>
         <Search
           placeholder="Search by pools or tokens name"
-          onSearch={filterPairs}
+          onSearch={setSearch}
           style={{
             width: 420,
             background: '#1E1E21',
@@ -189,7 +173,7 @@ const ListPools = memo<{
         </div> */}
       </div>
       <div className={styles.listpools_list}>
-        {filteredPairInfos.map((info) => (
+        {filterPairs().map((info) => (
           <PairBox
             {...info}
             apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
@@ -239,7 +223,6 @@ const Pools: React.FC<PoolsProps> = () => {
     );
 
     setCachedPairs(pairsData);
-    fetchPairInfoDataList();
   };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
@@ -269,9 +252,16 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
+    console.log('fetchPairInfoDataList');
+    if (!cachedPairs) {
+      // wait for cached pair updated
+      return;
+    }
+
     const poolList = _.compact(
       await Promise.all(pairs.map((p) => fetchPairInfoData(p)))
     );
+
     const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
@@ -317,6 +307,10 @@ const Pools: React.FC<PoolsProps> = () => {
   // );
 
   useEffect(() => {
+    fetchPairInfoDataList();
+  }, [cachedPairs]);
+
+  useEffect(() => {
     fetchCachedPairs();
   }, []);
 
@@ -326,7 +320,6 @@ const Pools: React.FC<PoolsProps> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
-        <WatchList />
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={allPoolApr}
