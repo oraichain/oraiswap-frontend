@@ -98,7 +98,8 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
 
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
-  toTokenInfo: TokenItemType
+  toTokenInfo: TokenItemType,
+  cachedPairs?: { [contract_addr: string]: PoolResponse }
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
@@ -109,15 +110,21 @@ async function fetchPoolInfoAmount(
   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
 
   if (pair) {
-    const poolInfo = await Contract.pair(pair.contract_addr).pool();
+    const poolInfo =
+      cachedPairs?.[pair.contract_addr] ||
+      (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
     const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
     const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
-    const fromPoolInfo = await Contract.pair(fromPairInfo.contract_addr).pool();
-    const toPoolInfo = await Contract.pair(toPairInfo.contract_addr).pool();
+    const fromPoolInfo =
+      cachedPairs?.[fromPairInfo.contract_addr] ||
+      (await Contract.pair(fromPairInfo.contract_addr).pool());
+    const toPoolInfo =
+      cachedPairs?.[toPairInfo.contract_addr] ||
+      (await Contract.pair(toPairInfo.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }

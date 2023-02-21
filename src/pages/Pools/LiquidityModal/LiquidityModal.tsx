@@ -165,37 +165,6 @@ const LiquidityModal: FC<ModalProps> = ({
     refetchPairAmountInfo();
   };
 
-  const getPairAmountInfo = async () => {
-    const poolData = await fetchPoolInfoAmount(
-      token1InfoData!,
-      token2InfoData!
-    );
-
-    const fromAmount = getUsd(
-      poolData.offerPoolAmount,
-      prices[token1!.coingeckoId as PriceKey],
-      token1!.decimals
-    );
-    const toAmount = getUsd(
-      poolData.askPoolAmount,
-      prices[token2!.coingeckoId as PriceKey],
-      token2!.decimals
-    );
-
-    return {
-      token1Amount: poolData.offerPoolAmount,
-      token2Amount: poolData.askPoolAmount,
-      usdAmount: fromAmount + toAmount,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
-    };
-  };
-
-  const getPairInfo = async () => {
-    const pair = getPair(token1InfoData.denom, token2InfoData.denom);
-    const pairData = await fetchPairInfo([token1InfoData!, token2InfoData!]);
-    return { pair, ...pairData };
-  };
-
   const increaseAllowance = async (
     amount: string,
     token: string,
