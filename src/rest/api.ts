@@ -57,7 +57,6 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     tokenInfo.verified = true;
   } else {
     const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
-    console.log(data);
     const dataCheckMilkyToken = data?.token_info_response ?? data;
     tokenInfo = {
       ...tokenInfo,

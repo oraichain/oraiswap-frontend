@@ -215,16 +215,11 @@ const Pools: React.FC<PoolsProps> = () => {
       filteredTokens.find((token) => token.denom === denom)
     );
     if (!fromToken || !toToken) return;
-
+    console.log(fromToken, toToken);
     try {
-      const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
-        fetchTokenInfo(fromToken),
-        fetchTokenInfo(toToken)
-      ]);
-
       const [poolData, infoData] = await Promise.all([
-        fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-        fetchPairInfo([fromTokenInfoData, toTokenInfoData])
+        fetchPoolInfoAmount(fromToken, toToken),
+        fetchPairInfo([fromToken, toToken])
       ]);
 
       return {
