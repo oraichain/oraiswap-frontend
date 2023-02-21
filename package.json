@@ -6,12 +6,13 @@
   "author": "Thanh Tu <tu@orai.io>",
   "license": "Apache-2.0",
   "dependencies": {
-    "@cosmjs/tendermint-rpc": "^0.29.5",
     "@cosmjs/cosmwasm-stargate": "^0.29.5",
     "@cosmjs/crypto": "^0.29.5",
     "@cosmjs/proto-signing": "^0.29.5",
     "@cosmjs/stargate": "^0.29.5",
+    "@cosmjs/tendermint-rpc": "^0.29.5",
     "@ethereumjs/util": "^8.0.3",
+    "@ethersproject/providers": "^5.0.10",
     "@hanchon/ethermint-address-converter": "^1.1.0",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/cosmos": "^0.9.12",
@@ -38,7 +39,6 @@
     "big.js": "^6.1.1",
     "classnames": "^2.2.6",
     "create-hash": "^1.2.0",
-    "@ethersproject/providers": "^5.0.10",
     "ethers": "^5.0.15",
     "https-browserify": "^1.0.0",
     "jsbi": "^4.3.0",
@@ -88,6 +88,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.18.6",
     "@sentry/webpack-plugin": "^1.20.0",
+    "@terran-one/cw-simulate": "^2.8.4",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.8",
@@ -111,5 +112,10 @@
     "sass": "^1.53.0",
     "source-map-explorer": "^2.5.0",
     "typescript": "^4.2.4"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/jest.setup.ts"
+    ]
   }
 }
