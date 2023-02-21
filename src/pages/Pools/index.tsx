@@ -234,8 +234,7 @@ const Pools: React.FC<PoolsProps> = () => {
         if (!data.success) {
           return [pair.contract_addr, {}];
         }
-        const pairData = fromBinary(data.data) as PoolResponse;
-        return [pair.contract_addr, pairData];
+        return [pair.contract_addr, fromBinary(data.data)];
       })
     );
 
