@@ -57,7 +57,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
     tokenInfo.verified = true;
   } else {
     const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
-    const dataCheckMilkyToken = data?.token_info_response ?? data
+    const dataCheckMilkyToken = data?.token_info_response ?? data;
     tokenInfo = {
       ...tokenInfo,
       symbol: dataCheckMilkyToken.symbol,
@@ -92,7 +92,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
   return parseInt(
     poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ||
-    '0'
+      '0'
   );
 }
 
@@ -206,8 +206,8 @@ async function fetchDistributionInfo(
 function getSubAmount(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
-  prices: CoinGeckoPrices<any>,
-): { [key: string]: { amount: number, usd: number } } {
+  prices: CoinGeckoPrices<any>
+): { [key: string]: { amount: number; usd: number } } {
   // get all native balances that are from oraibridge (ibc/...)
   const subAmounts = {};
   for (let mapping of tokenInfo.erc20Cw20Map) {
@@ -222,7 +222,14 @@ function getSubAmount(
       ).toNumber(),
       mapping.decimals.cw20Decimals
     ).toNumber();
-    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = { amount: parsedBalance, usd: getUsd(parsedBalance, prices[tokenInfo.coingeckoId] ?? 0, mapping.decimals.cw20Decimals) };
+    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
+      amount: parsedBalance,
+      usd: getUsd(
+        parsedBalance,
+        prices[tokenInfo.coingeckoId] ?? 0,
+        mapping.decimals.cw20Decimals
+      )
+    };
   }
   return subAmounts;
 }
@@ -238,7 +245,11 @@ async function generateConvertErc20Cw20Message(
   for (let mapping of tokenInfo.erc20Cw20Map) {
     const balance = calculateSubAmounts(amounts[tokenInfo.denom]);
     // reset so we convert using native first
-    const erc20TokenInfo = { ...tokenInfo, contractAddress: undefined, denom: mapping.erc20Denom }
+    const erc20TokenInfo = {
+      ...tokenInfo,
+      contractAddress: undefined,
+      denom: mapping.erc20Denom
+    };
     if (balance > 0) {
       const msgConvert = (
         await generateConvertMsgs({
@@ -326,27 +337,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {
@@ -780,5 +791,5 @@ export {
   getSubAmount,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
-  parseTokenInfo,
+  parseTokenInfo
 };

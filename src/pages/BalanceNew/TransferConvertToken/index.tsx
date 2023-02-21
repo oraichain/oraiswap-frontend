@@ -5,15 +5,12 @@ import styles from './index.module.scss';
 import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import {
-  filteredTokens,
-  TokenItemType,
-} from 'config/bridgeTokens';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import {
   parseAmountFromWithDecimal as parseAmountFrom,
   parseAmountToWithDecimal as parseAmountTo,
   parseBep20Erc20Name,
-  reduceString,
+  reduceString
 } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
@@ -24,7 +21,7 @@ import {
   COSMOS_TYPE,
   EVM_TYPE,
   BSC_ORG,
-  ETHEREUM_ORG,
+  ETHEREUM_ORG
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
@@ -35,14 +32,16 @@ import {
   networks,
   renderLogoNetwork,
   getTokenChain,
-  calculateSubAmounts,
+  calculateSubAmounts
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 
-const AMOUNT_BALANCE_25 = '25%';
-const AMOUNT_BALANCE_50 = '50%';
-const AMOUNT_BALANCE_75 = '75%';
-const AMOUNT_BALANCE_MAX = 'MAX';
+const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
+  [0.25, '25%'],
+  [0.5, '50%'],
+  [0.75, '75%'],
+  [1, 'MAX']
+];
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -60,11 +59,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   convertToken,
   transferIBC,
   convertKwt,
-  onClickTransfer,
+  onClickTransfer
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([
     undefined,
-    0,
+    0
   ]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [filterNetwork, setFilterNetwork] = useState('');
@@ -96,7 +95,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   // list of tokens where it exists in at least two different chains
   const listedTokens = filteredTokens.filter(
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
-  )
+  );
 
   const subAmount = calculateSubAmounts(amountDetail);
   const maxAmount = parseAmountFrom(
@@ -107,7 +106,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
       displayToast(TToastType.TX_FAILED, {
-        message: 'Invalid amount!',
+        message: 'Invalid amount!'
       });
       return false;
     }
@@ -130,9 +129,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         address = await window.Metamask!.getEthAddress();
       }
       if (network.networkType == COSMOS_TYPE) {
-        address = await window.Keplr.getKeplrAddr(
-          network.chainId
-        );
+        address = await window.Keplr.getKeplrAddr(network.chainId);
       }
       setAddressTransfer(address);
     } catch (error) {
@@ -186,7 +183,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <ul className={styles.items}>
                     {networks &&
                       networks
-                        .filter((item) => filterChainBridge(token, item, filterNetwork))
+                        .filter((item) =>
+                          filterChainBridge(token, item, filterNetwork)
+                        )
                         .map((network) => {
                           return (
                             <li
@@ -201,7 +200,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                               <div
                                 style={{
                                   display: 'flex',
-                                  alignItems: 'center',
+                                  alignItems: 'center'
                                 }}
                               >
                                 <div>{renderLogoNetwork(network.title)}</div>
@@ -254,48 +253,24 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 />
               </div>
             </div>
-            <div className={styles.balanceFromGroup}>
-              <button
-                className={styles.balanceBtn}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!amountDetail) return;
-                  setConvertAmount([maxAmount / 4, amountDetail.usd / 4]);
-                }}
-              >
-                {AMOUNT_BALANCE_25}
-              </button>
-              <button
-                className={styles.balanceBtn}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!amountDetail) return;
-                  setConvertAmount([maxAmount / 2, amountDetail.usd / 2]);
-                }}
-              >
-                {AMOUNT_BALANCE_50}
-              </button>
-              <button
-                className={styles.balanceBtn}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!amountDetail) return;
-                  setConvertAmount([maxAmount * 0.75, amountDetail.usd * 0.75]);
-                }}
-              >
-                {AMOUNT_BALANCE_75}
-              </button>
-              <button
-                className={styles.balanceBtn}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!amountDetail) return;
 
-                  setConvertAmount([maxAmount, amountDetail.usd]);
-                }}
-              >
-                {AMOUNT_BALANCE_MAX}
-              </button>
+            <div className={styles.balanceFromGroup}>
+              {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
+                <button
+                  key={coeff}
+                  className={styles.balanceBtn}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (!amountDetail) return;
+                    setConvertAmount([
+                      maxAmount * coeff,
+                      amountDetail.usd * coeff
+                    ]);
+                  }}
+                >
+                  {text}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -325,7 +300,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {filterNetwork === ORAICHAIN_ID ? "Transfer" : "Convert"} <strong>{filterNetwork}</strong>
+                    {filterNetwork === ORAICHAIN_ID ? 'Transfer' : 'Convert'}{' '}
+                    <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -334,8 +310,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             (token.cosmosBased &&
-              token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 &&
-              name) || (onClickTransferList.includes(token?.org))
+              token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
+              listedTokens.length > 0 &&
+              name) ||
+            onClickTransferList.includes(token?.org)
           ) {
             return (
               <>
@@ -348,21 +326,30 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
-                      if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
+                      if (
+                        token.bridgeNetworkIdentifier &&
+                        filterNetwork == ORAICHAIN_ID
+                      ) {
                         return await convertToken(
                           convertAmount,
                           token,
                           'nativeToCw20'
                         );
                       }
-                      if (onClickTransfer && (filterNetwork == KAWAII_ORG || onClickTransferList.includes(token?.org))) {
+                      if (
+                        onClickTransfer &&
+                        (filterNetwork == KAWAII_ORG ||
+                          onClickTransferList.includes(token?.org))
+                      ) {
                         return await onClickTransfer(convertAmount);
                       }
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID && t?.bridgeNetworkIdentifier
-                            ? t.bridgeNetworkIdentifier === filterNetwork && t.coingeckoId === token.coingeckoId
-                            : t.coingeckoId === token.coingeckoId && t.org === filterNetwork
+                      const to = filteredTokens.find((t) =>
+                        t.chainId === ORAI_BRIDGE_CHAIN_ID &&
+                        t?.bridgeNetworkIdentifier
+                          ? t.bridgeNetworkIdentifier === filterNetwork &&
+                            t.coingeckoId === token.coingeckoId
+                          : t.coingeckoId === token.coingeckoId &&
+                            t.org === filterNetwork
                       );
                       // convert reverse before transferring
                       await transferIBC(token, to, convertAmount);
@@ -373,8 +360,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {'Transfer'}{' '}
-                    <strong>{filterNetwork}</strong>
+                    {'Transfer'} <strong>{filterNetwork}</strong>
                   </span>
                 </button>
               </>

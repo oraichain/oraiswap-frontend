@@ -62,7 +62,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
-      console.log("amount details: ", amountDetail);
+      console.log('amount details: ', amountDetail);
     }
   }, [chainInfo]);
 
@@ -76,10 +76,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
-  const maxAmount = parseAmountFrom(
-    0,
-    token?.decimals
-  ).toNumber();
+  const maxAmount = parseAmountFrom(0, token?.decimals).toNumber();
 
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
@@ -319,7 +316,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (
             token.cosmosBased &&
             token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-            (token.erc20Cw20Map || token.bridgeNetworkIdentifier || token.denom === ORAI) && // TODO: Remove ORAI harcode
+            (token.erc20Cw20Map ||
+              token.bridgeNetworkIdentifier ||
+              token.denom === ORAI) && // TODO: Remove ORAI harcode
             name
           ) {
             return (
@@ -362,7 +361,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!window.ethereum || !metamaskAddress) {
                         displayToast(TToastType.TX_FAILED, {
-                          message: `Please install Metamask to continue.`,
+                          message: `Please install Metamask to continue.`
                         });
                         return;
                       }
@@ -370,13 +369,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       setTransferLoading(true);
                       const name = parseBep20Erc20Name(token.name);
                       const tokenBridge = token?.bridgeNetworkIdentifier;
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
-                            ? t.bridgeNetworkIdentifier.includes(
+                      const to = filteredTokens.find((t) =>
+                        t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
+                          ? t.bridgeNetworkIdentifier.includes(
                               token.bridgeNetworkIdentifier
                             )
-                            : t.name.includes(name)
+                          : t.name.includes(name)
                       );
 
                       // convert reverse before transferring
@@ -388,7 +386,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>{BSC_ORG}</strong> {/** TODO: Remove BSC ORG hardcode */}
+                    Transfer To <strong>{BSC_ORG}</strong>{' '}
+                    {/** TODO: Remove BSC ORG hardcode */}
                   </span>
                 </button>
               </>

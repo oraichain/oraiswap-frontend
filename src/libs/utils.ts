@@ -120,7 +120,7 @@ export const parseAmountFromWithDecimal = (
   desDecimals = 6
 ) => {
   // guarding conditions to prevent crashing
-  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
+  if (Number.isNaN(amount) || !Number.isFinite(amount)) return new Big(0);
 
   let t = new Big(amount)
     .div(new Big(10).pow(sourceDecimals))
