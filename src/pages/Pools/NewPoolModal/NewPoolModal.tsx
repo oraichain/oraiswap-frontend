@@ -14,7 +14,8 @@ import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
 import { poolTokens } from 'config/pools';
 import { TokenItemType } from 'config/bridgeTokens';
-import useLocalStorage from 'hooks/useLocalStorage';
+import { RootState } from 'store/configure';
+import { useSelector } from 'react-redux';
 
 const cx = cn.bind(style);
 
@@ -46,7 +47,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState('0');
   const [amountToken2, setAmountToken2] = useState('0');
-  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const amounts = useSelector((state: RootState) => state.amount.amounts);
   const tokenObj1 = poolTokens.find((token) => token.denom === token1);
   const tokenObj2 = poolTokens.find((token) => token.denom === token2);
 

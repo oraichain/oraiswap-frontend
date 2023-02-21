@@ -115,6 +115,9 @@ import {
 } from 'libs/contracts/OraiswapToken.types';
 import LoadingBox from 'components/LoadingBox';
 import { TransferBackMsg } from 'libs/contracts';
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState } from 'store/configure';
+import { updateAmounts } from 'reducer/amount';
 
 interface BalanceProps {}
 
@@ -132,12 +135,9 @@ const Balance: React.FC<BalanceProps> = () => {
     'Oraichain'
   );
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+  const cacheAmounts = useSelector((state: RootState) => state.amount.amounts)
   const [hideOtherSmallAmount, setHideOtherSmallAmount] =
     useLocalStorage<boolean>('hideOtherSmallAmount', false);
-  const [cacheAmounts, setAmounts] = useLocalStorage<AmountDetails>(
-    'amounts',
-    {}
-  );
   window.amounts = cacheAmounts;
 
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
@@ -145,12 +145,15 @@ const Balance: React.FC<BalanceProps> = () => {
     []
   ]);
   const [txHash, setTxHash] = useState('');
+  const dispatch = useDispatch();
 
   const forceUpdate = (amountDetails: AmountDetails) => {
-    Object.assign(window.amounts, amountDetails);
-    setAmounts({ ...window.amounts });
+    dispatch(updateAmounts({
+      ...amountDetails
+    }))
   };
 
+  
   const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
