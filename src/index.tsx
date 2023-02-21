@@ -24,7 +24,8 @@ import {
 } from '@cosmjs/cosmwasm-stargate';
 import { collectWallet } from 'libs/cosmjs';
 import { GasPrice } from '@cosmjs/stargate';
-
+import { Provider } from "react-redux";
+import { store } from 'store/configure';
 // enable Keplr
 window.Keplr = new Keplr();
 window.Metamask = new Metamask();
@@ -88,15 +89,17 @@ const startApp = async () => {
   } finally {
     render(
       <StrictMode>
-        <ToastProvider>
-          <Router>
-            <ScrollToTop />
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </Router>
-          <ToastContainer transition={Bounce} />
-        </ToastProvider>
+        <Provider store={store}>
+          <ToastProvider>
+            <Router>
+              <ScrollToTop />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </Router>
+            <ToastContainer transition={Bounce} />
+          </ToastProvider>
+        </Provider>
       </StrictMode>,
       document.getElementById('oraiswap')
     );
