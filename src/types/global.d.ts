@@ -10,7 +10,7 @@ import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 declare global {
   type AmountDetail = {
-    subAmounts?: { [key: string]: number };
+    subAmounts?: { [key: string]: { amount: number, usd: number } };
     amount: number;
     usd: number;
   };
@@ -135,15 +135,11 @@ declare global {
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
-      REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
-
-      // config for eth ibc denom
-      REACT_APP_ORAIETH_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
@@ -177,4 +173,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export {};
+export { };

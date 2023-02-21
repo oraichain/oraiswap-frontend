@@ -102,3 +102,5 @@ export class Contract {
     return this.getContract('multicall', network.multicall, false, 'Multicall');
   }
 }
+
+console.log(Contract.multicall);

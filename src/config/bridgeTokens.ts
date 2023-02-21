@@ -16,6 +16,7 @@ import {
   BSC_ORG,
   BSC_RPC,
   COSMOS_DECIMALS,
+  COSMOS_ORG,
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_ORG,
@@ -23,6 +24,7 @@ import {
   EVM_DECIMALS,
   KAWAII_CONTRACT,
   KAWAII_LCD,
+  KAWAII_ORG,
   KAWAII_RPC,
   KAWAII_SUBNET_RPC,
   KWT_BSC_CONTRACT,
@@ -43,6 +45,7 @@ import {
   ORAI_ETH_CONTRACT,
   ORAI_LCD,
   ORAI_RPC,
+  OSMOSIS_ORG,
   STABLE_DENOM,
   USDT_BSC_CONTRACT
 } from './constants';
@@ -60,18 +63,19 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse';
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
   erc20Cw20Map?: Erc20Cw20Map[];
   bridgeNetworkIdentifier?: string;
+  bridgeTo?: Array<string>;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   chainId: string | number;
   coinType?: number;
@@ -79,18 +83,18 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -105,6 +109,7 @@ const otherChainTokens: TokenItemType[] = [
     coingeckoId: 'cosmos',
     denom: 'uatom',
     decimals: COSMOS_DECIMALS,
+    bridgeTo: [ORAICHAIN_ID],
     chainId: 'cosmoshub-4',
     rpc: 'https://rpc-cosmos.oraidex.io',
     // lcd: 'https://lcd-cosmoshub.blockapsis.com',
@@ -125,6 +130,7 @@ const otherChainTokens: TokenItemType[] = [
     // lcd: 'https://lcd.osmosis.zone',
     decimals: COSMOS_DECIMALS,
     coingeckoId: 'osmosis',
+    bridgeTo: [ORAICHAIN_ID],
     cosmosBased: true,
     maxGas: 20000 * 0.025,
     Icon: OSMO
@@ -222,6 +228,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: BEP20_ORAI,
     contractAddress: ORAI_BSC_CONTRACT,
     rpc: BSC_RPC,
+    bridgeTo: [ORAICHAIN_ID],
     decimals: EVM_DECIMALS,
     coingeckoId: 'oraichain-token',
     cosmosBased: false,
@@ -235,6 +242,7 @@ const otherChainTokens: TokenItemType[] = [
     contractAddress: ORAI_ETH_CONTRACT,
     rpc: ETHEREUM_RPC,
     decimals: EVM_DECIMALS,
+    bridgeTo: [ORAICHAIN_ID],
     coingeckoId: 'oraichain-token',
     cosmosBased: false,
     Icon: OraiIcon
@@ -246,6 +254,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'bep20_airi',
     contractAddress: AIRI_BSC_CONTRACT,
     rpc: BSC_RPC,
+    bridgeTo: [ORAICHAIN_ID],
     decimals: EVM_DECIMALS,
     coingeckoId: 'airight',
     cosmosBased: false,
@@ -258,6 +267,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'bep20_usdt',
     contractAddress: USDT_BSC_CONTRACT,
     rpc: BSC_RPC,
+    bridgeTo: [ORAICHAIN_ID],
     decimals: EVM_DECIMALS,
     coingeckoId: 'tether',
     cosmosBased: false,
@@ -270,6 +280,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'bep20_kwt',
     contractAddress: KWT_BSC_CONTRACT,
     rpc: BSC_RPC,
+    bridgeTo: [ORAICHAIN_ID],
     decimals: EVM_DECIMALS,
     coingeckoId: 'kawaii-islands',
     cosmosBased: false,
@@ -284,6 +295,7 @@ const otherChainTokens: TokenItemType[] = [
     rpc: BSC_RPC,
     decimals: EVM_DECIMALS,
     coingeckoId: 'milky-token',
+    bridgeTo: [ORAICHAIN_ID],
     cosmosBased: false,
     Icon: MILKY
   },
@@ -295,7 +307,7 @@ const otherChainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     rpc: KAWAII_RPC,
-
+    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
     cosmosBased: true,
     type: 'milky',
     maxGas: 200000 * 2,
@@ -306,6 +318,7 @@ const otherChainTokens: TokenItemType[] = [
     org: 'Kawaiiverse',
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: 'erc20_milky',
+    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
     contractAddress: MILKY_ERC_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
     decimals: EVM_DECIMALS,
@@ -321,6 +334,7 @@ const otherChainTokens: TokenItemType[] = [
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
     decimals: EVM_DECIMALS,
+    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
     coingeckoId: 'kawaii-islands',
     rpc: KAWAII_RPC,
     cosmosBased: true,
@@ -332,6 +346,7 @@ const otherChainTokens: TokenItemType[] = [
     name: 'ERC20 KWT',
     org: 'Kawaiiverse',
     chainId: KWT_SUBNETWORK_CHAIN_ID,
+    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
     denom: 'erc20_kwt',
     contractAddress: KAWAII_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
@@ -351,7 +366,7 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     denom: 'orai',
     coingeckoId: 'oraichain-token',
-
+    bridgeTo: [BSC_ORG,ETHEREUM_ORG],
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
@@ -365,6 +380,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'cosmos',
     coinType: 118,
     denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
+    bridgeTo: [COSMOS_ORG],
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
@@ -379,17 +395,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'airight',
     denom: 'airi',
     contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
-      }
-    ],
+    bridgeTo: [BSC_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -404,17 +410,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'tether',
     denom: STABLE_DENOM,
     contractAddress: process.env.REACT_APP_USDT_CONTRACT,
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM
-      }
-    ],
+    bridgeTo: [BSC_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -429,40 +425,13 @@ const oraichainTokens: TokenItemType[] = [
     prefix: 'orai',
     coinType: 118,
     chainId: ORAICHAIN_ID,
+    bridgeTo: [OSMOSIS_ORG],
     rpc: ORAI_RPC,
     decimals: COSMOS_DECIMALS,
     coingeckoId: 'osmosis',
     cosmosBased: true,
     Icon: OSMO
   },
-
-  {
-    name: 'BEP20 ORAI',
-    org: ORAICHAIN_ID,
-    prefix: 'orai',
-    coingeckoId: 'oraichain-token',
-    denom: process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM,
-    bridgeNetworkIdentifier: BSC_ORG,
-    decimals: EVM_DECIMALS,
-    chainId: ORAICHAIN_ID,
-    rpc: ORAI_RPC,
-    cosmosBased: true,
-    Icon: OraiIcon
-  },
-  {
-    name: 'ERC20 ORAI',
-    org: ORAICHAIN_ID,
-    prefix: 'orai',
-    coingeckoId: 'oraichain-token',
-    denom: process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM,
-    bridgeNetworkIdentifier: ETHEREUM_ORG,
-    decimals: EVM_DECIMALS,
-    chainId: ORAICHAIN_ID,
-    rpc: ORAI_RPC,
-    cosmosBased: true,
-    Icon: OraiIcon
-  },
-
   {
     name: 'KWT',
     org: ORAICHAIN_ID,
@@ -470,6 +439,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'kawaii-islands',
     denom: 'kwt',
     contractAddress: process.env.REACT_APP_KWT_CONTRACT,
+    bridgeTo: [KAWAII_ORG, BSC_ORG],
     erc20Cw20Map: [
       {
         prefix: 'BEP20',
@@ -495,6 +465,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'milky-token',
     denom: 'milky',
     contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
+    bridgeTo: [KAWAII_ORG, BSC_ORG],
     erc20Cw20Map: [
       {
         prefix: 'BEP20',

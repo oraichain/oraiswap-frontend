@@ -7,18 +7,6 @@ import { ReactComponent as AtomCosmosIcon } from 'assets/network/atom_cosmos.svg
 import { ReactComponent as OsmosisIcon } from 'assets/network/osmosis.svg';
 import {
   BEP20_ORAI,
-  STABLE_DENOM,
-  ORAI,
-  AIRI_DENOM,
-  MILKY,
-  scORAI_DENOM,
-  BEP20_USDT,
-  BEP20_AIRI,
-  BEP20_KWT,
-  BEP20_MILKY,
-  UATOM_DENOM,
-  UOSMOS_DENOM,
-  ORAIX_DENOM,
   ORAICHAIN_ID,
   BSC_ORG,
   KAWAII_ORG,
@@ -27,12 +15,11 @@ import {
   ORAI_BRIDGE_ORG,
   ETHEREUM_ORG,
   ORAI_BRIDGE_CHAIN_ID,
-  ERC20_KWT,
-  ERC20_MILKY,
   ORAI_BRIDGE_RPC,
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
+  NOTI_INSTALL_OWALLET,
 } from 'config/constants';
 
 import {
@@ -50,8 +37,11 @@ import {
   EVM_TYPE,
 } from 'config/constants';
 import { ChainInfoType } from 'hooks/useGlobalState';
+import { network } from 'config/networks';
+import { TokenItemType } from 'config/bridgeTokens';
+import _ from 'lodash';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 
-const KWT_DENOM = 'kwt';
 interface Items {
   chainId?: string;
   title?: string;
@@ -59,24 +49,13 @@ interface Items {
 interface Tokens {
   denom?: string;
   chainId?: string | number;
+  bridgeTo?: Array<string>
 }
 
 export const networks = [
   {
     title: ORAICHAIN_ID,
     chainId: ORAICHAIN_ID,
-    icon: <ORAIIcon />,
-    networkType: COSMOS_TYPE,
-  },
-  {
-    title: ORAICHAIN_ID + ' BEP20',
-    chainId: ORAICHAIN_ID + ' BEP20',
-    icon: <ORAIIcon />,
-    networkType: COSMOS_TYPE,
-  },
-  {
-    title: ORAICHAIN_ID + ' ERC20',
-    chainId: ORAICHAIN_ID + ' ERC20',
     icon: <ORAIIcon />,
     networkType: COSMOS_TYPE,
   },
@@ -112,12 +91,6 @@ export const networks = [
   },
 ];
 
-export const networksFilterChain = networks.filter(
-  (token) =>
-    token.chainId != ORAICHAIN_ID + ' BEP20' &&
-    token.chainId != ORAICHAIN_ID + ' ERC20'
-);
-
 export const renderLogoNetwork = (network: string) => {
   let logo = <ORAIIcon />;
   switch (network) {
@@ -146,194 +119,17 @@ export const renderLogoNetwork = (network: string) => {
   return logo;
 };
 
-// filter chain support
 export const filterChainBridge = (
   token: Tokens,
   item: Items,
-  filterNetwork: string
+  filterNetwork?: string
 ) => {
-  const denom = token.denom.toLowerCase() ?? ORAI;
-
-  if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
-    return item.title === BSC_ORG
-  }
-
-  switch (denom) {
-    // Oraichain
-    case ORAI:
-      return (
-        item.title !== filterNetwork &&
-        (item.title === BSC_ORG ||
-          item.title === ETHEREUM_ORG)
-      );
-    case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM.toLowerCase():
-      return item.title === COSMOS_ORG;
-    case process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM.toLowerCase():
-      return item.title === OSMOSIS_ORG;
-    case AIRI_DENOM:
-      return item.title === BSC_ORG;
-    case STABLE_DENOM:
-      return item.title === BSC_ORG;
-    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM.toLowerCase():
-      return (
-        item.title !== filterNetwork &&
-        (item.title === BSC_ORG || item.title === ORAICHAIN_ID)
-      );
-    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM.toLowerCase(): 
-        return (
-          item.title !== filterNetwork &&
-          (item.title === ETHEREUM_ORG || item.title === ORAICHAIN_ID)
-        )
-    case KWT_DENOM:
-      return (
-        item.title !== filterNetwork &&
-        (item.title === KAWAII_ORG || item.title === BSC_ORG)
-      );
-    case MILKY:
-      return (
-        item.title !== filterNetwork &&
-        (item.title === KAWAII_ORG || item.title === BSC_ORG)
-      );
-    case ORAIX_DENOM.toLowerCase():
-      return item.title === ORAICHAIN_ID;
-    case scORAI_DENOM:
-      return item.title === ORAICHAIN_ID;
-
-    // Kawaiiverse
-    case process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM.toLowerCase():
-      return (
-        item.title !== filterNetwork &&
-        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
-      );
-    case process.env.REACT_APP_KWT_SUB_NETWORK_DENOM.toLowerCase():
-      return (
-        item.title !== filterNetwork &&
-        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
-      );
-    case ERC20_MILKY:
-      return (
-        item.title !== filterNetwork &&
-        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
-      );
-    case ERC20_KWT:
-      return (
-        item.title !== filterNetwork &&
-        (item.title === ORAICHAIN_ID || item.title === KAWAII_ORG)
-      );
-       
-    // Osmosis`
-    case UOSMOS_DENOM:
-      return item.title === ORAICHAIN_ID;
-
-    // Cosmos Hub
-    case UATOM_DENOM:
-      return item.title === ORAICHAIN_ID;
-
-    // BNB Chain
-    case BEP20_USDT:
-      return item.title === ORAICHAIN_ID;
-    case BEP20_AIRI:
-      return item.title === ORAICHAIN_ID;
-    case BEP20_KWT:
-      return item.title === ORAICHAIN_ID;
-    case BEP20_ORAI:
-      return item.title === ORAICHAIN_ID;
-    case BEP20_MILKY:
-      return item.title === ORAICHAIN_ID;
-
-    // ethereum 
-    case ERC20_ORAI:
-      return item.title === ORAICHAIN_ID;
-    
-    // oraibridge
-
-    default:
-      return item;
-  }
+  const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
+  return tokenCanBridgeTo.includes(item.title);
 };
 
-export const getTokenChain = (token?: {
-  chainId: string | number; org?: string; denom?: string 
-}) => {
-  let chainId = token?.org;
-  
-  if (token?.chainId == ORAI_BRIDGE_CHAIN_ID) {
-    return BSC_ORG
-  }
-
-  switch (token?.denom) {
-    // Oraichain
-    case ORAI:
-      chainId = BSC_ORG
-      break;
-    case process.env.REACT_APP_ATOM_ORAICHAIN_DENOM:
-      chainId = COSMOS_ORG;
-      break;
-    case AIRI_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case STABLE_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case process.env.REACT_APP_ORAIBSC_ORAICHAIN_DENOM:
-      chainId = BSC_ORG;
-      break;
-    case process.env.REACT_APP_ORAIETH_ORAICHAIN_DENOM:
-      chainId = ETHEREUM_ORG;
-      break; 
-    case KWT_DENOM:
-      chainId = KAWAII_ORG;
-      break;
-    case MILKY:
-      chainId = KAWAII_ORG;
-      break;
-    case ORAIX_DENOM.toLowerCase():
-      chainId = ORAICHAIN_ID;
-      break;
-    case scORAI_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-    case process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM:
-      chainId = OSMOSIS_ORG;
-      break;
-
-    // Kawaiiverse
-    case process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // Osmosis`
-    case UOSMOS_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // Cosmos Hub
-    case UATOM_DENOM:
-      chainId = ORAICHAIN_ID;
-      break;
-
-    // BNB Chain
-    case BEP20_USDT:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_AIRI:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_KWT:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_ORAI:
-      chainId = ORAICHAIN_ID;
-      break;
-    case BEP20_MILKY:
-      chainId = ORAICHAIN_ID;
-      break;
-    // ethereum
-    case ERC20_ORAI:
-      chainId = ORAICHAIN_ID;
-      break;
-  }
-  return chainId;
+export const getTokenChain = (token: TokenItemType) => {
+  return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
 };
 
 export const handleCheckChain = (
@@ -389,5 +185,24 @@ export const arrayLoadToken = [
   { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
   { chainId: OSMOSIS_CHAIN_ID, rpc: OSMOSIS_NETWORK_RPC },
   { chainId: COSMOS_CHAIN_ID, rpc: COSMOS_NETWORK_RPC },
-  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC }
+  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC },
+  { chainId: network.chainId, rpc: network.rpc }
 ];
+
+export const getNetworkGasPrice = async () => {
+  const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
+  return chainInfosWithoutEndpoints.find(e => e.chainId == network.chainId)?.feeCurrencies[0]?.gasPriceStep
+}
+
+export const calculateSubAmounts = (amountDetail: AmountDetail) => {
+  return (amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0)
+}
+
+export const handleCheckWallet = async () => {
+  const keplr = await window.Keplr.getKeplr();
+  if (!keplr) {
+    return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+      toastId: 'install_keplr'
+    });
+  }
+}

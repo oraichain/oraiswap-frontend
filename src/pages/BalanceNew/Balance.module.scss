@@ -29,7 +29,7 @@
 .action {
   display: flex;
   @include desktop {
-    @media (min-width: 1440px) {
+    @media (min-width: 1270px) {
       justify-content: center;
     }
   }
@@ -42,7 +42,7 @@
     @media (max-width: 1024px) {
       width: 100%;
     }
-    @media (max-width: 1440px) {
+    @media (max-width: 1270px) {
       width: 100%;
     }
     align-items: center;
@@ -71,6 +71,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
+  }
+  &_flex {
+    display: flex;
+    align-items: center;
   }
   &_text {
     font-size: 16px;
@@ -153,7 +157,7 @@
       @media (max-width: 1024px ) {
         width: 100%;
       }
-      @media (max-width: 1440px) {
+      @media (max-width: 1270px) {
         width: 100%;
       }
       width: 50%;
@@ -180,7 +184,7 @@
       @media (max-width: 1024px) {
         width: 100%;
       }
-      @media (max-width: 1440px) {
+      @media (max-width: 1270px) {
         width: 100%;
       }
       width: 50%;

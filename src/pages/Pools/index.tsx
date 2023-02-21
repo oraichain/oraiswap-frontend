@@ -23,6 +23,9 @@ import FilterSvg from 'assets/icons/icon-filter.svg';
 import SearchSvg from 'assets/icons/search-svg.svg';
 import NoDataSvg from 'assets/icons/NoDataPool.svg';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { Contract } from 'config/contracts';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 const { Search } = Input;
 const useQueryConfig = {
@@ -146,14 +149,6 @@ const PairBox = memo<PairInfoData & { apr: number }>(
   }
 );
 
-const WatchList = memo(() => {
-  return (
-    <div className={styles.watchlist}>
-      <div className={styles.watchlist_title}></div>
-    </div>
-  );
-});
-
 const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: any;
@@ -175,10 +170,6 @@ const ListPools = memo<{
       })
       .filter((item) => item.amount > 0);
   }, [amounts]);
-
-  console.log('LIST', listMyPool);
-  console.log('LIST amount', amounts);
-  console.log('LIST pair', filteredPairInfos);
 
   useEffect(() => {
     if (typeFilter === KeyFilter.my_pool) {
@@ -207,7 +198,6 @@ const ListPools = memo<{
         )
       )
     );
-
     setFilteredPairInfos(ret);
   };
 
@@ -293,30 +283,61 @@ type PairInfoData = {
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
+  const [cachedPairs, setCachedPairs] = useLocalStorage<{
+    [key: string]: PoolResponse;
+  }>('pairs');
+  const [cachedApr, setCachedApr] = useLocalStorage<{
+    [key: string]: PoolResponse;
+  }>('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+
+  const fetchApr = async () => {
+    const data = await fetchAllPoolApr();
+    setCachedApr(data);
+  };
+  const fetchCachedPairs = async () => {
+    const queries = pairs.map((pair) => ({
+      address: pair.contract_addr,
+      data: toBinary({
+        pool: {},
+      }),
+    }));
+
+    const res = await Contract.multicall.aggregate({
+      queries,
+    });
+    const pairsData = Object.fromEntries(
+      pairs.map((pair, ind) => {
+        const data = res.return_data[ind];
+        if (!data.success) {
+          return [pair.contract_addr, {}];
+        }
+        return [pair.contract_addr, fromBinary(data.data)];
+      })
+    );
+
+    setCachedPairs(pairsData);
+  };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
+    if (!fromToken || !toToken) return;
 
     try {
-      const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
-        fetchTokenInfo(fromToken!),
-        fetchTokenInfo(toToken!),
-      ]);
-
-      const [poolData, infoData] = await Promise.all([
-        fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-        fetchPairInfo([fromTokenInfoData, toTokenInfoData]),
-      ]);
+      const poolData = await fetchPoolInfoAmount(
+        fromToken,
+        toToken,
+        cachedPairs
+      );
 
       return {
         ...poolData,
         amount: 0,
         pair,
-        commissionRate: infoData.commission_rate,
+        commissionRate: pair.commission_rate,
         fromToken,
         toToken,
       };
@@ -326,9 +347,16 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
+    console.log('fetchPairInfoDataList');
+    if (!cachedPairs) {
+      // wait for cached pair updated
+      return;
+    }
+
     const poolList = _.compact(
       await Promise.all(pairs.map((p) => fetchPairInfoData(p)))
     );
+
     const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
@@ -362,11 +390,6 @@ const Pools: React.FC<PoolsProps> = () => {
     setOraiPrice(oraiPrice);
   };
 
-  const { data: allPoolApr } = useQuery(
-    ['fetchAllPoolApr'],
-    () => fetchAllPoolApr(),
-    useQueryConfig
-  );
   // useQuery(
   //   ['fetchPairInfoDataList'],
   //   () => fetchPairInfoDataList(),
@@ -375,7 +398,11 @@ const Pools: React.FC<PoolsProps> = () => {
 
   useEffect(() => {
     fetchPairInfoDataList();
-    return () => {};
+  }, [cachedPairs]);
+
+  useEffect(() => {
+    fetchCachedPairs();
+    fetchApr();
   }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
@@ -384,10 +411,9 @@ const Pools: React.FC<PoolsProps> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
-        <WatchList />
         <ListPools
           pairInfos={pairInfos}
-          allPoolApr={allPoolApr}
+          allPoolApr={cachedApr}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal

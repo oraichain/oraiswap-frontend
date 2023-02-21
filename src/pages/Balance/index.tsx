@@ -16,7 +16,12 @@ import {
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import {
+  ibcInfos,
+  ibcInfosOld,
+  oraicbain2atom,
+  oraib2oraichain
+} from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
@@ -29,6 +34,7 @@ import { network } from 'config/networks';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
+  parseTokenInfo,
   simulateSwap,
   Type,
   getSubAmount
@@ -76,7 +82,8 @@ import {
   ORAI_BRIDGE_RPC,
   OSMOSIS_CHAIN_ID,
   OSMOSIS_NETWORK_LCD,
-  OSMOSIS_NETWORK_RPC
+  ORAI_BSC_CONTRACT,
+  scORAI_DENOM
 } from 'config/constants';
 import CosmJs, {
   getAminoExecuteContractMsgs,
@@ -110,6 +117,8 @@ import {
   BalanceResponse,
   QueryMsg as TokenQueryMsg
 } from 'libs/contracts/OraiswapToken.types';
+import { TransferBackMsg } from 'libs/contracts';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 interface BalanceProps {}
 
@@ -117,7 +126,6 @@ const { Search } = Input;
 
 const arrayLoadToken = [
   { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
-  { chainId: OSMOSIS_CHAIN_ID, rpc: OSMOSIS_NETWORK_RPC },
   { chainId: COSMOS_CHAIN_ID, rpc: COSMOS_NETWORK_RPC },
   { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC }
 ];
@@ -315,7 +323,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const data = toBinary({
       balance: { address }
     } as TokenQueryMsg);
-    console.log(address, Contract.multicall);
+
     const res = await Contract.multicall.aggregate({
       queries: cw20Tokens.map((t) => ({
         address: t.contractAddress,
@@ -382,7 +390,7 @@ const Balance: React.FC<BalanceProps> = () => {
           .filter((c) => c.contractAddress)
           .map((t) => {
             const detail = window.amounts[t.denom];
-            const subAmount = getSubAmount(window.amounts, t);
+            const subAmount = getSubAmount(window.amounts, t, prices);
             return [
               t.denom,
               {
@@ -540,6 +548,77 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
+  const transferToRemoteChainIbcWasm = async (
+    ibcInfo: IBCInfo,
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    fromAddress: string,
+    toAddress: string,
+    amount: string,
+    memo: string
+  ): Promise<boolean> => {
+    // format: wasm.oraiaxv13....
+    const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
+    if (!ibcWasmContractAddress)
+      throw {
+        message:
+          'IBC Wasm source port is invalid. Cannot transfer to the destination chain'
+      };
+
+    const { info: assetInfo } = parseTokenInfo(fromToken);
+    Contract.sender = fromAddress;
+    const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
+    try {
+      // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
+      await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
+    } catch (error) {
+      console.log('error ibc wasm transfer back to remote chain: ', error);
+      console.log(
+        'We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC'
+      );
+      // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
+      return false;
+    }
+
+    // // if the sender still can convert to IBC native balance => we prioritize it to be bridged back to OraiBridge first.
+    // const ibcBalances = await fetchNativeTokenBalance(network.converter, fromToken.erc20Cw20Map[0].erc20Denom, undefined, true);
+    // // we convert the ibc balance decimal to the same decimal of the cw20 token and compare
+    // const parsedIbcBalances = parseInt(parseAmountFrom(ibcBalances as number, fromToken.erc20Cw20Map[0].decimals.erc20Decimals - fromToken.erc20Cw20Map[0].decimals.cw20Decimals).toFixed(0));
+    // if (parsedIbcBalances > parseInt(amount)) return false;
+
+    // if asset info is native => send native way, else send cw20 way
+    const msg = {
+      localChannelId: ibcInfo.channel,
+      remoteAddress: toAddress,
+      remoteDenom: toToken.denom,
+      timeout: ibcInfo.timeout,
+      memo
+    };
+    let result: ExecuteResult;
+    if (assetInfo.native_token) {
+      result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [
+        { amount, denom: fromToken.denom }
+      ]);
+    } else {
+      const cw20Token = Contract.token(fromToken.contractAddress);
+      result = await cw20Token.send(
+        {
+          amount: amount,
+          contract: ibcWasmContractAddress,
+          msg: Buffer.from(JSON.stringify(msg)).toString('base64')
+        },
+        'auto'
+      );
+      console.log('result: ', result);
+    }
+
+    displayToast(TToastType.TX_SUCCESSFUL, {
+      customLink: `${network.explorer}/txs/${result.transactionHash}`
+    });
+    setTxHash(result.transactionHash);
+    return true;
+  };
+
   const transferIbcCustom = async (
     fromToken: TokenItemType,
     toToken: TokenItemType,
@@ -582,10 +661,26 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+      const ibcMemo =
+        toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
 
-      // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (!fromToken.erc20Cw20Map) {
         if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
+          if (fromToken.denom === ORAI) {
+            // TODO: Remove ORAI hardcode
+            const canTransfer = await transferToRemoteChainIbcWasm(
+              ibcInfo,
+              fromToken,
+              toToken,
+              fromAddress,
+              toAddress,
+              amount.amount,
+              ibcMemo
+            );
+            if (!canTransfer) {
+              throw 'Cannot transfer to remote chain because cannot find mapping pair';
+            } else return;
+          }
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
           await transferIBCOrai({
             fromToken,
@@ -611,6 +706,11 @@ const Balance: React.FC<BalanceProps> = () => {
       if (ibcInfo.source.includes('wasm')) {
         // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
         ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+        // const canTransfer = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, fromAddress, toAddress, amount.amount, ibcMemo);
+        // if (!canTransfer) {
+        //   throw "Cannot transfer to remote chain because cannot find mapping pair";
+        // }
+        // else return;
       }
 
       console.log('ibc info: ', ibcInfo);
@@ -962,12 +1062,17 @@ const Balance: React.FC<BalanceProps> = () => {
         gravityContractAddr,
         fromAmount.toString()
       );
+      let finalKeplrAddress = keplrAddress;
+      // TODO: remove hardcode BEP20 ORAI
+      if (from!.contractAddress === ORAI_BSC_CONTRACT) {
+        finalKeplrAddress = `${oraib2oraichain}/${keplrAddress}`;
+      }
       const result = await window.Metamask.transferToGravity(
         from!.chainId as string,
         fromAmount.toString(),
         from!.contractAddress!,
         metamaskAddress,
-        keplrAddress
+        finalKeplrAddress
       );
       console.log(result);
       processTxResult(
@@ -1108,7 +1213,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name)
+        !from ||
+        ((from.chainId !== ORAI_BRIDGE_CHAIN_ID || t.denom === ORAI) &&
+          t.name === from.name) // TODO: Remove hardcode for ORAI BEP20
     );
   };
 

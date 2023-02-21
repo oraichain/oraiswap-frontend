@@ -32,6 +32,7 @@ import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
 import useLocalStorage from 'hooks/useLocalStorage';
+import { calculateSubAmounts } from 'helper';
 const cx = cn.bind(styles);
 
 const SwapComponent: React.FC<{
@@ -89,8 +90,14 @@ const SwapComponent: React.FC<{
     fetchTokenInfo(toToken!)
   );
 
-  const fromTokenBalance = fromToken ? amounts?.[fromToken.denom]?.amount : 0;
-  const toTokenBalance = toToken ? amounts?.[toToken.denom]?.amount : 0;
+  const fromTokenBalance = fromToken
+    ? amounts[fromToken.denom]?.amount +
+        calculateSubAmounts(amounts[fromToken.denom]) ?? 0
+    : 0;
+  const toTokenBalance = toToken
+    ? amounts[toToken.denom]?.amount +
+        calculateSubAmounts(amounts[toToken.denom]) ?? 0
+    : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],

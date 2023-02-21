@@ -65,10 +65,9 @@ a {
   text-decoration: none;
 }
 
-[target='_blank'] {
-  @include link($blue, $blue);
+[target='_blank'] {  
   &:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 }
 

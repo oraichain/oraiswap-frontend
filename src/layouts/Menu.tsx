@@ -66,9 +66,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
     setOpen(!open);
   };
 
-  const balance = amounts[ORAI]?.amount ?? 0;
+  const balance = amounts[ORAI]?.amount || 0;
   const metamaskBalance =
-    amounts[window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI]?.amount ?? 0;
+    amounts[window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI]?.amount || 0;
 
   useEffect(() => {
     setLink(location.pathname);
@@ -164,7 +164,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     {
                       <TokenBalance
                         balance={{
-                          amount: balance || '0',
+                          amount: balance,
                           decimals: 6,
                           denom: ORAI,
                         }}

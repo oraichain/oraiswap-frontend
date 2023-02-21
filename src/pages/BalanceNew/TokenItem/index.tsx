@@ -5,27 +5,18 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
-
-export type AmountDetail = {
-  subAmounts?: { [key: string]: number };
-  amount: number;
-  usd: number;
-};
+import { calculateSubAmounts } from 'helper';
 
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: AmountDetail;
   convertToken?: any;
   transferIBC?: any;
-  transferFromGravity?: any;
   name?: string;
   onClickTransfer?: any;
-  toToken?: TokenItemType;
-  fromToken?: TokenItemType;
   active: Boolean;
   className?: string;
   onClick?: Function;
-  onClickFrom?: Function;
   onBlur?: Function;
   convertKwt?: any;
 }
@@ -36,14 +27,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  onClickFrom,
   convertToken,
-  transferFromGravity,
   transferIBC,
   onClickTransfer,
-  toToken,
   convertKwt,
-  fromToken,
 }) => {
   return (
     <div
@@ -55,7 +42,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
       onClick={(event) => {
         event.stopPropagation();
         onClick?.(token);
-        // fromToken && onClickFrom?.(fromToken);
       }}
     >
       <div className={styles.balanceAmountInfo}>
@@ -76,7 +62,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail ? amountDetail?.amount?.toString() : '0',
+                amount: amountDetail
+                  ? amountDetail?.amount + calculateSubAmounts(amountDetail)
+                  : '0',
                 denom: '',
                 decimals: token.decimals,
               }}
@@ -84,7 +72,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               decimalScale={Math.min(6, token.decimals)}
             />
 
-            {!!amountDetail?.subAmounts && (
+            {calculateSubAmounts(amountDetail) > 0 && (
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>
@@ -105,7 +93,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                           </div>
                           <TokenBalance
                             balance={{
-                              amount: amountDetail.subAmounts[name],
+                              amount: amountDetail.subAmounts[name].amount,
                               denom: '',
                               decimals: token.decimals,
                             }}
@@ -134,10 +122,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             amountDetail={amountDetail}
             convertToken={convertToken}
-            transferFromGravity={transferFromGravity}
             transferIBC={transferIBC}
             onClickTransfer={onClickTransfer}
-            toToken={toToken}
             convertKwt={convertKwt}
           />
         )}

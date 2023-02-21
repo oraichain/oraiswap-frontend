@@ -19,6 +19,7 @@ import Loader from 'components/Loader';
 import {
   BSC_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
+  ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
@@ -56,10 +57,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferIbcLoading, setTransferIbcLoading] = useState(false);
   const [chainInfo] = useGlobalState('chainInfo');
+  const [metamaskAddress] = useGlobalState('metamaskAddress');
 
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
+      console.log('amount details: ', amountDetail);
     }
   }, [chainInfo]);
 
@@ -73,10 +76,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       t.chainId !== ORAI_BRIDGE_CHAIN_ID
   );
 
-  const maxAmount = parseAmountFrom(
-    amountDetail?.amount ?? 0,
-    token?.decimals
-  ).toNumber();
+  const maxAmount = parseAmountFrom(0, token?.decimals).toNumber();
 
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
@@ -229,7 +229,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const to = filteredTokens.find(
                         (t) =>
                           t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-                          t.name.includes(token.name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                          t.name.includes(token.name)
                       );
                       await transferIBC(token, to, convertAmount);
                     } finally {
@@ -316,7 +316,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (
             token.cosmosBased &&
             token.chainId !== ORAI_BRIDGE_CHAIN_ID &&
-            (token.erc20Cw20Map || token.bridgeNetworkIdentifier) &&
+            (token.erc20Cw20Map ||
+              token.bridgeNetworkIdentifier ||
+              token.denom === ORAI) && // TODO: Remove ORAI harcode
             name
           ) {
             return (
@@ -357,17 +359,22 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     event.stopPropagation();
                     try {
                       const isValid = checkValidAmount();
+                      if (!window.ethereum || !metamaskAddress) {
+                        displayToast(TToastType.TX_FAILED, {
+                          message: `Please install Metamask to continue.`
+                        });
+                        return;
+                      }
                       if (!isValid) return;
                       setTransferLoading(true);
                       const name = parseBep20Erc20Name(token.name);
                       const tokenBridge = token?.bridgeNetworkIdentifier;
-                      const to = filteredTokens.find(
-                        (t) =>
-                          t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
-                            ? t.bridgeNetworkIdentifier.includes(
-                                token.bridgeNetworkIdentifier
-                              )
-                            : t.name.includes(name) // TODO: need to seperate BEP20 & ERC20. Need user input
+                      const to = filteredTokens.find((t) =>
+                        t.chainId === ORAI_BRIDGE_CHAIN_ID && tokenBridge
+                          ? t.bridgeNetworkIdentifier.includes(
+                              token.bridgeNetworkIdentifier
+                            )
+                          : t.name.includes(name)
                       );
 
                       // convert reverse before transferring
@@ -379,7 +386,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    Transfer To <strong>OraiBridge</strong>
+                    Transfer To <strong>{BSC_ORG}</strong>{' '}
+                    {/** TODO: Remove BSC ORG hardcode */}
                   </span>
                 </button>
               </>
