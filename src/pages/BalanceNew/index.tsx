@@ -310,7 +310,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const data = toBinary({
       balance: { address }
     } as TokenQueryMsg);
-    console.log(address, Contract.multicall);
+
     const res = await Contract.multicall.aggregate({
       queries: cw20Tokens.map((t) => ({
         address: t.contractAddress,
@@ -318,7 +318,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }))
     });
 
-    let amountDetails = Object.fromEntries(
+    const amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {
         if (!res.return_data[ind].success) {
           return [t.denom, { amount: 0, usd: 0 }];

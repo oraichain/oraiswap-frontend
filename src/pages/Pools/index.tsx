@@ -18,6 +18,10 @@ import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
 import { useQuery } from '@tanstack/react-query';
+import useLocalStorage from 'hooks/useLocalStorage';
+import { Contract } from 'config/contracts';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 const { Search } = Input;
 const useQueryConfig = {
@@ -207,26 +211,56 @@ type PairInfoData = {
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
+  const [cachedPairs, setCachedPairs] = useLocalStorage<{
+    [key: string]: PoolResponse;
+  }>('pairs');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+
+  const fetchCachedPairs = async () => {
+    const queries = pairs.map((pair) => ({
+      address: pair.contract_addr,
+      data: toBinary({
+        pool: {}
+      })
+    }));
+
+    const res = await Contract.multicall.aggregate({
+      queries
+    });
+    const pairsData = Object.fromEntries(
+      pairs.map((pair, ind) => {
+        const data = res.return_data[ind];
+        if (!data.success) {
+          return [pair.contract_addr, {}];
+        }
+        const pairData = fromBinary(data.data) as PoolResponse;
+        return [pair.contract_addr, pairData];
+      })
+    );
+
+    setCachedPairs(pairsData);
+    fetchPairInfoDataList();
+  };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
       filteredTokens.find((token) => token.denom === denom)
     );
     if (!fromToken || !toToken) return;
-    console.log(fromToken, toToken);
+
     try {
-      const [poolData, infoData] = await Promise.all([
-        fetchPoolInfoAmount(fromToken, toToken),
-        fetchPairInfo([fromToken, toToken])
-      ]);
+      const poolData = await fetchPoolInfoAmount(
+        fromToken,
+        toToken,
+        cachedPairs
+      );
 
       return {
         ...poolData,
         amount: 0,
         pair,
-        commissionRate: infoData.commission_rate,
+        commissionRate: pair.commission_rate,
         fromToken,
         toToken
       };
@@ -284,8 +318,7 @@ const Pools: React.FC<PoolsProps> = () => {
   // );
 
   useEffect(() => {
-    fetchPairInfoDataList();
-    return () => {};
+    fetchCachedPairs();
   }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);

@@ -16,7 +16,12 @@ import {
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
-import { ibcInfos, ibcInfosOld, oraicbain2atom, oraib2oraichain } from 'config/ibcInfos';
+import {
+  ibcInfos,
+  ibcInfosOld,
+  oraicbain2atom,
+  oraib2oraichain
+} from 'config/ibcInfos';
 import {
   evmTokens,
   filteredTokens,
@@ -115,7 +120,7 @@ import {
 import { TransferBackMsg } from 'libs/contracts';
 import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const { Search } = Input;
 
@@ -318,7 +323,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const data = toBinary({
       balance: { address }
     } as TokenQueryMsg);
-    console.log(address, Contract.multicall);
+
     const res = await Contract.multicall.aggregate({
       queries: cw20Tokens.map((t) => ({
         address: t.contractAddress,
@@ -368,14 +373,14 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
           keplrAddress &&
-          getFunctionExecution(loadNativeBalance, [
-            keplrAddress,
-            network.rpc
-          ]),
+            getFunctionExecution(loadNativeBalance, [
+              keplrAddress,
+              network.rpc
+            ]),
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
@@ -543,10 +548,22 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferToRemoteChainIbcWasm = async (ibcInfo: IBCInfo, fromToken: TokenItemType, toToken: TokenItemType, fromAddress: string, toAddress: string, amount: string, memo: string): Promise<boolean> => {
+  const transferToRemoteChainIbcWasm = async (
+    ibcInfo: IBCInfo,
+    fromToken: TokenItemType,
+    toToken: TokenItemType,
+    fromAddress: string,
+    toAddress: string,
+    amount: string,
+    memo: string
+  ): Promise<boolean> => {
     // format: wasm.oraiaxv13....
-    const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
-    if (!ibcWasmContractAddress) throw { message: "IBC Wasm source port is invalid. Cannot transfer to the destination chain" };
+    const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
+    if (!ibcWasmContractAddress)
+      throw {
+        message:
+          'IBC Wasm source port is invalid. Cannot transfer to the destination chain'
+      };
 
     const { info: assetInfo } = parseTokenInfo(fromToken);
     Contract.sender = fromAddress;
@@ -555,8 +572,10 @@ const Balance: React.FC<BalanceProps> = () => {
       // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
       await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
     } catch (error) {
-      console.log("error ibc wasm transfer back to remote chain: ", error)
-      console.log("We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC");
+      console.log('error ibc wasm transfer back to remote chain: ', error);
+      console.log(
+        'We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC'
+      );
       // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
       return false;
     }
@@ -573,27 +592,32 @@ const Balance: React.FC<BalanceProps> = () => {
       remoteAddress: toAddress,
       remoteDenom: toToken.denom,
       timeout: ibcInfo.timeout,
-      memo,
+      memo
     };
     let result: ExecuteResult;
     if (assetInfo.native_token) {
-      result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
+      result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [
+        { amount, denom: fromToken.denom }
+      ]);
     } else {
       const cw20Token = Contract.token(fromToken.contractAddress);
-      result = await cw20Token.send({
-        amount: amount,
-        contract: ibcWasmContractAddress,
-        msg: Buffer.from(JSON.stringify(msg)).toString('base64')
-      }, 'auto')
-      console.log("result: ", result);
+      result = await cw20Token.send(
+        {
+          amount: amount,
+          contract: ibcWasmContractAddress,
+          msg: Buffer.from(JSON.stringify(msg)).toString('base64')
+        },
+        'auto'
+      );
+      console.log('result: ', result);
     }
 
     displayToast(TToastType.TX_SUCCESSFUL, {
-      customLink: `${network.explorer}/txs/${result.transactionHash}`,
+      customLink: `${network.explorer}/txs/${result.transactionHash}`
     });
     setTxHash(result.transactionHash);
     return true;
-  }
+  };
 
   const transferIbcCustom = async (
     fromToken: TokenItemType,
@@ -637,16 +661,25 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-      const ibcMemo = toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
+      const ibcMemo =
+        toToken.org === 'OraiBridge' ? toToken.prefix + metamaskAddress : '';
 
       if (!fromToken.erc20Cw20Map) {
         if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID) {
-          if (fromToken.denom === ORAI) { // TODO: Remove ORAI hardcode
-            const canTransfer = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, fromAddress, toAddress, amount.amount, ibcMemo);
+          if (fromToken.denom === ORAI) {
+            // TODO: Remove ORAI hardcode
+            const canTransfer = await transferToRemoteChainIbcWasm(
+              ibcInfo,
+              fromToken,
+              toToken,
+              fromAddress,
+              toAddress,
+              amount.amount,
+              ibcMemo
+            );
             if (!canTransfer) {
-              throw "Cannot transfer to remote chain because cannot find mapping pair";
-            }
-            else return;
+              throw 'Cannot transfer to remote chain because cannot find mapping pair';
+            } else return;
           }
           ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
           await transferIBCOrai({
@@ -1180,7 +1213,9 @@ const Balance: React.FC<BalanceProps> = () => {
 
     return toTokens.find(
       (t) =>
-        !from || ((from.chainId !== ORAI_BRIDGE_CHAIN_ID || t.denom === ORAI) && t.name === from.name) // TODO: Remove hardcode for ORAI BEP20
+        !from ||
+        ((from.chainId !== ORAI_BRIDGE_CHAIN_ID || t.denom === ORAI) &&
+          t.name === from.name) // TODO: Remove hardcode for ORAI BEP20
     );
   };
 
@@ -1308,8 +1343,8 @@ const Balance: React.FC<BalanceProps> = () => {
                         onClickTransfer={
                           !!to
                             ? (fromAmount: number) => {
-                              onClickTransfer(fromAmount, from, to);
-                            }
+                                onClickTransfer(fromAmount, from, to);
+                              }
                             : undefined
                         }
                         convertKwt={
@@ -1382,11 +1417,11 @@ const Balance: React.FC<BalanceProps> = () => {
                           onClickTransfer={
                             !!transferToToken
                               ? (fromAmount: number) =>
-                                onClickTransfer(
-                                  fromAmount,
-                                  to,
-                                  transferToToken
-                                )
+                                  onClickTransfer(
+                                    fromAmount,
+                                    to,
+                                    transferToToken
+                                  )
                               : undefined
                           }
                           toToken={transferToToken}
