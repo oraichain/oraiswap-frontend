@@ -3,7 +3,6 @@ import cn from 'classnames/bind';
 import { ReactComponent as SYMBOLIcon } from 'assets/icons/symbols_swap.svg';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
-import moment from 'moment';
 import { poolTokens } from 'config/pools';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
@@ -106,9 +105,13 @@ const SwapChart: React.FC<{
                   <TokenBalance balance={infoMove?.value} decimalScale={2} />
                 </div>
                 <p className={cx('content-date')}>
-                  {infoMove?.time
-                    ? moment(infoMove?.time * 1000).format('ll')
-                    : moment().format('ll')}
+                  {new Date(
+                    infoMove?.time ? infoMove?.time * 1000 : Date.now()
+                  ).toLocaleString('en-US', {
+                    month: 'short',
+                    year: 'numeric',
+                    day: 'numeric'
+                  })}
                 </p>
               </div>
               <div>
@@ -138,7 +141,7 @@ const SwapChart: React.FC<{
                 textColor: 'black',
                 areaTopColor: '#612fca',
                 // areaTopColor: 'rgba(168, 113, 223, 0.5)',
-                areaBottomColor: 'rgba(86, 42, 209, 0)',
+                areaBottomColor: 'rgba(86, 42, 209, 0)'
               }}
             />
           </div>

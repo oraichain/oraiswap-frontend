@@ -1,4 +1,3 @@
-import { Button } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
@@ -74,9 +73,9 @@ const RequireAuthButton: React.FC<any> = ({
 
   return (
     <React.Fragment>
-      <Button {...props} onClick={onClick}>
+      <button {...props} onClick={onClick}>
         {props.children}
-      </Button>
+      </button>
       {openConnectWalletModal && (
         <ConnectWalletModal
           connectMetamask={connectMetamask}

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from 'antd';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
@@ -343,13 +342,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           />
                         </div>
                       </div>
-                      <Button
+                      <button
                         className={cx('btn')}
                         style={{ marginTop: 30 }}
                         onClick={() => setIsOpenLiquidityModal(true)}
                       >
                         Add/Remove Liquidity
-                      </Button>
+                      </button>
                     </div>
                   </div>
 

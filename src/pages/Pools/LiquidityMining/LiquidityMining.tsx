@@ -1,5 +1,4 @@
 import React, { FC, memo, useEffect, useState } from 'react';
-import { Button, Divider, Input } from 'antd';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
@@ -183,12 +182,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             </div>
           </div>
           <div className={cx('earning')}>
-            <Button
+            <button
               className={cx('btn')}
               onClick={() => setIsOpenBondingModal(true)}
             >
               Start Earning
-            </Button>
+            </button>
           </div>
         </>
       </div>
@@ -229,12 +228,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     )}
                   </div>
                 </div>
-                <Divider
-                  dashed
+                <hr
                   style={{
-                    background: '#2D2938',
-                    width: '100%',
-                    height: '1px'
+                    borderTop: '1px  dashed #2D2938',
+                    width: '100%'
                     // margin: '16px 0'
                   }}
                 />
@@ -278,7 +275,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                             /> */}
                   </div>
                 ))}
-              <Button
+              <button
                 className={cx('btn')}
                 onClick={() => handleBond()}
                 disabled={
@@ -288,13 +285,13 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
               >
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
-              </Button>
-              <Button
+              </button>
+              <button
                 className={cx('btn', 'btn--dark')}
                 onClick={() => setIsOpenUnbondModal(true)}
               >
                 <span>Unbond</span>
-              </Button>
+              </button>
             </div>
           </div>
         </>

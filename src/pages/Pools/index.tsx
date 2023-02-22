@@ -1,6 +1,5 @@
 import React, { FC, memo, useEffect, useState, useMemo } from 'react';
 import styles from './index.module.scss';
-import { Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { Pair, pairs } from 'config/pools';
@@ -21,6 +20,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { updatePairs } from 'reducer/token';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
+import Input from 'components/Input';
 
 interface PoolsProps {}
 
@@ -225,12 +225,17 @@ const ListPools = memo<{
         </div>
         <div className={styles.listpools_search}>
           <Input
+            className={styles.listpools_search_input}
             placeholder="Search by pools or tokens name"
-            prefix={<img src={SearchSvg} alt="icon-search" />}
+            style={{
+              paddingLeft: 40,
+              backgroundImage: `url(${SearchSvg})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '10px center'
+            }}
             onChange={_.debounce((e) => {
               filterPairs(e.target.value);
             }, 500)}
-            onPressEnter={(e: any) => filterPairs(e.target.value)}
           />
           {/* <div
             className={styles.listpools_btn}

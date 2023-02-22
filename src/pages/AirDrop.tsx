@@ -4,9 +4,9 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
-import { Input } from 'antd';
 import bech32 from 'bech32';
 import _ from 'lodash';
+import Input from 'components/Input';
 
 const cx = cn.bind(styles);
 

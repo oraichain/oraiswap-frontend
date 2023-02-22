@@ -1,4 +1,3 @@
-import { Input } from 'antd';
 import classNames from 'classnames';
 import { FC, useEffect, useState } from 'react';
 import styles from './index.module.scss';
@@ -35,6 +34,7 @@ import {
   calculateSubAmounts
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
+import Input from 'components/Input';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],

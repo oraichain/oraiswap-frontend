@@ -94,10 +94,7 @@ import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
-// import cosmwasmRegistry from 'libs/cosmwasm-registry';
-import { Input } from 'antd';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
-// import { createIbcAminoConverters } from '@cosmjs/stargate/build/modules/ibc/aminomessages';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
@@ -113,10 +110,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
 import { updateAmounts } from 'reducer/token';
 import useConfigReducer from 'hooks/useConfigReducer';
+import Input from 'components/Input';
 
 interface BalanceProps {}
-
-const { Search } = Input;
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -1167,7 +1163,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
               </div>
             </div>
-            <Search
+            <Input
               placeholder="Search Token of Network"
               onSearch={(text: string) => {
                 if (!text) return navigate('');

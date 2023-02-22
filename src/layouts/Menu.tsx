@@ -1,4 +1,3 @@
-import { Button, Typography } from 'antd';
 import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
@@ -16,7 +15,7 @@ import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
 import ethIcon from 'assets/icons/eth.svg';
 
-import { ThemeContext, Themes } from 'context/theme-context';
+import { ThemeContext } from 'context/theme-context';
 
 import React, {
   memo,
@@ -50,7 +49,6 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-const { Text } = Typography;
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -96,7 +94,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           rel="noreferrer"
         >
           {icon}
-          <Text className={styles.menu_item_text}>{title}</Text>
+          <span className={styles.menu_item_text}>{title}</span>
         </a>
       );
     return (
@@ -109,7 +107,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
       >
         {icon}
-        <Text className={styles.menu_item_text}>{title}</Text>
+        <span className={styles.menu_item_text}>{title}</span>
       </Link>
     );
   };
@@ -208,7 +206,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
               )}
 
               {!address && !metamaskAddress && (
-                <Text className={styles.connect}>Connect wallet</Text>
+                <span className={styles.connect}>Connect wallet</span>
               )}
             </RequireAuthButton>
             {renderLink(
@@ -248,7 +246,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
 
         <div>
           <div className={styles.menu_themes}>
-            <Button
+            <button
               className={classNames(styles.menu_theme, {
                 [styles.active]: theme === 'dark'
               })}
@@ -257,9 +255,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
               }}
             >
               <Dark style={{ width: 15, height: 15 }} />
-              <Text className={styles.menu_theme_text}>Dark</Text>
-            </Button>
-            <Button
+              <span className={styles.menu_theme_text}>Dark</span>
+            </button>
+            <button
               className={classNames(styles.menu_theme, {
                 [styles.active]: theme === 'light'
               })}
@@ -268,8 +266,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
               }}
             >
               <Light style={{ width: 15, height: 15 }} />
-              <Text className={styles.menu_theme_text}>Light</Text>
-            </Button>
+              <span className={styles.menu_theme_text}>Light</span>
+            </button>
           </div>
 
           <div className={styles.menu_footer}>

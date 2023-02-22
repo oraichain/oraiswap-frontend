@@ -1,10 +1,10 @@
 /* eslint-disable import/no-anonymous-default-export */
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Spin } from 'antd';
 import NotFound from 'pages/NotFound';
 import AirDrop from 'pages/AirDrop';
 import EthereumTest from 'pages/EthereumTest';
+import Loader from 'components/Loader';
 
 // const Swap = React.lazy(() => import('pages/Swap/index'));
 const SwapV2 = React.lazy(() => import('pages/SwapV2/index'));
@@ -15,7 +15,7 @@ const Maintenance = React.lazy(() => import('pages/Maintenance'));
 
 export default () => {
   return (
-    <Suspense fallback={<Spin className="spin" />}>
+    <Suspense fallback={<Loader />}>
       <Routes>
         <Route path="/" element={<BalanceNew />} />
         <Route path="/swap" element={<SwapV2 />} />
