@@ -3,17 +3,15 @@ import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   gravityContracts,
-  TokenItemType,
+  TokenItemType
 } from 'config/bridgeTokens';
 import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
-import { getDenomEvm } from 'helper';
-import { publicToAddress } from "@ethereumjs/util";
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
 
   // compare in number type
   public isBsc() {
@@ -31,14 +29,14 @@ export default class Metamask {
   public async switchNetwork(chainId: string | number) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x' + Number(chainId).toString(16) }],
+      params: [{ chainId: '0x' + Number(chainId).toString(16) }]
     });
   }
 
   public async getEthAddress() {
     const [address] = await window.ethereum!.request({
       method: 'eth_requestAccounts',
-      params: [],
+      params: []
     });
     return address;
   }
@@ -64,7 +62,7 @@ export default class Metamask {
     const result = await gravityContract.methods
       .sendToCosmos(tokenContract, to, balance)
       .send({
-        from,
+        from
       });
     return result;
   }
@@ -94,7 +92,7 @@ export default class Metamask {
     const result = await tokenContract.methods
       .approve(spender, allowance)
       .send({
-        from: owner,
+        from: owner
       });
     return result;
   }

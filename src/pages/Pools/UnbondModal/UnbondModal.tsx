@@ -152,7 +152,7 @@ const UnbondModal: FC<ModalProps> = ({
                 })}
                 key={idx}
                 onClick={() => {
-                  setUnbondAmount((option * bondAmount) / (10 ** 6 * 100));
+                  setUnbondAmount((option * bondAmount) / (1_000_000 * 100));
                   setChosenOption(idx);
                 }}
               >
@@ -172,7 +172,7 @@ const UnbondModal: FC<ModalProps> = ({
                 // value={chosenOption === 4 && !!unbondAmount ? unbondAmount : ''}
                 onChange={(event) => {
                   setUnbondAmount(
-                    (+event.target.value * bondAmount) / (10 ** 6 * 100)
+                    (+event.target.value * bondAmount) / (1_000_000 * 100)
                   );
                 }}
               />

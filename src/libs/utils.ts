@@ -1,7 +1,5 @@
 import { is } from 'ramda';
 import bech32 from 'bech32';
-import Big from 'big.js';
-import { Fraction } from '@saberhq/token-utils';
 
 /* object */
 export const record = <T, V>(
@@ -45,6 +43,7 @@ const rules = [
 ];
 
 const webviewRegExp = new RegExp('(' + rules.join('|') + ')', 'ig');
+const atomics = 1_000_000; // for decimal divide
 
 export const isWebview = () => {
   const userAgent = navigator.userAgent || navigator.vendor;
@@ -94,39 +93,46 @@ export const parseDisplayAmount = (
 
 export const getUsd = (
   amount: number,
-  price: Fraction | number | null,
+  price: number | null,
   decimals: number
 ) => {
   if (!amount || !price) return 0;
 
-  const fragPrice =
-    typeof price === 'number' ? Fraction.fromNumber(price) : price;
-
-  return fragPrice.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
-    .asNumber;
+  return (
+    Number(
+      (BigInt(amount) * BigInt(Math.round(price * atomics))) /
+        BigInt(10 ** decimals)
+    ) / atomics
+  );
 };
 
-export const parseBalanceNumber = (balance: number) => {
+export const parseBalanceNumber = (balance: number): number => {
   if (isFinite(balance) && !isNaN(balance)) return balance;
   else return 0;
 };
-export const parseAmountToWithDecimal = (amount: number, decimals: number) => {
-  return new Big(amount).mul(new Big(10).pow(decimals));
+export const parseAmountToWithDecimal = (
+  amount: number,
+  decimals: number
+): number => {
+  return (
+    Number(BigInt(Math.round(amount * atomics)) * BigInt(10 ** decimals)) /
+    atomics
+  );
 };
 
 export const parseAmountFromWithDecimal = (
-  amount: number,
-  sourceDecimals: number,
+  amount: number | string,
+  sourceDecimals = 6,
   desDecimals = 6
-) => {
+): number => {
   // guarding conditions to prevent crashing
-  if (Number.isNaN(amount) || !Number.isFinite(amount)) return new Big(0);
+  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
 
-  let t = new Big(amount)
-    .div(new Big(10).pow(sourceDecimals))
-    .round(desDecimals, 0);
+  const returnAmount =
+    Number((BigInt(amount) * BigInt(atomics)) / BigInt(10 ** sourceDecimals)) /
+    atomics;
 
-  return t;
+  return Number(returnAmount.toFixed(desDecimals));
 };
 
 export const reduceString = (str: string, from: number, end: number) => {

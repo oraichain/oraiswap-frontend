@@ -10,7 +10,6 @@ import {
   parseAmountFromWithDecimal,
   parseAmountToWithDecimal
 } from 'libs/utils';
-import Big from 'big.js';
 import { Contract } from 'config/contracts';
 import { PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
@@ -210,12 +209,9 @@ function getSubAmount(
     const balance = amounts[mapping.erc20Denom].amount;
     // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
     const parsedBalance = parseAmountToWithDecimal(
-      parseAmountFromWithDecimal(
-        balance,
-        mapping.decimals.erc20Decimals
-      ).toNumber(),
+      parseAmountFromWithDecimal(balance, mapping.decimals.erc20Decimals),
       mapping.decimals.cw20Decimals
-    ).toNumber();
+    );
     subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
       amount: parsedBalance,
       usd: getUsd(
@@ -269,14 +265,14 @@ async function generateConvertCw20Erc20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    let balance: string;
+    let balance: number;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
-    balance = new Big(amounts[sendCoin.denom]?.amount ?? 0).toFixed(0);
+    balance = amounts[sendCoin.denom]?.amount ?? 0;
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
     if (+balance >= +sendCoin.amount) break;
 
-    balance = new Big(amounts[tokenInfo.denom]?.amount).toFixed(0);
+    balance = amounts[tokenInfo.denom]?.amount;
 
     if (+balance > 0) {
       const outputToken: TokenItemType = {
@@ -289,7 +285,7 @@ async function generateConvertCw20Erc20Message(
         await generateConvertMsgs({
           type: Type.CONVERT_TOKEN_REVERSE,
           sender,
-          inputAmount: balance,
+          inputAmount: balance.toString(),
           inputToken: tokenInfo,
           outputToken
         })

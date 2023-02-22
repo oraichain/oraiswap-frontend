@@ -30,7 +30,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   convertToken,
   transferIBC,
   onClickTransfer,
-  convertKwt,
+  convertKwt
 }) => {
   return (
     <div
@@ -66,7 +66,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                   ? amountDetail?.amount + calculateSubAmounts(amountDetail)
                   : '0',
                 denom: '',
-                decimals: token.decimals,
+                decimals: token.decimals
               }}
               className={styles.tokenAmount}
               decimalScale={Math.min(6, token.decimals)}
@@ -95,7 +95,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                             balance={{
                               amount: amountDetail.subAmounts[name].amount,
                               denom: '',
-                              decimals: token.decimals,
+                              decimals: token.decimals
                             }}
                             className={styles.tokenAmount}
                             decimalScale={Math.min(6, token.decimals)}
@@ -110,7 +110,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             )}
           </div>
           <TokenBalance
-            balance={amountDetail ? amountDetail.usd : 0}
+            balance={amountDetail?.usd || 0}
             className={styles.subLabel}
             decimalScale={2}
           />

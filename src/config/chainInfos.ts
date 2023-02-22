@@ -1,11 +1,9 @@
-import { Bech32Address } from '@keplr-wallet/cosmos';
 import { ChainInfo } from '@keplr-wallet/types';
 import {
   ORAI_BRIDGE_CHAIN_ID,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_LCD,
-  ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
   ORAI_BRIDGE_UDENOM,
   ORAI_RPC,
@@ -43,7 +41,14 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 118
     },
-    bech32Config: Bech32Address.defaultBech32Config('orai'),
+    bech32Config: {
+      bech32PrefixAccAddr: 'orai',
+      bech32PrefixAccPub: 'oraipub',
+      bech32PrefixValAddr: 'oraivaloper',
+      bech32PrefixValPub: 'oraivaloperpub',
+      bech32PrefixConsAddr: 'oraivalcons',
+      bech32PrefixConsPub: 'oraivalconspub'
+    },
     get currencies() {
       return [this.stakeCurrency];
     },
@@ -74,7 +79,14 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 118
     },
-    bech32Config: Bech32Address.defaultBech32Config(ORAI_BRIDGE_PREFIX),
+    bech32Config: {
+      bech32PrefixAccAddr: 'oraib',
+      bech32PrefixAccPub: 'oraibpub',
+      bech32PrefixValAddr: 'oraibvaloper',
+      bech32PrefixValPub: 'oraibvaloperpub',
+      bech32PrefixConsAddr: 'oraibvalcons',
+      bech32PrefixConsPub: 'oraibvalconspub'
+    },
     get currencies() {
       return [this.stakeCurrency];
     },
@@ -102,7 +114,14 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 60
     },
-    bech32Config: Bech32Address.defaultBech32Config('oraie'),
+    bech32Config: {
+      bech32PrefixAccAddr: 'oraie',
+      bech32PrefixAccPub: 'oraiepub',
+      bech32PrefixValAddr: 'oraievaloper',
+      bech32PrefixValPub: 'oraievaloperpub',
+      bech32PrefixConsAddr: 'oraievalcons',
+      bech32PrefixConsPub: 'oraievalconspub'
+    },
     get currencies() {
       return [this.stakeCurrency];
     },

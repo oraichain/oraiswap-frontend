@@ -3,21 +3,14 @@ import styles from './index.module.scss';
 import { Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { getPair, Pair, pairs } from 'config/pools';
-import {
-  fetchAllPoolApr,
-  fetchPairInfo,
-  fetchPoolInfoAmount,
-  fetchTokenInfo
-} from 'rest/api';
+import { Pair, pairs } from 'config/pools';
+import { fetchAllPoolApr, fetchPoolInfoAmount } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
-import { Fraction } from '@saberhq/token-utils';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
-import { useQuery } from '@tanstack/react-query';
 import DropdownCustom from 'components/DropdownCustom';
 import FilterSvg from 'assets/icons/icon-filter.svg';
 import SearchSvg from 'assets/icons/search-svg.svg';
@@ -25,18 +18,10 @@ import NoDataSvg from 'assets/icons/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { updateAmounts, updatePairs } from 'reducer/token';
+import { updatePairs } from 'reducer/token';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
 
-const { Search } = Input;
-const useQueryConfig = {
-  retry: 3,
-  retryDelay: 3000,
-  refetchOnMount: false,
-  refetchOnWindowFocus: false,
-  refetchOnReconnect: false
-};
 interface PoolsProps {}
 
 enum KeyFilter {
@@ -288,7 +273,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
-  const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+  const [oraiPrice, setOraiPrice] = useState(0);
   const dispatch = useDispatch();
   const setCachedPairs = (payload: PairDetails) =>
     dispatch(updatePairs(payload));
@@ -370,15 +355,9 @@ const Pools: React.FC<PoolsProps> = () => {
       return setTimeout(fetchPairInfoDataList, 5000);
     }
 
-    const oraiPrice = new Fraction(
-      oraiUsdtPool.askPoolAmount,
-      oraiUsdtPool.offerPoolAmount
-    );
-
-    const milkyPrice = new Fraction(
-      oraiUsdtPoolMilky.askPoolAmount,
-      oraiUsdtPoolMilky.offerPoolAmount
-    );
+    const oraiPrice = oraiUsdtPool.askPoolAmount / oraiUsdtPool.offerPoolAmount;
+    const milkyPrice =
+      oraiUsdtPoolMilky.askPoolAmount / oraiUsdtPoolMilky.offerPoolAmount;
     poolList.forEach((pool) => {
       pool.amount = getUsd(
         2 * pool.offerPoolAmount,
@@ -390,12 +369,6 @@ const Pools: React.FC<PoolsProps> = () => {
     setPairInfos(poolList);
     setOraiPrice(oraiPrice);
   };
-
-  // useQuery(
-  //   ['fetchPairInfoDataList'],
-  //   () => fetchPairInfoDataList(),
-  //   useQueryConfig
-  // );
 
   useEffect(() => {
     fetchPairInfoDataList();
@@ -411,7 +384,7 @@ const Pools: React.FC<PoolsProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
+        <Header amount={totalAmount} oraiPrice={oraiPrice ?? 0} />
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={cachedApr}

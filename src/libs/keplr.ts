@@ -1,17 +1,10 @@
 import { network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import createHash from 'create-hash';
-import { Bech32Address } from '@keplr-wallet/cosmos';
 import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
-
-const hash160 = (buffer: Uint8Array) => {
-  var t = createHash('sha256').update(buffer).digest();
-  return createHash('rmd160').update(t).digest();
-};
 
 export default class Keplr {
   constructor() {}
@@ -31,10 +24,12 @@ export default class Keplr {
     return this.keplr.getOfflineSignerAuto(chainId);
   }
 
-  async getChainInfosWithoutEndpoints(): Promise<Array<{
-    chainId: string,
-    feeCurrencies: FeeCurrency[]
-  }>> {
+  async getChainInfosWithoutEndpoints(): Promise<
+    Array<{
+      chainId: string;
+      feeCurrencies: FeeCurrency[];
+    }>
+  > {
     return this.keplr.getChainInfosWithoutEndpoints();
   }
 
@@ -110,15 +105,5 @@ export default class Keplr {
   async getKeplrPubKey(chainId?: string): Promise<Uint8Array | undefined> {
     const key = await this.getKeplrKey(chainId);
     return key?.pubKey;
-  }
-
-  async getKeplrBech32Address(
-    chainId?: string
-  ): Promise<Bech32Address | undefined> {
-    const pubkey = await this.getKeplrPubKey(chainId);
-
-    if (!pubkey) return undefined;
-    const address = hash160(pubkey);
-    return new Bech32Address(address);
   }
 }
