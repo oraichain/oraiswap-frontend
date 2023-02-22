@@ -36,11 +36,12 @@ import {
   COSMOS_TYPE,
   EVM_TYPE
 } from 'config/constants';
-import { ChainInfoType } from 'hooks/useConfigReducer';
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import _ from 'lodash';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { embedChainInfos } from 'config/chainInfos';
+import { ChainInfoType } from 'reducer/config';
 
 interface Items {
   chainId?: string;
@@ -180,7 +181,7 @@ export const arrayLoadToken = [
 
 export const getNetworkGasPrice = async () => {
   const chainInfosWithoutEndpoints =
-    await window.Keplr.getChainInfosWithoutEndpoints();
+    await window.Keplr?.getChainInfosWithoutEndpoints() ?? embedChainInfos;
   return chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
     ?.feeCurrencies[0]?.gasPriceStep;
 };
