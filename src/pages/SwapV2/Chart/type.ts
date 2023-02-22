@@ -35,8 +35,10 @@ export interface InfoToken {
   untrackedVolumeUSD: number,
   volume24hChange: number,
 }
-
 export interface DataChart {
   time: string,
-  value: string,
+  open: number, 
+  high: number, 
+  low: number, 
+  close: number
 }

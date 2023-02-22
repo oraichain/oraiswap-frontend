@@ -18,12 +18,12 @@ const ChartComponent = (props) => {
 
   useEffect(() => {
     const chart = createChart(chartContainerRef.current, {
-      rightPriceScale: {
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0,
-        },
-      },
+      // rightPriceScale: {
+      //   scaleMargins: {
+      //     top: 0.1,
+      //     bottom: 0,
+      //   },
+      // },
       layout: {
         backgroundColor: 'rgba(31, 33, 40,0)',
         textColor: '#c3c5cb',
@@ -48,25 +48,21 @@ const ChartComponent = (props) => {
         vertLine: {
           visible: true,
           style: 0,
-          width: 2,
+          width: 1,
           color: '#A871DF',
-          labelVisible: false,
+          labelVisible: true,
         },
       },
       timeScale: {
         rightOffset: 1,
-        barSpacing: 28,
+        barSpacing: 16,
         lockVisibleTimeRangeOnResize: true,
         timeVisible: true,
       },
     });
     // chart.timeScale().fitContent();
 
-    const series = chart.addAreaSeries({
-      lineColor,
-      topColor: areaTopColor,
-      bottomColor: areaBottomColor,
-    });
+    const series = chart.addCandlestickSeries({});
     series.setData(data);
 
     chart.subscribeCrosshairMove((param) => {
@@ -76,12 +72,11 @@ const ChartComponent = (props) => {
         param.point.x < 0 ||
         param.point.y < 0
       ) {
-        setValueChartMove(
-          data[data.length - 1].value,
-          data[data.length - 1].time
-        );
+        const valueMove = data[data.length - 1]?.close;
+        setValueChartMove(valueMove, data[data.length - 1]?.time);
       } else {
-        setValueChartMove(param.seriesPrices.get(series), param.time);
+        const valueMove: any = param.seriesPrices.get(series);
+        setValueChartMove(valueMove?.close, param.time);
       }
     });
 
@@ -110,7 +105,7 @@ const ChartComponent = (props) => {
 
   useEffect(() => {
     setValueChartMove(
-      data[data.length - 1]?.value,
+      data[data.length - 1]?.close,
       data[data.length - 1]?.time
     );
   }, [data]);
