@@ -157,7 +157,7 @@ const SwapComponent: React.FC<{
       var _fromAmount = parseAmountToWithDecimal(
         fromAmount,
         fromTokenInfoData.decimals
-      ).toFixed(0);
+      ).toString();
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
       const msgConvertsFrom = await generateConvertErc20Cw20Message(

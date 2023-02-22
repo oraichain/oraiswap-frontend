@@ -57,9 +57,6 @@ import {
   getEvmAddress,
   getFunctionExecution,
   getUsd,
-  parseAmountFromWithDecimal as parseAmountFrom,
-  parseAmountFromWithDecimal,
-  parseAmountToWithDecimal as parseAmountTo,
   parseAmountToWithDecimal,
   parseBep20Erc20Name
 } from 'libs/utils';
@@ -535,7 +532,7 @@ const Balance: React.FC<BalanceProps> = () => {
       parseAmountToWithDecimal(
         transferAmount,
         fromToken.erc20Cw20Map[0].decimals.erc20Decimals
-      ).toFixed(0),
+      ).toString(),
       fromToken.erc20Cw20Map[0].erc20Denom
     );
 
@@ -635,7 +632,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       let amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
       const ibcMemo =
@@ -749,7 +746,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       var amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 
@@ -829,7 +826,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
         fromToken.denom == 'erc20_milky'
           ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
@@ -992,7 +989,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const _fromAmount = parseAmountTo(amount, token.decimals).toFixed(0);
+      const _fromAmount = parseAmountToWithDecimal(
+        amount,
+        token.decimals
+      ).toString();
       console.log('convertToken');
 
       let msgs;
@@ -1080,7 +1080,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toFixed(0),
+        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 
@@ -1130,8 +1130,9 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => {
-    if (!c.subAmounts) return c.usd;
-    return c.usd + _.sumBy(Object.values(c.subAmounts), (sub) => sub.usd);
+    const amount = c.usd || 0;
+    if (!c.subAmounts) return amount;
+    return amount + _.sumBy(Object.values(c.subAmounts), (sub) => sub.usd || 0);
   });
 
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
-import React, { FC, memo, useEffect, useState } from 'react';
-import { Button, Divider, Input } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button } from 'antd';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
@@ -25,7 +25,6 @@ import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { Fraction } from '@saberhq/token-utils';
 import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
@@ -73,34 +72,25 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     const token1 = pairInfoData?.token1,
       token2 = pairInfoData?.token2;
 
-    let oraiPrice = Fraction.ZERO;
+    let oraiPrice = 0;
 
     const poolData = await fetchPoolInfoAmount(token1!, token2!);
     let _poolData: any = {};
     if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
-      oraiPrice = new Fraction(
-        poolData.askPoolAmount,
-        poolData.offerPoolAmount
-      );
+      oraiPrice = poolData.askPoolAmount / poolData.offerPoolAmount;
     }
     if (token1?.denom === MILKY && token2?.denom === STABLE_DENOM) {
       _poolData = await fetchPoolInfoAmount(
         poolTokens.find((token) => token.denom === MILKY)!,
         poolTokens.find((token) => token.denom === STABLE_DENOM)!
       );
-      oraiPrice = new Fraction(
-        _poolData.askPoolAmount,
-        _poolData.offerPoolAmount
-      );
+      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
     } else {
       _poolData = await fetchPoolInfoAmount(
         poolTokens.find((token) => token.denom === ORAI)!,
         poolTokens.find((token) => token.denom === STABLE_DENOM)!
       );
-      oraiPrice = new Fraction(
-        _poolData.askPoolAmount,
-        _poolData.offerPoolAmount
-      );
+      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
     }
     let halfValue = 0;
     if (token1?.denom === ORAI) {

@@ -16,7 +16,6 @@ import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
-import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
 import DropdownCustom from 'components/DropdownCustom';
@@ -277,7 +276,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
-  const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+  const [oraiPrice, setOraiPrice] = useState(0);
   const dispatch = useDispatch();
   const setCachedPairs = (payload: PairDetails) =>
     dispatch(updatePairs(payload));
@@ -394,15 +393,9 @@ const Pools: React.FC<PoolsProps> = () => {
       return setTimeout(fetchPairInfoDataList, 5000);
     }
 
-    const oraiPrice = new Fraction(
-      oraiUsdtPool.askPoolAmount,
-      oraiUsdtPool.offerPoolAmount
-    );
-
-    const milkyPrice = new Fraction(
-      oraiUsdtPoolMilky.askPoolAmount,
-      oraiUsdtPoolMilky.offerPoolAmount
-    );
+    const oraiPrice = oraiUsdtPool.askPoolAmount / oraiUsdtPool.offerPoolAmount;
+    const milkyPrice =
+      oraiUsdtPoolMilky.askPoolAmount / oraiUsdtPoolMilky.offerPoolAmount;
     poolList.forEach((pool) => {
       pool.amount = getUsd(
         2 * pool.offerPoolAmount,
@@ -414,12 +407,6 @@ const Pools: React.FC<PoolsProps> = () => {
     setPairInfos(poolList);
     setOraiPrice(oraiPrice);
   };
-
-  // useQuery(
-  //   ['fetchPairInfoDataList'],
-  //   () => fetchPairInfoDataList(),
-  //   useQueryConfig
-  // );
 
   useEffect(() => {
     fetchPairInfoDataList();
@@ -436,7 +423,7 @@ const Pools: React.FC<PoolsProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header amount={totalAmount} oraiPrice={oraiPrice?.asNumber ?? 0} />
+        <Header amount={totalAmount} oraiPrice={oraiPrice ?? 0} />
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={cachedApr}

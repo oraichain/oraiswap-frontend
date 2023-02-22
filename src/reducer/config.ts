@@ -27,9 +27,6 @@ export interface ConfigState {
   };
 }
 
-type ConfigStateKey = keyof ConfigState;
-type ConfigStateValue = ConfigState[ConfigStateKey];
-
 const initialState: ConfigState = {
   address: '',
   metamaskAddress: '',
@@ -52,11 +49,11 @@ export const configSlice = createSlice({
     updateConfig: {
       reducer(
         state,
-        action: PayloadAction<ConfigStateKey, string, ConfigStateValue>
+        action: PayloadAction<string, string, ConfigState[keyof ConfigState]>
       ) {
-        state[action.payload as string] = action.meta;
+        state[action.payload] = action.meta;
       },
-      prepare(key: ConfigStateKey, value: ConfigStateValue) {
+      prepare(key: string, value: ConfigState[keyof ConfigState]) {
         return { payload: key, meta: value };
       }
     }

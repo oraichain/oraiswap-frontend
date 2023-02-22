@@ -7,8 +7,8 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import {
-  parseAmountFromWithDecimal as parseAmountFrom,
-  parseAmountToWithDecimal as parseAmountTo,
+  parseAmountFromWithDecimal,
+  parseAmountToWithDecimal,
   parseBep20Erc20Name,
   reduceString
 } from 'libs/utils';
@@ -98,10 +98,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   );
 
   const subAmount = calculateSubAmounts(amountDetail);
-  const maxAmount = parseAmountFrom(
+  const maxAmount = parseAmountFromWithDecimal(
     amountDetail ? amountDetail.amount + subAmount : 0, // amount detail here can be undefined
     token?.decimals
-  ).toNumber();
+  );
 
   const checkValidAmount = () => {
     if (!convertAmount || convertAmount <= 0 || convertAmount > maxAmount) {
@@ -230,10 +230,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const _floatValue = parseAmountTo(
+                  const _floatValue = parseAmountToWithDecimal(
                     floatValue!,
                     token?.decimals
-                  ).toNumber();
+                  );
                   const usdValue =
                     (_floatValue / (amountDetail?.amount ?? 0)) *
                     (amountDetail?.usd ?? 0);

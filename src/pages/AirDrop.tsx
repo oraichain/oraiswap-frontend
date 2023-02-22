@@ -1,4 +1,3 @@
-import Big from 'big.js';
 import { FunctionComponent, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -6,7 +5,7 @@ import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import { Input } from 'antd';
-import { bech32 } from 'bech32-2.0';
+import bech32 from 'bech32';
 import _ from 'lodash';
 
 const cx = cn.bind(styles);
@@ -47,7 +46,7 @@ const AirDrop: FunctionComponent = () => {
 
   const parseAmount = (amount: number) => {
     if (typeof amount === 'number' && isFinite(amount) && !isNaN(amount))
-      return new Big(amount).div(Math.pow(10, 6)).toNumber();
+      return Number(BigInt(amount) / BigInt(1_000_000));
     return 0;
   };
 
