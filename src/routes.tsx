@@ -15,7 +15,21 @@ const Maintenance = React.lazy(() => import('pages/Maintenance'));
 
 export default () => {
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            height: '100vh',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Loader />
+        </div>
+      }
+    >
       <Routes>
         <Route path="/" element={<BalanceNew />} />
         <Route path="/swap" element={<SwapV2 />} />
