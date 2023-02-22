@@ -33,8 +33,9 @@ import { poolTokens } from 'config/pools';
 import { contracts } from 'libs/contracts';
 import { Contract } from 'config/contracts';
 import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
-import useLocalStorage from 'hooks/useLocalStorage';
+import { useSelector } from 'react-redux';
 import { calculateSubAmounts } from 'helper';
+import { RootState } from 'store/configure';
 
 const cx = cn.bind(style);
 
@@ -57,7 +58,7 @@ const Swap: React.FC = () => {
   const [address] = useGlobalState('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);

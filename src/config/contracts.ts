@@ -42,10 +42,10 @@ export class Contract {
     const name =
       className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
     if (!this[key]) {
+      const args = signing ? [this._sender, address] : [address];
       this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](
         window.client,
-        this._sender,
-        address
+        ...args
       );
     } else {
       this[key].sender = this._sender;
@@ -102,5 +102,3 @@ export class Contract {
     return this.getContract('multicall', network.multicall, false, 'Multicall');
   }
 }
-
-console.log(Contract.multicall);
