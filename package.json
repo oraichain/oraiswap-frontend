@@ -37,7 +37,6 @@
     "react-router-dom": "^6.2.2",
     "react-toastify": "^8.2.0",
     "redux-persist": "^6.0.0",
-    "styled-components": "^5.2.3",
     "web3": "^1.7.3"
   },
   "devDependencies": {
@@ -48,11 +47,7 @@
     "@keplr-wallet/types": "^0.11.38",
     "@sentry/webpack-plugin": "^1.20.0",
     "@terran-one/cw-simulate": "^2.8.4",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.8",
     "@types/classnames": "^2.2.10",
-    "@types/create-hash": "^1.2.2",
     "@types/jest": "^26.0.14",
     "@types/lodash": "^4.14.182",
     "@types/node": "^14.11.10",
@@ -61,7 +56,6 @@
     "@types/react-dom": "^17.0.7",
     "@types/react-modal": "^3.10.6",
     "@types/react-router-dom": "^5.1.7",
-    "@types/styled-components": "^5.1.9",
     "esbuild-loader": "^2.19.0",
     "firebase-tools": "^10.2.2",
     "https-browserify": "^1.0.0",
