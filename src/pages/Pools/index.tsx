@@ -156,7 +156,8 @@ const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: any;
   setIsOpenNewPoolModal: any;
-}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr }) => {
+  myPairsData?: Object;
+}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr , myPairsData }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
@@ -258,7 +259,13 @@ const ListPools = memo<{
       </div>
       <div className={styles.listpools_list}>
         {filteredPairInfos.length > 0 ? (
-          filteredPairInfos.map((info) => (
+          filteredPairInfos
+          .filter((item) => {
+            if (typeFilter == KeyFilter.all_pool) {
+              return item
+            }
+          })
+          .map((info) => (
             <PairBox
               {...info}
               apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
@@ -295,36 +302,24 @@ const Pools: React.FC<PoolsProps> = () => {
   }>('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+  const [myPairsData, setMyPairsData] = useState({});
 
   const fetchApr = async () => {
     const data = await fetchAllPoolApr();
     setCachedApr(data);
   };
   const fetchCachedPairs = async () => {
-    const queries = pairs.map((pair, i) => {
-      const assetToken = filteredTokens.find(
-        (item) => pair.token_asset === item.denom
-      );
-      const { info: assetInfo } = parseTokenInfo(assetToken);
-      return {
-        address: pair.contract_addr,
-        data: toBinary({
-          reward_info: {
-            asset_info: assetInfo,
-            staker_addr: address,
-          },
-        }),
-      };
-    });
-
-    console.log('QUE', queries);
+    const queries = pairs.map((pair) => ({
+      address: pair.contract_addr,
+      data: toBinary({
+        pool: {},
+      }),
+    }));
 
     const res = await Contract.multicall.aggregate({
       queries,
     });
-
-    console.log('LOG', res);
-
+    
     const pairsData = Object.fromEntries(
       pairs.map((pair, ind) => {
         const data = res.return_data[ind];
@@ -334,8 +329,42 @@ const Pools: React.FC<PoolsProps> = () => {
         return [pair.contract_addr, fromBinary(data.data)];
       })
     );
-
     setCachedPairs(pairsData);
+  };
+
+  const fetchMyCachedPairs = async () => {
+    const queries = pairs.map((pair) => {
+      const assetToken = filteredTokens.find(
+        (item) => pair.token_asset === item.denom
+      );
+      const { info: assetInfo } = parseTokenInfo(assetToken);
+      return {
+        address: process.env.REACT_APP_STAKING_CONTRACT,
+        data: toBinary({
+          reward_info: {
+            asset_info: assetInfo,
+            staker_addr: address,
+          },
+        }),
+      };
+    });
+
+    const res = await Contract.multicall.aggregate({
+      queries,
+    });
+
+    const myPairData = Object.fromEntries(
+      pairs.map((pair, ind) => {
+        const data = res.return_data[ind];
+        if (!data.success) {
+          return [pair.contract_addr, {}];
+        }
+        const value = fromBinary(data.data);
+        const bondPools = _.sumBy(Object.values(value.reward_infos));
+        return [pair.contract_addr, !!bondPools];
+      })
+    );
+    setMyPairsData(myPairData);
   };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
@@ -421,6 +450,7 @@ const Pools: React.FC<PoolsProps> = () => {
   useEffect(() => {
     fetchCachedPairs();
     fetchApr();
+    fetchMyCachedPairs();
   }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
@@ -432,6 +462,7 @@ const Pools: React.FC<PoolsProps> = () => {
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={cachedApr}
+          myPairsData={myPairsData}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal
