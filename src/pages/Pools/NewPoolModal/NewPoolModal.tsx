@@ -5,7 +5,7 @@ import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import TokenBalance from 'components/TokenBalance';

@@ -24,7 +24,7 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
@@ -62,7 +62,7 @@ const LiquidityModal: FC<ModalProps> = ({
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
   const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)

@@ -1,18 +1,17 @@
-import {
-  configureStore,
-  combineReducers,
-} from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import tokenReducer from '../reducer/token';
+import configReducer from '../reducer/config';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
 const rootPersistConfig = {
   key: 'root',
-  storage,
+  storage
 };
 
 const rootReducer = combineReducers({
-  token: tokenReducer,
+  config: configReducer,
+  token: tokenReducer
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);
@@ -21,8 +20,8 @@ export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+      serializableCheck: false
+    })
 });
 
 export const persistor = persistStore(store);

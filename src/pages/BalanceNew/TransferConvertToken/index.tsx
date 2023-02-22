@@ -25,7 +25,7 @@ import {
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import Tooltip from 'components/Tooltip';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import {
   filterChainBridge,
@@ -68,7 +68,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [transferLoading, setTransferLoading] = useState(false);
   const [filterNetwork, setFilterNetwork] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [chainInfo] = useGlobalState('chainInfo');
+  const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
   useEffect(() => {
     if (chainInfo) {
@@ -183,9 +183,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <ul className={styles.items}>
                     {networks &&
                       networks
-                        .filter((item) =>
-                          filterChainBridge(token, item, filterNetwork)
-                        )
+                        .filter((item) => filterChainBridge(token, item))
                         .map((network) => {
                           return (
                             <li

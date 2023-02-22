@@ -10,41 +10,26 @@ import styles from './index.module.scss';
 import { Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
-import { getPair, Pair, pairs } from 'config/pools';
-import {
-  fetchAllPoolApr,
-  fetchPairInfo,
-  fetchPoolInfoAmount,
-  fetchTokenInfo,
-  fetchRewardInfo,
-  parseTokenInfo,
-} from 'rest/api';
+import { Pair, pairs } from 'config/pools';
+import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
-// import { useQuery } from '@tanstack/react-query';
 import DropdownCustom from 'components/DropdownCustom';
 import FilterSvg from 'assets/icons/icon-filter.svg';
 import SearchSvg from 'assets/icons/search-svg.svg';
 import NoDataSvg from 'assets/icons/NoDataPool.svg';
-import useLocalStorage from 'hooks/useLocalStorage';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import useGlobalState from 'hooks/useGlobalState';
+import { updatePairs } from 'reducer/token';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'store/configure';
 
-// const { Search } = Input;
-// const useQueryConfig = {
-//   retry: 3,
-//   retryDelay: 3000,
-//   refetchOnMount: false,
-//   refetchOnWindowFocus: false,
-//   refetchOnReconnect: false,
-// };
 interface PoolsProps {}
 
 enum KeyFilter {
@@ -287,16 +272,15 @@ type PairInfoData = {
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
-  const [address, setAddress] = useGlobalState('address');
-  const [cachedPairs, setCachedPairs] = useLocalStorage<{
-    [key: string]: PoolResponse;
-  }>('pairs');
-  const [cachedApr, setCachedApr] = useLocalStorage<{
-    [key: string]: PoolResponse;
-  }>('apr');
+  const [myPairsData, setMyPairsData] = useState({});
+  const [address, setAddress] = useConfigReducer('address');
+  const cachedPairs = useSelector((state: RootState) => state.token.pairs);
+  const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
-  const [myPairsData, setMyPairsData] = useState({});
+  const dispatch = useDispatch();
+  const setCachedPairs = (payload: PairDetails) =>
+    dispatch(updatePairs(payload));
 
   const fetchApr = async () => {
     const data = await fetchAllPoolApr();

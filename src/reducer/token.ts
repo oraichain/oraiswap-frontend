@@ -2,29 +2,35 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 export interface TokenState {
-  amounts: Object;
+  amounts: AmountDetails;
+  pairs: PairDetails;
 }
 
 const initialState: TokenState = {
   amounts: {},
+  pairs: {}
 };
 
 export const tokenSlice = createSlice({
   name: 'token',
   initialState,
   reducers: {
-    updateAmounts: (state, action: PayloadAction<any>) => {
-      console.log({ state, action });
-      
+    updateAmounts: (state, action: PayloadAction<AmountDetails>) => {
       state.amounts = {
         ...state.amounts,
         ...action.payload
-      }
+      };
     },
-  },
+    updatePairs: (state, action: PayloadAction<PairDetails>) => {
+      state.pairs = {
+        ...state.pairs,
+        ...action.payload
+      };
+    }
+  }
 });
 
 // Action creators are generated for each case reducer function
-export const { updateAmounts } = tokenSlice.actions;
+export const { updateAmounts, updatePairs } = tokenSlice.actions;
 
 export default tokenSlice.reducer;

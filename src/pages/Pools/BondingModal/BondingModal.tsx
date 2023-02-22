@@ -12,7 +12,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
@@ -40,11 +40,11 @@ const BondingModal: FC<ModalProps> = ({
   liquidityValue,
   assetToken,
   onBondingAction,
-  pairInfoData,
+  pairInfoData
 }) => {
   const [bondAmount, setBondAmount] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
   const onChangeAmount = (value: string) => {
     setBondAmount(value);
@@ -55,7 +55,7 @@ const BondingModal: FC<ModalProps> = ({
 
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Amount is invalid!',
+        message: 'Amount is invalid!'
       });
 
     setActionLoading(true);
@@ -66,7 +66,7 @@ const BondingModal: FC<ModalProps> = ({
         sender: address,
         amount: parsedAmount,
         lpToken: lpTokenInfoData.contractAddress!,
-        assetToken,
+        assetToken
       });
 
       const msg = msgs[0];
@@ -75,14 +75,14 @@ const BondingModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         onBondingAction();
       }
@@ -93,7 +93,7 @@ const BondingModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setActionLoading(false);
@@ -131,7 +131,7 @@ const BondingModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`,
+                denom: `${lpTokenInfoData?.symbol}`
               }}
               decimalScale={6}
               prefix="Balance: "

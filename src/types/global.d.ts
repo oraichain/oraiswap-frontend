@@ -7,14 +7,18 @@ import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 declare global {
   type AmountDetail = {
-    subAmounts?: { [key: string]: { amount: number, usd: number } };
+    subAmounts?: { [key: string]: { amount: number; usd: number } };
     amount: number;
     usd: number;
   };
   type AmountDetails = { [key: string]: AmountDetail };
+  type PairDetails = {
+    [key: string]: PoolResponse;
+  };
   type MetaMaskEthereumProvider = AbstractProvider & {
     chainId: string;
     isMetaMask?: boolean;
@@ -101,7 +105,6 @@ declare global {
   }
   interface Window {
     MSStream: String;
-    amounts: AmountDetails | any;
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
@@ -173,4 +176,4 @@ declare global {
 
 declare module 'crypto-hashing';
 
-export { };
+export {};
