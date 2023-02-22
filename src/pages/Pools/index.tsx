@@ -301,30 +301,16 @@ const Pools: React.FC<PoolsProps> = () => {
     setCachedApr(data);
   };
   const fetchCachedPairs = async () => {
-    const queries = pairs.map((pair, i) => {
-      const assetToken = filteredTokens.find(
-        (item) => pair.token_asset === item.denom
-      );
-      const { info: assetInfo } = parseTokenInfo(assetToken);
-      return {
-        address: pair.contract_addr,
-        data: toBinary({
-          reward_info: {
-            asset_info: assetInfo,
-            staker_addr: address,
-          },
-        }),
-      };
-    });
-
-    console.log('QUE', queries);
+    const queries = pairs.map((pair) => ({
+      address: pair.contract_addr,
+      data: toBinary({
+        pool: {},
+      }),
+    }));
 
     const res = await Contract.multicall.aggregate({
       queries,
     });
-
-    console.log('LOG', res);
-
     const pairsData = Object.fromEntries(
       pairs.map((pair, ind) => {
         const data = res.return_data[ind];
