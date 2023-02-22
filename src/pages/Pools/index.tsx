@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
   useMemo,
-  useCallback,
+  useCallback
 } from 'react';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
@@ -18,9 +18,9 @@ import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
 import DropdownCustom from 'components/DropdownCustom';
-import FilterSvg from 'assets/icons/icon-filter.svg';
-import SearchSvg from 'assets/icons/search-svg.svg';
-import NoDataSvg from 'assets/icons/NoDataPool.svg';
+import FilterSvg from 'assets/images/icon-filter.svg';
+import SearchSvg from 'assets/images/search-svg.svg';
+import NoDataSvg from 'assets/images/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
@@ -33,23 +33,23 @@ interface PoolsProps {}
 
 enum KeyFilter {
   my_pool,
-  all_pool,
+  all_pool
 }
 
 const LIST_FILTER = [
   {
     key: KeyFilter.my_pool,
-    text: 'My Pools',
+    text: 'My Pools'
   },
   {
     key: KeyFilter.all_pool,
-    text: 'All Pools',
-  },
+    text: 'All Pools'
+  }
 ];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice,
+  oraiPrice
 }) => {
   return (
     <div className={styles.header}>
@@ -294,12 +294,12 @@ const Pools: React.FC<PoolsProps> = () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
       data: toBinary({
-        pool: {},
-      }),
+        pool: {}
+      })
     }));
 
     const res = await Contract.multicall.aggregate({
-      queries,
+      queries
     });
 
     const pairsData = Object.fromEntries(
@@ -325,14 +325,14 @@ const Pools: React.FC<PoolsProps> = () => {
         data: toBinary({
           reward_info: {
             asset_info: assetInfo,
-            staker_addr: address,
-          },
-        }),
+            staker_addr: address
+          }
+        })
       };
     });
 
     const res = await Contract.multicall.aggregate({
-      queries,
+      queries
     });
 
     const myPairData = Object.fromEntries(
@@ -368,7 +368,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: pair.commission_rate,
         fromToken,
-        toToken,
+        toToken
       };
     } catch (ex) {
       console.log(ex);

@@ -6,7 +6,7 @@ import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
 import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
-import { ReactComponent as ORAIX } from 'assets/icons/OraidexSVG.svg';
+import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
 import _ from 'lodash';
 import {
@@ -63,13 +63,13 @@ export type Erc20Cw20Map = {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -83,18 +83,18 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -307,7 +307,7 @@ const otherChainTokens: TokenItemType[] = [
     decimals: EVM_DECIMALS,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     rpc: KAWAII_RPC,
-    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
+    bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
     cosmosBased: true,
     type: 'milky',
     maxGas: 200000 * 2,
@@ -318,7 +318,7 @@ const otherChainTokens: TokenItemType[] = [
     org: 'Kawaiiverse',
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: 'erc20_milky',
-    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
+    bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
     contractAddress: MILKY_ERC_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
     decimals: EVM_DECIMALS,
@@ -334,7 +334,7 @@ const otherChainTokens: TokenItemType[] = [
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
     decimals: EVM_DECIMALS,
-    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
+    bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
     coingeckoId: 'kawaii-islands',
     rpc: KAWAII_RPC,
     cosmosBased: true,
@@ -346,7 +346,7 @@ const otherChainTokens: TokenItemType[] = [
     name: 'ERC20 KWT',
     org: 'Kawaiiverse',
     chainId: KWT_SUBNETWORK_CHAIN_ID,
-    bridgeTo: [ORAICHAIN_ID,KAWAII_ORG],
+    bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
     denom: 'erc20_kwt',
     contractAddress: KAWAII_CONTRACT,
     rpc: KAWAII_SUBNET_RPC,
@@ -366,7 +366,7 @@ const oraichainTokens: TokenItemType[] = [
     coinType: 118,
     denom: 'orai',
     coingeckoId: 'oraichain-token',
-    bridgeTo: [BSC_ORG,ETHEREUM_ORG],
+    bridgeTo: [BSC_ORG, ETHEREUM_ORG],
     decimals: COSMOS_DECIMALS,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,

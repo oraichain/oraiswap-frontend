@@ -1,10 +1,10 @@
 import React from 'react';
-import { ReactComponent as BNBIcon } from 'assets/network/bnb.svg';
-import { ReactComponent as ETHIcon } from 'assets/network/ethereum.svg';
-import { ReactComponent as ORAIIcon } from 'assets/network/oraichain.svg';
-import { ReactComponent as KwtIcon } from 'assets/network/kwt.svg';
-import { ReactComponent as AtomCosmosIcon } from 'assets/network/atom_cosmos.svg';
-import { ReactComponent as OsmosisIcon } from 'assets/network/osmosis.svg';
+import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
+import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
+import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
 import {
   BEP20_ORAI,
   ORAICHAIN_ID,
@@ -181,7 +181,7 @@ export const arrayLoadToken = [
 
 export const getNetworkGasPrice = async () => {
   const chainInfosWithoutEndpoints =
-    await window.Keplr?.getChainInfosWithoutEndpoints() ?? embedChainInfos;
+    (await window.Keplr?.getChainInfosWithoutEndpoints()) ?? embedChainInfos;
   return chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
     ?.feeCurrencies[0]?.gasPriceStep;
 };

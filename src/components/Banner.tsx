@@ -1,9 +1,7 @@
 import React, { FC } from 'react';
-import MainnetImg from 'assets/images/mainnet.png';
 import Under from 'assets/images/undermaintenance.jpeg';
 import ReactModal from 'react-modal';
 import styles from './Banner.module.scss';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 
 const Banner: FC<{}> = () => {
   const [open, setOpen] = React.useState(true);
@@ -19,12 +17,11 @@ const Banner: FC<{}> = () => {
           <CloseIcon color={'#ffffff'} width={20} height={20} />
         </span>
       </div> */}
-      <img
-        className={`${styles.imagesBanner}`}
-        src={Under}
-      ></img>
+      <img className={`${styles.imagesBanner}`} src={Under}></img>
       <div>
-        <span>v0.41.0 Upgrade is being processed. Thank you for your patience.</span>
+        <span>
+          v0.41.0 Upgrade is being processed. Thank you for your patience.
+        </span>
       </div>
     </ReactModal>
   );

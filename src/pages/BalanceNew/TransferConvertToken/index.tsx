@@ -23,7 +23,6 @@ import {
   ETHEREUM_ORG
 } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import Tooltip from 'components/Tooltip';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import {

@@ -36,6 +36,8 @@ import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 import { useSelector } from 'react-redux';
 import { calculateSubAmounts } from 'helper';
 import { RootState } from 'store/configure';
+import AntSwapImg from 'assets/images/ant_swap.svg';
+import RefreshImg from 'assets/images/refresh.svg';
 
 const cx = cn.bind(style);
 
@@ -244,16 +246,8 @@ const Swap: React.FC = () => {
           <div className={cx('from')}>
             <div className={cx('header')}>
               <div className={cx('title')}>FROM</div>
-              {/* <img
-                className={cx('btn')}
-                src={require('assets/icons/setting.svg').default}
-                onClick={() => setIsOpenSettingModal(true)}
-              /> */}
               <button onClick={() => setRefresh(!refresh)}>
-                <img
-                  className={cx('btn')}
-                  src={require('assets/icons/refresh.svg').default}
-                />
+                <img className={cx('btn')} src={RefreshImg} />
               </button>
             </div>
             <div className={cx('balance')}>
@@ -334,7 +328,7 @@ const Swap: React.FC = () => {
           </div>
           <div className={cx('swap-icon')}>
             <img
-              src={require('assets/icons/ant_swap.svg').default}
+              src={AntSwapImg}
               onClick={() => {
                 setSwapTokens([toTokenDenom, fromTokenDenom]);
                 setSwapAmount([toAmount, fromAmount]);

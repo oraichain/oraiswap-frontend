@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import cn from 'classnames/bind';
-import { ReactComponent as SYMBOLIcon } from 'assets/icons/symbols_swap.svg';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
 import { poolTokens } from 'config/pools';
 import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
-// import notFound from 'assets/images/notFound.svg';
 import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';
 import { getInfoTokenSv, getPriceTokenWithTF } from './services';
+import SymbolSwapImg from 'assets/images/symbols_swap.svg';
+
 const cx = cn.bind(styles);
 
 const SwapChart: React.FC<{
@@ -99,7 +99,7 @@ const SwapChart: React.FC<{
             <div className={cx('head-info-content')}>
               <div>
                 <div className={cx('content-price')}>
-                  <SYMBOLIcon />
+                  <img src={SymbolSwapImg} />
                   <TokenBalance balance={infoMove?.value} decimalScale={2} />
                 </div>
                 <p className={cx('content-date')}>

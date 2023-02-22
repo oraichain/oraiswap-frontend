@@ -28,6 +28,8 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
+import FluentAddImg from 'assets/images/fluent_add.svg';
+import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
 
 const cx = cn.bind(style);
 
@@ -419,10 +421,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img
-          src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => {}}
-        />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -650,7 +649,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={require('assets/icons/fluent-arrow-down.svg').default} />
+        <img src={ArrowDownImg} />
       </div>
       <div className={cx('receive')}>
         <div className={cx('header')}>

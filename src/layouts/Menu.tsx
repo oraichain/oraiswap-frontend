@@ -1,4 +1,3 @@
-import { ReactComponent as LogoFull } from 'assets/images/OraiDEX_full_light.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
@@ -13,8 +12,8 @@ import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
-import ethIcon from 'assets/icons/eth.svg';
-
+import { ReactComponent as EthereumIcon } from 'assets/icons/ethereum.svg';
+import LogoFullImg from 'assets/images/OraiDEX_full_light.svg';
 import { ThemeContext } from 'context/theme-context';
 
 import React, {
@@ -121,7 +120,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       {mobileMode && (
         <div className={styles.logo}>
           <Link to={'/'} onClick={() => setLink('/')}>
-            <LogoFull />
+            <img src={LogoFullImg} />
           </Link>
           <ToggleIcon onClick={handleToggle} />
         </div>
@@ -130,7 +129,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <LogoFull />
+              <img src={LogoFullImg} />
             </Link>
           )}
           <div className={styles.menu_items}>
@@ -179,7 +178,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     <BNBIcon className={styles.token_avatar} />
                   )}
                   {handleCheckChain(ETHEREUM_CHAIN_ID) && (
-                    <img src={ethIcon} className={styles.token_avatar} />
+                    <EthereumIcon className={styles.token_avatar} />
                   )}
                   {handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && (
                     <KwtIcon className={styles.token_avatar} />

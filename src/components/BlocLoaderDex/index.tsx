@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import OraidexSVG from './OraidexSVG.svg';
+import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 const cx = cn.bind(styles);
@@ -13,7 +13,7 @@ const BlocLoaderDex: React.FC<{
   open,
   borderRadius = false,
   classNameLoading,
-  classNameLogoLoading,
+  classNameLogoLoading
 }) => {
   let className = borderRadius
     ? ['loaderRoot', 'loaderRootBorderRadius']
@@ -27,11 +27,7 @@ const BlocLoaderDex: React.FC<{
       )}
     >
       <div className={cx('osmosisContainer')}>
-        <img
-          className={cx('svgLogo', classNameLogoLoading)}
-          src={OraidexSVG}
-          alt="logoOraiDex"
-        />
+        <ORAIX className={cx('svgLogo', classNameLogoLoading)} />
         <p className={cx('loading')}>
           <span className={cx('letter1')}>L</span>
           <span className={cx('letter2')}>o</span>
