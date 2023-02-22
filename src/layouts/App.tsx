@@ -6,49 +6,52 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
-import { network } from 'config/networks';
+import {
+  COSMOS_TYPE,
+  EVM_TYPE,
+  NOTI_INSTALL_OWALLET,
+  ORAICHAIN_ID
+} from 'config/constants';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
+import { ChainInfoType } from 'reducer/config';
 
 const App = () => {
-  const [address, setAddress] = useGlobalState('address');
-  const [_, setChainId] = useGlobalState('chainId');
-  const [_$, setChainInfo] = useGlobalState('chainInfo');
-  const [_$$, setStatusChangeAccount] = useGlobalState('statusChangeAccount');
-  const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
-  const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
-  const updateAddress = async (chainInfos) => {
+  const [address, setAddress] = useConfigReducer('address');
+  const [_, setChainId] = useConfigReducer('chainId');
+  const [_$, setChainInfo] = useConfigReducer('chainInfo');
+  const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
+  const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
+  const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const updateAddress = async (chainInfo: ChainInfoType) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
-      return displayToast(
-        TToastType.TX_INFO,
-        NOTI_INSTALL_OWALLET,
-        { toastId: 'install_keplr' }
-      );
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
     }
 
-    let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
+    let newAddress = await window.Keplr.getKeplrAddr(chainInfo?.chainId);
 
     if (isMobile()) {
       setInfoEvm({
         ...infoEvm,
-        chainId: window.ethereum.chainId,
+        chainId: window.ethereum.chainId
       });
     }
 
-    if (chainInfos) {
+    if (chainInfo) {
       setStatusChangeAccount(false);
-      setChainId(chainInfos.chainId);
-      setChainInfo(chainInfos);
-      if (chainInfos?.networkType === EVM_TYPE) {
-        window.ethereum.chainId = chainInfos.chainId;
-        setInfoEvm(chainInfos);
+      setChainId(chainInfo.chainId);
+      setChainInfo(chainInfo);
+      if (chainInfo?.networkType === EVM_TYPE) {
+        window.ethereum.chainId = chainInfo.chainId;
+        setInfoEvm(chainInfo);
       }
-      if (chainInfos?.networkType === COSMOS_TYPE) setInfoCosmos(chainInfos);
+      if (chainInfo?.networkType === COSMOS_TYPE) setInfoCosmos(chainInfo);
     }
 
     if (newAddress) {
@@ -57,7 +60,7 @@ const App = () => {
         setAddress('');
       }
       // finally update new address
-      if (!chainInfos?.chainId) {
+      if (!chainInfo?.chainId) {
         setStatusChangeAccount(true);
       }
       setAddress(newAddress as string);
@@ -80,7 +83,7 @@ const App = () => {
     if (window.keplr) {
       keplrGasPriceCheck();
     }
-  }, [])
+  }, []);
 
   const keplrGasPriceCheck = async () => {
     try {
@@ -88,13 +91,13 @@ const App = () => {
       if (gasPriceStep && !gasPriceStep.low) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: "https://www.youtube.com/watch?v=QMqCVUfxDAk"
+          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
         });
       }
     } catch (error) {
       console.log('Error: ', error);
     }
-  }
+  };
 
   const keplrHandler = async (event?: CustomEvent) => {
     try {

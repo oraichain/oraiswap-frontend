@@ -15,7 +15,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(style);
 
@@ -43,7 +43,7 @@ const UnbondModal: FC<ModalProps> = ({
   const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
   const handleUnbond = async (amount: number) => {
     const parsedAmount = +parseAmount(

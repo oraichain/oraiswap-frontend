@@ -1,8 +1,7 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import { AllPoolAprResponse } from 'types/oraiswap_pair/pool_response';
-import _, { map } from 'lodash';
-import { ORAI, ORAI_LCD, ORAI_NETWORK_LCD } from 'config/constants';
+import _ from 'lodash';
+import { ORAI } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
@@ -70,7 +69,7 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   return tokenInfo;
 }
 
-async function fetchAllPoolApr(): Promise<AllPoolAprResponse> {
+async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
   const { data } = await axios.get(
     `${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr/all`
   );

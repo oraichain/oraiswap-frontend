@@ -19,7 +19,7 @@ import {
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
-  NOTI_INSTALL_OWALLET,
+  NOTI_INSTALL_OWALLET
 } from 'config/constants';
 
 import {
@@ -34,9 +34,9 @@ import {
   ETHEREUM_RPC,
   BSC_RPC,
   COSMOS_TYPE,
-  EVM_TYPE,
+  EVM_TYPE
 } from 'config/constants';
-import { ChainInfoType } from 'hooks/useGlobalState';
+import { ChainInfoType } from 'hooks/useConfigReducer';
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
 import _ from 'lodash';
@@ -49,7 +49,7 @@ interface Items {
 interface Tokens {
   denom?: string;
   chainId?: string | number;
-  bridgeTo?: Array<string>
+  bridgeTo?: Array<string>;
 }
 
 export const networks = [
@@ -57,73 +57,62 @@ export const networks = [
     title: ORAICHAIN_ID,
     chainId: ORAICHAIN_ID,
     icon: <ORAIIcon />,
-    networkType: COSMOS_TYPE,
+    networkType: COSMOS_TYPE
   },
   {
     title: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     icon: <KwtIcon />,
-    networkType: COSMOS_TYPE,
+    networkType: COSMOS_TYPE
   },
   {
     title: OSMOSIS_ORG,
     chainId: OSMOSIS_CHAIN_ID,
     icon: <OsmosisIcon />,
-    networkType: COSMOS_TYPE,
+    networkType: COSMOS_TYPE
   },
   {
     title: COSMOS_ORG,
     chainId: COSMOS_CHAIN_ID,
     icon: <AtomCosmosIcon />,
-    networkType: COSMOS_TYPE,
+    networkType: COSMOS_TYPE
   },
   {
     title: BSC_ORG,
     chainId: BSC_ORG,
     icon: <BNBIcon />,
-    networkType: EVM_TYPE,
+    networkType: EVM_TYPE
   },
   {
     title: ETHEREUM_ORG,
     chainId: ETHEREUM_ORG,
     icon: <ETHIcon />,
-    networkType: EVM_TYPE,
-  },
+    networkType: EVM_TYPE
+  }
 ];
 
 export const renderLogoNetwork = (network: string) => {
-  let logo = <ORAIIcon />;
   switch (network) {
     case ORAICHAIN_ID:
-      logo = <ORAIIcon />;
-      break;
+      return <ORAIIcon />;
     case ORAI_BRIDGE_ORG:
-      logo = <ORAIIcon />;
-      break;
+      return <ORAIIcon />;
     case KAWAII_ORG:
-      logo = <KwtIcon />;
-      break;
+      return <KwtIcon />;
     case OSMOSIS_ORG:
-      logo = <OsmosisIcon />;
-      break;
+      return <OsmosisIcon />;
     case COSMOS_ORG:
-      logo = <AtomCosmosIcon />;
-      break;
+      return <AtomCosmosIcon />;
     case ETHEREUM_ORG:
-      logo = <ETHIcon />;
-      break;
+      return <ETHIcon />;
     case BSC_ORG:
-      logo = <BNBIcon />;
-      break;
+      return <BNBIcon />;
+    default:
+      return <ORAIIcon />;
   }
-  return logo;
 };
 
-export const filterChainBridge = (
-  token: Tokens,
-  item: Items,
-  filterNetwork?: string
-) => {
+export const filterChainBridge = (token: Tokens, item: Items) => {
   const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
   return tokenCanBridgeTo.includes(item.title);
 };
@@ -179,7 +168,7 @@ export const objConvertTokenIbc = {
   kwt: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
   milky: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
   airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
-}
+};
 
 export const arrayLoadToken = [
   { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
@@ -190,13 +179,17 @@ export const arrayLoadToken = [
 ];
 
 export const getNetworkGasPrice = async () => {
-  const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
-  return chainInfosWithoutEndpoints.find(e => e.chainId == network.chainId)?.feeCurrencies[0]?.gasPriceStep
-}
+  const chainInfosWithoutEndpoints =
+    await window.Keplr.getChainInfosWithoutEndpoints();
+  return chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
+    ?.feeCurrencies[0]?.gasPriceStep;
+};
 
 export const calculateSubAmounts = (amountDetail: AmountDetail) => {
-  return (amountDetail?.subAmounts ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount) : 0)
-}
+  return amountDetail?.subAmounts
+    ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount)
+    : 0;
+};
 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
@@ -205,7 +198,7 @@ export const handleCheckWallet = async () => {
       toastId: 'install_keplr'
     });
   }
-}
+};
 
 export const handleLedgerDevice = async () => {
   const keplr = await window.Keplr.getKeplr();
@@ -216,4 +209,4 @@ export const handleLedgerDevice = async () => {
     });
     return;
   }
-}
+};

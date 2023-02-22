@@ -23,7 +23,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement,
+  ReactElement
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -41,12 +41,12 @@ import {
   KWT_SUBNETWORK_EVM_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
-  OSMOSIS_CHAIN_ID,
+  OSMOSIS_CHAIN_ID
 } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
 import classNames from 'classnames';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
@@ -56,10 +56,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
-  const [address, setAddress] = useGlobalState('address');
-  const [infoCosmos] = useGlobalState('infoCosmos');
-  const amounts = useSelector((state: RootState) => state.token.amounts)
-  const [metamaskAddress] = useGlobalState('metamaskAddress');
+  const [address, setAddress] = useConfigReducer('address');
+  const [infoCosmos] = useConfigReducer('infoCosmos');
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -166,7 +166,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: balance,
                           decimals: 6,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
@@ -197,7 +197,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI,
+                          denom: ORAI
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
@@ -250,10 +250,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark,
+                [styles.active]: theme === 'dark'
               })}
               onClick={() => {
-                setTheme(Themes.dark);
+                setTheme('dark');
               }}
             >
               <Dark style={{ width: 15, height: 15 }} />
@@ -261,10 +261,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light,
+                [styles.active]: theme === 'light'
               })}
               onClick={() => {
-                setTheme(Themes.light);
+                setTheme('light');
               }}
             >
               <Light style={{ width: 15, height: 15 }} />

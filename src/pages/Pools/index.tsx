@@ -8,7 +8,7 @@ import {
   fetchAllPoolApr,
   fetchPairInfo,
   fetchPoolInfoAmount,
-  fetchTokenInfo,
+  fetchTokenInfo
 } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
@@ -22,10 +22,12 @@ import DropdownCustom from 'components/DropdownCustom';
 import FilterSvg from 'assets/icons/icon-filter.svg';
 import SearchSvg from 'assets/icons/search-svg.svg';
 import NoDataSvg from 'assets/icons/NoDataPool.svg';
-import useLocalStorage from 'hooks/useLocalStorage';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import { updateAmounts, updatePairs } from 'reducer/token';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'store/configure';
 
 const { Search } = Input;
 const useQueryConfig = {
@@ -33,29 +35,29 @@ const useQueryConfig = {
   retryDelay: 3000,
   refetchOnMount: false,
   refetchOnWindowFocus: false,
-  refetchOnReconnect: false,
+  refetchOnReconnect: false
 };
 interface PoolsProps {}
 
 enum KeyFilter {
   my_pool,
-  all_pool,
+  all_pool
 }
 
 const LIST_FILTER = [
   {
     key: KeyFilter.my_pool,
-    text: 'My Pools',
+    text: 'My Pools'
   },
   {
     key: KeyFilter.all_pool,
-    text: 'All Pools',
-  },
+    text: 'All Pools'
+  }
 ];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice,
+  oraiPrice
 }) => {
   return (
     <div className={styles.header}>
@@ -157,7 +159,7 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
-  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const amounts = useSelector((state: RootState) => state.token.amounts);
   const [typeFilter, setTypeFilter] = useState(KeyFilter.all_pool);
 
   const listMyPool = useMemo(() => {
@@ -165,7 +167,7 @@ const ListPools = memo<{
       .map((item) => {
         return {
           asset_denoms: item.asset_denoms,
-          amount: amounts[item.liquidity_token]?.amount ?? 0,
+          amount: amounts[item.liquidity_token]?.amount ?? 0
         };
       })
       .filter((item) => item.amount > 0);
@@ -283,14 +285,13 @@ type PairInfoData = {
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
-  const [cachedPairs, setCachedPairs] = useLocalStorage<{
-    [key: string]: PoolResponse;
-  }>('pairs');
-  const [cachedApr, setCachedApr] = useLocalStorage<{
-    [key: string]: PoolResponse;
-  }>('apr');
+  const cachedPairs = useSelector((state: RootState) => state.token.pairs);
+  const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [oraiPrice, setOraiPrice] = useState(Fraction.ZERO);
+  const dispatch = useDispatch();
+  const setCachedPairs = (payload: PairDetails) =>
+    dispatch(updatePairs(payload));
 
   const fetchApr = async () => {
     const data = await fetchAllPoolApr();
@@ -300,12 +301,12 @@ const Pools: React.FC<PoolsProps> = () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
       data: toBinary({
-        pool: {},
-      }),
+        pool: {}
+      })
     }));
 
     const res = await Contract.multicall.aggregate({
-      queries,
+      queries
     });
     const pairsData = Object.fromEntries(
       pairs.map((pair, ind) => {
@@ -339,7 +340,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: pair.commission_rate,
         fromToken,
-        toToken,
+        toToken
       };
     } catch (ex) {
       console.log(ex);

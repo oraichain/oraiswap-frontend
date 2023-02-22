@@ -2,11 +2,10 @@ import { Button } from 'antd';
 import React, { useState, useEffect } from 'react';
 import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
-import { InjectedConnector } from '@web3-react/injected-connector';
 import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
 
 const RequireAuthButton: React.FC<any> = ({
@@ -17,10 +16,10 @@ const RequireAuthButton: React.FC<any> = ({
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
   const [metamaskAddress, setMetamaskAddress] =
-    useGlobalState('metamaskAddress');
+    useConfigReducer('metamaskAddress');
   const { activate, deactivate } = useWeb3React();
 
-  useEagerConnect(isInactiveMetamask,false);
+  useEagerConnect(isInactiveMetamask, false);
   const onClick = () => {
     setOpenConnectWalletModal(true);
   };
@@ -54,11 +53,9 @@ const RequireAuthButton: React.FC<any> = ({
 
   const connectKeplr = async () => {
     if (!(await window.Keplr.getKeplr())) {
-      return displayToast(
-        TToastType.TX_INFO,
-        NOTI_INSTALL_OWALLET,
-        { toastId: 'install_keplr' }
-      );
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
     }
 
     await window.Keplr.suggestChain(network.chainId);

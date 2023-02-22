@@ -63,7 +63,6 @@ import {
   parseAmountToWithDecimal,
   parseBep20Erc20Name
 } from 'libs/utils';
-import useGlobalState from 'hooks/useGlobalState';
 import {
   BSC_CHAIN_ID,
   BSC_RPC,
@@ -90,7 +89,6 @@ import CosmJs, {
   HandleOptions,
   parseExecuteContractMultiple
 } from 'libs/cosmjs';
-import { MsgSendToEth } from '../../libs/proto/gravity/v1/msgs';
 import { initEthereum } from 'polyfill';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -106,7 +104,6 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modul
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
-import useLocalStorage from 'hooks/useLocalStorage';
 import { Contract } from 'config/contracts';
 import { ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import {
@@ -115,9 +112,10 @@ import {
 } from 'libs/contracts/OraiswapToken.types';
 import LoadingBox from 'components/LoadingBox';
 import { TransferBackMsg } from 'libs/contracts';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
 import { updateAmounts } from 'reducer/token';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 interface BalanceProps {}
 
@@ -126,19 +124,16 @@ const { Search } = Input;
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
-  const [keplrAddress] = useGlobalState('address');
+  const [keplrAddress] = useConfigReducer('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useLocalStorage<string>(
-    'chainId',
-    'Oraichain'
-  );
+  const [filterNetwork, setFilterNetwork] = useConfigReducer('chainId');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
-  const cacheAmounts = useSelector((state: RootState) => state.token.amounts)
-  const [hideOtherSmallAmount, setHideOtherSmallAmount] =
-    useLocalStorage<boolean>('hideOtherSmallAmount', false);
-  window.amounts = cacheAmounts;
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer(
+    'hideOtherSmallAmount'
+  );
 
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([
     [],
@@ -148,17 +143,14 @@ const Balance: React.FC<BalanceProps> = () => {
   const dispatch = useDispatch();
 
   const forceUpdate = (amountDetails: AmountDetails) => {
-    dispatch(updateAmounts({
-      ...amountDetails
-    }))
+    dispatch(updateAmounts(amountDetails));
   };
 
-  
   const { data: prices } = useCoinGeckoPrices(
     filteredTokens.map((t) => t.coingeckoId)
   );
 
-  const [metamaskAddress] = useGlobalState('metamaskAddress');
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
 
   useInactiveListener();
 
@@ -380,8 +372,8 @@ const Balance: React.FC<BalanceProps> = () => {
         filteredTokens
           .filter((c) => c.contractAddress && c.erc20Cw20Map)
           .map((t) => {
-            const detail = window.amounts[t.denom];
-            const subAmounts = getSubAmount(window.amounts, t, prices);
+            const detail = amounts[t.denom];
+            const subAmounts = getSubAmount(amounts, t, prices);
             return [
               t.denom,
               {
@@ -548,7 +540,7 @@ const Balance: React.FC<BalanceProps> = () => {
     );
 
     const msgConvertReverses = await generateConvertCw20Erc20Message(
-      window.amounts,
+      amounts,
       fromToken,
       fromAddress,
       amount
@@ -624,7 +616,7 @@ const Balance: React.FC<BalanceProps> = () => {
       await handleCheckWallet();
       // disable Oraichain -> Oraibridge Ledger
       await handleLedgerDevice();
-     
+
       await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
       await window.Keplr.suggestChain(fromToken.chainId as string);
@@ -767,7 +759,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
       if (fromToken.erc20Cw20Map) {
         const msgConvertReverses = await generateConvertCw20Erc20Message(
-          window.amounts,
+          amounts,
           fromToken,
           fromAddress,
           amount
@@ -950,7 +942,7 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const tokenAmountDetails = window.amounts[from.denom];
+    const tokenAmountDetails = amounts[from.denom];
     const fromBalance =
       from && tokenAmountDetails
         ? tokenAmountDetails.amount + calculateSubAmounts(tokenAmountDetails)
@@ -1127,25 +1119,21 @@ const Balance: React.FC<BalanceProps> = () => {
   const getFilterTokens = (org: string): TokenItemType[] => {
     return [...fromTokens, ...toTokens]
       .filter((token) => {
-        if (
-          hideOtherSmallAmount &&
-          !Number(window.amounts[token.denom]?.amount)
-        ) {
+        if (hideOtherSmallAmount && !Number(amounts[token.denom]?.amount)) {
           return false;
         }
         return token?.org === org;
       })
       .sort((a, b) => {
-        return (
-          window.amounts[b.denom]?.usd ?? 0 - window.amounts[a.denom]?.usd ?? 0
-        );
+        return amounts[b.denom]?.usd ?? 0 - amounts[a.denom]?.usd ?? 0;
       });
   };
 
-  const totalUsd = _.sumBy(Object.values(window.amounts), (c) => {
+  const totalUsd = _.sumBy(Object.values(amounts), (c) => {
     if (!c.subAmounts) return c.usd;
     return c.usd + _.sumBy(Object.values(c.subAmounts), (sub) => sub.usd);
   });
+
   const navigate = useNavigate();
 
   return (
@@ -1220,7 +1208,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   );
 
                 // check balance cw20
-                let amount = window.amounts[t.denom];
+                let amount = amounts[t.denom];
                 return (
                   <TokenItem
                     className={styles.tokens_element}

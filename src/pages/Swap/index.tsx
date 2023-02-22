@@ -4,7 +4,7 @@ import cn from 'classnames/bind';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import {
   fetchTokenInfo,
   generateContractMessages,
@@ -55,7 +55,7 @@ const Swap: React.FC = () => {
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -104,8 +104,14 @@ const Swap: React.FC = () => {
     }
   }, [fromToken, toToken]);
 
-  const fromTokenBalance = fromToken ? amounts[fromToken.denom].amount + calculateSubAmounts(amounts[fromToken.denom]) : 0;
-  const toTokenBalance = toToken ? amounts[toToken.denom].amount + calculateSubAmounts(amounts[toToken.denom]) : 0;
+  const fromTokenBalance = fromToken
+    ? amounts[fromToken.denom].amount +
+      calculateSubAmounts(amounts[fromToken.denom])
+    : 0;
+  const toTokenBalance = toToken
+    ? amounts[toToken.denom].amount +
+      calculateSubAmounts(amounts[toToken.denom])
+    : 0;
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
@@ -157,7 +163,7 @@ const Swap: React.FC = () => {
         message: 'From amount should be higher than 0!'
       });
 
-    console.log("in handle submit");
+    console.log('in handle submit');
 
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -366,9 +372,9 @@ const Swap: React.FC = () => {
                 decimalScale={6}
                 type="text"
                 value={toAmount}
-              // onValueChange={({ floatValue }) => {
-              //   onChangeToAmount(floatValue);
-              // }}
+                // onValueChange={({ floatValue }) => {
+                //   onChangeToAmount(floatValue);
+                // }}
               />
 
               {/* <input

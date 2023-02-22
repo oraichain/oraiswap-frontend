@@ -3,8 +3,8 @@ import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import { useLocation } from 'react-router-dom';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
-import useGlobalState from './useGlobalState';
 import { isMobile } from '@walletconnect/browser-utils';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
@@ -13,12 +13,12 @@ export const injected = new InjectedConnector({
 export function useEagerConnect(isInactive, isInterval) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
-  const [chainInfo] = useGlobalState('chainInfo');
+  const [chainInfo] = useConfigReducer('chainInfo');
   const [metamaskAddress, setMetamaskAddress] =
-    useGlobalState('metamaskAddress');
+    useConfigReducer('metamaskAddress');
 
   useEffect(() => {
-    if(isInterval) return;
+    if (isInterval) return;
     connectEvm();
   }, [pathname, isInterval]);
 
@@ -57,7 +57,7 @@ export function useEagerConnect(isInactive, isInterval) {
 
 export function useInactiveListener() {
   const { active, error, activate, deactivate, library } = useWeb3React();
-  const [, setMetamaskAddress] = useGlobalState('metamaskAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   useEffect(() => {
     const { ethereum } = window;
