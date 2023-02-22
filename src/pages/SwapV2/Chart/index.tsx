@@ -59,9 +59,7 @@ const SwapChart: React.FC<{
       const res = await getPriceTokenWithTF(tokenName, typeData);
       setLoading(false);
       if (res?.data) {
-        const dataPrice = res?.data?.map((item) => {
-          return { time: item?.time, value: item?.close };
-        });
+        const dataPrice = res?.data;
         setInitialData(dataPrice);
       }
     } catch (error) {

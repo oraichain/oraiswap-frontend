@@ -1,9 +1,16 @@
-import React, { FC, memo, useEffect, useState, useMemo } from 'react';
+import React, {
+  FC,
+  memo,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { Pair, pairs } from 'config/pools';
-import { fetchAllPoolApr, fetchPoolInfoAmount } from 'rest/api';
+import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import _ from 'lodash';
@@ -26,23 +33,23 @@ interface PoolsProps {}
 
 enum KeyFilter {
   my_pool,
-  all_pool
+  all_pool,
 }
 
 const LIST_FILTER = [
   {
     key: KeyFilter.my_pool,
-    text: 'My Pools'
+    text: 'My Pools',
   },
   {
     key: KeyFilter.all_pool,
-    text: 'All Pools'
-  }
+    text: 'All Pools',
+  },
 ];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice
+  oraiPrice,
 }) => {
   return (
     <div className={styles.header}>
@@ -140,53 +147,47 @@ const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: any;
   setIsOpenNewPoolModal: any;
-}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr }) => {
+  myPairsData?: Object;
+}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr, myPairsData }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
-  const amounts = useSelector((state: RootState) => state.token.amounts);
   const [typeFilter, setTypeFilter] = useState(KeyFilter.all_pool);
 
   const listMyPool = useMemo(() => {
-    return pairs
-      .map((item) => {
-        return {
-          asset_denoms: item.asset_denoms,
-          amount: amounts[item.liquidity_token]?.amount ?? 0
-        };
-      })
-      .filter((item) => item.amount > 0);
-  }, [amounts]);
+    return pairInfos.filter(
+      (pairInfo) => myPairsData[pairInfo?.pair?.contract_addr]
+    );
+  }, [myPairsData, pairInfos]);
 
   useEffect(() => {
     if (typeFilter === KeyFilter.my_pool) {
-      if (listMyPool.length === 0) return setFilteredPairInfos([]);
-      const myPools = pairInfos.filter((pairInfo) =>
-        listMyPool.some((pool) =>
-          _.isEqual(pool.asset_denoms, pairInfo.pair.asset_denoms)
-        )
-      );
-      setFilteredPairInfos(myPools);
+      setFilteredPairInfos(listMyPool);
     } else {
       setFilteredPairInfos(pairInfos);
     }
   }, [listMyPool, typeFilter, pairInfos]);
 
-  const filterPairs = (text: string) => {
-    if (!text) {
-      return setFilteredPairInfos(pairInfos);
-    }
-    const searchReg = new RegExp(text, 'i');
-    const ret = pairInfos.filter((pairInfo) =>
-      pairInfo.pair.asset_denoms.some((denom) =>
-        filteredTokens.find(
-          (token) =>
-            token.denom === denom && token.name.search(searchReg) !== -1
+  const filterPairs = useCallback(
+    (text: string) => {
+      const listPairs =
+        typeFilter === KeyFilter.all_pool ? pairInfos : listMyPool;
+      if (!text) {
+        return setFilteredPairInfos(listPairs);
+      }
+      const searchReg = new RegExp(text, 'i');
+      const ret = listPairs.filter((pairInfo) =>
+        pairInfo.pair.asset_denoms.some((denom) =>
+          filteredTokens.find(
+            (token) =>
+              token.denom === denom && token.name.search(searchReg) !== -1
+          )
         )
-      )
-    );
-    setFilteredPairInfos(ret);
-  };
+      );
+      setFilteredPairInfos(ret);
+    },
+    [pairInfos, listMyPool, typeFilter]
+  );
 
   const contentDropdown = useMemo(() => {
     return (
@@ -275,6 +276,8 @@ type PairInfoData = {
 
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
+  const [myPairsData, setMyPairsData] = useState({});
+  const [address, setAddress] = useConfigReducer('address');
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
@@ -291,13 +294,14 @@ const Pools: React.FC<PoolsProps> = () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
       data: toBinary({
-        pool: {}
-      })
+        pool: {},
+      }),
     }));
 
     const res = await Contract.multicall.aggregate({
-      queries
+      queries,
     });
+
     const pairsData = Object.fromEntries(
       pairs.map((pair, ind) => {
         const data = res.return_data[ind];
@@ -307,8 +311,42 @@ const Pools: React.FC<PoolsProps> = () => {
         return [pair.contract_addr, fromBinary(data.data)];
       })
     );
-
     setCachedPairs(pairsData);
+  };
+
+  const fetchMyCachedPairs = async () => {
+    const queries = pairs.map((pair) => {
+      const assetToken = filteredTokens.find(
+        (item) => pair.token_asset === item.denom
+      );
+      const { info: assetInfo } = parseTokenInfo(assetToken);
+      return {
+        address: process.env.REACT_APP_STAKING_CONTRACT,
+        data: toBinary({
+          reward_info: {
+            asset_info: assetInfo,
+            staker_addr: address,
+          },
+        }),
+      };
+    });
+
+    const res = await Contract.multicall.aggregate({
+      queries,
+    });
+
+    const myPairData = Object.fromEntries(
+      pairs.map((pair, ind) => {
+        const data = res.return_data[ind];
+        if (!data.success) {
+          return [pair.contract_addr, {}];
+        }
+        const value = fromBinary(data.data);
+        const bondPools = _.sumBy(Object.values(value.reward_infos));
+        return [pair.contract_addr, !!bondPools];
+      })
+    );
+    setMyPairsData(myPairData);
   };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
@@ -330,7 +368,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: pair.commission_rate,
         fromToken,
-        toToken
+        toToken,
       };
     } catch (ex) {
       console.log(ex);
@@ -382,6 +420,7 @@ const Pools: React.FC<PoolsProps> = () => {
   useEffect(() => {
     fetchCachedPairs();
     fetchApr();
+    fetchMyCachedPairs();
   }, []);
 
   const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
@@ -393,6 +432,7 @@ const Pools: React.FC<PoolsProps> = () => {
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={cachedApr}
+          myPairsData={myPairsData}
           setIsOpenNewPoolModal={setIsOpenNewPoolModal}
         />
         <NewPoolModal
