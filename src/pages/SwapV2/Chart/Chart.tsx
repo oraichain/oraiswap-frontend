@@ -62,7 +62,7 @@ const ChartComponent = (props) => {
       },
       timeScale: {
         rightOffset: 1,
-        barSpacing: 10,
+        barSpacing: 14,
         lockVisibleTimeRangeOnResize: true,
         timeVisible: true,
       },
