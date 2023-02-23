@@ -181,15 +181,13 @@ export const arrayLoadToken = [
 
 export const getNetworkGasPrice = async () => {
   const chainInfosWithoutEndpoints =
-    await window.Keplr?.getChainInfosWithoutEndpoints() ?? embedChainInfos;
+    (await window.Keplr?.getChainInfosWithoutEndpoints()) ?? embedChainInfos;
   return chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
     ?.feeCurrencies[0]?.gasPriceStep;
 };
 
-export const calculateSubAmounts = (amountDetail: AmountDetail) => {
-  return amountDetail?.subAmounts
-    ? _.sumBy(Object.values(amountDetail.subAmounts), (sub) => sub.amount)
-    : 0;
+export const calSumAmounts = (amounts:AmountDetails, type : keyof AmountDetail = 'amount') => {
+  return _.sumBy(Object.values(amounts), (sub) => sub[type]);
 };
 
 export const handleCheckWallet = async () => {

@@ -5,7 +5,6 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
-import { calculateSubAmounts } from 'helper';
 
 interface TokenItemProps {
   token: TokenItemType;
@@ -19,6 +18,7 @@ interface TokenItemProps {
   onClick?: Function;
   onBlur?: Function;
   convertKwt?: any;
+  subAmounts?:AmountDetails;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -30,7 +30,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
   convertToken,
   transferIBC,
   onClickTransfer,
-  convertKwt
+  convertKwt,
+  subAmounts,
 }) => {
   return (
     <div
@@ -63,7 +64,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             <TokenBalance
               balance={{
                 amount: amountDetail
-                  ? amountDetail?.amount + calculateSubAmounts(amountDetail)
+                  ? amountDetail?.amount
                   : '0',
                 denom: '',
                 decimals: token.decimals
@@ -71,12 +72,11 @@ const TokenItem: React.FC<TokenItemProps> = ({
               className={styles.tokenAmount}
               decimalScale={Math.min(6, token.decimals)}
             />
-
-            {calculateSubAmounts(amountDetail) > 0 && (
+            {subAmounts && Object.keys(subAmounts)?.length > 0 && (
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>
-                    {Object.keys(amountDetail?.subAmounts).map((name, idx) => {
+                    {Object.keys(subAmounts).map((name, idx) => {
                       let description: string;
                       if (name !== token.name)
                         description = token.erc20Cw20Map[0]?.description;
@@ -93,7 +93,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                           </div>
                           <TokenBalance
                             balance={{
-                              amount: amountDetail.subAmounts[name].amount,
+                              amount: subAmounts[name].amount,
                               denom: '',
                               decimals: token.decimals
                             }}

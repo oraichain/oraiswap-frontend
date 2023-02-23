@@ -3,7 +3,6 @@ import Modal from 'components/Modal';
 import style from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
-import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { fetchTokenInfo } from 'rest/api';
@@ -16,6 +15,7 @@ import { poolTokens } from 'config/pools';
 import { TokenItemType } from 'config/bridgeTokens';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
+import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 
 const cx = cn.bind(style);
 

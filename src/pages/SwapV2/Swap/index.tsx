@@ -16,6 +16,7 @@ import {
   fetchTokenInfo,
   generateContractMessages,
   generateConvertErc20Cw20Message,
+  getSubAmount,
   simulateSwap,
   SwapQuery,
   Type
@@ -27,13 +28,14 @@ import { network } from 'config/networks';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
-import SettingModal from 'pages/Swap/Modals/SettingModal';
-import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
+import SettingModal from '../Modals/SettingModal';
+import SelectTokenModal from '../Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
-import { calculateSubAmounts } from 'helper';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { calSumAmounts } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -55,7 +57,9 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-
+  const { data: prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmount]);
     setSwapAmount([amount, toAmount]);
@@ -92,13 +96,17 @@ const SwapComponent: React.FC<{
     fetchTokenInfo(toToken!)
   );
 
+  console.log({ fromToken,  toToken });
+  
+  const subAmountFrom = getSubAmount(amounts, fromToken, prices);
+  const subAmountTo = getSubAmount(amounts, toToken, prices);
   const fromTokenBalance = fromToken
     ? amounts[fromToken.denom]?.amount +
-        calculateSubAmounts(amounts[fromToken.denom]) ?? 0
+        calSumAmounts(subAmountFrom) ?? 0
     : 0;
   const toTokenBalance = toToken
     ? amounts[toToken.denom]?.amount +
-        calculateSubAmounts(amounts[toToken.denom]) ?? 0
+        calSumAmounts(subAmountTo) ?? 0
     : 0;
 
   const { data: simulateData } = useQuery(

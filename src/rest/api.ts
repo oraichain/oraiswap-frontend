@@ -20,7 +20,7 @@ import {
 } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { calculateSubAmounts } from 'helper';
+import { calSumAmounts } from 'helper';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -199,27 +199,29 @@ async function fetchDistributionInfo(
 function getSubAmount(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
-  prices: CoinGeckoPrices<any>
+  prices?: CoinGeckoPrices<any>
 ): { [key: string]: { amount: number; usd: number } } {
   // get all native balances that are from oraibridge (ibc/...)
   const subAmounts = {};
-  for (let mapping of tokenInfo.erc20Cw20Map) {
-    // update later
-    if (!amounts[mapping.erc20Denom]) continue;
-    const balance = amounts[mapping.erc20Denom].amount;
-    // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
-    const parsedBalance = parseAmountToWithDecimal(
-      parseAmountFromWithDecimal(balance, mapping.decimals.erc20Decimals),
-      mapping.decimals.cw20Decimals
-    );
-    subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
-      amount: parsedBalance,
-      usd: getUsd(
-        parsedBalance,
-        prices[tokenInfo.coingeckoId] ?? 0,
+  if (tokenInfo.erc20Cw20Map) {
+    for (let mapping of tokenInfo.erc20Cw20Map) {
+      // update later
+      if (!amounts[mapping.erc20Denom]) continue;
+      const balance = amounts[mapping.erc20Denom].amount;
+      // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
+      const parsedBalance = parseAmountToWithDecimal(
+        parseAmountFromWithDecimal(balance, mapping.decimals.erc20Decimals),
         mapping.decimals.cw20Decimals
-      )
-    };
+      );
+      subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
+        amount: parsedBalance,
+        usd: getUsd(
+          parsedBalance,
+          prices[tokenInfo.coingeckoId] ?? 0,
+          mapping.decimals.cw20Decimals
+        )
+      };
+    }
   }
   return subAmounts;
 }
@@ -233,7 +235,8 @@ async function generateConvertErc20Cw20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balance = calculateSubAmounts(amounts[tokenInfo.denom]);
+    const balanceSubAmount = getSubAmount(amounts,tokenInfo);
+    const balance = calSumAmounts(balanceSubAmount);
     // reset so we convert using native first
     const erc20TokenInfo = {
       ...tokenInfo,
