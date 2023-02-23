@@ -1,7 +1,7 @@
+import flatten from 'lodash/flatten';
+import uniq from 'lodash/uniq';
 import { filteredTokens, TokenItemType } from './bridgeTokens';
 import { ORAI, STABLE_DENOM } from './constants';
-
-import _ from 'lodash';
 
 export type Pair = {
   contract_addr: string;
@@ -19,7 +19,7 @@ export const pairs: Pair[] = [
     asset_denoms: [ORAI, 'airi'],
     liquidity_token: 'orai1hxm433hnwthrxneyjysvhny539s9kh6s2g2n8y',
     commission_rate: '0.003',
-    token_asset: 'airi',
+    token_asset: 'airi'
   },
   {
     contract_addr: 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5',
@@ -32,23 +32,24 @@ export const pairs: Pair[] = [
     contract_addr:
       'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
     asset_denoms: [ORAI, 'scorai'],
-    liquidity_token: 'orai1ay689ltr57jt2snujarvakxrmtuq8fhuat5rnvq6rct89vjer9gqm2vde6',
+    liquidity_token:
+      'orai1ay689ltr57jt2snujarvakxrmtuq8fhuat5rnvq6rct89vjer9gqm2vde6',
     commission_rate: '0.003',
-    token_asset: 'scorai',
+    token_asset: 'scorai'
   },
   {
     contract_addr: 'orai1jf74ry4m0jcy9emsaudkhe7vte9l8qy8enakvs',
     asset_denoms: [ORAI, process.env.REACT_APP_ATOM_ORAICHAIN_DENOM],
     liquidity_token: 'orai1g2prqry343kx566cp7uws9w7v78n5tejylvaz6',
     commission_rate: '0.003',
-    token_asset: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
+    token_asset: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM
   },
   {
     contract_addr: 'orai1c5s03c3l336dgesne7dylnmhszw8554tsyy9yt',
     asset_denoms: [ORAI, STABLE_DENOM],
     liquidity_token: 'orai1mav52eqhd07c3lwevcnqdykdzhh4733zf32jcn',
     commission_rate: '0.003',
-    token_asset: STABLE_DENOM,
+    token_asset: STABLE_DENOM
   },
   {
     contract_addr: 'orai1ynmd2cemryhcwtjq3adhcwayrm89l2cr4tws4v',
@@ -62,20 +63,18 @@ export const pairs: Pair[] = [
     asset_denoms: [ORAI, process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM],
     liquidity_token: 'orai19ltj97jmdqnz5mrd2amethetvcwsp0220kww3e',
     commission_rate: '0.003',
-    token_asset: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+    token_asset: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
   },
   {
     contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
     asset_denoms: ['milky', STABLE_DENOM],
     liquidity_token: 'orai18ywllw03hvy720l06rme0apwyyq9plk64h9ccf',
     commission_rate: '0.003',
-    token_asset: 'milky',
+    token_asset: 'milky'
   }
 ];
 
-export const pairDenoms = _.uniq(
-  _.flatten(pairs.map((pair) => pair.asset_denoms))
-);
+export const pairDenoms = uniq(flatten(pairs.map((pair) => pair.asset_denoms)));
 
 export const poolTokens = filteredTokens.filter((token) =>
   pairDenoms.includes(token.denom)

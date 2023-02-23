@@ -8,7 +8,8 @@ import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
 import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
 import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
-import _ from 'lodash';
+import uniqBy from 'lodash/uniqBy';
+import flatten from 'lodash/flatten';
 import {
   AIRI_BSC_CONTRACT,
   BEP20_ORAI,
@@ -516,8 +517,8 @@ const oraichainTokens: TokenItemType[] = [
 
 export const tokens = [otherChainTokens, oraichainTokens];
 
-export const filteredTokens = _.uniqBy(
-  _.flatten(tokens).filter(
+export const filteredTokens = uniqBy(
+  flatten(tokens).filter(
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
@@ -525,8 +526,8 @@ export const filteredTokens = _.uniqBy(
   (c) => c.denom
 );
 
-export const cw20Tokens = _.uniqBy(
-  _.flatten(filteredTokens).filter(
+export const cw20Tokens = uniqBy(
+  flatten(filteredTokens).filter(
     // filter cosmos based tokens to collect tokens that have contract addresses
     (token) =>
       // !token.contractAddress &&
@@ -535,8 +536,8 @@ export const cw20Tokens = _.uniqBy(
   (c) => c.denom
 );
 
-export const evmTokens = _.uniqBy(
-  _.flatten(tokens).filter(
+export const evmTokens = uniqBy(
+  flatten(tokens).filter(
     (token) =>
       // !token.contractAddress &&
       token.denom &&
@@ -547,10 +548,8 @@ export const evmTokens = _.uniqBy(
   (c) => c.denom
 );
 
-export const kawaiiTokens = _.uniqBy(
-  _.flatten(tokens).filter(
-    (token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID
-  ),
+export const kawaiiTokens = uniqBy(
+  flatten(tokens).filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom
 );
 
@@ -559,7 +558,7 @@ export const gravityContracts: { [key: string]: string } = {
   [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
 };
 
-export const usdtToken = _.uniqBy(
-  _.flatten(tokens).filter((token) => token.denom === STABLE_DENOM),
+export const usdtToken = uniqBy(
+  flatten(tokens).filter((token) => token.denom === STABLE_DENOM),
   (c) => c.denom
 );

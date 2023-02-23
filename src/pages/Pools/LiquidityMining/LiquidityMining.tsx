@@ -9,10 +9,10 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import _ from 'lodash';
 import { TokenInfo } from 'types/token';
 import useConfigReducer from 'hooks/useConfigReducer';
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
+import isEqual from 'lodash/isEqual';
 
 const cx = cn.bind(styles);
 
@@ -72,7 +72,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     let res = rewardPerSecInfoData.map((r: any) => {
       const pendingWithdraw = +(
         totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e: any) =>
-          _.isEqual(e.info, r.info)
+          isEqual(e.info, r.info)
         )?.amount ?? 0
       );
       const amount =
@@ -200,7 +200,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   <TokenBalance
                     balance={{
                       amount: rewardInfoFirst
-                        ? rewardInfoFirst.bond_amount ?? 0
+                        ? Number(rewardInfoFirst.bond_amount) ?? 0
                         : 0,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'

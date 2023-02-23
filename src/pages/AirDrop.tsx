@@ -5,8 +5,8 @@ import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import bech32 from 'bech32';
-import _ from 'lodash';
 import Input from 'components/Input';
+import throttle from 'lodash/throttle';
 
 const cx = cn.bind(styles);
 
@@ -70,7 +70,7 @@ const AirDrop: FunctionComponent = () => {
   };
   const timeout = 20000;
 
-  const handleotherNetworkAddrChange = _.throttle(
+  const handleotherNetworkAddrChange = throttle(
     ({ target }) => {
       setOtherNetworkAddr(target.value || '');
     },
@@ -78,7 +78,7 @@ const AirDrop: FunctionComponent = () => {
     { trailing: true }
   );
 
-  const handleOraiAddrChange = _.throttle(
+  const handleOraiAddrChange = throttle(
     ({ target }) => {
       setOraiAddress(target.value || '');
     },

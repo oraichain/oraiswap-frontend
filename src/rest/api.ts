@@ -1,6 +1,6 @@
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { ORAI } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
@@ -11,7 +11,7 @@ import {
   parseAmountToWithDecimal
 } from 'libs/utils';
 import { Contract } from 'config/contracts';
-import { PairInfo, SwapOperation } from 'libs/contracts';
+import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import {
   PoolInfoResponse,
@@ -87,9 +87,9 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
   }
 }
 
-function parsePoolAmount(poolInfo: PoolResponse, trueAsset: any) {
+function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
   return parseInt(
-    poolInfo.assets.find((asset) => _.isEqual(asset.info, trueAsset))?.amount ||
+    poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount ||
       '0'
   );
 }
@@ -235,7 +235,7 @@ async function generateConvertErc20Cw20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    const balanceSubAmount = getSubAmount(amounts,tokenInfo);
+    const balanceSubAmount = getSubAmount(amounts, tokenInfo);
     const balance = calSumAmounts(balanceSubAmount);
     // reset so we convert using native first
     const erc20TokenInfo = {

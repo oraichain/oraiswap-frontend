@@ -129,9 +129,10 @@ export const parseAmountFromWithDecimal = (
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
 
   const returnAmount =
-    Number((BigInt(amount) * BigInt(atomics)) / BigInt(10 ** sourceDecimals)) /
-    atomics;
-
+    Number(
+      (BigInt(Math.round(Number(amount) * atomics)) /
+        BigInt(10 ** sourceDecimals)
+    )) / atomics;
   return Number(returnAmount.toFixed(desDecimals));
 };
 
