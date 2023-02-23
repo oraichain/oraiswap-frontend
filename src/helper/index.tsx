@@ -181,10 +181,16 @@ export const arrayLoadToken = [
 ];
 
 export const getNetworkGasPrice = async () => {
-  const chainInfosWithoutEndpoints =
+  try {
+    const chainInfosWithoutEndpoints =
     (await window.Keplr?.getChainInfosWithoutEndpoints()) ?? embedChainInfos;
-  return chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
-    ?.feeCurrencies[0]?.gasPriceStep;
+    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
+  return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;;
+  
+  } catch (error) {
+    console.log({ error });
+    
+  }
 };
 
 export const calSumAmounts = (
