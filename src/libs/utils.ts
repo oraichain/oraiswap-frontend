@@ -100,7 +100,7 @@ export const getUsd = (
 
   return (
     Number(
-      (BigInt(amount) * BigInt(Math.round(price * atomics))) /
+      (BigInt(Math.round(price * atomics * amount))) /
         BigInt(10 ** decimals)
     ) / atomics
   );

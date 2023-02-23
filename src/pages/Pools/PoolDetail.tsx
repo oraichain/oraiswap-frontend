@@ -27,6 +27,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
+import { Contract } from 'config/contracts';
 
 const cx = cn.bind(styles);
 
@@ -40,6 +41,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useConfigReducer('address');
+  const [lpTokenAll,setLpTokenAll] = useState('0');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [assetToken, setAssetToken] = useState<TokenItemType>();
 
@@ -157,8 +159,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
+  useEffect(() => {
+    if (!!lpTokenAll) {
+      fetchLpTokenAll();
+    }
+  }, [pairInfoData])
+
+  const fetchLpTokenAll = async () => {
+    try {
+      const lpTokenAllContract = await Contract.token(pairInfoData?.liquidity_token).balance({ address: address });
+      setLpTokenAll(lpTokenAllContract?.balance)
+    } catch (error) {
+      console.log({ error });
+      setLpTokenAll('0')
+    }
+  }
+
   const lpTokenBalance = pairInfoData
-    ? amounts[pairInfoData.liquidity_token]?.amount ?? 0
+    ? +lpTokenAll ?? 0
     : 0;
 
   const { data: lpTokenInfoData } = useQuery(
