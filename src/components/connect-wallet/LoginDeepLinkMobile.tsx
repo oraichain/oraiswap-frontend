@@ -11,7 +11,7 @@ export const LoginWidgetDeepLink: FC<{
   text: string;
   address: string | null;
   disconnect: () => Promise<void>;
-}> = ({ logo, text, address, disconnect  }) => {
+}> = ({ logo, text, address, disconnect }) => {
   return (
     <div className={cx('item')} onClick={address ? disconnect : () => {}}>
       <img src={logo} className={cx('logo')} />

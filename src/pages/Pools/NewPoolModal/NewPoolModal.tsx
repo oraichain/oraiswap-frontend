@@ -16,6 +16,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
+import DoneStepImg from 'assets/images/done-step.svg';
 
 const cx = cn.bind(style);
 
@@ -450,7 +451,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   <img
                     key={idx}
                     className={cx('done', `point-${idx}`)}
-                    src={require('assets/icons/done-step.svg').default}
+                    src={DoneStepImg}
                   />
                 );
               if (step === idx)

@@ -36,6 +36,8 @@ import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { calSumAmounts } from 'helper';
+import AntSwapImg from 'assets/images/ant_swap.svg';
+import RefreshImg from 'assets/images/refresh.svg';
 
 const cx = cn.bind(styles);
 
@@ -229,11 +231,7 @@ const SwapComponent: React.FC<{
         <div className={cx('header')}>
           <div className={cx('title')}>FROM</div>
           <button onClick={() => setRefresh(!refresh)}>
-            <img
-              className={cx('btn')}
-              src={require('assets/icons/refresh.svg').default}
-              alt="btn"
-            />
+            <img className={cx('btn')} src={RefreshImg} alt="btn" />
           </button>
         </div>
         <div className={cx('balance')}>
@@ -284,7 +282,7 @@ const SwapComponent: React.FC<{
       </div>
       <div className={cx('swap-icon')}>
         <img
-          src={require('assets/icons/ant_swap.svg').default}
+          src={AntSwapImg}
           onClick={() => {
             setSwapTokens([toTokenDenom, fromTokenDenom]);
             setSwapAmount([toAmount, fromAmount]);
