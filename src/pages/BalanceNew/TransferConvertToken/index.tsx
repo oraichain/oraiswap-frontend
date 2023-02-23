@@ -30,10 +30,14 @@ import {
   networks,
   renderLogoNetwork,
   getTokenChain,
-  calculateSubAmounts
+  calSumAmounts,
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 import Input from 'components/Input';
+import { getSubAmount } from 'rest/api';
+import { RootState } from 'store/configure';
+import { useSelector } from 'react-redux';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
@@ -69,6 +73,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const { data: prices } = useCoinGeckoPrices(
+    filteredTokens.map((t) => t.coingeckoId)
+  );
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
@@ -95,10 +103,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const listedTokens = filteredTokens.filter(
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   );
-
-  const subAmount = calculateSubAmounts(amountDetail);
+  const subAmount = getSubAmount(amounts,token, prices);
+  const subCalAmount = calSumAmounts(subAmount, 'amount');
   const maxAmount = parseAmountFromWithDecimal(
-    amountDetail ? amountDetail.amount + subAmount : 0, // amount detail here can be undefined
+    amountDetail ? amountDetail.amount + subCalAmount : 0, // amount detail here can be undefined
     token?.decimals
   );
 

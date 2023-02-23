@@ -11,7 +11,6 @@ import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 declare global {
   type AmountDetail = {
-    subAmounts?: { [key: string]: { amount: number; usd: number } };
     amount: number;
     usd: number;
   };

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { coin } from '@cosmjs/proto-signing';
 import {
   arrayLoadToken,
-  calculateSubAmounts,
+  calSumAmounts,
   getNetworkGasPrice,
   handleCheckWallet,
   handleLedgerDevice,
@@ -361,22 +361,22 @@ const Balance: React.FC<BalanceProps> = () => {
         ].filter(Boolean)
       );
       // // run later
-      const amountDetails = Object.fromEntries(
-        filteredTokens
-          .filter((c) => c.contractAddress && c.erc20Cw20Map)
-          .map((t) => {
-            const detail = amounts[t.denom];
-            const subAmounts = getSubAmount(amounts, t, prices);
-            return [
-              t.denom,
-              {
-                ...detail,
-                subAmounts
-              }
-            ];
-          })
-      );
-      forceUpdate(amountDetails);
+      // const amountDetails = Object.fromEntries(
+      //   filteredTokens
+      //     .filter((c) => c.contractAddress && c.erc20Cw20Map)
+      //     .map((t) => {
+      //       const detail = amounts[t.denom];
+      //       const subAmounts = getSubAmount(amounts, t, prices);
+      //       return [
+      //         t.denom,
+      //         {
+      //           ...detail,
+      //           subAmounts
+      //         }
+      //       ];
+      //     })
+      // );
+      // forceUpdate(amountDetails);
     } catch (ex) {
       console.log(ex);
     }
@@ -936,9 +936,10 @@ const Balance: React.FC<BalanceProps> = () => {
       return;
     }
     const tokenAmountDetails = amounts[from.denom];
+    const subAmount = getSubAmount(amounts, from, prices);
     const fromBalance =
       from && tokenAmountDetails
-        ? tokenAmountDetails.amount + calculateSubAmounts(tokenAmountDetails)
+        ? tokenAmountDetails.amount + calSumAmounts(subAmount,'amount')
         : 0;
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
@@ -1126,9 +1127,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const totalUsd = _.sumBy(Object.values(amounts), (c) => {
-    const amount = c.usd || 0;
-    if (!c.subAmounts) return amount;
-    return amount + _.sumBy(Object.values(c.subAmounts), (sub) => sub.usd || 0);
+    return c.usd
   });
 
   const navigate = useNavigate();
@@ -1206,11 +1205,20 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 // check balance cw20
                 let amount = amounts[t.denom];
+                let subAmounts;
+                if (t.contractAddress && t.erc20Cw20Map) {
+                  subAmounts = getSubAmount(amounts,t, prices);
+                  amount = {
+                    amount: calSumAmounts(subAmounts,'amount') + amount.amount,
+                    usd: calSumAmounts(subAmounts,'usd') + amount.usd
+                  }
+                }
                 return (
                   <TokenItem
                     className={styles.tokens_element}
                     key={t.denom}
                     amountDetail={amount}
+                    subAmounts={subAmounts}
                     active={
                       tokenOraichain
                         ? to?.denom === t.denom
