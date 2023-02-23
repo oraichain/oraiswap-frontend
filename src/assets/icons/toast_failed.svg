@@ -3,7 +3,7 @@
 <path fill-rule="evenodd" clip-rule="evenodd" d="M42.3155 48.8344L48.7664 41.3622L36.5446 29.5483L48.7329 16.9393L41.2598 10.4644L29.4519 22.6922L16.8367 10.498L10.3618 17.9711L22.5994 29.7884L17.2688 35.3086L10.3965 42.4181L17.8687 48.869L29.692 36.6375L35.2061 41.9621L42.3155 48.8344Z" fill="#CF4868"/>
 </g>
 <defs>
-<filter id="filter0_dii_575_522" x="0.361816" y="0.464386" width="58.4045" height="58.4046" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter x="0.361816" y="0.464386" width="58.4045" height="58.4046" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feOffset/>
