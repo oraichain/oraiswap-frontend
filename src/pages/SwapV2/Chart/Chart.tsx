@@ -19,6 +19,7 @@ const ChartComponent = (props) => {
   useEffect(() => {
     const chart = createChart(chartContainerRef.current, {
       // rightPriceScale: {
+      //   autoScale: false,
       //   scaleMargins: {
       //     top: 0.1,
       //     bottom: 0,
