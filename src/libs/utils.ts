@@ -204,3 +204,43 @@ setInterval(function () {
     });
   }
 }, 1000);
+
+export const formateNumberDecimals = (price, decimals = 2) => {
+  return new Intl.NumberFormat("en-US", {
+      currency: "USD",
+      maximumFractionDigits: decimals,
+  }).format(price)
+}
+
+export const detectBestDecimalsDisplay = (price, minDecimal = 2, minPrice = 1, maxDecimal) => {
+  if (price && price > minPrice) return minDecimal
+  let decimals = minDecimal
+  if (price !== undefined) {
+      // Find out the number of leading floating zeros via regex
+      const priceSplit = price?.toString().split(".")
+      if (priceSplit?.length === 2 && priceSplit[0] === "0") {
+          const leadingZeros = priceSplit[1].match(/^0+/)
+          decimals += leadingZeros ? leadingZeros[0]?.length + 1 : 1
+      }
+  }
+  if (maxDecimal && decimals > maxDecimal) decimals = maxDecimal
+  return decimals
+}
+
+interface FormatNumberDecimal {
+  price: number;
+  maxDecimal?: number;
+  unit?: string;
+  minDecimal?: number;
+  minPrice?: number;
+  unitPosition?: 'prefix' | 'suffix'
+}
+
+export const formateNumberDecimalsAuto = ({ price, maxDecimal, unit, minDecimal, minPrice, unitPosition }: FormatNumberDecimal) => {
+  minDecimal = minDecimal ? minDecimal : 2;
+  minPrice = minPrice ? minPrice : 1;
+  unit = unit ? unit : '';
+  const priceFormat = formateNumberDecimals(price, detectBestDecimalsDisplay(price, minDecimal, minPrice, maxDecimal));
+  const res = unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
+  return res;
+}
