@@ -9,6 +9,7 @@ import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';
 import { getInfoTokenSv, getPriceTokenWithTF } from './services';
 import SymbolSwapImg from 'assets/images/symbols_swap.svg';
+import { formateNumberDecimalsAuto } from 'libs/utils';
 
 const cx = cn.bind(styles);
 
@@ -100,7 +101,16 @@ const SwapChart: React.FC<{
               <div>
                 <div className={cx('content-price')}>
                   <img src={SymbolSwapImg} />
-                  <TokenBalance balance={infoMove?.value} decimalScale={2} />
+                  <span>
+                    {formateNumberDecimalsAuto({
+                      price: infoMove?.value,
+                      maxDecimal: 6,
+                      minDecimal: 2,
+                      unit: '$',
+                      minPrice: 1,
+                      unitPosition: 'prefix',
+                    })}
+                  </span>
                 </div>
                 <p className={cx('content-date')}>
                   {new Date(
@@ -108,7 +118,7 @@ const SwapChart: React.FC<{
                   ).toLocaleString('en-US', {
                     month: 'short',
                     year: 'numeric',
-                    day: 'numeric'
+                    day: 'numeric',
                   })}
                 </p>
               </div>
@@ -139,7 +149,7 @@ const SwapChart: React.FC<{
                 textColor: 'black',
                 areaTopColor: '#612fca',
                 // areaTopColor: 'rgba(168, 113, 223, 0.5)',
-                areaBottomColor: 'rgba(86, 42, 209, 0)'
+                areaBottomColor: 'rgba(86, 42, 209, 0)',
               }}
             />
           </div>
