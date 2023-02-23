@@ -202,7 +202,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   <TokenBalance
                     balance={{
                       amount: rewardInfoFirst
-                        ? rewardInfoFirst.bond_amount ?? 0
+                        ? Number(rewardInfoFirst.bond_amount) ?? 0
                         : 0,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
