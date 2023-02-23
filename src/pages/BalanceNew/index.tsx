@@ -123,7 +123,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useConfigReducer('chainId');
+  const [filterNetwork, setFilterNetwork] = useConfigReducer('filterNetwork');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer(
@@ -362,23 +362,6 @@ const Balance: React.FC<BalanceProps> = () => {
           keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
         ].filter(Boolean)
       );
-      // // run later
-      // const amountDetails = Object.fromEntries(
-      //   filteredTokens
-      //     .filter((c) => c.contractAddress && c.erc20Cw20Map)
-      //     .map((t) => {
-      //       const detail = amounts[t.denom];
-      //       const subAmounts = getSubAmount(amounts, t, prices);
-      //       return [
-      //         t.denom,
-      //         {
-      //           ...detail,
-      //           subAmounts
-      //         }
-      //       ];
-      //     })
-      // );
-      // forceUpdate(amountDetails);
     } catch (ex) {
       console.log(ex);
     }
@@ -1211,8 +1194,9 @@ const Balance: React.FC<BalanceProps> = () => {
                 if (t.contractAddress && t.erc20Cw20Map) {
                   subAmounts = getSubAmount(amounts, t, prices);
                   amount = {
-                    amount: calSumAmounts(subAmounts, 'amount') + amount.amount,
-                    usd: calSumAmounts(subAmounts, 'usd') + amount.usd
+                    amount:
+                      calSumAmounts(subAmounts, 'amount') + amount?.amount ?? 0,
+                    usd: calSumAmounts(subAmounts, 'usd') + amount?.usd ?? 0
                   };
                 }
                 return (

@@ -18,6 +18,11 @@ declare global {
   type PairDetails = {
     [key: string]: PoolResponse;
   };
+  type LpPoolDetails = {
+    [key: string]: {
+      balance: string | number
+    }
+  } 
   type MetaMaskEthereumProvider = AbstractProvider & {
     chainId: string;
     isMetaMask?: boolean;
