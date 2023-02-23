@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
   useMemo,
-  useCallback
+  useCallback,
 } from 'react';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
@@ -16,8 +16,6 @@ import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
-import DropdownCustom from 'components/DropdownCustom';
-import FilterSvg from 'assets/images/icon-filter.svg';
 import SearchSvg from 'assets/images/search-svg.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -35,23 +33,23 @@ interface PoolsProps {}
 
 enum KeyFilter {
   my_pool,
-  all_pool
+  all_pool,
 }
 
 const LIST_FILTER = [
   {
-    key: KeyFilter.my_pool,
-    text: 'My Pools'
+    key: KeyFilter.all_pool,
+    text: 'All Pools',
   },
   {
-    key: KeyFilter.all_pool,
-    text: 'All Pools'
-  }
+    key: KeyFilter.my_pool,
+    text: 'My Pools',
+  },
 ];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice
+  oraiPrice,
 }) => {
   return (
     <div className={styles.header}>
@@ -191,40 +189,23 @@ const ListPools = memo<{
     [pairInfos, listMyPool, typeFilter]
   );
 
-  const contentDropdown = useMemo(() => {
-    return (
-      <div className={styles.content_dropdown}>
-        {LIST_FILTER.map((item) => (
-          <div
-            key={item.key}
-            style={{ color: item.key === typeFilter ? '#a871df' : '#ebebeb' }}
-            className={styles.item_dropdown}
-            onClick={() => setTypeFilter(item.key)}
-          >
-            {item.text}
-          </div>
-        ))}
-      </div>
-    );
-  }, [typeFilter]);
-
-  const triggerDropdown = useMemo(() => {
-    return (
-      <div className={styles.trigger_dropdown}>
-        <img src={FilterSvg} alt="filter_icon" /> Sort by
-      </div>
-    );
-  }, []);
-
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_header}>
         <div className={styles.listpools_filter}>
-          <DropdownCustom
-            triggerElement={triggerDropdown}
-            content={contentDropdown}
-            styles={{ top: 'calc(100% + 4px)' }}
-          />
+          {LIST_FILTER.map((item) => (
+            <div
+              key={item.key}
+              style={{
+                color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
+                background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21',
+              }}
+              className={styles.filter_item}
+              onClick={() => setTypeFilter(item.key)}
+            >
+              {item.text}
+            </div>
+          ))}
         </div>
         <div className={styles.listpools_search}>
           <Input
@@ -234,7 +215,7 @@ const ListPools = memo<{
               paddingLeft: 40,
               backgroundImage: `url(${SearchSvg})`,
               backgroundRepeat: 'no-repeat',
-              backgroundPosition: '10px center'
+              backgroundPosition: '10px center',
             }}
             onChange={debounce((e) => {
               filterPairs(e.target.value);
@@ -296,12 +277,12 @@ const Pools: React.FC<PoolsProps> = () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
       data: toBinary({
-        pool: {}
-      })
+        pool: {},
+      }),
     }));
 
     const res = await Contract.multicall.aggregate({
-      queries
+      queries,
     });
 
     const pairsData = Object.fromEntries(
@@ -327,14 +308,14 @@ const Pools: React.FC<PoolsProps> = () => {
         data: toBinary({
           reward_info: {
             asset_info: assetInfo,
-            staker_addr: address
-          }
-        })
+            staker_addr: address,
+          },
+        }),
       };
     });
 
     const res = await Contract.multicall.aggregate({
-      queries
+      queries,
     });
 
     const myPairData = Object.fromEntries(
@@ -370,7 +351,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: pair.commission_rate,
         fromToken,
-        toToken
+        toToken,
       };
     } catch (ex) {
       console.log(ex);
