@@ -1,4 +1,4 @@
-import { formatCash } from 'libs/utils';
+import { formateNumberDecimalsAuto } from 'libs/utils';
 import { createChart } from 'lightweight-charts';
 import { useEffect, useRef, memo, useCallback } from 'react';
 
@@ -19,6 +19,7 @@ const ChartComponent = (props) => {
   useEffect(() => {
     const chart = createChart(chartContainerRef.current, {
       // rightPriceScale: {
+      //   autoScale: false,
       //   scaleMargins: {
       //     top: 0.1,
       //     bottom: 0,
@@ -30,7 +31,14 @@ const ChartComponent = (props) => {
         fontFamily: 'Roboto, sans-serif',
       },
       localization: {
-        priceFormatter: (price) => formatCash(price),
+        priceFormatter: (price) =>
+          formateNumberDecimalsAuto({
+            price: price,
+            maxDecimal: 6,
+            minDecimal: 2,
+            unit: '',
+            minPrice: 1,
+          }),
       },
       grid: {
         horzLines: {
@@ -41,21 +49,21 @@ const ChartComponent = (props) => {
         },
       },
       crosshair: {
+        mode: 0,
         horzLine: {
-          visible: false,
-          labelVisible: false,
+          visible: true,
+          color: '#A871DF',
+          labelVisible: true,
         },
         vertLine: {
           visible: true,
-          style: 0,
-          width: 1,
           color: '#A871DF',
           labelVisible: true,
         },
       },
       timeScale: {
         rightOffset: 1,
-        barSpacing: 16,
+        barSpacing: 14,
         lockVisibleTimeRangeOnResize: true,
         timeVisible: true,
       },

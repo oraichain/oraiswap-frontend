@@ -27,7 +27,7 @@ const defaultOptions: ToastOptions = {
   draggable: false,
   progress: undefined,
   pauseOnFocusLoss: false,
-  closeButton: CloseButton
+  closeButton: CloseButton,
 };
 
 const defaultExtraData = { message: '', customLink: '' };
@@ -38,7 +38,7 @@ export enum TToastType {
   TX_FAILED,
   TX_INFO,
   KEPLR_FAILED,
-  METAMASK_FAILED
+  METAMASK_FAILED,
 }
 
 interface IToastExtra {
@@ -98,11 +98,11 @@ export const displayToast: DisplayToastFn = (
   const refinedExtraData = extraData ? extraData : {};
   const inputExtraData = {
     ...defaultExtraData,
-    ...refinedExtraData
+    ...refinedExtraData,
   } as IToastExtra;
   const inputOptions = {
     ...defaultOptions,
-    ...refinedOptions
+    ...refinedOptions,
   } as ToastOptions;
 
   switch (type) {
@@ -181,7 +181,7 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 );
 
 const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
-  message
+  message,
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
@@ -193,7 +193,7 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
 );
 
 const ToastMetamaksFailed: FunctionComponent<{ message: string }> = ({
-  message
+  message,
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
