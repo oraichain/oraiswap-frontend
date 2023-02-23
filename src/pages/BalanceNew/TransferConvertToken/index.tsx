@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import { FC, useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
@@ -30,7 +29,7 @@ import {
   networks,
   renderLogoNetwork,
   getTokenChain,
-  calSumAmounts,
+  calSumAmounts
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 import Input from 'components/Input';
@@ -103,7 +102,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const listedTokens = filteredTokens.filter(
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   );
-  const subAmount = getSubAmount(amounts,token, prices);
+  const subAmount = getSubAmount(amounts, token, prices);
   const subCalAmount = calSumAmounts(subAmount, 'amount');
   const maxAmount = parseAmountFromWithDecimal(
     amountDetail ? amountDetail.amount + subCalAmount : 0, // amount detail here can be undefined

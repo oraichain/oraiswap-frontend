@@ -13,7 +13,6 @@ import { Pair, pairs } from 'config/pools';
 import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
@@ -28,6 +27,9 @@ import { updatePairs } from 'reducer/token';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
 import Input from 'components/Input';
+import compact from 'lodash/compact';
+import debounce from 'lodash/debounce';
+import sumBy from 'lodash/sumBy';
 
 interface PoolsProps {}
 
@@ -234,7 +236,7 @@ const ListPools = memo<{
               backgroundRepeat: 'no-repeat',
               backgroundPosition: '10px center'
             }}
-            onChange={_.debounce((e) => {
+            onChange={debounce((e) => {
               filterPairs(e.target.value);
             }, 500)}
           />
@@ -342,7 +344,7 @@ const Pools: React.FC<PoolsProps> = () => {
           return [pair.contract_addr, {}];
         }
         const value = fromBinary(data.data);
-        const bondPools = _.sumBy(Object.values(value.reward_infos));
+        const bondPools = sumBy(Object.values(value.reward_infos));
         return [pair.contract_addr, !!bondPools];
       })
     );
@@ -382,7 +384,7 @@ const Pools: React.FC<PoolsProps> = () => {
       return;
     }
 
-    const poolList = _.compact(
+    const poolList = compact(
       await Promise.all(pairs.map((p) => fetchPairInfoData(p)))
     );
 
@@ -423,7 +425,7 @@ const Pools: React.FC<PoolsProps> = () => {
     fetchMyCachedPairs();
   }, []);
 
-  const totalAmount = _.sumBy(pairInfos, (c) => c.amount);
+  const totalAmount = sumBy(pairInfos, (c) => c.amount);
 
   return (
     <Content nonBackground>

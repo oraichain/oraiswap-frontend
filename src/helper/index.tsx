@@ -38,10 +38,11 @@ import {
 } from 'config/constants';
 import { network } from 'config/networks';
 import { TokenItemType } from 'config/bridgeTokens';
-import _ from 'lodash';
+
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
+import sumBy from 'lodash/sumBy';
 
 interface Items {
   chainId?: string;
@@ -186,8 +187,11 @@ export const getNetworkGasPrice = async () => {
     ?.feeCurrencies[0]?.gasPriceStep;
 };
 
-export const calSumAmounts = (amounts:AmountDetails, type : keyof AmountDetail = 'amount') => {
-  return _.sumBy(Object.values(amounts), (sub) => sub[type]);
+export const calSumAmounts = (
+  amounts: AmountDetails,
+  type: keyof AmountDetail = 'amount'
+) => {
+  return sumBy(Object.values(amounts), (sub) => sub[type]);
 };
 
 export const handleCheckWallet = async () => {

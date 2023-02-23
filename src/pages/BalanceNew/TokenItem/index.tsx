@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import styles from './index.module.scss';
-import _ from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
@@ -18,7 +17,7 @@ interface TokenItemProps {
   onClick?: Function;
   onBlur?: Function;
   convertKwt?: any;
-  subAmounts?:AmountDetails;
+  subAmounts?: AmountDetails;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -31,7 +30,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   transferIBC,
   onClickTransfer,
   convertKwt,
-  subAmounts,
+  subAmounts
 }) => {
   return (
     <div
@@ -63,9 +62,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail
-                  ? amountDetail?.amount
-                  : '0',
+                amount: amountDetail ? amountDetail?.amount : '0',
                 denom: '',
                 decimals: token.decimals
               }}

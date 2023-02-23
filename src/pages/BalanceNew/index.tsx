@@ -25,7 +25,6 @@ import {
   StargateClient
 } from '@cosmjs/stargate';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import _, { add } from 'lodash';
 import TokenBalance from 'components/TokenBalance';
 import {
   ibcInfos,
@@ -111,6 +110,9 @@ import { RootState } from 'store/configure';
 import { updateAmounts } from 'reducer/token';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Input from 'components/Input';
+import flatten from 'lodash/flatten';
+import isEqual from 'lodash/isEqual';
+import sumBy from 'lodash/sumBy';
 
 interface BalanceProps {}
 
@@ -226,7 +228,7 @@ const Balance: React.FC<BalanceProps> = () => {
   // update concurrency
   const loadEvmOraiAmounts = async (evmAddress: string) => {
     const amountDetails = Object.fromEntries(
-      _.flatten(
+      flatten(
         await Promise.all([
           loadEvmEntries(
             evmAddress,
@@ -403,11 +405,11 @@ const Balance: React.FC<BalanceProps> = () => {
   const onClickToken = useCallback(
     (type: string, token: TokenItemType) => {
       if (type === 'to') {
-        if (_.isEqual(to, token)) {
+        if (isEqual(to, token)) {
           setTo(undefined);
         } else setTo(token);
       } else {
-        if (_.isEqual(from, token)) {
+        if (isEqual(from, token)) {
           setFrom(undefined);
           setTo(undefined);
         } else {
@@ -939,7 +941,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const subAmount = getSubAmount(amounts, from, prices);
     const fromBalance =
       from && tokenAmountDetails
-        ? tokenAmountDetails.amount + calSumAmounts(subAmount,'amount')
+        ? tokenAmountDetails.amount + calSumAmounts(subAmount, 'amount')
         : 0;
     if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
@@ -1126,8 +1128,8 @@ const Balance: React.FC<BalanceProps> = () => {
       });
   };
 
-  const totalUsd = _.sumBy(Object.values(amounts), (c) => {
-    return c.usd
+  const totalUsd = sumBy(Object.values(amounts), (c) => {
+    return c.usd;
   });
 
   const navigate = useNavigate();
@@ -1207,11 +1209,11 @@ const Balance: React.FC<BalanceProps> = () => {
                 let amount = amounts[t.denom];
                 let subAmounts;
                 if (t.contractAddress && t.erc20Cw20Map) {
-                  subAmounts = getSubAmount(amounts,t, prices);
+                  subAmounts = getSubAmount(amounts, t, prices);
                   amount = {
-                    amount: calSumAmounts(subAmounts,'amount') + amount.amount,
-                    usd: calSumAmounts(subAmounts,'usd') + amount.usd
-                  }
+                    amount: calSumAmounts(subAmounts, 'amount') + amount.amount,
+                    usd: calSumAmounts(subAmounts, 'usd') + amount.usd
+                  };
                 }
                 return (
                   <TokenItem
