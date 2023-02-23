@@ -45,7 +45,7 @@ const App = () => {
 
     if (chainInfo) {
       setStatusChangeAccount(false);
-      setChainId(chainInfo.chainId);
+      setChainId(chainInfo.chainId ?? ORAICHAIN_ID);
       setChainInfo(chainInfo);
       if (chainInfo?.networkType === EVM_TYPE) {
         window.ethereum.chainId = chainInfo.chainId;
@@ -70,9 +70,7 @@ const App = () => {
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
-    if (!address) {
-      keplrHandler();
-    }
+    keplrHandler();
     window.addEventListener('keplr_keystorechange', keplrHandler);
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
