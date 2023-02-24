@@ -76,8 +76,8 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [amountToken1, setAmountToken1] = useState('');
-  const [amountToken2, setAmountToken2] = useState('');
+  const [amountToken1, setAmountToken1] = useState(0);
+  const [amountToken2, setAmountToken2] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
@@ -129,12 +129,12 @@ const LiquidityModal: FC<ModalProps> = ({
   useEffect(() => {
     if (!pairAmountInfoData?.ratio) {
     } else if (recentInput === 1 && !!+amountToken1) {
-      setAmountToken2(`${+amountToken1 / pairAmountInfoData.ratio}`);
+      setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
     } else if (recentInput === 2 && !!+amountToken2)
-      setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
+      setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
   }, [JSON.stringify(pairAmountInfoData)]);
 
-  const getValueUsd = (token: any, amount: number) => {
+  const getValueUsd = (token: any, amount: number | string) => {
     let t = getUsd(
       amount,
       prices[token!.coingeckoId as PriceKey],
@@ -143,10 +143,10 @@ const LiquidityModal: FC<ModalProps> = ({
     return t;
   };
 
-  const onChangeAmount1 = (floatValue: string) => {
+  const onChangeAmount1 = (floatValue: number) => {
     setRecentInput(1);
     setAmountToken1(floatValue);
-    setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
+    setAmountToken2(floatValue / pairAmountInfoData?.ratio);
     const amount1 = +toAmount(floatValue, token1InfoData!.decimals);
     const estimatedLP =
       (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
@@ -154,10 +154,10 @@ const LiquidityModal: FC<ModalProps> = ({
     setEstimatedLP(estimatedLP);
   };
 
-  const onChangeAmount2 = (floatValue: string) => {
+  const onChangeAmount2 = (floatValue: number) => {
     setRecentInput(2);
     setAmountToken2(floatValue);
-    setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
+    setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
     const amount2 = +toAmount(floatValue, token2InfoData!.decimals);
     const estimatedLP =
@@ -373,10 +373,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                toDisplay(
-                  token1Balance,
-                  token1InfoData?.decimals ?? 0
-                ).toString()
+                toDisplay(token1Balance, token1InfoData?.decimals ?? 0)
               )
             }
           >
@@ -387,9 +384,9 @@ const LiquidityModal: FC<ModalProps> = ({
             onClick={() =>
               onChangeAmount1(
                 toDisplay(
-                  (token1Balance / 2)?.toString(),
+                  Number(token1Balance) / 2,
                   token1InfoData?.decimals ?? 0
-                ).toString()
+                )
               )
             }
           >
@@ -444,10 +441,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                toDisplay(
-                  token2Balance,
-                  token2InfoData?.decimals ?? 0
-                ).toString()
+                toDisplay(token2Balance, token2InfoData?.decimals ?? 0)
               )
             }
           >
@@ -458,9 +452,9 @@ const LiquidityModal: FC<ModalProps> = ({
             onClick={() =>
               onChangeAmount2(
                 toDisplay(
-                  (token2Balance / 2)?.toString(),
+                  Number(token2Balance) / 2,
                   token2InfoData?.decimals ?? 0
-                ).toString()
+                )
               )
             }
           >
@@ -536,14 +530,8 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = +toAmount(
-            amountToken1.toString(),
-            token1InfoData!.decimals
-          ),
-          amount2 = +toAmount(
-            amountToken2.toString(),
-            token2InfoData!.decimals
-          );
+        const amount1 = +toAmount(amountToken1, token1InfoData!.decimals),
+          amount2 = +toAmount(amountToken2, token2InfoData!.decimals);
         let disableMsg: string;
         if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
         if (amount1 > token1Balance)
@@ -724,10 +712,7 @@ const LiquidityModal: FC<ModalProps> = ({
         )}
       </div>
       {(() => {
-        const amount = +toAmount(
-          lpAmountBurn.toString(),
-          lpTokenInfoData!.decimals
-        );
+        const amount = +toAmount(lpAmountBurn, lpTokenInfoData!.decimals);
         let disableMsg: string;
         if (amount <= 0) disableMsg = 'Enter an amount';
         if (amount > lpTokenBalance)

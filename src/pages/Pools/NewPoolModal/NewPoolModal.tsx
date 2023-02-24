@@ -46,8 +46,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     useState<TokenItemType[]>(poolTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
-  const [amountToken1, setAmountToken1] = useState('0');
-  const [amountToken2, setAmountToken2] = useState('0');
+  const [amountToken1, setAmountToken1] = useState(0);
+  const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const tokenObj1 = poolTokens.find((token) => token.denom === token1);
   const tokenObj2 = poolTokens.find((token) => token.denom === token2);
@@ -217,7 +217,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                toDisplay(token1Balance / 2, token1InfoData?.decimals)
+                toDisplay(Number(token1Balance) / 2, token1InfoData?.decimals)
               )
             }
           >
@@ -248,7 +248,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken1 ? amountToken1 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken1(floatValue?.toString() || '0');
+              setAmountToken1(floatValue);
             }}
           />
         </div>
@@ -282,7 +282,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                toDisplay(token2Balance / 2, token2InfoData?.decimals)
+                toDisplay(Number(token2Balance) / 2, token2InfoData?.decimals)
               )
             }
           >
@@ -313,7 +313,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken2 ? amountToken2 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken2(floatValue?.toString() || '0');
+              setAmountToken2(floatValue);
             }}
           />
         </div>

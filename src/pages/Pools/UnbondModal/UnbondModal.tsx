@@ -46,12 +46,11 @@ const UnbondModal: FC<ModalProps> = ({
   const [address] = useConfigReducer('address');
 
   const handleUnbond = async (amount: number) => {
-    const parsedAmount = +toAmount(
-      amount.toString(),
-      lpTokenInfoData!.decimals
-    );
+    const parsedAmount = toAmount(amount, lpTokenInfoData!.decimals);
 
-    if (parsedAmount <= 0 || parsedAmount > bondAmount)
+    const parsedAmountNumber = Number(parsedAmount);
+
+    if (parsedAmountNumber <= 0 || parsedAmountNumber > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
       });
@@ -62,7 +61,7 @@ const UnbondModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         assetToken
       });
       const msg = msgs[0];

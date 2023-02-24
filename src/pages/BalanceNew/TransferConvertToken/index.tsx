@@ -236,14 +236,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const _floatValue = toAmount(
-                    floatValue!,
-                    token?.decimals
-                  );
                   const usdValue =
-                    (_floatValue / (amountDetail?.amount ?? 0)) *
-                    (amountDetail?.usd ?? 0);
-
+                    floatValue * (prices[token.coingeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
                 className={styles.amount}

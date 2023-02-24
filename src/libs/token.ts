@@ -1,21 +1,35 @@
-import { StargateClient } from "@cosmjs/stargate";
-import { arrayLoadToken, handleCheckWallet } from "helper";
-import { getEvmAddress, getUsd } from "./utils";
-import { evmTokens, filteredTokens, kawaiiTokens, TokenItemType } from 'config/bridgeTokens';
-import { updateAmounts } from "reducer/token";
-import { fromBinary, toBinary } from "@cosmjs/cosmwasm-stargate";
-import { BalanceResponse } from "./contracts/OraiswapToken.types";
-import { Contract } from "config/contracts";
-import { BSC_CHAIN_ID, BSC_RPC, ETHEREUM_CHAIN_ID, ETHEREUM_RPC, KAWAII_SUBNET_RPC, KWT_SUBNETWORK_CHAIN_ID, KWT_SUBNETWORK_EVM_CHAIN_ID } from "config/constants";
-import { flatten } from "lodash";
+import { StargateClient } from '@cosmjs/stargate';
+import { arrayLoadToken, handleCheckWallet } from 'helper';
+import { getEvmAddress, toDisplay } from './utils';
+import {
+  evmTokens,
+  filteredTokens,
+  kawaiiTokens,
+  TokenItemType
+} from 'config/bridgeTokens';
+import { updateAmounts } from 'reducer/token';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { BalanceResponse } from './contracts/OraiswapToken.types';
+import { Contract } from 'config/contracts';
+import {
+  BSC_CHAIN_ID,
+  BSC_RPC,
+  ETHEREUM_CHAIN_ID,
+  ETHEREUM_RPC,
+  KAWAII_SUBNET_RPC,
+  KWT_SUBNETWORK_CHAIN_ID,
+  KWT_SUBNETWORK_EVM_CHAIN_ID
+} from 'config/constants';
+import { flatten } from 'lodash';
 import tokenABI from 'config/abi/erc20.json';
-import { ContractCallResults, Multicall } from "./ethereum-multicall";
+import { ContractCallResults, Multicall } from './ethereum-multicall';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 export class CacheTokens {
-  private readonly prices;
+  private readonly prices: CoinGeckoPrices<string>;
   private readonly dispatch;
-  private readonly address;
-  public constructor({prices, dispatch, address}) {
+  private readonly address: string;
+  public constructor({ prices, dispatch, address }) {
     this.prices = prices;
     this.dispatch = dispatch;
     this.address = address;
@@ -32,46 +46,47 @@ export class CacheTokens {
   }
 
   private async loadTokens() {
-      await handleCheckWallet();
-  for (const token of arrayLoadToken) {
-    window.Keplr.getKeplrAddr(token.chainId).then((address) =>
-      this.loadNativeBalance(address, token.rpc)
-    );
-  }
-  }
-
-  private async forceUpdate(amountDetails: AmountDetails){
-    this.dispatch(updateAmounts(amountDetails));
-  };
-
-  private async loadNativeBalance(address: string, rpc: string) {
-      const client = await StargateClient.connect(rpc);
-  let erc20MapTokens = [];
-  for (let token of filteredTokens) {
-    if (token.contractAddress && token.erc20Cw20Map) {
-      erc20MapTokens = erc20MapTokens.concat(
-        token.erc20Cw20Map.map((t) => ({
-          denom: t.erc20Denom,
-          coingeckoId: token.coingeckoId,
-          decimals: t.decimals.erc20Decimals
-        }))
+    await handleCheckWallet();
+    for (const token of arrayLoadToken) {
+      window.Keplr.getKeplrAddr(token.chainId).then((address) =>
+        this.loadNativeBalance(address, token.rpc)
       );
     }
   }
-  const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
-  const amountAll = await client.getAllBalances(address);
-  let amountDetails: AmountDetails = {};
-  for (const token of filteredTokensWithErc20Map) {
-    const foundToken = amountAll.find((t) => token.denom === t.denom);
-    if (!foundToken) continue;
-    const amount = parseInt(foundToken.amount);
-    amountDetails[token.denom] = {
-      amount,
-      usd: getUsd(amount, this.prices[token.coingeckoId] ?? 0, token.decimals)
-    };
+
+  private async forceUpdate(amountDetails: AmountDetails) {
+    this.dispatch(updateAmounts(amountDetails));
   }
-  console.log('loadNativeBalance', address);
-  this.forceUpdate(amountDetails);
+
+  private async loadNativeBalance(address: string, rpc: string) {
+    const client = await StargateClient.connect(rpc);
+    let erc20MapTokens = [];
+    for (let token of filteredTokens) {
+      if (token.contractAddress && token.erc20Cw20Map) {
+        erc20MapTokens = erc20MapTokens.concat(
+          token.erc20Cw20Map.map((t) => ({
+            denom: t.erc20Denom,
+            coingeckoId: token.coingeckoId,
+            decimals: t.decimals.erc20Decimals
+          }))
+        );
+      }
+    }
+    const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
+    const amountAll = await client.getAllBalances(address);
+    let amountDetails: AmountDetails = {};
+    for (const token of filteredTokensWithErc20Map) {
+      const foundToken = amountAll.find((t) => token.denom === t.denom);
+      if (!foundToken) continue;
+      const amount = foundToken.amount;
+      const displayAmount = toDisplay(amount, token.decimals);
+      amountDetails[token.denom] = {
+        amount: foundToken.amount,
+        usd: displayAmount * (this.prices[token.coingeckoId] ?? 0)
+      };
+    }
+    console.log('loadNativeBalance', address);
+    this.forceUpdate(amountDetails);
   }
 
   private async loadCw20Balance(address: string) {
@@ -96,20 +111,21 @@ export class CacheTokens {
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
-        const amount = parseInt(balanceRes.balance);
+        const amount = balanceRes.balance;
+        const displayAmount = toDisplay(amount, t.decimals);
         return [
           t.denom,
           {
             amount,
-            usd: getUsd(amount, this.prices[t.coingeckoId] ?? 0, t.decimals)
+            usd: displayAmount * (this.prices[t.coingeckoId] ?? 0)
           }
         ];
       })
     );
     this.forceUpdate(amountDetails);
-  };
+  }
 
-  private async loadEvmEntries (
+  private async loadEvmEntries(
     address: string,
     tokens: TokenItemType[],
     rpc: string,
@@ -136,19 +152,18 @@ export class CacheTokens {
 
     const results: ContractCallResults = await multicall.call(input);
     return tokens.map((token) => {
-      const amount = Number(
-        results.results[token.denom].callsReturnContext[0].returnValues[0].hex
-      );
-
+      const amount =
+        results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
+      const displayAmount = toDisplay(amount, token.decimals);
       return [
         token.denom,
         {
           amount,
-          usd: getUsd(amount, this.prices[token.coingeckoId] ?? 0, token.decimals)
+          usd: (this.prices[token.coingeckoId] ?? 0) * displayAmount
         } as AmountDetail
       ];
     });
-  };
+  }
 
   private async loadEvmOraiAmounts(evmAddress: string) {
     const amountDetails = Object.fromEntries(
@@ -171,9 +186,9 @@ export class CacheTokens {
       )
     );
     this.forceUpdate(amountDetails);
-  };
+  }
 
-  private async loadKawaiiSubnetAmount () {
+  private async loadKawaiiSubnetAmount() {
     const kwtSubnetAddress = getEvmAddress(
       await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
     );
@@ -188,9 +203,9 @@ export class CacheTokens {
     );
     // update amounts
     this.forceUpdate(amountDetails);
-  };
+  }
 
   static factory({ prices, dispatch, address }) {
-    return new CacheTokens({ prices, dispatch, address});
+    return new CacheTokens({ prices, dispatch, address });
   }
 }
