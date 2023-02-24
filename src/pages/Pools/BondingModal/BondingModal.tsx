@@ -4,7 +4,7 @@ import style from './BondingModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import TokenBalance from 'components/TokenBalance';
-import { getUsd, parseAmount } from 'libs/utils';
+import { getUsd, toAmount } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -51,7 +51,7 @@ const BondingModal: FC<ModalProps> = ({
   };
 
   const handleBond = async (amount: string) => {
-    const parsedAmount = +parseAmount(amount, lpTokenInfoData!.decimals);
+    const parsedAmount = +toAmount(amount, lpTokenInfoData!.decimals);
 
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {

@@ -30,27 +30,6 @@ export const getLength = (text: string) => new Blob([text]).size;
 export const capitalize = (text: string) =>
   text[0].toUpperCase() + text.slice(1);
 
-const rules = [
-  // if it says it's a webview, let's go with that
-  'WebView',
-  // iOS webview will be the same as safari but missing "Safari"
-  '(iPhone|iPod|iPad)(?!.*Safari)',
-  // Android Lollipop and Above: webview will be the same as native but it will contain "wv"
-  // Android KitKat to lollipop webview will put {version}.0.0.0
-  'Android.*(wv|.0.0.0)',
-  // old chrome android webview agent
-  'Linux; U; Android'
-];
-
-const webviewRegExp = new RegExp('(' + rules.join('|') + ')', 'ig');
-const atomics = 1_000_000; // for decimal divide
-
-export const isWebview = () => {
-  const userAgent = navigator.userAgent || navigator.vendor;
-
-  return !!userAgent.match(webviewRegExp);
-};
-
 export const checkPrefixAndLength = (
   prefix: string,
   data: string,
@@ -71,68 +50,23 @@ export const getEvmAddress = (bech32Address: string) => {
   return evmAddress;
 };
 
-export const parseAmount = (value: string | number, decimal: number = 6) => {
-  if (!value) return '0';
-  return `${(
-    (typeof value === 'string' ? parseFloat(value) : value) *
-    Math.pow(10, decimal)
-  ).toFixed(0)}`;
+export const validateNumber = (amount: number): number => {
+  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
+  return amount;
+};
+export const toAmount = (amount: number, decimals: number): BigInt => {
+  const validatedAmount = validateNumber(amount);
+  return BigInt(Math.round(validatedAmount * 10 ** decimals));
 };
 
-export const parseDisplayAmount = (
-  value: string | number,
-  decimal: number = 6
-) => {
-  if (value)
-    return `${(
-      (typeof value === 'string' ? parseFloat(value) : value) /
-      Math.pow(10, decimal)
-    ).toFixed(6)}`;
-  return '0';
-};
-
-export const getUsd = (
-  amount: number,
-  price: number | null,
-  decimals: number
-) => {
-  if (!amount || !price) return 0;
-
-  return (
-    Number(
-      (BigInt(Math.round(price * atomics * amount))) /
-        BigInt(10 ** decimals)
-    ) / atomics
-  );
-};
-
-export const parseBalanceNumber = (balance: number): number => {
-  if (isFinite(balance) && !isNaN(balance)) return balance;
-  else return 0;
-};
-export const parseAmountToWithDecimal = (
-  amount: number,
-  decimals: number
-): number => {
-  return (
-    Number(BigInt(Math.round(amount * atomics)) * BigInt(10 ** decimals)) /
-    atomics
-  );
-};
-
-export const parseAmountFromWithDecimal = (
-  amount: number | string,
+export const toDisplay = (
+  amount: number | string | BigInt,
   sourceDecimals = 6,
   desDecimals = 6
 ): number => {
   // guarding conditions to prevent crashing
-  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
-
-  const returnAmount =
-    Number(
-      (BigInt(Math.round(Number(amount) * atomics)) /
-        BigInt(10 ** sourceDecimals)
-    )) / atomics;
+  const validatedAmount = validateNumber(Number(amount));
+  const returnAmount = validatedAmount / 10 ** sourceDecimals;
   return Number(returnAmount.toFixed(desDecimals));
 };
 
@@ -206,26 +140,31 @@ setInterval(function () {
 }, 1000);
 
 export const formateNumberDecimals = (price, decimals = 2) => {
-  return new Intl.NumberFormat("en-US", {
-      currency: "USD",
-      maximumFractionDigits: decimals,
-  }).format(price)
-}
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    maximumFractionDigits: decimals
+  }).format(price);
+};
 
-export const detectBestDecimalsDisplay = (price, minDecimal = 2, minPrice = 1, maxDecimal) => {
-  if (price && price > minPrice) return minDecimal
-  let decimals = minDecimal
+export const detectBestDecimalsDisplay = (
+  price,
+  minDecimal = 2,
+  minPrice = 1,
+  maxDecimal
+) => {
+  if (price && price > minPrice) return minDecimal;
+  let decimals = minDecimal;
   if (price !== undefined) {
-      // Find out the number of leading floating zeros via regex
-      const priceSplit = price?.toString().split(".")
-      if (priceSplit?.length === 2 && priceSplit[0] === "0") {
-          const leadingZeros = priceSplit[1].match(/^0+/)
-          decimals += leadingZeros ? leadingZeros[0]?.length + 1 : 1
-      }
+    // Find out the number of leading floating zeros via regex
+    const priceSplit = price?.toString().split('.');
+    if (priceSplit?.length === 2 && priceSplit[0] === '0') {
+      const leadingZeros = priceSplit[1].match(/^0+/);
+      decimals += leadingZeros ? leadingZeros[0]?.length + 1 : 1;
+    }
   }
-  if (maxDecimal && decimals > maxDecimal) decimals = maxDecimal
-  return decimals
-}
+  if (maxDecimal && decimals > maxDecimal) decimals = maxDecimal;
+  return decimals;
+};
 
 interface FormatNumberDecimal {
   price: number;
@@ -233,14 +172,25 @@ interface FormatNumberDecimal {
   unit?: string;
   minDecimal?: number;
   minPrice?: number;
-  unitPosition?: 'prefix' | 'suffix'
+  unitPosition?: 'prefix' | 'suffix';
 }
 
-export const formateNumberDecimalsAuto = ({ price, maxDecimal, unit, minDecimal, minPrice, unitPosition }: FormatNumberDecimal) => {
+export const formateNumberDecimalsAuto = ({
+  price,
+  maxDecimal,
+  unit,
+  minDecimal,
+  minPrice,
+  unitPosition
+}: FormatNumberDecimal) => {
   minDecimal = minDecimal ? minDecimal : 2;
   minPrice = minPrice ? minPrice : 1;
   unit = unit ? unit : '';
-  const priceFormat = formateNumberDecimals(price, detectBestDecimalsDisplay(price, minDecimal, minPrice, maxDecimal));
-  const res = unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
+  const priceFormat = formateNumberDecimals(
+    price,
+    detectBestDecimalsDisplay(price, minDecimal, minPrice, maxDecimal)
+  );
+  const res =
+    unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
   return res;
-}
+};

@@ -4,12 +4,7 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import {
-  parseAmountFromWithDecimal,
-  parseAmountToWithDecimal,
-  parseBep20Erc20Name,
-  reduceString
-} from 'libs/utils';
+import { toDisplay, reduceString } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
@@ -102,10 +97,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const listedTokens = filteredTokens.filter(
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   );
-  const subAmount = getSubAmount(amounts, token, prices);
-  const subCalAmount = calSumAmounts(subAmount, 'amount');
-  const maxAmount = parseAmountFromWithDecimal(
-    amountDetail ? amountDetail.amount + subCalAmount : 0, // amount detail here can be undefined
+  const maxAmount = toDisplay(
+    amountDetail ? amountDetail.amount : 0, // amount detail here can be undefined
     token?.decimals
   );
 
@@ -236,15 +229,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const _floatValue = parseAmountToWithDecimal(
-                    floatValue!,
-                    token?.decimals
-                  );
-                  if (!amountDetail?.amount) return 0;
                   const usdValue =
-                    (_floatValue / amountDetail.amount) *
-                    (amountDetail.usd ?? 0);
-
+                    floatValue * (prices[token.coingeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
                 className={styles.amount}

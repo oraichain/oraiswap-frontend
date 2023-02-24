@@ -137,9 +137,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
               {address && (
                 <div className={styles.token_info}>
                   {/* <AvatarPlaceholder
-                    address={address}
-                    className={styles.token_avatar}
-                  /> */}
+                      address={address}
+                      className={styles.token_avatar}
+                    /> */}
                   {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
                     <KwtIcon className={styles.token_avatar} />
                   )}
@@ -174,7 +174,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
               )}
               {!!metamaskAddress && (
                 <div className={styles.token_info}>
-                  {handleCheckChain(BSC_CHAIN_ID) && (
+                  {(handleCheckChain(BSC_CHAIN_ID) ||
+                    (!handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) &&
+                      !handleCheckChain(ETHEREUM_CHAIN_ID))) && (
                     <BNBIcon className={styles.token_avatar} />
                   )}
                   {handleCheckChain(ETHEREUM_CHAIN_ID) && (

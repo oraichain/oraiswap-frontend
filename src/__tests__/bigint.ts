@@ -1,12 +1,10 @@
-import { parseAmountToWithDecimal } from 'libs/utils';
+import { toAmount } from 'libs/utils';
 
 describe('bigint', () => {
   it('amount > 1000', () => {
     const amount = 6000;
     const decimals = 18;
-    const formattedAmount = BigInt(
-      parseAmountToWithDecimal(amount, decimals)
-    ).toString();
-    console.log(formattedAmount);
+    const formattedAmount = toAmount(amount, decimals).toString();
+    expect(formattedAmount).toBe('6000000000000000000000');
   });
 });
