@@ -15,6 +15,7 @@ export interface NetworkConfig extends ExtNetworkConfig {
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;
+  factory_v2: string;
   oracle: string;
   staking: string;
   router: string;
@@ -22,12 +23,4 @@ export interface NetworkConfig extends ExtNetworkConfig {
   prefix: string;
   rewarder: string;
   converter: string;
-}
-
-export interface Network extends NetworkConfig {
-  /** Get finder link */
-  finder: (address: string, path?: string) => string;
-
-  /** Refresh the network from the extension */
-  refresh: () => void;
 }

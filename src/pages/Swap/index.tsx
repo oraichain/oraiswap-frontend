@@ -3,42 +3,38 @@ import style from './index.module.scss';
 import cn from 'classnames/bind';
 import SettingModal from './Modals/SettingModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import {
   fetchBalance,
-  fetchExchangeRate,
-  fetchTaxRate,
   fetchTokenInfo,
   fetchBalanceWithMapping,
   generateContractMessages,
   generateConvertMsgs,
   simulateSwap,
   SwapQuery,
-  generateConvertErc20Cw20Message,
+  generateConvertErc20Cw20Message
 } from 'rest/api';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { ORAI } from 'config/constants';
+import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import {
   buildMultipleMessages,
   parseAmount,
   parseAmountToWithDecimal,
-  parseDisplayAmount,
+  parseDisplayAmount
 } from 'libs/utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
 import NumberFormat from 'react-number-format';
-import {
-  filteredTokens,
-  TokenItemType,
-  tokens,
-  cw20Tokens,
-} from 'config/bridgeTokens';
+import { filteredTokens } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 import Loader from 'components/Loader';
 import Content from 'layouts/Content';
 import { poolTokens } from 'config/pools';
+import { contracts } from 'libs/contracts';
+import { Contract } from 'config/contracts';
+import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 
 const cx = cn.bind(style);
 
@@ -53,7 +49,7 @@ const Swap: React.FC = () => {
   // const [feeToken, setFeeToken] = useState<string>('airi');
   const [[fromAmount, toAmount], setSwapAmount] = useState([
     undefined,
-    undefined,
+    undefined
   ]);
   // const [currentPair, setCurrentPair] = useState<PairName>("ORAI-AIRI");
   const [averageRatio, setAverageRatio] = useState('0');
@@ -74,10 +70,15 @@ const Swap: React.FC = () => {
     setSwapAmount([finalAmount, toAmount]);
   };
 
-  const { data: taxRate, isLoading: isTaxRateLoading } = useQuery(
-    ['tax-rate'],
-    () => fetchTaxRate()
-  );
+  Contract.sender = address;
+
+  const { data: taxRate, isLoading: isTaxRateLoading } =
+    contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
+      client: Contract.oracle,
+      input: {
+        tax_rate: {}
+      }
+    });
 
   const fromToken = filteredTokens.find(
     (token) => token.denom === fromTokenDenom
@@ -130,19 +131,13 @@ const Swap: React.FC = () => {
     { enabled: !!address && !!toToken }
   );
 
-  useQuery(
-    ['exchange-rate', fromTokenInfoData, toTokenInfoData],
-    () => fetchExchangeRate(toTokenInfoData!.denom, fromTokenInfoData!.denom),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
-  );
-
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
     () =>
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals),
+        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
@@ -154,7 +149,7 @@ const Swap: React.FC = () => {
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData!.decimals),
+          amount: parseAmount('1', fromTokenInfoData!.decimals)
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -176,7 +171,7 @@ const Swap: React.FC = () => {
       fromAmount,
       parseFloat(
         parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
-      ),
+      )
     ]);
   }, [simulateData]);
 
@@ -188,7 +183,7 @@ const Swap: React.FC = () => {
   const handleSubmit = async () => {
     if (fromAmount <= 0)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!',
+        message: 'From amount should be higher than 0!'
       });
 
     setSwapLoading(true);
@@ -214,7 +209,7 @@ const Swap: React.FC = () => {
         sender: address,
         amount: _fromAmount,
         fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!,
+        toInfo: toTokenInfoData!
       } as SwapQuery);
 
       const msg = msgs[0];
@@ -225,14 +220,14 @@ const Swap: React.FC = () => {
         prefix: ORAI,
         walletAddr: address,
         msgs: messages,
-        gasAmount: { denom: ORAI, amount: '0' },
+        gasAmount: { denom: ORAI, amount: '0' }
       });
       console.log('result swap tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         refetchTokenBalances();
         setSwapLoading(false);
@@ -244,7 +239,7 @@ const Swap: React.FC = () => {
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setSwapLoading(false);
@@ -261,7 +256,7 @@ const Swap: React.FC = () => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <div className={cx('container')}>
@@ -285,7 +280,7 @@ const Swap: React.FC = () => {
                 balance={{
                   amount: fromTokenBalance,
                   decimals: fromTokenInfoData?.decimals,
-                  denom: fromTokenInfoData?.symbol ?? '',
+                  denom: fromTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -373,7 +368,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: toTokenBalance ? toTokenBalance : 0,
-                  denom: toTokenInfoData?.symbol ?? '',
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 prefix="Balance: "
                 decimalScale={6}
@@ -432,7 +427,7 @@ const Swap: React.FC = () => {
               <TokenBalance
                 balance={{
                   amount: simulateData ? simulateData?.amount : 0,
-                  denom: toTokenInfoData?.symbol ?? '',
+                  denom: toTokenInfoData?.symbol ?? ''
                 }}
                 decimalScale={6}
               />
@@ -447,8 +442,19 @@ const Swap: React.FC = () => {
                 <span>Tax rate</span>
                 {/* <TooltipIcon /> */}
               </div>
-              <span>{parseFloat(taxRate?.rate) * 100} %</span>
+              <span>
+                {parseFloat((taxRate as TaxRateResponse)?.rate) * 100} %
+              </span>
             </div>
+            {(fromToken?.denom == MILKY || toToken?.denom == MILKY) && (
+              <div className={cx('row')}>
+                <div className={cx('title')}>
+                  <span>
+                    *Additional: 5% entry tax rate for MILKY transactions
+                  </span>
+                </div>
+              </div>
+            )}
             {/* <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Exchange rate</span>
@@ -470,20 +476,34 @@ const Swap: React.FC = () => {
               isOpen={isSelectFrom}
               open={() => setIsSelectFrom(true)}
               close={() => setIsSelectFrom(false)}
-              listToken={poolTokens.filter(
-                (token) => token.denom !== toTokenDenom
+              listToken={poolTokens.filter((token) =>
+                toTokenDenom === MILKY
+                  ? token.denom === STABLE_DENOM
+                  : token.denom !== toTokenDenom
               )}
-              setToken={(denom) => setSwapTokens([denom, toTokenDenom])}
+              setToken={(denom) => {
+                setSwapTokens([
+                  denom,
+                  denom === MILKY ? STABLE_DENOM : toTokenDenom
+                ]);
+              }}
             />
           ) : (
             <SelectTokenModal
               isOpen={isSelectTo}
               open={() => setIsSelectTo(true)}
               close={() => setIsSelectTo(false)}
-              listToken={poolTokens.filter(
-                (token) => token.denom !== fromTokenDenom
+              listToken={poolTokens.filter((token) =>
+                fromTokenDenom === MILKY
+                  ? token.denom === STABLE_DENOM
+                  : token.denom !== fromTokenDenom
               )}
-              setToken={(denom) => setSwapTokens([fromTokenDenom, denom])}
+              setToken={(denom) => {
+                setSwapTokens([
+                  denom === MILKY ? STABLE_DENOM : fromTokenDenom,
+                  denom
+                ]);
+              }}
             />
           )}
         </div>

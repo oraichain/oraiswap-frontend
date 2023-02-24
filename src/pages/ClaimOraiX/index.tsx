@@ -1,5 +1,5 @@
 import { FunctionComponent, memo, useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'rest/request';
 import Loader from 'components/Loader';
 import useGlobalState from 'hooks/useGlobalState';
@@ -19,32 +19,32 @@ const ORAIX_CLAIM_CONTRACT = process.env.REACT_APP_ORAIX_CLAIM_CONTRACT;
 const arrayToken = [
   {
     denom: 'orai',
-    name: 'ORAI',
+    name: 'ORAI'
   },
   {
     denom: 'atom-oraidex',
-    name: 'ATOM (OraiDEX)',
+    name: 'ATOM (OraiDEX)'
   },
   {
     denom: 'cosmos',
-    name: 'ATOM (Cosmos Hub)',
+    name: 'ATOM (Cosmos Hub)'
   },
   {
     denom: 'osmo',
-    name: 'OSMO',
+    name: 'OSMO'
   },
   {
     denom: 'juno',
-    name: 'JUNO',
+    name: 'JUNO'
   },
   {
     denom: 'kwt-milky',
-    name: 'KWT-MILKY',
+    name: 'KWT-MILKY'
   },
   {
     denom: 'airi',
-    name: 'AIRI',
-  },
+    name: 'AIRI'
+  }
 ];
 
 const objNetwork = {
@@ -54,7 +54,7 @@ const objNetwork = {
   cosmos: { network: 'cosmos' },
   juno: { network: 'juno' },
   'atom-oraidex': { network: 'orai' },
-  'kwt-milky': { network: 'orai' },
+  'kwt-milky': { network: 'orai' }
 };
 
 type objNetworkKey = keyof typeof objNetwork;
@@ -172,7 +172,7 @@ const ClaimOraiX: FunctionComponent = () => {
                       height: '100%',
                       display: 'flex',
                       justifyContent: 'center',
-                      alignItems: 'center',
+                      alignItems: 'center'
                     }}
                   >
                     {claimLoading && (
@@ -214,7 +214,7 @@ const ClaimOraiX: FunctionComponent = () => {
     retryDelay: 3000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    refetchOnReconnect: false
   };
 
   const handleClaim = async () => {
@@ -230,11 +230,11 @@ const ClaimOraiX: FunctionComponent = () => {
             sender: address,
             stage: +stage,
             amount: amount.toString(),
-            proofs: proofs[stage],
+            proofs: proofs[stage]
           });
           return {
             contractAddress,
-            handleMsg: msg.toString(),
+            handleMsg: msg.toString()
           };
         }
       );
@@ -243,13 +243,13 @@ const ClaimOraiX: FunctionComponent = () => {
         prefix: ORAI,
         walletAddr: address,
         msgs,
-        gasAmount: { denom: ORAI, amount: '0' },
+        gasAmount: { denom: ORAI, amount: '0' }
       });
       console.log('result tx hash: ', result);
 
       setTimeout(() => {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         setClaimLoading(false);
         setIsClaimed(true);
@@ -259,7 +259,7 @@ const ClaimOraiX: FunctionComponent = () => {
       console.log('error message handle claim: ', error);
       setClaimLoading(false);
       return displayToast(TToastType.TX_FAILED, {
-        message: error.message,
+        message: error.message
       });
     }
   };
@@ -330,7 +330,7 @@ const ClaimOraiX: FunctionComponent = () => {
         totalClaimAmount,
         stageAmount,
         claimedAmount,
-        claimableAmount,
+        claimableAmount
       };
     } catch (error) {
       console.log('error fetch claim oraix: ', error);
@@ -342,14 +342,14 @@ const ClaimOraiX: FunctionComponent = () => {
     const msg = JSON.stringify({
       is_claimed: {
         stage,
-        address,
-      },
+        address
+      }
     });
     const { data } = (
       await axios.get(
-        `${
-          network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        `${network.lcd}/wasm/v1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(
+          msg
+        )}`,
         { cache: false }
       )
     ).data;
@@ -361,9 +361,9 @@ const ClaimOraiX: FunctionComponent = () => {
     const msg = JSON.stringify({ merkle_root: { stage } });
     const { data } = (
       await axios.get(
-        `${
-          network.lcd
-        }/wasm/v1beta1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(msg)}`,
+        `${network.lcd}/wasm/v1/contract/${ORAIX_CLAIM_CONTRACT}/smart/${btoa(
+          msg
+        )}`,
         { cache: false }
       )
     ).data;
@@ -378,14 +378,14 @@ const ClaimOraiX: FunctionComponent = () => {
       ([stage, amount]) => {
         return {
           stage,
-          amount,
+          amount
         };
       }
     );
 
     const res: any = (
       await axios.post(`${ORAIX_CLAIM_URL}/proof?address=${address}`, {
-        stages,
+        stages
       })
     ).data;
     return res;
@@ -403,7 +403,7 @@ const ClaimOraiX: FunctionComponent = () => {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          fontSize: 20,
+          fontSize: 20
         }}
       >
         <ClaimOraiXBox />

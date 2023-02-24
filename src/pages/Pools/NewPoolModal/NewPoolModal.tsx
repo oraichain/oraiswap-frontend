@@ -4,10 +4,10 @@ import style from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import useGlobalState from 'hooks/useGlobalState';
 import { fetchBalance, fetchTokenInfo } from 'rest/api';
-import { useCoinGeckoPrices } from '@sunnyag/react-coingecko';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import TokenBalance from 'components/TokenBalance';
 import { parseAmount, parseDisplayAmount } from 'libs/utils';
 import Pie from 'components/Pie';
@@ -28,7 +28,9 @@ interface ModalProps {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const { prices } = useCoinGeckoPrices(poolTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices(
+    poolTokens.map((t) => t.coingeckoId)
+  );
   const [step, setStep] = useState(1);
   const [isSelectingToken, setIsSelectingToken] = useState<
     'token1' | 'token2' | null
@@ -111,7 +113,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     const coingeckoId = poolTokens.find(
       (token) => token.name === tokenSymbol
     )?.coingeckoId;
-    const pricePer = prices[coingeckoId!]?.price?.asNumber ?? 0;
+    const pricePer = prices[coingeckoId!] ?? 0;
 
     return pricePer * +amount;
   };
@@ -275,7 +277,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken1 ? amountToken1 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken1(floatValue?.toString() ?? '0');
+              setAmountToken1(floatValue?.toString() || '0');
             }}
           />
         </div>
@@ -340,7 +342,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken2 ? amountToken2 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken2(floatValue?.toString() ?? '0');
+              setAmountToken2(floatValue?.toString() || '0');
             }}
           />
         </div>

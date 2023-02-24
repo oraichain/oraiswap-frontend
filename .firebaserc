@@ -19,6 +19,12 @@
         ],
         "oraiswap-staging-v1": [
           "oraiswap-staging-v1"
+        ],
+        "oraiswap-legacy": [
+          "oraiswap-legacy"
+        ],
+        "oraiswap-pre-mainnet": [
+          "oraiswap-pre-mainnet"
         ]
       }
     }

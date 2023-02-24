@@ -7,18 +7,30 @@ import {
   ORAI_BRIDGE_LCD,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
-  ORAI_BRIDGE_UDENOM
+  ORAI_BRIDGE_UDENOM,
+  ORAI_RPC,
+  ORAI_LCD,
+  ORAICHAIN_ID,
+  ORAI_SCAN
 } from './constants';
 
 /**
  * A list of Cosmos chain infos. If we need to add / remove any chains, just directly update this variable.
  */
-export const embedChainInfos: ChainInfo[] = [
+export interface ChainInfoCustom extends ChainInfo {
+  gasPriceStep: {
+    low: number,
+    average: number,
+    high: number
+  }
+}
+
+export const embedChainInfos: ChainInfoCustom[] = [
   {
-    rpc: 'https://rpc.orai.io',
-    rest: 'https://lcd.orai.io',
-    chainId: 'Oraichain',
-    chainName: 'Oraichain',
+    rpc: ORAI_RPC,
+    rest: ORAI_LCD,
+    chainId: ORAICHAIN_ID,
+    chainName: ORAICHAIN_ID,
     stakeCurrency: {
       coinDenom: 'ORAI',
       coinMinimalDenom: 'orai',
@@ -38,13 +50,13 @@ export const embedChainInfos: ChainInfo[] = [
     get feeCurrencies() {
       return [this.stakeCurrency];
     },
-    walletUrlForStaking: 'https://scan.orai.io/validators',
+    walletUrlForStaking: `${ORAI_SCAN}/validators`,
     gasPriceStep: {
-      low: 0,
-      average: 0.000025,
-      high: 0.00004
+      low: 0.003,
+      average: 0.005,
+      high: 0.007
     },
-    features: ['stargate', 'ibc-transfer', 'cosmwasm']
+    features: ['stargate', 'ibc-transfer', 'cosmwasm','wasmd_0.24+']
   },
   {
     rpc: ORAI_BRIDGE_RPC,

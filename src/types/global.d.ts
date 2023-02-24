@@ -6,6 +6,7 @@ import { Keplr as keplr } from '@keplr-wallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 declare global {
   type MetaMaskEthereumProvider = AbstractProvider & {
@@ -105,6 +106,7 @@ declare global {
       postMessage(msg: string): void;
     };
     keplr: keplr;
+    client: CosmWasmClient;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
@@ -123,6 +125,7 @@ declare global {
       REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
       REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
+      REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD: string;
 
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
@@ -133,7 +136,11 @@ declare global {
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
+      REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
+
+      // config for eth ibc denom
+      REACT_APP_ORAIETH_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;
@@ -142,7 +149,9 @@ declare global {
 
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
+      REACT_APP_FACTORY_V2_CONTRACT: string;
       REACT_APP_ROUTER_CONTRACT: string;
+      REACT_APP_ROUTER_V2_CONTRACT: string;
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_BSC_CONTRACT: string;
       REACT_APP_GRAVITY_ETH_CONTRACT: string;
@@ -154,6 +163,11 @@ declare global {
       REACT_APP_ORAIX_CLAIM_CONTRACT: string;
       REACT_APP_SENTRY_ENVIRONMENT: string;
       REACT_APP_KWT_CONTRACT: string;
+      REACT_APP_MILKY_CONTRACT: string;
+      REACT_APP_SCORAI_CONTRACT: string;
+
+      // config for ibc wasm contract (cw20-ics20)
+      REACT_APP_IBC_WASM_CONTRACT: string;
     }
   }
 }

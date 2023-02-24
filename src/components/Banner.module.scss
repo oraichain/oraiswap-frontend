@@ -1,0 +1,76 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+
+.modalBanner {
+  width: 100vw;
+  max-width: 1000px;
+  outline: 0;
+  position: relative;
+  text-align: center;
+  @include mobile {
+    margin: 0 auto;
+  }
+}
+
+.overlayBanner {
+  @include flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: fade-out(#070a13, 0.2);
+  z-index: 3;
+  max-width: 100% !important;
+}
+
+.closeBanner {
+  position: absolute;
+  right: 25px;
+  top: 25px;
+  text-align: right;
+  z-index: 1;
+
+  @include mobile {
+    right: 16px;
+  }
+
+  span {
+    cursor: pointer;
+  }
+}
+
+.contentBanner {
+  position: absolute;
+  right: 25px;
+  bottom: 67px;
+  text-align: right;
+  color: white;
+  background-color: black;
+  border: 1px solid rgba(142, 128, 91, 255);
+  font-weight: 700;
+  border-radius: 36px;
+  font-size: 24px;
+  padding: 14px;
+  z-index: 1;
+
+  @include mobile {
+    right: 16px;
+    bottom: 16px;
+    font-size: 8px;
+    padding: 4px;
+  }
+
+  span {
+    cursor: pointer;
+  }
+}
+
+.imagesBanner {
+  border-radius: 16px;
+  border: 0.5 solid gray;
+  @include mobile {
+    width: 100%;
+    height: 100%;
+  }
+}

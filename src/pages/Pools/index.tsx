@@ -8,7 +8,7 @@ import {
   fetchAllPoolApr,
   fetchPairInfo,
   fetchPoolInfoAmount,
-  fetchTokenInfo,
+  fetchTokenInfo
 } from 'rest/api';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
@@ -16,8 +16,8 @@ import _ from 'lodash';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { Fraction } from '@saberhq/token-utils';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { STABLE_DENOM } from 'config/constants';
-import { useQuery } from 'react-query';
+import { MILKY, STABLE_DENOM } from 'config/constants';
+import { useQuery } from '@tanstack/react-query';
 
 const { Search } = Input;
 const useQueryConfig = {
@@ -25,13 +25,13 @@ const useQueryConfig = {
   retryDelay: 3000,
   refetchOnMount: false,
   refetchOnWindowFocus: false,
-  refetchOnReconnect: false,
+  refetchOnReconnect: false
 };
 interface PoolsProps {}
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice,
+  oraiPrice
 }) => {
   return (
     <div className={styles.header}>
@@ -174,7 +174,7 @@ const ListPools = memo<{
             width: 420,
             background: '#1E1E21',
             borderRadius: '8px',
-            padding: '10px',
+            padding: '10px'
           }}
         />
         {/* <div
@@ -218,12 +218,12 @@ const Pools: React.FC<PoolsProps> = () => {
     try {
       const [fromTokenInfoData, toTokenInfoData] = await Promise.all([
         fetchTokenInfo(fromToken!),
-        fetchTokenInfo(toToken!),
+        fetchTokenInfo(toToken!)
       ]);
 
       const [poolData, infoData] = await Promise.all([
         fetchPoolInfoAmount(fromTokenInfoData, toTokenInfoData),
-        fetchPairInfo([fromTokenInfoData, toTokenInfoData]),
+        fetchPairInfo([fromTokenInfoData, toTokenInfoData])
       ]);
 
       return {
@@ -232,7 +232,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: infoData.commission_rate,
         fromToken,
-        toToken,
+        toToken
       };
     } catch (ex) {
       console.log(ex);
@@ -246,16 +246,28 @@ const Pools: React.FC<PoolsProps> = () => {
     const oraiUsdtPool = poolList.find(
       (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
     );
-    if (!oraiUsdtPool) throw Error('Ust pool not found');
+    const oraiUsdtPoolMilky = poolList.find(
+      (pool) => pool.pair.asset_denoms[0] === MILKY
+    );
+    if (!oraiUsdtPoolMilky || !oraiUsdtPool) {
+      console.warn('pool not found');
+      // retry after
+      return setTimeout(fetchPairInfoDataList, 5000);
+    }
+
     const oraiPrice = new Fraction(
-      oraiUsdtPool?.askPoolAmount,
-      oraiUsdtPool?.offerPoolAmount
+      oraiUsdtPool.askPoolAmount,
+      oraiUsdtPool.offerPoolAmount
     );
 
+    const milkyPrice = new Fraction(
+      oraiUsdtPoolMilky.askPoolAmount,
+      oraiUsdtPoolMilky.offerPoolAmount
+    );
     poolList.forEach((pool) => {
       pool.amount = getUsd(
         2 * pool.offerPoolAmount,
-        oraiPrice,
+        pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice,
         pool.fromToken.decimals
       );
     });

@@ -19,8 +19,11 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1m6q5k5nr2eh8q0rdrf57wr7phk7uvlpg7mwfv5',
-      // contract_addr: '',
       asset_denoms: [ORAI, 'oraix'],
+    },
+    {
+      contract_addr: 'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
+      asset_denoms: [ORAI, 'scorai'],
     },
     {
       contract_addr: 'orai1jf74ry4m0jcy9emsaudkhe7vte9l8qy8enakvs',
@@ -44,11 +47,12 @@ const pairsMap: Record<NetworkKey, Pair[]> = {
     },
     {
       contract_addr: 'orai1d37artrk4tkhz2qyjmaulc2jzjkx7206tmpfug',
-      asset_denoms: [
-        ORAI,
-        process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM
-      ]
-    }
+      asset_denoms: [ORAI, process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM],
+    },
+    {
+      contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
+      asset_denoms: ['milky', STABLE_DENOM],
+    },
   ],
 };
 
@@ -89,7 +93,9 @@ export const getPair = (
 
   return pairs.find(
     (pair) =>
-      pair.asset_denoms[0] === asset_denoms[0] &&
-      pair.asset_denoms[1] === asset_denoms[1]
+      (pair.asset_denoms[0] === asset_denoms[0] &&
+        pair.asset_denoms[1] === asset_denoms[1]) ||
+      (pair.asset_denoms[0] === asset_denoms[1] &&
+        pair.asset_denoms[1] === asset_denoms[0])
   );
 };

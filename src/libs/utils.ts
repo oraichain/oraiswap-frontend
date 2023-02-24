@@ -87,31 +87,17 @@ export const parseDisplayAmount = (
   return '0';
 };
 
-const gcd = (a: any, b: any): any => {
-  return b ? gcd(b, a % b) : a;
-};
-
-export const numberToFraction = function (_decimal: number) {
-  const top = _decimal.toString().replace(/\d+[.]/, '');
-  const bottom = Math.pow(10, top.length);
-  let topNumber = parseInt(top);
-  if (_decimal > 1) {
-    topNumber += Math.floor(_decimal) * bottom;
-  }
-  var x = gcd(top, bottom);
-  return new Fraction(topNumber / x, bottom / x);
-};
-
-(window as any).numberToFraction = numberToFraction;
-
 export const getUsd = (
   amount: number,
-  price: Fraction | null,
+  price: Fraction | number | null,
   decimals: number
 ) => {
   if (!amount || !price) return 0;
 
-  return price.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
+  const fragPrice =
+    typeof price === 'number' ? Fraction.fromNumber(price) : price;
+
+  return fragPrice.multiply(Fraction.fromNumber(amount)).divide(10 ** decimals)
     .asNumber;
 };
 
@@ -135,16 +121,22 @@ export const parseAmountFromWithDecimal = (
 };
 
 export const reduceString = (str: string, from: number, end: number) => {
-  return str ? str.substring(0, from) + " ... " + str.substring(str.length - end) : "-";
+  return str
+    ? str.substring(0, from) + ' ... ' + str.substring(str.length - end)
+    : '-';
 };
 
 export const parseBep20Erc20Name = (name: string) => {
   return name.replace(/(BEP20|ERC20)\s+/, '');
-}
+};
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   var messages: any[] = mainMsg ? [mainMsg] : [];
   messages.unshift(...preMessages.flat(1));
-  messages = messages.map(msg => ({ contractAddress: msg.contract, handleMsg: msg.msg.toString(), handleOptions: { funds: msg.sent_funds } }));
+  messages = messages.map((msg) => ({
+    contractAddress: msg.contract,
+    handleMsg: msg.msg.toString(),
+    handleOptions: { funds: msg.sent_funds }
+  }));
   return messages;
-}
+};

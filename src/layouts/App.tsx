@@ -7,12 +7,17 @@ import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import useGlobalState from 'hooks/useGlobalState';
-import bech32, { fromWords } from 'bech32';
-import { ETH } from '@hanchon/ethermint-address-converter';
+import { useEagerConnect } from 'hooks/useMetamask';
+import { isMobile } from '@walletconnect/browser-utils';
+import { ORAICHAIN_ID } from 'config/constants';
 
 const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
+  const [_$, setChainInfo] = useGlobalState('chainInfo');
+  const [_$$,setStatusChangeAccount] = useGlobalState('statusChangeAccount');
+  const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
+  const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -20,25 +25,30 @@ const App = () => {
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue',
+          message: 'You must install Keplr to continue'
         },
         { toastId: 'install_keplr' }
       );
     }
-    
+
     let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
 
+    if (isMobile()) {
+      setInfoEvm({
+        ...infoEvm,
+        chainId: window.ethereum.chainId,
+      });
+    }
+
     if (chainInfos) {
-      const addressEvm = await window.Keplr.getKeplrKey(chainInfos?.chainId);
+      setStatusChangeAccount(false);
       setChainId(chainInfos.chainId);
-      newAddress =
-        chainInfos.networkType === 'evm'
-          ? ETH.encoder(
-              Buffer.from(
-                fromWords(bech32.decode(addressEvm.bech32Address).words)
-              )
-            )
-          : addressEvm.bech32Address;
+      setChainInfo(chainInfos);
+      if (chainInfos?.networkType === 'evm') {
+        window.ethereum.chainId = chainInfos.chainId;
+        setInfoEvm(chainInfos);
+      }
+      if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
     }
 
     if (newAddress) {
@@ -47,10 +57,13 @@ const App = () => {
         setAddress('');
       }
       // finally update new address
+      if (!chainInfos?.chainId) {
+        setStatusChangeAccount(true);
+      }
       setAddress(newAddress as string);
     }
   };
-
+  useEagerConnect(false, true);
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
@@ -63,6 +76,27 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if(window.keplr) {
+      keplrGasPriceCheck();
+    }
+  },[])
+
+  const keplrGasPriceCheck = async () => {
+    try {
+      const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
+      const gasPriceStep = chainInfosWithoutEndpoints.find(e => e.chainId == ORAICHAIN_ID)?.feeCurrencies[0]?.gasPriceStep
+      if (gasPriceStep && !gasPriceStep.low) {
+        displayToast(TToastType.TX_INFO, {
+          message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
+          customLink: "https://www.youtube.com/watch?v=QMqCVUfxDAk"
+        });
+      }
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+  }
+
   const keplrHandler = async (event?: CustomEvent) => {
     try {
       console.log(
@@ -72,8 +106,9 @@ const App = () => {
       // window.location.reload();
     } catch (error) {
       console.log('Error: ', error.message);
+      setStatusChangeAccount(false);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`,
+        message: `There is an unexpected error with Keplr wallet. Please try again!`
       });
     }
   };

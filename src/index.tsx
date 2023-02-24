@@ -10,14 +10,20 @@ import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Metamask from 'libs/metamask';
 import {
   KWT_SUBNETWORK_CHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
+import {
+  CosmWasmClient,
+  SigningCosmWasmClient
+} from '@cosmjs/cosmwasm-stargate';
+import { collectWallet } from 'libs/cosmjs';
+import { GasPrice } from '@cosmjs/stargate';
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -29,50 +35,72 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT) {
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
     integrations: [new BrowserTracing()],
-
+    denyUrls: [
+      /extensions\//i,
+      /extension/i,
+      /^chrome:\/\//i,
+      /^chrome-extension:\/\//i,
+      /^moz-extension:\/\//i,
+    ],
+    ignoreErrors: ['Request rejected'],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 1.0
   });
 }
 
 const startApp = async () => {
   try {
     const keplr = await window.Keplr.getKeplr();
+
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
+      for (const networkId of [
+        network.chainId,
+        ORAI_BRIDGE_CHAIN_ID,
+        KWT_SUBNETWORK_CHAIN_ID
+      ]) {
+        try {
+          await window.Keplr.suggestChain(networkId);
+        } catch (error) {
+          console.log({ error });
+        }
+      }
 
-      await Promise.race([
-        Promise.all([
-          window.Keplr.suggestChain(network.chainId),
-          window.Keplr.suggestChain(ORAI_BRIDGE_CHAIN_ID),
-          window.Keplr.suggestChain(KWT_SUBNETWORK_CHAIN_ID),
-          // window.Keplr.suggestChain(ORAI_BRIDGE_ETHER_CHAIN_ID),
-        ]),
-        new Promise((resolve) => {
-          setTimeout(resolve, 10000);
-        }),
-      ]);
+      const wallet = await collectWallet(network.chainId);
+      window.client = await SigningCosmWasmClient.connectWithSigner(
+        network.rpc,
+        wallet,
+        {
+          prefix: network.prefix,
+          gasPrice: GasPrice.fromString(`0${network.denom}`)
+        }
+      );
+    } else {
+      // can not signer
+      window.client = await CosmWasmClient.connect(network.rpc);
     }
   } catch (ex) {
+    window.client = await CosmWasmClient.connect(network.rpc);
     console.log(ex);
+  } finally {
+    render(
+      <StrictMode>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
+      </StrictMode>,
+      document.getElementById('oraiswap')
+    );
   }
 };
 
 startApp();
-render(
-  <StrictMode>
-    <ToastProvider>
-      <Router>
-        <ScrollToTop />
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </Router>
-      <ToastContainer transition={Bounce} />
-    </ToastProvider>
-  </StrictMode>,
-  document.getElementById('oraiswap')
-);

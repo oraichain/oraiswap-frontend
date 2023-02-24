@@ -3,7 +3,7 @@ import { embedChainInfos } from 'config/chainInfos';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import createHash from 'create-hash';
 import { Bech32Address } from '@keplr-wallet/cosmos';
-import { Key, Keplr as keplr } from '@keplr-wallet/types';
+import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
@@ -31,6 +31,13 @@ export default class Keplr {
     return this.keplr.getOfflineSignerAuto(chainId);
   }
 
+  async getChainInfosWithoutEndpoints(): Promise<Array<{
+    chainId: string,
+    feeCurrencies: FeeCurrency[]
+  }>> {
+    return this.keplr.getChainInfosWithoutEndpoints();
+  }
+
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
     const chainInfo = embedChainInfos.find(
@@ -48,7 +55,8 @@ export default class Keplr {
   }
 
   async suggestToken(token: TokenItemType) {
-    if (token.contractAddress) {
+    // suggestToken is for cosmosBased only
+    if (token.cosmosBased && token.contractAddress) {
       const keplr = await this.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.KEPLR_FAILED, {
@@ -56,7 +64,7 @@ export default class Keplr {
         });
       }
 
-      await keplr.suggestToken(token.chainId, token.contractAddress);
+      await keplr.suggestToken(String(token.chainId), token.contractAddress);
     }
   }
 
