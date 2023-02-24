@@ -1137,9 +1137,9 @@ const Balance: React.FC<BalanceProps> = () => {
               <div className={styles.search_box}>
                 <div className={styles.search_flex}>
                   <div className={styles.search_logo}>
-                    {renderLogoNetwork(filterNetwork)}
+                    {renderLogoNetwork(filterNetwork || ORAICHAIN_ID)}
                   </div>
-                  <span className={styles.search_text}>{filterNetwork}</span>
+                  <span className={styles.search_text}>{filterNetwork || ORAICHAIN_ID}</span>
                 </div>
                 <div>
                   <ArrowDownIcon />
