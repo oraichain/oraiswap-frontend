@@ -30,6 +30,8 @@ import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import FluentAddImg from 'assets/images/fluent_add.svg';
 import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
+import { CacheTokens } from 'libs/token';
+import { useDispatch } from 'react-redux';
 
 const cx = cn.bind(style);
 
@@ -45,7 +47,7 @@ interface ModalProps {
   lpTokenBalance: any;
   pairAmountInfoData: any;
   refetchPairAmountInfo: any;
-
+  fetchCachedLpTokenAll: () => void;
   pairInfoData: any;
 }
 
@@ -59,7 +61,7 @@ const LiquidityModal: FC<ModalProps> = ({
   lpTokenBalance,
   pairAmountInfoData,
   refetchPairAmountInfo,
-
+  fetchCachedLpTokenAll,
   pairInfoData
 }) => {
   const token1 = token1InfoData;
@@ -81,7 +83,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [estimatedLP, setEstimatedLP] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-
+  const dispatch = useDispatch();
   const token1Balance = token1 ? amounts[token1.denom].amount : 0;
   const token2Balance = token2 ? amounts[token2.denom].amount : 0;
 
@@ -166,6 +168,8 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
+    fetchCachedLpTokenAll();
+    CacheTokens.factory({ prices, dispatch, address }).loadTokensCosmos();
   };
 
   const increaseAllowance = async (

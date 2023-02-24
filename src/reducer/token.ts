@@ -4,11 +4,13 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 export interface TokenState {
   amounts: AmountDetails;
   pairs: PairDetails;
+  lpPools: LpPoolDetails;
 }
 
 const initialState: TokenState = {
   amounts: {},
-  pairs: {}
+  pairs: {},
+  lpPools: {}
 };
 
 export const tokenSlice = createSlice({
@@ -30,11 +32,18 @@ export const tokenSlice = createSlice({
     removeToken: (state, action: PayloadAction<AmountDetails>) => {
       state.amounts = {};
       state.pairs = {};
+      state.lpPools = {};
+    },
+    updateLpPools: (state, action: PayloadAction<LpPoolDetails>) => {
+      state.lpPools = {
+        ...state.lpPools,
+        ...action.payload
+      }
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { updateAmounts, updatePairs, removeToken } = tokenSlice.actions;
+export const { updateAmounts, updatePairs, removeToken, updateLpPools } = tokenSlice.actions;
 
 export default tokenSlice.reducer;

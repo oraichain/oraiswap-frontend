@@ -26,8 +26,10 @@ import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Contract } from 'config/contracts';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { updateLpPools } from 'reducer/token';
 
 const cx = cn.bind(styles);
 
@@ -41,9 +43,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useConfigReducer('address');
-  const [lpTokenAll,setLpTokenAll] = useState('0');
-  const amounts = useSelector((state: RootState) => state.token.amounts);
   const [assetToken, setAssetToken] = useState<TokenItemType>();
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const dispatch = useDispatch();
+  const setCachedLpPools = (payload: LpPoolDetails) =>
+    dispatch(updateLpPools(payload));
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
@@ -67,6 +71,36 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       token2,
       apr
     };
+  };
+
+  useEffect(() => {
+    fetchCachedLpTokenAll();
+  }, []);
+
+  const fetchCachedLpTokenAll = async () => {
+    const queries = pairs.map((pair) => ({
+      address: pair.liquidity_token,
+      data: toBinary({
+        balance: {
+          address
+        }
+      })
+    }));
+
+    const res = await Contract.multicall.aggregate({
+      queries
+    });
+
+    const lpTokenData = Object.fromEntries(
+      pairs.map((pair, ind) => {
+        const data = res.return_data[ind];
+        if (!data.success) {
+          return [pair.liquidity_token, {}];
+        }
+        return [pair.liquidity_token, fromBinary(data.data)];
+      })
+    );
+    setCachedLpPools(lpTokenData);
   };
 
   const getPairAmountInfo = async () => {
@@ -159,24 +193,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  useEffect(() => {
-    if (!!lpTokenAll) {
-      fetchLpTokenAll();
-    }
-  }, [pairInfoData])
-
-  const fetchLpTokenAll = async () => {
-    try {
-      const lpTokenAllContract = await Contract.token(pairInfoData?.liquidity_token).balance({ address: address });
-      setLpTokenAll(lpTokenAllContract?.balance)
-    } catch (error) {
-      console.log({ error });
-      setLpTokenAll('0')
-    }
-  }
-
   const lpTokenBalance = pairInfoData
-    ? +lpTokenAll ?? 0
+    ? +lpPools[pairInfoData.liquidity_token]?.balance ?? 0
     : 0;
 
   const { data: lpTokenInfoData } = useQuery(
@@ -237,7 +255,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     ? (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply
     : 0;
 
-  const rewardInfoFirst = !!totalRewardInfoData?.reward_infos.length
+  const rewardInfoFirst = !!totalRewardInfoData?.reward_infos?.length
     ? totalRewardInfoData?.reward_infos[0]
     : 0;
   const bondAmountUsd = rewardInfoFirst
@@ -456,6 +474,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData}
+                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
               />
             )}
           {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (

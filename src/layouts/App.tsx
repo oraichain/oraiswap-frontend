@@ -17,6 +17,8 @@ import {
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
+import { useDispatch } from 'react-redux';
+import { removeToken } from 'reducer/token';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -25,6 +27,7 @@ const App = () => {
   const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
   const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const dispatch = useDispatch();
   const updateAddress = async (chainInfo: ChainInfoType) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -55,6 +58,9 @@ const App = () => {
     }
 
     if (newAddress) {
+      if (newAddress !== address) {
+        dispatch(removeToken());
+      }
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
         setAddress('');
