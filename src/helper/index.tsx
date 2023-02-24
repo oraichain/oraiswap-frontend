@@ -210,14 +210,3 @@ export const handleCheckWallet = async () => {
     });
   }
 };
-
-export const handleLedgerDevice = async () => {
-  const keplr = await window.Keplr.getKeplr();
-  const key = await keplr.getKey(network.chainId);
-  if (key.isNanoLedger) {
-    displayToast(TToastType.TX_FAILED, {
-      message: 'Ethereum signing with Ledger is not yet supported!'
-    });
-    return;
-  }
-};

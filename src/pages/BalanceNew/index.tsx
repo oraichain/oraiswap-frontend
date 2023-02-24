@@ -5,7 +5,6 @@ import {
   calSumAmounts,
   getNetworkGasPrice,
   handleCheckWallet,
-  handleLedgerDevice,
   networks
 } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -594,8 +593,16 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('to token: ', toToken);
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       await handleCheckWallet();
+      
       // disable Oraichain -> Oraibridge Ledger
-      await handleLedgerDevice();
+      // const keplr = await window.Keplr.getKeplr();
+      // const key = await keplr.getKey(network.chainId);
+      // if (key.isNanoLedger) {
+      //   displayToast(TToastType.TX_FAILED, {
+      //     message: 'Ethereum signing with Ledger is not yet supported!'
+      //   });
+      //   return;
+      // }
 
       await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
