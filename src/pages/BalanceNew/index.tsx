@@ -55,7 +55,6 @@ import {
   buildMultipleMessages,
   getEvmAddress,
   getFunctionExecution,
-  getUsd,
   toAmount,
   parseBep20Erc20Name,
   toDisplay

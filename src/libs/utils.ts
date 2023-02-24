@@ -59,14 +59,6 @@ export const toAmount = (amount: number, decimals: number): BigInt => {
   return BigInt(Math.round(validatedAmount * 10 ** decimals));
 };
 
-export const getUsd = (
-  amount: number | string | BigInt,
-  price: number,
-  decimals: number
-): number => {
-  return toDisplay(amount, decimals) * price;
-};
-
 export const toDisplay = (
   amount: number | string | BigInt,
   sourceDecimals = 6,

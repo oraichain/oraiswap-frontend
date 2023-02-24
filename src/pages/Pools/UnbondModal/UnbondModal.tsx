@@ -1,11 +1,7 @@
 import React, { FC, useState } from 'react';
-import ReactModal from 'react-modal';
 import Modal from 'components/Modal';
-import { TooltipIcon } from 'components/Tooltip';
 import style from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
-import { filteredTokens } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';

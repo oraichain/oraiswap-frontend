@@ -211,11 +211,9 @@ function getSubAmount(
       );
       subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
         amount: parsedBalance,
-        usd: getUsd(
-          parsedBalance,
-          prices[tokenInfo.coingeckoId] ?? 0,
-          mapping.decimals.cw20Decimals
-        )
+        usd:
+          toDisplay(parsedBalance, mapping.decimals.cw20Decimals) *
+            prices[tokenInfo.coingeckoId] ?? 0
       };
     }
   }

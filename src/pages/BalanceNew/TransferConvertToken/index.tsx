@@ -4,12 +4,7 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import {
-  toDisplay,
-  toAmount,
-  parseBep20Erc20Name,
-  reduceString
-} from 'libs/utils';
+import { toDisplay, reduceString } from 'libs/utils';
 import Loader from 'components/Loader';
 import {
   KWT_SUBNETWORK_CHAIN_ID,

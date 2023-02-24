@@ -14,7 +14,7 @@ import {
 } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, getUsd } from 'libs/utils';
+import { buildMultipleMessages } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
@@ -135,11 +135,9 @@ const LiquidityModal: FC<ModalProps> = ({
   }, [JSON.stringify(pairAmountInfoData)]);
 
   const getValueUsd = (token: any, amount: number | string) => {
-    let t = getUsd(
-      amount,
-      prices[token!.coingeckoId as PriceKey],
-      token!.decimals
-    );
+    let t =
+      toDisplay(amount, token!.decimals) *
+      prices[token!.coingeckoId as PriceKey];
     return t;
   };
 
