@@ -56,7 +56,7 @@ import {
   getEvmAddress,
   getFunctionExecution,
   getUsd,
-  parseAmountToWithDecimal,
+  toAmount,
   parseBep20Erc20Name
 } from 'libs/utils';
 import {
@@ -510,7 +510,7 @@ const Balance: React.FC<BalanceProps> = () => {
     ibcMemo?: string;
   }) => {
     amount = coin(
-      parseAmountToWithDecimal(
+      toAmount(
         transferAmount,
         fromToken.erc20Cw20Map[0].decimals.erc20Decimals
       ).toString(),
@@ -613,7 +613,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       let amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
       const ibcMemo =
@@ -727,7 +727,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       var amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 
@@ -807,7 +807,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom == 'erc20_milky'
           ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
@@ -971,7 +971,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const _fromAmount = parseAmountToWithDecimal(
+      const _fromAmount = toAmount(
         amount,
         token.decimals
       ).toString();
@@ -1062,7 +1062,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 

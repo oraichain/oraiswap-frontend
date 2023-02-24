@@ -18,7 +18,7 @@ import {
 } from 'rest/api';
 
 import { TokenItemType } from 'config/bridgeTokens';
-import { getUsd, parseAmount } from 'libs/utils';
+import { getUsd, toAmount } from 'libs/utils';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';

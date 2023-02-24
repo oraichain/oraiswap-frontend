@@ -7,8 +7,8 @@ import axios from './request';
 import { TokenInfo } from 'types/token';
 import {
   getUsd,
-  parseAmountFromWithDecimal,
-  parseAmountToWithDecimal
+  toDisplay,
+  toAmount
 } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
@@ -209,8 +209,8 @@ function getSubAmount(
       if (!amounts[mapping.erc20Denom]) continue;
       const balance = amounts[mapping.erc20Denom].amount;
       // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
-      const parsedBalance = parseAmountToWithDecimal(
-        parseAmountFromWithDecimal(balance, mapping.decimals.erc20Decimals),
+      const parsedBalance = toAmount(
+        toDisplay(balance, mapping.decimals.erc20Decimals),
         mapping.decimals.cw20Decimals
       );
       subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {

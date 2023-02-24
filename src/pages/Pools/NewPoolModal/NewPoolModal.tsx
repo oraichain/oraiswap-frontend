@@ -8,7 +8,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
 import { poolTokens } from 'config/pools';
@@ -207,7 +207,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+                toDisplay(token1Balance, token1InfoData?.decimals)
               )
             }
           >
@@ -217,7 +217,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                parseDisplayAmount(token1Balance / 2, token1InfoData?.decimals)
+                toDisplay(token1Balance / 2, token1InfoData?.decimals)
               )
             }
           >
@@ -226,7 +226,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={getBalanceValue(
               token1InfoData?.symbol ?? '',
-              parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+              toDisplay(token1Balance, token1InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
@@ -272,7 +272,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+                toDisplay(token2Balance, token2InfoData?.decimals)
               )
             }
           >
@@ -282,7 +282,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                parseDisplayAmount(token2Balance / 2, token2InfoData?.decimals)
+                toDisplay(token2Balance / 2, token2InfoData?.decimals)
               )
             }
           >
@@ -291,7 +291,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={getBalanceValue(
               token2InfoData?.symbol ?? '',
-              parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+              toDisplay(token2Balance, token2InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}

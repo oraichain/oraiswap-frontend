@@ -5,8 +5,8 @@ import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import {
-  parseAmountFromWithDecimal,
-  parseAmountToWithDecimal,
+  toDisplay,
+  toAmount,
   parseBep20Erc20Name,
   reduceString
 } from 'libs/utils';
@@ -104,7 +104,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   );
   const subAmount = getSubAmount(amounts, token, prices);
   const subCalAmount = calSumAmounts(subAmount, 'amount');
-  const maxAmount = parseAmountFromWithDecimal(
+  const maxAmount = toDisplay(
     amountDetail ? amountDetail.amount + subCalAmount : 0, // amount detail here can be undefined
     token?.decimals
   );
@@ -236,7 +236,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const _floatValue = parseAmountToWithDecimal(
+                  const _floatValue = toAmount(
                     floatValue!,
                     token?.decimals
                   );

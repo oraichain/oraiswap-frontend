@@ -7,7 +7,7 @@ import cn from 'classnames/bind';
 import { filteredTokens } from 'config/bridgeTokens';
 import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -46,7 +46,7 @@ const UnbondModal: FC<ModalProps> = ({
   const [address] = useConfigReducer('address');
 
   const handleUnbond = async (amount: number) => {
-    const parsedAmount = +parseAmount(
+    const parsedAmount = +toAmount(
       amount.toString(),
       lpTokenInfoData!.decimals
     );

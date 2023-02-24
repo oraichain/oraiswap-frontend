@@ -16,7 +16,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { buildMultipleMessages, getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
@@ -147,7 +147,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setRecentInput(1);
     setAmountToken1(floatValue);
     setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
-    const amount1 = +parseAmount(floatValue, token1InfoData!.decimals);
+    const amount1 = +toAmount(floatValue, token1InfoData!.decimals);
     const estimatedLP =
       (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
       +lpTokenInfoData.total_supply;
@@ -159,7 +159,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken2(floatValue);
     setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
 
-    const amount2 = +parseAmount(floatValue, token2InfoData!.decimals);
+    const amount2 = +toAmount(floatValue, token2InfoData!.decimals);
     const estimatedLP =
       (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
       +lpTokenInfoData.total_supply;
@@ -344,7 +344,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const onChangeWithdrawPercent = (option: number) => {
     setLpAmountBurn(
-      +parseDisplayAmount(
+      +toDisplay(
         ((option * lpTokenBalance) / 100).toString(),
         lpTokenInfoData?.decimals ?? 0
       )
@@ -373,7 +373,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                parseDisplayAmount(
+                toDisplay(
                   token1Balance,
                   token1InfoData?.decimals ?? 0
                 ).toString()
@@ -386,7 +386,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                parseDisplayAmount(
+                toDisplay(
                   (token1Balance / 2)?.toString(),
                   token1InfoData?.decimals ?? 0
                 ).toString()
@@ -444,7 +444,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                parseDisplayAmount(
+                toDisplay(
                   token2Balance,
                   token2InfoData?.decimals ?? 0
                 ).toString()
@@ -457,7 +457,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                parseDisplayAmount(
+                toDisplay(
                   (token2Balance / 2)?.toString(),
                   token2InfoData?.decimals ?? 0
                 ).toString()
@@ -536,11 +536,11 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = +parseAmount(
+        const amount1 = +toAmount(
             amountToken1.toString(),
             token1InfoData!.decimals
           ),
-          amount2 = +parseAmount(
+          amount2 = +toAmount(
             amountToken2.toString(),
             token2InfoData!.decimals
           );
@@ -724,7 +724,7 @@ const LiquidityModal: FC<ModalProps> = ({
         )}
       </div>
       {(() => {
-        const amount = +parseAmount(
+        const amount = +toAmount(
           lpAmountBurn.toString(),
           lpTokenInfoData!.decimals
         );

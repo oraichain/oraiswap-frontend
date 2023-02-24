@@ -4,9 +4,9 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import {
   buildMultipleMessages,
-  parseAmount,
-  parseAmountToWithDecimal,
-  parseDisplayAmount
+  toAmount,
+  toAmount,
+  toDisplay
 } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { contracts } from 'libs/contracts';
@@ -69,7 +69,7 @@ const SwapComponent: React.FC<{
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(
-      parseDisplayAmount(amount, fromTokenInfoData?.decimals) as string
+      toDisplay(amount, fromTokenInfoData?.decimals) as string
     );
     setSwapAmount([finalAmount, toAmount]);
   };
@@ -117,7 +117,7 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
+        amount: toAmount(fromAmount, fromTokenInfoData!.decimals)
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
   );
@@ -129,7 +129,7 @@ const SwapComponent: React.FC<{
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData!.decimals)
+          amount: toAmount('1', fromTokenInfoData!.decimals)
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -138,7 +138,7 @@ const SwapComponent: React.FC<{
     console.log('simulate average data: ', simulateAverageData);
     setAverageRatio(
       parseFloat(
-        parseDisplayAmount(
+        toDisplay(
           simulateAverageData?.amount,
           toTokenInfoData?.decimals
         )
@@ -150,7 +150,7 @@ const SwapComponent: React.FC<{
     setSwapAmount([
       fromAmount,
       parseFloat(
-        parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
+        toDisplay(simulateData?.amount, toTokenInfoData?.decimals)
       )
     ]);
   }, [simulateData]);
@@ -164,7 +164,7 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      var _fromAmount = parseAmountToWithDecimal(
+      var _fromAmount = toAmount(
         fromAmount,
         fromTokenInfoData.decimals
       ).toString();

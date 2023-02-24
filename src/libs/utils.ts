@@ -71,56 +71,50 @@ export const getEvmAddress = (bech32Address: string) => {
   return evmAddress;
 };
 
-export const parseAmount = (value: string | number, decimal: number = 6) => {
-  if (!value) return '0';
-  return `${(
-    (typeof value === 'string' ? parseFloat(value) : value) *
-    Math.pow(10, decimal)
-  ).toFixed(0)}`;
-};
+//duplicate
+// export const toAmount = (displayValue: string | number, decimal: number = 6) => {
+//   if (!value) return '0';
+//   return `${(
+//     (typeof value === 'string' ? parseFloat(value) : value) *
+//     Math.pow(10, decimal)
+//   ).toFixed(0)}`;
+// };
 
-export const parseDisplayAmount = (
-  value: string | number,
-  decimal: number = 6
-) => {
-  if (value)
-    return `${(
-      (typeof value === 'string' ? parseFloat(value) : value) /
-      Math.pow(10, decimal)
-    ).toFixed(6)}`;
-  return '0';
-};
+// //duplicate
+// export const toDisplay = (
+//   value: string | number,
+//   decimal: number = 6
+// ) => {
+//   if (value)
+//     return `${(
+//       (typeof value === 'string' ? parseFloat(value) : value) /
+//       Math.pow(10, decimal)
+//     ).toFixed(6)}`;
+//   return '0';
+// };
 
 export const getUsd = (
-  amount: number,
+  amount: number|BigInt,
   price: number | null,
   decimals: number
-) => {
+):number => {
   if (!amount || !price) return 0;
-
-  return (
-    Number(
-      (BigInt(Math.round(price * atomics * amount))) /
-        BigInt(10 ** decimals)
-    ) / atomics
-  );
+  return  price  * (Number(amount) / (10 ** decimals));
 };
 
-export const parseBalanceNumber = (balance: number): number => {
-  if (isFinite(balance) && !isNaN(balance)) return balance;
-  else return 0;
-};
-export const parseAmountToWithDecimal = (
+// export const toAmount = (balance: number): number => {
+//   if (isFinite(balance) && !isNaN(balance)) return balance;
+//   else return 0;
+// };
+export const toAmount = (
   amount: number,
   decimals: number
-): number => {
-  return (
-    Number(BigInt(Math.round(amount * atomics)) * BigInt(10 ** decimals)) /
-    atomics
-  );
+): BigInt => {
+  if (Number.isNaN(amount) || !Number.isFinite(amount)) return BigInt(0);
+  return BigInt(Math.round(amount * 10 ** decimals));
 };
 
-export const parseAmountFromWithDecimal = (
+export const toDisplay = (
   amount: number | string,
   sourceDecimals = 6,
   desDecimals = 6
