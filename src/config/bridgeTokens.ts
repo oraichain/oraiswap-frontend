@@ -51,16 +51,6 @@ import {
   USDT_BSC_CONTRACT
 } from './constants';
 
-export type Erc20Cw20Map = {
-  prefix: string;
-  description: string;
-  decimals: {
-    erc20Decimals: number;
-    cw20Decimals: number;
-  };
-  erc20Denom: string;
-};
-
 export type TokenItemType = {
   name: string;
   org?:
@@ -74,7 +64,7 @@ export type TokenItemType = {
   denom: string;
   prefix?: string;
   contractAddress?: string;
-  erc20Cw20Map?: Erc20Cw20Map[];
+  evmDenoms?: string[];
   bridgeNetworkIdentifier?: string;
   bridgeTo?: Array<string>;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
@@ -388,6 +378,18 @@ const oraichainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: ATOMCOSMOS
   },
+  {
+    name: 'BEP20 AIRI',
+    org: ORAICHAIN_ID,
+    coingeckoId: 'airight',
+    denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+    decimals: EVM_DECIMALS,
+    coinType: 118,
+    chainId: ORAICHAIN_ID,
+    rpc: ORAI_RPC,
+    cosmosBased: true,
+    Icon: AIRI
+  },
 
   {
     name: 'AIRI',
@@ -396,17 +398,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'airight',
     denom: 'airi',
     contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
-      }
-    ],
+    evmDenoms: [process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM],
     bridgeTo: [BSC_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
@@ -445,6 +437,18 @@ const oraichainTokens: TokenItemType[] = [
     Icon: OSMO
   },
   {
+    name: 'BEP20 KWT',
+    org: ORAICHAIN_ID,
+    coingeckoId: 'kawaii-islands',
+    denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+    decimals: EVM_DECIMALS,
+    coinType: 118,
+    chainId: ORAICHAIN_ID,
+    rpc: ORAI_RPC,
+    cosmosBased: true,
+    Icon: KWT
+  },
+  {
     name: 'KWT',
     org: ORAICHAIN_ID,
     prefix: 'orai',
@@ -452,23 +456,25 @@ const oraichainTokens: TokenItemType[] = [
     denom: 'kwt',
     contractAddress: process.env.REACT_APP_KWT_CONTRACT,
     bridgeTo: [KAWAII_ORG, BSC_ORG],
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM
-      }
-    ],
+    evmDenoms: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
     Icon: KWT
+  },
+  {
+    name: 'BEP20 MILKY',
+    org: ORAICHAIN_ID,
+    coingeckoId: 'milky-token',
+    denom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
+    decimals: EVM_DECIMALS,
+    coinType: 118,
+    chainId: ORAICHAIN_ID,
+    rpc: ORAI_RPC,
+    cosmosBased: true,
+    Icon: MILKY
   },
   {
     name: 'MILKY',
@@ -478,17 +484,7 @@ const oraichainTokens: TokenItemType[] = [
     denom: 'milky',
     contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
     bridgeTo: [KAWAII_ORG, BSC_ORG],
-    erc20Cw20Map: [
-      {
-        prefix: 'BEP20',
-        description: 'Ibc token from BNB chain',
-        decimals: {
-          erc20Decimals: EVM_DECIMALS,
-          cw20Decimals: COSMOS_DECIMALS
-        },
-        erc20Denom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM
-      }
-    ],
+    evmDenoms: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -532,16 +528,6 @@ const flattenTokens = flatten(tokens);
 export const tokenMap = Object.fromEntries(
   flattenTokens.map((c) => [c.denom, c])
 );
-
-export const decimalsMap: { [key: string]: number } = {};
-for (const token of flattenTokens) {
-  decimalsMap[token.denom] = token.decimals;
-  if (token.erc20Cw20Map) {
-    for (const mapping of token.erc20Cw20Map) {
-      decimalsMap[mapping.erc20Denom] = mapping.decimals.erc20Decimals;
-    }
-  }
-}
 
 export const filteredTokens = uniqBy(
   flattenTokens.filter(

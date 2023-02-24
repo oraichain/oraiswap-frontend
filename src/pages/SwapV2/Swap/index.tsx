@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { buildMultipleMessages, toAmount, toDisplay } from 'libs/utils';
+import {
+  buildMultipleMessages,
+  toAmount,
+  toDisplay,
+  toSubAmount
+} from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { contracts } from 'libs/contracts';
 import { filteredTokens, tokenMap } from 'config/bridgeTokens';
@@ -11,7 +16,7 @@ import {
   fetchTokenInfo,
   generateContractMessages,
   generateConvertErc20Cw20Message,
-  getSubAmount,
+  getSubAmountDetails,
   simulateSwap,
   SwapQuery,
   Type
@@ -30,7 +35,6 @@ import Loader from 'components/Loader';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { calSumAmounts } from 'helper';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
 
@@ -93,8 +97,8 @@ const SwapComponent: React.FC<{
 
   console.log({ fromToken, toToken });
 
-  const subAmountFrom = Number(getSubAmount(amounts, fromToken));
-  const subAmountTo = Number(getSubAmount(amounts, toToken));
+  const subAmountFrom = Number(toSubAmount(amounts, fromToken));
+  const subAmountTo = Number(toSubAmount(amounts, toToken));
   const fromTokenBalance = fromToken
     ? Number(amounts[fromToken.denom]) + subAmountFrom ?? 0
     : 0;

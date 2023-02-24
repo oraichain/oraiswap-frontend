@@ -23,12 +23,10 @@ import {
   filterChainBridge,
   networks,
   renderLogoNetwork,
-  getTokenChain,
-  calSumAmounts
+  getTokenChain
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 import Input from 'components/Input';
-import { getSubAmount } from 'rest/api';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';

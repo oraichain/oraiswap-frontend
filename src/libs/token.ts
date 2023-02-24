@@ -5,7 +5,8 @@ import {
   evmTokens,
   filteredTokens,
   kawaiiTokens,
-  TokenItemType
+  TokenItemType,
+  tokenMap
 } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
@@ -60,28 +61,12 @@ export class CacheTokens {
 
   private async loadNativeBalance(address: string, rpc: string) {
     const client = await StargateClient.connect(rpc);
-    let erc20MapTokens = [];
-    for (let token of filteredTokens) {
-      if (token.contractAddress && token.erc20Cw20Map) {
-        erc20MapTokens = erc20MapTokens.concat(
-          token.erc20Cw20Map.map((t) => ({
-            denom: t.erc20Denom,
-            coingeckoId: token.coingeckoId,
-            decimals: t.decimals.erc20Decimals
-          }))
-        );
-      }
-    }
-    const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
     const amountAll = await client.getAllBalances(address);
-    let amountDetails: AmountDetails = {};
-    for (const token of filteredTokensWithErc20Map) {
-      const foundToken = amountAll.find((t) => token.denom === t.denom);
-      if (!foundToken) continue;
-      const amount = foundToken.amount;
-      const displayAmount = toDisplay(amount, token.decimals);
-      amountDetails[token.denom] = foundToken.amount;
-    }
+    let amountDetails: AmountDetails = Object.fromEntries(
+      amountAll
+        .filter((coin) => tokenMap[coin.denom])
+        .map((coin) => [coin.denom, coin.amount])
+    );
     console.log('loadNativeBalance', address);
     this.forceUpdate(amountDetails);
   }

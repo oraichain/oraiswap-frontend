@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
 
@@ -76,23 +76,22 @@ const TokenItem: React.FC<TokenItemProps> = ({
                   <div className={styles.tooltipAmount}>
                     {Object.keys(subAmounts).map((denom, idx) => {
                       const subAmount = subAmounts[denom] ?? '0';
-                      const description = token.erc20Cw20Map[idx].prefix;
-
+                      const evmToken = tokenMap[denom];
                       return (
                         <div key={idx} className={styles.row}>
                           <div>
                             <div className={styles.description}>
-                              ({description})
+                              ({evmToken.name})
                             </div>
                           </div>
                           <TokenBalance
                             balance={{
                               amount: subAmount,
                               denom: token.denom,
-                              decimals: token.decimals
+                              decimals: evmToken.decimals
                             }}
                             className={styles.tokenAmount}
-                            decimalScale={Math.min(6, token.decimals)}
+                            decimalScale={token.decimals}
                           />
                         </div>
                       );

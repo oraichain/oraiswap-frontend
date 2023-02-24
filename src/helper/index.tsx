@@ -42,7 +42,6 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
-import sumBy from 'lodash/sumBy';
 import { FeeCurrency } from '@keplr-wallet/types';
 
 interface Items {
@@ -197,10 +196,6 @@ export const getNetworkGasPrice = async () => {
     );
     return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;
   }
-};
-
-export const calSumAmounts = (amounts: AmountDetails) => {
-  return sumBy(Object.values(amounts), Number);
 };
 
 export const handleCheckWallet = async () => {
