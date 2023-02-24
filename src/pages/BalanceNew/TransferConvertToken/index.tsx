@@ -240,9 +240,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     floatValue!,
                     token?.decimals
                   );
+                  if (!amountDetail?.amount) return 0;
                   const usdValue =
-                    (_floatValue / (amountDetail?.amount ?? 0)) *
-                    (amountDetail?.usd ?? 0);
+                    (_floatValue / amountDetail.amount) *
+                    (amountDetail.usd ?? 0);
 
                   setConvertAmount([floatValue!, usdValue]);
                 }}
