@@ -137,9 +137,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
               {address && (
                 <div className={styles.token_info}>
                   {/* <AvatarPlaceholder
-                    address={address}
-                    className={styles.token_avatar}
-                  /> */}
+                      address={address}
+                      className={styles.token_avatar}
+                    /> */}
                   {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
                     <KwtIcon className={styles.token_avatar} />
                   )}
