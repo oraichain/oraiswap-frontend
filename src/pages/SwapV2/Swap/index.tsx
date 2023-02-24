@@ -32,11 +32,12 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
 import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { calSumAmounts } from 'helper';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
+import { CacheTokens } from 'libs/token';
 
 const cx = cn.bind(styles);
 
@@ -52,6 +53,7 @@ const SwapComponent: React.FC<{
     undefined,
     undefined
   ]);
+  const dispatch = useDispatch();
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
   const [address] = useConfigReducer('address');
@@ -205,6 +207,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        CacheTokens.factory({ prices, dispatch, address }).loadTokensCosmos();
         setSwapLoading(false);
       }
     } catch (error) {
