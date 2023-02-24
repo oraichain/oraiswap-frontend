@@ -54,11 +54,9 @@ import {
   getFunctionExecution,
   toAmount,
   parseBep20Erc20Name,
-  toDisplay,
   getUsd,
   getTotalUsd,
   toSumDisplay,
-  toSubDisplay,
   toTotalDisplay
 } from 'libs/utils';
 import {
@@ -293,10 +291,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
-        const amount = balanceRes.balance;
-        const displayAmount = toDisplay(amount, token.decimals);
-
-        return [token.denom, amount];
+        return [token.denom, balanceRes.balance];
       })
     );
 
@@ -562,7 +557,7 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('to token: ', toToken);
       if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
       await handleCheckWallet();
-      
+
       // disable Oraichain -> Oraibridge Ledger
       // const keplr = await window.Keplr.getKeplr();
       // const key = await keplr.getKey(network.chainId);
