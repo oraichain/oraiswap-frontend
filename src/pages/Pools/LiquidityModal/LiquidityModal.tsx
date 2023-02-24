@@ -145,7 +145,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setRecentInput(1);
     setAmountToken1(floatValue);
     setAmountToken2(floatValue / pairAmountInfoData?.ratio);
-    const amount1 = +toAmount(floatValue, token1InfoData!.decimals);
+    const amount1 = floatValue ? Number(toAmount(+floatValue, token1InfoData!.decimals)) : 0;
     const estimatedLP =
       (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
       +lpTokenInfoData.total_supply;
@@ -157,7 +157,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken2(floatValue);
     setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
-    const amount2 = +toAmount(floatValue, token2InfoData!.decimals);
+    const amount2 = floatValue ? Number(toAmount(+floatValue, token2InfoData!.decimals)) : 0;
     const estimatedLP =
       (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
       +lpTokenInfoData.total_supply;
@@ -234,12 +234,14 @@ const LiquidityModal: FC<ModalProps> = ({
       const firstTokenConverts = await generateConvertErc20Cw20Message(
         amounts,
         token1,
-        address
+        address,
+        prices
       );
       const secTokenConverts = await generateConvertErc20Cw20Message(
         amounts,
         token2,
-        address
+        address,
+        prices
       );
 
       const msgs = await generateContractMessages({
@@ -528,8 +530,8 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = +toAmount(amountToken1, token1InfoData!.decimals),
-          amount2 = +toAmount(amountToken2, token2InfoData!.decimals);
+        const amount1 = amountToken1 ? Number(toAmount(+amountToken1, token1InfoData!.decimals)) : 0,
+          amount2 = amountToken2 ? Number(toAmount(+amountToken2, token2InfoData!.decimals)) : 0;
         let disableMsg: string;
         if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
         if (amount1 > token1Balance)
@@ -710,7 +712,7 @@ const LiquidityModal: FC<ModalProps> = ({
         )}
       </div>
       {(() => {
-        const amount = +toAmount(lpAmountBurn, lpTokenInfoData!.decimals);
+        const amount = lpAmountBurn ? Number(toAmount(+lpAmountBurn, lpTokenInfoData!.decimals)) : 0;
         let disableMsg: string;
         if (amount <= 0) disableMsg = 'Enter an amount';
         if (amount > lpTokenBalance)
