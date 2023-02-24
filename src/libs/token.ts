@@ -5,7 +5,8 @@ import {
   evmTokens,
   filteredTokens,
   kawaiiTokens,
-  TokenItemType
+  TokenItemType,
+  tokenMap
 } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
@@ -60,31 +61,12 @@ export class CacheTokens {
 
   private async loadNativeBalance(address: string, rpc: string) {
     const client = await StargateClient.connect(rpc);
-    let erc20MapTokens = [];
-    for (let token of filteredTokens) {
-      if (token.contractAddress && token.erc20Cw20Map) {
-        erc20MapTokens = erc20MapTokens.concat(
-          token.erc20Cw20Map.map((t) => ({
-            denom: t.erc20Denom,
-            coingeckoId: token.coingeckoId,
-            decimals: t.decimals.erc20Decimals
-          }))
-        );
-      }
-    }
-    const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
     const amountAll = await client.getAllBalances(address);
-    let amountDetails: AmountDetails = {};
-    for (const token of filteredTokensWithErc20Map) {
-      const foundToken = amountAll.find((t) => token.denom === t.denom);
-      if (!foundToken) continue;
-      const amount = foundToken.amount;
-      const displayAmount = toDisplay(amount, token.decimals);
-      amountDetails[token.denom] = {
-        amount: foundToken.amount,
-        usd: displayAmount * (this.prices[token.coingeckoId] ?? 0)
-      };
-    }
+    let amountDetails: AmountDetails = Object.fromEntries(
+      amountAll
+        .filter((coin) => tokenMap[coin.denom])
+        .map((coin) => [coin.denom, coin.amount])
+    );
     console.log('loadNativeBalance', address);
     this.forceUpdate(amountDetails);
   }
@@ -106,20 +88,14 @@ export class CacheTokens {
     const amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {
         if (!res.return_data[ind].success) {
-          return [t.denom, { amount: 0, usd: 0 }];
+          return [t.denom, 0];
         }
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
         const amount = balanceRes.balance;
         const displayAmount = toDisplay(amount, t.decimals);
-        return [
-          t.denom,
-          {
-            amount,
-            usd: displayAmount * (this.prices[t.coingeckoId] ?? 0)
-          }
-        ];
+        return [t.denom, amount];
       })
     );
     this.forceUpdate(amountDetails);
@@ -131,7 +107,7 @@ export class CacheTokens {
     rpc: string,
     chainId: number,
     multicallCustomContractAddress?: string
-  ): Promise<[string, AmountDetail][]> {
+  ): Promise<[string, string][]> {
     const multicall = new Multicall({
       nodeUrl: rpc,
       multicallCustomContractAddress,
@@ -155,13 +131,7 @@ export class CacheTokens {
       const amount =
         results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
       const displayAmount = toDisplay(amount, token.decimals);
-      return [
-        token.denom,
-        {
-          amount,
-          usd: (this.prices[token.coingeckoId] ?? 0) * displayAmount
-        } as AmountDetail
-      ];
+      return [token.denom, amount];
     });
   }
 

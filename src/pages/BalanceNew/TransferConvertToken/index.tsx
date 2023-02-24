@@ -23,12 +23,10 @@ import {
   filterChainBridge,
   networks,
   renderLogoNetwork,
-  getTokenChain,
-  calSumAmounts
+  getTokenChain
 } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
 import Input from 'components/Input';
-import { getSubAmount } from 'rest/api';
 import { RootState } from 'store/configure';
 import { useSelector } from 'react-redux';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -42,7 +40,7 @@ const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
 
 interface TransferConvertProps {
   token: TokenItemType;
-  amountDetail?: AmountDetail;
+  amountDetail?: [string, number];
   convertToken?: any;
   transferIBC?: any;
   convertKwt?: any;
@@ -84,6 +82,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     getAddressTransfer(findNetwork);
   }, [token?.chainId]);
 
+  const [amount, usd] = amountDetail;
   const name = token.name;
   const ibcConvertToken = filteredTokens.filter(
     (t) =>
@@ -98,7 +97,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   );
   const maxAmount = toDisplay(
-    amountDetail ? amountDetail.amount : 0, // amount detail here can be undefined
+    amount, // amount detail here can be undefined
     token?.decimals
   );
 
@@ -252,11 +251,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   className={styles.balanceBtn}
                   onClick={(event) => {
                     event.stopPropagation();
-                    if (!amountDetail) return;
-                    setConvertAmount([
-                      maxAmount * coeff,
-                      amountDetail.usd * coeff
-                    ]);
+
+                    setConvertAmount([maxAmount * coeff, usd * coeff]);
                   }}
                 >
                   {text}

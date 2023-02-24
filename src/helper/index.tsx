@@ -42,7 +42,6 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
-import sumBy from 'lodash/sumBy';
 import { FeeCurrency } from '@keplr-wallet/types';
 
 interface Items {
@@ -135,7 +134,8 @@ export const handleCheckChain = (
       return window.Metamask.isEth();
     case KWT_SUBNETWORK_EVM_CHAIN_ID:
       return (
-        Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID)
+        Number(window?.ethereum?.chainId) ===
+        Number(KWT_SUBNETWORK_EVM_CHAIN_ID)
       );
     case KWT_SUBNETWORK_CHAIN_ID:
       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
@@ -188,18 +188,14 @@ export const getNetworkGasPrice = async () => {
     gasPriceStep?: any;
   }> = embedChainInfos;
   try {
-    chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints()
+    chainInfosWithoutEndpoints =
+      await window.Keplr?.getChainInfosWithoutEndpoints();
   } finally {
-    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId)
+    const findToken = chainInfosWithoutEndpoints.find(
+      (e) => e.chainId == network.chainId
+    );
     return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;
   }
-};
-
-export const calSumAmounts = (
-  amounts: AmountDetails,
-  type: keyof AmountDetail = 'amount'
-) => {
-  return sumBy(Object.values(amounts), (sub) => Number(sub[type]));
 };
 
 export const handleCheckWallet = async () => {

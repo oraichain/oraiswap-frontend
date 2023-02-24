@@ -1,5 +1,7 @@
 import { is } from 'ramda';
 import bech32 from 'bech32';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 /* object */
 export const record = <T, V>(
@@ -54,13 +56,13 @@ export const validateNumber = (amount: number): number => {
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
   return amount;
 };
-export const toAmount = (amount: number, decimals: number): BigInt => {
+export const toAmount = (amount: number, decimals: number): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.round(validatedAmount * 10 ** decimals));
 };
 
 export const toDisplay = (
-  amount: number | string | BigInt,
+  amount: number | string | bigint,
   sourceDecimals = 6,
   desDecimals = 6
 ): number => {
@@ -68,6 +70,81 @@ export const toDisplay = (
   const validatedAmount = validateNumber(Number(amount));
   const returnAmount = validatedAmount / 10 ** sourceDecimals;
   return Number(returnAmount.toFixed(desDecimals));
+};
+
+export const getUsd = (
+  amount: string | number | bigint,
+  tokenInfo: TokenItemType,
+  prices: CoinGeckoPrices<string>
+): number => {
+  return (
+    toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0)
+  );
+};
+
+export const getTotalUsd = (
+  amounts: AmountDetails,
+  prices: CoinGeckoPrices<string>
+): number => {
+  let usd = 0;
+  for (const denom in amounts) {
+    const tokenInfo = tokenMap[denom];
+    if (!tokenInfo) continue;
+    const amount = toDisplay(amounts[denom], tokenInfo.decimals);
+    usd += amount * (prices[tokenInfo.coingeckoId] ?? 0);
+  }
+  return usd;
+};
+
+export const getSubAmountDetails = (
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType
+): AmountDetails => {
+  if (!tokenInfo.evmDenoms) return {};
+  return Object.fromEntries(
+    tokenInfo.evmDenoms.map((denom) => {
+      return [denom, amounts[denom]];
+    })
+  );
+};
+
+export const toSubDisplay = (
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType
+): number => {
+  const subAmounts = getSubAmountDetails(amounts, tokenInfo);
+  return toSumDisplay(subAmounts);
+};
+
+export const toTotalDisplay = (
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType
+): number => {
+  return (
+    toDisplay(Number(amounts[tokenInfo.denom] ?? 0), tokenInfo.decimals) +
+    toSubDisplay(amounts, tokenInfo)
+  );
+};
+
+export const toSubAmount = (
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType
+): bigint => {
+  const displayAmount = toSubDisplay(amounts, tokenInfo);
+  return toAmount(displayAmount, tokenInfo.decimals);
+};
+
+export const toSumDisplay = (amounts: AmountDetails): number => {
+  // get all native balances that are from oraibridge (ibc/...)
+  let amount = 0;
+
+  for (const denom in amounts) {
+    // update later
+    const balance = amounts[denom];
+    if (!balance) continue;
+    amount += toDisplay(balance, tokenMap[denom].decimals);
+  }
+  return amount;
 };
 
 export const reduceString = (str: string, from: number, end: number) => {
