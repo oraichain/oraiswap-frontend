@@ -396,6 +396,17 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'airight',
     denom: 'airi',
     contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
+    erc20Cw20Map: [
+      {
+        prefix: 'BEP20',
+        description: 'Ibc token from BNB chain',
+        decimals: {
+          erc20Decimals: EVM_DECIMALS,
+          cw20Decimals: COSMOS_DECIMALS
+        },
+        erc20Denom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
+      }
+    ],
     bridgeTo: [BSC_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,

@@ -4,14 +4,14 @@ import React, {
   useEffect,
   useState,
   useMemo,
-  useCallback,
+  useCallback
 } from 'react';
 import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { Pair, pairs } from 'config/pools';
 import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
-import { getUsd } from 'libs/utils';
+import { toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens } from 'config/bridgeTokens';
@@ -33,23 +33,23 @@ interface PoolsProps {}
 
 enum KeyFilter {
   my_pool,
-  all_pool,
+  all_pool
 }
 
 const LIST_FILTER = [
   {
     key: KeyFilter.all_pool,
-    text: 'All Pools',
+    text: 'All Pools'
   },
   {
     key: KeyFilter.my_pool,
-    text: 'My Pools',
-  },
+    text: 'My Pools'
+  }
 ];
 
 const Header: FC<{ amount: number; oraiPrice: number }> = ({
   amount,
-  oraiPrice,
+  oraiPrice
 }) => {
   return (
     <div className={styles.header}>
@@ -198,7 +198,7 @@ const ListPools = memo<{
               key={item.key}
               style={{
                 color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
-                background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21',
+                background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
               }}
               className={styles.filter_item}
               onClick={() => setTypeFilter(item.key)}
@@ -215,7 +215,7 @@ const ListPools = memo<{
               paddingLeft: 40,
               backgroundImage: `url(${SearchSvg})`,
               backgroundRepeat: 'no-repeat',
-              backgroundPosition: '10px center',
+              backgroundPosition: '10px center'
             }}
             onChange={debounce((e) => {
               filterPairs(e.target.value);
@@ -277,12 +277,12 @@ const Pools: React.FC<PoolsProps> = () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
       data: toBinary({
-        pool: {},
-      }),
+        pool: {}
+      })
     }));
 
     const res = await Contract.multicall.aggregate({
-      queries,
+      queries
     });
 
     const pairsData = Object.fromEntries(
@@ -308,14 +308,14 @@ const Pools: React.FC<PoolsProps> = () => {
         data: toBinary({
           reward_info: {
             asset_info: assetInfo,
-            staker_addr: address,
-          },
-        }),
+            staker_addr: address
+          }
+        })
       };
     });
 
     const res = await Contract.multicall.aggregate({
-      queries,
+      queries
     });
 
     const myPairData = Object.fromEntries(
@@ -351,7 +351,7 @@ const Pools: React.FC<PoolsProps> = () => {
         pair,
         commissionRate: pair.commission_rate,
         fromToken,
-        toToken,
+        toToken
       };
     } catch (ex) {
       console.log(ex);
@@ -385,11 +385,9 @@ const Pools: React.FC<PoolsProps> = () => {
     const milkyPrice =
       oraiUsdtPoolMilky.askPoolAmount / oraiUsdtPoolMilky.offerPoolAmount;
     poolList.forEach((pool) => {
-      pool.amount = getUsd(
-        2 * pool.offerPoolAmount,
-        pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice,
-        pool.fromToken.decimals
-      );
+      pool.amount =
+        toDisplay(2 * pool.offerPoolAmount, pool.fromToken.decimals) *
+        (pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice);
     });
 
     setPairInfos(poolList);

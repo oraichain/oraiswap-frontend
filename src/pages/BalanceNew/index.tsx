@@ -55,9 +55,9 @@ import {
   buildMultipleMessages,
   getEvmAddress,
   getFunctionExecution,
-  getUsd,
-  parseAmountToWithDecimal,
-  parseBep20Erc20Name
+  toAmount,
+  parseBep20Erc20Name,
+  toDisplay
 } from 'libs/utils';
 import {
   BSC_CHAIN_ID,
@@ -211,15 +211,14 @@ const Balance: React.FC<BalanceProps> = () => {
 
     const results: ContractCallResults = await multicall.call(input);
     return tokens.map((token) => {
-      const amount = Number(
-        results.results[token.denom].callsReturnContext[0].returnValues[0].hex
-      );
-
+      const amount =
+        results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
+      const displayAmount = toDisplay(amount, token.decimals);
       return [
         token.denom,
         {
           amount,
-          usd: getUsd(amount, prices[token.coingeckoId] ?? 0, token.decimals)
+          usd: displayAmount * (prices[token.coingeckoId] ?? 0)
         } as AmountDetail
       ];
     });
@@ -285,10 +284,11 @@ const Balance: React.FC<BalanceProps> = () => {
     for (const token of filteredTokensWithErc20Map) {
       const foundToken = amountAll.find((t) => token.denom === t.denom);
       if (!foundToken) continue;
-      const amount = parseInt(foundToken.amount);
+      const amount = foundToken.amount;
+      const displayAmount = toDisplay(amount, token.decimals);
       amountDetails[token.denom] = {
         amount,
-        usd: getUsd(amount, prices[token.coingeckoId] ?? 0, token.decimals)
+        usd: displayAmount * (prices[token.coingeckoId] ?? 0)
       };
     }
     console.log('loadNativeBalance', address);
@@ -310,19 +310,21 @@ const Balance: React.FC<BalanceProps> = () => {
     });
 
     const amountDetails = Object.fromEntries(
-      cw20Tokens.map((t, ind) => {
+      cw20Tokens.map((token, ind) => {
         if (!res.return_data[ind].success) {
-          return [t.denom, { amount: 0, usd: 0 }];
+          return [token.denom, { amount: 0, usd: 0 }];
         }
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
-        const amount = parseInt(balanceRes.balance);
+        const amount = balanceRes.balance;
+        const displayAmount = toDisplay(amount, token.decimals);
+
         return [
-          t.denom,
+          token.denom,
           {
             amount,
-            usd: getUsd(amount, prices[t.coingeckoId] ?? 0, t.decimals)
+            usd: displayAmount * (prices[token.coingeckoId] ?? 0)
           }
         ];
       })
@@ -510,7 +512,7 @@ const Balance: React.FC<BalanceProps> = () => {
     ibcMemo?: string;
   }) => {
     amount = coin(
-      parseAmountToWithDecimal(
+      toAmount(
         transferAmount,
         fromToken.erc20Cw20Map[0].decimals.erc20Decimals
       ).toString(),
@@ -613,7 +615,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       let amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
       const ibcMemo =
@@ -727,7 +729,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       var amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 
@@ -807,7 +809,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom == 'erc20_milky'
           ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
@@ -971,10 +973,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const _fromAmount = parseAmountToWithDecimal(
-        amount,
-        token.decimals
-      ).toString();
+      const _fromAmount = toAmount(amount, token.decimals).toString();
       console.log('convertToken');
 
       let msgs;
@@ -1062,7 +1061,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       const amount = coin(
-        parseAmountToWithDecimal(transferAmount, fromToken.decimals).toString(),
+        toAmount(transferAmount, fromToken.decimals).toString(),
         fromToken.denom
       );
 
@@ -1190,12 +1189,13 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 // check balance cw20
                 let amount = amounts[t.denom];
-                let subAmounts;
+                let subAmounts: AmountDetails;
                 if (t.contractAddress && t.erc20Cw20Map) {
                   subAmounts = getSubAmount(amounts, t, prices);
                   amount = {
                     amount:
-                      calSumAmounts(subAmounts, 'amount') + amount?.amount ?? 0,
+                      (calSumAmounts(subAmounts, 'amount') + Number(amount?.amount)).toString() ??
+                      '0',
                     usd: calSumAmounts(subAmounts, 'usd') + amount?.usd ?? 0
                   };
                 }

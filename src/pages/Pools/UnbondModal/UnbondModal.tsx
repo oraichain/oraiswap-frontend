@@ -1,13 +1,9 @@
 import React, { FC, useState } from 'react';
-import ReactModal from 'react-modal';
 import Modal from 'components/Modal';
-import { TooltipIcon } from 'components/Tooltip';
 import style from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
-import { filteredTokens } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -46,12 +42,11 @@ const UnbondModal: FC<ModalProps> = ({
   const [address] = useConfigReducer('address');
 
   const handleUnbond = async (amount: number) => {
-    const parsedAmount = +parseAmount(
-      amount.toString(),
-      lpTokenInfoData!.decimals
-    );
+    const parsedAmount = toAmount(amount, lpTokenInfoData!.decimals);
 
-    if (parsedAmount <= 0 || parsedAmount > bondAmount)
+    const parsedAmountNumber = Number(parsedAmount);
+
+    if (parsedAmountNumber <= 0 || parsedAmountNumber > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
       });
@@ -62,7 +57,7 @@ const UnbondModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         assetToken
       });
       const msg = msgs[0];

@@ -1,6 +1,6 @@
 import React from 'react';
 import NumberFormat, { NumberFormatProps } from 'react-number-format';
-import { parseAmountFromWithDecimal, parseBalanceNumber } from 'libs/utils';
+import { toDisplay } from 'libs/utils';
 
 type Props = {
   balance:
@@ -24,11 +24,8 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
           denom: string;
         }
   ) => {
-    if (typeof balance === 'number') return parseBalanceNumber(balance);
-    let bigBalance = balance?.amount || 0;
-    if (typeof balance?.amount === 'number')
-      bigBalance = parseBalanceNumber(balance?.amount || 0);
-    return parseAmountFromWithDecimal(bigBalance, balance?.decimals);
+    if (typeof balance === 'number') return balance;
+    return toDisplay(balance?.amount, balance?.decimals);
   };
 
   const amount = parseBalance(balance);

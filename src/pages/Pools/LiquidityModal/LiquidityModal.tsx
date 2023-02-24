@@ -14,9 +14,9 @@ import {
 } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, getUsd } from 'libs/utils';
+import { buildMultipleMessages } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
@@ -76,8 +76,8 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [amountToken1, setAmountToken1] = useState('');
-  const [amountToken2, setAmountToken2] = useState('');
+  const [amountToken1, setAmountToken1] = useState(0);
+  const [amountToken2, setAmountToken2] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
@@ -129,37 +129,35 @@ const LiquidityModal: FC<ModalProps> = ({
   useEffect(() => {
     if (!pairAmountInfoData?.ratio) {
     } else if (recentInput === 1 && !!+amountToken1) {
-      setAmountToken2(`${+amountToken1 / pairAmountInfoData.ratio}`);
+      setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
     } else if (recentInput === 2 && !!+amountToken2)
-      setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
+      setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
   }, [JSON.stringify(pairAmountInfoData)]);
 
-  const getValueUsd = (token: any, amount: number) => {
-    let t = getUsd(
-      amount,
-      prices[token!.coingeckoId as PriceKey],
-      token!.decimals
-    );
+  const getValueUsd = (token: any, amount: number | string) => {
+    let t =
+      toDisplay(amount, token!.decimals) *
+      prices[token!.coingeckoId as PriceKey];
     return t;
   };
 
-  const onChangeAmount1 = (floatValue: string) => {
+  const onChangeAmount1 = (floatValue: number) => {
     setRecentInput(1);
     setAmountToken1(floatValue);
-    setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
-    const amount1 = +parseAmount(floatValue, token1InfoData!.decimals);
+    setAmountToken2(floatValue / pairAmountInfoData?.ratio);
+    const amount1 = +toAmount(floatValue, token1InfoData!.decimals);
     const estimatedLP =
       (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
       +lpTokenInfoData.total_supply;
     setEstimatedLP(estimatedLP);
   };
 
-  const onChangeAmount2 = (floatValue: string) => {
+  const onChangeAmount2 = (floatValue: number) => {
     setRecentInput(2);
     setAmountToken2(floatValue);
-    setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
+    setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
-    const amount2 = +parseAmount(floatValue, token2InfoData!.decimals);
+    const amount2 = +toAmount(floatValue, token2InfoData!.decimals);
     const estimatedLP =
       (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
       +lpTokenInfoData.total_supply;
@@ -344,7 +342,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const onChangeWithdrawPercent = (option: number) => {
     setLpAmountBurn(
-      +parseDisplayAmount(
+      +toDisplay(
         ((option * lpTokenBalance) / 100).toString(),
         lpTokenInfoData?.decimals ?? 0
       )
@@ -373,10 +371,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                parseDisplayAmount(
-                  token1Balance,
-                  token1InfoData?.decimals ?? 0
-                ).toString()
+                toDisplay(token1Balance, token1InfoData?.decimals ?? 0)
               )
             }
           >
@@ -386,10 +381,10 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                parseDisplayAmount(
-                  (token1Balance / 2)?.toString(),
+                toDisplay(
+                  Number(token1Balance) / 2,
                   token1InfoData?.decimals ?? 0
-                ).toString()
+                )
               )
             }
           >
@@ -444,10 +439,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                parseDisplayAmount(
-                  token2Balance,
-                  token2InfoData?.decimals ?? 0
-                ).toString()
+                toDisplay(token2Balance, token2InfoData?.decimals ?? 0)
               )
             }
           >
@@ -457,10 +449,10 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                parseDisplayAmount(
-                  (token2Balance / 2)?.toString(),
+                toDisplay(
+                  Number(token2Balance) / 2,
                   token2InfoData?.decimals ?? 0
-                ).toString()
+                )
               )
             }
           >
@@ -536,14 +528,8 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = +parseAmount(
-            amountToken1.toString(),
-            token1InfoData!.decimals
-          ),
-          amount2 = +parseAmount(
-            amountToken2.toString(),
-            token2InfoData!.decimals
-          );
+        const amount1 = +toAmount(amountToken1, token1InfoData!.decimals),
+          amount2 = +toAmount(amountToken2, token2InfoData!.decimals);
         let disableMsg: string;
         if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
         if (amount1 > token1Balance)
@@ -724,10 +710,7 @@ const LiquidityModal: FC<ModalProps> = ({
         )}
       </div>
       {(() => {
-        const amount = +parseAmount(
-          lpAmountBurn.toString(),
-          lpTokenInfoData!.decimals
-        );
+        const amount = +toAmount(lpAmountBurn, lpTokenInfoData!.decimals);
         let disableMsg: string;
         if (amount <= 0) disableMsg = 'Enter an amount';
         if (amount > lpTokenBalance)

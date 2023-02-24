@@ -4,9 +4,8 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import {
   buildMultipleMessages,
-  parseAmount,
-  parseAmountToWithDecimal,
-  parseDisplayAmount
+  toAmount,
+  toDisplay
 } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { contracts } from 'libs/contracts';
@@ -49,7 +48,7 @@ const SwapComponent: React.FC<{
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
-  const [[fromAmount, toAmount], setSwapAmount] = useState([
+  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([
     undefined,
     undefined
   ]);
@@ -63,15 +62,15 @@ const SwapComponent: React.FC<{
     filteredTokens.map((t) => t.coingeckoId)
   );
   const onChangeFromAmount = (amount: number | undefined) => {
-    if (!amount) return setSwapAmount([undefined, toAmount]);
-    setSwapAmount([amount, toAmount]);
+    if (!amount) return setSwapAmount([undefined, toAmountToken]);
+    setSwapAmount([amount, toAmountToken]);
   };
 
   const onMaxFromAmount = (amount: number) => {
     let finalAmount = parseFloat(
-      parseDisplayAmount(amount, fromTokenInfoData?.decimals) as string
+      toDisplay(amount, fromTokenInfoData?.decimals).toString() as string
     );
-    setSwapAmount([finalAmount, toAmount]);
+    setSwapAmount([finalAmount, toAmountToken]);
   };
 
   Contract.sender = address;
@@ -103,23 +102,23 @@ const SwapComponent: React.FC<{
   const subAmountFrom = getSubAmount(amounts, fromToken, prices);
   const subAmountTo = getSubAmount(amounts, toToken, prices);
   const fromTokenBalance = fromToken
-    ? amounts[fromToken.denom]?.amount +
+    ? Number(amounts[fromToken.denom]?.amount) +
         calSumAmounts(subAmountFrom) ?? 0
     : 0;
   const toTokenBalance = toToken
-    ? amounts[toToken.denom]?.amount +
+    ? Number(amounts[toToken.denom]?.amount) +
         calSumAmounts(subAmountTo) ?? 0
     : 0;
 
   const { data: simulateData } = useQuery(
-    ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmount],
+    ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: parseAmount(fromAmount, fromTokenInfoData!.decimals)
+        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
       }),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmount > 0 }
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
 
   const { data: simulateAverageData, isLoading: isSimulateAverageDataLoading } =
@@ -129,7 +128,7 @@ const SwapComponent: React.FC<{
         simulateSwap({
           fromInfo: fromTokenInfoData!,
           toInfo: toTokenInfoData!,
-          amount: parseAmount('1', fromTokenInfoData!.decimals)
+          amount: toAmount(1, fromTokenInfoData!.decimals).toString()
         }),
       { enabled: !!fromTokenInfoData && !!toTokenInfoData }
     );
@@ -138,25 +137,25 @@ const SwapComponent: React.FC<{
     console.log('simulate average data: ', simulateAverageData);
     setAverageRatio(
       parseFloat(
-        parseDisplayAmount(
+        toDisplay(
           simulateAverageData?.amount,
           toTokenInfoData?.decimals
-        )
+        ).toString()
       ).toFixed(6)
     );
   }, [simulateAverageData]);
 
   useEffect(() => {
     setSwapAmount([
-      fromAmount,
-      parseFloat(
-        parseDisplayAmount(simulateData?.amount, toTokenInfoData?.decimals)
+      fromAmountToken,
+      parseFloat( 
+        toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString()
       )
     ]);
   }, [simulateData]);
 
   const handleSubmit = async () => {
-    if (fromAmount <= 0)
+    if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
       });
@@ -164,8 +163,8 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      var _fromAmount = parseAmountToWithDecimal(
-        fromAmount,
+      var _fromAmount = toAmount(
+        fromAmountToken,
         fromTokenInfoData.decimals
       ).toString();
 
@@ -273,7 +272,7 @@ const SwapComponent: React.FC<{
             thousandSeparator
             decimalScale={6}
             type="text"
-            value={fromAmount}
+            value={fromAmountToken}
             onValueChange={({ floatValue }) => {
               onChangeFromAmount(floatValue);
             }}
@@ -285,7 +284,7 @@ const SwapComponent: React.FC<{
           src={AntSwapImg}
           onClick={() => {
             setSwapTokens([toTokenDenom, fromTokenDenom]);
-            setSwapAmount([toAmount, fromAmount]);
+            setSwapAmount([toAmountToken, fromAmountToken]);
           }}
           alt="ant"
         />
@@ -320,7 +319,7 @@ const SwapComponent: React.FC<{
             thousandSeparator
             decimalScale={6}
             type="text"
-            value={toAmount}
+            value={toAmountToken}
           />
         </div>
       </div>
