@@ -97,10 +97,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const listedTokens = filteredTokens.filter(
     (t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId
   );
-  const subAmount = getSubAmount(amounts, token, prices);
-  const subCalAmount = calSumAmounts(subAmount, 'amount');
   const maxAmount = toDisplay(
-    amountDetail ? amountDetail.amount + subCalAmount : 0, // amount detail here can be undefined
+    amountDetail ? amountDetail.amount : 0, // amount detail here can be undefined
     token?.decimals
   );
 

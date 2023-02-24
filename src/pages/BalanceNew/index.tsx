@@ -1194,7 +1194,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   subAmounts = getSubAmount(amounts, t, prices);
                   amount = {
                     amount:
-                      calSumAmounts(subAmounts, 'amount') + amount?.amount ??
+                      (calSumAmounts(subAmounts, 'amount') + Number(amount?.amount)).toString() ??
                       '0',
                     usd: calSumAmounts(subAmounts, 'usd') + amount?.usd ?? 0
                   };

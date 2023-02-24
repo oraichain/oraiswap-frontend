@@ -199,7 +199,7 @@ export const calSumAmounts = (
   amounts: AmountDetails,
   type: keyof AmountDetail = 'amount'
 ) => {
-  return sumBy(Object.values(amounts), (sub) => sub[type]);
+  return sumBy(Object.values(amounts), (sub) => Number(sub[type]));
 };
 
 export const handleCheckWallet = async () => {
