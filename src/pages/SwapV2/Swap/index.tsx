@@ -174,12 +174,14 @@ const SwapComponent: React.FC<{
       const msgConvertsFrom = await generateConvertErc20Cw20Message(
         amounts,
         fromTokenInfoData,
-        address
+        address,
+        prices
       );
       const msgConvertTo = await generateConvertErc20Cw20Message(
         amounts,
         toTokenInfoData,
-        address
+        address,
+        prices
       );
 
       const msgs = await generateContractMessages({
