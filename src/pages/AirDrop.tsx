@@ -1,13 +1,12 @@
-import Big from 'big.js';
 import { FunctionComponent, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
-import { Input } from 'antd';
-import { bech32 } from 'bech32-2.0';
-import _ from 'lodash';
+import bech32 from 'bech32';
+import Input from 'components/Input';
+import throttle from 'lodash/throttle';
 
 const cx = cn.bind(styles);
 
@@ -45,9 +44,9 @@ const AirDrop: FunctionComponent = () => {
   const [oraiAddress, setOraiAddress] = useState('');
   const [otherNetworkAddr, setOtherNetworkAddr] = useState('');
 
-  const parseAmount = (amount: number) => {
+  const toAmount = (amount: number) => {
     if (typeof amount === 'number' && isFinite(amount) && !isNaN(amount))
-      return new Big(amount).div(Math.pow(10, 6)).toNumber();
+      return Number(BigInt(amount) / BigInt(1_000_000));
     return 0;
   };
 
@@ -71,7 +70,7 @@ const AirDrop: FunctionComponent = () => {
   };
   const timeout = 20000;
 
-  const handleotherNetworkAddrChange = _.throttle(
+  const handleotherNetworkAddrChange = throttle(
     ({ target }) => {
       setOtherNetworkAddr(target.value || '');
     },
@@ -79,7 +78,7 @@ const AirDrop: FunctionComponent = () => {
     { trailing: true }
   );
 
-  const handleOraiAddrChange = _.throttle(
+  const handleOraiAddrChange = throttle(
     ({ target }) => {
       setOraiAddress(target.value || '');
     },
@@ -105,9 +104,9 @@ const AirDrop: FunctionComponent = () => {
     let res: any = (await axios.get(url, { timeout })).data;
 
     let response = {
-      delegatedAmount: parseAmount(res.delegated),
-      undelegatedAmount: parseAmount(res.undelegated),
-      available: parseAmount(res.available)
+      delegatedAmount: toAmount(res.delegated),
+      undelegatedAmount: toAmount(res.undelegated),
+      available: toAmount(res.available)
     };
 
     return response;

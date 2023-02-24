@@ -1,5 +1,4 @@
 import React, { FC, memo, useEffect, useState } from 'react';
-import { Button, Divider, Input } from 'antd';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
@@ -10,10 +9,10 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import _ from 'lodash';
 import { TokenInfo } from 'types/token';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
+import isEqual from 'lodash/isEqual';
 
 const cx = cn.bind(styles);
 
@@ -46,7 +45,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<[any]>();
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
@@ -73,7 +72,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     let res = rewardPerSecInfoData.map((r: any) => {
       const pendingWithdraw = +(
         totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e: any) =>
-          _.isEqual(e.info, r.info)
+          isEqual(e.info, r.info)
         )?.amount ?? 0
       );
       const amount =
@@ -82,11 +81,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         let token = filteredTokens.find(
           (t) => t.contractAddress === r.info.token.contract_addr!
         );
-        // const usdValue = getUsd(
-        //   amount,
-        //   prices[token!.coingeckoId],
+        // const usdValue = toDisplay(//   amount,
         //   token!.decimals
-        // );
+        // ) *
+        //   prices[token!.coingeckoId];
         return {
           ...token,
           amount,
@@ -98,11 +96,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         let token = filteredTokens.find(
           (t) => t.denom === r.info.native_token.denom!
         );
-        // const usdValue = getUsd(
-        //   amount,
-        //   prices[token!.coingeckoId],
+        // const usdValue = toDisplay(//   amount,
         //   token!.decimals
-        // );
+        // ) *
+        //   prices[token!.coingeckoId];
         return {
           ...token,
           amount,
@@ -181,12 +178,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             </div>
           </div>
           <div className={cx('earning')}>
-            <Button
+            <button
               className={cx('btn')}
               onClick={() => setIsOpenBondingModal(true)}
             >
               Start Earning
-            </Button>
+            </button>
           </div>
         </>
       </div>
@@ -201,7 +198,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   <TokenBalance
                     balance={{
                       amount: rewardInfoFirst
-                        ? rewardInfoFirst.bond_amount ?? 0
+                        ? Number(rewardInfoFirst.bond_amount) ?? 0
                         : 0,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
@@ -227,12 +224,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     )}
                   </div>
                 </div>
-                <Divider
-                  dashed
+                <hr
                   style={{
-                    background: '#2D2938',
-                    width: '100%',
-                    height: '1px'
+                    borderTop: '1px  dashed #2D2938',
+                    width: '100%'
                     // margin: '16px 0'
                   }}
                 />
@@ -276,7 +271,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                             /> */}
                   </div>
                 ))}
-              <Button
+              <button
                 className={cx('btn')}
                 onClick={() => handleBond()}
                 disabled={
@@ -286,13 +281,13 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
               >
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
-              </Button>
-              <Button
+              </button>
+              <button
                 className={cx('btn', 'btn--dark')}
                 onClick={() => setIsOpenUnbondModal(true)}
               >
                 <span>Unbond</span>
-              </Button>
+              </button>
             </div>
           </div>
         </>

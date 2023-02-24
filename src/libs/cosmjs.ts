@@ -19,15 +19,6 @@ import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
  */
 export interface HandleOptions {
   readonly memo?: string;
-  /**
-   * The funds that are transferred from the sender to the newly created contract.
-   * The funds are transferred as part of the message execution after the contract address is
-   * created and before the instantiation message is executed by the contract.
-   *
-   * Only native tokens are supported.
-   *
-   * TODO: Rename to `funds` for consistency (https://github.com/cosmos/cosmjs/issues/806)
-   */
   readonly funds?: readonly Coin[];
 }
 
@@ -123,7 +114,7 @@ const executeMultipleAminoClient = async (
   walletAddr: string
 ) => {
 
-  const executeMsgs = getExecuteContractMsgs(walletAddr,msgs)
+  const executeMsgs = getExecuteContractMsgs(walletAddr, msgs)
 
   const result = await client.signAndBroadcast(
     walletAddr,

@@ -7,14 +7,22 @@ import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 declare global {
   type AmountDetail = {
-    subAmounts?: { [key: string]: number };
-    amount: number;
-    usd: number;
+    amount: string; // raw amount
+    usd: number; // display usd amount
   };
   type AmountDetails = { [key: string]: AmountDetail };
+  type PairDetails = {
+    [key: string]: PoolResponse;
+  };
+  type LpPoolDetails = {
+    [key: string]: {
+      balance: string | number;
+    };
+  };
   type MetaMaskEthereumProvider = AbstractProvider & {
     chainId: string;
     isMetaMask?: boolean;
@@ -101,7 +109,6 @@ declare global {
   }
   interface Window {
     MSStream: String;
-    amounts: AmountDetails;
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
@@ -135,15 +142,11 @@ declare global {
       // config for ibc denom
       REACT_APP_ATOM_ORAICHAIN_DENOM: string;
       REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
-      REACT_APP_ORAIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
       REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
-
-      // config for eth ibc denom
-      REACT_APP_ORAIETH_ORAICHAIN_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;

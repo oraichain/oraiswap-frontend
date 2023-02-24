@@ -3,18 +3,20 @@ import Modal from 'components/Modal';
 import style from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
-import SelectTokenModal from 'pages/Swap/Modals/SelectTokenModal';
 import { useQuery } from '@tanstack/react-query';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { fetchTokenInfo } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import Pie from 'components/Pie';
 import NumberFormat from 'react-number-format';
 import { poolTokens } from 'config/pools';
 import { TokenItemType } from 'config/bridgeTokens';
-import useLocalStorage from 'hooks/useLocalStorage';
+import { RootState } from 'store/configure';
+import { useSelector } from 'react-redux';
+import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
+import DoneStepImg from 'assets/images/done-step.svg';
 
 const cx = cn.bind(style);
 
@@ -44,9 +46,9 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     useState<TokenItemType[]>(poolTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
-  const [amountToken1, setAmountToken1] = useState('0');
-  const [amountToken2, setAmountToken2] = useState('0');
-  const [amounts] = useLocalStorage<AmountDetails>('amounts', {});
+  const [amountToken1, setAmountToken1] = useState(0);
+  const [amountToken2, setAmountToken2] = useState(0);
+  const amounts = useSelector((state: RootState) => state.token.amounts);
   const tokenObj1 = poolTokens.find((token) => token.denom === token1);
   const tokenObj2 = poolTokens.find((token) => token.denom === token2);
 
@@ -205,7 +207,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+                toDisplay(token1Balance, token1InfoData?.decimals)
               )
             }
           >
@@ -215,7 +217,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                parseDisplayAmount(token1Balance / 2, token1InfoData?.decimals)
+                toDisplay(Number(token1Balance) / 2, token1InfoData?.decimals)
               )
             }
           >
@@ -224,7 +226,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={getBalanceValue(
               token1InfoData?.symbol ?? '',
-              parseDisplayAmount(token1Balance, token1InfoData?.decimals)
+              toDisplay(token1Balance, token1InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
@@ -246,7 +248,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken1 ? amountToken1 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken1(floatValue?.toString() || '0');
+              setAmountToken1(floatValue);
             }}
           />
         </div>
@@ -270,7 +272,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+                toDisplay(token2Balance, token2InfoData?.decimals)
               )
             }
           >
@@ -280,7 +282,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                parseDisplayAmount(token2Balance / 2, token2InfoData?.decimals)
+                toDisplay(Number(token2Balance) / 2, token2InfoData?.decimals)
               )
             }
           >
@@ -289,7 +291,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           <TokenBalance
             balance={getBalanceValue(
               token2InfoData?.symbol ?? '',
-              parseDisplayAmount(token2Balance, token2InfoData?.decimals)
+              toDisplay(token2Balance, token2InfoData?.decimals)
             )}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
@@ -311,7 +313,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             type="text"
             value={!!amountToken2 ? amountToken2 : ''}
             onValueChange={({ floatValue }) => {
-              setAmountToken2(floatValue?.toString() || '0');
+              setAmountToken2(floatValue);
             }}
           />
         </div>
@@ -449,7 +451,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   <img
                     key={idx}
                     className={cx('done', `point-${idx}`)}
-                    src={require('assets/icons/done-step.svg').default}
+                    src={DoneStepImg}
                   />
                 );
               if (step === idx)

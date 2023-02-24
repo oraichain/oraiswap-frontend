@@ -1,6 +1,6 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import useLocalStorage from './useLocalStorage';
+import useConfigReducer from './useConfigReducer';
 
 /**
  * Constructs the URL to retrieve prices from CoinGecko.
@@ -34,9 +34,7 @@ export const useCoinGeckoPrices = <T extends string>(
   filteredTokens.sort();
 
   // use cached first then update by query, if is limited then return cached version
-  const [cachePrices, setCachePrices] = useLocalStorage<
-    CoinGeckoPrices<string>
-  >('cg_prices', {});
+  const [cachePrices, setCachePrices] = useConfigReducer('coingecko');
 
   return useQuery({
     initialData: cachePrices,
@@ -45,6 +43,8 @@ export const useCoinGeckoPrices = <T extends string>(
     queryKey: ['coinGeckoPrices', ...tokens],
     queryFn: async ({ signal }) => {
       const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
+
+      const prices = { ...cachePrices };
 
       // by default not return data then use cached version
       try {
@@ -56,16 +56,16 @@ export const useCoinGeckoPrices = <T extends string>(
         };
         // update cached
         for (const key in rawData) {
-          cachePrices[key] = rawData[key].usd;
+          prices[key] = rawData[key].usd;
         }
 
-        setCachePrices(cachePrices);
+        setCachePrices(prices);
       } catch {
         // remain old cache
       }
 
       return Object.fromEntries(
-        tokens.map((token) => [token, cachePrices[token]])
+        tokens.map((token) => [token, prices[token]])
       ) as CoinGeckoPrices<T>;
     }
   });

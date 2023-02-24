@@ -6,56 +6,67 @@ import { ThemeProvider } from 'context/theme-context';
 import './index.scss';
 import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import useGlobalState from 'hooks/useGlobalState';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import { NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
+import {
+  COSMOS_TYPE,
+  EVM_TYPE,
+  NOTI_INSTALL_OWALLET,
+  ORAICHAIN_ID
+} from 'config/constants';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { getNetworkGasPrice } from 'helper';
+import { ChainInfoType } from 'reducer/config';
+import { useDispatch } from 'react-redux';
+import { removeToken } from 'reducer/token';
 
 const App = () => {
-  const [address, setAddress] = useGlobalState('address');
-  const [_, setChainId] = useGlobalState('chainId');
-  const [_$, setChainInfo] = useGlobalState('chainInfo');
-  const [_$$,setStatusChangeAccount] = useGlobalState('statusChangeAccount');
-  const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
-  const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
-  const updateAddress = async (chainInfos) => {
+  const [address, setAddress] = useConfigReducer('address');
+  const [_, setChainId] = useConfigReducer('chainId');
+  const [_$, setChainInfo] = useConfigReducer('chainInfo');
+  const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
+  const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
+  const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const dispatch = useDispatch();
+  const updateAddress = async (chainInfo: ChainInfoType) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
-      return displayToast(
-        TToastType.TX_INFO,
-        NOTI_INSTALL_OWALLET,
-        { toastId: 'install_keplr' }
-      );
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
     }
 
-    let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
+    let newAddress = await window.Keplr.getKeplrAddr(chainInfo?.chainId);
 
     if (isMobile()) {
       setInfoEvm({
         ...infoEvm,
-        chainId: window.ethereum.chainId,
+        chainId: window.ethereum.chainId
       });
     }
 
-    if (chainInfos) {
+    if (chainInfo) {
       setStatusChangeAccount(false);
-      setChainId(chainInfos.chainId);
-      setChainInfo(chainInfos);
-      if (chainInfos?.networkType === 'evm') {
-        window.ethereum.chainId = chainInfos.chainId;
-        setInfoEvm(chainInfos);
+      setChainId(chainInfo.chainId ?? ORAICHAIN_ID);
+      setChainInfo(chainInfo);
+      if (chainInfo?.networkType === EVM_TYPE) {
+        window.ethereum.chainId = chainInfo.chainId;
+        setInfoEvm(chainInfo);
       }
-      if (chainInfos?.networkType === 'cosmos') setInfoCosmos(chainInfos);
+      if (chainInfo?.networkType === COSMOS_TYPE) setInfoCosmos(chainInfo);
     }
 
     if (newAddress) {
+      if (newAddress !== address) {
+        dispatch(removeToken());
+      }
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
         setAddress('');
       }
       // finally update new address
-      if (!chainInfos?.chainId) {
+      if (!chainInfo?.chainId) {
         setStatusChangeAccount(true);
       }
       setAddress(newAddress as string);
@@ -65,9 +76,7 @@ const App = () => {
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
-    if (!address) {
-      keplrHandler();
-    }
+    keplrHandler();
     window.addEventListener('keplr_keystorechange', keplrHandler);
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
@@ -75,25 +84,24 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if(window.keplr) {
+    if (window.keplr) {
       keplrGasPriceCheck();
     }
-  },[])
+  }, []);
 
   const keplrGasPriceCheck = async () => {
     try {
-      const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
-      const gasPriceStep = chainInfosWithoutEndpoints.find(e => e.chainId == ORAICHAIN_ID)?.feeCurrencies[0]?.gasPriceStep
+      const gasPriceStep = await getNetworkGasPrice();
       if (gasPriceStep && !gasPriceStep.low) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: "https://www.youtube.com/watch?v=QMqCVUfxDAk"
+          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
         });
       }
     } catch (error) {
       console.log('Error: ', error);
     }
-  }
+  };
 
   const keplrHandler = async (event?: CustomEvent) => {
     try {

@@ -9,11 +9,11 @@ window.React = require('react');
 window.Buffer = require('buffer').Buffer;
 window.process = require('process/browser');
 
-// polyfill for keplr extension
-if (!window.browser || !window.browser.storage) {
-  const { LocalKVStore } = require('@keplr-wallet/common/build/kv-store/local');
-  window.browser = { storage: { local: new LocalKVStore(ORAI) } };
-}
+// // polyfill for keplr extension
+// if (!window.browser || !window.browser.storage) {
+//   const { LocalKVStore } = require('@keplr-wallet/common/build/kv-store/local');
+//   window.browser = { storage: { local: new LocalKVStore(ORAI) } };
+// }
 
 if (typeof BigInt === 'undefined') {
   (window as any)._BigInt = _BigInt;

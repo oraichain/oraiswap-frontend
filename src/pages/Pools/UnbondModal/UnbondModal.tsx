@@ -1,13 +1,9 @@
 import React, { FC, useState } from 'react';
-import ReactModal from 'react-modal';
 import Modal from 'components/Modal';
-import { TooltipIcon } from 'components/Tooltip';
 import style from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
-import { filteredTokens } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -15,7 +11,7 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(style);
 
@@ -43,15 +39,14 @@ const UnbondModal: FC<ModalProps> = ({
   const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
   const handleUnbond = async (amount: number) => {
-    const parsedAmount = +parseAmount(
-      amount.toString(),
-      lpTokenInfoData!.decimals
-    );
+    const parsedAmount = toAmount(amount, lpTokenInfoData!.decimals);
 
-    if (parsedAmount <= 0 || parsedAmount > bondAmount)
+    const parsedAmountNumber = Number(parsedAmount);
+
+    if (parsedAmountNumber <= 0 || parsedAmountNumber > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
       });
@@ -62,7 +57,7 @@ const UnbondModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         assetToken
       });
       const msg = msgs[0];
@@ -152,7 +147,7 @@ const UnbondModal: FC<ModalProps> = ({
                 })}
                 key={idx}
                 onClick={() => {
-                  setUnbondAmount((option * bondAmount) / (10 ** 6 * 100));
+                  setUnbondAmount((option * bondAmount) / (1_000_000 * 100));
                   setChosenOption(idx);
                 }}
               >
@@ -172,7 +167,7 @@ const UnbondModal: FC<ModalProps> = ({
                 // value={chosenOption === 4 && !!unbondAmount ? unbondAmount : ''}
                 onChange={(event) => {
                   setUnbondAmount(
-                    (+event.target.value * bondAmount) / (10 ** 6 * 100)
+                    (+event.target.value * bondAmount) / (1_000_000 * 100)
                   );
                 }}
               />
