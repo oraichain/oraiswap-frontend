@@ -7,7 +7,7 @@ import { TooltipIcon } from 'components/Tooltip';
 
 interface TokenItemProps {
   token: TokenItemType;
-  amountDetail?: AmountDetail;
+  amountDetail?: [string, number];
   convertToken?: any;
   transferIBC?: any;
   name?: string;
@@ -32,6 +32,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   convertKwt,
   subAmounts
 }) => {
+  const [amount, usd] = amountDetail;
   return (
     <div
       className={classNames(
@@ -62,7 +63,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amountDetail ? amountDetail?.amount : '0',
+                amount: amount ?? '0',
                 denom: '',
                 decimals: token.decimals
               }}
@@ -73,25 +74,21 @@ const TokenItem: React.FC<TokenItemProps> = ({
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>
-                    {Object.keys(subAmounts).map((name, idx) => {
-                      let description: string;
-                      if (name !== token.name)
-                        description = token.erc20Cw20Map[0]?.description;
+                    {Object.keys(subAmounts).map((denom, idx) => {
+                      const subAmount = subAmounts[denom] ?? '0';
+                      const description = token.erc20Cw20Map[idx].prefix;
 
                       return (
                         <div key={idx} className={styles.row}>
                           <div>
-                            <div>{name}</div>
-                            {!!description && (
-                              <div className={styles.description}>
-                                ({description})
-                              </div>
-                            )}
+                            <div className={styles.description}>
+                              ({description})
+                            </div>
                           </div>
                           <TokenBalance
                             balance={{
-                              amount: subAmounts[name].amount,
-                              denom: '',
+                              amount: subAmount,
+                              denom: token.denom,
                               decimals: token.decimals
                             }}
                             className={styles.tokenAmount}
@@ -107,7 +104,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             )}
           </div>
           <TokenBalance
-            balance={amountDetail?.usd || 0}
+            balance={usd || 0}
             className={styles.subLabel}
             decimalScale={2}
           />

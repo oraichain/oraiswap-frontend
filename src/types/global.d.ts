@@ -10,11 +10,7 @@ import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 declare global {
-  type AmountDetail = {
-    amount: string; // raw amount
-    usd: number; // display usd amount
-  };
-  type AmountDetails = { [key: string]: AmountDetail };
+  type AmountDetails = { [denom: string]: string };
   type PairDetails = {
     [key: string]: PoolResponse;
   };

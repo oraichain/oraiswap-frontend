@@ -1,11 +1,16 @@
 import { network } from 'config/networks';
-import { TokenItemType } from 'config/bridgeTokens';
+import {
+  decimalsMap,
+  filteredTokens,
+  TokenItemType,
+  tokenMap
+} from 'config/bridgeTokens';
 import isEqual from 'lodash/isEqual';
 import { ORAI } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
-import { getUsd, toDisplay, toAmount } from 'libs/utils';
+import { toDisplay, toAmount } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
@@ -192,32 +197,55 @@ async function fetchDistributionInfo(
   return data;
 }
 
+function getUsd(
+  amount: string | number | bigint,
+  tokenInfo: TokenItemType,
+  prices: CoinGeckoPrices<string>
+): number {
+  return (
+    toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0)
+  );
+}
+
+function getTotalUsd(
+  amounts: AmountDetails,
+  prices: CoinGeckoPrices<string>
+): number {
+  let usd = 0;
+  for (const denom in amounts) {
+    const tokenInfo = tokenMap[denom];
+    if (!tokenInfo) continue;
+    const amount = toDisplay(amounts[denom], tokenInfo.decimals);
+    usd += amount * (prices[tokenInfo.coingeckoId] ?? 0);
+  }
+  return usd;
+}
+
+function getSubAmountDetails(
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType
+): AmountDetails {
+  return Object.fromEntries(
+    tokenInfo.erc20Cw20Map?.map((mapping) => {
+      return [mapping.erc20Denom, amounts[mapping.erc20Denom]];
+    })
+  );
+}
+
 function getSubAmount(
   amounts: AmountDetails,
-  tokenInfo: TokenItemType,
-  prices?: CoinGeckoPrices<any>
-): AmountDetails {
+  tokenInfo: TokenItemType
+): bigint {
   // get all native balances that are from oraibridge (ibc/...)
-  const subAmounts = {};
-  if (tokenInfo.erc20Cw20Map) {
-    for (let mapping of tokenInfo.erc20Cw20Map) {
-      // update later
-      if (!amounts[mapping.erc20Denom]) continue;
-      const balance = amounts[mapping.erc20Denom].amount;
-      // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
-      const parsedBalance = toAmount(
-        toDisplay(balance, mapping.decimals.erc20Decimals),
-        mapping.decimals.cw20Decimals
-      );
-      subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
-        amount: parsedBalance,
-        usd:
-          toDisplay(parsedBalance, mapping.decimals.cw20Decimals) *
-            prices[tokenInfo.coingeckoId] ?? 0
-      };
-    }
+  let amount = 0;
+
+  for (const denom in amounts) {
+    // update later
+    const balance = amounts[denom];
+    if (!balance) continue;
+    amount += toDisplay(balance, decimalsMap[denom]);
   }
-  return subAmounts;
+  return toAmount(amount, tokenInfo.decimals);
 }
 
 async function generateConvertErc20Cw20Message(
@@ -230,19 +258,19 @@ async function generateConvertErc20Cw20Message(
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
     const balanceSubAmount = getSubAmount(amounts, tokenInfo);
-    const balance = calSumAmounts(balanceSubAmount);
+    const balance = balanceSubAmount.toString();
     // reset so we convert using native first
     const erc20TokenInfo = {
       ...tokenInfo,
       contractAddress: undefined,
       denom: mapping.erc20Denom
     };
-    if (balance > 0) {
+    if (balance) {
       const msgConvert = (
         await generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
           sender,
-          inputAmount: balance.toFixed(0),
+          inputAmount: balance,
           inputToken: erc20TokenInfo
         })
       )[0];
@@ -262,16 +290,15 @@ async function generateConvertCw20Erc20Message(
   if (!tokenInfo.erc20Cw20Map) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let mapping of tokenInfo.erc20Cw20Map) {
-    let balance: string;
     // optimize. Only convert if not enough balance & match denom
     if (mapping.erc20Denom !== sendCoin.denom) continue;
-    balance = amounts[sendCoin.denom]?.amount;
+
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
-    if (+balance >= +sendCoin.amount) break;
+    if (+amounts[sendCoin.denom] >= +sendCoin.amount) break;
 
-    balance = amounts[tokenInfo.denom]?.amount;
+    const balance = amounts[tokenInfo.denom];
 
-    if (+balance > 0) {
+    if (balance) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
         denom: mapping.erc20Denom,
@@ -775,6 +802,9 @@ export {
   fetchDistributionInfo,
   fetchAllPoolApr,
   fetchPoolApr,
+  getUsd,
+  getTotalUsd,
+  getSubAmountDetails,
   getSubAmount,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,

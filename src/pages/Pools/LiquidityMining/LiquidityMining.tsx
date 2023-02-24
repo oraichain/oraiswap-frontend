@@ -2,7 +2,12 @@ import React, { FC, memo, useEffect, useState } from 'react';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
-import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import {
+  filteredTokens,
+  TokenItemType,
+  tokenMap,
+  tokens
+} from 'config/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import CosmJs from 'libs/cosmjs';
@@ -93,9 +98,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           // usdValue
         };
       } else {
-        let token = filteredTokens.find(
-          (t) => t.denom === r.info.native_token.denom!
-        );
+        const token = tokenMap[r.info.native_token.denom];
+
         // const usdValue = toDisplay(//   amount,
         //   token!.decimals
         // ) *

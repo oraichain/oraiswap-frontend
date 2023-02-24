@@ -527,9 +527,24 @@ const oraichainTokens: TokenItemType[] = [
 ];
 
 export const tokens = [otherChainTokens, oraichainTokens];
+const flattenTokens = flatten(tokens);
+
+export const tokenMap = Object.fromEntries(
+  flattenTokens.map((c) => [c.denom, c])
+);
+
+export const decimalsMap: { [key: string]: number } = {};
+for (const token of flattenTokens) {
+  decimalsMap[token.denom] = token.decimals;
+  if (token.erc20Cw20Map) {
+    for (const mapping of token.erc20Cw20Map) {
+      decimalsMap[mapping.erc20Denom] = mapping.decimals.erc20Decimals;
+    }
+  }
+}
 
 export const filteredTokens = uniqBy(
-  flatten(tokens).filter(
+  flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
       token.denom && token.cosmosBased && token.coingeckoId
@@ -538,7 +553,7 @@ export const filteredTokens = uniqBy(
 );
 
 export const cw20Tokens = uniqBy(
-  flatten(filteredTokens).filter(
+  filteredTokens.filter(
     // filter cosmos based tokens to collect tokens that have contract addresses
     (token) =>
       // !token.contractAddress &&
@@ -548,7 +563,7 @@ export const cw20Tokens = uniqBy(
 );
 
 export const evmTokens = uniqBy(
-  flatten(tokens).filter(
+  flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
       token.denom &&
@@ -560,7 +575,7 @@ export const evmTokens = uniqBy(
 );
 
 export const kawaiiTokens = uniqBy(
-  flatten(tokens).filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
+  flattenTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom
 );
 
@@ -570,6 +585,6 @@ export const gravityContracts: { [key: string]: string } = {
 };
 
 export const usdtToken = uniqBy(
-  flatten(tokens).filter((token) => token.denom === STABLE_DENOM),
+  flattenTokens.filter((token) => token.denom === STABLE_DENOM),
   (c) => c.denom
 );

@@ -54,13 +54,13 @@ export const validateNumber = (amount: number): number => {
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
   return amount;
 };
-export const toAmount = (amount: number, decimals: number): BigInt => {
+export const toAmount = (amount: number, decimals: number): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.round(validatedAmount * 10 ** decimals));
 };
 
 export const toDisplay = (
-  amount: number | string | BigInt,
+  amount: number | string | bigint,
   sourceDecimals = 6,
   desDecimals = 6
 ): number => {

@@ -70,8 +70,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     enabled: !!tokenObj2
   });
 
-  const token1Balance = tokenObj1 ? amounts[tokenObj1.denom].amount : 0;
-  const token2Balance = tokenObj2 ? amounts[tokenObj2.denom].amount : 0;
+  const token1Balance = Number(amounts[tokenObj1?.denom] ?? '0');
+  const token2Balance = Number(amounts[tokenObj2?.denom] ?? '0');
 
   const Token1Icon = tokenObj1?.Icon;
   const Token2Icon = tokenObj2?.Icon;

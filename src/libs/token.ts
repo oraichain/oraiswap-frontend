@@ -80,10 +80,7 @@ export class CacheTokens {
       if (!foundToken) continue;
       const amount = foundToken.amount;
       const displayAmount = toDisplay(amount, token.decimals);
-      amountDetails[token.denom] = {
-        amount: foundToken.amount,
-        usd: displayAmount * (this.prices[token.coingeckoId] ?? 0)
-      };
+      amountDetails[token.denom] = foundToken.amount;
     }
     console.log('loadNativeBalance', address);
     this.forceUpdate(amountDetails);
@@ -106,20 +103,14 @@ export class CacheTokens {
     const amountDetails = Object.fromEntries(
       cw20Tokens.map((t, ind) => {
         if (!res.return_data[ind].success) {
-          return [t.denom, { amount: 0, usd: 0 }];
+          return [t.denom, 0];
         }
         const balanceRes = fromBinary(
           res.return_data[ind].data
         ) as BalanceResponse;
         const amount = balanceRes.balance;
         const displayAmount = toDisplay(amount, t.decimals);
-        return [
-          t.denom,
-          {
-            amount,
-            usd: displayAmount * (this.prices[t.coingeckoId] ?? 0)
-          }
-        ];
+        return [t.denom, amount];
       })
     );
     this.forceUpdate(amountDetails);
@@ -131,7 +122,7 @@ export class CacheTokens {
     rpc: string,
     chainId: number,
     multicallCustomContractAddress?: string
-  ): Promise<[string, AmountDetail][]> {
+  ): Promise<[string, string][]> {
     const multicall = new Multicall({
       nodeUrl: rpc,
       multicallCustomContractAddress,
@@ -155,13 +146,7 @@ export class CacheTokens {
       const amount =
         results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
       const displayAmount = toDisplay(amount, token.decimals);
-      return [
-        token.denom,
-        {
-          amount,
-          usd: (this.prices[token.coingeckoId] ?? 0) * displayAmount
-        } as AmountDetail
-      ];
+      return [token.denom, amount];
     });
   }
 

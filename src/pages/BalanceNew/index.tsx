@@ -48,7 +48,10 @@ import {
   simulateSwap,
   Type,
   getSubAmount,
-  parseTokenInfo
+  parseTokenInfo,
+  getSubAmountDetails,
+  getUsd,
+  getTotalUsd
 } from 'rest/api';
 import Content from 'layouts/Content';
 import {
@@ -190,7 +193,7 @@ const Balance: React.FC<BalanceProps> = () => {
     rpc: string,
     chainId: number,
     multicallCustomContractAddress?: string
-  ): Promise<[string, AmountDetail][]> => {
+  ): Promise<[string, string][]> => {
     const multicall = new Multicall({
       nodeUrl: rpc,
       multicallCustomContractAddress,
@@ -213,14 +216,7 @@ const Balance: React.FC<BalanceProps> = () => {
     return tokens.map((token) => {
       const amount =
         results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-      const displayAmount = toDisplay(amount, token.decimals);
-      return [
-        token.denom,
-        {
-          amount,
-          usd: displayAmount * (prices[token.coingeckoId] ?? 0)
-        } as AmountDetail
-      ];
+      return [token.denom, amount];
     });
   };
 
@@ -266,30 +262,26 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const loadNativeBalance = async (address: string, rpc: string) => {
     const client = await StargateClient.connect(rpc);
-    let erc20MapTokens = [];
-    for (let token of filteredTokens) {
-      if (token.contractAddress && token.erc20Cw20Map) {
-        erc20MapTokens = erc20MapTokens.concat(
-          token.erc20Cw20Map.map((t) => ({
-            denom: t.erc20Denom,
-            coingeckoId: token.coingeckoId,
-            decimals: t.decimals.erc20Decimals
-          }))
-        );
-      }
-    }
-    const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
+    // let erc20MapTokens = [];
+    // for (let token of filteredTokens) {
+    //   if (token.contractAddress && token.erc20Cw20Map) {
+    //     erc20MapTokens = erc20MapTokens.concat(
+    //       token.erc20Cw20Map.map((t) => ({
+    //         denom: t.erc20Denom,
+    //         coingeckoId: token.coingeckoId,
+    //         decimals: t.decimals.erc20Decimals
+    //       }))
+    //     );
+    //   }
+    // }
+    // const filteredTokensWithErc20Map = filteredTokens.concat(erc20MapTokens);
     const amountAll = await client.getAllBalances(address);
     let amountDetails: AmountDetails = {};
-    for (const token of filteredTokensWithErc20Map) {
+    // console.log(amountAll, filteredTokensWithErc20Map);
+    for (const token of filteredTokens) {
       const foundToken = amountAll.find((t) => token.denom === t.denom);
       if (!foundToken) continue;
-      const amount = foundToken.amount;
-      const displayAmount = toDisplay(amount, token.decimals);
-      amountDetails[token.denom] = {
-        amount,
-        usd: displayAmount * (prices[token.coingeckoId] ?? 0)
-      };
+      amountDetails[token.denom] = foundToken.amount;
     }
     console.log('loadNativeBalance', address);
     forceUpdate(amountDetails);
@@ -312,7 +304,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const amountDetails = Object.fromEntries(
       cw20Tokens.map((token, ind) => {
         if (!res.return_data[ind].success) {
-          return [token.denom, { amount: 0, usd: 0 }];
+          return [token.denom, 0];
         }
         const balanceRes = fromBinary(
           res.return_data[ind].data
@@ -320,13 +312,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const amount = balanceRes.balance;
         const displayAmount = toDisplay(amount, token.decimals);
 
-        return [
-          token.denom,
-          {
-            amount,
-            usd: displayAmount * (prices[token.coingeckoId] ?? 0)
-          }
-        ];
+        return [token.denom, amount];
       })
     );
 
@@ -922,13 +908,11 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const tokenAmountDetails = amounts[from.denom];
-    const subAmount = getSubAmount(amounts, from, prices);
+    const tokenAmount = amounts[from.denom];
+    const subAmount = getSubAmount(amounts, from);
     const fromBalance =
-      from && tokenAmountDetails
-        ? tokenAmountDetails.amount + calSumAmounts(subAmount, 'amount')
-        : 0;
-    if (fromAmount <= 0 || fromAmount * from.decimals > fromBalance) {
+      from && tokenAmount ? subAmount + BigInt(tokenAmount) : BigInt(0);
+    if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Your balance is insufficient to make this transfer'
       });
@@ -1100,19 +1084,22 @@ const Balance: React.FC<BalanceProps> = () => {
   const getFilterTokens = (org: string): TokenItemType[] => {
     return [...fromTokens, ...toTokens]
       .filter((token) => {
-        if (hideOtherSmallAmount && !Number(amounts[token.denom]?.amount)) {
+        if (hideOtherSmallAmount && !Number(amounts[token.denom])) {
           return false;
         }
         return token?.org === org;
       })
       .sort((a, b) => {
-        return amounts[b.denom]?.usd ?? 0 - amounts[a.denom]?.usd ?? 0;
+        return (
+          toDisplay(Number(amounts[b.denom] ?? 0), b.decimals) *
+            prices[b.coingeckoId] -
+          toDisplay(Number(amounts[a.denom] ?? 0), a.decimals) *
+            prices[a.coingeckoId]
+        );
       });
   };
 
-  const totalUsd = sumBy(Object.values(amounts), (c) => {
-    return c.usd;
-  });
+  const totalUsd = getTotalUsd(amounts, prices);
 
   const navigate = useNavigate();
 
@@ -1139,7 +1126,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   <div className={styles.search_logo}>
                     {renderLogoNetwork(filterNetwork || ORAICHAIN_ID)}
                   </div>
-                  <span className={styles.search_text}>{filterNetwork || ORAICHAIN_ID}</span>
+                  <span className={styles.search_text}>
+                    {filterNetwork || ORAICHAIN_ID}
+                  </span>
                 </div>
                 <div>
                   <ArrowDownIcon />
@@ -1188,22 +1177,21 @@ const Balance: React.FC<BalanceProps> = () => {
                   );
 
                 // check balance cw20
-                let amount = amounts[t.denom];
+                let amount = BigInt(amounts[t.denom] ?? 0);
+                let usd = getUsd(amount, t, prices);
                 let subAmounts: AmountDetails;
                 if (t.contractAddress && t.erc20Cw20Map) {
-                  subAmounts = getSubAmount(amounts, t, prices);
-                  amount = {
-                    amount:
-                      (calSumAmounts(subAmounts, 'amount') + Number(amount?.amount)).toString() ??
-                      '0',
-                    usd: calSumAmounts(subAmounts, 'usd') + amount?.usd ?? 0
-                  };
+                  subAmounts = getSubAmountDetails(amounts, t);
+                  console.log('subAmounts', subAmounts);
+                  const subAmount = getSubAmount(subAmounts, t);
+                  amount += subAmount;
+                  usd += getUsd(subAmount, t, prices);
                 }
                 return (
                   <TokenItem
                     className={styles.tokens_element}
                     key={t.denom}
-                    amountDetail={amount}
+                    amountDetail={[amount.toString(), usd]}
                     subAmounts={subAmounts}
                     active={
                       tokenOraichain

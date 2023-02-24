@@ -14,7 +14,7 @@ import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
 import { toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
-import { filteredTokens } from 'config/bridgeTokens';
+import { filteredTokens, tokenMap } from 'config/bridgeTokens';
 import { MILKY, STABLE_DENOM } from 'config/constants';
 import SearchSvg from 'assets/images/search-svg.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
@@ -81,9 +81,7 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({
 const PairBox = memo<PairInfoData & { apr: number }>(
   ({ pair, amount, commissionRate, apr }) => {
     const navigate = useNavigate();
-    const [token1, token2] = pair.asset_denoms.map((denom) =>
-      filteredTokens.find((token) => token.denom === denom)
-    );
+    const [token1, token2] = pair.asset_denoms.map((denom) => tokenMap[denom]);
 
     if (!token1 || !token2) return null;
 
@@ -299,9 +297,7 @@ const Pools: React.FC<PoolsProps> = () => {
 
   const fetchMyCachedPairs = async () => {
     const queries = pairs.map((pair) => {
-      const assetToken = filteredTokens.find(
-        (item) => pair.token_asset === item.denom
-      );
+      const assetToken = tokenMap[pair.token_asset];
       const { info: assetInfo } = parseTokenInfo(assetToken);
       return {
         address: process.env.REACT_APP_STAKING_CONTRACT,
@@ -333,8 +329,8 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
-    const [fromToken, toToken] = pair.asset_denoms.map((denom) =>
-      filteredTokens.find((token) => token.denom === denom)
+    const [fromToken, toToken] = pair.asset_denoms.map(
+      (denom) => tokenMap[denom]
     );
     if (!fromToken || !toToken) return;
 

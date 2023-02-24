@@ -2,14 +2,10 @@ import React, { useState, useEffect } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import {
-  buildMultipleMessages,
-  toAmount,
-  toDisplay
-} from 'libs/utils';
+import { buildMultipleMessages, toAmount, toDisplay } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { contracts } from 'libs/contracts';
-import { filteredTokens } from 'config/bridgeTokens';
+import { filteredTokens, tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchTokenInfo,
@@ -83,10 +79,8 @@ const SwapComponent: React.FC<{
       }
     });
 
-  const fromToken = filteredTokens.find(
-    (token) => token.denom === fromTokenDenom
-  );
-  const toToken = filteredTokens.find((token) => token.denom === toTokenDenom);
+  const fromToken = tokenMap[fromTokenDenom];
+  const toToken = tokenMap[toTokenDenom];
 
   const { data: fromTokenInfoData } = useQuery(
     ['from-token-info', fromToken],
@@ -97,17 +91,15 @@ const SwapComponent: React.FC<{
     fetchTokenInfo(toToken!)
   );
 
-  console.log({ fromToken,  toToken });
-  
-  const subAmountFrom = getSubAmount(amounts, fromToken, prices);
-  const subAmountTo = getSubAmount(amounts, toToken, prices);
+  console.log({ fromToken, toToken });
+
+  const subAmountFrom = Number(getSubAmount(amounts, fromToken));
+  const subAmountTo = Number(getSubAmount(amounts, toToken));
   const fromTokenBalance = fromToken
-    ? Number(amounts[fromToken.denom]?.amount) +
-        calSumAmounts(subAmountFrom) ?? 0
+    ? Number(amounts[fromToken.denom]) + subAmountFrom ?? 0
     : 0;
   const toTokenBalance = toToken
-    ? Number(amounts[toToken.denom]?.amount) +
-        calSumAmounts(subAmountTo) ?? 0
+    ? Number(amounts[toToken.denom]) + subAmountTo ?? 0
     : 0;
 
   const { data: simulateData } = useQuery(
@@ -116,7 +108,10 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
+        amount: toAmount(
+          fromAmountToken,
+          fromTokenInfoData!.decimals
+        ).toString()
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
@@ -148,7 +143,7 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     setSwapAmount([
       fromAmountToken,
-      parseFloat( 
+      parseFloat(
         toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString()
       )
     ]);
