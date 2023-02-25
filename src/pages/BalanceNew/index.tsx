@@ -117,7 +117,7 @@ import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -324,9 +324,9 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
           // keplrAddress &&
           // getFunctionExecution(loadNativeBalance, [
           //   keplrAddress,
@@ -946,14 +946,14 @@ const Balance: React.FC<BalanceProps> = () => {
 
       let msgs;
       if (type === 'nativeToCw20') {
-        msgs = await generateConvertMsgs({
+        msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
           sender: keplrAddress,
           inputAmount: _fromAmount,
           inputToken: token
         });
       } else if (type === 'cw20ToNative') {
-        msgs = await generateConvertMsgs({
+        msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN_REVERSE,
           sender: keplrAddress,
           inputAmount: _fromAmount,
@@ -1192,13 +1192,13 @@ const Balance: React.FC<BalanceProps> = () => {
                       tokenOraichain
                         ? !!transferToToken
                           ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, to, transferToToken)
+                            onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                        ? (fromAmount: number) => {
+                          ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                        : undefined
+                          : undefined
                     }
                     convertKwt={
                       t.chainId === KWT_SUBNETWORK_CHAIN_ID
