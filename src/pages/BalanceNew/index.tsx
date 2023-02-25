@@ -116,6 +116,7 @@ import Input from 'components/Input';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
+import { getOneStepKeplrAddr } from './helpers';
 
 interface BalanceProps { }
 
@@ -837,14 +838,7 @@ const Balance: React.FC<BalanceProps> = () => {
         gravityContractAddr,
         fromAmount.toString()
       );
-      let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
-      // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
-      if (
-        from.contractAddress === KWT_BSC_CONTRACT ||
-        from.contractAddress === MILKY_BSC_CONTRACT
-      ) {
-        oneStepKeplrAddr = keplrAddress;
-      }
+      let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
       const result = await window.Metamask.transferToGravity(
         from!.chainId as string,
         fromAmount.toString(),
