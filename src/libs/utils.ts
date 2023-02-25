@@ -58,7 +58,8 @@ export const validateNumber = (amount: number): number => {
 };
 export const toAmount = (amount: number, decimals: number): bigint => {
   const validatedAmount = validateNumber(amount);
-  return BigInt(Math.round(validatedAmount * 10 ** decimals));
+  console.log("validate amount: ", Math.trunc(validatedAmount * 10 ** decimals));
+  return BigInt(Math.trunc(validatedAmount * 10 ** decimals));
 };
 
 export const toDisplay = (
