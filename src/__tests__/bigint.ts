@@ -44,13 +44,14 @@ describe('bigint', () => {
   });
 
   it('toDisplay-float-number-should-display-correct-des-decimal', async () => {
-    const amount = 454136345.353413531;
-    const decimal = 6;
+    // display number from value in string or bigint or e^n format
+    const amount = '454136345353413531';
+    const decimal = 15;
     let res = toDisplay(amount, decimal).toString();
     expect(res).toBe('454.136345');
 
     const desDecimal = 2;
     res = toDisplay(amount, decimal, desDecimal).toString();
-    expect(res).toBe('454.14'); // here toFixed round up, but its okay because it is just display, not true amount
+    expect(res).toBe('454.13'); // here toFixed round up, but its okay because it is just display, not true amount
   });
 });
