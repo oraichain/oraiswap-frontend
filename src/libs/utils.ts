@@ -3,6 +3,9 @@ import bech32 from 'bech32';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
+const truncDecimals = 6;
+const atomic = 10 ** truncDecimals;
+
 /* object */
 export const record = <T, V>(
   object: T,
@@ -56,9 +59,14 @@ export const validateNumber = (amount: number): number => {
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
   return amount;
 };
+
+// decimals always >= 6
 export const toAmount = (amount: number, decimals: number): bigint => {
   const validatedAmount = validateNumber(amount);
-  return BigInt(Math.round(validatedAmount * 10 ** decimals));
+  return (
+    BigInt(Math.trunc(validatedAmount * atomic)) *
+    BigInt(10 ** (decimals - truncDecimals))
+  );
 };
 
 export const toDisplay = (
@@ -67,9 +75,17 @@ export const toDisplay = (
   desDecimals = 6
 ): number => {
   // guarding conditions to prevent crashing
-  const validatedAmount = validateNumber(Number(amount));
-  const returnAmount = validatedAmount / 10 ** sourceDecimals;
-  return Number(returnAmount.toFixed(desDecimals));
+  const validatedAmount = BigInt(
+    typeof amount === 'number' ? validateNumber(amount) : amount
+  );
+  const displayDecimals = Math.min(truncDecimals, desDecimals);
+  const returnAmount =
+    validatedAmount / BigInt(10 ** (sourceDecimals - displayDecimals));
+  // save calculation by using cached atomic
+  return (
+    Number(returnAmount) /
+    (displayDecimals === truncDecimals ? atomic : 10 ** displayDecimals)
+  );
 };
 
 export const getUsd = (

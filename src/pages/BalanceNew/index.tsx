@@ -113,8 +113,9 @@ import Input from 'components/Input';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
+import { getOneStepKeplrAddr } from './helpers';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -318,9 +319,9 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
           // keplrAddress &&
           // getFunctionExecution(loadNativeBalance, [
           //   keplrAddress,
@@ -839,14 +840,7 @@ const Balance: React.FC<BalanceProps> = () => {
         gravityContractAddr,
         fromAmount.toString()
       );
-      let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
-      // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
-      if (
-        from.contractAddress === KWT_BSC_CONTRACT ||
-        from.contractAddress === MILKY_BSC_CONTRACT
-      ) {
-        oneStepKeplrAddr = keplrAddress;
-      }
+      let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
       const result = await window.Metamask.transferToGravity(
         from!.chainId as string,
         fromAmount.toString(),
@@ -948,14 +942,14 @@ const Balance: React.FC<BalanceProps> = () => {
 
       let msgs;
       if (type === 'nativeToCw20') {
-        msgs = await generateConvertMsgs({
+        msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
           sender: keplrAddress,
           inputAmount: _fromAmount,
           inputToken: token
         });
       } else if (type === 'cw20ToNative') {
-        msgs = await generateConvertMsgs({
+        msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN_REVERSE,
           sender: keplrAddress,
           inputAmount: _fromAmount,
@@ -1194,13 +1188,13 @@ const Balance: React.FC<BalanceProps> = () => {
                       tokenOraichain
                         ? !!transferToToken
                           ? (fromAmount: number) =>
-                              onClickTransfer(fromAmount, to, transferToToken)
+                            onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                        ? (fromAmount: number) => {
+                          ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                        : undefined
+                          : undefined
                     }
                     convertKwt={
                       t.chainId === KWT_SUBNETWORK_CHAIN_ID

@@ -85,7 +85,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
   return parseInt(
     poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount ||
-      '0'
+    '0'
   );
 }
 
@@ -207,7 +207,7 @@ async function generateConvertErc20Cw20Message(
     const erc20TokenInfo = tokenMap[denom];
     if (balance) {
       const msgConvert = (
-        await generateConvertMsgs({
+        generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
           sender,
           inputAmount: balance,
@@ -248,7 +248,7 @@ async function generateConvertCw20Erc20Message(
         decimals: evmToken.decimals
       };
       const msgConvert = (
-        await generateConvertMsgs({
+        generateConvertMsgs({
           type: Type.CONVERT_TOKEN_REVERSE,
           sender,
           inputAmount: balance,
@@ -293,27 +293,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: {
@@ -610,7 +610,7 @@ export type ConvertReverse = {
   outputToken: TokenItemType;
 };
 
-async function generateConvertMsgs(msg: Convert | ConvertReverse) {
+function generateConvertMsgs(msg: Convert | ConvertReverse) {
   const { type, sender, inputToken, inputAmount } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
