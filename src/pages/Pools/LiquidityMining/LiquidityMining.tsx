@@ -3,6 +3,7 @@ import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
 import {
+  cw20TokenMap,
   filteredTokens,
   TokenItemType,
   tokenMap,
@@ -93,11 +94,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec +
         pendingWithdraw;
 
-      const token = r.info.token
-        ? filteredTokens.find(
-            (t) => t.contractAddress === r.info.token.contract_addr!
-          )
-        : tokenMap[r.info.native_token.denom];
+      const token =
+        'token' in r.info
+          ? cw20TokenMap[r.info.token.contract_addr]
+          : tokenMap[r.info.native_token.denom];
 
       return {
         ...token,

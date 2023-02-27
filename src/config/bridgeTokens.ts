@@ -54,13 +54,13 @@ import {
 export type TokenItemType = {
   name: string;
   org?:
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse';
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -74,18 +74,18 @@ export type TokenItemType = {
   decimals: number;
   maxGas?: number;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -545,6 +545,10 @@ export const cw20Tokens = uniqBy(
       token.contractAddress
   ),
   (c) => c.denom
+);
+
+export const cw20TokenMap = Object.fromEntries(
+  cw20Tokens.map((c) => [c.contractAddress, c])
 );
 
 export const evmTokens = uniqBy(
