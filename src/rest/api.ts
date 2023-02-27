@@ -34,7 +34,7 @@ export enum Type {
 const oraiInfo = { native_token: { denom: ORAI } };
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
-  let tokenInfo: TokenInfo = {
+  const tokenInfo: TokenInfo = {
     ...tokenSwap,
     symbol: '',
     name: tokenSwap.name,
@@ -51,15 +51,15 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
   } else {
     const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
     const dataCheckMilkyToken = data?.token_info_response ?? data;
-    tokenInfo = {
-      ...tokenInfo,
+    Object.assign(tokenInfo, {
       symbol: dataCheckMilkyToken.symbol,
       name: dataCheckMilkyToken.name,
       contractAddress: tokenSwap.contractAddress,
       decimals: dataCheckMilkyToken.decimals,
       total_supply: dataCheckMilkyToken.total_supply
-    };
+    });
   }
+
   return tokenInfo;
 }
 

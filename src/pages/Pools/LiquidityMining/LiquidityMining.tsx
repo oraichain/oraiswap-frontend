@@ -171,7 +171,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
           <div className={cx('earning')}>
             <button
-              disabled={!lpTokenBalance}
+              disabled={BigInt(lpTokenBalance) <= 0}
               className={cx('btn')}
               onClick={() => setIsOpenBondingModal(true)}
             >
@@ -190,13 +190,9 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 <div>
                   <TokenBalance
                     balance={{
-                      amount: rewardInfoFirst?.bond_amount ?? '0',
+                      amount: BigInt(rewardInfoFirst?.bond_amount ?? '0'),
                       decimals: lpTokenInfoData.decimals,
-                      denom: `${
-                        lpTokenInfoData?.symbol.charAt(0) === 'u'
-                          ? lpTokenInfoData?.symbol.substring(1)
-                          : lpTokenInfoData?.symbol
-                      }` // symbol should not be minimal
+                      denom: lpTokenInfoData?.symbol
                     }}
                     className={cx('amount')}
                     decimalScale={6}

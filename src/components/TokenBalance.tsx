@@ -34,7 +34,10 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       {...(typeof balance === 'number'
         ? { prefix: '$' }
         : {
-            suffix: balance?.denom ? ` ${balance.denom.toUpperCase()}` : ''
+            // fix display denom
+            suffix: balance?.denom
+              ? ` ${balance.denom.replace(/^u/, '').toUpperCase()}`
+              : ''
           })}
       {...props}
     />

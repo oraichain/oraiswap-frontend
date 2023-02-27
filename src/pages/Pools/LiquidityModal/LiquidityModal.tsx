@@ -488,7 +488,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance,
-              denom: lpTokenInfoData?.symbol ?? '',
+              denom: lpTokenInfoData?.symbol,
               decimals: lpTokenInfoData?.decimals
             }}
             decimalScale={6}
@@ -502,7 +502,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: estimatedLP.toString(),
-              denom: lpTokenInfoData?.symbol ?? ''
+              denom: lpTokenInfoData?.symbol
             }}
             decimalScale={6}
           />
@@ -552,7 +552,7 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance,
-              denom: lpTokenInfoData?.symbol ?? '',
+              denom: lpTokenInfoData?.symbol,
               decimals: lpTokenInfoData?.decimals
             }}
             prefix="LP Token Balance: "

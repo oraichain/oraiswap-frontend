@@ -12,6 +12,7 @@ import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
 
@@ -21,7 +22,7 @@ interface ModalProps {
   open: () => void;
   bondAmount: string;
   bondAmountUsd: number;
-  lpTokenInfoData: any;
+  lpTokenInfoData: TokenInfo;
   assetToken: any;
   onBondingAction: any;
 }
@@ -113,7 +114,8 @@ const UnbondModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: bondAmount,
-                denom: lpTokenInfoData.symbol
+                denom: lpTokenInfoData.symbol,
+                decimals: lpTokenInfoData.decimals
               }}
               prefix="Bonded Token Balance: "
               decimalScale={6}

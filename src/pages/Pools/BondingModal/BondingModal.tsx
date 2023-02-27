@@ -130,7 +130,7 @@ const BondingModal: FC<ModalProps> = ({
               balance={{
                 amount: lpTokenBalance,
                 denom: lpTokenInfoData?.symbol,
-                decimals: 6
+                decimals: lpTokenInfoData?.decimals
               }}
               decimalScale={6}
               prefix="Balance: "
