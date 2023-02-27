@@ -94,9 +94,6 @@
     // cursor: pointer;
     opacity: 1;
 
-    &:disabled {
-      opacity: 0.7;
-    }
   }
 
   .swap {
@@ -324,9 +321,6 @@
 
   opacity: 1;
 
-  &:disabled {
-    opacity: 0.7;
-  }
 }
 
 .mining {
