@@ -1,11 +1,11 @@
 import { network } from 'config/networks';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import isEqual from 'lodash/isEqual';
-import { ORAI } from 'config/constants';
+import { ORAI, STABLE_DENOM } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
-import { getSubAmountDetails } from 'libs/utils';
+import { getSubAmountDetails, toDisplay } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
@@ -87,6 +87,44 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
     poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount ||
       '0'
   );
+}
+
+async function getPairAmountInfo(
+  fromToken: TokenItemType,
+  toToken: TokenItemType
+) {
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken);
+
+  // default is usdt
+  let tokenPrice = 1;
+  let tokenValue = poolData.askPoolAmount;
+
+  if (toToken.denom !== STABLE_DENOM) {
+    const poolOraiUsdData = await fetchPoolInfoAmount(
+      tokenMap[ORAI],
+      tokenMap[STABLE_DENOM]
+    );
+    // orai price
+    tokenPrice =
+      poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
+    tokenValue = poolData.offerPoolAmount;
+    // calculate indirect
+    if (fromToken.denom !== ORAI) {
+      const poolOraiData = await fetchPoolInfoAmount(toToken, tokenMap[ORAI]);
+      tokenValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
+    }
+  }
+
+  const usdtValue = toDisplay(tokenValue, toToken.decimals) * tokenPrice;
+
+  return {
+    token1Amount: poolData.offerPoolAmount,
+    token2Amount: poolData.askPoolAmount,
+    token1Usd: usdtValue,
+    token2Usd: usdtValue,
+    usdAmount: 2 * usdtValue,
+    ratio: poolData.offerPoolAmount / poolData.askPoolAmount
+  };
 }
 
 async function fetchPoolInfoAmount(
@@ -740,6 +778,7 @@ export {
   fetchDistributionInfo,
   fetchAllPoolApr,
   fetchPoolApr,
+  getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,

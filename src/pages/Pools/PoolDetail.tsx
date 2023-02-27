@@ -14,7 +14,8 @@ import {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchPoolApr
+  fetchPoolApr,
+  getPairAmountInfo
 } from 'rest/api';
 
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
@@ -104,48 +105,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setCachedLpPools(lpTokenData);
   };
 
-  const getPairAmountInfo = async () => {
-    const poolData = await fetchPoolInfoAmount(
-      pairInfoData.token1,
-      pairInfoData.token2
-    );
-
-    // default is usdt
-    let tokenPrice = 1;
-    let tokenValue = poolData.askPoolAmount;
-
-    if (pairInfoData.token2.denom !== STABLE_DENOM) {
-      const poolOraiUsdData = await fetchPoolInfoAmount(
-        tokenMap[ORAI],
-        tokenMap[STABLE_DENOM]
-      );
-      // orai price
-      tokenPrice =
-        poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
-      tokenValue = poolData.offerPoolAmount;
-      // calculate indirect
-      if (pairInfoData.token1.denom !== ORAI) {
-        const poolOraiData = await fetchPoolInfoAmount(
-          pairInfoData.token2,
-          tokenMap[ORAI]
-        );
-        tokenValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
-      }
-    }
-
-    const usdtValue =
-      toDisplay(tokenValue, pairInfoData.token2.decimals) * tokenPrice;
-
-    return {
-      token1Amount: poolData.askPoolAmount,
-      token2Amount: poolData.offerPoolAmount,
-      token1Usd: usdtValue,
-      token2Usd: usdtValue,
-      usdAmount: 2 * usdtValue,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
-    };
-  };
-
   const onBondingAction = () => {
     refetchRewardInfo();
   };
@@ -162,7 +121,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
     ['pair-amount-info', pairInfoData],
     () => {
-      return getPairAmountInfo();
+      return getPairAmountInfo(pairInfoData.token1, pairInfoData.token2);
     },
     {
       enabled: !!pairInfoData,
