@@ -5,7 +5,7 @@ import { ORAI, STABLE_DENOM } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
-import { getSubAmountDetails, toDisplay } from 'libs/utils';
+import { atomic, getSubAmountDetails, toDisplay, truncDecimals } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
@@ -82,8 +82,8 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
   }
 }
 
-function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
-  return parseInt(
+function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo):bigint {
+  return BigInt(
     poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount ||
       '0'
   );
@@ -96,7 +96,6 @@ async function getPairAmountInfo(
   const poolData = await fetchPoolInfoAmount(fromToken, toToken);
 
   // default is usdt
-  let tokenPrice = 1;
   let tokenValue = poolData.askPoolAmount;
 
   if (toToken.denom !== STABLE_DENOM) {
@@ -105,17 +104,16 @@ async function getPairAmountInfo(
       tokenMap[STABLE_DENOM]
     );
     // orai price
-    tokenPrice =
-      poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
-    tokenValue = poolData.offerPoolAmount;
+    tokenValue = (poolData.offerPoolAmount * poolOraiUsdData.askPoolAmount);
     // calculate indirect
     if (fromToken.denom !== ORAI) {
       const poolOraiData = await fetchPoolInfoAmount(toToken, tokenMap[ORAI]);
-      tokenValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
+      tokenValue = (tokenValue * poolOraiData.askPoolAmount) / poolOraiData.offerPoolAmount;
     }
+    tokenValue /= poolOraiUsdData.offerPoolAmount;
   }
 
-  const usdtValue = toDisplay(tokenValue, toToken.decimals) * tokenPrice;
+  const usdtValue = toDisplay(tokenValue, toToken.decimals);
 
   return {
     token1Amount: poolData.offerPoolAmount,
@@ -123,7 +121,8 @@ async function getPairAmountInfo(
     token1Usd: usdtValue,
     token2Usd: usdtValue,
     usdAmount: 2 * usdtValue,
-    ratio: poolData.offerPoolAmount / poolData.askPoolAmount
+    ratio: toDisplay((poolData.offerPoolAmount * BigInt(atomic)) / poolData.askPoolAmount, truncDecimals)
+   
   };
 }
 
@@ -135,8 +134,8 @@ async function fetchPoolInfoAmount(
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
-  let offerPoolAmount = 0,
-    askPoolAmount = 0;
+  let offerPoolAmount:bigint,
+    askPoolAmount:bigint;
 
   const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
 
@@ -234,7 +233,6 @@ async function generateConvertErc20Cw20Message(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
   sender: string,
-  prices?: CoinGeckoPrices<string>
 ) {
   let msgConverts: any[] = [];
   if (!tokenInfo.evmDenoms) return [];
@@ -244,7 +242,7 @@ async function generateConvertErc20Cw20Message(
     const balance = subAmounts[denom];
     // reset so we convert using native first
     const erc20TokenInfo = tokenMap[denom];
-    if (balance) {
+    if (!!Number(balance)) {
       const msgConvert = generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
         sender,

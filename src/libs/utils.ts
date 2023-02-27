@@ -3,8 +3,8 @@ import bech32 from 'bech32';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
-const truncDecimals = 6;
-const atomic = 10 ** truncDecimals;
+export const truncDecimals = 6;
+export const atomic = 10 ** truncDecimals;
 
 /* object */
 export const record = <T, V>(

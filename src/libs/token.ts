@@ -51,7 +51,7 @@ export class CacheTokens {
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) =>
-        this.loadNativeBalance(address, token.rpc)
+        this.loadNativeBalance(address, token)
       );
     }
   }
@@ -60,15 +60,30 @@ export class CacheTokens {
     this.dispatch(updateAmounts(amountDetails));
   }
 
-  private async loadNativeBalance(address: string, rpc: string) {
-    const client = await StargateClient.connect(rpc);
+  private async loadNativeBalance(
+    address: string,
+    tokenInfo: { chainId: string; rpc: string }
+  ) {
+    const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
-    let amountDetails: AmountDetails = Object.fromEntries(
-      amountAll
-        .filter((coin) => tokenMap[coin.denom])
-        .map((coin) => [coin.denom, coin.amount])
+
+    let amountDetails: AmountDetails = {};
+
+    // reset native balances
+    filteredTokens
+      .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
+      .forEach((t) => {
+        amountDetails[t.denom] = '0';
+      });
+
+    Object.assign(
+      amountDetails,
+      Object.fromEntries(
+        amountAll
+          .filter((coin) => tokenMap[coin.denom])
+          .map((coin) => [coin.denom, coin.amount])
+      )
     );
-    console.log('loadNativeBalance', address);
     this.forceUpdate(amountDetails);
   }
 

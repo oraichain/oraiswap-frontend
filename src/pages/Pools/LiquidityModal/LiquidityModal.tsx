@@ -237,13 +237,11 @@ const LiquidityModal: FC<ModalProps> = ({
         amounts,
         token1,
         address,
-        prices
       );
       const secTokenConverts = await generateConvertErc20Cw20Message(
         amounts,
         token2,
         address,
-        prices
       );
 
       const msgs = await generateContractMessages({
