@@ -23,6 +23,7 @@ const cx = cn.bind(styles);
 
 interface LiquidityMiningProps {
   setIsOpenBondingModal: any;
+  lpTokenBalance: number;
   rewardInfoFirst: any;
   lpTokenInfoData: TokenInfo;
   setIsOpenUnbondModal: any;
@@ -37,6 +38,7 @@ interface LiquidityMiningProps {
 
 const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setIsOpenBondingModal,
+  lpTokenBalance,
   rewardInfoFirst,
   lpTokenInfoData,
   setIsOpenUnbondModal,
@@ -185,6 +187,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           </div>
           <div className={cx('earning')}>
             <button
+              disabled={!lpTokenBalance}
               className={cx('btn')}
               onClick={() => setIsOpenBondingModal(true)}
             >

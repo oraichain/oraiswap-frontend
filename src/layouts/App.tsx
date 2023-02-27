@@ -19,6 +19,8 @@ import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
 import { CacheTokens } from 'libs/token';
+import { removeToken } from 'reducer/token';
+import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -27,8 +29,23 @@ const App = () => {
   const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
   const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const [persistVersion, setPersistVersion] =
+    useConfigReducer('persistVersion');
   const dispatch = useDispatch();
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+
+  // clear persist storage when update version
+  useEffect(() => {
+    const isClearPersistStorage =
+      persistVersion === undefined || persistVersion !== PERSIST_VER;
+    const clearPersistStorage = () => {
+      localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
+      setPersistVersion(PERSIST_VER);
+    };
+
+    if (isClearPersistStorage) clearPersistStorage();
+  }, []);
+
   const updateAddress = async (chainInfo: ChainInfoType) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
