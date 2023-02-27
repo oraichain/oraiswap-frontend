@@ -18,7 +18,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
-import { removeToken } from 'reducer/token';
+import { CacheTokens } from 'libs/token';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -28,6 +28,7 @@ const App = () => {
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
   const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
   const dispatch = useDispatch();
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const updateAddress = async (chainInfo: ChainInfoType) => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
@@ -58,12 +59,18 @@ const App = () => {
     }
 
     if (newAddress) {
-      if (newAddress !== address) {
-        dispatch(removeToken());
-      }
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
         setAddress('');
+      }else {
+        const accounts = window?.ethereum && await window.ethereum.request({
+          method: 'eth_accounts',
+          params: [60]
+        }) || [''];
+        CacheTokens.factory({
+          dispatch,
+          address: newAddress
+        }).loadAllToken(accounts?.[0] || metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {
