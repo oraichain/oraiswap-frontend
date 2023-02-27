@@ -105,37 +105,37 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const getPairAmountInfo = async () => {
-    let usdtValue = 0;
     const poolData = await fetchPoolInfoAmount(
       pairInfoData.token1,
       pairInfoData.token2
     );
 
-    if (pairInfoData.token2.denom === STABLE_DENOM) {
-      usdtValue = toDisplay(
-        poolData.askPoolAmount,
-        pairInfoData.token2.decimals
-      );
-    } else {
+    // default is usdt
+    let tokenPrice = 1;
+    let tokenValue = poolData.askPoolAmount;
+
+    if (pairInfoData.token2.denom !== STABLE_DENOM) {
       const poolOraiUsdData = await fetchPoolInfoAmount(
         tokenMap[ORAI],
         tokenMap[STABLE_DENOM]
       );
-      const oraiPrice =
+      tokenPrice =
         poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
-
-      let oraiValue = poolData.askPoolAmount;
+      tokenValue = poolData.offerPoolAmount;
       // calculate in orai amount
-      if (pairInfoData.token2.denom !== ORAI) {
+      if (pairInfoData.token1.denom !== ORAI) {
         const poolOraiData = await fetchPoolInfoAmount(
-          pairInfoData.token1,
+          pairInfoData.token2,
           tokenMap[ORAI]
         );
-        oraiValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
+        tokenValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
       }
-      usdtValue =
-        toDisplay(oraiValue, pairInfoData.token2.decimals) * oraiPrice;
     }
+
+    console.log(tokenPrice, tokenValue);
+
+    const usdtValue =
+      toDisplay(tokenValue, pairInfoData.token2.decimals) * tokenPrice;
 
     return {
       token1Amount: poolData.askPoolAmount,
