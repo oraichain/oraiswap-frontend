@@ -67,10 +67,8 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = (amount: number) => {
-    let finalAmount = parseFloat(
-      toDisplay(amount, fromTokenInfoData?.decimals).toString() as string
-    );
+  const onMaxFromAmount = (amount: bigint) => {
+    let finalAmount = toDisplay(amount, fromTokenInfoData?.decimals);
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
@@ -98,14 +96,14 @@ const SwapComponent: React.FC<{
 
   console.log({ fromToken, toToken });
 
-  const subAmountFrom = Number(toSubAmount(amounts, fromToken));
-  const subAmountTo = Number(toSubAmount(amounts, toToken));
+  const subAmountFrom = toSubAmount(amounts, fromToken);
+  const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken
-    ? Number(amounts[fromToken.denom]) + subAmountFrom ?? 0
-    : 0;
+    ? BigInt(amounts[fromToken.denom]) + subAmountFrom 
+    : BigInt(0);
   const toTokenBalance = toToken
-    ? Number(amounts[toToken.denom]) + subAmountTo ?? 0
-    : 0;
+    ? BigInt(amounts[toToken.denom]) + subAmountTo
+    : BigInt(0);
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
@@ -239,7 +237,7 @@ const SwapComponent: React.FC<{
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: fromTokenBalance,
+              amount: fromTokenBalance.toString(),
               decimals: fromTokenInfoData?.decimals,
               denom: fromTokenInfoData?.symbol ?? ''
             }}
@@ -250,14 +248,14 @@ const SwapComponent: React.FC<{
           <div
             className={cx('btn')}
             onClick={() =>
-              onMaxFromAmount(fromTokenBalance - (fromToken?.maxGas ?? 0))
+              onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0))
             }
           >
             MAX
           </div>
           <div
             className={cx('btn')}
-            onClick={() => onMaxFromAmount(fromTokenBalance / 2)}
+            onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2))}
           >
             HALF
           </div>
