@@ -151,6 +151,11 @@ const ListPools = memo<{
     []
   );
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
+  useEffect(() => {
+    if (!!!typeFilter) {
+      setTypeFilter(KeyFilterPool.all_pool);
+    }
+  }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
     return pairInfos.filter(
