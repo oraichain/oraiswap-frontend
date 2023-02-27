@@ -76,7 +76,7 @@ export const toDisplay = (
 ): number => {
   // guarding conditions to prevent crashing
   const validatedAmount = BigInt(
-    typeof amount === 'number' ? validateNumber(amount) : amount
+    typeof amount === 'number' ? validateNumber(amount) : amount || 0
   );
   const displayDecimals = Math.min(truncDecimals, desDecimals);
   const returnAmount =
