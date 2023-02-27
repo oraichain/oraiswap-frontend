@@ -24,14 +24,14 @@ import {
 const cx = cn.bind(styles);
 
 interface LiquidityMiningProps {
-  setIsOpenBondingModal: any;
+  setIsOpenBondingModal: (val: boolean) => void;
   lpTokenBalance: string;
   rewardInfoFirst: RewardInfoResponseItem;
   lpTokenInfoData: TokenInfo;
-  setIsOpenUnbondModal: any;
+  setIsOpenUnbondModal: (val: boolean) => void;
   pairAmountInfoData: PairAmountInfo;
   assetToken: TokenItemType;
-  onBondingAction: any;
+  onBondingAction: Function;
   totalRewardInfoData: RewardInfoResponse;
   rewardPerSecInfoData: Asset[];
   stakingPoolInfoData: PoolInfoResponse;

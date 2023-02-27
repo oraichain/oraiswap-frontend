@@ -44,7 +44,7 @@ interface ModalProps {
   lpTokenInfoData: TokenInfo;
   lpTokenBalance: string;
   pairAmountInfoData: PairAmountInfo;
-  refetchPairAmountInfo: any;
+  refetchPairAmountInfo: Function;
   fetchCachedLpTokenAll: () => void;
   pairInfoData: PairInfo;
 }

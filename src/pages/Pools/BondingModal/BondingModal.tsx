@@ -15,6 +15,7 @@ import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 import { PairInfo } from 'libs/contracts';
+import { TokenItemType } from 'config/bridgeTokens';
 
 const cx = cn.bind(style);
 
@@ -27,8 +28,8 @@ interface ModalProps {
   lpTokenInfoData: TokenInfo;
   lpTokenBalance: string;
   liquidityValue: number;
-  assetToken: any;
-  onBondingAction: any;
+  assetToken: TokenItemType;
+  onBondingAction: Function;
   apr: number;
 }
 
