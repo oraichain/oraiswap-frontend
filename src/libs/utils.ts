@@ -74,6 +74,7 @@ export const toDisplay = (
   sourceDecimals = 6,
   desDecimals = 6
 ): number => {
+  if (!amount) return 0;
   // guarding conditions to prevent crashing
   const validatedAmount = BigInt(
     typeof amount === 'number' ? validateNumber(amount) : amount
