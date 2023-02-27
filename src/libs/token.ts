@@ -27,11 +27,9 @@ import { ContractCallResults, Multicall } from './ethereum-multicall';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 export class CacheTokens {
-  private readonly prices: CoinGeckoPrices<string>;
   private readonly dispatch;
   private readonly address: string;
-  public constructor({ prices, dispatch, address }) {
-    this.prices = prices;
+  public constructor({ dispatch, address }) {
     this.dispatch = dispatch;
     this.address = address;
   }
@@ -39,11 +37,11 @@ export class CacheTokens {
   public async loadTokensCosmos() {
     this.loadTokens();
     this.loadCw20Balance(this.address);
+    this.loadKawaiiSubnetAmount();
   }
 
   public async loadTokensEvmKwt(metamaskAddress: string) {
     this.loadEvmOraiAmounts(metamaskAddress);
-    this.loadKawaiiSubnetAmount();
   }
 
   private async loadTokens() {
@@ -175,7 +173,7 @@ export class CacheTokens {
     this.forceUpdate(amountDetails);
   }
 
-  static factory({ prices, dispatch, address }) {
-    return new CacheTokens({ prices, dispatch, address });
+  static factory({ dispatch, address }) {
+    return new CacheTokens({ dispatch, address });
   }
 }

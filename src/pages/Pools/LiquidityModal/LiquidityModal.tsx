@@ -169,7 +169,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    CacheTokens.factory({ prices, dispatch, address }).loadTokensCosmos();
+    CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
   };
 
   const increaseAllowance = async (
