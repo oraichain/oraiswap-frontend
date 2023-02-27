@@ -29,6 +29,7 @@ import FluentAddImg from 'assets/images/fluent_add.svg';
 import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
 import { CacheTokens } from 'libs/token';
 import { useDispatch } from 'react-redux';
+import { PairInfo } from 'libs/contracts';
 
 const cx = cn.bind(style);
 
@@ -45,7 +46,7 @@ interface ModalProps {
   pairAmountInfoData: PairAmountInfo;
   refetchPairAmountInfo: any;
   fetchCachedLpTokenAll: () => void;
-  pairInfoData: any;
+  pairInfoData: PairInfo;
 }
 
 const LiquidityModal: FC<ModalProps> = ({

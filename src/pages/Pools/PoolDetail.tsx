@@ -64,11 +64,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       (token) => token.denom === pair!.asset_denoms[1]
     );
 
-    const pairInfo = await fetchPairInfo([token1!, token2!]);
-    const apr = await fetchPoolApr(pair.contract_addr);
+    const [info, apr] = await Promise.all([
+      fetchPairInfo([token1!, token2!]),
+      fetchPoolApr(pair.contract_addr)
+    ]);
 
     return {
-      ...pairInfo,
+      info,
       token1,
       token2,
       apr
@@ -131,14 +133,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   );
 
   const lpTokenBalance = BigInt(
-    pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0
+    pairInfoData
+      ? lpPools[pairInfoData.info.liquidity_token]?.balance ?? '0'
+      : 0
   );
 
   const { data: lpTokenInfoData } = useQuery(
     ['token-info', pairInfoData],
     () =>
       fetchTokenInfo({
-        contractAddress: pairInfoData?.liquidity_token
+        contractAddress: pairInfoData?.info.liquidity_token
       } as TokenItemType),
     {
       enabled: !!pairInfoData,
@@ -392,7 +396,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                   totalRewardInfoData={totalRewardInfoData}
                   rewardPerSecInfoData={rewardPerSecInfoData}
                   stakingPoolInfoData={stakingPoolInfoData}
-                  pairInfoData={pairInfoData}
+                  apr={pairInfoData.apr}
                 />
               )}
             </div>
@@ -411,7 +415,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 lpTokenBalance={lpTokenBalance.toString()}
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
-                pairInfoData={pairInfoData}
+                pairInfoData={pairInfoData.info}
                 fetchCachedLpTokenAll={fetchCachedLpTokenAll}
               />
             )}
@@ -425,7 +429,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               liquidityValue={liquidityUsd}
               assetToken={assetToken}
               onBondingAction={onBondingAction}
-              pairInfoData={pairInfoData}
+              apr={pairInfoData.apr}
             />
           )}
           {isOpenUnbondModal && (

@@ -2,13 +2,7 @@ import React, { FC, memo, useEffect, useState } from 'react';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
-import {
-  cw20TokenMap,
-  filteredTokens,
-  TokenItemType,
-  tokenMap,
-  tokens
-} from 'config/bridgeTokens';
+import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import CosmJs from 'libs/cosmjs';
@@ -19,10 +13,13 @@ import { TokenInfo } from 'types/token';
 import useConfigReducer from 'hooks/useConfigReducer';
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
 import isEqual from 'lodash/isEqual';
-import { RewardInfoResponseItem } from 'libs/contracts';
+import { PairInfo, RewardInfoResponseItem } from 'libs/contracts';
 import { toDecimal } from 'libs/utils';
 import { Asset } from 'libs/contracts';
-import { RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
+import {
+  PoolInfoResponse,
+  RewardInfoResponse
+} from 'libs/contracts/OraiswapStaking.types';
 
 const cx = cn.bind(styles);
 
@@ -37,13 +34,12 @@ interface LiquidityMiningProps {
   onBondingAction: any;
   totalRewardInfoData: RewardInfoResponse;
   rewardPerSecInfoData: Asset[];
-  stakingPoolInfoData: any;
-  pairInfoData: any;
+  stakingPoolInfoData: PoolInfoResponse;
+  apr: number;
 }
 
 type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
-  rewardPerSec: number;
   pendingWithdraw: bigint;
 };
 
@@ -59,7 +55,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   totalRewardInfoData,
   rewardPerSecInfoData,
   stakingPoolInfoData,
-  pairInfoData
+  apr
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] =
@@ -102,7 +98,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       return {
         ...token,
         amount,
-        rewardPerSec: Number(r.amount),
         pendingWithdraw
       };
     });
@@ -228,12 +223,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     // margin: '16px 0'
                   }}
                 />
-                {!!pairInfoData?.apr && (
+                {apr && (
                   <div className={cx('bonded-apr')}>
                     <div className={cx('bonded-name')}>Current APR</div>
-                    <div className={cx('bonded-value')}>
-                      {(pairInfoData?.apr).toFixed(2)}%
-                    </div>
+                    <div className={cx('bonded-value')}>{apr.toFixed(2)}%</div>
                   </div>
                 )}
                 {/* <div className={cx('bonded-unbouding')}>

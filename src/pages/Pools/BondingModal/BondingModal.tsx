@@ -14,6 +14,7 @@ import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
+import { PairInfo } from 'libs/contracts';
 
 const cx = cn.bind(style);
 
@@ -28,7 +29,7 @@ interface ModalProps {
   liquidityValue: number;
   assetToken: any;
   onBondingAction: any;
-  pairInfoData: any;
+  apr: number;
 }
 
 const BondingModal: FC<ModalProps> = ({
@@ -40,7 +41,7 @@ const BondingModal: FC<ModalProps> = ({
   liquidityValue,
   assetToken,
   onBondingAction,
-  pairInfoData
+  apr
 }) => {
   const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
@@ -108,13 +109,13 @@ const BondingModal: FC<ModalProps> = ({
         <div className={cx('title')}>Bond LP tokens</div>
 
         <div className={cx('detail')}>
-          {!!pairInfoData?.apr && (
+          {apr && (
             <div className={cx('row')}>
               <div className={cx('row-title')}>
                 <span>Current APR</span>
               </div>
               <span className={cx('row-des', 'highlight')}>
-                {(pairInfoData?.apr).toFixed(2)}%
+                {apr.toFixed(2)}%
               </span>
             </div>
           )}
