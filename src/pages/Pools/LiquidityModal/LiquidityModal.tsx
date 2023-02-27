@@ -347,7 +347,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onChangeWithdrawPercent = (option: number) => {
     setLpAmountBurn(
       +toDisplay(
-        ((option * lpTokenBalance) / 100).toString(),
+        Math.round((option * lpTokenBalance) / 100).toString(),
         lpTokenInfoData?.decimals ?? 0
       )
     );
@@ -366,7 +366,8 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.name ?? ''
+              denom: token1InfoData?.name ?? '',
+              decimals: token1InfoData?.decimals,
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -386,7 +387,7 @@ const LiquidityModal: FC<ModalProps> = ({
             onClick={() =>
               onChangeAmount1(
                 toDisplay(
-                  Number(token1Balance) / 2,
+                  Math.round(Number(token1Balance) / 2),
                   token1InfoData?.decimals ?? 0
                 )
               )
@@ -434,7 +435,8 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.name ?? ''
+              denom: token2InfoData?.name ?? '',
+              decimals: token2InfoData?.decimals,
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -454,7 +456,7 @@ const LiquidityModal: FC<ModalProps> = ({
             onClick={() =>
               onChangeAmount2(
                 toDisplay(
-                  Number(token2Balance) / 2,
+                  Math.round(Number(token2Balance) / 2),
                   token2InfoData?.decimals ?? 0
                 )
               )
@@ -512,7 +514,8 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? ''
+              denom: lpTokenInfoData?.symbol ?? '',
+              decimals: lpTokenInfoData?.decimals
             }}
             decimalScale={6}
           />
@@ -580,7 +583,8 @@ const LiquidityModal: FC<ModalProps> = ({
           <TokenBalance
             balance={{
               amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? ''
+              denom: lpTokenInfoData?.symbol ?? '',
+              decimals: lpTokenInfoData?.decimals,
             }}
             prefix="LP Token Balance: "
             decimalScale={6}
@@ -674,10 +678,10 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={getValueUsd(
                     token1,
-                    (lpAmountBurn *
+                    Math.round((lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                      +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply)
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -704,10 +708,10 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={getValueUsd(
                     token2,
-                    (lpAmountBurn *
+                    Math.round((lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                      +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply)
                   )}
                   className={cx('des')}
                   decimalScale={2}
