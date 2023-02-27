@@ -211,7 +211,7 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1) {
+      if (!!token1AllowanceToPair && token1AllowanceToPair < BigInt(amount1)) {
         await increaseAllowance(
           '9'.repeat(30),
           token1InfoData!.contractAddress!,
@@ -219,7 +219,7 @@ const LiquidityModal: FC<ModalProps> = ({
         );
         refetchToken1Allowance();
       }
-      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2) {
+      if (!!token2AllowanceToPair && token2AllowanceToPair < BigInt(amount2)) {
         await increaseAllowance(
           '9'.repeat(30),
           token2InfoData!.contractAddress!,

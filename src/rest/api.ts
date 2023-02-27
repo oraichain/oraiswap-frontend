@@ -183,14 +183,15 @@ async function fetchTokenAllowance(
   tokenAddr: string,
   walletAddr: string,
   spender: string
-) {
-  // hard code with token orai
-  // if (!tokenAddr) return '999999999999999999999999999999';
+): Promise<bigint> {
+  // hard code with native token
+  if (!tokenAddr) return BigInt('999999999999999999999999999999');
+
   const data = await Contract.token(tokenAddr).allowance({
     owner: walletAddr,
     spender
   });
-  return data.allowance;
+  return BigInt(data.allowance);
 }
 
 async function fetchRewardInfo(
