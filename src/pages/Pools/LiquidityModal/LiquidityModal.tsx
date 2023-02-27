@@ -79,7 +79,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
-  const [estimatedLP, setEstimatedLP] = useState(0);
+  const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const dispatch = useDispatch();
   const token1Balance = Number(amounts[token1?.denom] ?? '0');
@@ -144,11 +144,11 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken1(floatValue);
     setAmountToken2(floatValue / pairAmountInfoData?.ratio);
     const amount1 = floatValue
-      ? Number(toAmount(+floatValue, token1InfoData!.decimals))
-      : 0;
+      ? toAmount(floatValue, token1InfoData!.decimals)
+      : BigInt(0);
     const estimatedLP =
-      (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
-      +lpTokenInfoData.total_supply;
+      (amount1 / (amount1 + BigInt(pairAmountInfoData.token1Amount as number))) *
+      BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
@@ -158,18 +158,18 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
     const amount2 = floatValue
-      ? Number(toAmount(+floatValue, token2InfoData!.decimals))
-      : 0;
+      ? toAmount(+floatValue, token2InfoData!.decimals)
+      : BigInt(0);
     const estimatedLP =
-      (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
-      +lpTokenInfoData.total_supply;
+      (amount2 / (amount2 + BigInt(pairAmountInfoData.token2Amount as number))) *
+      BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    CacheTokens.factory({ prices, dispatch, address }).loadTokensCosmos();
+    CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
   };
 
   const increaseAllowance = async (
@@ -209,13 +209,13 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   };
 
-  const handleAddLiquidity = async (amount1: number, amount2: number) => {
+  const handleAddLiquidity = async (amount1: bigint, amount2: bigint) => {
     if (!pairInfoData) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      if (!!token1AllowanceToPair && token1AllowanceToPair < BigInt(amount1)) {
+      if (!!token1AllowanceToPair && token1AllowanceToPair < amount1) {
         await increaseAllowance(
           '9'.repeat(30),
           token1InfoData!.contractAddress!,
@@ -223,7 +223,7 @@ const LiquidityModal: FC<ModalProps> = ({
         );
         refetchToken1Allowance();
       }
-      if (!!token2AllowanceToPair && token2AllowanceToPair < BigInt(amount2)) {
+      if (!!token2AllowanceToPair && token2AllowanceToPair < amount2) {
         await increaseAllowance(
           '9'.repeat(30),
           token2InfoData!.contractAddress!,
@@ -251,8 +251,8 @@ const LiquidityModal: FC<ModalProps> = ({
         sender: address,
         fromInfo: token1InfoData!,
         toInfo: token2InfoData!,
-        fromAmount: amount1,
-        toAmount: amount2,
+        fromAmount: amount1.toString(),
+        toAmount: amount2.toString(),
         pair: pairInfoData.contract_addr
       } as ProvideQuery);
 
@@ -527,7 +527,7 @@ const LiquidityModal: FC<ModalProps> = ({
           </div>
           <TokenBalance
             balance={{
-              amount: estimatedLP ? estimatedLP : 0,
+              amount: estimatedLP.toString(),
               denom: lpTokenInfoData?.symbol ?? ''
             }}
             decimalScale={6}
@@ -535,12 +535,8 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = amountToken1
-            ? Number(toAmount(+amountToken1, token1InfoData!.decimals))
-            : 0,
-          amount2 = amountToken2
-            ? Number(toAmount(+amountToken2, token2InfoData!.decimals))
-            : 0;
+        const amount1 = toAmount(amountToken1, token1InfoData!.decimals),
+          amount2 = toAmount(amountToken2, token2InfoData!.decimals)
         let disableMsg: string;
         if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
         if (amount1 > token1Balance)
