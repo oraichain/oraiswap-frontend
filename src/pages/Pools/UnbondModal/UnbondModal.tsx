@@ -19,7 +19,7 @@ interface ModalProps {
   isOpen: boolean;
   close: () => void;
   open: () => void;
-  bondAmount: number;
+  bondAmount: string;
   bondAmountUsd: number;
   lpTokenInfoData: any;
   assetToken: any;
@@ -30,23 +30,21 @@ const UnbondModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
-  bondAmount,
+  bondAmount: bondAmountValue,
   bondAmountUsd,
   lpTokenInfoData,
   assetToken,
   onBondingAction
 }) => {
   const [chosenOption, setChosenOption] = useState(-1);
-  const [unbondAmount, setUnbondAmount] = useState(0);
+  const [unbondAmount, setUnbondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [address] = useConfigReducer('address');
 
-  const handleUnbond = async (amount: number) => {
-    const parsedAmount = toAmount(amount, lpTokenInfoData!.decimals);
+  const bondAmount = BigInt(bondAmountValue);
 
-    const parsedAmountNumber = Number(parsedAmount);
-
-    if (parsedAmountNumber <= 0 || parsedAmountNumber > bondAmount)
+  const handleUnbond = async (parsedAmount: bigint) => {
+    if (parsedAmount <= 0 || parsedAmount > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
       });
@@ -114,7 +112,7 @@ const UnbondModal: FC<ModalProps> = ({
           <div className={cx('balance')}>
             <TokenBalance
               balance={{
-                amount: bondAmount ? bondAmount : 0,
+                amount: bondAmount,
                 denom: lpTokenInfoData.symbol
               }}
               prefix="Bonded Token Balance: "
@@ -133,9 +131,9 @@ const UnbondModal: FC<ModalProps> = ({
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
-              value={!!unbondAmount ? unbondAmount : ''}
+              value={toDisplay(unbondAmount, lpTokenInfoData.decimals)}
               onValueChange={({ floatValue }) =>
-                setUnbondAmount(floatValue ?? 0)
+                setUnbondAmount(toAmount(floatValue, lpTokenInfoData.decimals))
               }
             />
           </div>
@@ -147,7 +145,7 @@ const UnbondModal: FC<ModalProps> = ({
                 })}
                 key={idx}
                 onClick={() => {
-                  setUnbondAmount((option * bondAmount) / (1_000_000 * 100));
+                  setUnbondAmount((BigInt(option) * bondAmount) / BigInt(100));
                   setChosenOption(idx);
                 }}
               >
@@ -164,10 +162,9 @@ const UnbondModal: FC<ModalProps> = ({
                 placeholder="0.00"
                 type={'number'}
                 className={cx('input')}
-                // value={chosenOption === 4 && !!unbondAmount ? unbondAmount : ''}
                 onChange={(event) => {
                   setUnbondAmount(
-                    (+event.target.value * bondAmount) / (1_000_000 * 100)
+                    (BigInt(event.target.value) * bondAmount) / BigInt(100)
                   );
                 }}
               />

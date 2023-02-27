@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { Pair, pairs } from 'config/pools';
 import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
-import { atomic, toDisplay, truncDecimals } from 'libs/utils';
+import { toDecimal, toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens, tokenMap } from 'config/bridgeTokens';
@@ -382,13 +382,18 @@ const Pools: React.FC<PoolsProps> = () => {
       return setTimeout(fetchPairInfoDataList, 5000);
     }
 
-    const oraiPrice = toDisplay(oraiUsdtPool.askPoolAmount * BigInt(atomic) / oraiUsdtPool.offerPoolAmount,truncDecimals);
-    const milkyPrice =
-      oraiUsdtPoolMilky.askPoolAmount / oraiUsdtPoolMilky.offerPoolAmount;
+    const oraiPrice = toDecimal(
+      oraiUsdtPool.askPoolAmount,
+      oraiUsdtPool.offerPoolAmount
+    );
+    const milkyPrice = toDecimal(
+      oraiUsdtPoolMilky.askPoolAmount,
+      oraiUsdtPoolMilky.offerPoolAmount
+    );
     poolList.forEach((pool) => {
       pool.amount =
         toDisplay(BigInt(2) * pool.offerPoolAmount, pool.fromToken.decimals) *
-        Number((pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice));
+        (pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice);
     });
 
     setPairInfos(poolList);
@@ -410,7 +415,7 @@ const Pools: React.FC<PoolsProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header amount={totalAmount} oraiPrice={Number(oraiPrice) ?? 0} />
+        <Header amount={totalAmount} oraiPrice={oraiPrice} />
         <ListPools
           pairInfos={pairInfos}
           allPoolApr={cachedApr}

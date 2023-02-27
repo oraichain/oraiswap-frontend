@@ -1210,20 +1210,7 @@
   dependencies:
     bn.js "^5.2.0"
 
-"@cosmjs/proto-signing@0.28.13", "@cosmjs/proto-signing@^0.28.4":
-  version "0.28.13"
-  resolved "https://registry.yarnpkg.com/@cosmjs/proto-signing/-/proto-signing-0.28.13.tgz#95ac12f0da0f0814f348f5ae996c3e96d015df61"
-  integrity sha512-nSl/2ZLsUJYz3Ad0RY3ihZUgRHIow2OnYqKsESMu+3RA/jTi9bDYhiBu8mNMHI0xrEJry918B2CyI56pOUHdPQ==
-  dependencies:
-    "@cosmjs/amino" "0.28.13"
-    "@cosmjs/crypto" "0.28.13"
-    "@cosmjs/encoding" "0.28.13"
-    "@cosmjs/math" "0.28.13"
-    "@cosmjs/utils" "0.28.13"
-    cosmjs-types "^0.4.0"
-    long "^4.0.0"
-
-"@cosmjs/proto-signing@^0.29.5":
+"@cosmjs/proto-signing@0.28.13", "@cosmjs/proto-signing@0.29.5", "@cosmjs/proto-signing@^0.28.4", "@cosmjs/proto-signing@^0.29.5":
   version "0.29.5"
   resolved "https://registry.yarnpkg.com/@cosmjs/proto-signing/-/proto-signing-0.29.5.tgz#af3b62a46c2c2f1d2327d678b13b7262db1fe87c"
   integrity sha512-QRrS7CiKaoETdgIqvi/7JC2qCwCR7lnWaUsTzh/XfRy3McLkEd+cXbKAW3cygykv7IN0VAEIhZd2lyIfT8KwNA==

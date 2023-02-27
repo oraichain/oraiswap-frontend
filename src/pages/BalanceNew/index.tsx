@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { coin } from '@cosmjs/proto-signing';
+import { Coin, coin } from '@cosmjs/stargate';
 import {
   arrayLoadToken,
   getNetworkGasPrice,
@@ -93,7 +93,7 @@ import TokenItem from './TokenItem';
 import KwtModal from './KwtModal';
 import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import Long from 'long';
-import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate/build/modules/wasm/aminomessages';
+import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
@@ -115,7 +115,7 @@ import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import { getOneStepKeplrAddr } from './helpers';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -333,9 +333,9 @@ const Balance: React.FC<BalanceProps> = () => {
         [
           getFunctionExecution(loadTokens),
           metamaskAddress &&
-          getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+            getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
           kwtSubnetAddress &&
-          getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+            getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
           // keplrAddress &&
           // getFunctionExecution(loadNativeBalance, [
           //   keplrAddress,
@@ -854,7 +854,10 @@ const Balance: React.FC<BalanceProps> = () => {
         gravityContractAddr,
         fromAmount.toString()
       );
-      let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
+      let oneStepKeplrAddr = getOneStepKeplrAddr(
+        keplrAddress,
+        from.contractAddress
+      );
       const result = await window.Metamask.transferToGravity(
         from!.chainId as string,
         fromAmount.toString(),
@@ -1202,13 +1205,13 @@ const Balance: React.FC<BalanceProps> = () => {
                       tokenOraichain
                         ? !!transferToToken
                           ? (fromAmount: number) =>
-                            onClickTransfer(fromAmount, to, transferToToken)
+                              onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                          ? (fromAmount: number) => {
+                        ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                          : undefined
+                        : undefined
                     }
                     convertKwt={
                       t.chainId === KWT_SUBNETWORK_CHAIN_ID

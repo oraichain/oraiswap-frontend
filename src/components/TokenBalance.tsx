@@ -3,7 +3,7 @@ import NumberFormat, { NumberFormatProps } from 'react-number-format';
 import { toDisplay } from 'libs/utils';
 
 type BalanceProp = {
-  amount: string | number;
+  amount: string | bigint;
   decimals?: number;
   denom?: string;
 };
@@ -14,19 +14,15 @@ type Props = {
 } & NumberFormatProps;
 
 const parseBalance = (balance: BalanceProp): number => {
-  // round number for DisplayComponent
-  const displayAmount = Number(balance.amount);
-  if (!balance.decimals) return displayAmount;
-
-  return toDisplay(displayAmount, balance.decimals);
+  if (!balance.decimals) return Number(balance.amount);
+  return toDisplay(balance.amount, balance.decimals);
 };
 
 const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
-  const balanceProp: BalanceProp =
+  const amount =
     typeof balance === 'number'
-      ? { amount: balance }
-      : balance ?? { amount: 0 };
-  const amount = parseBalance(balanceProp);
+      ? balance
+      : parseBalance(balance ?? { amount: '0' });
 
   return (
     <NumberFormat
@@ -35,12 +31,10 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       displayType={'text'}
       thousandSeparator={true}
       decimalScale={0}
-      {...(!balanceProp.decimals
+      {...(typeof balance === 'number'
         ? { prefix: '$' }
         : {
-            suffix: balanceProp.denom
-              ? ` ${balanceProp.denom.toUpperCase()}`
-              : ''
+            suffix: balance?.denom ? ` ${balance.denom.toUpperCase()}` : ''
           })}
       {...props}
     />

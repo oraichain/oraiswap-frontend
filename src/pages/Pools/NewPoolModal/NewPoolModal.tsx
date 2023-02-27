@@ -70,8 +70,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     enabled: !!tokenObj2
   });
 
-  const token1Balance = Number(amounts[tokenObj1?.denom] ?? '0');
-  const token2Balance = Number(amounts[tokenObj2?.denom] ?? '0');
+  const token1Balance = BigInt(amounts[tokenObj1?.denom] ?? '0');
+  const token2Balance = BigInt(amounts[tokenObj2?.denom] ?? '0');
 
   const Token1Icon = tokenObj1?.Icon;
   const Token2Icon = tokenObj2?.Icon;
@@ -197,8 +197,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.symbol ?? ''
+              amount: token1Balance,
+              denom: token1InfoData?.symbol
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -217,7 +217,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken1(
-                toDisplay(Number(token1Balance) / 2, token1InfoData?.decimals)
+                toDisplay(token1Balance / BigInt(2), token1InfoData?.decimals)
               )
             }
           >
@@ -262,8 +262,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.symbol ?? ''
+              amount: token2Balance,
+              denom: token2InfoData?.symbol
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -282,7 +282,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             className={cx('btn')}
             onClick={() =>
               setAmountToken2(
-                toDisplay(Number(token2Balance) / 2, token2InfoData?.decimals)
+                toDisplay(token2Balance / BigInt(2), token2InfoData?.decimals)
               )
             }
           >

@@ -4,7 +4,7 @@ import style from './BondingModal.module.scss';
 import cn from 'classnames/bind';
 import { TooltipIcon } from 'components/Tooltip';
 import TokenBalance from 'components/TokenBalance';
-import { getUsd, toAmount } from 'libs/utils';
+import { getUsd, toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
@@ -24,7 +24,7 @@ interface ModalProps {
   close: () => void;
   isCloseBtn?: boolean;
   lpTokenInfoData: TokenInfo;
-  lpTokenBalance: number;
+  lpTokenBalance: string;
   liquidityValue: number;
   assetToken: any;
   onBondingAction: any;
@@ -36,23 +36,19 @@ const BondingModal: FC<ModalProps> = ({
   close,
   open,
   lpTokenInfoData,
-  lpTokenBalance,
+  lpTokenBalance: lpTokenBalanceValue,
   liquidityValue,
   assetToken,
   onBondingAction,
   pairInfoData
 }) => {
-  const [bondAmount, setBondAmount] = useState(0);
+  const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [address] = useConfigReducer('address');
 
-  const onChangeAmount = (value: number) => {
-    setBondAmount(value);
-  };
+  const lpTokenBalance = BigInt(lpTokenBalanceValue);
 
-  const handleBond = async (amount: number) => {
-    const parsedAmount = Number(toAmount(amount, lpTokenInfoData!.decimals));
-
+  const handleBond = async (parsedAmount: bigint) => {
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
@@ -64,7 +60,7 @@ const BondingModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         lpToken: lpTokenInfoData.contractAddress!,
         assetToken
       });
@@ -131,7 +127,7 @@ const BondingModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`,
+                denom: lpTokenInfoData?.symbol,
                 decimals: 6
               }}
               decimalScale={6}
@@ -140,19 +136,13 @@ const BondingModal: FC<ModalProps> = ({
 
             <div
               className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(lpTokenBalance / 10 ** lpTokenInfoData.decimals)
-              }
+              onClick={() => setBondAmount(lpTokenBalance)}
             >
               MAX
             </div>
             <div
               className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(
-                  lpTokenBalance / 10 ** lpTokenInfoData.decimals / 2
-                )
-              }
+              onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}
             >
               HALF
             </div>
@@ -169,9 +159,11 @@ const BondingModal: FC<ModalProps> = ({
               decimalScale={6}
               placeholder={'0'}
               // type="input"
-              value={bondAmount ?? ''}
+              value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
               onChange={(e: { target: { value: string } }) => {
-                onChangeAmount(Number(e.target.value));
+                setBondAmount(
+                  toAmount(Number(e.target.value), lpTokenInfoData.decimals)
+                );
               }}
             />
           </div>

@@ -23,9 +23,14 @@ declare global {
   type PairDetails = {
     [key: string]: PoolResponse;
   };
+  type PairAmountInfo = {
+    token1Amount: string;
+    token2Amount: string;
+    tokenUsd: number;
+  };
   type LpPoolDetails = {
     [key: string]: {
-      balance: string | number;
+      balance: string;
     };
   };
   type MetaMaskEthereumProvider = AbstractProvider & {
@@ -44,19 +49,6 @@ declare global {
     ): this;
     removeAllListeners(event?: string | symbol): this;
   };
-
-  type Browser = {
-    storage: {
-      local: KVStore;
-    };
-  };
-
-  type Fund = {
-    denom: string;
-    amount: string;
-  };
-
-  type Funds = Fund[];
 
   type ExecuteOptions = {
     gas?: number;

@@ -3,8 +3,8 @@ import bech32 from 'bech32';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
-export const truncDecimals = 6;
-export const atomic = 10 ** truncDecimals;
+const truncDecimals = 6;
+const atomic = 10 ** truncDecimals;
 
 /* object */
 export const record = <T, V>(
@@ -69,16 +69,20 @@ export const toAmount = (amount: number, decimals: number): bigint => {
   );
 };
 
+export const toDecimal = (numerator: bigint, denominator: bigint): number => {
+  if (denominator === BigInt(0)) return 0;
+  return toDisplay((numerator * BigInt(atomic)) / denominator, truncDecimals);
+};
+
 export const toDisplay = (
-  amount: number | string | bigint,
+  amount: string | bigint,
   sourceDecimals = 6,
   desDecimals = 6
 ): number => {
   if (!amount) return 0;
   // guarding conditions to prevent crashing
-  const validatedAmount = BigInt(
-    typeof amount === 'number' ? validateNumber(amount) : amount || 0
-  );
+  const validatedAmount =
+    typeof amount === 'string' ? BigInt(amount || '0') : amount;
   const displayDecimals = Math.min(truncDecimals, desDecimals);
   const returnAmount =
     validatedAmount / BigInt(10 ** (sourceDecimals - displayDecimals));
@@ -90,7 +94,7 @@ export const toDisplay = (
 };
 
 export const getUsd = (
-  amount: string | number | bigint,
+  amount: string | bigint,
   tokenInfo: TokenItemType,
   prices: CoinGeckoPrices<string>
 ): number => {
@@ -138,7 +142,7 @@ export const toTotalDisplay = (
   tokenInfo: TokenItemType
 ): number => {
   return (
-    toDisplay(Number(amounts[tokenInfo.denom] ?? 0), tokenInfo.decimals) +
+    toDisplay(amounts[tokenInfo.denom], tokenInfo.decimals) +
     toSubDisplay(amounts, tokenInfo)
   );
 };

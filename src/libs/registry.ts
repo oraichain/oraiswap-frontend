@@ -24,14 +24,14 @@ export const customAminoTypes = {
       amount,
       bridgeFee,
       chainFee,
-      evmChainPrefix,
+      evmChainPrefix
     }: MsgSendToEth) => ({
       sender,
       eth_dest: ethDest,
       amount,
       bridge_fee: bridgeFee,
       chain_fee: chainFee,
-      evm_chain_prefix: evmChainPrefix,
+      evm_chain_prefix: evmChainPrefix
     }),
     fromAmino: ({
       sender,
@@ -39,15 +39,15 @@ export const customAminoTypes = {
       amount,
       bridge_fee,
       chain_fee,
-      evm_chain_prefix,
+      evm_chain_prefix
     }): MsgSendToEth => ({
       sender,
       ethDest: eth_dest,
       amount,
       bridgeFee: bridge_fee,
       chainFee: chain_fee,
-      evmChainPrefix: evm_chain_prefix,
-    }),
+      evmChainPrefix: evm_chain_prefix
+    })
   },
   '/ibc.applications.transfer.v1.MsgTransfer': {
     aminoType: 'cosmos-sdk/MsgTransfer',
@@ -59,7 +59,7 @@ export const customAminoTypes = {
       receiver,
       timeoutHeight,
       timeoutTimestamp,
-      memo,
+      memo
     }: MsgTransfer) => ({
       source_port: sourcePort,
       source_channel: sourceChannel,
@@ -68,7 +68,7 @@ export const customAminoTypes = {
       receiver: receiver,
       timeout_height: timeoutHeight,
       timeout_timestamp: timeoutTimestamp,
-      memo,
+      memo
     }),
     fromAmino: ({
       source_port,
@@ -78,7 +78,7 @@ export const customAminoTypes = {
       receiver,
       timeout_height,
       timeout_timestamp,
-      memo,
+      memo
     }): MsgTransfer => ({
       sourcePort: source_port,
       sourceChannel: source_channel,
@@ -87,9 +87,9 @@ export const customAminoTypes = {
       receiver,
       timeoutHeight: timeout_height,
       timeoutTimestamp: timeout_timestamp,
-      memo,
-    }),
-  },
+      memo
+    })
+  }
 };
 
 export default customRegistry;

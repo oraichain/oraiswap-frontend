@@ -48,10 +48,7 @@ const SwapComponent: React.FC<{
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
-  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([
-    0,
-    0
-  ]);
+  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
   const dispatch = useDispatch();
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
@@ -99,7 +96,7 @@ const SwapComponent: React.FC<{
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken
-    ? BigInt(amounts[fromToken.denom]) + subAmountFrom 
+    ? BigInt(amounts[fromToken.denom]) + subAmountFrom
     : BigInt(0);
   const toTokenBalance = toToken
     ? BigInt(amounts[toToken.denom]) + subAmountTo
@@ -170,12 +167,12 @@ const SwapComponent: React.FC<{
       const msgConvertsFrom = await generateConvertErc20Cw20Message(
         amounts,
         fromTokenInfoData,
-        address,
+        address
       );
       const msgConvertTo = await generateConvertErc20Cw20Message(
         amounts,
         toTokenInfoData,
-        address,
+        address
       );
 
       const msgs = await generateContractMessages({
@@ -297,7 +294,7 @@ const SwapComponent: React.FC<{
             balance={{
               amount: toTokenBalance.toString(),
               denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals,
+              decimals: toTokenInfoData?.decimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -338,7 +335,7 @@ const SwapComponent: React.FC<{
           </div>
           <TokenBalance
             balance={{
-              amount: simulateData ? simulateData?.amount : 0,
+              amount: simulateData?.amount ?? '0',
               denom: toTokenInfoData?.symbol ?? ''
             }}
             decimalScale={6}

@@ -18,23 +18,33 @@ import { TokenInfo } from 'types/token';
 import useConfigReducer from 'hooks/useConfigReducer';
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
 import isEqual from 'lodash/isEqual';
+import { RewardInfoResponseItem } from 'libs/contracts';
+import { toDecimal } from 'libs/utils';
+import { Asset } from 'libs/contracts';
+import { RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
 
 const cx = cn.bind(styles);
 
 interface LiquidityMiningProps {
   setIsOpenBondingModal: any;
-  lpTokenBalance: number;
-  rewardInfoFirst: any;
+  lpTokenBalance: string;
+  rewardInfoFirst: RewardInfoResponseItem;
   lpTokenInfoData: TokenInfo;
   setIsOpenUnbondModal: any;
-  pairAmountInfoData: any;
+  pairAmountInfoData: PairAmountInfo;
   assetToken: TokenItemType;
   onBondingAction: any;
-  totalRewardInfoData: any;
-  rewardPerSecInfoData: any;
+  totalRewardInfoData: RewardInfoResponse;
+  rewardPerSecInfoData: Asset[];
   stakingPoolInfoData: any;
   pairInfoData: any;
 }
+
+type TokenItemTypeExtended = TokenItemType & {
+  amount: bigint;
+  rewardPerSec: number;
+  pendingWithdraw: bigint;
+};
 
 const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   setIsOpenBondingModal,
@@ -51,7 +61,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   pairInfoData
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
-  const [pendingRewards, setPendingRewards] = useState<[any]>();
+  const [pendingRewards, setPendingRewards] =
+    useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
 
   useEffect(() => {
@@ -60,62 +71,40 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       // return () => clearInterval(interval);
       setNewReward();
     }
-  }, [
-    JSON.stringify(totalRewardInfoData),
-    JSON.stringify(rewardPerSecInfoData),
-    JSON.stringify(stakingPoolInfoData)
-  ]);
+  }, [totalRewardInfoData, rewardPerSecInfoData, stakingPoolInfoData]);
 
   const setNewReward = () => {
-    let totalRewardAmount = !!totalRewardInfoData.reward_infos.length
-      ? +totalRewardInfoData.reward_infos[0]?.pending_reward
-      : 0;
+    const totalRewardAmount = BigInt(
+      totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0
+    );
 
-    const totalRewardPerSec =
-      rewardPerSecInfoData.length > 1
-        ? rewardPerSecInfoData.reduce((a: any, b: any) => +a.amount + +b.amount)
-        : +rewardPerSecInfoData[0].amount;
+    const totalRewardPerSec = rewardPerSecInfoData
+      .map((a) => BigInt(a.amount))
+      .reduce((a, b) => a + b, BigInt(0));
 
-    let res = rewardPerSecInfoData.map((r: any) => {
-      const pendingWithdraw = +(
-        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e: any) =>
+    let res = rewardPerSecInfoData.map((r) => {
+      const pendingWithdraw = BigInt(
+        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) =>
           isEqual(e.info, r.info)
         )?.amount ?? 0
       );
 
       const amount =
-        Math.round((totalRewardAmount * +r.amount) / totalRewardPerSec) +
+        (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec +
         pendingWithdraw;
-      if (!!r.info.token) {
-        let token = filteredTokens.find(
-          (t) => t.contractAddress === r.info.token.contract_addr!
-        );
-        // const usdValue = toDisplay(//   amount,
-        //   token!.decimals
-        // ) *
-        //   prices[token!.coingeckoId];
-        return {
-          ...token,
-          amount,
-          rewardPerSec: +r.amount,
-          pendingWithdraw
-          // usdValue
-        };
-      } else {
-        const token = tokenMap[r.info.native_token.denom];
 
-        // const usdValue = toDisplay(//   amount,
-        //   token!.decimals
-        // ) *
-        //   prices[token!.coingeckoId];
-        return {
-          ...token,
-          amount,
-          rewardPerSec: +r.amount,
-          pendingWithdraw
-          // usdValue
-        };
-      }
+      const token = r.info.token
+        ? filteredTokens.find(
+            (t) => t.contractAddress === r.info.token.contract_addr!
+          )
+        : tokenMap[r.info.native_token.denom];
+
+      return {
+        ...token,
+        amount,
+        rewardPerSec: Number(r.amount),
+        pendingWithdraw
+      };
     });
 
     setPendingRewards(res);
@@ -206,9 +195,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 <div>
                   <TokenBalance
                     balance={{
-                      amount: rewardInfoFirst
-                        ? Number(rewardInfoFirst.bond_amount) ?? 0
-                        : 0,
+                      amount: rewardInfoFirst?.bond_amount ?? '0',
                       decimals: lpTokenInfoData.decimals,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
@@ -223,10 +210,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     {!!pairAmountInfoData && !!lpTokenInfoData && (
                       <TokenBalance
                         balance={
-                          (rewardInfoFirst
-                            ? rewardInfoFirst.bond_amount *
-                              pairAmountInfoData.usdAmount
-                            : 0) / +lpTokenInfoData.total_supply
+                          toDecimal(
+                            BigInt(rewardInfoFirst?.bond_amount ?? 0),
+                            BigInt(lpTokenInfoData.total_supply)
+                          ) * pairAmountInfoData.tokenUsd
                         }
                         className={cx('amount-usd')}
                         decimalScale={2}
@@ -262,7 +249,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             <div className={cx('container', 'container_earning')}>
               <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
-                pendingRewards.map((r: any, idx) => (
+                pendingRewards.map((r, idx) => (
                   <div key={idx}>
                     <div className={cx('amount')}>
                       <TokenBalance

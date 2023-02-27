@@ -44,12 +44,6 @@ const AirDrop: FunctionComponent = () => {
   const [oraiAddress, setOraiAddress] = useState('');
   const [otherNetworkAddr, setOtherNetworkAddr] = useState('');
 
-  const toAmount = (amount: number) => {
-    if (typeof amount === 'number' && isFinite(amount) && !isNaN(amount))
-      return Number(BigInt(amount) / BigInt(1_000_000));
-    return 0;
-  };
-
   const filterAddress = (prefix: string, address: string) => {
     const totalLength = prefix.length + 39;
     try {
@@ -104,9 +98,9 @@ const AirDrop: FunctionComponent = () => {
     let res: any = (await axios.get(url, { timeout })).data;
 
     let response = {
-      delegatedAmount: toAmount(res.delegated),
-      undelegatedAmount: toAmount(res.undelegated),
-      available: toAmount(res.available)
+      delegatedAmount: res.delegated,
+      undelegatedAmount: res.undelegated,
+      available: res.available
     };
 
     return response;

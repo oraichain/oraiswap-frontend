@@ -1,5 +1,4 @@
 import { collectWallet } from './cosmjs';
-import { StargateClient } from '@cosmjs/stargate';
 import { kawaiiTokens } from 'config/bridgeTokens';
 import { KAWAII_API_DEV, KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
 import {
@@ -11,9 +10,10 @@ import {
 } from '@oraichain/kawaiiverse-txs';
 import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
-import { OfflineDirectSigner } from '@cosmjs/proto-signing';
-import axios from 'rest/request';
+
 import { getEvmAddress } from './utils';
+import { OfflineDirectSigner } from '@keplr-wallet/types';
+import { Coin, StargateClient } from '@cosmjs/stargate';
 
 async function getAccountInfo(accAddress: string) {
   return await fetch(
