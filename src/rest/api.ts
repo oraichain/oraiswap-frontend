@@ -108,9 +108,6 @@ async function fetchPoolInfoAmount(
       (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
-    if (Object.isExtensible(cachedPairs)) {
-      cachedPairs[pair.contract_addr] = poolInfo;
-    }
   } else {
     // handle multi-swap case
     const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
@@ -123,10 +120,6 @@ async function fetchPoolInfoAmount(
       (await Contract.pair(toPairInfo.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
-    if (Object.isExtensible(cachedPairs)) {
-      cachedPairs[fromPairInfo.contract_addr] = fromPoolInfo;
-      cachedPairs[toPairInfo.contract_addr] = toPoolInfo;
-    }
   }
 
   return { offerPoolAmount, askPoolAmount };

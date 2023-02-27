@@ -108,12 +108,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     // const token1 = pairInfoData?.token1,
     //   token2 = pairInfoData?.token2;
 
-    const newCachedPairs = { ...cachedPairs };
-
     const poolOraiUsdData = await fetchPoolInfoAmount(
       tokenMap[ORAI],
-      tokenMap[STABLE_DENOM],
-      newCachedPairs
+      tokenMap[STABLE_DENOM]
     );
     const oraiPrice =
       poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
@@ -123,22 +120,15 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
         ? [pairInfoData.token2, pairInfoData.token1]
         : [pairInfoData.token1, pairInfoData.token2];
 
-    const poolData = await fetchPoolInfoAmount(token1, token2, newCachedPairs);
+    const poolData = await fetchPoolInfoAmount(token1, token2);
     let oraiValue = poolData.askPoolAmount;
     // calculate in orai amount
     if (token2.denom !== ORAI) {
-      const poolOraiData = await fetchPoolInfoAmount(
-        token1,
-        tokenMap[ORAI],
-        newCachedPairs
-      );
+      const poolOraiData = await fetchPoolInfoAmount(token1, tokenMap[ORAI]);
       oraiValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
     }
 
     const usdtValue = toDisplay(oraiValue, token2.decimals) * oraiPrice;
-
-    // update cachedPairs
-    dispatch(updatePairs(newCachedPairs));
 
     return {
       token1Amount: poolData.askPoolAmount,
@@ -225,10 +215,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
   const liquidity1 = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply
+    ? Math.round(
+        (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) /
+          lpTotalSupply
+      )
     : 0;
   const liquidity2 = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply
+    ? Math.round(
+        (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) /
+          lpTotalSupply
+      )
     : 0;
   const liquidity1Usd = lpTokenBalance
     ? (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
