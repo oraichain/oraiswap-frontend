@@ -105,9 +105,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const getPairAmountInfo = async () => {
-    // const token1 = pairInfoData?.token1,
-    //   token2 = pairInfoData?.token2;
-
     const poolOraiUsdData = await fetchPoolInfoAmount(
       tokenMap[ORAI],
       tokenMap[STABLE_DENOM]
