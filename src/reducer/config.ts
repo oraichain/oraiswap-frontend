@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { KeyFilterPool } from 'pages/Pools';
 
 export type ChainInfoType = {
   networkType?: string;
@@ -26,6 +27,7 @@ export interface ConfigState {
   apr: {
     [key: string]: number;
   };
+  filterDefaultPool: KeyFilterPool;
 }
 
 const initialState: ConfigState = {
@@ -41,7 +43,8 @@ const initialState: ConfigState = {
   hideOraichainSmallAmount: false,
   theme: 'dark',
   coingecko: {},
-  apr: {}
+  apr: {},
+  filterDefaultPool: KeyFilterPool.all_pool,
 };
 
 export const configSlice = createSlice({

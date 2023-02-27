@@ -31,18 +31,18 @@ import sumBy from 'lodash/sumBy';
 
 interface PoolsProps {}
 
-enum KeyFilter {
-  my_pool,
-  all_pool
+export enum KeyFilterPool {
+  my_pool = 'my_pool',
+  all_pool = 'all_pool'
 }
 
-const LIST_FILTER = [
+const LIST_FILTER_POOL = [
   {
-    key: KeyFilter.all_pool,
+    key: KeyFilterPool.all_pool,
     text: 'All Pools'
   },
   {
-    key: KeyFilter.my_pool,
+    key: KeyFilterPool.my_pool,
     text: 'My Pools'
   }
 ];
@@ -150,7 +150,7 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>(
     []
   );
-  const [typeFilter, setTypeFilter] = useState(KeyFilter.all_pool);
+  const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
 
   const listMyPool = useMemo(() => {
     return pairInfos.filter(
@@ -159,7 +159,7 @@ const ListPools = memo<{
   }, [myPairsData, pairInfos]);
 
   useEffect(() => {
-    if (typeFilter === KeyFilter.my_pool) {
+    if (typeFilter === KeyFilterPool.my_pool) {
       setFilteredPairInfos(listMyPool);
     } else {
       setFilteredPairInfos(pairInfos);
@@ -169,7 +169,7 @@ const ListPools = memo<{
   const filterPairs = useCallback(
     (text: string) => {
       const listPairs =
-        typeFilter === KeyFilter.all_pool ? pairInfos : listMyPool;
+        typeFilter === KeyFilterPool.all_pool ? pairInfos : listMyPool;
       if (!text) {
         return setFilteredPairInfos(listPairs);
       }
@@ -191,7 +191,7 @@ const ListPools = memo<{
     <div className={styles.listpools}>
       <div className={styles.listpools_header}>
         <div className={styles.listpools_filter}>
-          {LIST_FILTER.map((item) => (
+          {LIST_FILTER_POOL.map((item) => (
             <div
               key={item.key}
               style={{
