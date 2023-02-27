@@ -387,6 +387,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               {lpTokenInfoData && assetToken && (
                 <LiquidityMining
                   setIsOpenBondingModal={setIsOpenBondingModal}
+                  lpTokenBalance={lpTokenBalance}
                   rewardInfoFirst={rewardInfoFirst}
                   lpTokenInfoData={lpTokenInfoData}
                   setIsOpenUnbondModal={setIsOpenUnbondModal}
