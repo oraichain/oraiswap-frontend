@@ -92,7 +92,7 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
-  cachedPairs?: { [contract_addr: string]: PoolResponse }
+  cachedPairs?: PairDetails
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);

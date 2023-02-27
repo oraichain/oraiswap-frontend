@@ -5,8 +5,6 @@ import cn from 'classnames/bind';
 import { getPair } from 'config/pools';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchPairInfo,
-  fetchPoolInfoAmount,
   generateContractMessages,
   fetchTokenAllowance,
   ProvideQuery,

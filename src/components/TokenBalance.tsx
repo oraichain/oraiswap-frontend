@@ -15,7 +15,7 @@ type Props = {
 
 const parseBalance = (balance: BalanceProp): number => {
   // round number for DisplayComponent
-  const displayAmount = Math.trunc(Number(balance.amount));
+  const displayAmount = Number(balance.amount);
   if (!balance.decimals) return displayAmount;
 
   return toDisplay(displayAmount, balance.decimals);

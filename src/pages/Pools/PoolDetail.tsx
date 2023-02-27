@@ -17,7 +17,7 @@ import {
   fetchPoolApr
 } from 'rest/api';
 
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
@@ -105,64 +105,47 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const getPairAmountInfo = async () => {
-    const token1 = pairInfoData?.token1,
-      token2 = pairInfoData?.token2;
+    // const token1 = pairInfoData?.token1,
+    //   token2 = pairInfoData?.token2;
 
-    let oraiPrice = 0;
     const newCachedPairs = { ...cachedPairs };
-    const poolData = await fetchPoolInfoAmount(
-      token1!,
-      token2!,
+
+    const poolOraiUsdData = await fetchPoolInfoAmount(
+      tokenMap[ORAI],
+      tokenMap[STABLE_DENOM],
       newCachedPairs
     );
-    let _poolData: any = {};
-    if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
-      oraiPrice = poolData.askPoolAmount / poolData.offerPoolAmount;
-    }
-    if (token1?.denom === MILKY && token2?.denom === STABLE_DENOM) {
-      _poolData = await fetchPoolInfoAmount(
-        poolTokens.find((token) => token.denom === MILKY)!,
-        poolTokens.find((token) => token.denom === STABLE_DENOM)!,
+    const oraiPrice =
+      poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
+
+    const [token1, token2] =
+      pairInfoData.token1.denom === ORAI
+        ? [pairInfoData.token2, pairInfoData.token1]
+        : [pairInfoData.token1, pairInfoData.token2];
+
+    const poolData = await fetchPoolInfoAmount(token1, token2, newCachedPairs);
+    let oraiValue = poolData.askPoolAmount;
+    // calculate in orai amount
+    if (token2.denom !== ORAI) {
+      const poolOraiData = await fetchPoolInfoAmount(
+        token1,
+        tokenMap[ORAI],
         newCachedPairs
       );
-      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
-    } else {
-      _poolData = await fetchPoolInfoAmount(
-        poolTokens.find((token) => token.denom === ORAI)!,
-        poolTokens.find((token) => token.denom === STABLE_DENOM)!,
-        newCachedPairs
-      );
-      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
+      oraiValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
     }
+
+    const usdtValue = toDisplay(oraiValue, token2.decimals) * oraiPrice;
 
     // update cachedPairs
     dispatch(updatePairs(newCachedPairs));
 
-    let halfValue = 0;
-    if (token1?.denom === ORAI) {
-      const oraiValue =
-        toDisplay(poolData.offerPoolAmount, token1.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token2?.denom === ORAI) {
-      const oraiValue =
-        toDisplay(poolData.askPoolAmount, token2.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token1?.denom === MILKY) {
-      const oraiValue =
-        toDisplay(_poolData.offerPoolAmount, token1.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token2?.denom === MILKY) {
-      const oraiValue =
-        toDisplay(_poolData.askPoolAmount, token2.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    }
-
     return {
-      token1Amount: poolData.offerPoolAmount,
-      token2Amount: poolData.askPoolAmount,
-      token1Usd: halfValue,
-      token2Usd: halfValue,
-      usdAmount: 2 * halfValue,
+      token1Amount: poolData.askPoolAmount,
+      token2Amount: poolData.offerPoolAmount,
+      token1Usd: usdtValue,
+      token2Usd: usdtValue,
+      usdAmount: 2 * usdtValue,
       ratio: poolData.offerPoolAmount / poolData.askPoolAmount
     };
   };
