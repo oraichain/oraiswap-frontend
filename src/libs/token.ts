@@ -24,14 +24,17 @@ import {
 import { flatten } from 'lodash';
 import tokenABI from 'config/abi/erc20.json';
 import { ContractCallResults, Multicall } from './ethereum-multicall';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-
 export class CacheTokens {
   private readonly dispatch;
   private readonly address: string;
   public constructor({ dispatch, address }) {
     this.dispatch = dispatch;
     this.address = address;
+  }
+
+  public async loadAllToken(metamaskAddress: string) {
+    this.loadTokensCosmos();
+    this.loadTokensEvmKwt(metamaskAddress);
   }
 
   public async loadTokensCosmos() {

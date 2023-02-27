@@ -158,7 +158,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
     const amount2 = floatValue
-      ? toAmount(+floatValue, token2InfoData!.decimals)
+      ? toAmount(floatValue, token2InfoData!.decimals)
       : BigInt(0);
     const estimatedLP =
       (amount2 / (amount2 + BigInt(pairAmountInfoData.token2Amount as number))) *
@@ -419,7 +419,7 @@ const LiquidityModal: FC<ModalProps> = ({
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             allowNegative={false}
             onChange={(e: any) => {
-              onChangeAmount1(e.target.value.replaceAll(',', ''));
+              onChangeAmount1(Number(e.target.value.replaceAll(',', '')));
             }}
           />
         </div>
@@ -487,7 +487,7 @@ const LiquidityModal: FC<ModalProps> = ({
             allowNegative={false}
             value={amountToken2 ?? ''}
             onChange={(e: any) => {
-              onChangeAmount2(e.target.value.replaceAll(',', ''));
+              onChangeAmount2(Number(e.target.value.replaceAll(',', '')));
             }}
           />
         </div>

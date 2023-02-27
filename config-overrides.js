@@ -44,7 +44,7 @@ const rewiredEsbuild = (config) => {
           loader: require.resolve('esbuild-loader'),
           options: {
             loader: useTypeScript ? 'tsx' : 'jsx',
-            // drop: ['console'],
+            drop: ['console'],
             target
           }
         });

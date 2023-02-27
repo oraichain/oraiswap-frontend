@@ -18,6 +18,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
+import { CacheTokens } from 'libs/token';
 import { removeToken } from 'reducer/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 
@@ -31,6 +32,7 @@ const App = () => {
   const [persistVersion, setPersistVersion] =
     useConfigReducer('persistVersion');
   const dispatch = useDispatch();
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
 
   // clear persist storage when update version
   useEffect(() => {
@@ -74,12 +76,18 @@ const App = () => {
     }
 
     if (newAddress) {
-      if (newAddress !== address) {
-        dispatch(removeToken());
-      }
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
         setAddress('');
+      }else {
+        const accounts = window?.ethereum && await window.ethereum.request({
+          method: 'eth_accounts',
+          params: [60]
+        }) || [''];
+        CacheTokens.factory({
+          dispatch,
+          address: newAddress
+        }).loadAllToken(accounts?.[0] || metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {

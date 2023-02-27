@@ -269,7 +269,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               <>
                 <button
                   className={styles.tfBtn}
-                  disabled={transferLoading}
+                  disabled={transferLoading || !addressTransfer}
                   onClick={async (event) => {
                     event.stopPropagation();
                     try {
@@ -305,7 +305,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             return (
               <>
                 <button
-                  disabled={transferLoading}
+                  disabled={transferLoading || !addressTransfer}
                   className={styles.tfBtn}
                   onClick={async (event) => {
                     event.stopPropagation();
@@ -361,7 +361,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             return (
               <button
                 className={styles.tfBtn}
-                disabled={transferLoading}
+                disabled={transferLoading || !addressTransfer}
                 onClick={async (event) => {
                   event.stopPropagation();
                   try {
