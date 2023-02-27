@@ -180,8 +180,9 @@
       // margin-top: 25px;
 
       &.tokens {
-        min-width: 70%;
+        min-width: 500px;
         display: flex;
+        flex:1;
         flex-direction: row;
         gap: 30px;
 

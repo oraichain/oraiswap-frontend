@@ -80,8 +80,10 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
           isEqual(e.info, r.info)
         )?.amount ?? 0
       );
+
       const amount =
-        (totalRewardAmount * +r.amount) / totalRewardPerSec + pendingWithdraw;
+        Math.round((totalRewardAmount * +r.amount) / totalRewardPerSec) +
+        pendingWithdraw;
       if (!!r.info.token) {
         let token = filteredTokens.find(
           (t) => t.contractAddress === r.info.token.contract_addr!
@@ -204,6 +206,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       amount: rewardInfoFirst
                         ? Number(rewardInfoFirst.bond_amount) ?? 0
                         : 0,
+                      decimals: lpTokenInfoData.decimals,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
                           ? lpTokenInfoData?.symbol.substring(1)

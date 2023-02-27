@@ -16,7 +16,6 @@ import {
   fetchTokenInfo,
   generateContractMessages,
   generateConvertErc20Cw20Message,
-  getSubAmountDetails,
   simulateSwap,
   SwapQuery,
   Type

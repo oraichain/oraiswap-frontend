@@ -14,10 +14,11 @@ import {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchPoolApr
+  fetchPoolApr,
+  getPairAmountInfo
 } from 'rest/api';
 
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
@@ -28,7 +29,7 @@ import { RootState } from 'store/configure';
 import { useDispatch, useSelector } from 'react-redux';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { updateLpPools } from 'reducer/token';
+import { updateLpPools, updatePairs } from 'reducer/token';
 import { toDisplay } from 'libs/utils';
 
 const cx = cn.bind(styles);
@@ -45,6 +46,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useConfigReducer('address');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const dispatch = useDispatch();
   const setCachedLpPools = (payload: LpPoolDetails) =>
     dispatch(updateLpPools(payload));
@@ -103,59 +105,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setCachedLpPools(lpTokenData);
   };
 
-  const getPairAmountInfo = async () => {
-    const token1 = pairInfoData?.token1,
-      token2 = pairInfoData?.token2;
-
-    let oraiPrice = 0;
-
-    const poolData = await fetchPoolInfoAmount(token1!, token2!);
-    let _poolData: any = {};
-    if (token1?.denom === ORAI && token2?.denom === STABLE_DENOM) {
-      oraiPrice = poolData.askPoolAmount / poolData.offerPoolAmount;
-    }
-    if (token1?.denom === MILKY && token2?.denom === STABLE_DENOM) {
-      _poolData = await fetchPoolInfoAmount(
-        poolTokens.find((token) => token.denom === MILKY)!,
-        poolTokens.find((token) => token.denom === STABLE_DENOM)!
-      );
-      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
-    } else {
-      _poolData = await fetchPoolInfoAmount(
-        poolTokens.find((token) => token.denom === ORAI)!,
-        poolTokens.find((token) => token.denom === STABLE_DENOM)!
-      );
-      oraiPrice = _poolData.askPoolAmount / _poolData.offerPoolAmount;
-    }
-    let halfValue = 0;
-    if (token1?.denom === ORAI) {
-      const oraiValue =
-        toDisplay(poolData.offerPoolAmount, token1.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token2?.denom === ORAI) {
-      const oraiValue =
-        toDisplay(poolData.askPoolAmount, token2.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token1?.denom === MILKY) {
-      const oraiValue =
-        toDisplay(_poolData.offerPoolAmount, token1.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    } else if (token2?.denom === MILKY) {
-      const oraiValue =
-        toDisplay(_poolData.askPoolAmount, token2.decimals) * oraiPrice;
-      halfValue = oraiValue;
-    }
-
-    return {
-      token1Amount: poolData.offerPoolAmount,
-      token2Amount: poolData.askPoolAmount,
-      token1Usd: halfValue,
-      token2Usd: halfValue,
-      usdAmount: 2 * halfValue,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
-    };
-  };
-
   const onBondingAction = () => {
     refetchRewardInfo();
   };
@@ -172,7 +121,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
     ['pair-amount-info', pairInfoData],
     () => {
-      return getPairAmountInfo();
+      return getPairAmountInfo(pairInfoData.token1, pairInfoData.token2);
     },
     {
       enabled: !!pairInfoData,
@@ -231,10 +180,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
   const liquidity1 = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) / lpTotalSupply
+    ? Math.round(
+        (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) /
+          lpTotalSupply
+      )
     : 0;
   const liquidity2 = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) / lpTotalSupply
+    ? Math.round(
+        (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) /
+          lpTotalSupply
+      )
     : 0;
   const liquidity1Usd = lpTokenBalance
     ? (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
@@ -269,9 +224,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     pairInfoData.token2!.name
                   }`}</div>
                   <TokenBalance
-                    balance={
-                      pairAmountInfoData ? +pairAmountInfoData?.usdAmount : 0
-                    }
+                    balance={pairAmountInfoData?.usdAmount}
                     className={cx('value')}
                     decimalScale={2}
                   />
@@ -287,7 +240,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               )}
             </div>
             <div className={cx('info')}>
-              {!!pairAmountInfoData && (
+              {!!pairAmountInfoData && lpTokenInfoData && (
                 <div className={cx('row')}>
                   <div className={cx('container', 'tokens')}>
                     <div className={cx('available-tokens')}>
@@ -296,8 +249,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div>
                           <TokenBalance
                             balance={{
-                              amount: lpTokenBalance ?? 0,
-                              denom: `${lpTokenInfoData?.symbol}`
+                              amount: lpTokenBalance,
+                              decimals: lpTokenInfoData.decimals,
+                              denom: lpTokenInfoData.symbol
                             }}
                             decimalScale={6}
                             className={cx('amount')}
@@ -326,14 +280,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: liquidity1 ?? 0,
-                              denom: ''
+                              amount: liquidity1,
+                              decimals: pairInfoData.token1.decimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={liquidity1Usd ?? 0}
+                            balance={liquidity1Usd}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -353,14 +307,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: liquidity2 ?? 0,
-                              denom: ''
+                              amount: liquidity2,
+                              decimals: pairInfoData.token2.decimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={liquidity2Usd ?? 0}
+                            balance={liquidity2Usd}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -389,8 +343,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData?.token1Amount,
-                              denom: ''
+                              amount: pairAmountInfoData.token1Amount,
+                              decimals: pairInfoData.token1.decimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -412,8 +366,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData?.token2Amount,
-                              denom: ''
+                              amount: pairAmountInfoData.token2Amount,
+                              decimals: pairInfoData.token2.decimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}

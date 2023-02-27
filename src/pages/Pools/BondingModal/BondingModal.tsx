@@ -42,16 +42,16 @@ const BondingModal: FC<ModalProps> = ({
   onBondingAction,
   pairInfoData
 }) => {
-  const [bondAmount, setBondAmount] = useState('');
+  const [bondAmount, setBondAmount] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
   const [address] = useConfigReducer('address');
 
-  const onChangeAmount = (value: string) => {
+  const onChangeAmount = (value: number) => {
     setBondAmount(value);
   };
 
-  const handleBond = async (amount: string) => {
-    const parsedAmount = +toAmount(amount, lpTokenInfoData!.decimals);
+  const handleBond = async (amount: number) => {
+    const parsedAmount = Number(toAmount(amount, lpTokenInfoData!.decimals));
 
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
@@ -131,7 +131,8 @@ const BondingModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`
+                denom: `${lpTokenInfoData?.symbol}`,
+                decimals: 6
               }}
               decimalScale={6}
               prefix="Balance: "
@@ -140,9 +141,7 @@ const BondingModal: FC<ModalProps> = ({
             <div
               className={cx('btn')}
               onClick={() =>
-                onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals}`
-                )
+                onChangeAmount(lpTokenBalance / 10 ** lpTokenInfoData.decimals)
               }
             >
               MAX
@@ -151,7 +150,7 @@ const BondingModal: FC<ModalProps> = ({
               className={cx('btn')}
               onClick={() =>
                 onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals / 2}`
+                  lpTokenBalance / 10 ** lpTokenInfoData.decimals / 2
                 )
               }
             >
@@ -172,7 +171,7 @@ const BondingModal: FC<ModalProps> = ({
               // type="input"
               value={bondAmount ?? ''}
               onChange={(e: { target: { value: string } }) => {
-                onChangeAmount(e.target.value.replaceAll(',', ''));
+                onChangeAmount(Number(e.target.value));
               }}
             />
           </div>
