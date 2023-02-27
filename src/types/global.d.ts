@@ -11,6 +11,15 @@ import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
+  type IBCInfoMsg = {
+    sourcePort: string;
+    sourceChannel: string;
+    amount: string;
+    denom: string;
+    sender: string;
+    receiver: string;
+    timeoutTimestamp: number;
+  };
   type PairDetails = {
     [key: string]: PoolResponse;
   };
@@ -173,7 +182,5 @@ declare global {
     }
   }
 }
-
-declare module 'crypto-hashing';
 
 export {};

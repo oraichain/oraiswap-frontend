@@ -123,9 +123,9 @@ export default class KawaiiverseJs {
     coin
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
-    coin: { amount: string; denom: string };
+    coin: Coin;
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -182,7 +182,7 @@ export default class KawaiiverseJs {
     contractAddr
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
     amount: string;
     contractAddr?: string;
@@ -237,17 +237,9 @@ export default class KawaiiverseJs {
     customMessages
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
-    ibcInfo: {
-      sourcePort: string;
-      sourceChannel: string;
-      amount: string;
-      denom: string;
-      sender: string;
-      receiver: string;
-      timeoutTimestamp: number;
-    };
+    ibcInfo: IBCInfoMsg;
     customMessages?: any[];
   }) {
     try {
@@ -305,18 +297,10 @@ export default class KawaiiverseJs {
     contractAddr
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
     amount: string;
-    ibcInfo: {
-      sourcePort: string;
-      sourceChannel: string;
-      amount: string;
-      denom: string;
-      sender: string;
-      receiver: string;
-      timeoutTimestamp: number;
-    };
+    ibcInfo: IBCInfoMsg;
     contractAddr?: string;
   }) {
     try {
