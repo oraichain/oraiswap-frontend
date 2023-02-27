@@ -105,27 +105,37 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const getPairAmountInfo = async () => {
-    const poolOraiUsdData = await fetchPoolInfoAmount(
-      tokenMap[ORAI],
-      tokenMap[STABLE_DENOM]
+    let usdtValue = 0;
+    const poolData = await fetchPoolInfoAmount(
+      pairInfoData.token1,
+      pairInfoData.token2
     );
-    const oraiPrice =
-      poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
 
-    const [token1, token2] =
-      pairInfoData.token1.denom === ORAI
-        ? [pairInfoData.token2, pairInfoData.token1]
-        : [pairInfoData.token1, pairInfoData.token2];
+    if (pairInfoData.token2.denom === STABLE_DENOM) {
+      usdtValue = toDisplay(
+        poolData.askPoolAmount,
+        pairInfoData.token2.decimals
+      );
+    } else {
+      const poolOraiUsdData = await fetchPoolInfoAmount(
+        tokenMap[ORAI],
+        tokenMap[STABLE_DENOM]
+      );
+      const oraiPrice =
+        poolOraiUsdData.askPoolAmount / poolOraiUsdData.offerPoolAmount;
 
-    const poolData = await fetchPoolInfoAmount(token1, token2);
-    let oraiValue = poolData.askPoolAmount;
-    // calculate in orai amount
-    if (token2.denom !== ORAI) {
-      const poolOraiData = await fetchPoolInfoAmount(token1, tokenMap[ORAI]);
-      oraiValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
+      let oraiValue = poolData.askPoolAmount;
+      // calculate in orai amount
+      if (pairInfoData.token2.denom !== ORAI) {
+        const poolOraiData = await fetchPoolInfoAmount(
+          pairInfoData.token1,
+          tokenMap[ORAI]
+        );
+        oraiValue *= poolOraiData.askPoolAmount / poolOraiData.offerPoolAmount;
+      }
+      usdtValue =
+        toDisplay(oraiValue, pairInfoData.token2.decimals) * oraiPrice;
     }
-
-    const usdtValue = toDisplay(oraiValue, token2.decimals) * oraiPrice;
 
     return {
       token1Amount: poolData.askPoolAmount,
