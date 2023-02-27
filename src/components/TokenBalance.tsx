@@ -14,20 +14,20 @@ type Props = {
   className?: string;
 } & NumberFormatProps;
 
-const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
-  const parseBalance = (
-    balance:
-      | number
-      | {
-          amount: string | number;
-          decimals?: number;
-          denom: string;
-        }
-  ) => {
-    if (typeof balance === 'number') return balance;
-    return toDisplay(balance?.amount, balance?.decimals);
-  };
+const parseBalance = (
+  balance:
+    | number
+    | {
+        amount: string | number;
+        decimals?: number;
+        denom: string;
+      }
+) => {
+  if (typeof balance === 'number') return balance;
+  return toDisplay(balance?.amount, balance?.decimals);
+};
 
+const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
   const amount = parseBalance(balance);
 
   return (

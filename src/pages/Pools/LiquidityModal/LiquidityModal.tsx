@@ -145,7 +145,9 @@ const LiquidityModal: FC<ModalProps> = ({
     setRecentInput(1);
     setAmountToken1(floatValue);
     setAmountToken2(floatValue / pairAmountInfoData?.ratio);
-    const amount1 = floatValue ? Number(toAmount(+floatValue, token1InfoData!.decimals)) : 0;
+    const amount1 = floatValue
+      ? Number(toAmount(+floatValue, token1InfoData!.decimals))
+      : 0;
     const estimatedLP =
       (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
       +lpTokenInfoData.total_supply;
@@ -157,7 +159,9 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken2(floatValue);
     setAmountToken1(floatValue * pairAmountInfoData?.ratio);
 
-    const amount2 = floatValue ? Number(toAmount(+floatValue, token2InfoData!.decimals)) : 0;
+    const amount2 = floatValue
+      ? Number(toAmount(+floatValue, token2InfoData!.decimals))
+      : 0;
     const estimatedLP =
       (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
       +lpTokenInfoData.total_supply;
@@ -422,7 +426,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -530,8 +534,12 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = amountToken1 ? Number(toAmount(+amountToken1, token1InfoData!.decimals)) : 0,
-          amount2 = amountToken2 ? Number(toAmount(+amountToken2, token2InfoData!.decimals)) : 0;
+        const amount1 = amountToken1
+            ? Number(toAmount(+amountToken1, token1InfoData!.decimals))
+            : 0,
+          amount2 = amountToken2
+            ? Number(toAmount(+amountToken2, token2InfoData!.decimals))
+            : 0;
         let disableMsg: string;
         if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
         if (amount1 > token1Balance)
@@ -671,7 +679,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token1Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -701,7 +709,7 @@ const LiquidityModal: FC<ModalProps> = ({
                     (lpAmountBurn *
                       10 ** lpTokenInfoData.decimals *
                       pairAmountInfoData?.token2Amount) /
-                    +lpTokenInfoData!.total_supply
+                      +lpTokenInfoData!.total_supply
                   )}
                   className={cx('des')}
                   decimalScale={2}
@@ -712,7 +720,9 @@ const LiquidityModal: FC<ModalProps> = ({
         )}
       </div>
       {(() => {
-        const amount = lpAmountBurn ? Number(toAmount(+lpAmountBurn, lpTokenInfoData!.decimals)) : 0;
+        const amount = lpAmountBurn
+          ? Number(toAmount(+lpAmountBurn, lpTokenInfoData!.decimals))
+          : 0;
         let disableMsg: string;
         if (amount <= 0) disableMsg = 'Enter an amount';
         if (amount > lpTokenBalance)
