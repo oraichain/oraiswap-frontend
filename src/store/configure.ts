@@ -3,9 +3,10 @@ import tokenReducer from '../reducer/token';
 import configReducer from '../reducer/config';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import { PERSIST_CONFIG_KEY } from './constants';
 
 const rootPersistConfig = {
-  key: 'root',
+  key: PERSIST_CONFIG_KEY,
   storage
 };
 
