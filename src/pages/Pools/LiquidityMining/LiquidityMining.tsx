@@ -206,6 +206,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       amount: rewardInfoFirst
                         ? Number(rewardInfoFirst.bond_amount) ?? 0
                         : 0,
+                      decimals: lpTokenInfoData.decimals,
                       denom: `${
                         lpTokenInfoData?.symbol.charAt(0) === 'u'
                           ? lpTokenInfoData?.symbol.substring(1)
