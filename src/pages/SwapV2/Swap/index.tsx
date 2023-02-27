@@ -49,8 +49,8 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([
-    undefined,
-    undefined
+    0,
+    0
   ]);
   const dispatch = useDispatch();
   const [averageRatio, setAverageRatio] = useState('0');
@@ -171,13 +171,11 @@ const SwapComponent: React.FC<{
         amounts,
         fromTokenInfoData,
         address,
-        prices
       );
       const msgConvertTo = await generateConvertErc20Cw20Message(
         amounts,
         toTokenInfoData,
         address,
-        prices
       );
 
       const msgs = await generateContractMessages({
@@ -297,7 +295,7 @@ const SwapComponent: React.FC<{
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: toTokenBalance ? toTokenBalance : 0,
+              amount: toTokenBalance.toString(),
               denom: toTokenInfoData?.symbol ?? '',
               decimals: toTokenInfoData?.decimals,
             }}

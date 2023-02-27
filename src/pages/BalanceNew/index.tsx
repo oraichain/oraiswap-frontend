@@ -172,7 +172,7 @@ const Balance: React.FC<BalanceProps> = () => {
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) =>
-        loadNativeBalance(address, token.rpc)
+        loadNativeBalance(address, token)
       );
     }
   };
@@ -258,15 +258,29 @@ const Balance: React.FC<BalanceProps> = () => {
     forceUpdate(amountDetails);
   };
 
-  const loadNativeBalance = async (address: string, rpc: string) => {
-    const client = await StargateClient.connect(rpc);
+  const loadNativeBalance = async (
+    address: string,
+    tokenInfo: { chainId: string; rpc: string }
+  ) => {
+    const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
-    let amountDetails: AmountDetails = Object.fromEntries(
-      amountAll
-        .filter((coin) => tokenMap[coin.denom])
-        .map((coin) => [coin.denom, coin.amount])
+    let amountDetails: AmountDetails = {};
+
+    // reset native balances
+    filteredTokens
+      .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
+      .forEach((t) => {
+        amountDetails[t.denom] = '0';
+      });
+
+    Object.assign(
+      amountDetails,
+      Object.fromEntries(
+        amountAll
+          .filter((coin) => tokenMap[coin.denom])
+          .map((coin) => [coin.denom, coin.amount])
+      )
     );
-    console.log('loadNativeBalance', address);
     forceUpdate(amountDetails);
   };
 
@@ -504,7 +518,7 @@ const Balance: React.FC<BalanceProps> = () => {
       value: MsgTransfer.fromPartial({
         sourcePort: ibcInfo.source,
         sourceChannel: ibcInfo.channel,
-        token: amount,
+        token: evmAmount,
         sender: fromAddress,
         receiver: toAddress,
         memo: ibcMemo,

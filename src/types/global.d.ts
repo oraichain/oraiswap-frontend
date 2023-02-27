@@ -97,8 +97,8 @@ declare global {
   }
 
   interface PoolInfo {
-    offerPoolAmount: number;
-    askPoolAmount: number;
+    offerPoolAmount: bigint;
+    askPoolAmount: bigint;
   }
 
   interface ChildKeyData {
