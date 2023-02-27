@@ -191,17 +191,55 @@ async function fetchDistributionInfo(
   return data;
 }
 
+<<<<<<< HEAD
+=======
+function getSubAmount(
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType,
+  prices?: CoinGeckoPrices<string>
+): AmountDetails {
+  // get all native balances that are from oraibridge (ibc/...)
+  const subAmounts = {};
+  if (tokenInfo.erc20Cw20Map) {
+    for (let mapping of tokenInfo.erc20Cw20Map) {
+      // update later
+      if (!amounts[mapping.erc20Denom]) continue;
+      const balance = amounts[mapping.erc20Denom].amount;
+      // need to parse amount from old decimal to new because incrementing balance with different decimal will lead to wrong result
+      const parsedBalance = toAmount(
+        toDisplay(balance, mapping.decimals.erc20Decimals),
+        mapping.decimals.cw20Decimals
+      );
+      subAmounts[`${mapping.prefix} ${tokenInfo.name}`] = {
+        amount: parsedBalance ?? 0,
+        usd:
+          toDisplay(parsedBalance, mapping.decimals.cw20Decimals) *
+            (prices?.[tokenInfo?.coingeckoId] ?? 0)
+      };
+    }
+  }
+  return subAmounts;
+}
+
+>>>>>>> 2b669e4a80de26635ddb6e22b78d13385fac9909
 async function generateConvertErc20Cw20Message(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
-  sender: string
+  sender: string,
+  prices?: CoinGeckoPrices<string>
 ) {
   let msgConverts: any[] = [];
   if (!tokenInfo.evmDenoms) return [];
   const subAmounts = getSubAmountDetails(amounts, tokenInfo);
   // we convert all mapped tokens to cw20 to unify the token
+<<<<<<< HEAD
   for (const denom in subAmounts) {
     const balance = subAmounts[denom];
+=======
+  for (let mapping of tokenInfo.erc20Cw20Map) {
+    const balanceSubAmount = getSubAmount(amounts, tokenInfo, prices);
+    const balance = calSumAmounts(balanceSubAmount);
+>>>>>>> 2b669e4a80de26635ddb6e22b78d13385fac9909
     // reset so we convert using native first
     const erc20TokenInfo = tokenMap[denom];
     if (balance) {
