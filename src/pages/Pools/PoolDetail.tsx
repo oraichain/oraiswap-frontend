@@ -197,7 +197,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
 
   const bondAmountUsd = rewardInfoFirst
-    ? toDecimal(BigInt(rewardInfoFirst.bond_amount), lpTotalSupply) *
+    ? toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), lpTotalSupply) *
       (pairAmountInfoData?.tokenUsd ?? 0)
     : 0;
 
