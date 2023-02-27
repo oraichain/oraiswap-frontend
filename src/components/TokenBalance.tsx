@@ -14,8 +14,11 @@ type Props = {
 } & NumberFormatProps;
 
 const parseBalance = (balance: BalanceProp): number => {
-  if (!balance.decimals) return Number(balance.amount);
-  return toDisplay(balance.amount, balance.decimals);
+  // round number for DisplayComponent
+  const displayAmount = Math.trunc(Number(balance.amount));
+  if (!balance.decimals) return displayAmount;
+
+  return toDisplay(displayAmount, balance.decimals);
 };
 
 const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
@@ -32,9 +35,13 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       displayType={'text'}
       thousandSeparator={true}
       decimalScale={0}
-      {...(!balanceProp.denom
+      {...(!balanceProp.decimals
         ? { prefix: '$' }
-        : { suffix: ` ${balanceProp.denom.toUpperCase()}` })}
+        : {
+            suffix: balanceProp.denom
+              ? ` ${balanceProp.denom.toUpperCase()}`
+              : ''
+          })}
       {...props}
     />
   );
