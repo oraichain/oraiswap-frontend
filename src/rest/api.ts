@@ -85,7 +85,7 @@ async function fetchPoolApr(contract_addr: string): Promise<number> {
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo) {
   return parseInt(
     poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount ||
-    '0'
+      '0'
   );
 }
 
@@ -206,14 +206,12 @@ async function generateConvertErc20Cw20Message(
     // reset so we convert using native first
     const erc20TokenInfo = tokenMap[denom];
     if (balance) {
-      const msgConvert = (
-        generateConvertMsgs({
-          type: Type.CONVERT_TOKEN,
-          sender,
-          inputAmount: balance,
-          inputToken: erc20TokenInfo
-        })
-      )[0];
+      const msgConvert = generateConvertMsgs({
+        type: Type.CONVERT_TOKEN,
+        sender,
+        inputAmount: balance,
+        inputToken: erc20TokenInfo
+      })[0];
       msgConverts.push(msgConvert);
     }
   }
@@ -247,15 +245,13 @@ async function generateConvertCw20Erc20Message(
         contractAddress: undefined,
         decimals: evmToken.decimals
       };
-      const msgConvert = (
-        generateConvertMsgs({
-          type: Type.CONVERT_TOKEN_REVERSE,
-          sender,
-          inputAmount: balance,
-          inputToken: tokenInfo,
-          outputToken
-        })
-      )[0];
+      const msgConvert = generateConvertMsgs({
+        type: Type.CONVERT_TOKEN_REVERSE,
+        sender,
+        inputAmount: balance,
+        inputToken: tokenInfo,
+        outputToken
+      })[0];
       msgConverts.push(msgConvert);
     }
   }
@@ -293,27 +289,27 @@ const generateSwapOperationMsgs = (
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: oraiInfo
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: oraiInfo,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: {

@@ -2,33 +2,28 @@ import React from 'react';
 import NumberFormat, { NumberFormatProps } from 'react-number-format';
 import { toDisplay } from 'libs/utils';
 
-type Props = {
-  balance:
-    | number
-    | {
-        amount: string | number;
-        decimals?: number;
-        denom: string;
-      };
+type BalanceProp = {
+  amount: string | number;
+  decimals?: number;
+  denom?: string;
+};
 
+type Props = {
+  balance: BalanceProp | number;
   className?: string;
 } & NumberFormatProps;
 
-const parseBalance = (
-  balance:
-    | number
-    | {
-        amount: string | number;
-        decimals?: number;
-        denom: string;
-      }
-) => {
-  if (typeof balance === 'number') return balance;
-  return toDisplay(balance?.amount, balance?.decimals);
+const parseBalance = (balance: BalanceProp): number => {
+  if (!balance.decimals) return Number(balance.amount);
+  return toDisplay(balance.amount, balance.decimals);
 };
 
 const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
-  const amount = parseBalance(balance);
+  const balanceProp: BalanceProp =
+    typeof balance === 'number'
+      ? { amount: balance }
+      : balance ?? { amount: 0 };
+  const amount = parseBalance(balanceProp);
 
   return (
     <NumberFormat
@@ -37,9 +32,9 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       displayType={'text'}
       thousandSeparator={true}
       decimalScale={0}
-      {...(typeof balance === 'number'
+      {...(!balanceProp.denom
         ? { prefix: '$' }
-        : { suffix: ` ${balance?.denom?.toUpperCase()}` })}
+        : { suffix: ` ${balanceProp.denom.toUpperCase()}` })}
       {...props}
     />
   );
