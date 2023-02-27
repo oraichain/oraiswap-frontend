@@ -64,6 +64,8 @@ const LiquidityModal: FC<ModalProps> = ({
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
+  const token1Amount = BigInt(pairAmountInfoData.token1Amount);
+  const token2Amount = BigInt(pairAmountInfoData.token2Amount);
   const [address] = useConfigReducer('address');
 
   const { data: prices } = useCoinGeckoPrices(
@@ -74,16 +76,16 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [amountToken1, setAmountToken1] = useState(0);
-  const [amountToken2, setAmountToken2] = useState(0);
+  const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
+  const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(0);
   const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const dispatch = useDispatch();
-  const token1Balance = Number(amounts[token1?.denom] ?? '0');
-  const token2Balance = Number(amounts[token2?.denom] ?? '0');
+  const token1Balance = BigInt(amounts[token1?.denom] ?? '0');
+  const token2Balance = BigInt(amounts[token2?.denom] ?? '0');
 
   const {
     data: token1AllowanceToPair,
@@ -125,43 +127,39 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   useEffect(() => {
-    if (!pairAmountInfoData?.ratio) {
-    } else if (recentInput === 1 && !!+amountToken1) {
-      setAmountToken2(amountToken1 / pairAmountInfoData.ratio);
-    } else if (recentInput === 2 && !!+amountToken2)
-      setAmountToken1(amountToken2 * pairAmountInfoData.ratio);
+    console.log('pairAmountInfoData',pairAmountInfoData)
+     if (recentInput === 1 && amountToken1  > BigInt(0)) {
+      setAmountToken2(amountToken1 *token2Amount / token1Amount);
+    } else if (recentInput === 2 && amountToken2 > BigInt(0))
+      setAmountToken1(amountToken2 * token1Amount / token2Amount);
   }, [JSON.stringify(pairAmountInfoData)]);
 
-  const getValueUsd = (token: any, amount: number | string) => {
+  const getValueUsd = (token: any, amount: number | string |  bigint) => {
     let t =
       toDisplay(amount, token!.decimals) *
       prices[token!.coingeckoId as PriceKey];
     return t;
   };
 
-  const onChangeAmount1 = (floatValue: number) => {
+  const onChangeAmount1 = (value: bigint) => {
     setRecentInput(1);
-    setAmountToken1(floatValue);
-    setAmountToken2(floatValue / pairAmountInfoData?.ratio);
-    const amount1 = floatValue
-      ? toAmount(floatValue, token1InfoData!.decimals)
-      : BigInt(0);
+    setAmountToken1(value);
+    setAmountToken2(value * token2Amount / token1Amount);
+   
     const estimatedLP =
-      (amount1 / (amount1 + BigInt(pairAmountInfoData.token1Amount as number))) *
+      (value / (value + token1Amount)) *
       BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
-  const onChangeAmount2 = (floatValue: number) => {
+  const onChangeAmount2 = (value: bigint) => {
     setRecentInput(2);
-    setAmountToken2(floatValue);
-    setAmountToken1(floatValue * pairAmountInfoData?.ratio);
+    setAmountToken2(value);
+    setAmountToken1(value * token1Amount / token2Amount);
 
-    const amount2 = floatValue
-      ? toAmount(floatValue, token2InfoData!.decimals)
-      : BigInt(0);
+   
     const estimatedLP =
-      (amount2 / (amount2 + BigInt(pairAmountInfoData.token2Amount as number))) *
+      (value / (value + token2Amount)) *
       BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
@@ -363,7 +361,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token1Balance ? token1Balance : 0,
+              amount: token1Balance.toString(),
               denom: token1InfoData?.name ?? '',
               decimals: token1InfoData?.decimals,
             }}
@@ -374,7 +372,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                toDisplay(token1Balance, token1InfoData?.decimals ?? 0)
+                token1Balance
               )
             }
           >
@@ -384,10 +382,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount1(
-                toDisplay(
-                  Math.round(Number(token1Balance) / 2),
-                  token1InfoData?.decimals ?? 0
-                )
+                  token1Balance / BigInt(2)
               )
             }
           >
@@ -413,11 +408,11 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
             placeholder={'0'}
             // type="input"
-            value={amountToken1 ?? ''}
+            value={toDisplay(amountToken1,token1InfoData.decimals)}
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             allowNegative={false}
             onChange={(e: any) => {
-              onChangeAmount1(Number(e.target.value.replaceAll(',', '')));
+              onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')),token1InfoData.decimals));
             }}
           />
         </div>
@@ -432,7 +427,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token2Balance ? token2Balance : 0,
+              amount: token2Balance.toString(),
               denom: token2InfoData?.name ?? '',
               decimals: token2InfoData?.decimals,
             }}
@@ -443,7 +438,7 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                toDisplay(token2Balance, token2InfoData?.decimals ?? 0)
+                token2Balance
               )
             }
           >
@@ -453,10 +448,8 @@ const LiquidityModal: FC<ModalProps> = ({
             className={cx('btn')}
             onClick={() =>
               onChangeAmount2(
-                toDisplay(
-                  Math.round(Number(token2Balance) / 2),
-                  token2InfoData?.decimals ?? 0
-                )
+             
+                 token2Balance / BigInt(2)
               )
             }
           >
@@ -483,9 +476,9 @@ const LiquidityModal: FC<ModalProps> = ({
             placeholder={'0'}
             // type="input"
             allowNegative={false}
-            value={amountToken2 ?? ''}
+            value={toDisplay(amountToken2,token2InfoData.decimals)}
             onChange={(e: any) => {
-              onChangeAmount2(Number(e.target.value.replaceAll(',', '')));
+              onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')),token2InfoData.decimals));
             }}
           />
         </div>
@@ -533,13 +526,12 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       {(() => {
-        const amount1 = toAmount(amountToken1, token1InfoData!.decimals),
-          amount2 = toAmount(amountToken2, token2InfoData!.decimals)
+     
         let disableMsg: string;
-        if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
-        if (amount1 > token1Balance)
+        if (amountToken1 <= 0 || amountToken2 <= 0) disableMsg = 'Enter an amount';
+        if (amountToken1 > token1Balance)
           disableMsg = `Insufficient ${token1InfoData?.name} balance`;
-        else if (amount2 > token2Balance)
+        else if (amountToken2 > token2Balance)
           disableMsg = `Insufficient ${token2InfoData?.name} balance`;
 
         const disabled =
@@ -556,7 +548,7 @@ const LiquidityModal: FC<ModalProps> = ({
               disabled: disabled
             })}
             onClick={() => {
-              return handleAddLiquidity(amount1, amount2);
+              return handleAddLiquidity(amountToken1, amountToken2);
             }}
             disabled={disabled}
           >

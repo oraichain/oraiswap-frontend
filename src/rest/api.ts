@@ -116,13 +116,11 @@ async function getPairAmountInfo(
   const usdtValue = toDisplay(tokenValue, toToken.decimals);
 
   return {
-    token1Amount: poolData.offerPoolAmount,
-    token2Amount: poolData.askPoolAmount,
+    token1Amount: poolData.offerPoolAmount.toString(),
+    token2Amount: poolData.askPoolAmount.toString(),
     token1Usd: usdtValue,
     token2Usd: usdtValue,
     usdAmount: 2 * usdtValue,
-    ratio: toDisplay((poolData.offerPoolAmount * BigInt(atomic)) / poolData.askPoolAmount, truncDecimals)
-   
   };
 }
 

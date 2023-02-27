@@ -30,7 +30,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { updateLpPools, updatePairs } from 'reducer/token';
-import { toDisplay } from 'libs/utils';
+import { atomic, toDisplay, truncDecimals } from 'libs/utils';
 
 const cx = cn.bind(styles);
 
@@ -181,21 +181,21 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const lpTotalSupply = lpTokenInfoData ? +lpTokenInfoData.total_supply : 0;
   const liquidity1 = lpTokenBalance
     ? Math.round(
-        (lpTokenBalance * (pairAmountInfoData?.token1Amount ?? 0)) /
+        (Number(lpTokenBalance) * Number(pairAmountInfoData?.token1Amount ?? 0)) /
           lpTotalSupply
       )
     : 0;
   const liquidity2 = lpTokenBalance
     ? Math.round(
-        (lpTokenBalance * (pairAmountInfoData?.token2Amount ?? 0)) /
+        (Number(lpTokenBalance) * Number(pairAmountInfoData?.token2Amount ?? 0)) /
           lpTotalSupply
       )
     : 0;
   const liquidity1Usd = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
+    ? (Number(lpTokenBalance) * (pairAmountInfoData?.token1Usd ?? 0)) / lpTotalSupply
     : 0;
   const liquidity2Usd = lpTokenBalance
-    ? (lpTokenBalance * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply
+    ? (Number(lpTokenBalance) * (pairAmountInfoData?.token2Usd ?? 0)) / lpTotalSupply
     : 0;
 
   const rewardInfoFirst = !!totalRewardInfoData?.reward_infos?.length
@@ -207,6 +207,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       +(lpTokenInfoData?.total_supply ?? 0)
     : 0;
 
+  const ratio = pairAmountInfoData ? toDisplay(BigInt(pairAmountInfoData.token1Amount) * BigInt(atomic) / BigInt(pairAmountInfoData.token2Amount), truncDecimals):0;
   return (
     <Content nonBackground>
       {!!pairInfoData ? (
@@ -233,9 +234,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               {!!pairAmountInfoData && (
                 <div className={cx('des')}>
                   <span>{`1 ${pairInfoData.token2!.name} ≈ `}</span>
-                  <span>{`${+pairAmountInfoData?.ratio.toFixed(6)} ${
-                    pairInfoData.token1!.name
-                  }`}</span>
+                  <span>{ratio}{' '}{pairInfoData.token1!.name}</span>
                 </div>
               )}
             </div>
@@ -343,7 +342,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData.token1Amount,
+                              amount: pairAmountInfoData.token1Amount.toString(),
                               decimals: pairInfoData.token1.decimals
                             }}
                             className={cx('amount')}
@@ -366,7 +365,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
                             balance={{
-                              amount: pairAmountInfoData.token2Amount,
+                              amount: pairAmountInfoData.token2Amount.toString(),
                               decimals: pairInfoData.token2.decimals
                             }}
                             className={cx('amount')}
