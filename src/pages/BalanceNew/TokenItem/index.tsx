@@ -89,7 +89,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               />
             )}
           </div>
-          <TokenBalance balance={usd || 0} className={styles.subLabel} decimalScale={2} />
+          <TokenBalance balance={usd} className={styles.subLabel} decimalScale={2} />
         </div>
       </div>
       <div>
