@@ -85,20 +85,16 @@ import customRegistry, { customAminoTypes } from 'libs/registry';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CheckBox from 'components/CheckBox';
 import { Contract } from 'config/contracts';
-import { ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { BalanceResponse, QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import LoadingBox from 'components/LoadingBox';
 import { TransferBackMsg } from 'libs/contracts';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
-import { updateAmounts } from 'reducer/token';
 import useConfigReducer from 'hooks/useConfigReducer';
-import Input from 'components/Input';
-import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
-import sumBy from 'lodash/sumBy';
 import { getOneStepKeplrAddr } from './helpers';
 import SearchInput from 'components/SearchInput';
+import { CacheTokens } from 'libs/token';
 
 interface BalanceProps {}
 
@@ -118,10 +114,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [txHash, setTxHash] = useState('');
   const dispatch = useDispatch();
 
-  const forceUpdate = (amountDetails: AmountDetails) => {
-    dispatch(updateAmounts(amountDetails));
-  };
-
   const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
@@ -138,167 +130,20 @@ const Balance: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
-  useEffect(() => {
-    loadTokenAmounts();
-  }, [keplrAddress, metamaskAddress, txHash, prices]);
+  const cacheTokensCosmos = React.useMemo(
+    () => CacheTokens.factory({ dispatch, address: keplrAddress }),
+    [dispatch, keplrAddress]
+  );
 
-  const loadTokens = async () => {
-    await handleCheckWallet();
-    for (const token of arrayLoadToken) {
-      window.Keplr.getKeplrAddr(token.chainId).then((address) => loadNativeBalance(address, token));
-    }
-  };
+  useEffect(() => {
+    cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+  }, [keplrAddress, metamaskAddress, txHash, prices]);
 
   const _initEthereum = async () => {
     try {
       await initEthereum();
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  const loadEvmEntries = async (
-    address: string,
-    tokens: TokenItemType[],
-    rpc: string,
-    chainId: number,
-    multicallCustomContractAddress?: string
-  ): Promise<[string, string][]> => {
-    const multicall = new Multicall({
-      nodeUrl: rpc,
-      multicallCustomContractAddress,
-      chainId
-    });
-    const input = tokens.map((token) => ({
-      reference: token.denom,
-      contractAddress: token.contractAddress,
-      abi: tokenABI,
-      calls: [
-        {
-          reference: token.denom,
-          methodName: 'balanceOf(address)',
-          methodParameters: [address]
-        }
-      ]
-    }));
-
-    const results: ContractCallResults = await multicall.call(input);
-    return tokens.map((token) => {
-      const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-      return [token.denom, amount];
-    });
-  };
-
-  // update concurrency
-  const loadEvmOraiAmounts = async (evmAddress: string) => {
-    const amountDetails = Object.fromEntries(
-      flatten(
-        await Promise.all([
-          loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-            BSC_RPC,
-            BSC_CHAIN_ID
-          ),
-
-          loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-            ETHEREUM_RPC,
-            ETHEREUM_CHAIN_ID
-          )
-        ])
-      )
-    );
-    console.log('loadEvmOraiAmounts');
-    forceUpdate(amountDetails);
-  };
-
-  const loadKawaiiSubnetAmount = async (kwtSubnetAddress: string) => {
-    let amountDetails = Object.fromEntries(
-      await loadEvmEntries(
-        kwtSubnetAddress,
-        kawaiiTokens.filter((t) => !!t.contractAddress),
-        KAWAII_SUBNET_RPC,
-        KWT_SUBNETWORK_EVM_CHAIN_ID,
-        '0x74876644692e02459899760B8b9747965a6D3f90'
-      )
-    );
-    console.log('loadKawaiiSubnetAmount');
-    // update amounts
-    forceUpdate(amountDetails);
-  };
-
-  const loadNativeBalance = async (address: string, tokenInfo: { chainId: string; rpc: string }) => {
-    const client = await StargateClient.connect(tokenInfo.rpc);
-    const amountAll = await client.getAllBalances(address);
-
-    const amountDetails = Object.assign(
-      // reset native balances
-      Object.fromEntries(
-        filteredTokens.filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress).map((t) => [t.denom, '0'])
-      ),
-      Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
-    );
-    forceUpdate(amountDetails);
-  };
-
-  const loadCw20Balance = async (address: string) => {
-    // get all cw20 token contract
-    const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
-    const data = toBinary({
-      balance: { address }
-    } as TokenQueryMsg);
-
-    const res = await Contract.multicall.aggregate({
-      queries: cw20Tokens.map((t) => ({
-        address: t.contractAddress,
-        data
-      }))
-    });
-
-    const amountDetails = Object.fromEntries(
-      cw20Tokens.map((token, ind) => {
-        if (!res.return_data[ind].success) {
-          return [token.denom, 0];
-        }
-        const balanceRes = fromBinary(res.return_data[ind].data) as BalanceResponse;
-        return [token.denom, balanceRes.balance];
-      })
-    );
-
-    console.log('loadCw20Balance');
-    forceUpdate(amountDetails);
-  };
-
-  const loadTokenAmounts = async () => {
-    try {
-      // let chainId = network.chainId;
-      // we enable oraichain then use pubkey to calculate other address
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) {
-        return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-          toastId: 'install_keplr'
-        });
-      }
-
-      const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-
-      await Promise.all(
-        [
-          getFunctionExecution(loadTokens),
-          metamaskAddress && getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
-          kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-          // keplrAddress &&
-          // getFunctionExecution(loadNativeBalance, [
-          //   keplrAddress,
-          //   network.rpc
-          // ]),
-          keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
-        ].filter(Boolean)
-      );
-    } catch (ex) {
-      console.log(ex);
     }
   };
 
@@ -736,7 +581,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts();
+      cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
