@@ -9,7 +9,6 @@ import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, STABLE_DENOM } from 'config/constants';
-import SearchSvg from 'assets/images/search-svg.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
@@ -17,10 +16,9 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { updatePairs } from 'reducer/token';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store/configure';
-import Input from 'components/Input';
 import compact from 'lodash/compact';
-import debounce from 'lodash/debounce';
 import sumBy from 'lodash/sumBy';
+import SearchInput from 'components/SearchInput';
 
 interface PoolsProps {}
 
@@ -171,25 +169,7 @@ const ListPools = memo<{
           ))}
         </div>
         <div className={styles.listpools_search}>
-          <Input
-            className={styles.listpools_search_input}
-            placeholder="Search by pools or tokens name"
-            style={{
-              paddingLeft: 40,
-              backgroundImage: `url(${SearchSvg})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: '10px center'
-            }}
-            onChange={debounce((e) => {
-              filterPairs(e.target.value);
-            }, 500)}
-          />
-          {/* <div
-            className={styles.listpools_btn}
-            onClick={() => setIsOpenNewPoolModal(true)}
-          >
-            Create new pool
-          </div> */}
+          <SearchInput placeholder="Search by pools or tokens name" onSearch={filterPairs} />
         </div>
       </div>
       <div className={styles.listpools_list}>

@@ -1,21 +1,22 @@
 import React from 'react';
 import classNames from 'classnames';
 import styles from './Input.module.scss';
+import debounce from 'lodash/debounce';
 
-const Input: React.FC<
-  React.PropsWithChildren<
-    React.InputHTMLAttributes<HTMLInputElement> & {
-      className?: string;
-      placeholder: string;
-      onSearch?: (text: string) => void;
-    }
-  >
-> = ({ className, onSearch, ...props }) => (
+export type InputProps = React.PropsWithChildren<
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    className?: string;
+    placeholder: string;
+    onSearch?: (text: string) => void;
+  }
+>;
+
+const Input: React.FC<InputProps> = ({ className, onSearch, ...props }) => (
   <input
     className={classNames(styles.input, className)}
-    onChange={(e) => {
+    onChange={debounce((e) => {
       onSearch?.(e.target.value);
-    }}
+    }, 500)}
     {...props}
   />
 );
