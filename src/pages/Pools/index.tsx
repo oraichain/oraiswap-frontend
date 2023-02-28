@@ -14,8 +14,8 @@ import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
 import { toDecimal, toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
-import { filteredTokens, tokenMap } from 'config/bridgeTokens';
-import { MILKY, STABLE_DENOM } from 'config/constants';
+import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import SearchSvg from 'assets/images/search-svg.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -256,8 +256,8 @@ type PairInfoData = {
   pair: Pair;
   amount: number;
   commissionRate: string;
-  fromToken: any;
-  toToken: any;
+  fromToken: TokenItemType;
+  toToken: TokenItemType;
 } & PoolInfo;
 
 const Pools: React.FC<PoolsProps> = () => {
@@ -333,18 +333,17 @@ const Pools: React.FC<PoolsProps> = () => {
     setMyPairsData(myPairData);
   };
 
-  const fetchPairInfoData = async (pair: Pair): Promise<PairInfoData> => {
+  const fetchPairInfoData = async (
+    pair: Pair,
+    cached: PairDetails
+  ): Promise<PairInfoData> => {
     const [fromToken, toToken] = pair.asset_denoms.map(
       (denom) => tokenMap[denom]
     );
     if (!fromToken || !toToken) return;
 
     try {
-      const poolData = await fetchPoolInfoAmount(
-        fromToken,
-        toToken,
-        cachedPairs
-      );
+      const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached);
 
       return {
         ...poolData,
@@ -360,40 +359,34 @@ const Pools: React.FC<PoolsProps> = () => {
   };
 
   const fetchPairInfoDataList = async () => {
-    console.log('fetchPairInfoDataList');
     if (!cachedPairs) {
       // wait for cached pair updated
       return;
     }
-
+    console.log('fetchPairInfoDataList');
     const poolList = compact(
-      await Promise.all(pairs.map((p) => fetchPairInfoData(p)))
+      await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs)))
     );
 
     const oraiUsdtPool = poolList.find(
-      (pool) => pool.pair.asset_denoms[1] === STABLE_DENOM
+      (pool) =>
+        pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM
     );
-    const oraiUsdtPoolMilky = poolList.find(
-      (pool) => pool.pair.asset_denoms[0] === MILKY
-    );
-    if (!oraiUsdtPoolMilky || !oraiUsdtPool) {
-      console.warn('pool not found');
-      // retry after
-      return setTimeout(fetchPairInfoDataList, 5000);
-    }
 
     const oraiPrice = toDecimal(
       oraiUsdtPool.askPoolAmount,
       oraiUsdtPool.offerPoolAmount
     );
-    const milkyPrice = toDecimal(
-      oraiUsdtPoolMilky.askPoolAmount,
-      oraiUsdtPoolMilky.offerPoolAmount
-    );
+
     poolList.forEach((pool) => {
+      const tokenPrice =
+        pool.toToken.denom !== STABLE_DENOM
+          ? oraiPrice
+          : toDecimal(pool.askPoolAmount, pool.offerPoolAmount);
       pool.amount =
-        toDisplay(BigInt(2) * pool.offerPoolAmount, pool.fromToken.decimals) *
-        (pool.fromToken?.denom === MILKY ? milkyPrice : oraiPrice);
+        toDisplay(pool.offerPoolAmount, pool.fromToken.decimals) *
+        tokenPrice *
+        2;
     });
 
     setPairInfos(poolList);

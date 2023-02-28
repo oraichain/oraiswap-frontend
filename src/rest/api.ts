@@ -5,7 +5,7 @@ import { ORAI, STABLE_DENOM } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
-import { getSubAmountDetails, toDisplay } from 'libs/utils';
+import { getSubAmountDetails, toDecimal, toDisplay } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
@@ -91,34 +91,35 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo): bigint {
 
 async function getPairAmountInfo(
   fromToken: TokenItemType,
-  toToken: TokenItemType
+  toToken: TokenItemType,
+  cachedPairs?: PairDetails
 ): Promise<PairAmountInfo> {
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken);
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
 
   // default is usdt
-  let tokenValue = poolData.askPoolAmount;
+  let tokenPrice = 0;
 
   if (toToken.denom !== STABLE_DENOM) {
     const poolOraiUsdData = await fetchPoolInfoAmount(
       tokenMap[ORAI],
-      tokenMap[STABLE_DENOM]
+      tokenMap[STABLE_DENOM],
+      cachedPairs
     );
     // orai price
-    tokenValue = poolData.offerPoolAmount * poolOraiUsdData.askPoolAmount;
-    // calculate indirect
-    if (fromToken.denom !== ORAI) {
-      const poolOraiData = await fetchPoolInfoAmount(toToken, tokenMap[ORAI]);
-      tokenValue =
-        (tokenValue * poolOraiData.askPoolAmount) /
-        poolOraiData.offerPoolAmount;
-    }
-    tokenValue /= poolOraiUsdData.offerPoolAmount;
+    tokenPrice = toDecimal(
+      poolOraiUsdData.askPoolAmount,
+      poolOraiUsdData.offerPoolAmount
+    );
+  } else {
+    // calculate indirect?, pool must have orai or stable coin for sure
+    tokenPrice = toDecimal(poolData.askPoolAmount, poolData.offerPoolAmount);
   }
 
   return {
     token1Amount: poolData.offerPoolAmount.toString(),
     token2Amount: poolData.askPoolAmount.toString(),
-    tokenUsd: 2 * toDisplay(tokenValue, toToken.decimals)
+    tokenUsd:
+      2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
   };
 }
 

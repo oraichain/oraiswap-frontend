@@ -9,7 +9,6 @@ import Pie from 'components/Pie';
 import { getPair, Pair, pairs, poolTokens } from 'config/pools';
 import {
   fetchPairInfo,
-  fetchPoolInfoAmount,
   fetchTokenInfo,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
@@ -18,7 +17,7 @@ import {
   getPairAmountInfo
 } from 'rest/api';
 
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
@@ -46,7 +45,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useConfigReducer('address');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const dispatch = useDispatch();
   const setCachedLpPools = (payload: LpPoolDetails) =>
     dispatch(updateLpPools(payload));
