@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import {
-  buildMultipleMessages,
-  toAmount,
-  toDisplay,
-  toSubAmount
-} from 'libs/utils';
+import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { contracts } from 'libs/contracts';
-import { filteredTokens, tokenMap } from 'config/bridgeTokens';
+import { tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchTokenInfo,
@@ -33,7 +28,6 @@ import { poolTokens } from 'config/pools';
 import Loader from 'components/Loader';
 import { RootState } from 'store/configure';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
 import { CacheTokens } from 'libs/token';
@@ -56,9 +50,6 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const { data: prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -71,36 +62,26 @@ const SwapComponent: React.FC<{
 
   Contract.sender = address;
 
-  const { data: taxRate, isLoading: isTaxRateLoading } =
-    contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
-      client: Contract.oracle,
-      input: {
-        tax_rate: {}
-      }
-    });
+  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
+    client: Contract.oracle,
+    input: {
+      tax_rate: {}
+    }
+  });
 
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
 
-  const { data: fromTokenInfoData } = useQuery(
-    ['from-token-info', fromToken],
-    () => fetchTokenInfo(fromToken!)
-  );
+  const { data: fromTokenInfoData } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(fromToken!));
 
-  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () =>
-    fetchTokenInfo(toToken!)
-  );
+  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
 
   console.log({ fromToken, toToken });
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
-  const fromTokenBalance = fromToken
-    ? BigInt(amounts[fromToken.denom]) + subAmountFrom
-    : BigInt(0);
-  const toTokenBalance = toToken
-    ? BigInt(amounts[toToken.denom]) + subAmountTo
-    : BigInt(0);
+  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom]) + subAmountFrom : BigInt(0);
+  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom]) + subAmountTo : BigInt(0);
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
@@ -108,46 +89,32 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(
-          fromAmountToken,
-          fromTokenInfoData!.decimals
-        ).toString()
+        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
 
-  const { data: simulateAverageData, isLoading: isSimulateAverageDataLoading } =
-    useQuery(
-      ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
-      () =>
-        simulateSwap({
-          fromInfo: fromTokenInfoData!,
-          toInfo: toTokenInfoData!,
-          amount: toAmount(1, fromTokenInfoData!.decimals).toString()
-        }),
-      { enabled: !!fromTokenInfoData && !!toTokenInfoData }
-    );
+  const { data: simulateAverageData } = useQuery(
+    ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
+    () =>
+      simulateSwap({
+        fromInfo: fromTokenInfoData!,
+        toInfo: toTokenInfoData!,
+        amount: toAmount(1, fromTokenInfoData!.decimals).toString()
+      }),
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+  );
 
   useEffect(() => {
     console.log('simulate average data: ', simulateAverageData);
     setAverageRatio(
-      parseFloat(
-        toDisplay(
-          simulateAverageData?.amount,
-          toTokenInfoData?.decimals
-        ).toString()
-      ).toFixed(6)
+      parseFloat(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString()).toFixed(6)
     );
-  }, [simulateAverageData]);
+  }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([
-      fromAmountToken,
-      parseFloat(
-        toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString()
-      )
-    ]);
-  }, [simulateData]);
+    setSwapAmount([fromAmountToken, parseFloat(toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString())]);
+  }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -158,22 +125,11 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      var _fromAmount = toAmount(
-        fromAmountToken,
-        fromTokenInfoData.decimals
-      ).toString();
+      var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(
-        amounts,
-        fromTokenInfoData,
-        address
-      );
-      const msgConvertTo = await generateConvertErc20Cw20Message(
-        amounts,
-        toTokenInfoData,
-        address
-      );
+      const msgConvertsFrom = await generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
+      const msgConvertTo = await generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
 
       const msgs = await generateContractMessages({
         type: Type.SWAP,
@@ -240,18 +196,10 @@ const SwapComponent: React.FC<{
             decimalScale={6}
           />
 
-          <div
-            className={cx('btn')}
-            onClick={() =>
-              onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0))
-            }
-          >
+          <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0))}>
             MAX
           </div>
-          <div
-            className={cx('btn')}
-            onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2))}
-          >
+          <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2))}>
             HALF
           </div>
         </div>
@@ -311,20 +259,10 @@ const SwapComponent: React.FC<{
             <div className={cx('arrow-down')} />
           </div>
 
-          <NumberFormat
-            className={cx('amount')}
-            thousandSeparator
-            decimalScale={6}
-            type="text"
-            value={toAmountToken}
-          />
+          <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
         </div>
       </div>
-      <button
-        className={cx('swap-btn')}
-        onClick={handleSubmit}
-        disabled={swapLoading}
-      >
+      <button className={cx('swap-btn')} onClick={handleSubmit} disabled={swapLoading}>
         {swapLoading && <Loader width={40} height={40} />}
         <span>Swap</span>
       </button>
@@ -369,15 +307,10 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           listToken={poolTokens.filter((token) =>
-            toTokenDenom === MILKY
-              ? token.denom === STABLE_DENOM
-              : token.denom !== toTokenDenom
+            toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           setToken={(denom) => {
-            setSwapTokens([
-              denom,
-              denom === MILKY ? STABLE_DENOM : toTokenDenom
-            ]);
+            setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
           }}
         />
       ) : (
@@ -386,15 +319,10 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectTo(true)}
           close={() => setIsSelectTo(false)}
           listToken={poolTokens.filter((token) =>
-            fromTokenDenom === MILKY
-              ? token.denom === STABLE_DENOM
-              : token.denom !== fromTokenDenom
+            fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {
-            setSwapTokens([
-              denom === MILKY ? STABLE_DENOM : fromTokenDenom,
-              denom
-            ]);
+            setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
           }}
         />
       )}

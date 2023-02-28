@@ -3,12 +3,7 @@ import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
 import { useQuery } from '@tanstack/react-query';
-import {
-  generateContractMessages,
-  fetchTokenAllowance,
-  ProvideQuery,
-  generateConvertErc20Cw20Message
-} from 'rest/api';
+import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
 import { buildMultipleMessages, toDecimal } from 'libs/utils';
@@ -69,11 +64,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
 
-  const { data: prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
-
-  type PriceKey = keyof typeof prices;
+  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
@@ -95,11 +86,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token1InfoData],
     () => {
-      return fetchTokenAllowance(
-        token1InfoData.contractAddress!,
-        address,
-        pairInfoData!.contract_addr
-      );
+      return fetchTokenAllowance(token1InfoData.contractAddress!, address, pairInfoData!.contract_addr);
     },
     {
       // enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
@@ -115,11 +102,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token2InfoData],
     () => {
-      return fetchTokenAllowance(
-        token2InfoData.contractAddress!,
-        address,
-        pairInfoData!.contract_addr
-      );
+      return fetchTokenAllowance(token2InfoData.contractAddress!, address, pairInfoData!.contract_addr);
     },
     {
       enabled: !!address && !!pairInfoData,
@@ -143,8 +126,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken1(value);
     setAmountToken2((value * token2Amount) / token1Amount);
 
-    const estimatedLP =
-      (value / (value + token1Amount)) * BigInt(lpTokenInfoData.total_supply);
+    const estimatedLP = (value / (value + token1Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
@@ -153,8 +135,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setAmountToken2(value);
     setAmountToken1((value * token1Amount) / token2Amount);
 
-    const estimatedLP =
-      (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
+    const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
@@ -164,11 +145,7 @@ const LiquidityModal: FC<ModalProps> = ({
     CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
   };
 
-  const increaseAllowance = async (
-    amount: string,
-    token: string,
-    walletAddr: string
-  ) => {
+  const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
     const msgs = await generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
@@ -208,33 +185,17 @@ const LiquidityModal: FC<ModalProps> = ({
 
     try {
       if (!!token1AllowanceToPair && token1AllowanceToPair < amount1) {
-        await increaseAllowance(
-          '9'.repeat(30),
-          token1InfoData!.contractAddress!,
-          address
-        );
+        await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, address);
         refetchToken1Allowance();
       }
       if (!!token2AllowanceToPair && token2AllowanceToPair < amount2) {
-        await increaseAllowance(
-          '9'.repeat(30),
-          token2InfoData!.contractAddress!,
-          address
-        );
+        await increaseAllowance('9'.repeat(30), token2InfoData!.contractAddress!, address);
         refetchToken2Allowance();
       }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = await generateConvertErc20Cw20Message(
-        amounts,
-        token1,
-        address
-      );
-      const secTokenConverts = await generateConvertErc20Cw20Message(
-        amounts,
-        token2,
-        address
-      );
+      const firstTokenConverts = await generateConvertErc20Cw20Message(amounts, token1, address);
+      const secTokenConverts = await generateConvertErc20Cw20Message(amounts, token2, address);
 
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
@@ -248,11 +209,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const msg = msgs[0];
 
-      var messages = buildMultipleMessages(
-        msg,
-        firstTokenConverts,
-        secTokenConverts
-      );
+      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -360,16 +317,10 @@ const LiquidityModal: FC<ModalProps> = ({
             prefix="Balance: "
             decimalScale={6}
           />
-          <div
-            className={cx('btn')}
-            onClick={() => onChangeAmount1(token1Balance)}
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance)}>
             MAX
           </div>
-          <div
-            className={cx('btn')}
-            onClick={() => onChangeAmount1(token1Balance / BigInt(2))}
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -396,12 +347,7 @@ const LiquidityModal: FC<ModalProps> = ({
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             allowNegative={false}
             onChange={(e: any) => {
-              onChangeAmount1(
-                toAmount(
-                  Number(e.target.value.replaceAll(',', '')),
-                  token1InfoData.decimals
-                )
-              );
+              onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1InfoData.decimals));
             }}
           />
         </div>
@@ -423,16 +369,10 @@ const LiquidityModal: FC<ModalProps> = ({
             prefix="Balance: "
             decimalScale={6}
           />
-          <div
-            className={cx('btn')}
-            onClick={() => onChangeAmount2(token2Balance)}
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance)}>
             MAX
           </div>
-          <div
-            className={cx('btn')}
-            onClick={() => onChangeAmount2(token2Balance / BigInt(2))}
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -458,12 +398,7 @@ const LiquidityModal: FC<ModalProps> = ({
             allowNegative={false}
             value={toDisplay(amountToken2, token2InfoData.decimals)}
             onChange={(e: any) => {
-              onChangeAmount2(
-                toAmount(
-                  Number(e.target.value.replaceAll(',', '')),
-                  token2InfoData.decimals
-                )
-              );
+              onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2InfoData.decimals));
             }}
           />
         </div>
@@ -510,12 +445,9 @@ const LiquidityModal: FC<ModalProps> = ({
       </div>
       {(() => {
         let disableMsg: string;
-        if (amountToken1 <= 0 || amountToken2 <= 0)
-          disableMsg = 'Enter an amount';
-        if (amountToken1 > token1Balance)
-          disableMsg = `Insufficient ${token1InfoData?.name} balance`;
-        else if (amountToken2 > token2Balance)
-          disableMsg = `Insufficient ${token2InfoData?.name} balance`;
+        if (amountToken1 <= 0 || amountToken2 <= 0) disableMsg = 'Enter an amount';
+        if (amountToken1 > token1Balance) disableMsg = `Insufficient ${token1InfoData?.name} balance`;
+        else if (amountToken2 > token2Balance) disableMsg = `Insufficient ${token2InfoData?.name} balance`;
 
         const disabled =
           actionLoading ||
@@ -561,10 +493,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
           {!!pairAmountInfoData && !!lpTokenInfoData && (
             <TokenBalance
-              balance={
-                pairAmountInfoData?.tokenUsd *
-                toDecimal(lpTokenBalance, totalSupply)
-              }
+              balance={pairAmountInfoData?.tokenUsd * toDecimal(lpTokenBalance, totalSupply)}
               style={{ flexGrow: 1, textAlign: 'right' }}
               decimalScale={2}
             />
@@ -578,9 +507,7 @@ const LiquidityModal: FC<ModalProps> = ({
             placeholder={'0'}
             value={toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
             allowNegative={false}
-            onValueChange={({ floatValue }) =>
-              setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))
-            }
+            onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))}
           />
         </div>
         <div className={cx('options')}>
@@ -646,11 +573,7 @@ const LiquidityModal: FC<ModalProps> = ({
                   prefix={''}
                 />
 
-                <TokenBalance
-                  balance={getValueUsd(token1, lp1BurnAmount)}
-                  className={cx('des')}
-                  decimalScale={2}
-                />
+                <TokenBalance balance={getValueUsd(token1, lp1BurnAmount)} className={cx('des')} decimalScale={2} />
               </div>
             </div>{' '}
             <div className={cx('seperator')} />
@@ -670,11 +593,7 @@ const LiquidityModal: FC<ModalProps> = ({
                   prefix={''}
                 />
 
-                <TokenBalance
-                  balance={getValueUsd(token2, lp2BurnAmount)}
-                  className={cx('des')}
-                  decimalScale={2}
-                />
+                <TokenBalance balance={getValueUsd(token2, lp2BurnAmount)} className={cx('des')} decimalScale={2} />
               </div>
             </div>
           </>
@@ -683,10 +602,8 @@ const LiquidityModal: FC<ModalProps> = ({
       {(() => {
         let disableMsg: string;
         if (lpAmountBurn <= 0) disableMsg = 'Enter an amount';
-        if (lpAmountBurn > lpTokenBalance)
-          disableMsg = `Insufficient LP token balance`;
-        const disabled =
-          actionLoading || !lpTokenInfoData || !pairInfoData || !!disableMsg;
+        if (lpAmountBurn > lpTokenBalance) disableMsg = `Insufficient LP token balance`;
+        const disabled = actionLoading || !lpTokenInfoData || !pairInfoData || !!disableMsg;
         return (
           <button
             className={cx('swap-btn', {
@@ -704,28 +621,14 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={true}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
-        <div
-          className={cx('title')}
-        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
+        <div className={cx('title')}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
         <div className={cx('switch')}>
-          <div
-            className={cx({ 'active-tab': activeTab === 0 })}
-            onClick={() => setActiveTab(0)}
-          >
+          <div className={cx({ 'active-tab': activeTab === 0 })} onClick={() => setActiveTab(0)}>
             Add
           </div>
-          <div
-            className={cx({ 'active-tab': activeTab === 1 })}
-            onClick={() => setActiveTab(1)}
-          >
+          <div className={cx({ 'active-tab': activeTab === 1 })} onClick={() => setActiveTab(1)}>
             Withdraw
           </div>
         </div>

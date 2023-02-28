@@ -6,7 +6,7 @@ import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
@@ -93,13 +93,7 @@ const UnbondModal: FC<ModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={false}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('setting')}>
         <div className={cx('title')}>
           <div>Unbond LP tokens</div>
@@ -121,11 +115,7 @@ const UnbondModal: FC<ModalProps> = ({
               decimalScale={6}
             />
 
-            <TokenBalance
-              balance={bondAmountUsd}
-              style={{ flexGrow: 1, textAlign: 'right' }}
-              decimalScale={2}
-            />
+            <TokenBalance balance={bondAmountUsd} style={{ flexGrow: 1, textAlign: 'right' }} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
@@ -134,9 +124,7 @@ const UnbondModal: FC<ModalProps> = ({
               decimalScale={6}
               placeholder={'0'}
               value={toDisplay(unbondAmount, lpTokenInfoData.decimals)}
-              onValueChange={({ floatValue }) =>
-                setUnbondAmount(toAmount(floatValue, lpTokenInfoData.decimals))
-              }
+              onValueChange={({ floatValue }) => setUnbondAmount(toAmount(floatValue, lpTokenInfoData.decimals))}
             />
           </div>
           <div className={cx('options')}>
@@ -165,20 +153,14 @@ const UnbondModal: FC<ModalProps> = ({
                 type={'number'}
                 className={cx('input')}
                 onChange={(event) => {
-                  setUnbondAmount(
-                    (BigInt(event.target.value) * bondAmount) / BigInt(100)
-                  );
+                  setUnbondAmount((BigInt(event.target.value) * bondAmount) / BigInt(100));
                 }}
               />
               %
             </div>
           </div>
         </div>
-        <button
-          className={cx('swap-btn')}
-          onClick={() => handleUnbond(unbondAmount)}
-          disabled={actionLoading}
-        >
+        <button className={cx('swap-btn')} onClick={() => handleUnbond(unbondAmount)} disabled={actionLoading}>
           {actionLoading && <Loader width={20} height={20} />}
           <span>Unbond</span>
         </button>

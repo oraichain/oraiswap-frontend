@@ -16,18 +16,11 @@ import { ReactComponent as EthereumIcon } from 'assets/icons/ethereum.svg';
 import LogoFullImg from 'assets/images/OraiDEX_full_light.svg';
 import { ThemeContext } from 'context/theme-context';
 
-import React, {
-  memo,
-  useContext,
-  useEffect,
-  useState,
-  ReactElement
-} from 'react';
+import React, { memo, useContext, useEffect, useState, ReactElement } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import CenterEllipsis from 'components/CenterEllipsis';
-import AvatarPlaceholder from 'components/AvatarPlaceholder/AvatarPlaceholder';
 import TokenBalance from 'components/TokenBalance';
 import {
   BEP20_ORAI,
@@ -64,28 +57,19 @@ const Menu: React.FC<{}> = React.memo((props) => {
   };
 
   const balance = amounts[ORAI] || '0';
-  const metamaskBalance =
-    amounts[window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI] || 0;
+  const metamaskBalance = amounts[window.Metamask.isEth() ? ERC20_ORAI : BEP20_ORAI] || 0;
 
   useEffect(() => {
     setLink(location.pathname);
   }, []);
 
-  const renderLink = (
-    to: string,
-    title: string,
-    onClick: any,
-    icon: ReactElement,
-    externalLink = false
-  ) => {
+  const renderLink = (to: string, title: string, onClick: any, icon: ReactElement, externalLink = false) => {
     if (externalLink)
       return (
         <a
           target="_blank"
           href={to}
-          className={
-            styles.menu_item + (link === to ? ` ${styles.active}` : '')
-          }
+          className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
           onClick={() => {
             setOpen(!open);
             onClick(to);
@@ -136,28 +120,12 @@ const Menu: React.FC<{}> = React.memo((props) => {
             <RequireAuthButton address={address} setAddress={setAddress}>
               {address && (
                 <div className={styles.token_info}>
-                  {/* <AvatarPlaceholder
-                      address={address}
-                      className={styles.token_avatar}
-                    /> */}
-                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
-                    <KwtIcon className={styles.token_avatar} />
-                  )}
-                  {handleCheckChain(COSMOS_CHAIN_ID, infoCosmos) && (
-                    <AtomCosmosIcon className={styles.token_avatar} />
-                  )}
-                  {handleCheckChain(OSMOSIS_CHAIN_ID, infoCosmos) && (
-                    <OsmosisIcon className={styles.token_avatar} />
-                  )}
-                  {handleCheckChain(ORAICHAIN_ID, infoCosmos) && (
-                    <ORAIIcon className={styles.token_avatar} />
-                  )}
+                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && <KwtIcon className={styles.token_avatar} />}
+                  {handleCheckChain(COSMOS_CHAIN_ID, infoCosmos) && <AtomCosmosIcon className={styles.token_avatar} />}
+                  {handleCheckChain(OSMOSIS_CHAIN_ID, infoCosmos) && <OsmosisIcon className={styles.token_avatar} />}
+                  {handleCheckChain(ORAICHAIN_ID, infoCosmos) && <ORAIIcon className={styles.token_avatar} />}
                   <div className={styles.token_info_balance}>
-                    <CenterEllipsis
-                      size={6}
-                      text={address}
-                      className={styles.token_address}
-                    />
+                    <CenterEllipsis size={6} text={address} className={styles.token_address} />
                     {
                       <TokenBalance
                         balance={{
@@ -175,22 +143,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
               {!!metamaskAddress && (
                 <div className={styles.token_info}>
                   {(handleCheckChain(BSC_CHAIN_ID) ||
-                    (!handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) &&
-                      !handleCheckChain(ETHEREUM_CHAIN_ID))) && (
+                    (!handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && !handleCheckChain(ETHEREUM_CHAIN_ID))) && (
                     <BNBIcon className={styles.token_avatar} />
                   )}
-                  {handleCheckChain(ETHEREUM_CHAIN_ID) && (
-                    <EthereumIcon className={styles.token_avatar} />
-                  )}
-                  {handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && (
-                    <KwtIcon className={styles.token_avatar} />
-                  )}
+                  {handleCheckChain(ETHEREUM_CHAIN_ID) && <EthereumIcon className={styles.token_avatar} />}
+                  {handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && <KwtIcon className={styles.token_avatar} />}
                   <div className={styles.token_info_balance}>
-                    <CenterEllipsis
-                      size={6}
-                      text={metamaskAddress}
-                      className={styles.token_address}
-                    />
+                    <CenterEllipsis size={6} text={metamaskAddress} className={styles.token_address} />
                     {!!metamaskBalance && (
                       <TokenBalance
                         balance={{
@@ -206,28 +165,11 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 </div>
               )}
 
-              {!address && !metamaskAddress && (
-                <span className={styles.connect}>Connect wallet</span>
-              )}
+              {!address && !metamaskAddress && <span className={styles.connect}>Connect wallet</span>}
             </RequireAuthButton>
-            {renderLink(
-              '/bridge',
-              'Bridge',
-              setLink,
-              <Wallet style={{ width: 30, height: 30 }} />
-            )}
-            {renderLink(
-              '/swap',
-              'Swap',
-              setLink,
-              <Swap style={{ width: 30, height: 30 }} />
-            )}
-            {renderLink(
-              '/pools',
-              'Pools',
-              setLink,
-              <Pools style={{ width: 30, height: 30 }} />
-            )}
+            {renderLink('/bridge', 'Bridge', setLink, <Wallet style={{ width: 30, height: 30 }} />)}
+            {renderLink('/swap', 'Swap', setLink, <Swap style={{ width: 30, height: 30 }} />)}
+            {renderLink('/pools', 'Pools', setLink, <Pools style={{ width: 30, height: 30 }} />)}
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
@@ -271,9 +213,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </button>
           </div>
 
-          <div className={styles.menu_footer}>
-            © 2020 - 2023 Oraichain Foundation
-          </div>
+          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation</div>
         </div>
       </div>
     </>

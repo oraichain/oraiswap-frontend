@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { BSC_RPC, ORAI } from 'config/constants';
+import { BSC_RPC } from 'config/constants';
 import { BSC_CHAIN_ID } from 'config/constants';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -28,8 +28,7 @@ if (typeof BigInt === 'undefined') {
       return new Proxy(this, {
         get(obj, field) {
           if (field in obj) return obj[field];
-          if (typeof obj.value !== 'bigint' && field in obj.value)
-            return obj.value[field].bind(obj.value);
+          if (typeof obj.value !== 'bigint' && field in obj.value) return obj.value[field].bind(obj.value);
           return undefined;
         }
       });
@@ -85,11 +84,7 @@ if (typeof BigInt === 'undefined') {
      * @param {boolean} littleEndian use little endian byte order, default is false
      * @param {boolean} detectSupport auto-detect support for native MyBigInt, default is true
      */
-    static fromUint8Array(
-      uint8arr: Uint8Array,
-      littleEndian: boolean = false,
-      detectSupport: boolean = true
-    ) {
+    static fromUint8Array(uint8arr: Uint8Array, littleEndian: boolean = false, detectSupport: boolean = true) {
       if (supportsNative && detectSupport) {
         const view = new DataView(uint8arr.buffer);
         return new MyBigInt(view.getBigUint64(0, littleEndian));

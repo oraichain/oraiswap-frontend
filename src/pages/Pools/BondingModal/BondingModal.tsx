@@ -2,19 +2,17 @@ import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './BondingModal.module.scss';
 import cn from 'classnames/bind';
-import { TooltipIcon } from 'components/Tooltip';
 import TokenBalance from 'components/TokenBalance';
 import { getUsd, toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
-import { PairInfo } from 'libs/contracts';
 import { TokenItemType } from 'config/bridgeTokens';
 
 const cx = cn.bind(style);
@@ -99,13 +97,7 @@ const BondingModal: FC<ModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={true}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
         <div className={cx('title')}>Bond LP tokens</div>
 
@@ -115,9 +107,7 @@ const BondingModal: FC<ModalProps> = ({
               <div className={cx('row-title')}>
                 <span>Current APR</span>
               </div>
-              <span className={cx('row-des', 'highlight')}>
-                {apr.toFixed(2)}%
-              </span>
+              <span className={cx('row-des', 'highlight')}>{apr.toFixed(2)}%</span>
             </div>
           )}
         </div>
@@ -136,23 +126,13 @@ const BondingModal: FC<ModalProps> = ({
               prefix="Balance: "
             />
 
-            <div
-              className={cx('btn')}
-              onClick={() => setBondAmount(lpTokenBalance)}
-            >
+            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance)}>
               MAX
             </div>
-            <div
-              className={cx('btn')}
-              onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}
-            >
+            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
               HALF
             </div>
-            <TokenBalance
-              style={{ flexGrow: 1, textAlign: 'right' }}
-              balance={liquidityValue}
-              decimalScale={2}
-            />
+            <TokenBalance style={{ flexGrow: 1, textAlign: 'right' }} balance={liquidityValue} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
@@ -163,19 +143,13 @@ const BondingModal: FC<ModalProps> = ({
               // type="input"
               value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
               onChange={(e: { target: { value: string } }) => {
-                setBondAmount(
-                  toAmount(Number(e.target.value), lpTokenInfoData.decimals)
-                );
+                setBondAmount(toAmount(Number(e.target.value), lpTokenInfoData.decimals));
               }}
             />
           </div>
         </div>
 
-        <button
-          className={cx('swap-btn')}
-          onClick={() => handleBond(bondAmount)}
-          disabled={actionLoading}
-        >
+        <button className={cx('swap-btn')} onClick={() => handleBond(bondAmount)} disabled={actionLoading}>
           {actionLoading && <Loader width={20} height={20} />}
           <span>Bond</span>
         </button>

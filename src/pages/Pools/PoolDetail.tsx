@@ -23,12 +23,11 @@ import TokenBalance from 'components/TokenBalance';
 import UnbondModal from './UnbondModal/UnbondModal';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { RootState } from 'store/configure';
 import { useDispatch, useSelector } from 'react-redux';
 import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { updateLpPools, updatePairs } from 'reducer/token';
+import { updateLpPools } from 'reducer/token';
 import { toDecimal } from 'libs/utils';
 
 const cx = cn.bind(styles);
@@ -46,26 +45,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
-  const setCachedLpPools = (payload: LpPoolDetails) =>
-    dispatch(updateLpPools(payload));
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
 
     pair = getPair(poolUrl.split('_'));
     if (!pair) return;
-    const token1 = poolTokens.find(
-      (token) => token.denom === pair!.asset_denoms[0]
-    );
+    const token1 = poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
 
-    const token2 = poolTokens.find(
-      (token) => token.denom === pair!.asset_denoms[1]
-    );
+    const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
 
-    const [info, apr] = await Promise.all([
-      fetchPairInfo([token1!, token2!]),
-      fetchPoolApr(pair.contract_addr)
-    ]);
+    const [info, apr] = await Promise.all([fetchPairInfo([token1!, token2!]), fetchPoolApr(pair.contract_addr)]);
 
     return {
       info,
@@ -109,14 +100,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     refetchRewardInfo();
   };
 
-  const { data: pairInfoData } = useQuery(
-    ['pair-info', poolUrl],
-    () => getPairInfo(),
-    {
-      // enabled: !!token1! && !!token2!,
-      refetchOnWindowFocus: false
-    }
-  );
+  const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
+    // enabled: !!token1! && !!token2!,
+    refetchOnWindowFocus: false
+  });
 
   let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
     ['pair-amount-info', pairInfoData],
@@ -130,11 +117,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     }
   );
 
-  const lpTokenBalance = BigInt(
-    pairInfoData
-      ? lpPools[pairInfoData.info.liquidity_token]?.balance ?? '0'
-      : 0
-  );
+  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.info.liquidity_token]?.balance ?? '0' : 0);
 
   const { data: lpTokenInfoData } = useQuery(
     ['token-info', pairInfoData],
@@ -184,23 +167,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
   const lpTotalSupply = BigInt(lpTokenInfoData?.total_supply ?? 0);
-  const liquidity1 =
-    lpTotalSupply === BigInt(0)
-      ? BigInt(0)
-      : (lpTokenBalance * token1Amount) / lpTotalSupply;
-  const liquidity2 =
-    lpTotalSupply === BigInt(0)
-      ? BigInt(0)
-      : (lpTokenBalance * token2Amount) / lpTotalSupply;
-  const liquidityUsd =
-    toDecimal(lpTokenBalance, lpTotalSupply) *
-    (pairAmountInfoData?.tokenUsd ?? 0);
+  const liquidity1 = lpTotalSupply === BigInt(0) ? BigInt(0) : (lpTokenBalance * token1Amount) / lpTotalSupply;
+  const liquidity2 = lpTotalSupply === BigInt(0) ? BigInt(0) : (lpTokenBalance * token2Amount) / lpTotalSupply;
+  const liquidityUsd = toDecimal(lpTokenBalance, lpTotalSupply) * (pairAmountInfoData?.tokenUsd ?? 0);
 
   const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
 
   const bondAmountUsd = rewardInfoFirst
-    ? toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), lpTotalSupply) *
-      (pairAmountInfoData?.tokenUsd ?? 0)
+    ? toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), lpTotalSupply) * (pairAmountInfoData?.tokenUsd ?? 0)
     : 0;
 
   const ratio = pairAmountInfoData ? toDecimal(token1Amount, token2Amount) : 0;
@@ -217,14 +191,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
 
                 <div className={cx('title')}>
-                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${
-                    pairInfoData.token2!.name
-                  }`}</div>
-                  <TokenBalance
-                    balance={pairAmountInfoData?.tokenUsd}
-                    className={cx('value')}
-                    decimalScale={2}
-                  />
+                  <div className={cx('name')}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name}`}</div>
+                  <TokenBalance balance={pairAmountInfoData?.tokenUsd} className={cx('value')} decimalScale={2} />
                 </div>
               </div>
               {!!pairAmountInfoData && (
@@ -254,25 +222,16 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount')}
                           />
                         </div>
-                        <TokenBalance
-                          balance={liquidityUsd}
-                          decimalScale={2}
-                          className={cx('amount-usd')}
-                        />
+                        <TokenBalance balance={liquidityUsd} decimalScale={2} className={cx('amount-usd')} />
                       </Pie>
                     </div>
                     <div className={cx('liquidity')}>
                       <div className={cx('label')}>My liquidity</div>
                       <div className={cx('liquidity_token')}>
                         <div className={cx('liquidity_token_name')}>
-                          <span
-                            className={cx('mark')}
-                            style={{ background: '#FFD5AE' }}
-                          ></span>
+                          <span className={cx('mark')} style={{ background: '#FFD5AE' }}></span>
                           <span className={cx('icon')}></span>
-                          <span className={cx('token-name')}>
-                            {pairInfoData.token1?.name}
-                          </span>
+                          <span className={cx('token-name')}>{pairInfoData.token1?.name}</span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
@@ -283,23 +242,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount')}
                             decimalScale={6}
                           />
-                          <TokenBalance
-                            balance={liquidityUsd / 2}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
+                          <TokenBalance balance={liquidityUsd / 2} className={cx('amount-usd')} decimalScale={2} />
                         </div>
                       </div>
                       <div className={cx('liquidity_token')}>
                         <div className={cx('liquidity_token_name')}>
-                          <span
-                            className={cx('mark')}
-                            style={{ background: '#612FCA' }}
-                          ></span>
+                          <span className={cx('mark')} style={{ background: '#612FCA' }}></span>
                           <span className={cx('icon')}></span>
-                          <span className={cx('token-name')}>
-                            {pairInfoData.token2?.name}
-                          </span>
+                          <span className={cx('token-name')}>{pairInfoData.token2?.name}</span>
                         </div>
                         <div className={cx('liquidity_token_value')}>
                           <TokenBalance
@@ -310,11 +260,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount')}
                             decimalScale={6}
                           />
-                          <TokenBalance
-                            balance={liquidityUsd / 2}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
+                          <TokenBalance balance={liquidityUsd / 2} className={cx('amount-usd')} decimalScale={2} />
                         </div>
                       </div>
                       <button
@@ -333,9 +279,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                       <div className={cx('pool-catalyst_token')}>
                         <div className={cx('pool-catalyst_token_name')}>
                           {Token1Icon! && <Token1Icon className={cx('icon')} />}
-                          <span className={cx('token-name')}>
-                            {pairInfoData.token1!.name}
-                          </span>
+                          <span className={cx('token-name')}>{pairInfoData.token1!.name}</span>
                         </div>
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
@@ -356,9 +300,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                       <div className={cx('pool-catalyst_token')}>
                         <div className={cx('pool-catalyst_token_name')}>
                           {Token2Icon! && <Token2Icon className={cx('icon')} />}
-                          <span className={cx('token-name')}>
-                            {pairInfoData.token2?.name}
-                          </span>
+                          <span className={cx('token-name')}>{pairInfoData.token2?.name}</span>
                         </div>
                         <div className={cx('pool-catalyst_token_value')}>
                           <TokenBalance
@@ -399,24 +341,21 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               )}
             </div>
           </div>
-          {isOpenLiquidityModal &&
-            lpTokenInfoData &&
-            pairInfoData.token1 &&
-            pairInfoData.token2 && (
-              <LiquidityModal
-                isOpen={isOpenLiquidityModal}
-                open={() => setIsOpenLiquidityModal(true)}
-                close={() => setIsOpenLiquidityModal(false)}
-                token1InfoData={pairInfoData.token1}
-                token2InfoData={pairInfoData.token2}
-                lpTokenInfoData={lpTokenInfoData}
-                lpTokenBalance={lpTokenBalance.toString()}
-                pairAmountInfoData={pairAmountInfoData}
-                refetchPairAmountInfo={refetchPairAmountInfo}
-                pairInfoData={pairInfoData.info}
-                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
-              />
-            )}
+          {isOpenLiquidityModal && lpTokenInfoData && pairInfoData.token1 && pairInfoData.token2 && (
+            <LiquidityModal
+              isOpen={isOpenLiquidityModal}
+              open={() => setIsOpenLiquidityModal(true)}
+              close={() => setIsOpenLiquidityModal(false)}
+              token1InfoData={pairInfoData.token1}
+              token2InfoData={pairInfoData.token2}
+              lpTokenInfoData={lpTokenInfoData}
+              lpTokenBalance={lpTokenBalance.toString()}
+              pairAmountInfoData={pairAmountInfoData}
+              refetchPairAmountInfo={refetchPairAmountInfo}
+              pairInfoData={pairInfoData.info}
+              fetchCachedLpTokenAll={fetchCachedLpTokenAll}
+            />
+          )}
           {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (
             <BondingModal
               isOpen={isOpenBondingModal}

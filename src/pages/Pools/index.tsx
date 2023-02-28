@@ -8,7 +8,7 @@ import { toDecimal, toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { ORAI, STABLE_DENOM } from 'config/constants';
 import SearchSvg from 'assets/images/search-svg.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import useConfigReducer from 'hooks/useConfigReducer';

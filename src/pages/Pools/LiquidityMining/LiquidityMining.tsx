@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
@@ -13,13 +13,10 @@ import { TokenInfo } from 'types/token';
 import useConfigReducer from 'hooks/useConfigReducer';
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
 import isEqual from 'lodash/isEqual';
-import { PairInfo, RewardInfoResponseItem } from 'libs/contracts';
+import { RewardInfoResponseItem } from 'libs/contracts';
 import { toDecimal } from 'libs/utils';
 import { Asset } from 'libs/contracts';
-import {
-  PoolInfoResponse,
-  RewardInfoResponse
-} from 'libs/contracts/OraiswapStaking.types';
+import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
 
 const cx = cn.bind(styles);
 
@@ -58,8 +55,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   apr
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
-  const [pendingRewards, setPendingRewards] =
-    useState<TokenItemTypeExtended[]>();
+  const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
 
   useEffect(() => {
@@ -71,29 +67,18 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   }, [totalRewardInfoData, rewardPerSecInfoData, stakingPoolInfoData]);
 
   const setNewReward = () => {
-    const totalRewardAmount = BigInt(
-      totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0
-    );
+    const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
 
-    const totalRewardPerSec = rewardPerSecInfoData
-      .map((a) => BigInt(a.amount))
-      .reduce((a, b) => a + b, BigInt(0));
+    const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
 
     let res = rewardPerSecInfoData.map((r) => {
       const pendingWithdraw = BigInt(
-        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) =>
-          isEqual(e.info, r.info)
-        )?.amount ?? 0
+        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
       );
 
-      const amount =
-        (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec +
-        pendingWithdraw;
+      const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
 
-      const token =
-        'token' in r.info
-          ? cw20TokenMap[r.info.token.contract_addr]
-          : tokenMap[r.info.native_token.denom];
+      const token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
 
       return {
         ...token,
@@ -158,16 +143,11 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
   return (
     <>
-      <div
-        className={cx('row')}
-        style={{ marginBottom: '30px', marginTop: '40px' }}
-      >
+      <div className={cx('row')} style={{ marginBottom: '30px', marginTop: '40px' }}>
         <>
           <div className={cx('mining')}>
             <div className={cx('label--bold')}>Liquidity Mining</div>
-            <div className={cx('label--sub')}>
-              Bond liquidity to earn ORAI liquidity reward and swap fees
-            </div>
+            <div className={cx('label--sub')}>Bond liquidity to earn ORAI liquidity reward and swap fees</div>
           </div>
           <div className={cx('earning')}>
             <button
@@ -201,10 +181,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     {!!pairAmountInfoData && !!lpTokenInfoData && (
                       <TokenBalance
                         balance={
-                          toDecimal(
-                            BigInt(rewardInfoFirst?.bond_amount ?? 0),
-                            BigInt(lpTokenInfoData.total_supply)
-                          ) * pairAmountInfoData.tokenUsd
+                          toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), BigInt(lpTokenInfoData.total_supply)) *
+                          pairAmountInfoData.tokenUsd
                         }
                         className={cx('amount-usd')}
                         decimalScale={2}
@@ -260,18 +238,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
               <button
                 className={cx('btn')}
                 onClick={() => handleBond()}
-                disabled={
-                  actionLoading ||
-                  !+totalRewardInfoData?.reward_infos[0]?.pending_reward
-                }
+                disabled={actionLoading || !+totalRewardInfoData?.reward_infos[0]?.pending_reward}
               >
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
               </button>
-              <button
-                className={cx('btn', 'btn--dark')}
-                onClick={() => setIsOpenUnbondModal(true)}
-              >
+              <button className={cx('btn', 'btn--dark')} onClick={() => setIsOpenUnbondModal(true)}>
                 <span>Unbond</span>
               </button>
             </div>

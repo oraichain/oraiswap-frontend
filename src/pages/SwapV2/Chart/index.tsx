@@ -3,7 +3,6 @@ import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
 import { poolTokens } from 'config/pools';
-import TokenBalance from 'components/TokenBalance';
 import LoadingBox from 'components/LoadingBox';
 import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';
@@ -81,17 +80,11 @@ const SwapChart: React.FC<{
                     <IconFromToken />
                   </div>
                   <span className={cx('item-text')}>
-                    {poolTokens
-                      .find((el) => el.denom === fromTokenDenom)
-                      ?.name?.toUpperCase()}
+                    {poolTokens.find((el) => el.denom === fromTokenDenom)?.name?.toUpperCase()}
                   </span>
                 </div>
-                <span
-                  className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}
-                >
-                  {price24hChange >= 0
-                    ? `+${price24hChange.toFixed(2)}%`
-                    : `${price24hChange.toFixed(2)}%`}
+                <span className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}>
+                  {price24hChange >= 0 ? `+${price24hChange.toFixed(2)}%` : `${price24hChange.toFixed(2)}%`}
                 </span>
               </div>
             </div>
@@ -108,17 +101,15 @@ const SwapChart: React.FC<{
                       minDecimal: 2,
                       unit: '$',
                       minPrice: 1,
-                      unitPosition: 'prefix',
+                      unitPosition: 'prefix'
                     })}
                   </span>
                 </div>
                 <p className={cx('content-date')}>
-                  {new Date(
-                    infoMove?.time ? infoMove?.time * 1000 : Date.now()
-                  ).toLocaleString('en-US', {
+                  {new Date(infoMove?.time ? infoMove?.time * 1000 : Date.now()).toLocaleString('en-US', {
                     month: 'short',
                     year: 'numeric',
-                    day: 'numeric',
+                    day: 'numeric'
                   })}
                 </p>
               </div>
@@ -149,7 +140,7 @@ const SwapChart: React.FC<{
                 textColor: 'black',
                 areaTopColor: '#612fca',
                 // areaTopColor: 'rgba(168, 113, 223, 0.5)',
-                areaBottomColor: 'rgba(86, 42, 209, 0)',
+                areaBottomColor: 'rgba(86, 42, 209, 0)'
               }}
             />
           </div>
