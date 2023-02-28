@@ -9,6 +9,7 @@ import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
 import tokenABI from 'config/abi/erc20.json';
 import { Multicall, ContractCallResults } from 'libs/ethereum-multicall';
+import SearchSvg from 'assets/images/search-svg.svg';
 import {
   AminoTypes,
   DeliverTxResponse,
@@ -97,6 +98,7 @@ import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import { getOneStepKeplrAddr } from './helpers';
+import SearchInput from 'components/SearchInput';
 
 interface BalanceProps {}
 
@@ -931,13 +933,13 @@ const Balance: React.FC<BalanceProps> = () => {
                 </div>
               </div>
             </div>
-            <Input
+
+            <SearchInput
               placeholder="Search Token of Network"
-              onSearch={(text: string) => {
+              onSearch={(text) => {
                 if (!text) return navigate('');
                 navigate(`?token=${text}`);
               }}
-              className={styles.search_form}
             />
           </div>
         </div>
