@@ -80,8 +80,8 @@ const SwapComponent: React.FC<{
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
-  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom]) + subAmountFrom : BigInt(0);
-  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom]) + subAmountTo : BigInt(0);
+  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
+  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
