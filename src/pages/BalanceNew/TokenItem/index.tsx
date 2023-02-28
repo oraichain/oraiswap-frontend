@@ -35,11 +35,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   const [amount, usd] = amountDetail;
   return (
     <div
-      className={classNames(
-        styles.tokenWrapper,
-        { [styles.active]: active },
-        className
-      )}
+      className={classNames(styles.tokenWrapper, { [styles.active]: active }, className)}
       onClick={(event) => {
         event.stopPropagation();
         onClick?.(token);
@@ -50,13 +46,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
           {token.Icon && <token.Icon className={styles.tokenIcon} />}
           <div className={styles.tokenInfo}>
             <div className={styles.tokenName}>{token.name}</div>
-            <div className={styles.tokenOrg}>
-              <span className={styles.tokenOrgTxt}>
-                {token.bridgeNetworkIdentifier
-                  ? `${token.org} (${token.bridgeNetworkIdentifier})`
-                  : token.org}
-              </span>
-            </div>
           </div>
         </div>
         <div className={styles.tokenBalance}>
@@ -80,9 +69,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                       return (
                         <div key={idx} className={styles.row}>
                           <div>
-                            <div className={styles.description}>
-                              ({evmToken.name})
-                            </div>
+                            <div className={styles.description}>({evmToken.name})</div>
                           </div>
                           <TokenBalance
                             balance={{
@@ -102,11 +89,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               />
             )}
           </div>
-          <TokenBalance
-            balance={usd || 0}
-            className={styles.subLabel}
-            decimalScale={2}
-          />
+          <TokenBalance balance={usd || 0} className={styles.subLabel} decimalScale={2} />
         </div>
       </div>
       <div>
