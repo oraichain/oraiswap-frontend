@@ -17,18 +17,13 @@ const package = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
 const isDevelopment = process.env.NODE_ENV === 'development';
-const vendorPath = path.resolve(
-  isDevelopment ? 'vendor' : paths.appPublic,
-  'vendor'
-);
+const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
 
 const config = {
   mode: process.env.NODE_ENV,
   target: 'web',
   entry: {
-    vendor: Object.keys(package.dependencies).filter(
-      (dep) => !ignores.includes(dep)
-    )
+    vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
@@ -39,14 +34,20 @@ const config = {
     path: vendorPath,
     library: 'vendor_lib'
   },
+
   plugins: [
     new webpack.ProgressPlugin(),
+
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, 'manifest.json')
     })
   ]
 };
+
+if (isDevelopment) {
+  config.devtool = 'cheap-module-source-map';
+}
 
 const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
@@ -76,8 +77,7 @@ compiler.run((err, stats) => {
 
     // Add additional information for postcss errors
     if (Object.prototype.hasOwnProperty.call(err, 'postcssNode')) {
-      errMessage +=
-        '\nCompileError: Begins at CSS selector ' + err['postcssNode'].selector;
+      errMessage += '\nCompileError: Begins at CSS selector ' + err['postcssNode'].selector;
     }
 
     messages = formatWebpackMessages({
@@ -85,9 +85,7 @@ compiler.run((err, stats) => {
       warnings: []
     });
   } else {
-    messages = formatWebpackMessages(
-      stats.toJson({ all: false, warnings: true, errors: true })
-    );
+    messages = formatWebpackMessages(stats.toJson({ all: false, warnings: true, errors: true }));
   }
   if (messages.errors.length) {
     // Only keep the first error. Others are often indicative
@@ -99,14 +97,12 @@ compiler.run((err, stats) => {
   }
   if (
     process.env.CI &&
-    (typeof process.env.CI !== 'string' ||
-      process.env.CI.toLowerCase() !== 'false') &&
+    (typeof process.env.CI !== 'string' || process.env.CI.toLowerCase() !== 'false') &&
     messages.warnings.length
   ) {
     console.log(
       chalk.yellow(
-        '\nTreating warnings as errors because process.env.CI = true.\n' +
-          'Most CI servers set it automatically.\n'
+        '\nTreating warnings as errors because process.env.CI = true.\n' + 'Most CI servers set it automatically.\n'
       )
     );
   }
