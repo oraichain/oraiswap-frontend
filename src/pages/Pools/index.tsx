@@ -324,8 +324,8 @@ const Pools: React.FC<PoolsProps> = () => {
     const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
 
     poolList.forEach((pool) => {
-      const tokenPrice =
-        pool.toToken.denom !== STABLE_DENOM ? oraiPrice : toDecimal(pool.askPoolAmount, pool.offerPoolAmount);
+      // from denom must be orai, or to denom must be stable coin
+      const tokenPrice = pool.toToken.denom === ORAI ? oraiPrice : toDecimal(pool.askPoolAmount, pool.offerPoolAmount);
       pool.amount = toDisplay(pool.offerPoolAmount, pool.fromToken.decimals) * tokenPrice * 2;
     });
 
