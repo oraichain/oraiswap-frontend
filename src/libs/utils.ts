@@ -7,11 +7,7 @@ const truncDecimals = 6;
 const atomic = 10 ** truncDecimals;
 
 /* object */
-export const record = <T, V>(
-  object: T,
-  value: V,
-  skip?: (keyof T)[]
-): Record<keyof T, V> =>
+export const record = <T, V>(object: T, value: V, skip?: (keyof T)[]): Record<keyof T, V> =>
   Object.keys(object).reduce(
     (acc, cur) =>
       Object.assign({}, acc, {
@@ -27,19 +23,13 @@ export const omitEmpty = (object: object): object =>
   }, {});
 
 /* array */
-export const insertIf = <T>(condition?: any, ...elements: T[]) =>
-  condition ? elements : [];
+export const insertIf = <T>(condition?: any, ...elements: T[]) => (condition ? elements : []);
 
 /* string */
 export const getLength = (text: string) => new Blob([text]).size;
-export const capitalize = (text: string) =>
-  text[0].toUpperCase() + text.slice(1);
+export const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1);
 
-export const checkPrefixAndLength = (
-  prefix: string,
-  data: string,
-  length: number
-): boolean => {
+export const checkPrefixAndLength = (prefix: string, data: string, length: number): boolean => {
   try {
     const vals = bech32.decode(data);
     return vals.prefix === prefix && data.length == length;
@@ -50,8 +40,7 @@ export const checkPrefixAndLength = (
 
 export const getEvmAddress = (bech32Address: string) => {
   const decoded = bech32.decode(bech32Address);
-  const evmAddress =
-    '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
+  const evmAddress = '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
   return evmAddress;
 };
 
@@ -63,10 +52,7 @@ export const validateNumber = (amount: number): number => {
 // decimals always >= 6
 export const toAmount = (amount: number, decimals: number): bigint => {
   const validatedAmount = validateNumber(amount);
-  return (
-    BigInt(Math.trunc(validatedAmount * atomic)) *
-    BigInt(10 ** (decimals - truncDecimals))
-  );
+  return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
 };
 
 export const toDecimal = (numerator: bigint, denominator: bigint): number => {
@@ -74,39 +60,21 @@ export const toDecimal = (numerator: bigint, denominator: bigint): number => {
   return toDisplay((numerator * BigInt(atomic)) / denominator, truncDecimals);
 };
 
-export const toDisplay = (
-  amount: string | bigint,
-  sourceDecimals = 6,
-  desDecimals = 6
-): number => {
+export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecimals = 6): number => {
   if (!amount) return 0;
   // guarding conditions to prevent crashing
-  const validatedAmount =
-    typeof amount === 'string' ? BigInt(amount || '0') : amount;
+  const validatedAmount = typeof amount === 'string' ? BigInt(amount || '0') : amount;
   const displayDecimals = Math.min(truncDecimals, desDecimals);
-  const returnAmount =
-    validatedAmount / BigInt(10 ** (sourceDecimals - displayDecimals));
+  const returnAmount = validatedAmount / BigInt(10 ** (sourceDecimals - displayDecimals));
   // save calculation by using cached atomic
-  return (
-    Number(returnAmount) /
-    (displayDecimals === truncDecimals ? atomic : 10 ** displayDecimals)
-  );
+  return Number(returnAmount) / (displayDecimals === truncDecimals ? atomic : 10 ** displayDecimals);
 };
 
-export const getUsd = (
-  amount: string | bigint,
-  tokenInfo: TokenItemType,
-  prices: CoinGeckoPrices<string>
-): number => {
-  return (
-    toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0)
-  );
+export const getUsd = (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>): number => {
+  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0);
 };
 
-export const getTotalUsd = (
-  amounts: AmountDetails,
-  prices: CoinGeckoPrices<string>
-): number => {
+export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<string>): number => {
   let usd = 0;
   for (const denom in amounts) {
     const tokenInfo = tokenMap[denom];
@@ -117,10 +85,7 @@ export const getTotalUsd = (
   return usd;
 };
 
-export const getSubAmountDetails = (
-  amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): AmountDetails => {
+export const getSubAmountDetails = (amounts: AmountDetails, tokenInfo: TokenItemType): AmountDetails => {
   if (!tokenInfo.evmDenoms) return {};
   return Object.fromEntries(
     tokenInfo.evmDenoms.map((denom) => {
@@ -129,28 +94,16 @@ export const getSubAmountDetails = (
   );
 };
 
-export const toSubDisplay = (
-  amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): number => {
+export const toSubDisplay = (amounts: AmountDetails, tokenInfo: TokenItemType): number => {
   const subAmounts = getSubAmountDetails(amounts, tokenInfo);
   return toSumDisplay(subAmounts);
 };
 
-export const toTotalDisplay = (
-  amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): number => {
-  return (
-    toDisplay(amounts[tokenInfo.denom], tokenInfo.decimals) +
-    toSubDisplay(amounts, tokenInfo)
-  );
+export const toTotalDisplay = (amounts: AmountDetails, tokenInfo: TokenItemType): number => {
+  return toDisplay(amounts[tokenInfo.denom], tokenInfo.decimals) + toSubDisplay(amounts, tokenInfo);
 };
 
-export const toSubAmount = (
-  amounts: AmountDetails,
-  tokenInfo: TokenItemType
-): bigint => {
+export const toSubAmount = (amounts: AmountDetails, tokenInfo: TokenItemType): bigint => {
   const displayAmount = toSubDisplay(amounts, tokenInfo);
   return toAmount(displayAmount, tokenInfo.decimals);
 };
@@ -169,9 +122,7 @@ export const toSumDisplay = (amounts: AmountDetails): number => {
 };
 
 export const reduceString = (str: string, from: number, end: number) => {
-  return str
-    ? str.substring(0, from) + '...' + str.substring(str.length - end)
-    : '-';
+  return str ? str.substring(0, from) + '...' + str.substring(str.length - end) : '-';
 };
 
 export const parseBep20Erc20Name = (name: string) => {
@@ -197,8 +148,7 @@ export const formatCash = (n: number) => {
   if (n >= 1e12) return +(n / 1e12).toFixed(1) + 'T';
 };
 
-export const delay = (timeout: number) =>
-  new Promise((resolve) => setTimeout(resolve, timeout));
+export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 let cache = {};
 export async function getFunctionExecution(
@@ -244,12 +194,7 @@ export const formateNumberDecimals = (price, decimals = 2) => {
   }).format(price);
 };
 
-export const detectBestDecimalsDisplay = (
-  price,
-  minDecimal = 2,
-  minPrice = 1,
-  maxDecimal
-) => {
+export const detectBestDecimalsDisplay = (price, minDecimal = 2, minPrice = 1, maxDecimal) => {
   if (price && price > minPrice) return minDecimal;
   let decimals = minDecimal;
   if (price !== undefined) {
@@ -284,11 +229,7 @@ export const formateNumberDecimalsAuto = ({
   minDecimal = minDecimal ? minDecimal : 2;
   minPrice = minPrice ? minPrice : 1;
   unit = unit ? unit : '';
-  const priceFormat = formateNumberDecimals(
-    price,
-    detectBestDecimalsDisplay(price, minDecimal, minPrice, maxDecimal)
-  );
-  const res =
-    unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
+  const priceFormat = formateNumberDecimals(price, detectBestDecimalsDisplay(price, minDecimal, minPrice, maxDecimal));
+  const res = unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
   return res;
 };
