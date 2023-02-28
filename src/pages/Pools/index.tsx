@@ -306,7 +306,7 @@ const Pools: React.FC<PoolsProps> = () => {
     const pairAmounts = await Promise.all(
       poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs))
     );
-    poolList.map((pool, ind) => {
+    poolList.forEach((pool, ind) => {
       pool.amount = pairAmounts[ind].tokenUsd;
     });
 
