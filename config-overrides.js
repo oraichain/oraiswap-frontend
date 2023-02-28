@@ -20,7 +20,7 @@ const fallback = {
   https: require.resolve('https-browserify')
 };
 
-const rewiredEsbuild = (config) => {
+const rewiredEsbuild = (config, env) => {
   const useTypeScript = fs.existsSync(paths.appTsConfig);
   const target = 'es2020';
   // replace babel-loader to esbuild-loader
@@ -29,50 +29,41 @@ const rewiredEsbuild = (config) => {
       let babelLoaderIndex = -1;
       const rules = Object.entries(oneOf);
       for (const [index, rule] of rules.slice().reverse()) {
-        if (
-          rule.loader &&
-          rule.loader.includes(path.sep + 'babel-loader' + path.sep)
-        ) {
+        if (rule.loader && rule.loader.includes(path.sep + 'babel-loader' + path.sep)) {
           oneOf.splice(index, 1);
           babelLoaderIndex = index;
         }
       }
       if (~babelLoaderIndex) {
+        const options = {
+          loader: useTypeScript ? 'tsx' : 'jsx',
+          target
+        };
+        if (env !== 'development') {
+          options.drop = ['console'];
+        }
         oneOf.splice(babelLoaderIndex, 0, {
           test: /\.(js|mjs|jsx|ts|tsx)$/,
           include: [paths.appSrc],
           loader: require.resolve('esbuild-loader'),
-          options: {
-            loader: useTypeScript ? 'tsx' : 'jsx',
-            drop: ['console'],
-            target
-          }
+          options
         });
       }
     }
   }
 
   // replace minimizer
-  for (const [index, minimizer] of Object.entries(config.optimization.minimizer)
-    .slice()
-    .reverse()) {
+  for (const [index, minimizer] of Object.entries(config.optimization.minimizer).slice().reverse()) {
     const options = {
       target,
       css: true
     };
     // replace TerserPlugin to ESBuildMinifyPlugin
     if (minimizer.constructor.name === 'TerserPlugin') {
-      config.optimization.minimizer.splice(
-        index,
-        1,
-        new ESBuildMinifyPlugin(options)
-      );
+      config.optimization.minimizer.splice(index, 1, new ESBuildMinifyPlugin(options));
     }
     // remove OptimizeCssAssetsWebpackPlugin
-    if (
-      options.css &&
-      minimizer.constructor.name === 'OptimizeCssAssetsWebpackPlugin'
-    ) {
+    if (options.css && minimizer.constructor.name === 'OptimizeCssAssetsWebpackPlugin') {
       config.optimization.minimizer.splice(index, 1);
     }
   }
@@ -96,16 +87,10 @@ module.exports = {
     const isDevelopment = env === 'development';
 
     // do not check issues
-    config.plugins = config.plugins.filter(
-      (plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin'
-    );
+    config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
     // add dll
-    const vendorManifest = path.resolve(
-      isDevelopment ? 'vendor' : paths.appPublic,
-      'vendor',
-      'manifest.json'
-    );
+    const vendorManifest = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor', 'manifest.json');
 
     if (!fs.existsSync(vendorManifest)) {
       execSync('yarn vendor', {
@@ -142,6 +127,6 @@ module.exports = {
       })
     );
 
-    return rewiredEsbuild(config);
+    return rewiredEsbuild(config, env);
   }
 };
