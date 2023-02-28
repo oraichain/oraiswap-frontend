@@ -230,17 +230,12 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadNativeBalance = async (address: string, tokenInfo: { chainId: string; rpc: string }) => {
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
-    let amountDetails: AmountDetails = {};
 
-    // reset native balances
-    filteredTokens
-      .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
-      .forEach((t) => {
-        amountDetails[t.denom] = '0';
-      });
-
-    Object.assign(
-      amountDetails,
+    const amountDetails = Object.assign(
+      // reset native balances
+      Object.fromEntries(
+        filteredTokens.filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress).map((t) => [t.denom, '0'])
+      ),
       Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
     );
     forceUpdate(amountDetails);
