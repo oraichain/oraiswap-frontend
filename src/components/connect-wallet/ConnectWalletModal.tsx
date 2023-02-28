@@ -5,10 +5,10 @@ import React from 'react';
 import MESSAGE from 'lang/MESSAGE.json';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
-import MetamaskImage from 'assets/icons/metamask.svg';
+import MetamaskImage from 'assets/images/metamask.svg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
-import { isMobile, isIOS, isAndroid } from '@walletconnect/browser-utils';
+import { isMobile, isAndroid } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(style);
 
@@ -33,7 +33,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   metamaskAddress,
   disconnectMetamask,
   address,
-  open,
+  open
 }) => {
   const mobileMode = isMobile();
 
@@ -50,12 +50,8 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
                 target="__blank"
                 href={
                   isAndroid()
-                    ? `app.owallet.oauth://google/open_url?url=${encodeURIComponent(
-                        'https://oraidex.io'
-                      )}`
-                    : `owallet://open_url?url=${encodeURIComponent(
-                        'https://oraidex.io'
-                      )}`
+                    ? `app.owallet.oauth://google/open_url?url=${encodeURIComponent('https://oraidex.io')}`
+                    : `owallet://open_url?url=${encodeURIComponent('https://oraidex.io')}`
                 }
               >
                 <LoginWidgetDeepLink

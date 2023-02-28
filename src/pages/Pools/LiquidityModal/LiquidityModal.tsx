@@ -2,23 +2,13 @@ import { FC, useEffect, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
-import { getPair } from 'config/pools';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchBalance,
-  fetchPairInfo,
-  fetchPoolInfoAmount,
-  generateContractMessages,
-  fetchTokenAllowance,
-  ProvideQuery,
-  fetchBalanceWithMapping,
-  generateConvertErc20Cw20Message
-} from 'rest/api';
+import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, getUsd } from 'libs/utils';
+import { buildMultipleMessages, toDecimal } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Type } from 'rest/api';
@@ -26,8 +16,15 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
+import { RootState } from 'store/configure';
+import { useSelector } from 'react-redux';
+import FluentAddImg from 'assets/images/fluent_add.svg';
+import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
+import { CacheTokens } from 'libs/token';
+import { useDispatch } from 'react-redux';
+import { PairInfo } from 'libs/contracts';
 
 const cx = cn.bind(style);
 
@@ -40,11 +37,11 @@ interface ModalProps {
   token1InfoData: TokenItemType;
   token2InfoData: TokenItemType;
   lpTokenInfoData: TokenInfo;
-  lpTokenBalance: any;
-  pairAmountInfoData: any;
-  refetchPairAmountInfo: any;
-  refetchLpTokenBalance: any;
-  pairInfoData: any;
+  lpTokenBalance: string;
+  pairAmountInfoData: PairAmountInfo;
+  refetchPairAmountInfo: Function;
+  fetchCachedLpTokenAll: () => void;
+  pairInfoData: PairInfo;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -54,64 +51,33 @@ const LiquidityModal: FC<ModalProps> = ({
   token1InfoData,
   token2InfoData,
   lpTokenInfoData,
-  lpTokenBalance,
+  lpTokenBalance: lpTokenBalanceValue,
   pairAmountInfoData,
   refetchPairAmountInfo,
-  refetchLpTokenBalance,
+  fetchCachedLpTokenAll,
   pairInfoData
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
-  const [address] = useGlobalState('address');
+  const token1Amount = BigInt(pairAmountInfoData.token1Amount);
+  const token2Amount = BigInt(pairAmountInfoData.token2Amount);
+  const lpTokenBalance = BigInt(lpTokenBalanceValue);
+  const [address] = useConfigReducer('address');
 
-  const { data: prices } = useCoinGeckoPrices(
-    filteredTokens.map((t) => t.coingeckoId)
-  );
-
-  type PriceKey = keyof typeof prices;
+  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [amountToken1, setAmountToken1] = useState('');
-  const [amountToken2, setAmountToken2] = useState('');
+  const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
+  const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
-  const [lpAmountBurn, setLpAmountBurn] = useState(0);
-  const [estimatedLP, setEstimatedLP] = useState(0);
-
-  const { data: token1Balance = 0, refetch: refetchToken1Balance } = useQuery(
-    ['balance', token1!.denom, address],
-    async () =>
-      token1?.erc20Cw20Map
-        ? (await fetchBalanceWithMapping(address, token1)).amount
-        : fetchBalance(
-            address,
-            token1!.denom,
-            token1!.contractAddress,
-            token1!.lcd
-          ),
-    {
-      enabled: !!address && !!token1,
-      refetchOnWindowFocus: false
-    }
-  );
-
-  const { data: token2Balance = 0, refetch: refetchToken2Balance } = useQuery(
-    ['balance', token2!.denom, address],
-    async () =>
-      token2?.erc20Cw20Map
-        ? (await fetchBalanceWithMapping(address, token2)).amount
-        : fetchBalance(
-            address,
-            token2!.denom,
-            token2!.contractAddress,
-            token2!.lcd
-          ),
-    {
-      enabled: !!address && !!token2,
-      refetchOnWindowFocus: false
-    }
-  );
+  const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
+  const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const dispatch = useDispatch();
+  const token1Balance = BigInt(amounts[token1?.denom] ?? '0');
+  const token2Balance = BigInt(amounts[token2?.denom] ?? '0');
 
   const {
     data: token1AllowanceToPair,
@@ -120,11 +86,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token1InfoData],
     () => {
-      return fetchTokenAllowance(
-        token1InfoData.contractAddress!,
-        address,
-        pairInfoData!.contract_addr
-      );
+      return fetchTokenAllowance(token1InfoData.contractAddress!, address, pairInfoData!.contract_addr);
     },
     {
       // enabled: !!address && !!token1InfoData.contractAddress && !!pairInfoData,
@@ -140,11 +102,7 @@ const LiquidityModal: FC<ModalProps> = ({
   } = useQuery(
     ['token-allowance', JSON.stringify(pairInfoData), token2InfoData],
     () => {
-      return fetchTokenAllowance(
-        token2InfoData.contractAddress!,
-        address,
-        pairInfoData!.contract_addr
-      );
+      return fetchTokenAllowance(token2InfoData.contractAddress!, address, pairInfoData!.contract_addr);
     },
     {
       enabled: !!address && !!pairInfoData,
@@ -153,88 +111,41 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   useEffect(() => {
-    if (!pairAmountInfoData?.ratio) {
-    } else if (recentInput === 1 && !!+amountToken1) {
-      setAmountToken2(`${+amountToken1 / pairAmountInfoData.ratio}`);
-    } else if (recentInput === 2 && !!+amountToken2)
-      setAmountToken1(`${+amountToken2 * pairAmountInfoData.ratio}`);
-  }, [JSON.stringify(pairAmountInfoData)]);
+    if (recentInput === 1 && amountToken1 > 0) {
+      setAmountToken2((amountToken1 * token2Amount) / token1Amount);
+    } else if (recentInput === 2 && amountToken2 > BigInt(0))
+      setAmountToken1((amountToken2 * token1Amount) / token2Amount);
+  }, [pairAmountInfoData]);
 
-  const getValueUsd = (token: any, amount: number) => {
-    let t = getUsd(
-      amount,
-      prices[token!.coingeckoId as PriceKey],
-      token!.decimals
-    );
-    return t;
+  const getValueUsd = (token: TokenItemType, amount: string | bigint) => {
+    return toDisplay(amount, token!.decimals) * prices[token!.coingeckoId];
   };
 
-  const onChangeAmount1 = (floatValue: string) => {
+  const onChangeAmount1 = (value: bigint) => {
     setRecentInput(1);
-    setAmountToken1(floatValue);
-    setAmountToken2(`${+floatValue / pairAmountInfoData?.ratio!}`);
-    const amount1 = +parseAmount(floatValue, token1InfoData!.decimals);
-    const estimatedLP =
-      (amount1 / (amount1 + pairAmountInfoData.token1Amount)) *
-      +lpTokenInfoData.total_supply;
+    setAmountToken1(value);
+    setAmountToken2((value * token2Amount) / token1Amount);
+
+    const estimatedLP = (value / (value + token1Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
-  const onChangeAmount2 = (floatValue: string) => {
+  const onChangeAmount2 = (value: bigint) => {
     setRecentInput(2);
-    setAmountToken2(floatValue);
-    setAmountToken1(`${+floatValue * pairAmountInfoData?.ratio!}`);
+    setAmountToken2(value);
+    setAmountToken1((value * token1Amount) / token2Amount);
 
-    const amount2 = +parseAmount(floatValue, token2InfoData!.decimals);
-    const estimatedLP =
-      (amount2 / (amount2 + pairAmountInfoData.token2Amount)) *
-      +lpTokenInfoData.total_supply;
+    const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
   const onLiquidityChange = () => {
-    refetchToken1Balance();
-    refetchToken2Balance();
     refetchPairAmountInfo();
-    refetchLpTokenBalance();
+    fetchCachedLpTokenAll();
+    CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
   };
 
-  const getPairAmountInfo = async () => {
-    const poolData = await fetchPoolInfoAmount(
-      token1InfoData!,
-      token2InfoData!
-    );
-
-    const fromAmount = getUsd(
-      poolData.offerPoolAmount,
-      prices[token1!.coingeckoId as PriceKey],
-      token1!.decimals
-    );
-    const toAmount = getUsd(
-      poolData.askPoolAmount,
-      prices[token2!.coingeckoId as PriceKey],
-      token2!.decimals
-    );
-
-    return {
-      token1Amount: poolData.offerPoolAmount,
-      token2Amount: poolData.askPoolAmount,
-      usdAmount: fromAmount + toAmount,
-      ratio: poolData.offerPoolAmount / poolData.askPoolAmount
-    };
-  };
-
-  const getPairInfo = async () => {
-    const pair = getPair(token1InfoData.denom, token2InfoData.denom);
-    const pairData = await fetchPairInfo([token1InfoData!, token2InfoData!]);
-    return { pair, ...pairData };
-  };
-
-  const increaseAllowance = async (
-    amount: string,
-    token: string,
-    walletAddr: string
-  ) => {
+  const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
     const msgs = await generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
@@ -267,56 +178,38 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   };
 
-  const handleAddLiquidity = async (amount1: number, amount2: number) => {
+  const handleAddLiquidity = async (amount1: bigint, amount2: bigint) => {
     if (!pairInfoData) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      if (!!token1AllowanceToPair && +token1AllowanceToPair < amount1) {
-        await increaseAllowance(
-          '9'.repeat(30),
-          token1InfoData!.contractAddress!,
-          address
-        );
+      if (!!token1AllowanceToPair && token1AllowanceToPair < amount1) {
+        await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, address);
         refetchToken1Allowance();
       }
-      if (!!token2AllowanceToPair && +token2AllowanceToPair < amount2) {
-        await increaseAllowance(
-          '9'.repeat(30),
-          token2InfoData!.contractAddress!,
-          address
-        );
+      if (!!token2AllowanceToPair && token2AllowanceToPair < amount2) {
+        await increaseAllowance('9'.repeat(30), token2InfoData!.contractAddress!, address);
         refetchToken2Allowance();
       }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(token1)),
-        address
-      );
-      const secTokenConverts = await generateConvertErc20Cw20Message(
-        JSON.parse(JSON.stringify(token2)),
-        address
-      );
+      const firstTokenConverts = await generateConvertErc20Cw20Message(amounts, token1, address);
+      const secTokenConverts = await generateConvertErc20Cw20Message(amounts, token2, address);
 
       const msgs = await generateContractMessages({
         type: Type.PROVIDE,
         sender: address,
         fromInfo: token1InfoData!,
         toInfo: token2InfoData!,
-        fromAmount: amount1,
-        toAmount: amount2,
+        fromAmount: amount1.toString(),
+        toAmount: amount2.toString(),
         pair: pairInfoData.contract_addr
       } as ProvideQuery);
 
       const msg = msgs[0];
 
-      var messages = buildMultipleMessages(
-        msg,
-        firstTokenConverts,
-        secTokenConverts
-      );
+      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -346,7 +239,7 @@ const LiquidityModal: FC<ModalProps> = ({
     }
   };
 
-  const handleWithdrawLiquidity = async (amount: number) => {
+  const handleWithdrawLiquidity = async (amount: string) => {
     if (!pairInfoData) return;
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -399,17 +292,15 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const onChangeWithdrawPercent = (option: number) => {
-    setLpAmountBurn(
-      +parseDisplayAmount(
-        ((option * lpTokenBalance) / 100).toString(),
-        lpTokenInfoData?.decimals ?? 0
-      )
-    );
+    setLpAmountBurn((BigInt(option) * lpTokenBalance) / BigInt(100));
   };
+
+  const totalSupply = BigInt(lpTokenInfoData!.total_supply ?? 0);
 
   const Token1Icon = token1!.Icon;
   const Token2Icon = token2!.Icon;
-
+  const lp1BurnAmount = (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
+  const lp2BurnAmount = (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
   const addTab = (
     <>
       <div className={cx('supply')}>
@@ -419,36 +310,17 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token1Balance ? token1Balance : 0,
-              denom: token1InfoData?.name ?? ''
+              amount: token1Balance.toString(),
+              denom: token1InfoData?.name ?? '',
+              decimals: token1InfoData?.decimals
             }}
             prefix="Balance: "
             decimalScale={6}
           />
-          <div
-            className={cx('btn')}
-            onClick={() =>
-              onChangeAmount1(
-                parseDisplayAmount(
-                  token1Balance,
-                  token1InfoData?.decimals ?? 0
-                ).toString()
-              )
-            }
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance)}>
             MAX
           </div>
-          <div
-            className={cx('btn')}
-            onClick={() =>
-              onChangeAmount1(
-                parseDisplayAmount(
-                  (token1Balance / 2)?.toString(),
-                  token1InfoData?.decimals ?? 0
-                ).toString()
-              )
-            }
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -471,20 +343,17 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
             placeholder={'0'}
             // type="input"
-            value={amountToken1 ?? ''}
+            value={toDisplay(amountToken1, token1InfoData.decimals)}
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             allowNegative={false}
             onChange={(e: any) => {
-              onChangeAmount1(e.target.value.replaceAll(',', ''));
+              onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1InfoData.decimals));
             }}
           />
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img
-          src={require('assets/icons/fluent_add.svg').default}
-          onClick={() => {}}
-        />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -493,36 +362,17 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: token2Balance ? token2Balance : 0,
-              denom: token2InfoData?.name ?? ''
+              amount: token2Balance.toString(),
+              denom: token2InfoData?.name ?? '',
+              decimals: token2InfoData?.decimals
             }}
             prefix="Balance: "
             decimalScale={6}
           />
-          <div
-            className={cx('btn')}
-            onClick={() =>
-              onChangeAmount2(
-                parseDisplayAmount(
-                  token2Balance,
-                  token2InfoData?.decimals ?? 0
-                ).toString()
-              )
-            }
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance)}>
             MAX
           </div>
-          <div
-            className={cx('btn')}
-            onClick={() =>
-              onChangeAmount2(
-                parseDisplayAmount(
-                  (token2Balance / 2)?.toString(),
-                  token2InfoData?.decimals ?? 0
-                ).toString()
-              )
-            }
-          >
+          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -546,9 +396,9 @@ const LiquidityModal: FC<ModalProps> = ({
             placeholder={'0'}
             // type="input"
             allowNegative={false}
-            value={amountToken2 ?? ''}
+            value={toDisplay(amountToken2, token2InfoData.decimals)}
             onChange={(e: any) => {
-              onChangeAmount2(e.target.value.replaceAll(',', ''));
+              onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2InfoData.decimals));
             }}
           />
         </div>
@@ -561,9 +411,7 @@ const LiquidityModal: FC<ModalProps> = ({
           </div>
 
           <TokenBalance
-            balance={
-              pairAmountInfoData?.usdAmount ? pairAmountInfoData?.usdAmount : 0
-            }
+            balance={pairAmountInfoData.tokenUsd}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -574,8 +422,9 @@ const LiquidityModal: FC<ModalProps> = ({
           </div>
           <TokenBalance
             balance={{
-              amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? ''
+              amount: lpTokenBalance,
+              denom: lpTokenInfoData?.symbol,
+              decimals: lpTokenInfoData?.decimals
             }}
             decimalScale={6}
           />
@@ -587,28 +436,18 @@ const LiquidityModal: FC<ModalProps> = ({
           </div>
           <TokenBalance
             balance={{
-              amount: estimatedLP ? estimatedLP : 0,
-              denom: lpTokenInfoData?.symbol ?? ''
+              amount: estimatedLP.toString(),
+              denom: lpTokenInfoData?.symbol
             }}
             decimalScale={6}
           />
         </div>
       </div>
       {(() => {
-        const amount1 = +parseAmount(
-            amountToken1.toString(),
-            token1InfoData!.decimals
-          ),
-          amount2 = +parseAmount(
-            amountToken2.toString(),
-            token2InfoData!.decimals
-          );
         let disableMsg: string;
-        if (amount1 <= 0 || amount2 <= 0) disableMsg = 'Enter an amount';
-        if (amount1 > token1Balance)
-          disableMsg = `Insufficient ${token1InfoData?.name} balance`;
-        else if (amount2 > token2Balance)
-          disableMsg = `Insufficient ${token2InfoData?.name} balance`;
+        if (amountToken1 <= 0 || amountToken2 <= 0) disableMsg = 'Enter an amount';
+        if (amountToken1 > token1Balance) disableMsg = `Insufficient ${token1InfoData?.name} balance`;
+        else if (amountToken2 > token2Balance) disableMsg = `Insufficient ${token2InfoData?.name} balance`;
 
         const disabled =
           actionLoading ||
@@ -624,7 +463,7 @@ const LiquidityModal: FC<ModalProps> = ({
               disabled: disabled
             })}
             onClick={() => {
-              return handleAddLiquidity(amount1, amount2);
+              return handleAddLiquidity(amountToken1, amountToken2);
             }}
             disabled={disabled}
           >
@@ -644,8 +483,9 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: lpTokenBalance ? lpTokenBalance : 0,
-              denom: lpTokenInfoData?.symbol ?? ''
+              amount: lpTokenBalance,
+              denom: lpTokenInfoData?.symbol,
+              decimals: lpTokenInfoData?.decimals
             }}
             prefix="LP Token Balance: "
             decimalScale={6}
@@ -653,10 +493,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
           {!!pairAmountInfoData && !!lpTokenInfoData && (
             <TokenBalance
-              balance={
-                (pairAmountInfoData?.usdAmount * +lpTokenBalance) /
-                +lpTokenInfoData?.total_supply
-              }
+              balance={pairAmountInfoData?.tokenUsd * toDecimal(lpTokenBalance, totalSupply)}
               style={{ flexGrow: 1, textAlign: 'right' }}
               decimalScale={2}
             />
@@ -668,9 +505,9 @@ const LiquidityModal: FC<ModalProps> = ({
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
-            value={!!lpAmountBurn ? lpAmountBurn : ''}
+            value={toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
             allowNegative={false}
-            onValueChange={({ floatValue }) => setLpAmountBurn(floatValue ?? 0)}
+            onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))}
           />
         </div>
         <div className={cx('options')}>
@@ -712,7 +549,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={require('assets/icons/fluent-arrow-down.svg').default} />
+        <img src={ArrowDownImg} />
       </div>
       <div className={cx('receive')}>
         <div className={cx('header')}>
@@ -728,25 +565,15 @@ const LiquidityModal: FC<ModalProps> = ({
               </div>
               <div className={cx('value')}>
                 <TokenBalance
-                  balance={
-                    (lpAmountBurn * pairAmountInfoData?.token1Amount) /
-                    +lpTokenInfoData!.total_supply
-                  }
+                  balance={{
+                    amount: lp1BurnAmount,
+                    decimals: token1.decimals
+                  }}
                   decimalScale={6}
                   prefix={''}
                 />
 
-                <TokenBalance
-                  balance={getValueUsd(
-                    token1,
-                    (lpAmountBurn *
-                      10 ** lpTokenInfoData.decimals *
-                      pairAmountInfoData?.token1Amount) /
-                      +lpTokenInfoData!.total_supply
-                  )}
-                  className={cx('des')}
-                  decimalScale={2}
-                />
+                <TokenBalance balance={getValueUsd(token1, lp1BurnAmount)} className={cx('des')} decimalScale={2} />
               </div>
             </div>{' '}
             <div className={cx('seperator')} />
@@ -758,47 +585,31 @@ const LiquidityModal: FC<ModalProps> = ({
               </div>
               <div className={cx('value')}>
                 <TokenBalance
-                  balance={
-                    (lpAmountBurn * pairAmountInfoData?.token2Amount) /
-                    +lpTokenInfoData!.total_supply
-                  }
+                  balance={{
+                    amount: lp2BurnAmount,
+                    decimals: token2.decimals
+                  }}
                   decimalScale={6}
                   prefix={''}
                 />
 
-                <TokenBalance
-                  balance={getValueUsd(
-                    token2,
-                    (lpAmountBurn *
-                      10 ** lpTokenInfoData.decimals *
-                      pairAmountInfoData?.token2Amount) /
-                      +lpTokenInfoData!.total_supply
-                  )}
-                  className={cx('des')}
-                  decimalScale={2}
-                />
+                <TokenBalance balance={getValueUsd(token2, lp2BurnAmount)} className={cx('des')} decimalScale={2} />
               </div>
             </div>
           </>
         )}
       </div>
       {(() => {
-        const amount = +parseAmount(
-          lpAmountBurn.toString(),
-          lpTokenInfoData!.decimals
-        );
         let disableMsg: string;
-        if (amount <= 0) disableMsg = 'Enter an amount';
-        if (amount > lpTokenBalance)
-          disableMsg = `Insufficient LP token balance`;
-        const disabled =
-          actionLoading || !lpTokenInfoData || !pairInfoData || !!disableMsg;
+        if (lpAmountBurn <= 0) disableMsg = 'Enter an amount';
+        if (lpAmountBurn > lpTokenBalance) disableMsg = `Insufficient LP token balance`;
+        const disabled = actionLoading || !lpTokenInfoData || !pairInfoData || !!disableMsg;
         return (
           <button
             className={cx('swap-btn', {
               disabled: disabled
             })}
-            onClick={() => handleWithdrawLiquidity(amount)}
+            onClick={() => handleWithdrawLiquidity(lpAmountBurn.toString())}
             disabled={disabled}
           >
             {actionLoading && <Loader width={20} height={20} />}
@@ -810,28 +621,14 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={true}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
-        <div
-          className={cx('title')}
-        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
+        <div className={cx('title')}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
         <div className={cx('switch')}>
-          <div
-            className={cx({ 'active-tab': activeTab === 0 })}
-            onClick={() => setActiveTab(0)}
-          >
+          <div className={cx({ 'active-tab': activeTab === 0 })} onClick={() => setActiveTab(0)}>
             Add
           </div>
-          <div
-            className={cx({ 'active-tab': activeTab === 1 })}
-            onClick={() => setActiveTab(1)}
-          >
+          <div className={cx({ 'active-tab': activeTab === 1 })} onClick={() => setActiveTab(1)}>
             Withdraw
           </div>
         </div>

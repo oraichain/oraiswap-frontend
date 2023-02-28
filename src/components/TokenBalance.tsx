@@ -1,40 +1,28 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import NumberFormat, { NumberFormatProps } from 'react-number-format';
-import Big from 'big.js';
-import { parseBalanceNumber } from 'libs/utils';
+import { toDisplay } from 'libs/utils';
+
+type BalanceProp = {
+  amount: string | bigint;
+  decimals?: number;
+  denom?: string;
+};
 
 type Props = {
-  balance:
-  | number
-  | {
-    amount: string | number;
-    decimals?: number;
-    denom: string;
-  };
-
+  balance: BalanceProp | number;
   className?: string;
 } & NumberFormatProps;
 
-const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
-  const parseBalance = (
-    balance:
-      | number
-      | {
-        amount: string | number;
-        decimals?: number;
-        denom: string;
-      }
-  ) => {
-    if (typeof balance === 'number') return parseBalanceNumber(balance);
-    let bigBalance = balance.amount;
-    if (typeof balance.amount === 'number')
-      bigBalance = parseBalanceNumber(balance.amount);
-    return new Big(bigBalance)
-      .div(new Big(10).pow(balance.decimals ?? 6))
-      .toNumber();
-  };
+const parseBalance = (balance: BalanceProp): number => {
+  if (!balance.decimals) return Number(balance.amount);
+  return toDisplay(balance.amount, balance.decimals);
+};
 
-  const amount = parseBalance(balance);
+const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
+  const amount =
+    typeof balance === 'number'
+      ? balance
+      : parseBalance(balance ?? { amount: '0' });
 
   return (
     <NumberFormat
@@ -45,7 +33,12 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
       decimalScale={0}
       {...(typeof balance === 'number'
         ? { prefix: '$' }
-        : { suffix: ` ${balance?.denom.toUpperCase()}` })}
+        : {
+            // fix display denom
+            suffix: balance?.denom
+              ? ` ${balance.denom.replace(/^u/, '').toUpperCase()}`
+              : ''
+          })}
       {...props}
     />
   );

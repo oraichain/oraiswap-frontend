@@ -2,18 +2,18 @@ import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './BondingModal.module.scss';
 import cn from 'classnames/bind';
-import { TooltipIcon } from 'components/Tooltip';
 import TokenBalance from 'components/TokenBalance';
-import { getUsd, parseAmount } from 'libs/utils';
+import { getUsd, toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
+import { TokenItemType } from 'config/bridgeTokens';
 
 const cx = cn.bind(style);
 
@@ -24,11 +24,11 @@ interface ModalProps {
   close: () => void;
   isCloseBtn?: boolean;
   lpTokenInfoData: TokenInfo;
-  lpTokenBalance: number;
+  lpTokenBalance: string;
   liquidityValue: number;
-  assetToken: any;
-  onBondingAction: any;
-  pairInfoData: any;
+  assetToken: TokenItemType;
+  onBondingAction: Function;
+  apr: number;
 }
 
 const BondingModal: FC<ModalProps> = ({
@@ -36,26 +36,22 @@ const BondingModal: FC<ModalProps> = ({
   close,
   open,
   lpTokenInfoData,
-  lpTokenBalance,
+  lpTokenBalance: lpTokenBalanceValue,
   liquidityValue,
   assetToken,
   onBondingAction,
-  pairInfoData,
+  apr
 }) => {
-  const [bondAmount, setBondAmount] = useState('');
+  const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
-  const onChangeAmount = (value: string) => {
-    setBondAmount(value);
-  };
+  const lpTokenBalance = BigInt(lpTokenBalanceValue);
 
-  const handleBond = async (amount: string) => {
-    const parsedAmount = +parseAmount(amount, lpTokenInfoData!.decimals);
-
+  const handleBond = async (parsedAmount: bigint) => {
     if (parsedAmount <= 0 || parsedAmount > lpTokenBalance)
       return displayToast(TToastType.TX_FAILED, {
-        message: 'Amount is invalid!',
+        message: 'Amount is invalid!'
       });
 
     setActionLoading(true);
@@ -64,9 +60,9 @@ const BondingModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         lpToken: lpTokenInfoData.contractAddress!,
-        assetToken,
+        assetToken
       });
 
       const msg = msgs[0];
@@ -75,14 +71,14 @@ const BondingModal: FC<ModalProps> = ({
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds },
+        handleOptions: { funds: msg.sent_funds }
       });
       console.log('result provide tx hash: ', result);
 
       if (result) {
         console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`,
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         onBondingAction();
       }
@@ -93,7 +89,7 @@ const BondingModal: FC<ModalProps> = ({
         finalError = error as string;
       } else finalError = String(error);
       displayToast(TToastType.TX_FAILED, {
-        message: finalError,
+        message: finalError
       });
     } finally {
       setActionLoading(false);
@@ -101,25 +97,17 @@ const BondingModal: FC<ModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={true}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
         <div className={cx('title')}>Bond LP tokens</div>
 
         <div className={cx('detail')}>
-          {!!pairInfoData?.apr && (
+          {apr && (
             <div className={cx('row')}>
               <div className={cx('row-title')}>
                 <span>Current APR</span>
               </div>
-              <span className={cx('row-des', 'highlight')}>
-                {(pairInfoData?.apr).toFixed(2)}%
-              </span>
+              <span className={cx('row-des', 'highlight')}>{apr.toFixed(2)}%</span>
             </div>
           )}
         </div>
@@ -131,37 +119,20 @@ const BondingModal: FC<ModalProps> = ({
             <TokenBalance
               balance={{
                 amount: lpTokenBalance,
-                denom: `${lpTokenInfoData?.symbol}`,
+                denom: lpTokenInfoData?.symbol,
+                decimals: lpTokenInfoData?.decimals
               }}
               decimalScale={6}
               prefix="Balance: "
             />
 
-            <div
-              className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals}`
-                )
-              }
-            >
+            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance)}>
               MAX
             </div>
-            <div
-              className={cx('btn')}
-              onClick={() =>
-                onChangeAmount(
-                  `${lpTokenBalance / 10 ** lpTokenInfoData.decimals / 2}`
-                )
-              }
-            >
+            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
               HALF
             </div>
-            <TokenBalance
-              style={{ flexGrow: 1, textAlign: 'right' }}
-              balance={liquidityValue}
-              decimalScale={2}
-            />
+            <TokenBalance style={{ flexGrow: 1, textAlign: 'right' }} balance={liquidityValue} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
@@ -170,19 +141,15 @@ const BondingModal: FC<ModalProps> = ({
               decimalScale={6}
               placeholder={'0'}
               // type="input"
-              value={bondAmount ?? ''}
+              value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
               onChange={(e: { target: { value: string } }) => {
-                onChangeAmount(e.target.value.replaceAll(',', ''));
+                setBondAmount(toAmount(Number(e.target.value), lpTokenInfoData.decimals));
               }}
             />
           </div>
         </div>
 
-        <button
-          className={cx('swap-btn')}
-          onClick={() => handleBond(bondAmount)}
-          disabled={actionLoading}
-        >
+        <button className={cx('swap-btn')} onClick={() => handleBond(bondAmount)} disabled={actionLoading}>
           {actionLoading && <Loader width={20} height={20} />}
           <span>Bond</span>
         </button>

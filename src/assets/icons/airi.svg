@@ -62,15 +62,15 @@
 <path d="M13.1428 11.6571L13.1285 11.6714L15.9857 16.6286L18.8571 11.6571H13.1428Z" fill="#49CDFD"/>
 </g>
 <defs>
-<linearGradient id="paint0_linear_370_7643" x1="4.51614" y1="5.25823" x2="27.5678" y2="27.8236" gradientUnits="userSpaceOnUse">
+<linearGradient x1="4.51614" y1="5.25823" x2="27.5678" y2="27.8236" gradientUnits="userSpaceOnUse">
 <stop stop-color="#84E9FD"/>
 <stop offset="1" stop-color="#0044E3"/>
 </linearGradient>
-<linearGradient id="paint1_linear_370_7643" x1="6.39584" y1="3.33799" x2="29.4475" y2="25.9033" gradientUnits="userSpaceOnUse">
+<linearGradient x1="6.39584" y1="3.33799" x2="29.4475" y2="25.9033" gradientUnits="userSpaceOnUse">
 <stop stop-color="#84E9FD"/>
 <stop offset="1" stop-color="#0044E3"/>
 </linearGradient>
-<linearGradient id="paint2_linear_370_7643" x1="1.10164" y1="8.74632" x2="24.1534" y2="31.3117" gradientUnits="userSpaceOnUse">
+<linearGradient x1="1.10164" y1="8.74632" x2="24.1534" y2="31.3117" gradientUnits="userSpaceOnUse">
 <stop stop-color="#84E9FD"/>
 <stop offset="1" stop-color="#0044E3"/>
 </linearGradient>

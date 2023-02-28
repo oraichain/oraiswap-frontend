@@ -1,0 +1,26 @@
+diff --git a/node_modules/@terran-one/cosmwasm-vm-js/dist/backend/backendApi.js b/node_modules/@terran-one/cosmwasm-vm-js/dist/backend/backendApi.js
+index 6313e49..800143d 100644
+--- a/node_modules/@terran-one/cosmwasm-vm-js/dist/backend/backendApi.js
++++ b/node_modules/@terran-one/cosmwasm-vm-js/dist/backend/backendApi.js
+@@ -51,7 +51,7 @@ class BasicBackendApi {
+         const normalized = canonical.length - this.EXCESS_PADDING >= 48
+             ? canonical.slice(0, this.CANONICAL_LENGTH - this.EXCESS_PADDING)
+             : canonical;
+-        return bech32_1.bech32.encode(this.bech32_prefix, bech32_1.bech32.toWords(normalized));
++        return bech32_1.encode(this.bech32_prefix, bech32_1.toWords(normalized));
+     }
+ }
+ exports.BasicBackendApi = BasicBackendApi;
+diff --git a/node_modules/@terran-one/cosmwasm-vm-js/dist/instance.js b/node_modules/@terran-one/cosmwasm-vm-js/dist/instance.js
+index ed8fd02..2777b1b 100644
+--- a/node_modules/@terran-one/cosmwasm-vm-js/dist/instance.js
++++ b/node_modules/@terran-one/cosmwasm-vm-js/dist/instance.js
+@@ -27,7 +27,7 @@ class VMInstance {
+         this.backend = backend;
+         this.gasLimit = gasLimit;
+         this.debugMsgs = [];
+-        this.bech32 = bech32_1.bech32;
++        this.bech32 = bech32_1;
+     }
+     build(wasmByteCode) {
+         return __awaiter(this, void 0, void 0, function* () {

@@ -5,12 +5,21 @@ export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
 export const AIRI = 'AIRI';
 export const ATOM = 'ATOM';
+export const OSMO = 'OSMO';
 export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
+export const UOSMOS_DENOM = "uosmo";
+export const UATOM_DENOM = "uatom";
 export const BEP20_ORAI = 'bep20_orai';
+export const BEP20_USDT = 'bep20_usdt';
+export const BEP20_AIRI = 'bep20_airi';
+export const BEP20_KWT = 'bep20_kwt';
+export const BEP20_MILKY = 'bep20_milky';
 export const ERC20_ORAI = 'erc20_orai';
+export const ERC20_KWT = 'erc20_kwt';
+export const ERC20_MILKY = 'erc20_milky';
 export const KAWAII_ORAI = 'kawaii_orai';
 
 export const NATIVE_TOKENS = [ORAI];
@@ -53,6 +62,9 @@ export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
 export const JUNO_CHAIN_ID = 'juno-1';
 
+export const COSMOS_TYPE = 'cosmos';
+export const EVM_TYPE = 'evm';
+
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
@@ -62,9 +74,13 @@ export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_SCAN = 'https://scan.orai.io';
 export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
 export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
-export const ORAI_LCD = 'https://lcd.orai.io';
-export const ORAI_RPC = 'https://rpc.orai.io';
+export const ORAI_LCD = 'https://lcd-balance.orai.io';
+export const ORAI_RPC = 'https://rpc-balance.orai.io';
 export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
+export const OSMOSIS_NETWORK_LCD = 'https://lcd-osmosis.blockapsis.com';
+export const COSMOS_NETWORK_LCD = 'https://lcd-cosmos.oraidex.io';
+export const OSMOSIS_NETWORK_RPC = 'https://rpc-osmosis.blockapsis.com';
+export const COSMOS_NETWORK_RPC = 'https://rpc-cosmos.oraidex.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
@@ -78,6 +94,7 @@ export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179Cf06e71ac328c1b5';
 export const MILKY_ERC_CONTRACT = '0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75';
 export const ORAIX_DENOM = 'ORAIX';
 export const scORAI_DENOM = 'scorai';
+export const AIRI_DENOM = 'airi';
 export const KWT_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT;
 export const MILKY_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + MILKY_BSC_CONTRACT;
 
@@ -87,3 +104,16 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
+
+export const KAWAII_ORG = 'Kawaiiverse';
+export const OSMOSIS_ORG = 'Osmosis';
+export const COSMOS_ORG = 'Cosmos Hub';
+export const ORAI_BRIDGE_ORG = 'OraiBridge';
+
+// noti install owallet chorme extensions
+export const NOTI_INSTALL_OWALLET = {
+  message: 'You need to install OWallet or Keplr to continue.',
+  customLink:
+    'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+  textLink: 'View on store',
+};

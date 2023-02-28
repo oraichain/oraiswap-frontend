@@ -2,16 +2,11 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 // import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
-import { OfflineSigner, isBroadcastTxFailure } from '@cosmjs/launchpad';
-import {
-  isDeliverTxFailure,
-  DeliverTxResponse,
-  logs,
-  GasPrice
-} from '@cosmjs/stargate';
+import { isDeliverTxFailure, logs, GasPrice } from '@cosmjs/stargate';
 import * as encoding_1 from '@cosmjs/encoding';
 // import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 /**
  * The options of an .instantiate() call.
@@ -19,15 +14,6 @@ import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
  */
 export interface HandleOptions {
   readonly memo?: string;
-  /**
-   * The funds that are transferred from the sender to the newly created contract.
-   * The funds are transferred as part of the message execution after the contract address is
-   * created and before the instantiation message is executed by the contract.
-   *
-   * Only native tokens are supported.
-   *
-   * TODO: Rename to `funds` for consistency (https://github.com/cosmos/cosmjs/issues/806)
-   */
   readonly funds?: readonly Coin[];
 }
 
@@ -122,8 +108,7 @@ const executeMultipleAminoClient = async (
   client: cosmwasm.SigningCosmWasmClient,
   walletAddr: string
 ) => {
-
-  const executeMsgs = getExecuteContractMsgs(walletAddr,msgs)
+  const executeMsgs = getExecuteContractMsgs(walletAddr, msgs);
 
   const result = await client.signAndBroadcast(
     walletAddr,
@@ -148,7 +133,7 @@ class CosmJs {
     address: string;
     handleMsg: string;
     handleOptions?: HandleOptions;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
   }) {
     try {
@@ -170,7 +155,7 @@ class CosmJs {
     prefix?: string;
     walletAddr: string;
     msgs: ExecuteMultipleMsg[];
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
   }) {
     try {
@@ -197,7 +182,7 @@ class CosmJs {
   }: {
     walletAddr: string;
     msgs: any[];
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     lcd?: string;
     chainId?: string;
   }) {
@@ -239,7 +224,7 @@ class CosmJs {
     address: string;
     handleMsg: string;
     handleOptions?: HandleOptions;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     contractAddr?: string;
   }) {
     try {
@@ -282,7 +267,7 @@ class CosmJs {
     prefix?: string;
     walletAddr: string;
     msgs: ExecuteMultipleMsg[];
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
   }) {
     try {
       await window.Keplr.suggestChain(network.chainId);
@@ -339,7 +324,7 @@ class CosmJs {
     address: string;
     handleMsg: string;
     handleOptions?: HandleOptions;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
   }) {
     try {
       const wallet = await collectWallet();
@@ -379,7 +364,7 @@ class CosmJs {
     prefix?: string;
     walletAddr: string;
     msgs: ExecuteMultipleMsg[];
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
   }) {
     try {
       const wallet = await collectWallet();

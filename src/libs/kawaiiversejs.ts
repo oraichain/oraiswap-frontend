@@ -1,5 +1,4 @@
 import { collectWallet } from './cosmjs';
-import { StargateClient } from '@cosmjs/stargate';
 import { kawaiiTokens } from 'config/bridgeTokens';
 import { KAWAII_API_DEV, KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
 import {
@@ -11,8 +10,10 @@ import {
 } from '@oraichain/kawaiiverse-txs';
 import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
-import { OfflineDirectSigner } from '@cosmjs/proto-signing';
-import axios from 'rest/request';
+
+import { getEvmAddress } from './utils';
+import { OfflineDirectSigner } from '@keplr-wallet/types';
+import { Coin, StargateClient } from '@cosmjs/stargate';
 
 async function getAccountInfo(accAddress: string) {
   return await fetch(
@@ -122,9 +123,9 @@ export default class KawaiiverseJs {
     coin
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
-    coin: { amount: string; denom: string };
+    coin: Coin;
   }) {
     try {
       const subnetwork = kawaiiTokens[0];
@@ -137,14 +138,11 @@ export default class KawaiiverseJs {
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       const senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
-      const { address_eth } = await (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`
-        )
-      ).data;
+
+      const destinationAddress = getEvmAddress(senderInfo.accountAddress);
 
       const params = {
-        destinationAddress: address_eth,
+        destinationAddress,
         amount: coin.amount.toString(),
         denom: coin.denom.toString()
       };
@@ -184,7 +182,7 @@ export default class KawaiiverseJs {
     contractAddr
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
     amount: string;
     contractAddr?: string;
@@ -207,12 +205,7 @@ export default class KawaiiverseJs {
         amount
       };
 
-      const { address_eth } = await (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`
-        )
-      ).data;
-      senderInfo.accountAddress = address_eth;
+      senderInfo.accountAddress = getEvmAddress(senderInfo.accountAddress);
 
       const { signDirect } = createMessageConvertERC20(
         { chainId: chainIdNumber, cosmosChainId: subnetwork.chainId as string },
@@ -244,17 +237,9 @@ export default class KawaiiverseJs {
     customMessages
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
-    ibcInfo: {
-      sourcePort: string;
-      sourceChannel: string;
-      amount: string;
-      denom: string;
-      sender: string;
-      receiver: string;
-      timeoutTimestamp: number;
-    };
+    ibcInfo: IBCInfoMsg;
     customMessages?: any[];
   }) {
     try {
@@ -312,18 +297,10 @@ export default class KawaiiverseJs {
     contractAddr
   }: {
     sender: string;
-    gasAmount: { amount: string; denom: string };
+    gasAmount: Coin;
     gasLimits?: { exec: number };
     amount: string;
-    ibcInfo: {
-      sourcePort: string;
-      sourceChannel: string;
-      amount: string;
-      denom: string;
-      sender: string;
-      receiver: string;
-      timeoutTimestamp: number;
-    };
+    ibcInfo: IBCInfoMsg;
     contractAddr?: string;
   }) {
     try {
@@ -350,18 +327,14 @@ export default class KawaiiverseJs {
         revisionHeight: 0
       };
 
-      const { address_eth } = await (
-        await axios.get(
-          `${KAWAII_API_DEV}/mintscan/v1/account/cosmos-to-eth/${senderInfo.accountAddress}`
-        )
-      ).data;
+      const evmAddress = getEvmAddress(senderInfo.accountAddress);
 
       const { signDirect } = createMessageConvertIbcTransferERC20(
         { chainId: chainIdNumber, cosmosChainId: subnetwork.chainId as string },
         senderInfo,
-        address_eth,
+        evmAddress,
         fee,
-        `sender - ${address_eth}; receiver - ${params.receiver}`,
+        `sender - ${evmAddress}; receiver - ${params.receiver}`,
         params
       );
 

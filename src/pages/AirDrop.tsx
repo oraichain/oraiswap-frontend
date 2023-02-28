@@ -1,13 +1,12 @@
-import Big from 'big.js';
 import { FunctionComponent, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'rest/request';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
-import { Input } from 'antd';
-import { bech32 } from 'bech32-2.0';
-import _ from 'lodash';
+import bech32 from 'bech32';
+import Input from 'components/Input';
+import throttle from 'lodash/throttle';
 
 const cx = cn.bind(styles);
 
@@ -45,12 +44,6 @@ const AirDrop: FunctionComponent = () => {
   const [oraiAddress, setOraiAddress] = useState('');
   const [otherNetworkAddr, setOtherNetworkAddr] = useState('');
 
-  const parseAmount = (amount: number) => {
-    if (typeof amount === 'number' && isFinite(amount) && !isNaN(amount))
-      return new Big(amount).div(Math.pow(10, 6)).toNumber();
-    return 0;
-  };
-
   const filterAddress = (prefix: string, address: string) => {
     const totalLength = prefix.length + 39;
     try {
@@ -71,7 +64,7 @@ const AirDrop: FunctionComponent = () => {
   };
   const timeout = 20000;
 
-  const handleotherNetworkAddrChange = _.throttle(
+  const handleotherNetworkAddrChange = throttle(
     ({ target }) => {
       setOtherNetworkAddr(target.value || '');
     },
@@ -79,7 +72,7 @@ const AirDrop: FunctionComponent = () => {
     { trailing: true }
   );
 
-  const handleOraiAddrChange = _.throttle(
+  const handleOraiAddrChange = throttle(
     ({ target }) => {
       setOraiAddress(target.value || '');
     },
@@ -87,17 +80,15 @@ const AirDrop: FunctionComponent = () => {
     { trailing: true }
   );
 
-  const { data: airdropAmount } = useQuery(
-    ['airdrop', otherNetworkAddr],
-    () => fetchAirDrop(),
-    { enabled: !!otherNetworkAddr, ...useQueryProps }
-  );
+  const { data: airdropAmount } = useQuery(['airdrop', otherNetworkAddr], () => fetchAirDrop(), {
+    enabled: !!otherNetworkAddr,
+    ...useQueryProps
+  });
 
-  const { data: airdropLp } = useQuery(
-    ['airdrop-lp', oraiAddress],
-    () => fetchAirDropLp(),
-    { enabled: !!oraiAddress, ...useQueryProps }
-  );
+  const { data: airdropLp } = useQuery(['airdrop-lp', oraiAddress], () => fetchAirDropLp(), {
+    enabled: !!oraiAddress,
+    ...useQueryProps
+  });
 
   async function fetchAirDrop() {
     if (!filterAddress(chain, otherNetworkAddr)) return;
@@ -105,9 +96,9 @@ const AirDrop: FunctionComponent = () => {
     let res: any = (await axios.get(url, { timeout })).data;
 
     let response = {
-      delegatedAmount: parseAmount(res.delegated),
-      undelegatedAmount: parseAmount(res.undelegated),
-      available: parseAmount(res.available)
+      delegatedAmount: res.delegated,
+      undelegatedAmount: res.undelegated,
+      available: res.available
     };
 
     return response;
@@ -118,9 +109,7 @@ const AirDrop: FunctionComponent = () => {
     try {
       let url = `https://airdrop-api.oraidex.io/lp/${chain}/account/${oraiAddress}`;
       let res = (await axios.get(url, { timeout })).data;
-      const denom = Object.keys(res).find(
-        (key) => key === chainDenomMap[`${chain}`]
-      );
+      const denom = Object.keys(res).find((key) => key === chainDenomMap[`${chain}`]);
       return { denom, ...res };
     } catch (error) {
       console.log("no airdrop lp for this chain's account");
@@ -139,18 +128,10 @@ const AirDrop: FunctionComponent = () => {
       }}
     >
       {(chain !== 'cosmos' || (chain === 'cosmos' && !isLp)) && (
-        <CustomInput
-          chainName={chainUpper}
-          address={otherNetworkAddr}
-          onChange={handleotherNetworkAddrChange}
-        />
+        <CustomInput chainName={chainUpper} address={otherNetworkAddr} onChange={handleotherNetworkAddrChange} />
       )}
       {chain === 'cosmos' && isLp && (
-        <CustomInput
-          chainName={'ORAI'}
-          address={oraiAddress}
-          onChange={handleOraiAddrChange}
-        />
+        <CustomInput chainName={'ORAI'} address={oraiAddress} onChange={handleOraiAddrChange} />
       )}
 
       {!!airdropAmount && (
@@ -163,9 +144,7 @@ const AirDrop: FunctionComponent = () => {
       )}
       {!!airdropLp && !isNaN(airdropLp.total_lp) && (
         <div>
-          <div>{`Total liquidity in ${airdropLp.denom.toUpperCase()}-ORAI: ${
-            airdropLp.total_lp
-          } LP`}</div>
+          <div>{`Total liquidity in ${airdropLp.denom.toUpperCase()}-ORAI: ${airdropLp.total_lp} LP`}</div>
           <div>{`Total IBC ${airdropLp.denom.toUpperCase()} on Oraichain: ${
             airdropLp[airdropLp.denom]
           } ${airdropLp.denom.toUpperCase()}`}</div>

@@ -1,21 +1,18 @@
 import React, { FC, useState } from 'react';
-import ReactModal from 'react-modal';
 import Modal from 'components/Modal';
-import { TooltipIcon } from 'components/Tooltip';
 import style from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
-import { filteredTokens } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
-import { parseAmount, parseDisplayAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateContractMessages, generateMiningMsgs, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useGlobalState from 'hooks/useGlobalState';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(style);
 
@@ -23,9 +20,9 @@ interface ModalProps {
   isOpen: boolean;
   close: () => void;
   open: () => void;
-  bondAmount: number;
+  bondAmount: string;
   bondAmountUsd: number;
-  lpTokenInfoData: any;
+  lpTokenInfoData: TokenInfo;
   assetToken: any;
   onBondingAction: any;
 }
@@ -34,23 +31,20 @@ const UnbondModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
-  bondAmount,
+  bondAmount: bondAmountValue,
   bondAmountUsd,
   lpTokenInfoData,
   assetToken,
   onBondingAction
 }) => {
   const [chosenOption, setChosenOption] = useState(-1);
-  const [unbondAmount, setUnbondAmount] = useState(0);
+  const [unbondAmount, setUnbondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useGlobalState('address');
+  const [address] = useConfigReducer('address');
 
-  const handleUnbond = async (amount: number) => {
-    const parsedAmount = +parseAmount(
-      amount.toString(),
-      lpTokenInfoData!.decimals
-    );
+  const bondAmount = BigInt(bondAmountValue);
 
+  const handleUnbond = async (parsedAmount: bigint) => {
     if (parsedAmount <= 0 || parsedAmount > bondAmount)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Amount is invalid!'
@@ -62,7 +56,7 @@ const UnbondModal: FC<ModalProps> = ({
       const msgs = await generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: address,
-        amount: parsedAmount,
+        amount: parsedAmount.toString(),
         assetToken
       });
       const msg = msgs[0];
@@ -99,13 +93,7 @@ const UnbondModal: FC<ModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      close={close}
-      open={open}
-      isCloseBtn={false}
-      className={cx('modal')}
-    >
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('setting')}>
         <div className={cx('title')}>
           <div>Unbond LP tokens</div>
@@ -119,18 +107,15 @@ const UnbondModal: FC<ModalProps> = ({
           <div className={cx('balance')}>
             <TokenBalance
               balance={{
-                amount: bondAmount ? bondAmount : 0,
-                denom: lpTokenInfoData.symbol
+                amount: bondAmount,
+                denom: lpTokenInfoData.symbol,
+                decimals: lpTokenInfoData.decimals
               }}
               prefix="Bonded Token Balance: "
               decimalScale={6}
             />
 
-            <TokenBalance
-              balance={bondAmountUsd}
-              style={{ flexGrow: 1, textAlign: 'right' }}
-              decimalScale={2}
-            />
+            <TokenBalance balance={bondAmountUsd} style={{ flexGrow: 1, textAlign: 'right' }} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
@@ -138,10 +123,8 @@ const UnbondModal: FC<ModalProps> = ({
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
-              value={!!unbondAmount ? unbondAmount : ''}
-              onValueChange={({ floatValue }) =>
-                setUnbondAmount(floatValue ?? 0)
-              }
+              value={toDisplay(unbondAmount, lpTokenInfoData.decimals)}
+              onValueChange={({ floatValue }) => setUnbondAmount(toAmount(floatValue, lpTokenInfoData.decimals))}
             />
           </div>
           <div className={cx('options')}>
@@ -152,7 +135,7 @@ const UnbondModal: FC<ModalProps> = ({
                 })}
                 key={idx}
                 onClick={() => {
-                  setUnbondAmount((option * bondAmount) / (10 ** 6 * 100));
+                  setUnbondAmount((BigInt(option) * bondAmount) / BigInt(100));
                   setChosenOption(idx);
                 }}
               >
@@ -169,22 +152,15 @@ const UnbondModal: FC<ModalProps> = ({
                 placeholder="0.00"
                 type={'number'}
                 className={cx('input')}
-                // value={chosenOption === 4 && !!unbondAmount ? unbondAmount : ''}
                 onChange={(event) => {
-                  setUnbondAmount(
-                    (+event.target.value * bondAmount) / (10 ** 6 * 100)
-                  );
+                  setUnbondAmount((BigInt(event.target.value) * bondAmount) / BigInt(100));
                 }}
               />
               %
             </div>
           </div>
         </div>
-        <button
-          className={cx('swap-btn')}
-          onClick={() => handleUnbond(unbondAmount)}
-          disabled={actionLoading}
-        >
+        <button className={cx('swap-btn')} onClick={() => handleUnbond(unbondAmount)} disabled={actionLoading}>
           {actionLoading && <Loader width={20} height={20} />}
           <span>Unbond</span>
         </button>

@@ -1,10 +1,4 @@
-import React, {
-  FC,
-  FunctionComponent,
-  ReactComponentElement,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import React, { FunctionComponent } from 'react';
 import styles from './Toast.module.scss';
 import classNames from 'classnames';
 import { toast, ToastOptions } from 'react-toastify';
@@ -50,6 +44,7 @@ export enum TToastType {
 interface IToastExtra {
   message: string;
   customLink: string;
+  textLink: string;
 }
 
 export type DisplayToastFn = ((
@@ -83,7 +78,9 @@ export type DisplayToastFn = ((
   ) => void) &
   ((
     type: TToastType.TX_INFO,
-    extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink'>>,
+    extraData?: Partial<
+      Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>
+    >,
     options?: Partial<ToastOptions>
   ) => void);
 
@@ -114,6 +111,7 @@ export const displayToast: DisplayToastFn = (
         <ToastInfo
           message={inputExtraData.message}
           link={inputExtraData.customLink}
+          textLink={inputExtraData.textLink}
         />,
         inputOptions
       );
@@ -154,17 +152,18 @@ const ToastTxBroadcasting: FunctionComponent = () => (
   </div>
 );
 
-const ToastInfo: FunctionComponent<{ message: string; link: string }> = ({
-  message,
-  link,
-}) => (
+const ToastInfo: FunctionComponent<{
+  message: string;
+  link: string;
+  textLink: string;
+}> = ({ message, link, textLink }) => (
   <div className={classNames(styles.toast_content, styles.toast_info)}>
     <InfoIcon />
     <section className={styles.toast_section}>
       <p>{message}</p>
       {link && (
         <a target="__blank" href={link}>
-          View on Instructions <LinkIcon />
+          {textLink ?? 'View on Instructions'} <LinkIcon />
         </a>
       )}
     </section>

@@ -9,7 +9,6 @@ import GravityABI from 'config/abi/gravity.json';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'web3-utils';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
-import { getDenomEvm } from 'helper';
 
 export default class Metamask {
   constructor() {}
@@ -23,11 +22,23 @@ export default class Metamask {
     return Number(window.ethereum?.chainId) === Number(ETHEREUM_CHAIN_ID);
   }
 
+  public isWindowEthereum() {
+    return !!window.ethereum;
+  }
+
   public async switchNetwork(chainId: string | number) {
     await window.ethereum.request!({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: "0x" + Number(chainId).toString(16) }]
+      params: [{ chainId: '0x' + Number(chainId).toString(16) }]
     });
+  }
+
+  public async getEthAddress() {
+    const [address] = await window.ethereum!.request({
+      method: 'eth_requestAccounts',
+      params: []
+    });
+    return address;
   }
 
   public async transferToGravity(
@@ -86,38 +97,38 @@ export default class Metamask {
     return result;
   }
 
-  public getOraiToken(denom?: string): TokenItemType | undefined {
-    return evmTokens.find(
-      (token) => token.denom === (denom ? denom : getDenomEvm())
-    );
-  }
+  // public getOraiToken(denom?: string): TokenItemType | undefined {
+  //   return evmTokens.find(
+  //     (token) => token.denom === (denom ? denom : getDenomEvm())
+  //   );
+  // }
 
-  public async getOraiBalance(
-    address: string | null,
-    inputToken?: TokenItemType,
-    rpc?: string,
-    denom?: string
-  ) {
-    // must has chainId and contractAddress
-    const token = inputToken || this.getOraiToken(denom);
-    if (!token || !token.contractAddress) return '0';
+  // public async getOraiBalance(
+  //   address: string | null,
+  //   inputToken?: TokenItemType,
+  //   rpc?: string,
+  //   denom?: string
+  // ) {
+  //   // must has chainId and contractAddress
+  //   const token = inputToken || this.getOraiToken(denom);
+  //   if (!token || !token.contractAddress) return '0';
 
-    try {
-      // if the same chain id using window.ethereum
-      const provider =
-        Number(token.chainId) !== Number(window.ethereum.chainId)
-          ? token.rpc
-          : window.ethereum;
+  //   try {
+  //     // if the same chain id using window.ethereum
+  //     const provider =
+  //       Number(token.chainId) !== Number(window.ethereum.chainId)
+  //         ? token.rpc
+  //         : window.ethereum;
 
-      const web3 = new Web3(rpc || provider);
-      const tokenInst = new web3.eth.Contract(
-        tokenABI as AbiItem[],
-        token.contractAddress
-      );
-      const balance = await tokenInst.methods.balanceOf(address).call();
-      return balance;
-    } catch (ex) {
-      return '0';
-    }
-  }
+  //     const web3 = new Web3(rpc || provider);
+  //     const tokenInst = new web3.eth.Contract(
+  //       tokenABI as AbiItem[],
+  //       token.contractAddress
+  //     );
+  //     const balance = await tokenInst.methods.balanceOf(address).call();
+  //     return balance;
+  //   } catch (ex) {
+  //     return '0';
+  //   }
+  // }
 }

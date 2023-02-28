@@ -4,6 +4,16 @@ export interface AllowMsg {
 }
 export type Uint128 = string;
 export type Binary = string;
+export type AssetInfo = {
+  token: {
+    contract_addr: Addr;
+  };
+} | {
+  native_token: {
+    denom: string;
+  };
+};
+export type Addr = string;
 export interface Cw20ReceiveMsg {
   amount: Uint128;
   msg: Binary;
@@ -15,20 +25,23 @@ export interface TransferMsg {
   remote_address: string;
   timeout?: number | null;
 }
-
 export interface TransferBackMsg {
   local_channel_id: string;
-  remote_address: string;
-  timeout?: number | null;
   memo?: string | null;
+  remote_address: string;
+  remote_denom: string;
+  timeout?: number | null;
 }
-
-export interface Cw20PairMsg {
-  cw20_decimals: number;
-  cw20_denom: string;
+export interface UpdatePairMsg {
+  asset_info: AssetInfo;
+  asset_info_decimals: number;
   denom: string;
   local_channel_id: string;
   remote_decimals: number;
+}
+export interface DeletePairMsg {
+  denom: string;
+  local_channel_id: string;
 }
 export type Amount = {
   native: Coin;
@@ -54,29 +67,27 @@ export interface IbcEndpoint {
   port_id: string;
   [k: string]: unknown;
 }
-export type Addr = string;
-export interface Cw20PairQuery {
-  cw20_map: Cw20MappingMetadata;
-  key: string;
-}
-export interface Cw20MappingMetadata {
-  cw20_decimals: number;
-  cw20_denom: string;
-  remote_decimals: number;
-}
 export interface AllowedInfo {
   contract: string;
   gas_limit?: number | null;
 }
-export type AssetInfo = {
-  token: {
-    contract_addr: Addr;
-  };
-} | {
-  native_token: {
-    denom: string;
-  };
-};
+export interface PairQuery {
+  key: string;
+  pair_mapping: MappingMetadata;
+}
+export interface MappingMetadata {
+  asset_info: AssetInfo;
+  asset_info_decimals: number;
+  remote_decimals: number;
+}
+export type ArrayOfPairQuery = PairQuery[];
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
+}
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
@@ -86,12 +97,44 @@ export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
 }
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
+export type OrderDirection = "buy" | "sell";
+export interface Asset {
+  amount: Uint128;
+  info: AssetInfo;
+}
+export type OrderFilter = ("tick" | "none") | {
+  bidder: string;
+} | {
+  price: Decimal;
+};
+export type OracleTreasuryQuery = {
+  tax_rate: {};
+} | {
+  tax_cap: {
+    denom: string;
+  };
+};
+export type OracleExchangeQuery = {
+  exchange_rate: {
+    base_denom?: string | null;
+    quote_denom: string;
+  };
+} | {
+  exchange_rates: {
+    base_denom?: string | null;
+    quote_denoms: string[];
+  };
+};
+export type OracleContractQuery = {
+  contract_info: {};
+} | {
+  reward_pool: {
+    denom: string;
+  };
+};
+export interface ExchangeRateItem {
+  exchange_rate: Decimal;
+  quote_denom: string;
 }
 export type Uint64 = string;
 export interface SwapMsg {
@@ -139,45 +182,6 @@ export interface ExternalTokenMsg {
 export interface AllowedTokenInfo {
   contract: string;
   denom: string;
-}
-export type OrderDirection = "buy" | "sell";
-export interface Asset {
-  amount: Uint128;
-  info: AssetInfo;
-}
-export type OrderFilter = ("tick" | "none") | {
-  bidder: string;
-} | {
-  price: Decimal;
-};
-export type OracleTreasuryQuery = {
-  tax_rate: {};
-} | {
-  tax_cap: {
-    denom: string;
-  };
-};
-export type OracleExchangeQuery = {
-  exchange_rate: {
-    base_denom?: string | null;
-    quote_denom: string;
-  };
-} | {
-  exchange_rates: {
-    base_denom?: string | null;
-    quote_denoms: string[];
-  };
-};
-export type OracleContractQuery = {
-  contract_info: {};
-} | {
-  reward_pool: {
-    denom: string;
-  };
-};
-export interface ExchangeRateItem {
-  exchange_rate: Decimal;
-  quote_denom: string;
 }
 export type SwapOperation = {
   orai_swap: {
@@ -229,3 +233,35 @@ export interface SpenderAllowanceInfo {
 export type LogoInfo = {
   url: string;
 } | "embedded";
+
+export interface Call {
+  address: Addr;
+  data: Binary;
+}
+export interface CallOptional {
+  address: Addr;
+  data: Binary;
+  require_success: boolean;
+}
+export interface AggregateResult {
+  return_data: CallResult[];
+}
+export interface CallResult {
+  data: Binary;
+  success: boolean;
+}
+export interface BlockAggregateResult {
+  block: number;
+  return_data: CallResult[];
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
+}
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
+}

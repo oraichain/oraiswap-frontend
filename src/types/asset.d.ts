@@ -1,8 +1,3 @@
-interface Coin {
-  amount: string;
-  denom: string;
-}
-
 interface Asset {
   amount: string;
   symbol: string;
