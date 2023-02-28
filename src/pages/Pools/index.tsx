@@ -3,7 +3,7 @@ import styles from './index.module.scss';
 import { useNavigate } from 'react-router-dom';
 import Content from 'layouts/Content';
 import { Pair, pairs } from 'config/pools';
-import { fetchAllPoolApr, fetchPoolInfoAmount, parseTokenInfo } from 'rest/api';
+import { fetchAllPoolApr, fetchPoolInfoAmount, getPairAmountInfo, parseTokenInfo } from 'rest/api';
 import { toDecimal, toDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
@@ -303,10 +303,11 @@ const Pools: React.FC<PoolsProps> = () => {
     const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
     const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
 
-    poolList.forEach((pool) => {
-      // from denom must be orai, or to denom must be stable coin
-      const tokenPrice = pool.toToken.denom === ORAI ? oraiPrice : toDecimal(pool.askPoolAmount, pool.offerPoolAmount);
-      pool.amount = toDisplay(pool.offerPoolAmount, pool.fromToken.decimals) * tokenPrice * 2;
+    const pairAmounts = await Promise.all(
+      poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs))
+    );
+    poolList.map((pool, ind) => {
+      pool.amount = pairAmounts[ind].tokenUsd;
     });
 
     setPairInfos(poolList);
