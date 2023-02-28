@@ -37,7 +37,7 @@ describe('bigint', () => {
   });
 
   it('toDisplay-happy-path', async () => {
-    const amount = 1000;
+    const amount = '1000';
     const decimal = 6;
     const res = toDisplay(amount, decimal).toString();
     expect(res).toBe('0.001');
