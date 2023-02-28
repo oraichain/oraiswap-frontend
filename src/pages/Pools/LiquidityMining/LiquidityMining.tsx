@@ -17,6 +17,8 @@ import { RewardInfoResponseItem } from 'libs/contracts';
 import { toDecimal } from 'libs/utils';
 import { Asset } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
+import { CacheTokens } from 'libs/token';
+import { useDispatch } from 'react-redux';
 
 const cx = cn.bind(styles);
 
@@ -57,7 +59,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
       // let interval = setInterval(() => setNewReward(), 1000);
@@ -89,6 +91,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
     setPendingRewards(res);
   };
+
+  const cacheTokensCosmos = React.useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const handleBond = async () => {
     setActionLoading(true);
@@ -124,6 +128,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        cacheTokensCosmos.loadTokensCosmos();
         setActionLoading(false);
         onBondingAction();
         return;
