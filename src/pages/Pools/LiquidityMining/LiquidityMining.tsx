@@ -248,7 +248,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
               </button>
-              <button className={cx('btn', 'btn--dark')} onClick={() => setIsOpenUnbondModal(true)}>
+              <button className={cx('btn', 'btn--dark', 'btn-unbond')} onClick={() => setIsOpenUnbondModal(true)}>
                 <span>Unbond</span>
               </button>
             </div>
