@@ -38,8 +38,15 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
 
 /// using multicall when query multiple
 async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]> {
-  const tokenInfos = tokenSwaps.filter((t) => !t.contractAddress).map((t) => toTokenInfo(t));
-  const filterTokenSwaps = tokenSwaps.filter((t) => t.contractAddress);
+  const filterIndex = {};
+  let currentInd = 0;
+  const filterTokenSwaps = tokenSwaps.filter((t, ind) => {
+    if (t.contractAddress) {
+      filterIndex[ind] = currentInd++;
+      return true;
+    }
+    return false;
+  });
   const queries = filterTokenSwaps.map((t) => ({
     address: t.contractAddress,
     data: toBinary({
@@ -51,10 +58,12 @@ async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]
     queries
   });
 
-  const infoList = res.return_data.map((data) => fromBinary(data.data) as TokenInfoResponse);
-  tokenInfos.push(...filterTokenSwaps.map((t, ind) => toTokenInfo(t, infoList[ind])));
-
-  return tokenInfos;
+  console.log(filterIndex);
+  return tokenSwaps.map((t, ind) => {
+    const data = res.return_data[filterIndex[ind]];
+    const info = data ? fromBinary(data.data) : undefined;
+    return toTokenInfo(t, info);
+  });
 }
 
 async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
