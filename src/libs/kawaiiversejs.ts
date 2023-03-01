@@ -193,7 +193,7 @@ export default class KawaiiverseJs {
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
-        contractAddress: contractAddr ?? KAWAII_CONTRACT,
+        contractAddress: contractAddr,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount
       };
