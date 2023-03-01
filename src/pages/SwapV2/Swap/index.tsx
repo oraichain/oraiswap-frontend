@@ -63,7 +63,7 @@ const SwapComponent: React.FC<{
 
   Contract.sender = address;
 
-  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
+  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery<TaxRateResponse>({
     client: Contract.oracle,
     input: {
       tax_rate: {}
@@ -108,13 +108,11 @@ const SwapComponent: React.FC<{
 
   useEffect(() => {
     console.log('simulate average data: ', simulateAverageData);
-    setAverageRatio(
-      parseFloat(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString()).toFixed(6)
-    );
+    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, parseFloat(toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString())]);
+    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   const handleSubmit = async () => {
@@ -272,20 +270,13 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Minimum Received</span>
           </div>
-          <TokenBalance
-            balance={{
-              amount: simulateData?.amount ?? '0',
-              denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals
-            }}
-            decimalScale={6}
-          />
+          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={6} />
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{parseFloat((taxRate as TaxRateResponse)?.rate) * 100} %</span>
+          <span>{(Number(taxRate?.rate) * 100).toFixed(1)} %</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
