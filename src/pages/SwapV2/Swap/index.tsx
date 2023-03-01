@@ -270,7 +270,7 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Minimum Received</span>
           </div>
-          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={6} />
+          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={2} />
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>
