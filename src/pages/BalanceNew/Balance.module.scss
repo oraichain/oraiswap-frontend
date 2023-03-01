@@ -69,7 +69,7 @@
   &_box {
     display: flex;
     align-items: center;
-    justify-content: space-between;    
+    justify-content: space-between;
   }
   &_flex {
     display: flex;
@@ -82,7 +82,7 @@
   }
   &_form {
     width: 420px;
-    background: #2B2D3B;
+    background: #2b2d3b;
     border-radius: 8px;
     padding: 12px;
     height: 56px;
@@ -90,7 +90,7 @@
     justify-content: center;
     flex-direction: column;
     @include mobile {
-      width: 100%!important;
+      width: 100% !important;
       margin-top: 20px;
     }
   }
@@ -103,6 +103,10 @@
     font-weight: 600;
     font-size: 16px;
     color: white;
+    @include mobile {
+      margin-top: 12px;
+      width: 100%;
+    }
   }
 }
 
@@ -153,7 +157,7 @@
   justify-content: center;
   &_form {
     @include desktop {
-      @media (max-width: 1024px ) {
+      @media (max-width: 1024px) {
         width: 100%;
       }
       @media (max-width: 1270px) {
