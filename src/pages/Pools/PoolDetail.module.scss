@@ -106,7 +106,6 @@
 
       color: #ffffff;
       // cursor: pointer;
-
     }
 
     .swap {
@@ -182,7 +181,7 @@
       &.tokens {
         min-width: 500px;
         display: flex;
-        flex:1;
+        flex: 1;
         flex-direction: row;
         gap: 30px;
 
@@ -427,6 +426,91 @@
           font-size: 14px;
           line-height: 100%;
           color: #777e90;
+        }
+      }
+    }
+  }
+}
+
+//responsive mobile
+@media (max-width: 575px) {
+  .pool-detail {
+    padding: 0;
+    margin-top: 20px;
+    .header {
+      margin-bottom: 20px;
+      .token-info {
+        gap: 16px;
+        .logo {
+          width: 45px;
+          height: 50px;
+          .token1,
+          .token2 {
+            width: 32px;
+            height: 32px;
+          }
+        }
+        .title {
+          .name {
+            font-size: 16px;
+          }
+          .value {
+            font-size: 24px;
+          }
+        }
+      }
+      .des {
+        font-size: 14px;
+      }
+    }
+    .info {
+      .container {
+        padding: 16px;
+        width: 100%;
+        &.tokens {
+          flex-wrap: wrap;
+          min-width: auto;
+          gap: 15px;
+          .available-tokens {
+            width: 100%;
+          }
+          .liquidity {
+            width: 100%;
+            .liquidity_token {
+              margin-top: 15px;
+              .liquidity_token_name {
+                .token-name {
+                  font-size: 16px;
+                }
+                .amount {
+                  font-size: 16px;
+                }
+              }
+              .liquidity_token_value {
+                .amount {
+                  font-size: 16px;
+                }
+              }
+            }
+          }
+        }
+        .btn {
+          font-size: 14px;
+        }
+        &.pool-catalyst {
+          .pool-catalyst_token {
+            margin-top: 15px;
+            .pool-catalyst_token_name {
+              .token-name {
+                font-size: 16px;
+              }
+            }
+            .pool-catalyst_token_value {
+              .amount {
+                font-size: 16px;
+              }
+            }
+          }
         }
       }
     }

@@ -5,14 +5,8 @@ import { useEffect, useRef, memo, useCallback } from 'react';
 const ChartComponent = (props) => {
   const {
     data,
-    colors: {
-      backgroundColor,
-      lineColor,
-      textColor,
-      areaTopColor,
-      areaBottomColor,
-    },
-    setInfoMove,
+    colors: { backgroundColor, lineColor, textColor, areaTopColor, areaBottomColor },
+    setInfoMove
   } = props;
   const chartContainerRef = useRef();
 
@@ -28,7 +22,7 @@ const ChartComponent = (props) => {
       layout: {
         backgroundColor: 'rgba(31, 33, 40,0)',
         textColor: '#c3c5cb',
-        fontFamily: 'Roboto, sans-serif',
+        fontFamily: 'Roboto, sans-serif'
       },
       localization: {
         priceFormatter: (price) =>
@@ -37,36 +31,36 @@ const ChartComponent = (props) => {
             maxDecimal: 6,
             minDecimal: 2,
             unit: '',
-            minPrice: 1,
-          }),
+            minPrice: 1
+          })
       },
       grid: {
         horzLines: {
-          visible: false,
+          visible: false
         },
         vertLines: {
-          visible: false,
-        },
+          visible: false
+        }
       },
       crosshair: {
         mode: 0,
         horzLine: {
           visible: true,
           color: '#A871DF',
-          labelVisible: true,
+          labelVisible: true
         },
         vertLine: {
           visible: true,
           color: '#A871DF',
-          labelVisible: true,
-        },
+          labelVisible: true
+        }
       },
       timeScale: {
         rightOffset: 1,
-        barSpacing: 14,
+        barSpacing: 12,
         lockVisibleTimeRangeOnResize: true,
-        timeVisible: true,
-      },
+        timeVisible: true
+      }
     });
     // chart.timeScale().fitContent();
 
@@ -74,12 +68,7 @@ const ChartComponent = (props) => {
     series.setData(data);
 
     chart.subscribeCrosshairMove((param) => {
-      if (
-        param === undefined ||
-        param.time === undefined ||
-        param.point.x < 0 ||
-        param.point.y < 0
-      ) {
+      if (param === undefined || param.time === undefined || param.point.x < 0 || param.point.y < 0) {
         const valueMove = data[data.length - 1]?.close;
         setValueChartMove(valueMove, data[data.length - 1]?.time);
       } else {
@@ -89,10 +78,7 @@ const ChartComponent = (props) => {
     });
 
     new ResizeObserver((entries) => {
-      if (
-        entries.length === 0 ||
-        entries[0].target !== chartContainerRef.current
-      ) {
+      if (entries.length === 0 || entries[0].target !== chartContainerRef.current) {
         return;
       }
       const newRect = entries[0].contentRect;
@@ -102,20 +88,10 @@ const ChartComponent = (props) => {
     return () => {
       chart.remove();
     };
-  }, [
-    data,
-    backgroundColor,
-    lineColor,
-    textColor,
-    areaTopColor,
-    areaBottomColor,
-  ]);
+  }, [data, backgroundColor, lineColor, textColor, areaTopColor, areaBottomColor]);
 
   useEffect(() => {
-    setValueChartMove(
-      data[data.length - 1]?.close,
-      data[data.length - 1]?.time
-    );
+    setValueChartMove(data[data.length - 1]?.close, data[data.length - 1]?.time);
   }, [data]);
 
   const setValueChartMove = useCallback(
@@ -123,7 +99,7 @@ const ChartComponent = (props) => {
       if (setInfoMove) {
         setInfoMove({
           value,
-          time,
+          time
         });
       }
     },
@@ -139,7 +115,7 @@ const ChartComponent = (props) => {
         bottom: '0',
         left: '0',
         height: '100%',
-        width: '100%',
+        width: '100%'
       }}
       ref={chartContainerRef}
     />
