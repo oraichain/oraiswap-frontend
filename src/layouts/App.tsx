@@ -61,7 +61,7 @@ const App = () => {
       shouldReconnect: (closeEvent) => true,
       onMessage: (event) => {
         // TODO: should we load alltoken here, or just cosmos tokens?
-        cacheTokens.loadAllToken(metamaskAddress);
+        cacheTokens.loadTokensCosmos();
       },
       reconnectAttempts: WEBSOCKET_RECONNECT_ATTEMPTS,
       reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL,
