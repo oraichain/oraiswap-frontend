@@ -42,10 +42,10 @@ const App = () => {
         // subscribe to IBC received packet & MsgSend event cases
         sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
         // subscribe to MsgSend and MsgTransfer event case
-        sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
+        // sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
         // subscribe to cw20 contract transfer & send case
         sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
-        sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
+        // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
       },
       onClose: () => {
         console.log("unsubscribe all clients");
