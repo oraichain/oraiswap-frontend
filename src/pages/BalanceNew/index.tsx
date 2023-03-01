@@ -70,7 +70,7 @@ import KwtModal from './KwtModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -697,7 +697,7 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
-          contractAddr: fromToken?.denom == 'erc20_milky' ? fromToken?.contractAddress : undefined
+          contractAddr: fromToken?.contractAddress
         });
       }
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
@@ -810,10 +810,10 @@ const Balance: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                        ? (fromAmount: number) => {
+                          ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                        : undefined
+                          : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />

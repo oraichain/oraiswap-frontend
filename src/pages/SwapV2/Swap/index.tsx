@@ -275,7 +275,8 @@ const SwapComponent: React.FC<{
           <TokenBalance
             balance={{
               amount: simulateData?.amount ?? '0',
-              denom: toTokenInfoData?.symbol ?? ''
+              denom: toTokenInfoData?.symbol ?? '',
+              decimals: toTokenInfoData?.decimals
             }}
             decimalScale={6}
           />
