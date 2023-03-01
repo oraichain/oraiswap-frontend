@@ -39,7 +39,7 @@ async function getSenderInfo(sender: string, pubkey: Uint8Array) {
 
 async function getWallet(chainId: string) {
   if (await window.Keplr.getKeplr()) await window.Keplr.suggestChain(chainId);
-  else throw 'Cannot get Keplr to get account';
+  else throw new Error('Cannot get Keplr to get account');
 
   const wallet = (await collectWallet(chainId)) as OfflineDirectSigner;
   const accounts = await wallet.getAccounts();

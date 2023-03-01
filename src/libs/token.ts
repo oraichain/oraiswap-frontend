@@ -1,6 +1,6 @@
 import { StargateClient } from '@cosmjs/stargate';
 import { arrayLoadToken, handleCheckWallet } from 'helper';
-import { getEvmAddress, toDisplay } from './utils';
+import { getEvmAddress, getFunctionExecution, toDisplay } from './utils';
 import { evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
@@ -13,11 +13,13 @@ import {
   ETHEREUM_RPC,
   KAWAII_SUBNET_RPC,
   KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
+  NOTI_INSTALL_OWALLET
 } from 'config/constants';
 import flatten from 'lodash/flatten';
 import tokenABI from 'config/abi/erc20.json';
 import { ContractCallResults, Multicall } from './ethereum-multicall';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 export class CacheTokens {
   private readonly dispatch;
   private readonly address: string;
@@ -70,6 +72,26 @@ export class CacheTokens {
       Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
     );
     this.forceUpdate(amountDetails);
+  }
+
+  public async loadTokenAmounts(metamaskAddress: string) {
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
+    }
+
+    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
+
+    await Promise.all(
+      [
+        getFunctionExecution(this.loadTokens),
+        metamaskAddress && getFunctionExecution(this.loadEvmOraiAmounts, [metamaskAddress]),
+        kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+        this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
+      ].filter(Boolean)
+    );
   }
 
   private async loadCw20Balance(address: string) {

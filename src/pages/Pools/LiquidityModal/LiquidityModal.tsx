@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Modal from 'components/Modal';
 import style from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
@@ -138,11 +138,12 @@ const LiquidityModal: FC<ModalProps> = ({
     const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
+  const cacheTokensCosmos = React.useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
+    cacheTokensCosmos.loadTokensCosmos();
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {

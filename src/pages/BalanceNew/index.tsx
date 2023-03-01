@@ -1,4 +1,4 @@
-import { createWasmAminoConverters, ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import {
   AminoTypes,
   Coin,
@@ -6,8 +6,7 @@ import {
   DeliverTxResponse,
   GasPrice,
   isDeliverTxFailure,
-  SigningStargateClient,
-  StargateClient
+  SigningStargateClient
 } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
@@ -16,29 +15,13 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import tokenABI from 'config/abi/erc20.json';
+import { filteredTokens, gravityContracts, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
-  evmTokens,
-  filteredTokens,
-  gravityContracts,
-  kawaiiTokens,
-  TokenItemType,
-  tokenMap,
-  tokens
-} from 'config/bridgeTokens';
-import {
-  BSC_CHAIN_ID,
-  BSC_RPC,
   BSC_SCAN,
-  ETHEREUM_CHAIN_ID,
-  ETHEREUM_RPC,
   ETHEREUM_SCAN,
-  KAWAII_SUBNET_RPC,
   KWT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
-  NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
@@ -46,21 +29,18 @@ import {
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { arrayLoadToken, getNetworkGasPrice, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
+import { getNetworkGasPrice, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
 import { TransferBackMsg } from 'libs/contracts';
-import { BalanceResponse, QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
-import { ContractCallResults, Multicall } from 'libs/ethereum-multicall';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import customRegistry, { customAminoTypes } from 'libs/registry';
+import { CacheTokens } from 'libs/token';
 import {
   buildMultipleMessages,
-  getEvmAddress,
-  getFunctionExecution,
   getTotalUsd,
   getUsd,
   parseBep20Erc20Name,
@@ -68,14 +48,12 @@ import {
   toSumDisplay,
   toTotalDisplay
 } from 'libs/utils';
-import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { updateAmounts } from 'reducer/token';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -110,10 +88,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [txHash, setTxHash] = useState('');
   const dispatch = useDispatch();
 
-  const forceUpdate = (amountDetails: AmountDetails) => {
-    dispatch(updateAmounts(amountDetails));
-  };
-
   const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
@@ -130,16 +104,14 @@ const Balance: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
-  useEffect(() => {
-    loadTokenAmounts();
-  }, [keplrAddress, metamaskAddress, txHash, prices]);
+  const cacheTokensCosmos = React.useMemo(
+    () => CacheTokens.factory({ dispatch, address: keplrAddress }),
+    [dispatch, keplrAddress]
+  );
 
-  const loadTokens = async () => {
-    await handleCheckWallet();
-    for (const token of arrayLoadToken) {
-      window.Keplr.getKeplrAddr(token.chainId).then((address) => loadNativeBalance(address, token));
-    }
-  };
+  useEffect(() => {
+    cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+  }, [keplrAddress, metamaskAddress, txHash, prices]);
 
   const _initEthereum = async () => {
     try {
@@ -147,147 +119,6 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const loadEvmEntries = async (
-    address: string,
-    tokens: TokenItemType[],
-    rpc: string,
-    chainId: number,
-    multicallCustomContractAddress?: string
-  ): Promise<[string, string][]> => {
-    const multicall = new Multicall({
-      nodeUrl: rpc,
-      multicallCustomContractAddress,
-      chainId
-    });
-    const input = tokens.map((token) => ({
-      reference: token.denom,
-      contractAddress: token.contractAddress,
-      abi: tokenABI,
-      calls: [
-        {
-          reference: token.denom,
-          methodName: 'balanceOf(address)',
-          methodParameters: [address]
-        }
-      ]
-    }));
-
-    const results: ContractCallResults = await multicall.call(input);
-    return tokens.map((token) => {
-      const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-      return [token.denom, amount];
-    });
-  };
-
-  // update concurrency
-  const loadEvmOraiAmounts = async (evmAddress: string) => {
-    const amountDetails = Object.fromEntries(
-      flatten(
-        await Promise.all([
-          loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-            BSC_RPC,
-            BSC_CHAIN_ID
-          ),
-
-          loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-            ETHEREUM_RPC,
-            ETHEREUM_CHAIN_ID
-          )
-        ])
-      )
-    );
-    console.log('loadEvmOraiAmounts');
-    forceUpdate(amountDetails);
-  };
-
-  const loadKawaiiSubnetAmount = async (kwtSubnetAddress: string) => {
-    let amountDetails = Object.fromEntries(
-      await loadEvmEntries(
-        kwtSubnetAddress,
-        kawaiiTokens.filter((t) => !!t.contractAddress),
-        KAWAII_SUBNET_RPC,
-        KWT_SUBNETWORK_EVM_CHAIN_ID,
-        '0x74876644692e02459899760B8b9747965a6D3f90'
-      )
-    );
-    console.log('loadKawaiiSubnetAmount');
-    // update amounts
-    forceUpdate(amountDetails);
-  };
-
-  const loadNativeBalance = async (address: string, tokenInfo: { chainId: string; rpc: string }) => {
-    const client = await StargateClient.connect(tokenInfo.rpc);
-    const amountAll = await client.getAllBalances(address);
-
-    const amountDetails = Object.assign(
-      // reset native balances
-      Object.fromEntries(
-        filteredTokens.filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress).map((t) => [t.denom, '0'])
-      ),
-      Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
-    );
-    forceUpdate(amountDetails);
-  };
-
-  const loadCw20Balance = async (address: string) => {
-    // get all cw20 token contract
-    const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
-    const data = toBinary({
-      balance: { address }
-    } as TokenQueryMsg);
-
-    const res = await Contract.multicall.aggregate({
-      queries: cw20Tokens.map((t) => ({
-        address: t.contractAddress,
-        data
-      }))
-    });
-
-    const amountDetails = Object.fromEntries(
-      cw20Tokens.map((token, ind) => {
-        if (!res.return_data[ind].success) {
-          return [token.denom, 0];
-        }
-        const balanceRes = fromBinary(res.return_data[ind].data) as BalanceResponse;
-        return [token.denom, balanceRes.balance];
-      })
-    );
-
-    console.log('loadCw20Balance');
-    forceUpdate(amountDetails);
-  };
-
-  const loadTokenAmounts = async () => {
-    // let chainId = network.chainId;
-    // we enable oraichain then use pubkey to calculate other address
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
-    }
-
-    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-
-    await Promise.all(
-      [
-        getFunctionExecution(loadTokens),
-        metamaskAddress && getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
-        kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-        // keplrAddress &&
-        // getFunctionExecution(loadNativeBalance, [
-        //   keplrAddress,
-        //   network.rpc
-        // ]),
-        keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
-      ].filter(Boolean)
-    );
   };
 
   const processTxResult = (token: TokenItemType, result: DeliverTxResponse, customLink?: string) => {
@@ -349,7 +180,9 @@ const Balance: React.FC<BalanceProps> = () => {
   ): Promise<void> => {
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     if (!ibcWasmContractAddress)
-      throw new Error('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
+      throw {
+        message: 'IBC Wasm source port is invalid. Cannot transfer to the destination chain'
+      };
 
     const { info: assetInfo } = parseTokenInfo(fromToken);
     Contract.sender = fromAddress;
@@ -644,7 +477,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const amount = coin(
         toAmount(transferAmount, fromToken.decimals).toString(),
-        fromToken.denom === 'erc20_milky'
+        fromToken.denom == 'erc20_milky'
           ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
       );
@@ -663,7 +496,7 @@ const Balance: React.FC<BalanceProps> = () => {
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
         },
         amount: amount.amount,
-        contractAddr: fromToken.denom === 'erc20_milky' ? fromToken.contractAddress : undefined
+        contractAddr: fromToken.denom == 'erc20_milky' ? fromToken.contractAddress : undefined
       });
 
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
@@ -722,7 +555,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts();
+      cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
@@ -867,7 +700,7 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
-          contractAddr: fromToken?.denom === 'erc20_milky' ? fromToken?.contractAddress : undefined
+          contractAddr: fromToken?.denom == 'erc20_milky' ? fromToken?.contractAddress : undefined
         });
       }
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
@@ -946,9 +779,9 @@ const Balance: React.FC<BalanceProps> = () => {
             <div className={styles.tokens_form}>
               {getFilterTokens(filterNetwork).map((t: TokenItemType) => {
                 const name = parseBep20Erc20Name(t.name);
-                const isOraichain = filterNetwork === ORAICHAIN_ID;
+                const tokenOraichain = filterNetwork == ORAICHAIN_ID;
                 const transferToToken =
-                  isOraichain &&
+                  tokenOraichain &&
                   fromTokens.find(
                     (token) => token.cosmosBased && token.name.includes(name) && token.chainId !== ORAI_BRIDGE_CHAIN_ID
                   );
@@ -969,13 +802,13 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={[amount.toString(), usd]}
                     subAmounts={subAmounts}
-                    active={isOraichain ? to?.denom === t.denom : from?.denom === t.denom}
+                    active={tokenOraichain ? to?.denom === t.denom : from?.denom === t.denom}
                     token={t}
-                    onClick={isOraichain ? onClickTokenTo : onClickTokenFrom}
+                    onClick={tokenOraichain ? onClickTokenTo : onClickTokenFrom}
                     convertToken={convertToken}
                     transferIBC={transferIbcCustom}
                     onClickTransfer={
-                      isOraichain
+                      tokenOraichain
                         ? !!transferToToken
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
