@@ -1,10 +1,10 @@
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
 import { TooltipIcon } from 'components/Tooltip';
-import style from './SettingModal.module.scss';
+import styles from './SettingModal.module.scss';
 import cn from 'classnames/bind';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   isOpen: boolean;

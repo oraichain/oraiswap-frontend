@@ -3,13 +3,9 @@ import classNames from 'classnames';
 import styles from './Input.module.scss';
 import debounce from 'lodash/debounce';
 
-export type InputProps = React.PropsWithChildren<
-  React.InputHTMLAttributes<HTMLInputElement> & {
-    className?: string;
-    placeholder: string;
-    onSearch?: (text: string) => void;
-  }
->;
+export type InputProps = Input & {
+  onSearch?: (text: string) => void;
+};
 
 const Input: React.FC<InputProps> = ({ className, onSearch, ...props }) => (
   <input

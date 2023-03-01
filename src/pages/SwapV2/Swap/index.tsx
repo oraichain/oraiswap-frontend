@@ -37,7 +37,7 @@ const cx = cn.bind(styles);
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
   toTokenDenom: string;
-  setSwapTokens: any;
+  setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);

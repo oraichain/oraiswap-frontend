@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
 import Modal from 'components/Modal';
-import style from './SelectTokenModal.module.scss';
+import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   className?: string;

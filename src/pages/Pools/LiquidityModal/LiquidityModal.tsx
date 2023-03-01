@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import Modal from 'components/Modal';
-import style from './LiquidityModal.module.scss';
+import styles from './LiquidityModal.module.scss';
 import cn from 'classnames/bind';
 import { useQuery } from '@tanstack/react-query';
 import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
@@ -26,7 +26,7 @@ import { CacheTokens } from 'libs/token';
 import { useDispatch } from 'react-redux';
 import { PairInfo } from 'libs/contracts';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   className?: string;

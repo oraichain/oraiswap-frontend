@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
-import style from './NewPoolModal.module.scss';
+import styles from './NewPoolModal.module.scss';
 import cn from 'classnames/bind';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTokenInfo } from 'rest/api';
@@ -16,7 +16,7 @@ import { useSelector } from 'react-redux';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import DoneStepImg from 'assets/images/done-step.svg';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   className?: string;

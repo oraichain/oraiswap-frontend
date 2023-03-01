@@ -1,21 +1,21 @@
-import React, { FC, useState } from 'react';
-import Modal from 'components/Modal';
-import style from './BondingModal.module.scss';
 import cn from 'classnames/bind';
-import TokenBalance from 'components/TokenBalance';
-import { getUsd, toAmount, toDisplay } from 'libs/utils';
-import NumberFormat from 'react-number-format';
+import Loader from 'components/Loader';
+import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateMiningMsgs, Type } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
+import TokenBalance from 'components/TokenBalance';
+import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
-import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
+import CosmJs from 'libs/cosmjs';
+import { toAmount, toDisplay } from 'libs/utils';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { generateMiningMsgs, Type } from 'rest/api';
 import { TokenInfo } from 'types/token';
-import { TokenItemType } from 'config/bridgeTokens';
+import styles from './BondingModal.module.scss';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   className?: string;
