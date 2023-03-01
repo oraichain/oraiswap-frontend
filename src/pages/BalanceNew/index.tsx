@@ -552,7 +552,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      cacheTokens.loadTokenAmounts(metamaskAddress);
+      await cacheTokens.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
@@ -751,9 +751,6 @@ const Balance: React.FC<BalanceProps> = () => {
             </div>
 
             <SearchInput
-              style={{
-                height: 56
-              }}
               placeholder="Search Token of Network"
               onSearch={(text) => {
                 if (!text) return navigate('');
