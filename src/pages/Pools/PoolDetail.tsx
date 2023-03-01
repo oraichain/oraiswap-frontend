@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
@@ -97,11 +97,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setCachedLpPools(lpTokenData);
   };
 
-  const cacheTokensCosmos = React.useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const onBondingAction = () => {
     refetchRewardInfo();
-    cacheTokensCosmos.loadTokensCosmos();
+    cacheTokens.loadTokensCosmosKwt();
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Coin, coin } from '@cosmjs/stargate';
 import { arrayLoadToken, getNetworkGasPrice, handleCheckWallet, networks } from 'helper';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -130,13 +130,10 @@ const Balance: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
-  const cacheTokensCosmos = React.useMemo(
-    () => CacheTokens.factory({ dispatch, address: keplrAddress }),
-    [dispatch, keplrAddress]
-  );
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
 
   useEffect(() => {
-    cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+    cacheTokens.loadTokenAmounts(metamaskAddress);
   }, [keplrAddress, metamaskAddress, txHash, prices]);
 
   const _initEthereum = async () => {
@@ -581,7 +578,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+      cacheTokens.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });

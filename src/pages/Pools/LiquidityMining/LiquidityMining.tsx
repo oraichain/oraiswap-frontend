@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
@@ -92,7 +92,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setPendingRewards(res);
   };
 
-  const cacheTokensCosmos = React.useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const handleBond = async () => {
     setActionLoading(true);
@@ -128,7 +128,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokensCosmos.loadTokensCosmos();
+        cacheTokens.loadTokensCosmosKwt();
         setActionLoading(false);
         onBondingAction();
         return;
