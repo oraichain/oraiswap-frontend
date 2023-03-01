@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './LiquidityMining.module.scss';
 import cn from 'classnames/bind';
 import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
@@ -17,6 +17,8 @@ import { RewardInfoResponseItem } from 'libs/contracts';
 import { toDecimal } from 'libs/utils';
 import { Asset } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
+import { CacheTokens } from 'libs/token';
+import { useDispatch } from 'react-redux';
 
 const cx = cn.bind(styles);
 
@@ -57,7 +59,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
       // let interval = setInterval(() => setNewReward(), 1000);
@@ -89,6 +91,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
     setPendingRewards(res);
   };
+
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const handleBond = async () => {
     setActionLoading(true);
@@ -124,6 +128,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        cacheTokens.loadTokensCosmosKwt();
         setActionLoading(false);
         onBondingAction();
         return;
@@ -243,7 +248,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 {actionLoading && <Loader width={20} height={20} />}
                 <span>Claim Rewards</span>
               </button>
-              <button className={cx('btn', 'btn--dark')} onClick={() => setIsOpenUnbondModal(true)}>
+              <button className={cx('btn', 'btn--dark', 'btn-unbond')} onClick={() => setIsOpenUnbondModal(true)}>
                 <span>Unbond</span>
               </button>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -37,7 +37,7 @@ const cx = cn.bind(styles);
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
   toTokenDenom: string;
-  setSwapTokens: any;
+  setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
@@ -50,6 +50,7 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -62,7 +63,7 @@ const SwapComponent: React.FC<{
 
   Contract.sender = address;
 
-  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
+  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery<TaxRateResponse>({
     client: Contract.oracle,
     input: {
       tax_rate: {}
@@ -107,13 +108,11 @@ const SwapComponent: React.FC<{
 
   useEffect(() => {
     console.log('simulate average data: ', simulateAverageData);
-    setAverageRatio(
-      parseFloat(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString()).toFixed(6)
-    );
+    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, parseFloat(toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString())]);
+    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   const handleSubmit = async () => {
@@ -156,7 +155,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
+        cacheTokens.loadTokensCosmosKwt();
         setSwapLoading(false);
       }
     } catch (error) {
@@ -271,19 +270,13 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Minimum Received</span>
           </div>
-          <TokenBalance
-            balance={{
-              amount: simulateData?.amount ?? '0',
-              denom: toTokenInfoData?.symbol ?? ''
-            }}
-            decimalScale={6}
-          />
+          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={2} />
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{parseFloat((taxRate as TaxRateResponse)?.rate) * 100} %</span>
+          <span>{(Number(taxRate?.rate) * 100).toFixed(1)} %</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>

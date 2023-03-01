@@ -16,7 +16,7 @@ const SwapChart: React.FC<{
   fromTokenDenom: string;
 }> = ({ fromTokenDenom }) => {
   const [initialData, setInitialData] = useState<DataChart[] | []>([]);
-  const [typeData, setTypeData] = useState(INTERVALS[1].tf);
+  const [typeData, setTypeData] = useState(INTERVALS[0].tf);
   const [infoMove, setInfoMove] = useState<InfoMove>();
   const [loading, setLoading] = useState<boolean>(false);
   const [price24hChange, setPrice24hChange] = useState<number | null>(null);

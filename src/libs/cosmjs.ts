@@ -1,12 +1,9 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-// import { GasPrice } from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate/build';
 import { network } from 'config/networks';
 import { Decimal } from '@cosmjs/math';
-import { isDeliverTxFailure, logs, GasPrice } from '@cosmjs/stargate';
-import * as encoding_1 from '@cosmjs/encoding';
-// import * as stargate_1 from '@cosmjs/cosmwasm-stargate/node_modules/@cosmjs/stargate';
+import { isDeliverTxFailure, logs, GasPrice, Coin } from '@cosmjs/stargate';
+import { toUtf8 } from '@cosmjs/encoding';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-import { OfflineSigner } from '@cosmjs/proto-signing';
 
 /**
  * The options of an .instantiate() call.
@@ -32,7 +29,7 @@ interface Msg {
 const collectWallet = async (chainId?: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
-    throw 'You have to install Keplr first if you do not use a mnemonic to sign transactions';
+    throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
   }
   // use keplr instead
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
@@ -56,7 +53,7 @@ const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
       value: MsgExecuteContract.fromPartial({
         sender: senderAddress,
         contract: contractAddress,
-        msg: encoding_1.toUtf8(JSON.stringify(handleMsg)),
+        msg: toUtf8(JSON.stringify(handleMsg)),
         funds: [...(transferAmount || [])]
       })
     };
@@ -85,12 +82,7 @@ const executeMultipleDirectClient = async (
 ) => {
   const executeContractMsgs = getExecuteContractMsgs(senderAddress, msgs);
 
-  const result = await client.signAndBroadcast(
-    senderAddress,
-    executeContractMsgs,
-    'auto',
-    memo
-  );
+  const result = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', memo);
   if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Raw log: ${result.rawLog}`
@@ -110,12 +102,7 @@ const executeMultipleAminoClient = async (
 ) => {
   const executeMsgs = getExecuteContractMsgs(walletAddr, msgs);
 
-  const result = await client.signAndBroadcast(
-    walletAddr,
-    executeMsgs,
-    'auto',
-    memo
-  );
+  const result = await client.signAndBroadcast(walletAddr, executeMsgs, 'auto', memo);
   if (isDeliverTxFailure(result)) {
     throw new Error(
       `Error when broadcasting tx ${result.transactionHash} at height ${result.height}. Code: ${result.code}; Raw log: ${result.rawLog}`
@@ -143,7 +130,7 @@ class CosmJs {
         if (key.isNanoLedger) return this.executeAmino(data);
         return this.executeDirect(data);
       } else {
-        throw 'You need to install Keplr to execute the contract';
+        throw new Error('You need to install Keplr to execute the contract');
       }
     } catch (error) {
       console.log('error in executing contract: ' + error);
@@ -165,7 +152,7 @@ class CosmJs {
         if (key.isNanoLedger) return this.executeMultipleAmino(data);
         return this.executeMultipleDirect(data);
       } else {
-        throw 'You need to install Keplr to execute the contract';
+        throw new Error('You need to install Keplr to execute the contract');
       }
     } catch (error) {
       console.log('error in executing contract: ' + error);
@@ -189,14 +176,10 @@ class CosmJs {
     await window.Keplr.suggestChain(chainId);
     const wallet = await collectWallet(chainId);
 
-    const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-      lcd,
-      wallet as OfflineSigner,
-      {
-        gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-        prefix: 'orai'
-      }
-    );
+    const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(lcd, wallet, {
+      gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+      prefix: 'orai'
+    });
 
     const result = await client.signAndBroadcast(walletAddr, msgs, 'auto');
     if (isDeliverTxFailure(result)) {
@@ -216,8 +199,7 @@ class CosmJs {
     handleOptions,
     gasAmount,
     prefix,
-    walletAddr,
-    contractAddr
+    walletAddr
   }: {
     prefix?: string;
     walletAddr: string;
@@ -225,31 +207,19 @@ class CosmJs {
     handleMsg: string;
     handleOptions?: HandleOptions;
     gasAmount: Coin;
-    contractAddr?: string;
   }) {
     try {
       await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
 
-      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.rpc,
-        wallet as OfflineSigner,
-        {
-          gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-          prefix
-        }
-      );
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+        prefix
+      });
 
       const input = JSON.parse(handleMsg);
 
-      const result = await client.execute(
-        walletAddr,
-        address,
-        input,
-        'auto',
-        undefined,
-        handleOptions?.funds
-      );
+      const result = await client.execute(walletAddr, address, input, 'auto', undefined, handleOptions?.funds);
 
       return result;
     } catch (error) {
@@ -273,31 +243,20 @@ class CosmJs {
       await window.Keplr.suggestChain(network.chainId);
       const wallet = await collectWallet();
 
-      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.rpc,
-        wallet as OfflineSigner,
-        {
-          gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-          prefix
-        }
-      );
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
+        prefix
+      });
 
-      const input: Msg[] = msgs.map(
-        ({ handleMsg, handleOptions, contractAddress }) => {
-          return {
-            handleMsg: JSON.parse(handleMsg),
-            transferAmount: handleOptions?.funds,
-            contractAddress
-          };
-        }
-      );
+      const input: Msg[] = msgs.map(({ handleMsg, handleOptions, contractAddress }) => {
+        return {
+          handleMsg: JSON.parse(handleMsg),
+          transferAmount: handleOptions?.funds,
+          contractAddress
+        };
+      });
 
-      const result = await executeMultipleAminoClient(
-        input,
-        '',
-        client,
-        walletAddr
-      );
+      const result = await executeMultipleAminoClient(input, '', client, walletAddr);
 
       return result;
     } catch (error) {
@@ -328,26 +287,12 @@ class CosmJs {
   }) {
     try {
       const wallet = await collectWallet();
-      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.rpc,
-        wallet,
-        {
-          gasPrice: new GasPrice(
-            Decimal.fromUserInput(gasAmount.amount, 6),
-            gasAmount.denom
-          ),
-          prefix
-        }
-      );
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: new GasPrice(Decimal.fromUserInput(gasAmount.amount, 6), gasAmount.denom),
+        prefix
+      });
       const input = JSON.parse(handleMsg);
-      const result = await client.execute(
-        walletAddr,
-        address,
-        input,
-        'auto',
-        '',
-        handleOptions?.funds
-      );
+      const result = await client.execute(walletAddr, address, input, 'auto', '', handleOptions?.funds);
       return result;
     } catch (error) {
       console.log('error in executing contract: ', error);
@@ -368,33 +313,19 @@ class CosmJs {
   }) {
     try {
       const wallet = await collectWallet();
-      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-        network.rpc,
-        wallet,
-        {
-          gasPrice: new GasPrice(
-            Decimal.fromUserInput(gasAmount.amount, 6),
-            gasAmount.denom
-          ),
-          prefix
-        }
-      );
+      const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: new GasPrice(Decimal.fromUserInput(gasAmount.amount, 6), gasAmount.denom),
+        prefix
+      });
 
-      const input: Msg[] = msgs.map(
-        ({ handleMsg, handleOptions, contractAddress }) => {
-          return {
-            handleMsg: JSON.parse(handleMsg),
-            transferAmount: handleOptions?.funds,
-            contractAddress
-          };
-        }
-      );
-      const result = await executeMultipleDirectClient(
-        walletAddr,
-        input,
-        undefined,
-        client
-      );
+      const input: Msg[] = msgs.map(({ handleMsg, handleOptions, contractAddress }) => {
+        return {
+          handleMsg: JSON.parse(handleMsg),
+          transferAmount: handleOptions?.funds,
+          contractAddress
+        };
+      });
+      const result = await executeMultipleDirectClient(walletAddr, input, undefined, client);
       return result;
     } catch (error) {
       console.log('error in executing contract: ', error);
@@ -403,11 +334,6 @@ class CosmJs {
   }
 }
 
-export {
-  collectWallet,
-  getExecuteContractMsgs,
-  parseExecuteContractMultiple,
-  getAminoExecuteContractMsgs
-};
+export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple, getAminoExecuteContractMsgs };
 
 export default CosmJs;

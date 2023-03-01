@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import Tippy, { TippyProps } from '@tippyjs/react';
 import classNames from 'classnames';
-import { isNil } from 'ramda';
 import { ReactComponent as InfoIcon } from 'assets/icons/info.svg';
 
 import 'tippy.js/dist/tippy.css';
@@ -33,11 +32,7 @@ const Tooltip: FC<Props> = ({ className, onClick, children, ...props }) => {
   );
 
   return props.content ? (
-    <Tippy
-      {...TooltipTippyProps}
-      {...props}
-      hideOnClick={isNil(props.visible) ? false : undefined}
-    >
+    <Tippy {...TooltipTippyProps} {...props} hideOnClick={props.visible}>
       {button}
     </Tippy>
   ) : (

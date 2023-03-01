@@ -93,7 +93,6 @@
     color: #ffffff;
     // cursor: pointer;
     opacity: 1;
-
   }
 
   .swap {
@@ -112,6 +111,10 @@
   display: flex;
   justify-content: space-between;
   gap: 30px;
+  @media (max-width: 575px) {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
 
   &:first-child {
     padding-bottom: 40px;
@@ -313,6 +316,13 @@
   justify-content: center;
   align-items: center;
 
+  @media (max-width: 575px) {
+    font-size: 14px;
+    &.btn-unbond {
+      margin-top: 0;
+    }
+  }
+
   &--dark {
     background: #2d2938;
     border: none;
@@ -320,7 +330,6 @@
   }
 
   opacity: 1;
-
 }
 
 .mining {
@@ -417,6 +426,22 @@
       font-size: 14px;
       line-height: 100%;
       color: #777e90;
+    }
+  }
+}
+
+//responsive mobile
+@media (max-width: 575px) {
+  .mining {
+    width: 100%;
+  }
+  .earning {
+    width: 100%;
+    .container_earning {
+      .amount {
+        font-size: 16px;
+        margin-top: 8px;
+      }
     }
   }
 }

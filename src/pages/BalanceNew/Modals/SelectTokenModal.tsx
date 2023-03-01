@@ -1,9 +1,9 @@
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
-import style from './SelectTokenModal.module.scss';
+import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   className?: string;
@@ -16,14 +16,7 @@ interface ModalProps {
   icon?: boolean;
 }
 
-const SelectTokenModal: FC<ModalProps> = ({
-  isOpen,
-  close,
-  open,
-  listToken,
-  setToken,
-  icon
-}) => {
+const SelectTokenModal: FC<ModalProps> = ({ isOpen, close, open, listToken, setToken, icon }) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>

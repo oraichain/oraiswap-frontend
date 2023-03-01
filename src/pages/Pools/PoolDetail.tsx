@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
 import { useParams } from 'react-router-dom';
@@ -29,6 +29,7 @@ import { Contract } from 'config/contracts';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { updateLpPools } from 'reducer/token';
 import { toDecimal } from 'libs/utils';
+import { CacheTokens } from 'libs/token';
 
 const cx = cn.bind(styles);
 
@@ -96,8 +97,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setCachedLpPools(lpTokenData);
   };
 
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+
   const onBondingAction = () => {
     refetchRewardInfo();
+    refetchPairAmountInfo();
+    fetchCachedLpTokenAll();
+    cacheTokens.loadTokensCosmosKwt();
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {

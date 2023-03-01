@@ -1144,20 +1144,7 @@
     long "^4.0.0"
     pako "^2.0.2"
 
-"@cosmjs/crypto@0.28.13", "@cosmjs/crypto@^0.28.13", "@cosmjs/crypto@^0.28.4":
-  version "0.28.13"
-  resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.28.13.tgz#541b6a36f616b2da5a568ead46d4e83841ceb412"
-  integrity sha512-ynKfM0q/tMBQMHJby6ad8lR3gkgBKaelQhIsCZTjClsnuC7oYT9y3ThSZCUWr7Pa9h0J8ahU2YV2oFWFVWJQzQ==
-  dependencies:
-    "@cosmjs/encoding" "0.28.13"
-    "@cosmjs/math" "0.28.13"
-    "@cosmjs/utils" "0.28.13"
-    "@noble/hashes" "^1"
-    bn.js "^5.2.0"
-    elliptic "^6.5.3"
-    libsodium-wrappers "^0.7.6"
-
-"@cosmjs/crypto@^0.29.5":
+"@cosmjs/crypto@0.28.13", "@cosmjs/crypto@0.29.5", "@cosmjs/crypto@^0.28.13", "@cosmjs/crypto@^0.28.4", "@cosmjs/crypto@^0.29.5":
   version "0.29.5"
   resolved "https://registry.yarnpkg.com/@cosmjs/crypto/-/crypto-0.29.5.tgz#ab99fc382b93d8a8db075780cf07487a0f9519fd"
   integrity sha512-2bKkaLGictaNL0UipQCL6C1afaisv6k8Wr/GCLx9FqiyFkh9ZgRHDyetD64ZsjnWV/N/D44s/esI+k6oPREaiQ==
@@ -1196,14 +1183,7 @@
     "@cosmjs/stream" "^0.29.5"
     xstream "^11.14.0"
 
-"@cosmjs/math@0.28.13":
-  version "0.28.13"
-  resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.28.13.tgz#50c05bc67007a04216f7f5e0c93f57270f8cc077"
-  integrity sha512-PDpL8W/kbyeWi0mQ2OruyqE8ZUAdxPs1xCbDX3WXJwy2oU+X2UTbkuweJHVpS9CIqmZulBoWQAmlf6t6zr1N/g==
-  dependencies:
-    bn.js "^5.2.0"
-
-"@cosmjs/math@^0.29.5":
+"@cosmjs/math@0.28.13", "@cosmjs/math@0.29.5", "@cosmjs/math@^0.29.5":
   version "0.29.5"
   resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.29.5.tgz#722c96e080d6c2b62215ce9f4c70da7625b241b6"
   integrity sha512-2GjKcv+A9f86MAWYLUkjhw1/WpRl2R1BTb3m9qPG7lzMA7ioYff9jY5SPCfafKdxM4TIQGxXQlYGewQL16O68Q==
@@ -3301,13 +3281,6 @@
   version "6.9.7"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
   integrity sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==
-
-"@types/ramda@^0.27.29":
-  version "0.27.66"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.27.66.tgz#f1a23d13b0087d806a62e3ff941e5e59b3318999"
-  integrity sha512-i2YW+E2U6NfMt3dp0RxNcejox+bxJUNDjB7BpYuRuoHIzv5juPHkJkNgcUOu+YSQEmaWu8cnAo/8r63C0NnuVA==
-  dependencies:
-    ts-toolbelt "^6.15.1"
 
 "@types/range-parser@*":
   version "1.2.4"
@@ -12437,11 +12410,6 @@ raf@^3.4.1:
   dependencies:
     performance-now "^2.1.0"
 
-ramda@^0.27.1:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.2.tgz#84463226f7f36dc33592f6f4ed6374c48306c3f1"
-  integrity sha512-SbiLPU40JuJniHexQSAgad32hfwd+DRUdwF2PlVuI5RZD0/vahUco7R8vD86J/tcEKKF9vZrUVwgtmGCqlCKyA==
-
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5, randombytes@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/randombytes/-/randombytes-2.1.0.tgz#df6f84372f0270dc65cdf6291349ab7a473d4f2a"
@@ -12549,10 +12517,10 @@ react-dom@^17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-error-overlay@6.0.9, react-error-overlay@^6.0.11:
-  version "6.0.9"
-  resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.9.tgz#3c743010c9359608c375ecd6bc76f35d93995b0a"
-  integrity sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==
+react-error-overlay@6.0.11, react-error-overlay@^6.0.11:
+  version "6.0.11"
+  resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
+  integrity sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==
 
 react-hook-form@^7.1.1:
   version "7.41.1"
@@ -14395,11 +14363,6 @@ ts-results@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/ts-results/-/ts-results-3.3.0.tgz#68623a6c18e65556287222dab76498a28154922f"
   integrity sha512-FWqxGX2NHp5oCyaMd96o2y2uMQmSu8Dey6kvyuFdRJ2AzfmWo3kWa4UsPlCGlfQ/qu03m09ZZtppMoY8EMHuiA==
-
-ts-toolbelt@^6.15.1:
-  version "6.15.5"
-  resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-6.15.5.tgz#cb3b43ed725cb63644782c64fbcad7d8f28c0a83"
-  integrity sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==
 
 tsconfig-paths@^3.14.1:
   version "3.14.1"

@@ -2,15 +2,14 @@ import LoginWidget from './LoginWidget';
 import LoginWidgetDeepLink from './LoginDeepLinkMobile';
 import Modal from 'components/Modal';
 import React from 'react';
-import MESSAGE from 'lang/MESSAGE.json';
-import style from './ConnectWalletModal.module.scss';
+import styles from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
 import MetamaskImage from 'assets/images/metamask.svg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
@@ -55,7 +54,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
                 }
               >
                 <LoginWidgetDeepLink
-                  text={MESSAGE.Form.Button.ConnectOWallet}
+                  text="Connect OWallet"
                   address={address}
                   logo={OWalletImage}
                   disconnect={disconnectKeplr}
@@ -63,7 +62,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
               </a>
             ) : (
               <LoginWidgetDeepLink
-                text={MESSAGE.Form.Button.ConnectOWallet}
+                text="Connect OWallet"
                 address={address}
                 logo={OWalletImage}
                 disconnect={disconnectKeplr}
@@ -71,7 +70,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
             )
           ) : (
             <LoginWidget
-              text={MESSAGE.Form.Button.ConnectKeplr}
+              text="Keplr Wallet"
               address={address}
               logo={KeplrImage}
               connect={connectKeplr}
@@ -82,7 +81,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           <LoginWidget
             address={metamaskAddress}
             logo={MetamaskImage}
-            text={MESSAGE.Form.Button.ConnectMetamask}
+            text="Connect Metamask"
             connect={connectMetamask}
             disconnect={disconnectMetamask}
           />

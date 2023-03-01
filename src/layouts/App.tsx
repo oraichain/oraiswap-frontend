@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import routes from 'routes';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
@@ -8,18 +8,12 @@ import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import {
-  COSMOS_TYPE,
-  EVM_TYPE,
-  NOTI_INSTALL_OWALLET,
-  ORAICHAIN_ID
-} from 'config/constants';
+import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
 import { CacheTokens } from 'libs/token';
-import { removeToken } from 'reducer/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 
 const App = () => {
@@ -29,15 +23,14 @@ const App = () => {
   const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
   const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
-  const [persistVersion, setPersistVersion] =
-    useConfigReducer('persistVersion');
+  const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const dispatch = useDispatch();
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
 
   // clear persist storage when update version
   useEffect(() => {
-    const isClearPersistStorage =
-      persistVersion === undefined || persistVersion !== PERSIST_VER;
+    const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
       localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
       setPersistVersion(PERSIST_VER);
@@ -79,15 +72,13 @@ const App = () => {
       if (newAddress === address) {
         // same address, trigger update by clear address then re-update
         setAddress('');
-      }else {
-        const accounts = window?.ethereum && await window.ethereum.request({
-          method: 'eth_accounts',
-          params: [60]
-        }) || [''];
-        CacheTokens.factory({
-          dispatch,
-          address: newAddress
-        }).loadAllToken(accounts?.[0] || metamaskAddress);
+      } else {
+        const accounts = (window?.ethereum &&
+          (await window.ethereum.request({
+            method: 'eth_accounts',
+            params: [60]
+          }))) || [''];
+        cacheTokens.loadAllToken(accounts?.[0] || metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {
@@ -129,9 +120,7 @@ const App = () => {
 
   const keplrHandler = async (event?: CustomEvent) => {
     try {
-      console.log(
-        'Key store in Keplr is changed. You may need to refetch the account info.'
-      );
+      console.log('Key store in Keplr is changed. You may need to refetch the account info.');
       await updateAddress(event?.detail?.data);
       // window.location.reload();
     } catch (error) {

@@ -1,24 +1,24 @@
-import React, { FC, memo, useEffect, useState, useMemo, useCallback } from 'react';
-import styles from './index.module.scss';
-import { useNavigate } from 'react-router-dom';
-import Content from 'layouts/Content';
-import { Pair, pairs } from 'config/pools';
-import { fetchAllPoolApr, fetchPoolInfoAmount, getPairAmountInfo, parseTokenInfo } from 'rest/api';
-import { toDecimal, toDisplay } from 'libs/utils';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import NoDataSvg from 'assets/images/NoDataPool.svg';
+import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, STABLE_DENOM } from 'config/constants';
-import NoDataSvg from 'assets/images/NoDataPool.svg';
-import useConfigReducer from 'hooks/useConfigReducer';
 import { Contract } from 'config/contracts';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { updatePairs } from 'reducer/token';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store/configure';
+import { Pair, pairs } from 'config/pools';
+import useConfigReducer from 'hooks/useConfigReducer';
+import Content from 'layouts/Content';
+import { toDecimal } from 'libs/utils';
 import compact from 'lodash/compact';
 import sumBy from 'lodash/sumBy';
-import SearchInput from 'components/SearchInput';
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { updatePairs } from 'reducer/token';
+import { fetchAllPoolApr, fetchPoolInfoAmount, getPairAmountInfo, parseTokenInfo } from 'rest/api';
+import { RootState } from 'store/configure';
+import styles from './index.module.scss';
+import NewPoolModal from './NewPoolModal/NewPoolModal';
 
 interface PoolsProps {}
 
@@ -109,10 +109,9 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
 
 const ListPools = memo<{
   pairInfos: PairInfoData[];
-  allPoolApr: any;
-  setIsOpenNewPoolModal: any;
+  allPoolApr: { [key: string]: number };
   myPairsData?: Object;
-}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr, myPairsData }) => {
+}>(({ pairInfos, allPoolApr, myPairsData }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   useEffect(() => {
@@ -203,7 +202,7 @@ type PairInfoData = {
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [myPairsData, setMyPairsData] = useState({});
-  const [address, setAddress] = useConfigReducer('address');
+  const [address] = useConfigReducer('address');
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
@@ -330,12 +329,7 @@ const Pools: React.FC<PoolsProps> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice} />
-        <ListPools
-          pairInfos={pairInfos}
-          allPoolApr={cachedApr}
-          myPairsData={myPairsData}
-          setIsOpenNewPoolModal={setIsOpenNewPoolModal}
-        />
+        <ListPools pairInfos={pairInfos} allPoolApr={cachedApr} myPairsData={myPairsData} />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}

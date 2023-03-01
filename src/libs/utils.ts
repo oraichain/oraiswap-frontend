@@ -1,42 +1,9 @@
-import { is } from 'ramda';
 import bech32 from 'bech32';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 const truncDecimals = 6;
 const atomic = 10 ** truncDecimals;
-
-/* object */
-export const record = <T, V>(object: T, value: V, skip?: (keyof T)[]): Record<keyof T, V> =>
-  Object.keys(object).reduce(
-    (acc, cur) =>
-      Object.assign({}, acc, {
-        [cur]: skip?.includes(cur as keyof T) ? object[cur as keyof T] : value
-      }),
-    {} as Record<keyof T, V>
-  );
-
-export const omitEmpty = (object: object): object =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    const next = is(Object, value) ? omitEmpty(value) : value;
-    return Object.assign({}, acc, value && { [key]: next });
-  }, {});
-
-/* array */
-export const insertIf = <T>(condition?: any, ...elements: T[]) => (condition ? elements : []);
-
-/* string */
-export const getLength = (text: string) => new Blob([text]).size;
-export const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1);
-
-export const checkPrefixAndLength = (prefix: string, data: string, length: number): boolean => {
-  try {
-    const vals = bech32.decode(data);
-    return vals.prefix === prefix && data.length == length;
-  } catch (e) {
-    return false;
-  }
-};
 
 export const getEvmAddress = (bech32Address: string) => {
   const decoded = bech32.decode(bech32Address);
@@ -138,14 +105,6 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
     handleOptions: { funds: msg.sent_funds }
   }));
   return messages;
-};
-
-export const formatCash = (n: number) => {
-  if (n < 1e3) return n.toFixed(2);
-  if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + 'K';
-  if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + 'B';
-  if (n >= 1e12) return +(n / 1e12).toFixed(1) + 'T';
 };
 
 export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));

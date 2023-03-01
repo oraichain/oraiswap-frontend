@@ -1,25 +1,24 @@
-import { collectWallet } from './cosmjs';
-import { kawaiiTokens } from 'config/bridgeTokens';
-import { KAWAII_API_DEV, KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
 import {
   createMessageConvertCoin,
   createMessageConvertERC20,
-  createTxIBCMsgTransfer,
   createMessageConvertIbcTransferERC20,
-  createMsgIbcCustom
+  createMsgIbcCustom,
+  createTxIBCMsgTransfer
 } from '@oraichain/kawaiiverse-txs';
-import Long from 'long';
 import { createTxRaw } from '@tharsis/proto';
+import { kawaiiTokens } from 'config/bridgeTokens';
+import { KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
+import Long from 'long';
+import { collectWallet } from './cosmjs';
 
-import { getEvmAddress } from './utils';
-import { OfflineDirectSigner } from '@keplr-wallet/types';
 import { Coin, StargateClient } from '@cosmjs/stargate';
+import { OfflineDirectSigner } from '@keplr-wallet/types';
+import { getEvmAddress } from './utils';
 
 async function getAccountInfo(accAddress: string) {
-  return await fetch(
-    `${KAWAII_LCD}/cosmos/auth/v1beta1/accounts/${accAddress}`,
-    { method: 'GET' }
-  ).then((data) => data.json());
+  return await fetch(`${KAWAII_LCD}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
+    data.json()
+  );
 }
 
 // chain id format: something_1234-3
@@ -40,7 +39,7 @@ async function getSenderInfo(sender: string, pubkey: Uint8Array) {
 
 async function getWallet(chainId: string) {
   if (await window.Keplr.getKeplr()) await window.Keplr.suggestChain(chainId);
-  else throw 'Cannot get Keplr to get account';
+  else throw new Error('Cannot get Keplr to get account');
 
   const wallet = (await collectWallet(chainId)) as OfflineDirectSigner;
   const accounts = await wallet.getAccounts();
@@ -71,11 +70,9 @@ async function submit({
     accountNumber: new Long(accountNumber)
   });
   const signature = Buffer.from(signResult.signature.signature, 'base64');
-  const txRaw = createTxRaw(
-    signResult.signed.bodyBytes,
-    signResult.signed.authInfoBytes,
-    [signature]
-  ).message.serialize();
+  const txRaw = createTxRaw(signResult.signed.bodyBytes, signResult.signed.authInfoBytes, [
+    signature
+  ]).message.serialize();
   const client = await StargateClient.connect(rpc);
   const result = await client.broadcastTx(txRaw);
   return result;
@@ -131,9 +128,7 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId as string);
 
-      const { wallet, accounts } = await getWallet(
-        subnetwork.chainId as string
-      );
+      const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
@@ -191,16 +186,14 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId as string);
 
-      const { wallet, accounts } = await getWallet(
-        subnetwork.chainId as string
-      );
+      const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
-        contractAddress: contractAddr ?? KAWAII_CONTRACT,
+        contractAddress: contractAddr,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount
       };
@@ -246,9 +239,7 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId as string);
 
-      const { wallet, accounts } = await getWallet(
-        subnetwork.chainId as string
-      );
+      const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
@@ -256,9 +247,7 @@ export default class KawaiiverseJs {
 
       const params = {
         ...ibcInfo,
-        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp)
-          .multiply(1000000000)
-          .toString(),
+        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(),
         revisionNumber: 0,
         revisionHeight: 0
       };
@@ -307,9 +296,7 @@ export default class KawaiiverseJs {
       const subnetwork = kawaiiTokens[0];
       const chainIdNumber = parseChainIdNumber(subnetwork.chainId as string);
 
-      const { wallet, accounts } = await getWallet(
-        subnetwork.chainId as string
-      );
+      const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
 
@@ -320,9 +307,7 @@ export default class KawaiiverseJs {
         contractAddress: contractAddr ?? KAWAII_CONTRACT,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
-        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp)
-          .multiply(1000000000)
-          .toString(),
+        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(),
         revisionNumber: 0,
         revisionHeight: 0
       };
