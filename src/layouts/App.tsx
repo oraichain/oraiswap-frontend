@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import routes from 'routes';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
@@ -8,13 +8,16 @@ import Menu from './Menu';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { isMobile } from '@walletconnect/browser-utils';
-import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID } from 'config/constants';
+import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getNetworkGasPrice } from 'helper';
 import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
 import { CacheTokens } from 'libs/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { network } from 'config/networks';
+import { buildUnsubscribeMessage, buildWebsocketSendMessage } from 'libs/utils';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -27,6 +30,49 @@ const App = () => {
   const dispatch = useDispatch();
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+
+  //Public API that will echo messages sent to it back to the client
+
+  const { sendJsonMessage, lastMessage, readyState } = useWebSocket(
+    `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
+    {
+      onOpen: () => {
+        console.log('opened websocket, subscribing...');
+        // subscribe to IBC received packet & MsgSend event cases
+        sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
+        // subscribe to MsgSend and MsgTransfer event case
+        sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
+        // subscribe to cw20 contract transfer & send case
+        sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
+        sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
+      },
+      onClose: () => {
+        console.log("unsubscribe all clients");
+        sendJsonMessage(buildUnsubscribeMessage())
+      },
+      onReconnectStop(numAttempts) {
+        // if cannot reconnect then we unsubscribe all
+        if (numAttempts === WEBSOCKET_RECONNECT_ATTEMPTS) {
+          console.log("reconnection reaches above limit. Unsubscribe to all!");
+          sendJsonMessage(buildUnsubscribeMessage());
+        }
+      },
+      shouldReconnect: (closeEvent) => true,
+      onMessage: (event) => {
+        // TODO: should we load alltoken here, or just cosmos tokens?
+        cacheTokens.loadAllToken(metamaskAddress);
+      },
+      reconnectAttempts: WEBSOCKET_RECONNECT_ATTEMPTS,
+      reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL,
+    }
+  );
+
+  // this is used for debugging only
+  useEffect(() => {
+    if (lastMessage !== null) {
+      console.debug("last socket message is: ", lastMessage);
+    }
+  }, [lastMessage]);
 
   // clear persist storage when update version
   useEffect(() => {
@@ -144,3 +190,4 @@ const App = () => {
 };
 
 export default App;
+

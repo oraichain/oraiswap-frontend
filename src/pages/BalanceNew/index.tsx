@@ -15,7 +15,7 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, gravityContracts, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { filteredTokens, gravityContracts, TokenItemType, tokenMap, tokens, kawaiiTokens } from 'config/bridgeTokens';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
@@ -471,12 +471,11 @@ const Balance: React.FC<BalanceProps> = () => {
         });
         return;
       }
+      const nativeToken = kawaiiTokens.find(token => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId); // collect kawaiiverse cosmos based token for conversion
 
       const amount = coin(
         toAmount(transferAmount, fromToken.decimals).toString(),
-        fromToken.denom == 'erc20_milky'
-          ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
-          : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
+        nativeToken.denom
       );
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
@@ -493,7 +492,7 @@ const Balance: React.FC<BalanceProps> = () => {
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
         },
         amount: amount.amount,
-        contractAddr: fromToken.denom == 'erc20_milky' ? fromToken.contractAddress : undefined
+        contractAddr: fromToken?.contractAddress
       });
 
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);

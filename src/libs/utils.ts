@@ -192,3 +192,21 @@ export const formateNumberDecimalsAuto = ({
   const res = unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
   return res;
 };
+
+export const buildWebsocketSendMessage = (message: string, id = 1) => {
+  return {
+    jsonrpc: '2.0',
+    method: 'subscribe',
+    params: [`tm.event='Tx' AND ${message}`],
+    id
+  };
+}
+
+export const buildUnsubscribeMessage = () => {
+  return {
+    jsonrpc: '2.0',
+    method: 'unsubscribe_all',
+    params: [],
+    id: 99
+  }
+}
