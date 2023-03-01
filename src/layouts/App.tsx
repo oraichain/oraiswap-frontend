@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import routes from 'routes';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
@@ -25,7 +25,7 @@ const App = () => {
   const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const dispatch = useDispatch();
-  const cacheTokensCosmos = React.useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
 
   // clear persist storage when update version
@@ -78,7 +78,7 @@ const App = () => {
             method: 'eth_accounts',
             params: [60]
           }))) || [''];
-        cacheTokensCosmos.loadAllToken(accounts?.[0] || metamaskAddress);
+        cacheTokens.loadAllToken(accounts?.[0] || metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {

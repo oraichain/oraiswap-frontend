@@ -29,26 +29,26 @@ export class CacheTokens {
   }
 
   public async loadAllToken(metamaskAddress: string) {
-    this.loadTokensCosmos();
-    this.loadTokensEvmKwt(metamaskAddress);
+    this.loadTokensCosmosKwt();
+    this.loadTokensEvm(metamaskAddress);
   }
 
-  public async loadTokensCosmos() {
-    this.loadTokens();
-    this.loadCw20Balance(this.address);
+  public async loadTokensCosmosKwt() {
+    this.loadTokensCosmos();
+    this.loadCw20Balance();
     this.loadKawaiiSubnetAmount();
   }
 
-  public async loadTokensEvmKwt(metamaskAddress: string) {
+  private async loadTokensEvm(metamaskAddress: string) {
     this.loadEvmOraiAmounts(metamaskAddress);
   }
 
-  private async loadTokens() {
+  private loadTokensCosmos = async () => {
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
     }
-  }
+  };
 
   private async forceUpdate(amountDetails: AmountDetails) {
     this.dispatch(updateAmounts(amountDetails));
@@ -86,19 +86,20 @@ export class CacheTokens {
 
     await Promise.all(
       [
-        getFunctionExecution(this.loadTokens),
-        metamaskAddress && getFunctionExecution(this.loadEvmOraiAmounts, [metamaskAddress]),
-        kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-        this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
+        getFunctionExecution(this.loadTokensCosmos),
+        metamaskAddress && getFunctionExecution(this.loadEvmOraiAmounts.bind(this), [metamaskAddress]),
+        kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount.bind(this)),
+        this.address && getFunctionExecution(this.loadCw20Balance.bind(this))
       ].filter(Boolean)
     );
   }
 
-  private async loadCw20Balance(address: string) {
+  private async loadCw20Balance() {
+    if (!this.address) return;
     // get all cw20 token contract
     const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
     const data = toBinary({
-      balance: { address }
+      balance: { address: this.address }
     });
 
     const res = await Contract.multicall.aggregate({
@@ -115,7 +116,6 @@ export class CacheTokens {
         }
         const balanceRes = fromBinary(res.return_data[ind].data) as BalanceResponse;
         const amount = balanceRes.balance;
-        const displayAmount = toDisplay(amount, t.decimals);
         return [t.denom, amount];
       })
     );
@@ -150,7 +150,6 @@ export class CacheTokens {
     const results: ContractCallResults = await multicall.call(input);
     return tokens.map((token) => {
       const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-      const displayAmount = toDisplay(amount, token.decimals);
       return [token.denom, amount];
     });
   }

@@ -51,7 +51,7 @@ import {
 import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { initEthereum } from 'polyfill';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -104,13 +104,10 @@ const Balance: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
-  const cacheTokensCosmos = React.useMemo(
-    () => CacheTokens.factory({ dispatch, address: keplrAddress }),
-    [dispatch, keplrAddress]
-  );
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
 
   useEffect(() => {
-    cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+    cacheTokens.loadTokenAmounts(metamaskAddress);
   }, [keplrAddress, metamaskAddress, txHash, prices]);
 
   const _initEthereum = async () => {
@@ -555,7 +552,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      cacheTokensCosmos.loadTokenAmounts(metamaskAddress);
+      cacheTokens.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
