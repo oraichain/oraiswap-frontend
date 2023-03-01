@@ -21,7 +21,6 @@ import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 import SettingModal from '../Modals/SettingModal';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
@@ -60,13 +59,6 @@ const SwapComponent: React.FC<{
     let finalAmount = toDisplay(amount, fromTokenInfoData?.decimals);
     setSwapAmount([finalAmount, toAmountToken]);
   };
-
-  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery<TaxRateResponse>({
-    client: Contract.oracle,
-    input: {
-      tax_rate: {}
-    }
-  });
 
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
@@ -272,7 +264,7 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{(Number(taxRate?.rate) * 100).toFixed(1)} %</span>
+          <span>0.3 %</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
