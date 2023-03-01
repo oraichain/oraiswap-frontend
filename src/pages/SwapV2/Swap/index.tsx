@@ -8,7 +8,7 @@ import { contracts } from 'libs/contracts';
 import { tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchTokenInfo,
+  fetchTokenInfos,
   generateContractMessages,
   generateConvertErc20Cw20Message,
   simulateSwap,
@@ -21,7 +21,6 @@ import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 import SettingModal from '../Modals/SettingModal';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
@@ -61,23 +60,12 @@ const SwapComponent: React.FC<{
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
-  Contract.sender = address;
-
-  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery<TaxRateResponse>({
-    client: Contract.oracle,
-    input: {
-      tax_rate: {}
-    }
-  });
-
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
 
-  const { data: fromTokenInfoData } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(fromToken!));
-
-  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
-
-  console.log({ fromToken, toToken });
+  const {
+    data: [fromTokenInfoData, toTokenInfoData]
+  } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -127,10 +115,10 @@ const SwapComponent: React.FC<{
       var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
-      const msgConvertTo = await generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
+      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
+      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.SWAP,
         sender: address,
         amount: _fromAmount,
@@ -276,7 +264,7 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{(Number(taxRate?.rate) * 100).toFixed(1)} %</span>
+          <span>0.3 %</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>

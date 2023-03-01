@@ -15,6 +15,7 @@ import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
 import { CacheTokens } from 'libs/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
+import { Contract } from 'config/contracts';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -84,7 +85,9 @@ const App = () => {
       if (!chainInfo?.chainId) {
         setStatusChangeAccount(true);
       }
-      setAddress(newAddress as string);
+
+      Contract.sender = newAddress;
+      setAddress(newAddress);
     }
   };
   useEagerConnect(false, true);
