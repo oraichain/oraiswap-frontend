@@ -101,6 +101,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
   const onBondingAction = () => {
     refetchRewardInfo();
+    refetchPairAmountInfo();
+    fetchCachedLpTokenAll();
     cacheTokens.loadTokensCosmosKwt();
   };
 
