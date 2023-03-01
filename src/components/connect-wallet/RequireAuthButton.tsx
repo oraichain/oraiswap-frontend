@@ -6,16 +6,12 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
+import { Contract } from 'config/contracts';
 
-const RequireAuthButton: React.FC<any> = ({
-  address,
-  setAddress,
-  ...props
-}) => {
+const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
-  const [metamaskAddress, setMetamaskAddress] =
-    useConfigReducer('metamaskAddress');
+  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const { activate, deactivate } = useWeb3React();
 
   useEagerConnect(isInactiveMetamask, false);
@@ -59,12 +55,14 @@ const RequireAuthButton: React.FC<any> = ({
 
     await window.Keplr.suggestChain(network.chainId);
     const address = await window.Keplr.getKeplrAddr();
+    Contract.sender = address;
     setAddress(address as string);
   };
 
   const disconnectKeplr = async () => {
     try {
       window.Keplr.disconnect();
+      Contract.sender = '';
       setAddress('');
     } catch (ex) {
       console.log(ex);

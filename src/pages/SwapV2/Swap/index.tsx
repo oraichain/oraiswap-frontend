@@ -8,7 +8,7 @@ import { contracts } from 'libs/contracts';
 import { tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchTokenInfo,
+  fetchTokenInfos,
   generateContractMessages,
   generateConvertErc20Cw20Message,
   simulateSwap,
@@ -61,8 +61,6 @@ const SwapComponent: React.FC<{
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
-  Contract.sender = address;
-
   const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery<TaxRateResponse>({
     client: Contract.oracle,
     input: {
@@ -73,11 +71,9 @@ const SwapComponent: React.FC<{
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
 
-  const { data: fromTokenInfoData } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(fromToken!));
-
-  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
-
-  console.log({ fromToken, toToken });
+  const {
+    data: [fromTokenInfoData, toTokenInfoData]
+  } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -127,10 +123,10 @@ const SwapComponent: React.FC<{
       var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
-      const msgConvertTo = await generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
+      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
+      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.SWAP,
         sender: address,
         amount: _fromAmount,

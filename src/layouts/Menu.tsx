@@ -41,6 +41,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
+import { Contract } from 'config/contracts';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
