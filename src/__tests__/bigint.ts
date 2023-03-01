@@ -54,4 +54,12 @@ describe('bigint', () => {
     res = toDisplay(amount, decimal, desDecimal).toString();
     expect(res).toBe('454.13'); // here toFixed round up, but its okay because it is just display, not true amount
   });
+
+  it('toDisplay-big-number-should-display-correct-des-decimal', async () => {
+    // display number from value in string or bigint or e^n format
+    const amount = '100000000000000';
+    const decimal = 18;
+    let res = toDisplay(amount, decimal).toString();
+    expect(res).toBe('0.0001');
+  });
 });

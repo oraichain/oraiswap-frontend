@@ -17,8 +17,10 @@ import { CacheTokens } from 'libs/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import useWebSocket from 'react-use-websocket';
 import { network } from 'config/networks';
-import { buildUnsubscribeMessage, buildWebsocketSendMessage } from 'libs/utils';
+import { buildUnsubscribeMessage, buildWebsocketSendMessage, toDisplay } from 'libs/utils';
 import { Contract } from 'config/contracts';
+import { Asset } from 'libs/contracts';
+import { filteredTokens } from 'config/bridgeTokens';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -34,17 +36,18 @@ const App = () => {
 
   //Public API that will echo messages sent to it back to the client
 
-  const { sendJsonMessage, lastMessage } = useWebSocket(
+  const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
       onOpen: () => {
         console.log('opened websocket, subscribing...');
-        // subscribe to IBC received packet & MsgSend event cases
-        sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
+        // subscribe to IBC Wasm case
+        sendJsonMessage(buildWebsocketSendMessage(`wasm._contract_address = '${process.env.REACT_APP_IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`), true);
+        // sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
         // subscribe to MsgSend and MsgTransfer event case
         // sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
         // subscribe to cw20 contract transfer & send case
-        sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
+        // sendJsonMessage(buildWebsocketSendMessage(`wasm.to = '${address}'`, 3), true);
         // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
       },
       onClose: () => {
@@ -59,21 +62,49 @@ const App = () => {
         }
       },
       shouldReconnect: (closeEvent) => true,
-      onMessage: (event) => {
-        // TODO: should we load alltoken here, or just cosmos tokens?
-        cacheTokens.loadTokensCosmos();
-      },
       reconnectAttempts: WEBSOCKET_RECONNECT_ATTEMPTS,
       reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL,
     }
   );
 
+  const processWsResponseMsg = (message: any): string => {
+    if (message === null) {
+      return null;
+    }
+    const { result } = message;
+    if (
+      result && // 👈 null and undefined check
+      (Object.keys(result).length !== 0 ||
+        result.constructor !== Object)
+    ) {
+      const events = result.events;
+      console.log('events: ', events);
+      // TODO: process multiple tokens at once if there are multiple recvpacket messages
+      const packets = events['recv_packet.packet_data'];
+      let tokens = "";
+      for (let packetRaw of packets) {
+        const packet = JSON.parse(packetRaw);
+        // we look for the true denom information with decimals to process
+        // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
+        const receivedToken = filteredTokens.find(token => token.denom === packet.denom);
+        const displayAmount = toDisplay(packet.amount, receivedToken.decimals);
+        tokens = tokens.concat(`${displayAmount} ${receivedToken.name}, `);
+      }
+      return tokens.substring(0, tokens.length - 2); // remove , due to concat
+    }
+    return null;
+  }
+
   // this is used for debugging only
   useEffect(() => {
-    if (lastMessage !== null) {
-      console.debug("last socket message is: ", lastMessage);
+    const tokenDisplay = processWsResponseMsg(lastJsonMessage);
+    if (tokenDisplay) {
+      displayToast(TToastType.TX_INFO, {
+        message: `You have received ${tokenDisplay}`
+      });
+      cacheTokens.loadTokensCosmosKwt();
     }
-  }, [lastMessage]);
+  }, [lastJsonMessage]);
 
   // clear persist storage when update version
   useEffect(() => {
