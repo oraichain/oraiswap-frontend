@@ -1,15 +1,15 @@
-import React, { ReactElement } from 'react';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
-import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
-import { ReactComponent as USDT } from 'assets/icons/tether.svg';
+import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
 import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
+import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
-import uniqBy from 'lodash/uniqBy';
+import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
+import { ReactComponent as USDT } from 'assets/icons/tether.svg';
 import flatten from 'lodash/flatten';
+import uniqBy from 'lodash/uniqBy';
+import React from 'react';
 import {
   AIRI_BSC_CONTRACT,
   BEP20_ORAI,
@@ -24,7 +24,6 @@ import {
   ETHEREUM_RPC,
   EVM_DECIMALS,
   KAWAII_CONTRACT,
-  KAWAII_LCD,
   KAWAII_ORG,
   KAWAII_RPC,
   KAWAII_SUBNET_RPC,
@@ -41,10 +40,8 @@ import {
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
-  ORAI_BRIDGE_UDENOM,
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT,
-  ORAI_LCD,
   ORAI_RPC,
   OSMOSIS_ORG,
   STABLE_DENOM,
@@ -53,14 +50,7 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org?:
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse';
+  org?: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse';
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -524,9 +514,7 @@ const oraichainTokens: TokenItemType[] = [
 export const tokens = [otherChainTokens, oraichainTokens];
 const flattenTokens = flatten(tokens);
 
-export const tokenMap = Object.fromEntries(
-  flattenTokens.map((c) => [c.denom, c])
-);
+export const tokenMap = Object.fromEntries(flattenTokens.map((c) => [c.denom, c]));
 
 export const filteredTokens = uniqBy(
   flattenTokens.filter(
@@ -547,18 +535,13 @@ export const cw20Tokens = uniqBy(
   (c) => c.denom
 );
 
-export const cw20TokenMap = Object.fromEntries(
-  cw20Tokens.map((c) => [c.contractAddress, c])
-);
+export const cw20TokenMap = Object.fromEntries(cw20Tokens.map((c) => [c.contractAddress, c]));
 
 export const evmTokens = uniqBy(
   flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
-      token.denom &&
-      !token.cosmosBased &&
-      token.coingeckoId &&
-      token.chainId !== KWT_SUBNETWORK_CHAIN_ID
+      token.denom && !token.cosmosBased && token.coingeckoId && token.chainId !== KWT_SUBNETWORK_CHAIN_ID
   ),
   (c) => c.denom
 );

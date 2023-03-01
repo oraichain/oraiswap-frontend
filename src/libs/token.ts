@@ -1,13 +1,7 @@
 import { StargateClient } from '@cosmjs/stargate';
 import { arrayLoadToken, handleCheckWallet } from 'helper';
 import { getEvmAddress, toDisplay } from './utils';
-import {
-  evmTokens,
-  filteredTokens,
-  kawaiiTokens,
-  TokenItemType,
-  tokenMap
-} from 'config/bridgeTokens';
+import { evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { BalanceResponse } from './contracts/OraiswapToken.types';
@@ -21,7 +15,7 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID
 } from 'config/constants';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import tokenABI from 'config/abi/erc20.json';
 import { ContractCallResults, Multicall } from './ethereum-multicall';
 export class CacheTokens {
@@ -50,9 +44,7 @@ export class CacheTokens {
   private async loadTokens() {
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
-      window.Keplr.getKeplrAddr(token.chainId).then((address) =>
-        this.loadNativeBalance(address, token)
-      );
+      window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
     }
   }
 
@@ -60,10 +52,7 @@ export class CacheTokens {
     this.dispatch(updateAmounts(amountDetails));
   }
 
-  private async loadNativeBalance(
-    address: string,
-    tokenInfo: { chainId: string; rpc: string }
-  ) {
+  private async loadNativeBalance(address: string, tokenInfo: { chainId: string; rpc: string }) {
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
 
@@ -78,11 +67,7 @@ export class CacheTokens {
 
     Object.assign(
       amountDetails,
-      Object.fromEntries(
-        amountAll
-          .filter((coin) => tokenMap[coin.denom])
-          .map((coin) => [coin.denom, coin.amount])
-      )
+      Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
     );
     this.forceUpdate(amountDetails);
   }
@@ -106,9 +91,7 @@ export class CacheTokens {
         if (!res.return_data[ind].success) {
           return [t.denom, 0];
         }
-        const balanceRes = fromBinary(
-          res.return_data[ind].data
-        ) as BalanceResponse;
+        const balanceRes = fromBinary(res.return_data[ind].data) as BalanceResponse;
         const amount = balanceRes.balance;
         const displayAmount = toDisplay(amount, t.decimals);
         return [t.denom, amount];
@@ -144,8 +127,7 @@ export class CacheTokens {
 
     const results: ContractCallResults = await multicall.call(input);
     return tokens.map((token) => {
-      const amount =
-        results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
+      const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
       const displayAmount = toDisplay(amount, token.decimals);
       return [token.denom, amount];
     });
@@ -175,9 +157,7 @@ export class CacheTokens {
   }
 
   private async loadKawaiiSubnetAmount() {
-    const kwtSubnetAddress = getEvmAddress(
-      await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID)
-    );
+    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
     let amountDetails = Object.fromEntries(
       await this.loadEvmEntries(
         kwtSubnetAddress,

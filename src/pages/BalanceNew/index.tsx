@@ -1,26 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Coin, coin } from '@cosmjs/stargate';
-import { arrayLoadToken, getNetworkGasPrice, handleCheckWallet, networks } from 'helper';
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
-import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
-import { renderLogoNetwork } from 'helper';
-import SelectTokenModal from './Modals/SelectTokenModal';
-import { IBCInfo } from 'types/ibc';
-import styles from './Balance.module.scss';
-import tokenABI from 'config/abi/erc20.json';
-import { Multicall, ContractCallResults } from 'libs/ethereum-multicall';
-import SearchSvg from 'assets/images/search-svg.svg';
+import { createWasmAminoConverters, ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import {
   AminoTypes,
+  Coin,
+  coin,
   DeliverTxResponse,
   GasPrice,
   isDeliverTxFailure,
   SigningStargateClient,
   StargateClient
 } from '@cosmjs/stargate';
+import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
+import CheckBox from 'components/CheckBox';
+import LoadingBox from 'components/LoadingBox';
+import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';
+import tokenABI from 'config/abi/erc20.json';
 import {
   evmTokens,
   filteredTokens,
@@ -30,26 +26,6 @@ import {
   tokenMap,
   tokens
 } from 'config/bridgeTokens';
-import { network } from 'config/networks';
-import {
-  generateConvertCw20Erc20Message,
-  generateConvertMsgs,
-  Type,
-  parseTokenInfo,
-  getSubAmountDetails
-} from 'rest/api';
-import Content from 'layouts/Content';
-import {
-  buildMultipleMessages,
-  getEvmAddress,
-  getFunctionExecution,
-  toAmount,
-  parseBep20Erc20Name,
-  getUsd,
-  getTotalUsd,
-  toSumDisplay,
-  toTotalDisplay
-} from 'libs/utils';
 import {
   BSC_CHAIN_ID,
   BSC_RPC,
@@ -59,46 +35,62 @@ import {
   ETHEREUM_SCAN,
   KAWAII_SUBNET_RPC,
   KWT,
-  KWT_BSC_CONTRACT,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
   KWT_SUBNETWORK_EVM_CHAIN_ID,
-  MILKY_BSC_CONTRACT,
   NOTI_INSTALL_OWALLET,
   ORAI,
   ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_FEE,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_EVM_FEE
+  ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
-import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
-import { initEthereum } from 'polyfill';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import KawaiiverseJs from 'libs/kawaiiversejs';
-import { useInactiveListener } from 'hooks/useMetamask';
-import TokenItem from './TokenItem';
-import KwtModal from './KwtModal';
-import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
-import Long from 'long';
-import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
-import customRegistry, { customAminoTypes } from 'libs/registry';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import CheckBox from 'components/CheckBox';
 import { Contract } from 'config/contracts';
-import { ExecuteResult, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { BalanceResponse, QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
-import LoadingBox from 'components/LoadingBox';
-import { TransferBackMsg } from 'libs/contracts';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store/configure';
-import { updateAmounts } from 'reducer/token';
+import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';
+import { network } from 'config/networks';
+import { arrayLoadToken, getNetworkGasPrice, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import Input from 'components/Input';
+import { useInactiveListener } from 'hooks/useMetamask';
+import Content from 'layouts/Content';
+import { TransferBackMsg } from 'libs/contracts';
+import { BalanceResponse, QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
+import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
+import { ContractCallResults, Multicall } from 'libs/ethereum-multicall';
+import KawaiiverseJs from 'libs/kawaiiversejs';
+import customRegistry, { customAminoTypes } from 'libs/registry';
+import {
+  buildMultipleMessages,
+  getEvmAddress,
+  getFunctionExecution,
+  getTotalUsd,
+  getUsd,
+  parseBep20Erc20Name,
+  toAmount,
+  toSumDisplay,
+  toTotalDisplay
+} from 'libs/utils';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
-import sumBy from 'lodash/sumBy';
+import Long from 'long';
+import { initEthereum } from 'polyfill';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { updateAmounts } from 'reducer/token';
+import {
+  generateConvertCw20Erc20Message,
+  generateConvertMsgs,
+  getSubAmountDetails,
+  parseTokenInfo,
+  Type
+} from 'rest/api';
+import { RootState } from 'store/configure';
+import { IBCInfo } from 'types/ibc';
+import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
+import styles from './Balance.module.scss';
 import { getOneStepKeplrAddr } from './helpers';
-import SearchInput from 'components/SearchInput';
+import KwtModal from './KwtModal';
+import SelectTokenModal from './Modals/SelectTokenModal';
+import TokenItem from './TokenItem';
 
 interface BalanceProps {}
 
@@ -272,34 +264,30 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const loadTokenAmounts = async () => {
-    try {
-      // let chainId = network.chainId;
-      // we enable oraichain then use pubkey to calculate other address
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) {
-        return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-          toastId: 'install_keplr'
-        });
-      }
-
-      const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-
-      await Promise.all(
-        [
-          getFunctionExecution(loadTokens),
-          metamaskAddress && getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
-          kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-          // keplrAddress &&
-          // getFunctionExecution(loadNativeBalance, [
-          //   keplrAddress,
-          //   network.rpc
-          // ]),
-          keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
-        ].filter(Boolean)
-      );
-    } catch (ex) {
-      console.log(ex);
+    // let chainId = network.chainId;
+    // we enable oraichain then use pubkey to calculate other address
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
+        toastId: 'install_keplr'
+      });
     }
+
+    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
+
+    await Promise.all(
+      [
+        getFunctionExecution(loadTokens),
+        metamaskAddress && getFunctionExecution(loadEvmOraiAmounts, [metamaskAddress]),
+        kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+        // keplrAddress &&
+        // getFunctionExecution(loadNativeBalance, [
+        //   keplrAddress,
+        //   network.rpc
+        // ]),
+        keplrAddress && getFunctionExecution(loadCw20Balance, [keplrAddress])
+      ].filter(Boolean)
+    );
   };
 
   const processTxResult = (token: TokenItemType, result: DeliverTxResponse, customLink?: string) => {
@@ -361,9 +349,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ): Promise<void> => {
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     if (!ibcWasmContractAddress)
-      throw {
-        message: 'IBC Wasm source port is invalid. Cannot transfer to the destination chain'
-      };
+      throw new Error('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
 
     const { info: assetInfo } = parseTokenInfo(fromToken);
     Contract.sender = fromAddress;
@@ -377,7 +363,7 @@ const Balance: React.FC<BalanceProps> = () => {
         'We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC'
       );
       // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-      throw 'Cannot transfer to remote chain because cannot find mapping pair';
+      throw new Error('Cannot transfer to remote chain because cannot find mapping pair');
     }
 
     // if asset info is native => send native way, else send cw20 way
@@ -481,7 +467,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       console.log('from token: ', fromToken);
       console.log('to token: ', toToken);
-      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      if (transferAmount === 0) throw new Error('Transfer amount is empty');
       await handleCheckWallet();
 
       // disable Oraichain -> Oraibridge Ledger
@@ -579,7 +565,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     try {
-      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      if (transferAmount === 0) throw new Error('Transfer amount is empty');
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(toToken.chainId as string);
@@ -641,7 +627,7 @@ const Balance: React.FC<BalanceProps> = () => {
     transferAmount: number
   ) => {
     try {
-      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      if (transferAmount === 0) throw new Error('Transfer amount is empty');
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(toToken.chainId as string);
@@ -658,7 +644,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const amount = coin(
         toAmount(transferAmount, fromToken.decimals).toString(),
-        fromToken.denom == 'erc20_milky'
+        fromToken.denom === 'erc20_milky'
           ? process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM
           : process.env.REACT_APP_KWT_SUB_NETWORK_DENOM
       );
@@ -677,7 +663,7 @@ const Balance: React.FC<BalanceProps> = () => {
           timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
         },
         amount: amount.amount,
-        contractAddr: fromToken.denom == 'erc20_milky' ? fromToken.contractAddress : undefined
+        contractAddr: fromToken.denom === 'erc20_milky' ? fromToken.contractAddress : undefined
       });
 
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
@@ -856,7 +842,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const convertKwt = async (transferAmount: number, fromToken: TokenItemType) => {
     try {
-      if (transferAmount === 0) throw { message: 'Transfer amount is empty' };
+      if (transferAmount === 0) throw new Error('Transfer amount is empty');
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) return;
       await window.Keplr.suggestChain(fromToken.chainId as string);
@@ -881,7 +867,7 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: fromAddress,
           gasAmount: { amount: '0', denom: KWT },
           amount: amount.amount,
-          contractAddr: fromToken?.denom == 'erc20_milky' ? fromToken?.contractAddress : undefined
+          contractAddr: fromToken?.denom === 'erc20_milky' ? fromToken?.contractAddress : undefined
         });
       }
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
@@ -960,9 +946,9 @@ const Balance: React.FC<BalanceProps> = () => {
             <div className={styles.tokens_form}>
               {getFilterTokens(filterNetwork).map((t: TokenItemType) => {
                 const name = parseBep20Erc20Name(t.name);
-                const tokenOraichain = filterNetwork == ORAICHAIN_ID;
+                const isOraichain = filterNetwork === ORAICHAIN_ID;
                 const transferToToken =
-                  tokenOraichain &&
+                  isOraichain &&
                   fromTokens.find(
                     (token) => token.cosmosBased && token.name.includes(name) && token.chainId !== ORAI_BRIDGE_CHAIN_ID
                   );
@@ -983,13 +969,13 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={[amount.toString(), usd]}
                     subAmounts={subAmounts}
-                    active={tokenOraichain ? to?.denom === t.denom : from?.denom === t.denom}
+                    active={isOraichain ? to?.denom === t.denom : from?.denom === t.denom}
                     token={t}
-                    onClick={tokenOraichain ? onClickTokenTo : onClickTokenFrom}
+                    onClick={isOraichain ? onClickTokenTo : onClickTokenFrom}
                     convertToken={convertToken}
                     transferIBC={transferIbcCustom}
                     onClickTransfer={
-                      tokenOraichain
+                      isOraichain
                         ? !!transferToToken
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
