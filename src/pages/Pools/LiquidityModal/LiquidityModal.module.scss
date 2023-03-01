@@ -1,3 +1,4 @@
+@import 'src/styles/mixins';
 .modal {
   max-width: 568px;
 
@@ -82,11 +83,14 @@
       border-radius: 16px;
 
       border: 1px solid;
-      border-image: linear-gradient(99.99deg,
+      border-image: linear-gradient(
+          99.99deg,
           rgba(255, 255, 255, 0) 0%,
           rgba(255, 255, 255, 0.15) 26.06%,
           rgba(225, 240, 255, 0.202656) 64.17%,
-          rgba(232, 241, 255, 0) 98.89%) 1;
+          rgba(232, 241, 255, 0) 98.89%
+        )
+        1;
 
       /* Inside auto layout */
 
@@ -139,6 +143,9 @@
         font-style: normal;
         font-weight: 500;
         font-size: 14px;
+        @include mobile {
+          font-size: 12px;
+        }
         line-height: 150%;
         /* identical to box height, or 21px */
 
@@ -169,6 +176,9 @@
           font-style: normal;
           font-weight: 500;
           font-size: 13px;
+          @include mobile {
+            font-size: 11px;
+          }
           line-height: 100%;
           /* identical to box height, or 13px */
 
@@ -390,11 +400,14 @@
       border-radius: 16px;
 
       border: 1px solid;
-      border-image: linear-gradient(99.99deg,
+      border-image: linear-gradient(
+          99.99deg,
           rgba(255, 255, 255, 0) 0%,
           rgba(255, 255, 255, 0.15) 26.06%,
           rgba(225, 240, 255, 0.202656) 64.17%,
-          rgba(232, 241, 255, 0) 98.89%) 1;
+          rgba(232, 241, 255, 0) 98.89%
+        )
+        1;
 
       /* Inside auto layout */
 
@@ -626,6 +639,48 @@
 
       .border {
         border: 1px solid #3c404d;
+      }
+    }
+  }
+}
+
+//responsive
+@media (max-width: 575px) {
+  .modal {
+    max-height: 85vh;
+    margin-top: 60px;
+    .container {
+      max-height: 85vh;
+      .title {
+        font-size: 18px;
+      }
+      .supply {
+        padding: 16px 0;
+        .header {
+          .title {
+            font-size: 16px;
+          }
+        }
+        .input {
+          .amount {
+            width: 100%;
+            font-size: 18px;
+          }
+          .token {
+            .title {
+              font-size: 16px;
+              height: 36px;
+              .des {
+                font-size: 14px;
+              }
+            }
+          }
+        }
+      }
+      .switch {
+        padding: 0;
+        font-size: 16px;
+        margin: 24px 0;
       }
     }
   }

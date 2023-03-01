@@ -551,7 +551,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      cacheTokens.loadTokenAmounts(metamaskAddress);
+      await cacheTokens.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
