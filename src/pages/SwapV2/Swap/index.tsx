@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -50,6 +50,7 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -156,7 +157,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        CacheTokens.factory({ dispatch, address }).loadTokensCosmos();
+        cacheTokens.loadTokensCosmosKwt();
         setSwapLoading(false);
       }
     } catch (error) {
