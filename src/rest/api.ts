@@ -5,13 +5,15 @@ import { ORAI, STABLE_DENOM } from 'config/constants';
 import { getPair, Pair } from 'config/pools';
 import axios from './request';
 import { TokenInfo } from 'types/token';
-import { getSubAmountDetails, toDecimal, toDisplay } from 'libs/utils';
+import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import { Contract } from 'config/contracts';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { Coin } from '@cosmjs/stargate';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { QueryMsg as TokenQueryMsg, TokenInfoResponse } from 'libs/contracts/OraiswapToken.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -30,33 +32,26 @@ export enum Type {
 const oraiInfo = { native_token: { denom: ORAI } };
 
 async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
-  const tokenInfo: TokenInfo = {
-    ...tokenSwap,
-    symbol: '',
-    name: tokenSwap.name,
-    contractAddress: tokenSwap.contractAddress,
-    decimals: tokenSwap.decimals,
-    icon: '',
-    denom: tokenSwap.denom,
-    verified: false,
-    total_supply: ''
-  };
-  if (!tokenSwap.contractAddress) {
-    tokenInfo.symbol = tokenSwap.name;
-    tokenInfo.verified = true;
-  } else {
-    const data = await Contract.token(tokenSwap.contractAddress).tokenInfo();
-    const dataCheckMilkyToken = data?.token_info_response ?? data;
-    Object.assign(tokenInfo, {
-      symbol: dataCheckMilkyToken.symbol,
-      name: dataCheckMilkyToken.name,
-      contractAddress: tokenSwap.contractAddress,
-      decimals: dataCheckMilkyToken.decimals,
-      total_supply: dataCheckMilkyToken.total_supply
-    });
-  }
+  const data = tokenSwap.contractAddress ? await Contract.token(tokenSwap.contractAddress).tokenInfo() : undefined;
+  return toTokenInfo(tokenSwap, data);
+}
 
-  return tokenInfo;
+/// using multicall when query multiple
+async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]> {
+  const filterTokenSwaps = tokenSwaps.filter((t) => t.contractAddress);
+  const queries = filterTokenSwaps.map((t) => ({
+    address: t.contractAddress,
+    data: toBinary({
+      token_info: {}
+    } as TokenQueryMsg)
+  }));
+
+  const res = await Contract.multicall.aggregate({
+    queries
+  });
+
+  let ind = 0;
+  return tokenSwaps.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
 }
 
 async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
@@ -185,7 +180,7 @@ async function fetchDistributionInfo(assetToken: TokenInfo): Promise<Distributio
   return data;
 }
 
-async function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: TokenItemType, sender: string) {
+function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: TokenItemType, sender: string) {
   let msgConverts: any[] = [];
   if (!tokenInfo.evmDenoms) return [];
   const subAmounts = getSubAmountDetails(amounts, tokenInfo);
@@ -362,7 +357,7 @@ export type IncreaseAllowanceQuery = {
   token: string; //token contract addr
 };
 
-async function generateContractMessages(
+function generateContractMessages(
   query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery | TransferQuery
 ) {
   const { type, sender, ...params } = query;
@@ -389,7 +384,7 @@ async function generateContractMessages(
           send: {
             contract: contractAddr,
             amount: swapQuery.amount.toString(),
-            msg: btoa(JSON.stringify(inputTemp))
+            msg: toBinary(inputTemp)
           }
         };
         contractAddr = swapQuery.fromInfo.contractAddress;
@@ -498,13 +493,11 @@ async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiqui
         send: {
           contract: network.staking,
           amount: bondMsg.amount.toString(),
-          msg: btoa(
-            JSON.stringify({
-              bond: {
-                asset_info
-              }
-            })
-          ) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+          msg: toBinary({
+            bond: {
+              asset_info
+            }
+          }) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
         }
       };
       contractAddr = bondMsg.lpToken;
@@ -581,11 +574,9 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
           send: {
             contract: network.converter,
             amount: inputAmount,
-            msg: btoa(
-              JSON.stringify({
-                convert: {}
-              })
-            )
+            msg: toBinary({
+              convert: {}
+            })
           }
         };
         contractAddr = assetInfo.token.contract_addr;
@@ -612,13 +603,11 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
           send: {
             contract: network.converter,
             amount: inputAmount,
-            msg: btoa(
-              JSON.stringify({
-                convert_reverse: {
-                  from: outputAssetInfo
-                }
-              })
-            )
+            msg: toBinary({
+              convert_reverse: {
+                from: outputAssetInfo
+              }
+            })
           }
         };
         contractAddr = assetInfo.token.contract_addr;
@@ -680,6 +669,7 @@ function generateClaimMsg(msg: Claim) {
 export {
   fetchPairInfo,
   fetchTokenInfo,
+  fetchTokenInfos,
   generateContractMessages,
   generateClaimMsg,
   simulateSwap,

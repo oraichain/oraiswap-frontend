@@ -8,7 +8,7 @@ import { contracts } from 'libs/contracts';
 import { tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchTokenInfo,
+  fetchTokenInfos,
   generateContractMessages,
   generateConvertErc20Cw20Message,
   simulateSwap,
@@ -21,7 +21,6 @@ import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import TokenBalance from 'components/TokenBalance';
 import NumberFormat from 'react-number-format';
-import { TaxRateResponse } from 'libs/contracts/OraiswapOracle.types';
 import SettingModal from '../Modals/SettingModal';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { poolTokens } from 'config/pools';
@@ -37,7 +36,7 @@ const cx = cn.bind(styles);
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
   toTokenDenom: string;
-  setSwapTokens: any;
+  setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
@@ -61,23 +60,12 @@ const SwapComponent: React.FC<{
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
-  Contract.sender = address;
-
-  const { data: taxRate } = contracts.OraiswapOracle.useOraiswapOracleTreasuryQuery({
-    client: Contract.oracle,
-    input: {
-      tax_rate: {}
-    }
-  });
-
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
 
-  const { data: fromTokenInfoData } = useQuery(['from-token-info', fromToken], () => fetchTokenInfo(fromToken!));
-
-  const { data: toTokenInfoData } = useQuery(['to-token-info', toToken], () => fetchTokenInfo(toToken!));
-
-  console.log({ fromToken, toToken });
+  const {
+    data: [fromTokenInfoData, toTokenInfoData]
+  } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -108,13 +96,11 @@ const SwapComponent: React.FC<{
 
   useEffect(() => {
     console.log('simulate average data: ', simulateAverageData);
-    setAverageRatio(
-      parseFloat(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString()).toFixed(6)
-    );
+    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, parseFloat(toDisplay(simulateData?.amount, toTokenInfoData?.decimals).toString())]);
+    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   const handleSubmit = async () => {
@@ -129,10 +115,10 @@ const SwapComponent: React.FC<{
       var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = await generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
-      const msgConvertTo = await generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
+      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
+      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.SWAP,
         sender: address,
         amount: _fromAmount,
@@ -272,20 +258,13 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Minimum Received</span>
           </div>
-          <TokenBalance
-            balance={{
-              amount: simulateData?.amount ?? '0',
-              denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals
-            }}
-            decimalScale={6}
-          />
+          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={2} />
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{parseFloat((taxRate as TaxRateResponse)?.rate) * 100} %</span>
+          <span>0.3 %</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>

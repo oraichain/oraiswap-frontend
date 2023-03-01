@@ -15,9 +15,10 @@ import { ChainInfoType } from 'reducer/config';
 import { useDispatch } from 'react-redux';
 import { CacheTokens } from 'libs/token';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import useWebSocket from 'react-use-websocket';
 import { network } from 'config/networks';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage } from 'libs/utils';
+import { Contract } from 'config/contracts';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -33,7 +34,7 @@ const App = () => {
 
   //Public API that will echo messages sent to it back to the client
 
-  const { sendJsonMessage, lastMessage, readyState } = useWebSocket(
+  const { sendJsonMessage, lastMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
       onOpen: () => {
@@ -130,7 +131,9 @@ const App = () => {
       if (!chainInfo?.chainId) {
         setStatusChangeAccount(true);
       }
-      setAddress(newAddress as string);
+
+      Contract.sender = newAddress;
+      setAddress(newAddress);
     }
   };
   useEagerConnect(false, true);

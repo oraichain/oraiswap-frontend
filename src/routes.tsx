@@ -6,12 +6,11 @@ import AirDrop from 'pages/AirDrop';
 import EthereumTest from 'pages/EthereumTest';
 import Loader from 'components/Loader';
 
-// const Swap = React.lazy(() => import('pages/Swap/index'));
 const SwapV2 = React.lazy(() => import('pages/SwapV2/index'));
 const Pools = React.lazy(() => import('pages/Pools'));
 const BalanceNew = React.lazy(() => import('pages/BalanceNew'));
 const PoolDetail = React.lazy(() => import('pages/Pools/PoolDetail'));
-const Maintenance = React.lazy(() => import('pages/Maintenance'));
+// const Maintenance = React.lazy(() => import('pages/Maintenance'));
 
 export default () => {
   return (
@@ -23,7 +22,7 @@ export default () => {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
           <Loader />

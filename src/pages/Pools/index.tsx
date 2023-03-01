@@ -109,10 +109,9 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
 
 const ListPools = memo<{
   pairInfos: PairInfoData[];
-  allPoolApr: any;
-  setIsOpenNewPoolModal: any;
+  allPoolApr: { [key: string]: number };
   myPairsData?: Object;
-}>(({ pairInfos, setIsOpenNewPoolModal, allPoolApr, myPairsData }) => {
+}>(({ pairInfos, allPoolApr, myPairsData }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   useEffect(() => {
@@ -203,7 +202,7 @@ type PairInfoData = {
 const Pools: React.FC<PoolsProps> = () => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [myPairsData, setMyPairsData] = useState({});
-  const [address, setAddress] = useConfigReducer('address');
+  const [address] = useConfigReducer('address');
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
@@ -330,12 +329,7 @@ const Pools: React.FC<PoolsProps> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice} />
-        <ListPools
-          pairInfos={pairInfos}
-          allPoolApr={cachedApr}
-          myPairsData={myPairsData}
-          setIsOpenNewPoolModal={setIsOpenNewPoolModal}
-        />
+        <ListPools pairInfos={pairInfos} allPoolApr={cachedApr} myPairsData={myPairsData} />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}

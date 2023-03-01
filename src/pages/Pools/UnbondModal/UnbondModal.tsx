@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import Modal from 'components/Modal';
-import style from './UnbondModal.module.scss';
+import styles from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -14,7 +14,7 @@ import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 
-const cx = cn.bind(style);
+const cx = cn.bind(styles);
 
 interface ModalProps {
   isOpen: boolean;

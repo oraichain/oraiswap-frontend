@@ -1,6 +1,8 @@
 import bech32 from 'bech32';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { TokenInfo } from 'types/token';
+import { TokenInfoResponse } from './contracts/OraiswapToken.types';
 
 const truncDecimals = 6;
 const atomic = 10 ** truncDecimals;
@@ -94,6 +96,16 @@ export const reduceString = (str: string, from: number, end: number) => {
 
 export const parseBep20Erc20Name = (name: string) => {
   return name.replace(/(BEP20|ERC20)\s+/, '');
+};
+
+export const toTokenInfo = (tokenSwap: TokenItemType, info?: TokenInfoResponse): TokenInfo => {
+  const data = info?.token_info_response ?? info;
+  return {
+    ...tokenSwap,
+    symbol: tokenSwap.name,
+    verified: !tokenSwap.contractAddress,
+    ...data
+  };
 };
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {

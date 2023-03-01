@@ -70,7 +70,7 @@ import KwtModal from './KwtModal';
 import SelectTokenModal from './Modals/SelectTokenModal';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -182,7 +182,6 @@ const Balance: React.FC<BalanceProps> = () => {
       };
 
     const { info: assetInfo } = parseTokenInfo(fromToken);
-    Contract.sender = fromAddress;
     const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
     try {
       // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
@@ -551,7 +550,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      cacheTokens.loadTokenAmounts(metamaskAddress);
+      await cacheTokens.loadTokenAmounts(metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
@@ -809,10 +808,10 @@ const Balance: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                          ? (fromAmount: number) => {
+                        ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                          : undefined
+                        : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />

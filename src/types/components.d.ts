@@ -1,109 +1,93 @@
 /* Forms */
-type Values<T> = Record<T, string>
-type Touched<T> = Record<T, boolean>
+type Values<T> = Record<T, string>;
+type Touched<T> = Record<T, boolean>;
 
-type Input = DetailedHTMLProps<
-  InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->
+type Input = React.PropsWithChildren<React.InputHTMLAttributes<HTMLInputElement>>;
 
-type TextArea = DetailedHTMLProps<
-  TextareaHTMLAttributes<HTMLTextAreaElement>,
-  HTMLTextAreaElement
->
+type TextArea = React.PropsWithChildren<React.InputHTMLAttributes<HTMLTextAreaElement>>;
 
-type Select = DetailedHTMLProps<
-  SelectHTMLAttributes<HTMLSelectElement>,
-  HTMLSelectElement
->
+type Select = React.PropsWithChildren<React.InputHTMLAttributes<HTMLSelectElement>>;
 
 interface FormGroup {
-  input?: Input
-  textarea?: TextArea
-  select?: Select
-  value?: ReactNode
-  label?: ReactNode
-  help?: Content
-  unit?: ReactNode
-  max?: () => void
-  assets?: ReactNode
-  focused?: boolean
-  error?: string
-  type?: 1 | 2
-  skipFeedback?: boolean
-  feeSymbol?: string
-  feeSelect?: (symbol: string) => void
-  isLoading?: boolean
+  input?: Input;
+  textarea?: TextArea;
+  select?: Select;
+  value?: ReactNode;
+  label?: ReactNode;
+  help?: Content;
+  unit?: ReactNode;
+  max?: () => void;
+  assets?: ReactNode;
+  focused?: boolean;
+  error?: string;
+  type?: 1 | 2;
+  skipFeedback?: boolean;
+  feeSymbol?: string;
+  feeSelect?: (symbol: string) => void;
+  isLoading?: boolean;
 }
 
 /* Buttons */
 interface ButtonProps {
   /** xs: 22px; sm: 26px; md: 36px; lg: 50px */
-  size?: "xs" | "sm" | "md" | "lg" | "swap"
-  color?: string
-  outline?: boolean
-  block?: boolean
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'swap';
+  color?: string;
+  outline?: boolean;
+  block?: boolean;
 
-  loading?: boolean
-  submit?: boolean
+  loading?: boolean;
+  submit?: boolean;
 
-  disabled?: boolean
-  className?: string
-  children?: ReactNode
+  disabled?: boolean;
+  className?: string;
+  children?: ReactNode;
 }
 
-type ButtonAttrs = ButtonHTMLAttributes<HTMLButtonElement>
-type Button = ButtonProps & ButtonAttrs
+type ButtonAttrs = ButtonHTMLAttributes<HTMLButtonElement>;
+type Button = ButtonProps & ButtonAttrs;
 
 /* Tab */
 interface TabViewProps {
-  tabs: { name: string; title?: string; tooltip?: string }[]
-  selectedTabName?: string
-  shadow?: boolean
-  extra?: { iconUrl: string; onClick: () => void; disabled?: boolean }[]
+  tabs: { name: string; title?: string; tooltip?: string }[];
+  selectedTabName?: string;
+  shadow?: boolean;
+  extra?: { iconUrl: string; onClick: () => void; disabled?: boolean }[];
   side?: {
-    component: ReactNode
-    visible: boolean
-    isModalOnMobile?: boolean
-    onOpen?: () => void
-    onClose?: () => void
-  }[]
+    component: ReactNode;
+    visible: boolean;
+    isModalOnMobile?: boolean;
+    onOpen?: () => void;
+    onClose?: () => void;
+  }[];
 }
 
 /* Modal */
 interface Modal {
-  className?: string
-  isOpen: boolean
-  open: () => void
-  close: () => void
-  isCloseBtn?: boolean
+  className?: string;
+  isOpen: boolean;
+  open: () => void;
+  close: () => void;
+  isCloseBtn?: boolean;
 }
 
 /* Modules */
 interface FormatConfig {
-  integer?: boolean
-  dp?: number
+  integer?: boolean;
+  dp?: number;
 }
 
 interface CountOptions extends FormatConfig {
   /** 0 if undefined */
-  children?: string
+  children?: string;
   /** As a unit. */
-  symbol?: string
+  symbol?: string;
   /** Plus on positive */
-  plus?: boolean
+  plus?: boolean;
   /** Custom formatter */
-  format?: (current: string) => string
+  format?: (current: string) => string;
 }
 
 interface Confirm {
-  contents?: Content[]
-  warning?: string
-}
-
-interface AssetItem {
-  symbol: string
-  name: string
-  price?: string
-  balance?: string
+  contents?: Content[];
+  warning?: string;
 }
