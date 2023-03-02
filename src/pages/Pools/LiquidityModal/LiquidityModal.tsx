@@ -147,7 +147,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = await generateContractMessages({
+    const msgs = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -195,10 +195,10 @@ const LiquidityModal: FC<ModalProps> = ({
       }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = await generateConvertErc20Cw20Message(amounts, token1, address);
-      const secTokenConverts = await generateConvertErc20Cw20Message(amounts, token2, address);
+      const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, address);
+      const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, address);
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.PROVIDE,
         sender: address,
         fromInfo: token1InfoData!,
@@ -354,7 +354,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
