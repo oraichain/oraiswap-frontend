@@ -1,5 +1,5 @@
-import React, { FC, useState } from 'react';
 import classNames from 'classnames';
+import { FC } from 'react';
 import styles from './CheckBox.module.scss';
 
 const CheckBox: FC<{

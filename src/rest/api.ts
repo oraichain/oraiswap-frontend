@@ -1,19 +1,19 @@
-import { network } from 'config/networks';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import isEqual from 'lodash/isEqual';
 import { ORAI, STABLE_DENOM } from 'config/constants';
-import { getPair, Pair } from 'config/pools';
-import axios from './request';
-import { TokenInfo } from 'types/token';
-import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
+import { getPair, Pair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
-import { Coin } from '@cosmjs/stargate';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { QueryMsg as TokenQueryMsg, TokenInfoResponse } from 'libs/contracts/OraiswapToken.types';
+import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
+import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import isEqual from 'lodash/isEqual';
+import { TokenInfo } from 'types/token';
+import axios from './request';
 
 export enum Type {
   'TRANSFER' = 'Transfer',

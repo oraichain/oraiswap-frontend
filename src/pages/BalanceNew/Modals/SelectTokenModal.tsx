@@ -1,7 +1,7 @@
-import React, { FC, useState } from 'react';
-import Modal from 'components/Modal';
-import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
+import Modal from 'components/Modal';
+import { FC } from 'react';
+import styles from './SelectTokenModal.module.scss';
 
 const cx = cn.bind(styles);
 

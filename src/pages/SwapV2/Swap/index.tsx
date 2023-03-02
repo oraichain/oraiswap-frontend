@@ -1,12 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import cn from 'classnames/bind';
-import styles from './index.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import { Contract } from 'config/contracts';
-import { contracts } from 'libs/contracts';
-import { tokenMap } from 'config/bridgeTokens';
 import { useQuery } from '@tanstack/react-query';
+import AntSwapImg from 'assets/images/ant_swap.svg';
+import RefreshImg from 'assets/images/refresh.svg';
+import cn from 'classnames/bind';
+import Loader from 'components/Loader';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import TokenBalance from 'components/TokenBalance';
+import { tokenMap } from 'config/bridgeTokens';
+import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { network } from 'config/networks';
+import { poolTokens } from 'config/pools';
+import useConfigReducer from 'hooks/useConfigReducer';
+import CosmJs from 'libs/cosmjs';
+import { CacheTokens } from 'libs/token';
+import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import React, { useEffect, useMemo, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchTokenInfos,
   generateContractMessages,
@@ -15,21 +24,10 @@ import {
   SwapQuery,
   Type
 } from 'rest/api';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import CosmJs from 'libs/cosmjs';
-import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
-import { network } from 'config/networks';
-import TokenBalance from 'components/TokenBalance';
-import NumberFormat from 'react-number-format';
-import SettingModal from '../Modals/SettingModal';
-import SelectTokenModal from '../Modals/SelectTokenModal';
-import { poolTokens } from 'config/pools';
-import Loader from 'components/Loader';
 import { RootState } from 'store/configure';
-import { useDispatch, useSelector } from 'react-redux';
-import AntSwapImg from 'assets/images/ant_swap.svg';
-import RefreshImg from 'assets/images/refresh.svg';
-import { CacheTokens } from 'libs/token';
+import SelectTokenModal from '../Modals/SelectTokenModal';
+import SettingModal from '../Modals/SettingModal';
+import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 

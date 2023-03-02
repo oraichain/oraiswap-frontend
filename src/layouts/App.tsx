@@ -1,26 +1,31 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import routes from 'routes';
+import { isMobile } from '@walletconnect/browser-utils';
 import { Web3ReactProvider } from '@web3-react/core';
-import Web3 from 'web3';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import {
+  COSMOS_TYPE,
+  EVM_TYPE,
+  NOTI_INSTALL_OWALLET,
+  ORAICHAIN_ID,
+  WEBSOCKET_RECONNECT_ATTEMPTS,
+  WEBSOCKET_RECONNECT_INTERVAL
+} from 'config/constants';
+import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
+import { getNetworkGasPrice } from 'helper';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { useEagerConnect } from 'hooks/useMetamask';
+import { CacheTokens } from 'libs/token';
+import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
+import { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import useWebSocket from 'react-use-websocket';
+import { ChainInfoType } from 'reducer/config';
+import routes from 'routes';
+import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
+import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { useEagerConnect } from 'hooks/useMetamask';
-import { isMobile } from '@walletconnect/browser-utils';
-import { COSMOS_TYPE, EVM_TYPE, NOTI_INSTALL_OWALLET, ORAICHAIN_ID, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { getNetworkGasPrice } from 'helper';
-import { ChainInfoType } from 'reducer/config';
-import { useDispatch } from 'react-redux';
-import { CacheTokens } from 'libs/token';
-import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import useWebSocket from 'react-use-websocket';
-import { network } from 'config/networks';
-import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg, toDisplay } from 'libs/utils';
-import { Contract } from 'config/contracts';
-import { Asset } from 'libs/contracts';
-import { filteredTokens } from 'config/bridgeTokens';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -42,7 +47,12 @@ const App = () => {
       onOpen: () => {
         console.log('opened websocket, subscribing...');
         // subscribe to IBC Wasm case
-        sendJsonMessage(buildWebsocketSendMessage(`wasm._contract_address = '${process.env.REACT_APP_IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`), true);
+        sendJsonMessage(
+          buildWebsocketSendMessage(
+            `wasm._contract_address = '${process.env.REACT_APP_IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`
+          ),
+          true
+        );
         // sendJsonMessage(buildWebsocketSendMessage(`coin_received.receiver = '${address}'`), true);
         // subscribe to MsgSend and MsgTransfer event case
         // sendJsonMessage(buildWebsocketSendMessage(`coin_spent.spender = '${address}'`, 2), true);
@@ -51,19 +61,19 @@ const App = () => {
         // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
       },
       onClose: () => {
-        console.log("unsubscribe all clients");
-        sendJsonMessage(buildUnsubscribeMessage())
+        console.log('unsubscribe all clients');
+        sendJsonMessage(buildUnsubscribeMessage());
       },
       onReconnectStop(numAttempts) {
         // if cannot reconnect then we unsubscribe all
         if (numAttempts === WEBSOCKET_RECONNECT_ATTEMPTS) {
-          console.log("reconnection reaches above limit. Unsubscribe to all!");
+          console.log('reconnection reaches above limit. Unsubscribe to all!');
           sendJsonMessage(buildUnsubscribeMessage());
         }
       },
       shouldReconnect: (closeEvent) => true,
       reconnectAttempts: WEBSOCKET_RECONNECT_ATTEMPTS,
-      reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL,
+      reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL
     }
   );
 
@@ -196,4 +206,3 @@ const App = () => {
 };
 
 export default App;
-

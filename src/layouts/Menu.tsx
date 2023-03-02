@@ -1,26 +1,24 @@
-import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import { ReactComponent as Swap } from 'assets/icons/swap.svg';
-import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
-import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
-import { ReactComponent as Pools } from 'assets/icons/pool.svg';
-import { ReactComponent as Dark } from 'assets/icons/dark.svg';
-import { ReactComponent as Light } from 'assets/icons/light.svg';
-import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
-import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
+import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as EthereumIcon } from 'assets/icons/ethereum.svg';
+import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
+import { ReactComponent as Light } from 'assets/icons/light.svg';
+import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
+import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
+import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
+import { ReactComponent as Pools } from 'assets/icons/pool.svg';
+import { ReactComponent as Swap } from 'assets/icons/swap.svg';
+import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import LogoFullImg from 'assets/images/OraiDEX_full_light.svg';
 import { ThemeContext } from 'context/theme-context';
 
-import React, { memo, useContext, useEffect, useState, ReactElement } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import styles from './Menu.module.scss';
-import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
+import { isMobile } from '@walletconnect/browser-utils';
 import CenterEllipsis from 'components/CenterEllipsis';
+import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import TokenBalance from 'components/TokenBalance';
 import {
   BEP20_ORAI,
@@ -34,14 +32,15 @@ import {
   ORAICHAIN_ID,
   OSMOSIS_CHAIN_ID
 } from 'config/constants';
-import { isMobile } from '@walletconnect/browser-utils';
+import React, { memo, ReactElement, useContext, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import styles from './Menu.module.scss';
 
 import classNames from 'classnames';
+import { handleCheckChain } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { handleCheckChain, getDenomEvm, getRpcEvm } from 'helper';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { Contract } from 'config/contracts';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();

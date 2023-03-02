@@ -1,5 +1,5 @@
-import { FunctionComponent, memo } from 'react';
 import Content from 'layouts/Content';
+import { FunctionComponent } from 'react';
 import styles from './index.module.scss';
 
 const Maintenance: FunctionComponent = () => {
@@ -15,28 +15,21 @@ const Maintenance: FunctionComponent = () => {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          fontSize: 30,
+          fontSize: 30
         }}
       >
         <div className={styles.maintenance}>
           <div className={styles.maintenance_content}>
-            OraiBridge is upgrading to new version. Please use the Bridge later
-            when it finalizes necessary processes.
+            OraiBridge is upgrading to new version. Please use the Bridge later when it finalizes necessary processes.
           </div>
         </div>
         <div style={{ position: 'absolute', bottom: '5%', fontSize: 18 }}>
           OWallet app (
-          <a
-            style={{ color: 'green' }}
-            href="https://apps.apple.com/app/owallet/id1626035069"
-          >
+          <a style={{ color: 'green' }} href="https://apps.apple.com/app/owallet/id1626035069">
             iOS
           </a>
           /
-          <a
-            style={{ color: 'green' }}
-            href="https://play.google.com/store/apps/details?id=com.io.owallet"
-          >
+          <a style={{ color: 'green' }} href="https://play.google.com/store/apps/details?id=com.io.owallet">
             Android
           </a>
           )

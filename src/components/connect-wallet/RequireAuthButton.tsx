@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { network } from 'config/networks';
 import { useWeb3React } from '@web3-react/core';
-import ConnectWalletModal from './ConnectWalletModal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { injected, useEagerConnect } from 'hooks/useMetamask';
-import useConfigReducer from 'hooks/useConfigReducer';
 import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
 import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { injected, useEagerConnect } from 'hooks/useMetamask';
+import React, { useState } from 'react';
+import ConnectWalletModal from './ConnectWalletModal';
 
 const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => {
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
