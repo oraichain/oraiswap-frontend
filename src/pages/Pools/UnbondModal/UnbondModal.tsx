@@ -153,7 +153,8 @@ const UnbondModal: FC<ModalProps> = ({
                 type={'number'}
                 className={cx('input')}
                 onChange={(event) => {
-                  setUnbondAmount((BigInt(event.target.value) * bondAmount) / BigInt(100));
+                  // multiply 10^6 then divide 10^8
+                  setUnbondAmount((toAmount(Number(event.target.value), 6) * bondAmount) / BigInt(100000000));
                 }}
               />
               %
