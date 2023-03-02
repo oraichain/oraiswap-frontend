@@ -10,8 +10,8 @@ export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
-export const UOSMOS_DENOM = "uosmo";
-export const UATOM_DENOM = "uatom";
+export const UOSMOS_DENOM = 'uosmo';
+export const UATOM_DENOM = 'uatom';
 export const BEP20_ORAI = 'bep20_orai';
 export const BEP20_USDT = 'bep20_usdt';
 export const BEP20_AIRI = 'bep20_airi';
@@ -24,6 +24,12 @@ export const NATIVE_TOKENS = [ORAI];
 export const EVM_DECIMALS = 18;
 export const COSMOS_DECIMALS = 6;
 export const DECIMAL_FRACTION = Math.pow(10, EVM_DECIMALS);
+
+// estimate fee
+export const GAS_ESTIMATION_SWAP_DEFAULT = 580000;
+export const GAS_ESTIMATION_BRIDGE_DEFAULT = 200000;
+export const MULTIPLIER = 1.6;
+export const HIGH_GAS_PRICE = 0.007;
 
 /* oraiswap:configs */
 export const DEFAULT_MAX_SPREAD = 0.5;
@@ -115,7 +121,6 @@ export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
 // noti install owallet chorme extensions
 export const NOTI_INSTALL_OWALLET = {
   message: 'You need to install OWallet or Keplr to continue.',
-  customLink:
-    'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
-  textLink: 'View on store',
+  customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+  textLink: 'View on store'
 };

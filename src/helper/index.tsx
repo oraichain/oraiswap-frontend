@@ -19,7 +19,9 @@ import {
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
-  NOTI_INSTALL_OWALLET
+  NOTI_INSTALL_OWALLET,
+  HIGH_GAS_PRICE,
+  MULTIPLIER
 } from 'config/constants';
 
 import {
@@ -123,20 +125,14 @@ export const getTokenChain = (token: TokenItemType) => {
   return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
 };
 
-export const handleCheckChain = (
-  chainId: string | number,
-  infoCosmos?: ChainInfoType
-) => {
+export const handleCheckChain = (chainId: string | number, infoCosmos?: ChainInfoType) => {
   switch (chainId) {
     case BSC_CHAIN_ID:
       return window.Metamask.isBsc();
     case ETHEREUM_CHAIN_ID:
       return window.Metamask.isEth();
     case KWT_SUBNETWORK_EVM_CHAIN_ID:
-      return (
-        Number(window?.ethereum?.chainId) ===
-        Number(KWT_SUBNETWORK_EVM_CHAIN_ID)
-      );
+      return Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID);
     case KWT_SUBNETWORK_CHAIN_ID:
       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
     case COSMOS_CHAIN_ID:
@@ -188,14 +184,17 @@ export const getNetworkGasPrice = async () => {
     gasPriceStep?: any;
   }> = embedChainInfos;
   try {
-    chainInfosWithoutEndpoints =
-      await window.Keplr?.getChainInfosWithoutEndpoints();
+    chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
   } finally {
-    const findToken = chainInfosWithoutEndpoints.find(
-      (e) => e.chainId == network.chainId
-    );
+    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId);
     return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;
   }
+};
+
+//hardcode fee
+export const feeEstimate = async (tokenInfo: TokenItemType, gasDefault: number) => {
+  if (!tokenInfo) return 0;
+  return (gasDefault * MULTIPLIER * HIGH_GAS_PRICE) / 10 ** tokenInfo?.decimals;
 };
 
 export const handleCheckWallet = async () => {

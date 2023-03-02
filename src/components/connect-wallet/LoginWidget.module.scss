@@ -1,4 +1,4 @@
-@import "src/styles/variables";
+@import 'src/styles/variables';
 
 .container {
   display: flex;
@@ -63,7 +63,6 @@ button.connect {
     flex-direction: column;
     gap: 10px;
     .network-title {
-      font-family: IBM Plex Sans;
       font-style: normal;
       font-weight: 600;
       font-size: 18px;
@@ -76,14 +75,13 @@ button.connect {
     }
 
     .des {
-      font-family: IBM Plex Sans;
       font-style: normal;
       font-weight: 500;
       font-size: 14px;
       line-height: 150%;
       /* identical to box height, or 21px */
 
-      font-feature-settings: "ss03" on;
+      font-feature-settings: 'ss03' on;
 
       /* aiRight/Gray 3 */
 

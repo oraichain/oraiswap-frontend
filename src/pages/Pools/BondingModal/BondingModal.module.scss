@@ -14,7 +14,7 @@
 
     .title {
       width: 100%;
-      font-family: 'IBM Plex Sans';
+
       font-style: normal;
       font-weight: 600;
       font-size: 22px;
@@ -64,7 +64,6 @@
         gap: 12px;
 
         .title {
-          font-family: 'IBM Plex Mono';
           font-style: normal;
           font-weight: 600;
           font-size: 20px;
@@ -102,7 +101,6 @@
       }
 
       .balance {
-        font-family: 'IBM Plex Sans';
         font-style: normal;
         font-weight: 500;
         font-size: 14px;
@@ -132,7 +130,6 @@
 
           border-radius: 4px;
 
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 500;
           font-size: 13px;
@@ -165,7 +162,7 @@
         /* aiRight/Dark card */
 
         border-radius: 8px;
-        font-family: 'IBM Plex Sans';
+
         font-style: normal;
         font-weight: 600;
         font-size: 24px;
@@ -192,7 +189,6 @@
           }
 
           .title {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 22px;
@@ -210,7 +206,6 @@
             justify-content: space-between;
             height: 44px;
             .des {
-              font-family: 'IBM Plex Sans';
               font-style: normal;
               font-weight: 600;
               font-size: 16px;
@@ -225,7 +220,6 @@
             }
 
             .highlight {
-              font-family: 'IBM Plex Sans';
               font-style: normal;
               font-weight: 600;
               font-size: 14px;
@@ -276,7 +270,7 @@
       border-radius: 8px;
 
       padding: 16px;
-      font-family: 'IBM Plex Sans';
+
       font-style: normal;
       font-weight: 600;
       font-size: 16px;
@@ -326,7 +320,6 @@
       flex-direction: column;
       gap: 8px;
 
-      font-family: 'IBM Plex Sans';
       font-style: normal;
       font-weight: 500;
       font-size: 14px;
@@ -353,7 +346,6 @@
         }
 
         .row-des {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 600;
           font-size: 16px;
@@ -409,7 +401,6 @@
         gap: 12px;
 
         .title {
-          font-family: 'IBM Plex Mono';
           font-style: normal;
           font-weight: 600;
           font-size: 20px;
@@ -430,7 +421,6 @@
       }
 
       .balance {
-        font-family: 'IBM Plex Sans';
         font-style: normal;
         font-weight: 500;
         font-size: 14px;
@@ -460,7 +450,7 @@
         /* aiRight/Dark card */
 
         border-radius: 8px;
-        font-family: 'IBM Plex Sans';
+
         font-style: normal;
         font-weight: 600;
         font-size: 24px;
@@ -481,7 +471,7 @@
 
         .title {
           flex-grow: 1;
-          font-family: 'IBM Plex Sans';
+
           font-style: normal;
           font-weight: 600;
           font-size: 22px;
@@ -499,7 +489,6 @@
           justify-content: space-between;
           height: 44px;
           .des {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 16px;
@@ -515,7 +504,6 @@
           }
 
           .highlight {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 14px;
@@ -535,7 +523,6 @@
         }
 
         .value {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 600;
           font-size: 22px;
@@ -553,7 +540,6 @@
           justify-content: space-between;
           height: 44px;
           .des {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 16px;
@@ -585,7 +571,6 @@
         display: flex;
         justify-content: center;
 
-        font-family: IBM Plex Sans;
         font-style: normal;
         font-weight: 600;
         font-size: 16px;
@@ -613,7 +598,7 @@
 
       .input {
         padding: 0;
-        font-family: IBM Plex Sans;
+
         font-style: normal;
         font-weight: 600;
         font-size: 16px;

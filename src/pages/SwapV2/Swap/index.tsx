@@ -6,7 +6,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -28,6 +28,7 @@ import { RootState } from 'store/configure';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import SettingModal from '../Modals/SettingModal';
 import styles from './index.module.scss';
+import { feeEstimate } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -53,8 +54,21 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = (amount: bigint) => {
-    let finalAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
+    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    let finalAmount = displayAmount;
+
+    // hardcode fee when swap token orai
+    if (fromTokenDenom === ORAI) {
+      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      if (type === 'max') {
+        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
+      }
+      if (type === 'half') {
+        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+      }
+    }
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
@@ -181,10 +195,13 @@ const SwapComponent: React.FC<{
             decimalScale={6}
           />
 
-          <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0))}>
+          <div
+            className={cx('btn')}
+            onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0), 'max')}
+          >
             MAX
           </div>
-          <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2))}>
+          <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2), 'half')}>
             HALF
           </div>
         </div>
