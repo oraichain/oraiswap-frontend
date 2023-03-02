@@ -1,5 +1,5 @@
 import bech32 from 'bech32';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
 import { TokenInfoResponse } from './contracts/OraiswapToken.types';
@@ -204,3 +204,52 @@ export const formateNumberDecimalsAuto = ({
   const res = unitPosition === 'prefix' ? unit + priceFormat : priceFormat + unit;
   return res;
 };
+
+export const buildWebsocketSendMessage = (message: string, id = 1) => {
+  return {
+    jsonrpc: '2.0',
+    method: 'subscribe',
+    params: [`tm.event='Tx' AND ${message}`],
+    id
+  };
+}
+
+export const buildUnsubscribeMessage = () => {
+  return {
+    jsonrpc: '2.0',
+    method: 'unsubscribe_all',
+    params: [],
+    id: 99
+  }
+}
+
+export const processWsResponseMsg = (message: any): string => {
+  if (message === null || message.result === null) {
+    return null;
+  }
+  const { result } = message;
+  if (
+    result && // 👈 null and undefined check
+    (Object.keys(result).length !== 0 ||
+      result.constructor !== Object)
+  ) {
+    if (!result.events)
+      return null;
+    const events = result.events;
+    console.log('events: ', events);
+    // TODO: process multiple tokens at once if there are multiple recvpacket messages
+    const packets = events['recv_packet.packet_data'];
+    if (!packets) return null;
+    let tokens = "";
+    for (let packetRaw of packets) {
+      const packet = JSON.parse(packetRaw);
+      // we look for the true denom information with decimals to process
+      // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
+      const receivedToken = filteredTokens.find(token => token.denom === packet.denom);
+      const displayAmount = toDisplay(packet.amount, receivedToken.decimals);
+      tokens = tokens.concat(`${displayAmount} ${receivedToken.name}, `);
+    }
+    return tokens.substring(0, tokens.length - 2); // remove , due to concat
+  }
+  return null;
+}

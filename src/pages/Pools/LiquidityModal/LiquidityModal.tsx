@@ -147,7 +147,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = await generateContractMessages({
+    const msgs = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -185,20 +185,20 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      if (!!token1AllowanceToPair && token1AllowanceToPair < amount1) {
+      if (token1AllowanceToPair < amount1) {
         await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, address);
         refetchToken1Allowance();
       }
-      if (!!token2AllowanceToPair && token2AllowanceToPair < amount2) {
+      if (token2AllowanceToPair < amount2) {
         await increaseAllowance('9'.repeat(30), token2InfoData!.contractAddress!, address);
         refetchToken2Allowance();
       }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = await generateConvertErc20Cw20Message(amounts, token1, address);
-      const secTokenConverts = await generateConvertErc20Cw20Message(amounts, token2, address);
+      const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, address);
+      const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, address);
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.PROVIDE,
         sender: address,
         fromInfo: token1InfoData!,
@@ -227,7 +227,7 @@ const LiquidityModal: FC<ModalProps> = ({
         onLiquidityChange();
       }
     } catch (error) {
-      console.log('error in swap form: ', error);
+      console.log('error in providing liquidity: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = error as string;
@@ -354,7 +354,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>

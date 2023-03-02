@@ -304,7 +304,7 @@ export default class KawaiiverseJs {
 
       const params = {
         ...ibcInfo,
-        contractAddress: contractAddr ?? KAWAII_CONTRACT,
+        contractAddress: contractAddr,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
         timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(),

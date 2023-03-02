@@ -43,7 +43,7 @@ export class CacheTokens {
     this.loadEvmOraiAmounts(metamaskAddress);
   }
 
-  private loadTokensCosmos = async () => {
+  public async loadTokensCosmos() {
     await handleCheckWallet();
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
@@ -86,7 +86,7 @@ export class CacheTokens {
 
     await Promise.all(
       [
-        getFunctionExecution(this.loadTokensCosmos),
+        getFunctionExecution(this.loadTokensCosmos.bind(this)),
         metamaskAddress && getFunctionExecution(this.loadEvmOraiAmounts.bind(this), [metamaskAddress]),
         kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount.bind(this)),
         this.address && getFunctionExecution(this.loadCw20Balance.bind(this))
