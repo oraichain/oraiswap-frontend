@@ -8,6 +8,12 @@ describe('bigint', () => {
     expect(res).toBe('6000000000000000000000');
   });
 
+  it('toAmount-percent', () => {
+    const bondAmount = BigInt(1000);
+    const percentValue = (toAmount(0.3, 6) * bondAmount) / BigInt(100000000);
+    expect(percentValue.toString()).toBe('3');
+  });
+
   it('toAmount-super-large-number-should-return-equal-amount-form-in-number', async () => {
     const amount = 2000000;
     const decimal = 18;

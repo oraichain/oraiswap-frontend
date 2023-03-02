@@ -1,20 +1,20 @@
-import React, { FC, useState } from 'react';
-import Modal from 'components/Modal';
-import styles from './NewPoolModal.module.scss';
-import cn from 'classnames/bind';
 import { useQuery } from '@tanstack/react-query';
-import { fetchTokenInfo } from 'rest/api';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import TokenBalance from 'components/TokenBalance';
-import { toDisplay } from 'libs/utils';
-import Pie from 'components/Pie';
-import NumberFormat from 'react-number-format';
-import { poolTokens } from 'config/pools';
-import { TokenItemType } from 'config/bridgeTokens';
-import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
-import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import DoneStepImg from 'assets/images/done-step.svg';
+import cn from 'classnames/bind';
+import Modal from 'components/Modal';
+import Pie from 'components/Pie';
+import TokenBalance from 'components/TokenBalance';
+import { TokenItemType } from 'config/bridgeTokens';
+import { poolTokens } from 'config/pools';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { toDisplay } from 'libs/utils';
+import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { useSelector } from 'react-redux';
+import { fetchTokenInfo } from 'rest/api';
+import { RootState } from 'store/configure';
+import styles from './NewPoolModal.module.scss';
 
 const cx = cn.bind(styles);
 

@@ -293,7 +293,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const onChangeWithdrawPercent = (option: number) => {
-    setLpAmountBurn((BigInt(option) * lpTokenBalance) / BigInt(100));
+    setLpAmountBurn((toAmount(option, 6) * lpTokenBalance) / BigInt(100000000));
   };
 
   const totalSupply = BigInt(lpTokenInfoData!.total_supply ?? 0);
@@ -354,7 +354,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>

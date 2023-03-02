@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { isMobile } from '@walletconnect/browser-utils';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
-import { useLocation } from 'react-router-dom';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
-import { isMobile } from '@walletconnect/browser-utils';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
@@ -14,8 +14,7 @@ export function useEagerConnect(isInactive, isInterval) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
-  const [metamaskAddress, setMetamaskAddress] =
-    useConfigReducer('metamaskAddress');
+  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   useEffect(() => {
     if (isInterval) return;
@@ -24,17 +23,8 @@ export function useEagerConnect(isInactive, isInterval) {
 
   const connectEvm = () => {
     if (!window.ethereum) return;
-    if (
-      ![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(
-        Number(window.ethereum.chainId)
-      )
-    )
-      return;
-    if (
-      !web3React.account &&
-      !isInactive &&
-      (pathname === '/' || pathname === '/bridge')
-    ) {
+    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(Number(window.ethereum.chainId))) return;
+    if (!web3React.account && !isInactive && (pathname === '/' || pathname === '/bridge')) {
       console.log('activate');
       web3React.activate(injected);
     }
@@ -83,20 +73,20 @@ export function useInactiveListener() {
   const handleConnect = () => {
     activate(injected);
   };
-  const handleChainChanged = (chainId) => {
-    activate(injected);
-  };
+  // const handleChainChanged = (chainId) => {
+  //   activate(injected);
+  // };
   const handleAccountsChanged = (accounts) => {
     if (accounts.length > 0) {
       setMetamaskAddress(accounts[0]);
     }
   };
-  const handleNetworkChanged = (networkId) => {
-    activate(injected);
-  };
-  const handleDisconnect = () => {
-    if (library?.provider?.isMetamask) {
-      deactivate();
-    }
-  };
+  // const handleNetworkChanged = (networkId) => {
+  //   activate(injected);
+  // };
+  // const handleDisconnect = () => {
+  //   if (library?.provider?.isMetamask) {
+  //     deactivate();
+  //   }
+  // };
 }

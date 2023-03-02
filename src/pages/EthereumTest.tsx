@@ -1,9 +1,9 @@
-import { FunctionComponent, useEffect, useState } from 'react';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import Content from 'layouts/Content';
-import Web3 from 'web3';
 import { KWT_SCAN } from 'config/constants';
+import Content from 'layouts/Content';
+import { FunctionComponent, useState } from 'react';
+import Web3 from 'web3';
 
 const EthereumTest: FunctionComponent = () => {
   const [claimLoading, setClaimLoading] = useState(false);
@@ -24,7 +24,7 @@ const EthereumTest: FunctionComponent = () => {
       const nonce = await window.ethereum.request({
         method: 'eth_getTransactionCount',
         params: ['0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222', 'latest'],
-        rpc: 'https://endpoint1.kawaii.global',
+        rpc: 'https://endpoint1.kawaii.global'
       });
       alert(`nonce: ${nonce}`);
 
@@ -41,22 +41,22 @@ const EthereumTest: FunctionComponent = () => {
           {
             from: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
             to: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
-            value: web3.utils.toHex(1),
-          },
+            value: web3.utils.toHex(1)
+          }
         ],
         chainId: 'kawaii_6886-1',
-        signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222',
+        signer: '0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222'
       });
 
       console.log('result: ', result);
 
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${KWT_SCAN}/tx/${result}`,
+        customLink: `${KWT_SCAN}/tx/${result}`
       });
     } catch (error: any) {
       console.log('error message handle claim: ', error);
       return displayToast(TToastType.TX_FAILED, {
-        message: error.message,
+        message: error.message
       });
     }
     setClaimLoading(false);
@@ -74,7 +74,7 @@ const EthereumTest: FunctionComponent = () => {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          fontSize: 20,
+          fontSize: 20
         }}
       >
         <button
@@ -89,7 +89,7 @@ const EthereumTest: FunctionComponent = () => {
             fontWeight: 600,
             fontFamily: 'IBM Plex Sans',
             margin: '20px 0',
-            width: 200,
+            width: 200
           }}
           onClick={handleClaim}
           disabled={claimLoading}
@@ -99,7 +99,7 @@ const EthereumTest: FunctionComponent = () => {
               height: '100%',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center',
+              alignItems: 'center'
             }}
           >
             {claimLoading && (

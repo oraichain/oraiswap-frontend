@@ -8,10 +8,10 @@
     padding: 24px;
     max-height: 100vh;
     overflow-y: auto;
-    
+
     .title {
       width: 100%;
-      font-family: 'IBM Plex Sans';
+
       font-style: normal;
       font-weight: 600;
       font-size: 22px;
@@ -55,7 +55,7 @@
           text-align: center;
 
           color: #ffffff;
-          font-family: 'IBM Plex Sans';
+
           font-style: normal;
           font-weight: 600;
           font-size: 16px;
@@ -101,7 +101,6 @@
       }
 
       .text {
-        font-family: 'IBM Plex Sans';
         font-style: normal;
         font-weight: 600;
         font-size: 13px;
@@ -175,7 +174,7 @@
 
         .title {
           width: fit-content;
-          font-family: 'IBM Plex Mono';
+
           font-style: normal;
           font-weight: 600;
           font-size: 16px;
@@ -212,7 +211,6 @@
         }
 
         .percent {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 500;
           font-size: 14px;
@@ -226,7 +224,6 @@
       }
 
       .balance {
-        font-family: 'IBM Plex Sans';
         font-style: normal;
         font-weight: 500;
         font-size: 14px;
@@ -256,7 +253,6 @@
 
           border-radius: 4px;
 
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 500;
           font-size: 13px;
@@ -289,7 +285,7 @@
         /* aiRight/Dark card */
 
         border-radius: 8px;
-        font-family: 'IBM Plex Sans';
+
         font-style: normal;
         font-weight: 600;
         font-size: 24px;
@@ -313,11 +309,7 @@
           }
 
           .placeholder-logo {
-            background: linear-gradient(
-              136.88deg,
-              #393939 14.35%,
-              #141416 90.69%
-            );
+            background: linear-gradient(136.88deg, #393939 14.35%, #141416 90.69%);
 
             width: 40px;
             height: 40px;
@@ -325,7 +317,6 @@
           }
 
           .title {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 18px;
@@ -350,7 +341,6 @@
             }
 
             .des {
-              font-family: 'IBM Plex Sans';
               font-style: normal;
               font-weight: 600;
               font-size: 16px;
@@ -365,7 +355,6 @@
             }
 
             .highlight {
-              font-family: 'IBM Plex Sans';
               font-style: normal;
               font-weight: 600;
               font-size: 14px;
@@ -435,7 +424,7 @@
       border-radius: 8px;
 
       padding: 16px;
-      font-family: 'IBM Plex Sans';
+
       font-style: normal;
       font-weight: 600;
       font-size: 16px;
@@ -459,7 +448,7 @@
       border-radius: 8px;
 
       padding: 16px;
-      font-family: 'IBM Plex Sans';
+
       font-style: normal;
       font-weight: 600;
       font-size: 16px;
@@ -483,7 +472,6 @@
       flex-direction: column;
       gap: 8px;
 
-      font-family: 'IBM Plex Sans';
       font-style: normal;
       font-weight: 500;
       font-size: 14px;
@@ -547,7 +535,6 @@
         gap: 12px;
 
         .title {
-          font-family: 'IBM Plex Mono';
           font-style: normal;
           font-weight: 600;
           font-size: 20px;
@@ -568,7 +555,6 @@
       }
 
       .balance {
-        font-family: 'IBM Plex Sans';
         font-style: normal;
         font-weight: 500;
         font-size: 14px;
@@ -598,7 +584,7 @@
         /* aiRight/Dark card */
 
         border-radius: 8px;
-        font-family: 'IBM Plex Sans';
+
         font-style: normal;
         font-weight: 600;
         font-size: 24px;
@@ -619,7 +605,7 @@
 
         .title {
           flex-grow: 1;
-          font-family: 'IBM Plex Sans';
+
           font-style: normal;
           font-weight: 600;
           font-size: 22px;
@@ -637,7 +623,6 @@
           justify-content: space-between;
           height: 44px;
           .des {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 16px;
@@ -653,7 +638,6 @@
           }
 
           .highlight {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 14px;
@@ -673,7 +657,6 @@
         }
 
         .value {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 600;
           font-size: 22px;
@@ -691,7 +674,6 @@
           justify-content: space-between;
           height: 44px;
           .des {
-            font-family: 'IBM Plex Sans';
             font-style: normal;
             font-weight: 600;
             font-size: 16px;
@@ -723,7 +705,6 @@
         display: flex;
         justify-content: center;
 
-        font-family: IBM Plex Sans;
         font-style: normal;
         font-weight: 600;
         font-size: 16px;
@@ -751,7 +732,7 @@
 
       .input {
         padding: 0;
-        font-family: IBM Plex Sans;
+
         font-style: normal;
         font-weight: 600;
         font-size: 16px;
@@ -793,7 +774,6 @@
           height: 20px;
         }
         .stats_info_name {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 600;
           font-size: 18px;
@@ -809,7 +789,6 @@
           text-transform: uppercase;
         }
         .stats_info_percent {
-          font-family: 'IBM Plex Sans';
           font-style: normal;
           font-weight: 500;
           font-size: 14px;
@@ -827,7 +806,7 @@
           flex-grow: 1;
           text-align: right;
           min-width: 130px;
-          font-family: 'IBM Plex Sans';
+
           font-style: normal;
           font-weight: 600;
           font-size: 18px;
@@ -846,7 +825,7 @@
           min-width: 130px;
           text-align: right;
           flex-grow: 1;
-          font-family: 'IBM Plex Sans';
+
           font-style: normal;
           font-weight: 600;
           font-size: 14px;
