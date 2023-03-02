@@ -139,10 +139,11 @@ export async function getFunctionExecution(
 
   cache[key] = { expired: Date.now() + expiredIn, pending: true };
   const value = await method(...args);
-  cache[key].pending = false;
-  cache[key].value = value;
-
-  return cache[key].value;
+  if (cache[key]) {
+    cache[key].pending = false;
+    cache[key].value = value;
+  }
+  return value;
 }
 
 // Interval to clear cache;
