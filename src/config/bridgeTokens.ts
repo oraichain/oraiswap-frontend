@@ -65,6 +65,7 @@ export type TokenItemType = {
   rpc: string;
   decimals: number;
   maxGas?: number;
+  factoryV2?: boolean;
   coingeckoId:
     | 'oraichain-token'
     | 'osmosis'
@@ -454,6 +455,7 @@ const oraichainTokens: TokenItemType[] = [
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
+    factoryV2: true,
     Icon: USDC
   },
   {
@@ -552,7 +554,8 @@ const oraichainTokens: TokenItemType[] = [
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
-    Icon: scORAI
+    factoryV2: true,
+    Icon: scORAI,
   }
 ];
 
