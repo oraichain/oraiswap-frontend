@@ -99,7 +99,7 @@ export const networks: NetworkType[] = [
 ];
 
 export const renderLogoNetwork = (chainId: string | number = ORAICHAIN_ID) => {
-  const network = networks.find((n) => n.chainId === chainId) ?? networks.find((n) => n.title === chainId);
+  const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);
   if (network) {
     return <network.Icon />;
   }

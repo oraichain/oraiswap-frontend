@@ -714,7 +714,7 @@ const Balance: React.FC<BalanceProps> = () => {
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
-        return token.chainId === chainId;
+        return token.chainId == chainId;
       })
       .sort((a, b) => {
         return toTotalDisplay(amounts, b) * prices[b.coingeckoId] - toTotalDisplay(amounts, a) * prices[a.coingeckoId];
@@ -739,7 +739,7 @@ const Balance: React.FC<BalanceProps> = () => {
               <div className={styles.search_box}>
                 <div className={styles.search_flex}>
                   <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                  <span className={styles.search_text}>{networks.find((n) => n.chainId === filterNetwork)?.title}</span>
+                  <span className={styles.search_text}>{networks.find((n) => n.chainId == filterNetwork)?.title}</span>
                 </div>
                 <div>
                   <ArrowDownIcon />
