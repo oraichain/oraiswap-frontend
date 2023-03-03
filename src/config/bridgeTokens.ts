@@ -7,6 +7,7 @@ import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
+import { ReactComponent as USDC } from 'assets/icons/usd_coin.svg';
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
 import React from 'react';
@@ -45,6 +46,7 @@ import {
   ORAI_RPC,
   OSMOSIS_ORG,
   STABLE_DENOM,
+  USDC_ETH_CONTRACT,
   USDT_BSC_CONTRACT
 } from './constants';
 
@@ -75,7 +77,8 @@ export type TokenItemType = {
     | 'kawaii-islands'
     | 'milky-token'
     | 'scorai'
-    | 'oraidex';
+    | 'oraidex'
+    | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -144,6 +147,20 @@ const otherChainTokens: TokenItemType[] = [
     coingeckoId: 'oraichain-token',
     cosmosBased: true,
     Icon: OraiIcon
+  },
+  {
+    name: 'USDC',
+    prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+    org: 'OraiBridge',
+    chainId: ORAI_BRIDGE_CHAIN_ID,
+    coinType: 118,
+    denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDC_ETH_CONTRACT,
+    bridgeNetworkIdentifier: ETHEREUM_ORG,
+    rpc: ORAI_BRIDGE_RPC,
+    decimals: EVM_DECIMALS,
+    coingeckoId: 'usd-coin',
+    cosmosBased: true,
+    Icon: USDC
   },
   {
     name: 'AIRI',
@@ -227,6 +244,19 @@ const otherChainTokens: TokenItemType[] = [
     coingeckoId: 'oraichain-token',
     cosmosBased: false,
     Icon: OraiIcon
+  },
+  {
+    name: 'USDC',
+    org: ETHEREUM_ORG,
+    chainId: ETHEREUM_CHAIN_ID,
+    denom: 'erc20-usdc',
+    contractAddress: USDC_ETH_CONTRACT,
+    rpc: ETHEREUM_RPC,
+    decimals: EVM_DECIMALS,
+    bridgeTo: [ORAICHAIN_ID],
+    coingeckoId: 'oraichain-token',
+    cosmosBased: false,
+    Icon: USDC
   },
   {
     name: 'AIRI',
@@ -410,6 +440,21 @@ const oraichainTokens: TokenItemType[] = [
     rpc: ORAI_RPC,
     cosmosBased: true,
     Icon: USDT
+  },
+  {
+    name: 'USDC',
+    org: ORAICHAIN_ID,
+    prefix: 'orai',
+    coingeckoId: 'usd-coin',
+    denom: 'usdc',
+    contractAddress: process.env.REACT_APP_USDC_CONTRACT,
+    bridgeTo: [ETHEREUM_ORG],
+    decimals: COSMOS_DECIMALS,
+    coinType: 118,
+    chainId: ORAICHAIN_ID,
+    rpc: ORAI_RPC,
+    cosmosBased: true,
+    Icon: USDC
   },
   {
     name: 'OSMO',
