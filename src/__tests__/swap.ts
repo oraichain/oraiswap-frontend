@@ -88,7 +88,7 @@ describe('swap', () => {
       verified: false,
       total_supply: "749999978999989"
     }
-    
+
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
 
     const msgs = generateContractMessages({
@@ -108,6 +108,6 @@ describe('swap', () => {
       handleOptions: { funds: null }
     }];
 
-    expect(messages.toString()).toBe(result.toString());
+    expect(messages).toEqual(result);
   });
 });
