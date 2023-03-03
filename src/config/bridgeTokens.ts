@@ -52,7 +52,7 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org?: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse';
+  org?: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse' | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;

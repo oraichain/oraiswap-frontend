@@ -54,6 +54,8 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
+  console.log('MAO', amounts);
+
   const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
     const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
     let finalAmount = displayAmount;
@@ -107,7 +109,6 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    console.log('simulate average data: ', simulateAverageData);
     setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
@@ -142,16 +143,16 @@ const SwapComponent: React.FC<{
 
       var messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
 
+      console.log('TO', messages);
+
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
         walletAddr: address,
         msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' }
       });
-      console.log('result swap tx hash: ', result);
 
       if (result) {
-        console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
@@ -159,7 +160,6 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      console.log('error in swap form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = error as string;
