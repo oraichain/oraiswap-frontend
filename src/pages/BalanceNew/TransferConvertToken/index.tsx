@@ -59,7 +59,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
-  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices();
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
@@ -171,7 +171,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                   alignItems: 'center'
                                 }}
                               >
-                                <div>{renderLogoNetwork(network.title)}</div>
+                                <div>{renderLogoNetwork(network.chainId)}</div>
                                 <div className={styles.items_title}>{network.title}</div>
                               </div>
                             </li>

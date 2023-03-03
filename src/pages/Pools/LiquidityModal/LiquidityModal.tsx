@@ -64,7 +64,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
 
-  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices();
 
   const [activeTab, setActiveTab] = useState(0);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);

@@ -2,6 +2,10 @@ import React, { FC } from 'react';
 import Modal from 'components/Modal';
 import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { getTotalUsd, toDisplay } from 'libs/utils';
+import { NetworkType } from 'helper';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 const cx = cn.bind(styles);
 
@@ -11,34 +15,63 @@ interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
-  listToken: any[];
+  amounts: AmountDetails;
+  prices: CoinGeckoPrices<string>;
+  listToken: TokenItemType[] | NetworkType[];
   setToken: (denom: string) => void;
-  icon?: boolean;
+  type?: 'token' | 'network';
 }
 
-const SelectTokenModal: FC<ModalProps> = ({ isOpen, close, open, listToken, setToken, icon }) => {
+const SelectTokenModal: FC<ModalProps> = ({
+  type = 'token',
+  isOpen,
+  close,
+  open,
+  listToken,
+  setToken,
+  prices,
+  amounts
+}) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>
         <div className={cx('title')}>
-          <div>Select a token</div>
+          <div>{type === 'token' ? 'Select a token' : 'Select a network'}</div>
         </div>
         <div className={cx('options')}>
-          {listToken.map((option: any, idx) => {
+          {listToken.map((item: TokenItemType | NetworkType) => {
+            let key: string, title: string, balance: string;
+
+            if (type === 'token') {
+              const token = item as TokenItemType;
+              key = token.denom;
+              title = token.name;
+              const amount = toDisplay(amounts[token.denom], token.decimals);
+              balance = amount > 0 ? amount.toFixed(6) : '0';
+            } else {
+              const network = item as NetworkType;
+              key = network.chainId.toString();
+              title = network.title;
+              const subAmounts = Object.fromEntries(
+                Object.entries(amounts).filter(([denom]) => tokenMap[denom].chainId === network.chainId)
+              );
+              const totalUsd = getTotalUsd(subAmounts, prices);
+              balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
+            }
             return (
               <div
                 className={cx('item')}
-                key={idx}
+                key={key}
                 onClick={() => {
-                  setToken(option.denom);
+                  setToken(key);
                   close();
                 }}
               >
-                {!icon && <option.Icon className={cx('logo')} />}
+                {item.Icon && <item.Icon className={cx('logo')} />}
                 <div className={cx('grow')}>
-                  <div>{option.title || option.name}</div>
+                  <div>{title}</div>
                 </div>
-                <div>{option.balance}</div>
+                <div>{balance}</div>
               </div>
             );
           })}

@@ -54,7 +54,7 @@ export class CacheTokens {
     this.dispatch(updateAmounts(amountDetails));
   }
 
-  private async loadNativeBalance(address: string, tokenInfo: TokenItemType) {
+  private async loadNativeBalance(address: string, tokenInfo: { chainId: string; rpc: string }) {
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
 

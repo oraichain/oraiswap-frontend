@@ -29,7 +29,7 @@ interface ModalProps {
 const steps = ['Set token ratio', 'Add Liquidity', 'Confirm'];
 
 const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
-  const { data: prices } = useCoinGeckoPrices(poolTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices();
   const [step, setStep] = useState(1);
   const [isSelectingToken, setIsSelectingToken] = useState<'token1' | 'token2' | null>(null);
   const [token1, setToken1] = useState<string | null>(null);
@@ -402,16 +402,20 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         isOpen={isSelectingToken === 'token1'}
         open={() => setIsSelectingToken('token1')}
         close={() => setIsSelectingToken(null)}
+        prices={prices}
         setToken={(token1: string) => {
           setToken1(token1);
           setListToken2Option(poolTokens.filter((t) => t.denom !== token1));
         }}
+        amounts={amounts}
         listToken={listToken1Option}
       />
       <SelectTokenModal
         isOpen={isSelectingToken === 'token2'}
         open={() => setIsSelectingToken('token2')}
         close={() => setIsSelectingToken(null)}
+        prices={prices}
+        amounts={amounts}
         setToken={(token2: string) => {
           setToken2(token2);
           setListToken1Option(poolTokens.filter((t) => t.denom !== token2));

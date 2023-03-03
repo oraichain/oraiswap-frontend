@@ -29,6 +29,7 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import SettingModal from '../Modals/SettingModal';
 import styles from './index.module.scss';
 import { feeEstimate } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const cx = cn.bind(styles);
 
@@ -37,6 +38,7 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const { data: prices } = useCoinGeckoPrices();
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -53,8 +55,6 @@ const SwapComponent: React.FC<{
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
   };
-
-  console.log('MAO', amounts);
 
   const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
     const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
@@ -302,9 +302,11 @@ const SwapComponent: React.FC<{
           isOpen={isSelectFrom}
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
+          prices={prices}
           listToken={poolTokens.filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
+          amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
           }}
@@ -314,6 +316,8 @@ const SwapComponent: React.FC<{
           isOpen={isSelectTo}
           open={() => setIsSelectTo(true)}
           close={() => setIsSelectTo(false)}
+          prices={prices}
+          amounts={amounts}
           listToken={poolTokens.filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
