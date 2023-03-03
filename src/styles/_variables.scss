@@ -20,17 +20,6 @@ $orange: #dd794a;
 
 $text: $gray;
 
-$colors: (
-  bg: $bg,
-  darkblue: $darkblue,
-  battleship: $battleship,
-  slate: $slate,
-  blue: $blue,
-  aqua: $aqua,
-  red: $red,
-  orange: $orange
-);
-
 $hr-shadow: fade-out(black, 0.8);
 $hr: fade-out(white, 0.92);
 $border: 1px solid fade-out($slate, 0.8);
