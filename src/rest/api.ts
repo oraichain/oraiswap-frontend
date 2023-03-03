@@ -132,7 +132,7 @@ async function fetchPoolInfoAmount(
 
 async function fetchPairInfo(assetInfos: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factory = assetInfos.some((a) => a.denom === 'scorai') ? Contract.factory_v2 : Contract.factory;
+  const factory = assetInfos.some((a) => a.factoryV2) ? Contract.factory_v2 : Contract.factory;
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
