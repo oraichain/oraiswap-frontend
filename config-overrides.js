@@ -120,6 +120,10 @@ module.exports = {
       );
     }
 
+    if (!isDevelopment) {
+      config.optimization.sideEffects = false;
+    }
+
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,

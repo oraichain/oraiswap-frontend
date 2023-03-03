@@ -347,22 +347,26 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
               )}
             </div>
           </div>
-          {isOpenLiquidityModal && lpTokenInfoData && pairInfoData.token1 && pairInfoData.token2 && (
-            <LiquidityModal
-              isOpen={isOpenLiquidityModal}
-              open={() => setIsOpenLiquidityModal(true)}
-              close={() => setIsOpenLiquidityModal(false)}
-              token1InfoData={pairInfoData.token1}
-              token2InfoData={pairInfoData.token2}
-              lpTokenInfoData={lpTokenInfoData}
-              lpTokenBalance={lpTokenBalance.toString()}
-              pairAmountInfoData={pairAmountInfoData}
-              refetchPairAmountInfo={refetchPairAmountInfo}
-              pairInfoData={pairInfoData.info}
-              fetchCachedLpTokenAll={fetchCachedLpTokenAll}
-            />
-          )}
-          {isOpenBondingModal && !!lpTokenInfoData && !!lpTokenBalance && (
+          {isOpenLiquidityModal &&
+            pairAmountInfoData &&
+            lpTokenInfoData &&
+            pairInfoData.token1 &&
+            pairInfoData.token2 && (
+              <LiquidityModal
+                isOpen={isOpenLiquidityModal}
+                open={() => setIsOpenLiquidityModal(true)}
+                close={() => setIsOpenLiquidityModal(false)}
+                token1InfoData={pairInfoData.token1}
+                token2InfoData={pairInfoData.token2}
+                lpTokenInfoData={lpTokenInfoData}
+                lpTokenBalance={lpTokenBalance.toString()}
+                pairAmountInfoData={pairAmountInfoData}
+                refetchPairAmountInfo={refetchPairAmountInfo}
+                pairInfoData={pairInfoData.info}
+                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
+              />
+            )}
+          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (
             <BondingModal
               isOpen={isOpenBondingModal}
               open={() => setIsOpenBondingModal(true)}

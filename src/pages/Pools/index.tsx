@@ -300,6 +300,12 @@ const Pools: React.FC<PoolsProps> = () => {
     const poolList = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
 
     const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
+
+    if (!oraiUsdtPool) {
+      // retry after 3 seconds
+      return setTimeout(fetchPairInfoDataList, 3000);
+    }
+
     const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
 
     const pairAmounts = await Promise.all(
