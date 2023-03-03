@@ -34,7 +34,9 @@ const config = {
     path: vendorPath,
     library: 'vendor_lib'
   },
-
+  optimization: {
+    sideEffects: false
+  },
   plugins: [
     new webpack.ProgressPlugin(),
 
