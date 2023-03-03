@@ -1,7 +1,7 @@
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import { filteredTokens, TokenItemType } from './bridgeTokens';
-import { ORAI, STABLE_DENOM } from './constants';
+import { MILKY, MILKY_DENOM, ORAI, STABLE_DENOM } from './constants';
 
 export type Pair = {
   contract_addr: string;
@@ -65,7 +65,7 @@ export const pairs: Pair[] = [
   },
   {
     contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
-    asset_denoms: [ORAI, STABLE_DENOM],
+    asset_denoms: [MILKY, STABLE_DENOM],
     liquidity_token: 'orai18ywllw03hvy720l06rme0apwyyq9plk64h9ccf',
     commission_rate: '0.003',
     token_asset: 'milky'
