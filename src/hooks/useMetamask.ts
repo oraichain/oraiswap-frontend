@@ -14,7 +14,7 @@ export function useEagerConnect(isInactive, isInterval) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
-  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   useEffect(() => {
     if (isInterval) return;

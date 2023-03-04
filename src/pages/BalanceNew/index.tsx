@@ -107,8 +107,12 @@ const Balance: React.FC<BalanceProps> = () => {
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
 
   useEffect(() => {
-    cacheTokens.loadTokenAmounts(metamaskAddress);
-  }, [keplrAddress, metamaskAddress, txHash, prices]);
+    cacheTokens.loadTokenAmounts(false);
+  }, [keplrAddress, txHash, prices]);
+
+  useEffect(() => {
+    cacheTokens.loadTokenAmounts(true, metamaskAddress, false);
+  }, [metamaskAddress]);
 
   const _initEthereum = async () => {
     try {
@@ -549,7 +553,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await cacheTokens.loadTokenAmounts(metamaskAddress);
+      await cacheTokens.loadTokenAmounts(true, metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });

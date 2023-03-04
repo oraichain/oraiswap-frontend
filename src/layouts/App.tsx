@@ -84,7 +84,8 @@ const App = () => {
       displayToast(TToastType.TX_INFO, {
         message: `You have received ${tokenDisplay}`
       });
-      cacheTokens.loadTokensCosmosKwt();
+      // no metamaskAddress, only reload cosmos
+      cacheTokens.loadTokenAmounts();
     }
   }, [lastJsonMessage]);
 
@@ -133,12 +134,7 @@ const App = () => {
         // same address, trigger update by clear address then re-update
         setAddress('');
       } else {
-        const accounts = (window?.ethereum &&
-          (await window.ethereum.request({
-            method: 'eth_accounts',
-            params: [60]
-          }))) || [''];
-        cacheTokens.loadAllToken(accounts?.[0] || metamaskAddress);
+        cacheTokens.loadTokenAmounts(true, metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {

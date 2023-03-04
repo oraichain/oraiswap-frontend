@@ -128,7 +128,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokensCosmosKwt();
+        cacheTokens.loadTokenAmounts(true);
         setActionLoading(false);
         onBondingAction();
         return;

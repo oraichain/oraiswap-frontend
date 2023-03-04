@@ -156,7 +156,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokensCosmosKwt();
+        cacheTokens.loadTokenAmounts(true);
         setSwapLoading(false);
       }
     } catch (error) {

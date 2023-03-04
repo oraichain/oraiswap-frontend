@@ -143,7 +143,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    cacheTokens.loadTokensCosmosKwt();
+    cacheTokens.loadTokenAmounts(true);
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
