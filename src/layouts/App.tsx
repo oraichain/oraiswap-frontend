@@ -29,11 +29,11 @@ import Menu from './Menu';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
-  const [_, setChainId] = useConfigReducer('chainId');
-  const [_$, setChainInfo] = useConfigReducer('chainInfo');
-  const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
+  const [, setChainId] = useConfigReducer('chainId');
+  const [, setChainInfo] = useConfigReducer('chainInfo');
+  const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
-  const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const [, setInfoCosmos] = useConfigReducer('infoCosmos');
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const dispatch = useDispatch();
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
@@ -84,7 +84,8 @@ const App = () => {
       displayToast(TToastType.TX_INFO, {
         message: `You have received ${tokenDisplay}`
       });
-      cacheTokens.loadTokensCosmosKwt();
+      // no metamaskAddress, only reload cosmos
+      cacheTokens.loadTokenAmounts();
     }
   }, [lastJsonMessage]);
 
@@ -133,12 +134,7 @@ const App = () => {
         // same address, trigger update by clear address then re-update
         setAddress('');
       } else {
-        const accounts = (window?.ethereum &&
-          (await window.ethereum.request({
-            method: 'eth_accounts',
-            params: [60]
-          }))) || [''];
-        cacheTokens.loadAllToken(accounts?.[0] || metamaskAddress);
+        cacheTokens.loadTokenAmounts(true, metamaskAddress);
       }
       // finally update new address
       if (!chainInfo?.chainId) {
@@ -151,6 +147,8 @@ const App = () => {
   };
   useEagerConnect(false, true);
   useEffect(() => {
+    // load cosmos
+    cacheTokens.loadTokenAmounts(false);
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();

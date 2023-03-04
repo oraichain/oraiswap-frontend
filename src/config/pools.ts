@@ -1,7 +1,7 @@
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import { filteredTokens, TokenItemType } from './bridgeTokens';
-import { ORAI, STABLE_DENOM } from './constants';
+import { MILKY, MILKY_DENOM, ORAI, STABLE_DENOM } from './constants';
 
 export type Pair = {
   contract_addr: string;
@@ -29,11 +29,9 @@ export const pairs: Pair[] = [
     token_asset: 'oraix'
   },
   {
-    contract_addr:
-      'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
+    contract_addr: 'orai15aunrryk5yqsrgy0tvzpj7pupu62s0t2n09t0dscjgzaa27e44esefzgf8',
     asset_denoms: [ORAI, 'scorai'],
-    liquidity_token:
-      'orai1ay689ltr57jt2snujarvakxrmtuq8fhuat5rnvq6rct89vjer9gqm2vde6',
+    liquidity_token: 'orai1ay689ltr57jt2snujarvakxrmtuq8fhuat5rnvq6rct89vjer9gqm2vde6',
     commission_rate: '0.003',
     token_asset: 'scorai'
   },
@@ -67,23 +65,25 @@ export const pairs: Pair[] = [
   },
   {
     contract_addr: 'orai1hr2l03ep6p9lwdkuqu5253fgpzc40xcpwymjfc',
-    asset_denoms: ['milky', STABLE_DENOM],
+    asset_denoms: [MILKY, STABLE_DENOM],
     liquidity_token: 'orai18ywllw03hvy720l06rme0apwyyq9plk64h9ccf',
     commission_rate: '0.003',
     token_asset: 'milky'
   }
+  // {
+  //   contract_addr: 'orai105q4n6n8hclxcm3hj0306jqh09dxffy3j4ze2rzaylklqmu9hlcs7a39kq',
+  //   asset_denoms: [ORAI, 'usdc'],
+  //   liquidity_token: 'orai1ssg8qy3teld8tjwyjlqhw7j0xllxyw88fp5af72z50lr5akqu68qlugue5',
+  //   commission_rate: '0.003',
+  //   token_asset: 'usdc'
+  // }
 ];
 
 export const pairDenoms = uniq(flatten(pairs.map((pair) => pair.asset_denoms)));
 
-export const poolTokens = filteredTokens.filter((token) =>
-  pairDenoms.includes(token.denom)
-);
+export const poolTokens = filteredTokens.filter((token) => pairDenoms.includes(token.denom));
 
-export const getPair = (
-  denom1: string | string[],
-  denom2?: string
-): Pair | undefined => {
+export const getPair = (denom1: string | string[], denom2?: string): Pair | undefined => {
   const asset_denoms = typeof denom1 === 'string' ? [denom1, denom2] : denom1;
 
   // ORAI should be at the start
@@ -93,9 +93,7 @@ export const getPair = (
 
   return pairs.find(
     (pair) =>
-      (pair.asset_denoms[0] === asset_denoms[0] &&
-        pair.asset_denoms[1] === asset_denoms[1]) ||
-      (pair.asset_denoms[0] === asset_denoms[1] &&
-        pair.asset_denoms[1] === asset_denoms[0])
+      (pair.asset_denoms[0] === asset_denoms[0] && pair.asset_denoms[1] === asset_denoms[1]) ||
+      (pair.asset_denoms[0] === asset_denoms[1] && pair.asset_denoms[1] === asset_denoms[0])
   );
 };

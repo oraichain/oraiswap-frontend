@@ -1,6 +1,6 @@
 import { StargateClient } from '@cosmjs/stargate';
 import { arrayLoadToken, handleCheckWallet } from 'helper';
-import { getEvmAddress, getFunctionExecution, toDisplay } from './utils';
+import { clearFunctionExecution, getEvmAddress, getFunctionExecution, toDisplay } from './utils';
 import { evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
@@ -13,42 +13,25 @@ import {
   ETHEREUM_RPC,
   KAWAII_SUBNET_RPC,
   KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
-  NOTI_INSTALL_OWALLET
+  KWT_SUBNETWORK_EVM_CHAIN_ID
 } from 'config/constants';
 import flatten from 'lodash/flatten';
 import tokenABI from 'config/abi/erc20.json';
 import { ContractCallResults, Multicall } from './ethereum-multicall';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { Dispatch } from 'react';
+
 export class CacheTokens {
-  private readonly dispatch;
+  private readonly dispatch: Dispatch<any>;
   private readonly address: string;
   public constructor({ dispatch, address }) {
     this.dispatch = dispatch;
     this.address = address;
-  }
 
-  public async loadAllToken(metamaskAddress: string) {
-    this.loadTokensCosmosKwt();
-    this.loadTokensEvm(metamaskAddress);
+    this.loadTokensCosmos = this.loadTokensCosmos.bind(this);
+    this.loadTokensEvm = this.loadTokensEvm.bind(this);
+    this.loadKawaiiSubnetAmount = this.loadKawaiiSubnetAmount.bind(this);
+    this.loadCw20Balance = this.loadCw20Balance.bind(this);
   }
-
-  public async loadTokensCosmosKwt() {
-    this.loadTokensCosmos();
-    this.loadCw20Balance();
-    this.loadKawaiiSubnetAmount();
-  }
-
-  private async loadTokensEvm(metamaskAddress: string) {
-    this.loadEvmOraiAmounts(metamaskAddress);
-  }
-
-  public async loadTokensCosmos() {
-    await handleCheckWallet();
-    for (const token of arrayLoadToken) {
-      window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
-    }
-  };
 
   private async forceUpdate(amountDetails: AmountDetails) {
     this.dispatch(updateAmounts(amountDetails));
@@ -74,24 +57,33 @@ export class CacheTokens {
     this.forceUpdate(amountDetails);
   }
 
-  public async loadTokenAmounts(metamaskAddress: string) {
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
+  public async loadTokenAmounts(refresh = false, metamaskAddress?: string, loadCosmos = true) {
+    if (refresh) {
+      clearFunctionExecution(
+        loadCosmos && this.loadTokensCosmos,
+        loadCosmos && this.loadKawaiiSubnetAmount,
+        loadCosmos && this.loadCw20Balance,
+        metamaskAddress && this.loadTokensEvm
+      );
     }
 
     const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
 
     await Promise.all(
       [
-        getFunctionExecution(this.loadTokensCosmos.bind(this)),
-        metamaskAddress && getFunctionExecution(this.loadEvmOraiAmounts.bind(this), [metamaskAddress]),
-        kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount.bind(this)),
-        this.address && getFunctionExecution(this.loadCw20Balance.bind(this))
+        loadCosmos && getFunctionExecution(this.loadTokensCosmos),
+        metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
+        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
+        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
       ].filter(Boolean)
     );
+  }
+
+  private async loadTokensCosmos() {
+    await handleCheckWallet();
+    for (const token of arrayLoadToken) {
+      window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
+    }
   }
 
   private async loadCw20Balance() {
@@ -154,7 +146,7 @@ export class CacheTokens {
     });
   }
 
-  private async loadEvmOraiAmounts(evmAddress: string) {
+  private async loadTokensEvm(evmAddress: string) {
     const amountDetails = Object.fromEntries(
       flatten(
         await Promise.all([

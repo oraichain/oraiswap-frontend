@@ -121,12 +121,21 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
 
 export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
 
-let cache = {};
+const cache = {};
+
+export function clearFunctionExecution(...keys: (Function | string)[]) {
+  for (const methodOrKey of keys) {
+    if (!methodOrKey) continue;
+    const key = typeof methodOrKey === 'string' ? methodOrKey : methodOrKey.name;
+    delete cache[key];
+  }
+}
+
 export async function getFunctionExecution(
   method: Function,
   args: any[] = [],
   cacheKey: string = null,
-  expiredIn = 10000
+  expiredIn = 60000
 ) {
   const key = cacheKey || method.name;
   if (cache[key] !== undefined) {

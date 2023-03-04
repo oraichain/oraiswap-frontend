@@ -50,6 +50,7 @@ import {
 } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import Long from 'long';
+import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -67,7 +68,6 @@ import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import styles from './Balance.module.scss';
 import { getOneStepKeplrAddr } from './helpers';
 import KwtModal from './KwtModal';
-import SelectTokenModal from './Modals/SelectTokenModal';
 import TokenItem from './TokenItem';
 
 interface BalanceProps {}
@@ -88,7 +88,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [txHash, setTxHash] = useState('');
   const dispatch = useDispatch();
 
-  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices();
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
 
@@ -107,8 +107,12 @@ const Balance: React.FC<BalanceProps> = () => {
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
 
   useEffect(() => {
-    cacheTokens.loadTokenAmounts(metamaskAddress);
-  }, [keplrAddress, metamaskAddress, txHash, prices]);
+    cacheTokens.loadTokenAmounts(false);
+  }, [keplrAddress, txHash, prices]);
+
+  useEffect(() => {
+    cacheTokens.loadTokenAmounts(true, metamaskAddress, false);
+  }, [metamaskAddress]);
 
   const _initEthereum = async () => {
     try {
@@ -470,12 +474,11 @@ const Balance: React.FC<BalanceProps> = () => {
         });
         return;
       }
-      const nativeToken = kawaiiTokens.find(token => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId); // collect kawaiiverse cosmos based token for conversion
+      const nativeToken = kawaiiTokens.find(
+        (token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId
+      ); // collect kawaiiverse cosmos based token for conversion
 
-      const amount = coin(
-        toAmount(transferAmount, fromToken.decimals).toString(),
-        nativeToken.denom
-      );
+      const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
       const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
       const result = await KawaiiverseJs.convertIbcTransferERC20({
@@ -550,7 +553,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await cacheTokens.loadTokenAmounts(metamaskAddress);
+      await cacheTokens.loadTokenAmounts(true, metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
       console.log({ err });
@@ -707,7 +710,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const getFilterTokens = (org: string): TokenItemType[] => {
+  const getFilterTokens = (chainId: string | number): TokenItemType[] => {
     return [...fromTokens, ...toTokens]
       .filter((token) => {
         // not display because it is evm map and no bridge to option
@@ -715,7 +718,7 @@ const Balance: React.FC<BalanceProps> = () => {
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
-        return token?.org === org;
+        return token.chainId == chainId;
       })
       .sort((a, b) => {
         return toTotalDisplay(amounts, b) * prices[b.coingeckoId] - toTotalDisplay(amounts, a) * prices[a.coingeckoId];
@@ -739,8 +742,8 @@ const Balance: React.FC<BalanceProps> = () => {
             <div className={styles.search_filter} onClick={() => setIsSelectNetwork(true)}>
               <div className={styles.search_box}>
                 <div className={styles.search_flex}>
-                  <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork || ORAICHAIN_ID)}</div>
-                  <span className={styles.search_text}>{filterNetwork || ORAICHAIN_ID}</span>
+                  <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
+                  <span className={styles.search_text}>{networks.find((n) => n.chainId == filterNetwork)?.title}</span>
                 </div>
                 <div>
                   <ArrowDownIcon />
@@ -825,11 +828,13 @@ const Balance: React.FC<BalanceProps> = () => {
           isOpen={isSelectNetwork}
           open={() => setIsSelectNetwork(true)}
           close={() => setIsSelectNetwork(false)}
+          prices={prices}
+          amounts={amounts}
+          type="network"
           listToken={networks}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}
-          icon={true}
         />
       </div>
     </Content>
