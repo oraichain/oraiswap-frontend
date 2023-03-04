@@ -4,7 +4,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 import { TooltipIcon } from 'components/Tooltip';
-
+import { isMobile } from '@walletconnect/browser-utils';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: [string, number];
@@ -59,7 +59,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               className={styles.tokenAmount}
               decimalScale={Math.min(6, token.decimals)}
             />
-            {subAmounts && Object.keys(subAmounts)?.length > 0 && (
+            {!isMobile() && subAmounts && Object.keys(subAmounts)?.length > 0 && (
               <TooltipIcon
                 content={
                   <div className={styles.tooltipAmount}>
@@ -96,6 +96,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         {active && (
           <TransferConvertToken
             token={token}
+            subAmounts={subAmounts}
             amountDetail={amountDetail}
             convertToken={convertToken}
             transferIBC={transferIBC}

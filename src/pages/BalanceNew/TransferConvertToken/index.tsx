@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import classNames from 'classnames';
@@ -5,7 +6,7 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import {
   BSC_ORG,
   COSMOS_TYPE,
@@ -42,6 +43,7 @@ interface TransferConvertProps {
   transferIBC?: any;
   convertKwt?: any;
   onClickTransfer?: any;
+  subAmounts?: object;
 }
 
 const onClickTransferList = [BSC_ORG, ETHEREUM_ORG];
@@ -51,7 +53,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   convertToken,
   transferIBC,
   convertKwt,
-  onClickTransfer
+  onClickTransfer,
+  subAmounts
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
@@ -120,6 +123,28 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
+      <div className={styles.tokenSubAmouts}>
+        {isMobile() &&
+          subAmounts &&
+          Object.keys(subAmounts)?.length > 0 &&
+          Object.keys(subAmounts).map((denom, idx) => {
+            const subAmount = subAmounts[denom] ?? '0';
+            const evmToken = tokenMap[denom];
+            return (
+              <div key={idx} className={styles.itemSubAmounts}>
+                <TokenBalance
+                  balance={{
+                    amount: subAmount,
+                    denom: evmToken.name,
+                    decimals: evmToken.decimals
+                  }}
+                  className={styles.tokenAmount}
+                  decimalScale={token.decimals}
+                />
+              </div>
+            );
+          })}
+      </div>
       <div className={styles.tokenFromGroupBalance}>
         <div className={styles.network}>
           <div className={styles.loading}>{transferLoading && <img src={loadingGif} width={180} height={180} />}</div>
