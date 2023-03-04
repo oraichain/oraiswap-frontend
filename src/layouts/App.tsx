@@ -147,6 +147,8 @@ const App = () => {
   };
   useEagerConnect(false, true);
   useEffect(() => {
+    // load cosmos
+    cacheTokens.loadTokenAmounts(false);
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();

@@ -59,7 +59,6 @@ export class CacheTokens {
 
   public async loadTokenAmounts(refresh = false, metamaskAddress?: string, loadCosmos = true) {
     if (refresh) {
-      console.log('clear');
       clearFunctionExecution(
         loadCosmos && this.loadTokensCosmos,
         loadCosmos && this.loadKawaiiSubnetAmount,
