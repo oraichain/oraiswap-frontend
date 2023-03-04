@@ -67,19 +67,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex'
-  | 'usd-coin';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex'
+    | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -149,20 +149,20 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: OraiIcon
   },
-  {
-    name: 'USDC',
-    prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-    org: 'OraiBridge',
-    chainId: ORAI_BRIDGE_CHAIN_ID,
-    coinType: 118,
-    denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDC_ETH_CONTRACT,
-    bridgeNetworkIdentifier: ETHEREUM_ORG,
-    rpc: ORAI_BRIDGE_RPC,
-    decimals: EVM_DECIMALS,
-    coingeckoId: 'usd-coin',
-    cosmosBased: true,
-    Icon: USDC
-  },
+  // {
+  //   name: 'USDC',
+  //   prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+  //   org: 'OraiBridge',
+  //   chainId: ORAI_BRIDGE_CHAIN_ID,
+  //   coinType: 118,
+  //   denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDC_ETH_CONTRACT,
+  //   bridgeNetworkIdentifier: ETHEREUM_ORG,
+  //   rpc: ORAI_BRIDGE_RPC,
+  //   decimals: EVM_DECIMALS,
+  //   coingeckoId: 'usd-coin',
+  //   cosmosBased: true,
+  //   Icon: USDC
+  // },
   {
     name: 'AIRI',
     prefix: ORAI_BRIDGE_PREFIX,
@@ -246,19 +246,19 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: false,
     Icon: OraiIcon
   },
-  {
-    name: 'USDC',
-    org: ETHEREUM_ORG,
-    chainId: ETHEREUM_CHAIN_ID,
-    denom: 'erc20-usdc',
-    contractAddress: USDC_ETH_CONTRACT,
-    rpc: ETHEREUM_RPC,
-    decimals: EVM_DECIMALS,
-    bridgeTo: [ORAICHAIN_ID],
-    coingeckoId: 'usd-coin',
-    cosmosBased: false,
-    Icon: USDC
-  },
+  // {
+  //   name: 'USDC',
+  //   org: ETHEREUM_ORG,
+  //   chainId: ETHEREUM_CHAIN_ID,
+  //   denom: 'erc20-usdc',
+  //   contractAddress: USDC_ETH_CONTRACT,
+  //   rpc: ETHEREUM_RPC,
+  //   decimals: EVM_DECIMALS,
+  //   bridgeTo: [ORAICHAIN_ID],
+  //   coingeckoId: 'usd-coin',
+  //   cosmosBased: false,
+  //   Icon: USDC
+  // },
   {
     name: 'AIRI',
     org: BSC_ORG,
@@ -442,22 +442,22 @@ const oraichainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: USDT
   },
-  {
-    name: 'USDC',
-    org: ORAICHAIN_ID,
-    prefix: 'orai',
-    coingeckoId: 'usd-coin',
-    denom: 'usdc',
-    contractAddress: process.env.REACT_APP_USDC_CONTRACT,
-    bridgeTo: [ETHEREUM_ORG],
-    decimals: COSMOS_DECIMALS,
-    coinType: 118,
-    chainId: ORAICHAIN_ID,
-    rpc: ORAI_RPC,
-    cosmosBased: true,
-    factoryV2: false,
-    Icon: USDC
-  },
+  // {
+  //   name: 'USDC',
+  //   org: ORAICHAIN_ID,
+  //   prefix: 'orai',
+  //   coingeckoId: 'usd-coin',
+  //   denom: 'usdc',
+  //   contractAddress: process.env.REACT_APP_USDC_CONTRACT,
+  //   bridgeTo: [ETHEREUM_ORG],
+  //   decimals: COSMOS_DECIMALS,
+  //   coinType: 118,
+  //   chainId: ORAICHAIN_ID,
+  //   rpc: ORAI_RPC,
+  //   cosmosBased: true,
+  //   factoryV2: false,
+  //   Icon: USDC
+  // },
   {
     name: 'OSMO',
     org: ORAICHAIN_ID,
