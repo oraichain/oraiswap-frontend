@@ -53,7 +53,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               key = network.chainId.toString();
               title = network.title;
               const subAmounts = Object.fromEntries(
-                Object.entries(amounts).filter(([denom]) => tokenMap[denom].chainId === network.chainId)
+                Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
               );
               const totalUsd = getTotalUsd(subAmounts, prices);
               balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
