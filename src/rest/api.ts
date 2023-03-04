@@ -4,7 +4,7 @@ import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair, Pair } from 'config/pools';
+import { getPair, Pair, poolTokens } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
@@ -61,8 +61,8 @@ async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
   try {
-    const { data } = await axios.get(`${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`);
-    return data.data;
+    const data = await axios.get(`${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`);
+    return data.data.data;
   } catch (error) {
     console.log(error);
     return 0;
@@ -135,6 +135,17 @@ async function fetchPairInfo(assetInfos: [TokenItemType, TokenItemType]): Promis
   const factory = assetInfos.some((a) => a.factoryV2) ? Contract.factory_v2 : Contract.factory;
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+
+  // TODO: temporary fix for USDC. Will comment out after the factory contract has been migrated successfully
+  if (assetInfos[0].denom === 'usdc' || assetInfos[1].denom === 'usdc') {
+    return {
+      asset_infos: [firstAsset, secondAsset],
+      commission_rate: "0.003",
+      contract_addr: "orai105q4n6n8hclxcm3hj0306jqh09dxffy3j4ze2rzaylklqmu9hlcs7a39kq",
+      liquidity_token: "orai1ssg8qy3teld8tjwyjlqhw7j0xllxyw88fp5af72z50lr5akqu68qlugue5",
+      oracle_addr: "orai18rgtdvlrev60plvucw2rz8nmj8pau9gst4q07m",
+    }
+  }
 
   const data = await factory.pair({
     assetInfos: [firstAsset, secondAsset]
@@ -269,27 +280,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: oraiInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: oraiInfo
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: oraiInfo,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
