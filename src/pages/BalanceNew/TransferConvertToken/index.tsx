@@ -1,32 +1,32 @@
-import classNames from 'classnames';
-import { FC, useEffect, useState } from 'react';
-import styles from './index.module.scss';
-import TokenBalance from 'components/TokenBalance';
-import NumberFormat from 'react-number-format';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { toDisplay, reduceString } from 'libs/utils';
-import Loader from 'components/Loader';
-import {
-  KWT_SUBNETWORK_CHAIN_ID,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  KAWAII_ORG,
-  COSMOS_TYPE,
-  EVM_TYPE,
-  BSC_ORG,
-  ETHEREUM_ORG,
-  ORAI,
-  GAS_ESTIMATION_BRIDGE_DEFAULT
-} from 'config/constants';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
-import { filterChainBridge, networks, renderLogoNetwork, getTokenChain, feeEstimate } from 'helper';
 import loadingGif from 'assets/gif/loading.gif';
+import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import classNames from 'classnames';
 import Input from 'components/Input';
-import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
+import Loader from 'components/Loader';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import TokenBalance from 'components/TokenBalance';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import {
+  BSC_ORG,
+  COSMOS_TYPE,
+  ETHEREUM_ORG,
+  EVM_TYPE,
+  GAS_ESTIMATION_BRIDGE_DEFAULT,
+  KAWAII_ORG,
+  KWT_SUBNETWORK_CHAIN_ID,
+  ORAI,
+  ORAICHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID
+} from 'config/constants';
+import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { reduceString, toDisplay } from 'libs/utils';
+import { FC, useEffect, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import styles from './index.module.scss';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
@@ -59,8 +59,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
-  const amounts = useSelector((state: RootState) => state.token.amounts);
-  const { data: prices } = useCoinGeckoPrices(filteredTokens.map((t) => t.coingeckoId));
+  const { data: prices } = useCoinGeckoPrices();
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
@@ -172,7 +171,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                   alignItems: 'center'
                                 }}
                               >
-                                <div>{renderLogoNetwork(network.title)}</div>
+                                <div>{renderLogoNetwork(network.chainId)}</div>
                                 <div className={styles.items_title}>{network.title}</div>
                               </div>
                             </li>

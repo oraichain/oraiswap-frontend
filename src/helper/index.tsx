@@ -46,77 +46,66 @@ import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
 
-interface Items {
-  chainId?: string;
-  title?: string;
-}
 interface Tokens {
   denom?: string;
   chainId?: string | number;
   bridgeTo?: Array<string>;
 }
 
-export const networks = [
+export type NetworkType = {
+  title: string;
+  chainId: string | number;
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
+  networkType: string;
+};
+
+export const networks: NetworkType[] = [
   {
     title: ORAICHAIN_ID,
     chainId: ORAICHAIN_ID,
-    icon: <ORAIIcon />,
+    Icon: ORAIIcon,
     networkType: COSMOS_TYPE
   },
   {
     title: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
-    icon: <KwtIcon />,
+    Icon: KwtIcon,
     networkType: COSMOS_TYPE
   },
   {
     title: OSMOSIS_ORG,
     chainId: OSMOSIS_CHAIN_ID,
-    icon: <OsmosisIcon />,
+    Icon: OsmosisIcon,
     networkType: COSMOS_TYPE
   },
   {
     title: COSMOS_ORG,
     chainId: COSMOS_CHAIN_ID,
-    icon: <AtomCosmosIcon />,
+    Icon: AtomCosmosIcon,
     networkType: COSMOS_TYPE
   },
   {
     title: BSC_ORG,
-    chainId: BSC_ORG,
-    icon: <BNBIcon />,
+    chainId: BSC_CHAIN_ID,
+    Icon: BNBIcon,
     networkType: EVM_TYPE
   },
   {
     title: ETHEREUM_ORG,
-    chainId: ETHEREUM_ORG,
-    icon: <ETHIcon />,
+    chainId: ETHEREUM_CHAIN_ID,
+    Icon: ETHIcon,
     networkType: EVM_TYPE
   }
 ];
 
-export const renderLogoNetwork = (network: string) => {
-  switch (network) {
-    case ORAICHAIN_ID:
-      return <ORAIIcon />;
-    case ORAI_BRIDGE_ORG:
-      return <ORAIIcon />;
-    case KAWAII_ORG:
-      return <KwtIcon />;
-    case OSMOSIS_ORG:
-      return <OsmosisIcon />;
-    case COSMOS_ORG:
-      return <AtomCosmosIcon />;
-    case ETHEREUM_ORG:
-      return <ETHIcon />;
-    case BSC_ORG:
-      return <BNBIcon />;
-    default:
-      return <ORAIIcon />;
+export const renderLogoNetwork = (chainId: string | number = ORAICHAIN_ID) => {
+  const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);
+  if (network) {
+    return <network.Icon />;
   }
 };
 
-export const filterChainBridge = (token: Tokens, item: Items) => {
+export const filterChainBridge = (token: Tokens, item: NetworkType) => {
   const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
   return tokenCanBridgeTo.includes(item.title);
 };

@@ -48,7 +48,7 @@ export class CacheTokens {
     for (const token of arrayLoadToken) {
       window.Keplr.getKeplrAddr(token.chainId).then((address) => this.loadNativeBalance(address, token));
     }
-  };
+  }
 
   private async forceUpdate(amountDetails: AmountDetails) {
     this.dispatch(updateAmounts(amountDetails));

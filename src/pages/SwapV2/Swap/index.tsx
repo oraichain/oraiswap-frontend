@@ -29,6 +29,7 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import SettingModal from '../Modals/SettingModal';
 import styles from './index.module.scss';
 import { feeEstimate } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const cx = cn.bind(styles);
 
@@ -37,6 +38,7 @@ const SwapComponent: React.FC<{
   toTokenDenom: string;
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
+  const { data: prices } = useCoinGeckoPrices();
   const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
@@ -107,7 +109,6 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    console.log('simulate average data: ', simulateAverageData);
     setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
@@ -142,16 +143,16 @@ const SwapComponent: React.FC<{
 
       var messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
 
+      console.log('TO', messages);
+
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
         walletAddr: address,
         msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' }
       });
-      console.log('result swap tx hash: ', result);
 
       if (result) {
-        console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
@@ -159,7 +160,6 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      console.log('error in swap form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = error as string;
@@ -302,9 +302,11 @@ const SwapComponent: React.FC<{
           isOpen={isSelectFrom}
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
+          prices={prices}
           listToken={poolTokens.filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
+          amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
           }}
@@ -314,6 +316,8 @@ const SwapComponent: React.FC<{
           isOpen={isSelectTo}
           open={() => setIsSelectTo(true)}
           close={() => setIsSelectTo(false)}
+          prices={prices}
+          amounts={amounts}
           listToken={poolTokens.filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}

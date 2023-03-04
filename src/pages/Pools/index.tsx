@@ -296,9 +296,8 @@ const Pools: React.FC<PoolsProps> = () => {
       // wait for cached pair updated
       return;
     }
-    console.log('fetchPairInfoDataList');
-    const poolList = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
 
+    const poolList: PairInfoData[] = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
     const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
 
     if (!oraiUsdtPool) {
@@ -314,6 +313,7 @@ const Pools: React.FC<PoolsProps> = () => {
     poolList.forEach((pool, ind) => {
       pool.amount = pairAmounts[ind].tokenUsd;
     });
+    poolList.sort((a, b) => b.amount - a.amount);
 
     setPairInfos(poolList);
     setOraiPrice(oraiPrice);

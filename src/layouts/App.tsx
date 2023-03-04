@@ -29,11 +29,11 @@ import Menu from './Menu';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
-  const [_, setChainId] = useConfigReducer('chainId');
-  const [_$, setChainInfo] = useConfigReducer('chainInfo');
-  const [_$$, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
+  const [, setChainId] = useConfigReducer('chainId');
+  const [, setChainInfo] = useConfigReducer('chainInfo');
+  const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
-  const [_$$$, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const [, setInfoCosmos] = useConfigReducer('infoCosmos');
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const dispatch = useDispatch();
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
