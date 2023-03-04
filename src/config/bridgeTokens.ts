@@ -67,19 +67,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex'
-    | 'usd-coin';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex'
+  | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -455,7 +455,7 @@ const oraichainTokens: TokenItemType[] = [
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
-    factoryV2: true,
+    factoryV2: false,
     Icon: USDC
   },
   {
