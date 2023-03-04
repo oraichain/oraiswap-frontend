@@ -255,7 +255,7 @@ const otherChainTokens: TokenItemType[] = [
     rpc: ETHEREUM_RPC,
     decimals: EVM_DECIMALS,
     bridgeTo: [ORAICHAIN_ID],
-    coingeckoId: 'oraichain-token',
+    coingeckoId: 'usd-coin',
     cosmosBased: false,
     Icon: USDC
   },
@@ -555,7 +555,7 @@ const oraichainTokens: TokenItemType[] = [
     rpc: ORAI_RPC,
     cosmosBased: true,
     factoryV2: true,
-    Icon: scORAI,
+    Icon: scORAI
   }
 ];
 
