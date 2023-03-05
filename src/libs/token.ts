@@ -69,14 +69,20 @@ export class CacheTokens {
 
     const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
 
-    await Promise.all(
-      [
-        loadCosmos && getFunctionExecution(this.loadTokensCosmos),
-        metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
-        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
-        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
-      ].filter(Boolean)
-    );
+    // hotfix load balance ledger not support
+    loadCosmos && getFunctionExecution(this.loadTokensCosmos);
+    metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]);
+    loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount);
+    loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance);
+
+    // await Promise.all(
+    //   [
+    //     loadCosmos && getFunctionExecution(this.loadTokensCosmos),
+    //     metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
+    //     loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
+    //     loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
+    //   ].filter(Boolean)
+    // );
   }
 
   private async loadTokensCosmos() {
