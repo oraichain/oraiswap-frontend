@@ -157,7 +157,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const onClickTokenFrom = useCallback(
     (token: TokenItemType) => {
-      console.log('onClickTokenFrom');
       onClickToken('from', token);
     },
     [onClickToken]
@@ -191,10 +190,6 @@ const Balance: React.FC<BalanceProps> = () => {
       // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
       await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
     } catch (error) {
-      console.log('error ibc wasm transfer back to remote chain: ', error);
-      console.log(
-        'We dont need to handle error for non-registered pair case. We just simply switch to the old case, which is through native IBC'
-      );
       // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
       throw new Error('Cannot transfer to remote chain because cannot find mapping pair');
     }
@@ -227,7 +222,6 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         'auto'
       );
-      console.log('result: ', result);
     }
 
     displayToast(TToastType.TX_SUCCESSFUL, {
@@ -298,8 +292,6 @@ const Balance: React.FC<BalanceProps> = () => {
   // Oraichain (Orai)
   const transferIbcCustom = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     try {
-      console.log('from token: ', fromToken);
-      console.log('to token: ', toToken);
       if (transferAmount === 0) throw new Error('Transfer amount is empty');
       await handleCheckWallet();
 
@@ -356,7 +348,6 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       // }
     } catch (ex: any) {
-      console.log('error in transfer ibc custom: ', ex);
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
       });
@@ -521,9 +512,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       await window.Metamask.checkOrIncreaseAllowance(from, metamaskAddress, gravityContractAddr, fromAmount);
       let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
-      console.log('one step keplr: ', oneStepKeplrAddr);
       const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
-      console.log(result);
       processTxResult(
         from,
         result,
@@ -545,7 +534,6 @@ const Balance: React.FC<BalanceProps> = () => {
       await cacheTokens.loadTokenAmounts(true, metamaskAddress);
       setLoadingRefresh(false);
     } catch (err) {
-      console.log({ err });
       setLoadingRefresh(false);
     }
   };
@@ -558,7 +546,6 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    console.log('from amount on click transfer: ', fromAmount);
     const tokenAmount = amounts[from.denom];
     const subAmounts = getSubAmountDetails(amounts, from);
     const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
@@ -602,7 +589,6 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const _fromAmount = toAmount(amount, token.decimals).toString();
-      console.log('convertToken');
 
       let msgs;
       if (type === 'nativeToCw20') {
@@ -622,10 +608,6 @@ const Balance: React.FC<BalanceProps> = () => {
         });
       }
       const msg = msgs[0];
-      console.log(
-        'msgs: ',
-        msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      );
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
@@ -636,12 +618,9 @@ const Balance: React.FC<BalanceProps> = () => {
       });
 
       if (result) {
-        console.log('in correct result');
-        console.log(result);
         processTxResult(token, result as any, `${network.explorer}/txs/${result.transactionHash}`);
       }
     } catch (error) {
-      console.log('error in swap form: ', error);
       let finalError = '';
       if (typeof error === 'string' || error instanceof String) {
         finalError = `${error}`;
@@ -693,7 +672,6 @@ const Balance: React.FC<BalanceProps> = () => {
       }
       processTxResult(fromToken, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
     } catch (ex: any) {
-      console.log(ex);
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
       });
