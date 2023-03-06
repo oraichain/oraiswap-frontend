@@ -4,9 +4,10 @@ import { gravityContracts } from 'config/bridgeTokens';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
+import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() {}
+  constructor() { }
 
   // compare in number type
   public isBsc() {
@@ -41,10 +42,10 @@ export default class Metamask {
     amountVal: string,
     tokenContract: string,
     from: string | null,
-    to: string
+    to: string,
+    decimals: number,
   ) {
-    const balance = Web3.utils.toWei(amountVal);
-
+    const balance = toAmount(parseFloat(amountVal), decimals);
     await this.switchNetwork(chainId);
 
     const web3 = new Web3(window.ethereum);
