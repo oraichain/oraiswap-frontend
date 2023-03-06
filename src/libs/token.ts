@@ -74,7 +74,7 @@ export class CacheTokens {
       [
         loadCosmos && getFunctionExecution(this.loadTokensCosmos),
         metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
-        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
+        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
         loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
       ].filter(Boolean)
     );
