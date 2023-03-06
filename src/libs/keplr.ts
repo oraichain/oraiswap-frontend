@@ -79,11 +79,11 @@ export default class Keplr {
   async getKeplrKey(chainId?: string): Promise<Key | undefined> {
     chainId = chainId ?? network.chainId;
     if (!chainId) return undefined;
+
     const keplr = await this.getKeplr();
     if (keplr) {
       return keplr.getKey(chainId);
     }
-    return undefined;
   }
 
   async getKeplrAddr(chainId?: string): Promise<string | undefined> {
@@ -91,12 +91,11 @@ export default class Keplr {
     chainId = chainId ?? network.chainId;
     const token = filteredTokens.find((token) => token.chainId === chainId);
     if (!token) return;
-    const key = await this.getKeplrKey(chainId);
-    return key?.bech32Address;
-  }
-
-  async getKeplrPubKey(chainId?: string): Promise<Uint8Array | undefined> {
-    const key = await this.getKeplrKey(chainId);
-    return key?.pubKey;
+    try {
+      const key = await this.getKeplrKey(chainId);
+      return key?.bech32Address;
+    } catch (ex) {
+      console.log(ex, chainId);
+    }
   }
 }
