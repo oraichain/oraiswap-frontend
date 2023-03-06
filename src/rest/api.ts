@@ -136,17 +136,6 @@ async function fetchPairInfo(assetInfos: [TokenItemType, TokenItemType]): Promis
   let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
   let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
 
-  // TODO: temporary fix for USDC. Will comment out after the factory contract has been migrated successfully
-  if (assetInfos[0].denom === 'usdc' || assetInfos[1].denom === 'usdc') {
-    return {
-      asset_infos: [firstAsset, secondAsset],
-      commission_rate: "0.003",
-      contract_addr: "orai105q4n6n8hclxcm3hj0306jqh09dxffy3j4ze2rzaylklqmu9hlcs7a39kq",
-      liquidity_token: "orai1ssg8qy3teld8tjwyjlqhw7j0xllxyw88fp5af72z50lr5akqu68qlugue5",
-      oracle_addr: "orai18rgtdvlrev60plvucw2rz8nmj8pau9gst4q07m",
-    }
-  }
-
   const data = await factory.pair({
     assetInfos: [firstAsset, secondAsset]
   });
@@ -317,6 +306,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
       offerAmount: amount.toString(),
       operations
     });
+    console.log("simulate swap data: ", data);
     return data;
   } catch (error) {
     throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
