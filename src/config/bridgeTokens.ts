@@ -158,7 +158,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDC_ETH_CONTRACT,
     bridgeNetworkIdentifier: ETHEREUM_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    decimals: EVM_DECIMALS,
+    decimals: COSMOS_DECIMALS,
     coingeckoId: 'usd-coin',
     cosmosBased: true,
     Icon: USDC
@@ -253,7 +253,7 @@ const otherChainTokens: TokenItemType[] = [
     denom: 'erc20-usdc',
     contractAddress: USDC_ETH_CONTRACT,
     rpc: ETHEREUM_RPC,
-    decimals: EVM_DECIMALS,
+    decimals: COSMOS_DECIMALS,
     bridgeTo: [ORAICHAIN_ID],
     coingeckoId: 'usd-coin',
     cosmosBased: false,
