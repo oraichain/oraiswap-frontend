@@ -71,9 +71,9 @@ export const pairs: Pair[] = [
     token_asset: 'milky'
   },
   {
-    contract_addr: 'orai105q4n6n8hclxcm3hj0306jqh09dxffy3j4ze2rzaylklqmu9hlcs7a39kq',
+    contract_addr: 'orai19ttg0j7w5kr83js32tmwnwxxdq9rkmw4m3d7mn2j2hkpugwwa4tszwsnkg',
     asset_denoms: [ORAI, 'usdc'],
-    liquidity_token: 'orai1ssg8qy3teld8tjwyjlqhw7j0xllxyw88fp5af72z50lr5akqu68qlugue5',
+    liquidity_token: 'orai1e0x87w9ezwq2sdmvv5dq5ngzy98lt47tqfaf2m7zpkg49g5dj6fqred5d7',
     commission_rate: '0.003',
     token_asset: 'usdc'
   }

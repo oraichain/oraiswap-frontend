@@ -300,6 +300,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
+  console.log("operations: ", operations);
 
   try {
     const data = await Contract.router.simulateSwapOperations({
