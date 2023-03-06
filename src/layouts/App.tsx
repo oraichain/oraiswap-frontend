@@ -85,7 +85,7 @@ const App = () => {
         message: `You have received ${tokenDisplay}`
       });
       // no metamaskAddress, only reload cosmos
-      cacheTokens.loadTokenAmounts();
+      cacheTokens.loadTokenAmounts(true);
     }
   }, [lastJsonMessage]);
 
