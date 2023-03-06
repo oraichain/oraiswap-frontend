@@ -124,7 +124,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onChangeAmount1 = (value: bigint) => {
     setRecentInput(1);
     setAmountToken1(value);
-    setAmountToken2((value * token2Amount) / token1Amount);
+    if (token1Amount > 0) setAmountToken2((value * token2Amount) / token1Amount);
 
     const estimatedLP = (value / (value + token1Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
@@ -133,7 +133,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onChangeAmount2 = (value: bigint) => {
     setRecentInput(2);
     setAmountToken2(value);
-    setAmountToken1((value * token1Amount) / token2Amount);
+    if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
 
     const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
