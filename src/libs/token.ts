@@ -69,20 +69,15 @@ export class CacheTokens {
     }
 
     const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-    // hotfix load balance ledger not support
-    loadCosmos && getFunctionExecution(this.loadTokensCosmos);
-    metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]);
-    loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]);
-    loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance);
 
-    // await Promise.all(
-    //   [
-    //     loadCosmos && getFunctionExecution(this.loadTokensCosmos),
-    //     metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
-    //     loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
-    //     loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
-    //   ].filter(Boolean)
-    // );
+    await Promise.all(
+      [
+        loadCosmos && getFunctionExecution(this.loadTokensCosmos),
+        metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
+        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
+      ].filter(Boolean)
+    );
   }
 
   private async loadTokensCosmos() {
@@ -92,12 +87,12 @@ export class CacheTokens {
     }
   }
 
-  private async loadCw20Balance() {
-    if (!this.address) return;
+  private async loadCw20Balance(address: string) {
+    if (!address) return;
     // get all cw20 token contract
     const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
     const data = toBinary({
-      balance: { address: this.address }
+      balance: { address }
     });
 
     const res = await Contract.multicall.aggregate({
