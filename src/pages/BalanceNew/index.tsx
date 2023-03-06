@@ -70,7 +70,7 @@ import { getOneStepKeplrAddr } from './helpers';
 import KwtModal from './KwtModal';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -505,7 +505,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const transferEvmToIBC = async (fromAmount: number, decimals: number) => {
+  const transferEvmToIBC = async (fromAmount: number) => {
     await window.Metamask.switchNetwork(from!.chainId);
     if (!metamaskAddress || !keplrAddress) {
       displayToast(TToastType.TX_FAILED, {
@@ -519,23 +519,10 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
-      await window.Metamask.checkOrIncreaseAllowance(
-        from!.chainId as string,
-        from!.contractAddress!,
-        metamaskAddress,
-        gravityContractAddr,
-        fromAmount.toString()
-      );
+      await window.Metamask.checkOrIncreaseAllowance(from, metamaskAddress, gravityContractAddr, fromAmount);
       let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
-      console.log("one step keplr: ", oneStepKeplrAddr);
-      const result = await window.Metamask.transferToGravity(
-        from!.chainId as string,
-        fromAmount.toString(),
-        from!.contractAddress!,
-        metamaskAddress,
-        oneStepKeplrAddr,
-        decimals
-      );
+      console.log('one step keplr: ', oneStepKeplrAddr);
+      const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
       console.log(result);
       processTxResult(
         from,
@@ -571,7 +558,7 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    console.log("from amount on click transfer: ", fromAmount);
+    console.log('from amount on click transfer: ', fromAmount);
     const tokenAmount = amounts[from.denom];
     const subAmounts = getSubAmountDetails(amounts, from);
     const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
@@ -592,7 +579,7 @@ const Balance: React.FC<BalanceProps> = () => {
       } else if (from.cosmosBased) {
         return await transferIbcCustom(from, to, fromAmount);
       } else {
-        await transferEvmToIBC(fromAmount, from.decimals);
+        await transferEvmToIBC(fromAmount);
       }
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
@@ -814,10 +801,10 @@ const Balance: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                          ? (fromAmount: number) => {
+                        ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                          : undefined
+                        : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />
