@@ -75,7 +75,7 @@ export class CacheTokens {
         loadCosmos && getFunctionExecution(this.loadTokensCosmos),
         metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
         loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
-        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
+        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
       ].filter(Boolean)
     );
   }
@@ -87,12 +87,12 @@ export class CacheTokens {
     }
   }
 
-  private async loadCw20Balance() {
-    if (!this.address) return;
+  private async loadCw20Balance(address: string) {
+    if (!address) return;
     // get all cw20 token contract
     const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
     const data = toBinary({
-      balance: { address: this.address }
+      balance: { address }
     });
 
     const res = await Contract.multicall.aggregate({
