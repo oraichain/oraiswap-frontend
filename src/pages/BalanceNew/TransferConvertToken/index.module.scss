@@ -138,6 +138,18 @@
     font-size: 20px;
   }
 }
+
+.tokenSubAmouts {
+  display: flex;
+  flex-direction: column;
+  text-align: end;
+}
+.itemSubAmounts {
+  color: #777e90;
+  font-weight: 600;
+  font-size: 13px;
+}
+
 .tokenFromGroup {
   margin: 5px 0;
 

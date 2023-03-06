@@ -69,14 +69,14 @@ export const pairs: Pair[] = [
     liquidity_token: 'orai18ywllw03hvy720l06rme0apwyyq9plk64h9ccf',
     commission_rate: '0.003',
     token_asset: 'milky'
+  },
+  {
+    contract_addr: 'orai19ttg0j7w5kr83js32tmwnwxxdq9rkmw4m3d7mn2j2hkpugwwa4tszwsnkg',
+    asset_denoms: [ORAI, 'usdc'],
+    liquidity_token: 'orai1e0x87w9ezwq2sdmvv5dq5ngzy98lt47tqfaf2m7zpkg49g5dj6fqred5d7',
+    commission_rate: '0.003',
+    token_asset: 'usdc'
   }
-  // {
-  //   contract_addr: 'orai105q4n6n8hclxcm3hj0306jqh09dxffy3j4ze2rzaylklqmu9hlcs7a39kq',
-  //   asset_denoms: [ORAI, 'usdc'],
-  //   liquidity_token: 'orai1ssg8qy3teld8tjwyjlqhw7j0xllxyw88fp5af72z50lr5akqu68qlugue5',
-  //   commission_rate: '0.003',
-  //   token_asset: 'usdc'
-  // }
 ];
 
 export const pairDenoms = uniq(flatten(pairs.map((pair) => pair.asset_denoms)));

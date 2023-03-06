@@ -38,6 +38,7 @@ export class CacheTokens {
   }
 
   private async loadNativeBalance(address: string, tokenInfo: { chainId: string; rpc: string }) {
+    if (!address) return;
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
 
@@ -73,8 +74,8 @@ export class CacheTokens {
       [
         loadCosmos && getFunctionExecution(this.loadTokensCosmos),
         metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
-        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount),
-        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance)
+        loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
+        loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
       ].filter(Boolean)
     );
   }
@@ -86,12 +87,12 @@ export class CacheTokens {
     }
   }
 
-  private async loadCw20Balance() {
-    if (!this.address) return;
+  private async loadCw20Balance(address: string) {
+    if (!address) return;
     // get all cw20 token contract
     const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
     const data = toBinary({
-      balance: { address: this.address }
+      balance: { address }
     });
 
     const res = await Contract.multicall.aggregate({
@@ -169,8 +170,7 @@ export class CacheTokens {
     this.forceUpdate(amountDetails);
   }
 
-  private async loadKawaiiSubnetAmount() {
-    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
+  private async loadKawaiiSubnetAmount(kwtSubnetAddress: string) {
     let amountDetails = Object.fromEntries(
       await this.loadEvmEntries(
         kwtSubnetAddress,

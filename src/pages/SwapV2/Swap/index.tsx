@@ -187,7 +187,7 @@ const SwapComponent: React.FC<{
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: fromTokenBalance.toString(),
+              amount: fromTokenBalance,
               decimals: fromTokenInfoData?.decimals,
               denom: fromTokenInfoData?.symbol ?? ''
             }}
@@ -242,7 +242,7 @@ const SwapComponent: React.FC<{
         <div className={cx('balance')}>
           <TokenBalance
             balance={{
-              amount: toTokenBalance.toString(),
+              amount: toTokenBalance,
               denom: toTokenInfoData?.symbol ?? '',
               decimals: toTokenInfoData?.decimals
             }}
@@ -273,7 +273,14 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Minimum Received</span>
           </div>
-          <TokenBalance balance={toDisplay(simulateData?.amount, toTokenInfoData?.decimals)} decimalScale={2} />
+          <TokenBalance
+            balance={{
+              amount: simulateData?.amount,
+              denom: toTokenInfoData?.symbol,
+              decimals: toTokenInfoData?.decimals
+            }}
+            decimalScale={6}
+          />
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>

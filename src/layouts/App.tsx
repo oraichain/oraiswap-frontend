@@ -85,7 +85,7 @@ const App = () => {
         message: `You have received ${tokenDisplay}`
       });
       // no metamaskAddress, only reload cosmos
-      cacheTokens.loadTokenAmounts();
+      cacheTokens.loadTokenAmounts(true);
     }
   }, [lastJsonMessage]);
 
@@ -148,7 +148,7 @@ const App = () => {
   useEagerConnect(false, true);
   useEffect(() => {
     // load cosmos
-    cacheTokens.loadTokenAmounts(false);
+    cacheTokens.loadTokenAmounts();
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
