@@ -1,13 +1,13 @@
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
-import { gravityContracts } from 'config/bridgeTokens';
+import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
 
   // compare in number type
   public isBsc() {
@@ -37,43 +37,29 @@ export default class Metamask {
     return address;
   }
 
-  public async transferToGravity(
-    chainId: string,
-    amountVal: string,
-    tokenContract: string,
-    from: string | null,
-    to: string,
-    decimals: number,
-  ) {
-    const balance = toAmount(parseFloat(amountVal), decimals);
-    await this.switchNetwork(chainId);
-
+  public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
+    await this.switchNetwork(token.chainId);
+    const balance = toAmount(amountVal, token.decimals);
     const web3 = new Web3(window.ethereum);
-    const gravityContractAddr = gravityContracts[chainId] as string;
+    const gravityContractAddr = gravityContracts[token.chainId] as string;
     if (!gravityContractAddr || !from || !to) return;
     const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
-    const result = await gravityContract.methods.sendToCosmos(tokenContract, to, balance).send({
+    const result = await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
       from
     });
     return result;
   }
 
-  public async checkOrIncreaseAllowance(
-    chainId: string,
-    tokenAddr: string,
-    owner: string,
-    spender: string,
-    amount: string
-  ) {
-    await this.switchNetwork(chainId);
-    const weiAmount = Web3.utils.toWei(amount);
+  public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
+    await this.switchNetwork(token.chainId);
+    const weiAmount = toAmount(amount, token.decimals);
     const web3 = new Web3(window.ethereum);
-    const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], tokenAddr);
-    const currentAllowance = await tokenContract.methods.allowance(owner, spender).call();
+    const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
+    const currentAllowance = BigInt(await tokenContract.methods.allowance(owner, spender).call());
 
-    if (+currentAllowance >= +weiAmount) return;
+    if (currentAllowance >= weiAmount) return;
 
-    const allowance = Web3.utils.toWei('99999999999999999');
+    const allowance = toAmount(999999999999999, token.decimals);
 
     const result = await tokenContract.methods.approve(spender, allowance).send({
       from: owner
