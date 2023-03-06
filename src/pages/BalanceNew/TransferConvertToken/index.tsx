@@ -124,8 +124,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
-        {isMobile() &&
-          subAmounts &&
+        {subAmounts &&
           Object.keys(subAmounts)?.length > 0 &&
           Object.keys(subAmounts).map((denom, idx) => {
             const subAmount = subAmounts[denom] ?? '0';

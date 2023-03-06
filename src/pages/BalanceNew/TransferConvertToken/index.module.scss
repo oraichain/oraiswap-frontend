@@ -141,12 +141,13 @@
 
 .tokenSubAmouts {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  text-align: end;
 }
 .itemSubAmounts {
   color: #777e90;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .tokenFromGroup {

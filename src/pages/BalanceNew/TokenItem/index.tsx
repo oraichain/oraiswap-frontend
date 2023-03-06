@@ -59,35 +59,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
               className={styles.tokenAmount}
               decimalScale={Math.min(6, token.decimals)}
             />
-            {!isMobile() && subAmounts && Object.keys(subAmounts)?.length > 0 && (
-              <TooltipIcon
-                content={
-                  <div className={styles.tooltipAmount}>
-                    {Object.keys(subAmounts).map((denom, idx) => {
-                      const subAmount = subAmounts[denom] ?? '0';
-                      const evmToken = tokenMap[denom];
-                      return (
-                        <div key={idx} className={styles.row}>
-                          <div>
-                            <div className={styles.description}>({evmToken.name})</div>
-                          </div>
-                          <TokenBalance
-                            balance={{
-                              amount: subAmount,
-                              denom: token.denom,
-                              decimals: evmToken.decimals
-                            }}
-                            className={styles.tokenAmount}
-                            decimalScale={token.decimals}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                }
-                placement="bottom-end"
-              />
-            )}
           </div>
           <TokenBalance balance={usd} className={styles.subLabel} decimalScale={2} />
         </div>
