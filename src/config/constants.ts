@@ -52,7 +52,7 @@ export const ETHEREUM_CHAIN_ID = 1;
 export const ETHEREUM_RPC = 'https://1rpc.io/eth';
 export const ETHEREUM_SCAN = 'https://etherscan.io';
 export const BSC_CHAIN_ID = 56;
-export const BSC_RPC = 'https://bsc-dataseed.binance.org';
+export const BSC_RPC = 'https://1rpc.io/bnb';
 export const BSC_SCAN = 'https://bscscan.com';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 

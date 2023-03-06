@@ -38,6 +38,7 @@ export class CacheTokens {
   }
 
   private async loadNativeBalance(address: string, tokenInfo: { chainId: string; rpc: string }) {
+    if (!address) return;
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
 
@@ -68,11 +69,10 @@ export class CacheTokens {
     }
 
     const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-
     // hotfix load balance ledger not support
     loadCosmos && getFunctionExecution(this.loadTokensCosmos);
     metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]);
-    loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount);
+    loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]);
     loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance);
 
     // await Promise.all(
@@ -175,8 +175,7 @@ export class CacheTokens {
     this.forceUpdate(amountDetails);
   }
 
-  private async loadKawaiiSubnetAmount() {
-    const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
+  private async loadKawaiiSubnetAmount(kwtSubnetAddress: string) {
     let amountDetails = Object.fromEntries(
       await this.loadEvmEntries(
         kwtSubnetAddress,

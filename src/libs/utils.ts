@@ -8,6 +8,7 @@ const truncDecimals = 6;
 const atomic = 10 ** truncDecimals;
 
 export const getEvmAddress = (bech32Address: string) => {
+  if (!bech32Address) return;
   const decoded = bech32.decode(bech32Address);
   const evmAddress = '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
   return evmAddress;
