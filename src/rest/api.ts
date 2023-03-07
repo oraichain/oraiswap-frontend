@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, STABLE_DENOM } from 'config/constants';
+import { ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
@@ -30,8 +30,6 @@ export enum Type {
   'CLAIM_ORAIX' = 'Claim ORAIX tokens',
   'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens'
 }
-
-const oraiInfo = { native_token: { denom: ORAI } };
 
 async function fetchTokenInfo(token: TokenItemType): Promise<TokenInfo> {
   const data = token.contractAddress ? await Contract.token(token.contractAddress).tokenInfo() : undefined;
@@ -318,12 +316,12 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
         {
           orai_swap: {
             offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
+            ask_asset_info: ORAI_INFO
           }
         },
         {
           orai_swap: {
-            offer_asset_info: oraiInfo,
+            offer_asset_info: ORAI_INFO,
             ask_asset_info: askInfo
           }
         }

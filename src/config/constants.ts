@@ -138,7 +138,7 @@ export const ORAIX_COINGECKO_ID = 'oraidex';
 // asset info token
 export const ORAI_INFO = {
   native_token: {
-    denom: 'orai'
+    denom: ORAI
   }
 };
 
