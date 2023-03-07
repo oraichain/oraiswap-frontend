@@ -230,12 +230,13 @@ const Pools: React.FC<PoolsProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
 
   const fetchApr = async () => {
-    const tokens = pairs.map((p) => tokenMap[p.liquidity_token]);
+    const lpTokens = pairs.map((p) => tokenMap[p.liquidity_token]);
+    const assetTokens = pairs.map((p) => tokenMap[p.token_asset]);
     try {
       const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-        fetchTokenInfos(tokens),
-        fetchAllTokenAssetPools(tokens),
-        fetchAllRewardPerSecInfos(tokens)
+        fetchTokenInfos(lpTokens),
+        fetchAllTokenAssetPools(assetTokens),
+        fetchAllRewardPerSecInfos(assetTokens)
       ]);
       const aprResult = pairs.reduce((acc, pair, ind) => {
         const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
@@ -244,7 +245,7 @@ const Pools: React.FC<PoolsProps> = () => {
         const bondValue =
           (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) /
           validateNumber(tokenSupply.total_supply);
-        const rewardsPerSec = allRewardPerSec[ind]?.assets;
+        const rewardsPerSec = allRewardPerSec[ind].assets;
         let rewardsPerYearValue = 0;
         rewardsPerSec.forEach(({ amount, info }) => {
           if (isEqual(info, ORAI_INFO))
