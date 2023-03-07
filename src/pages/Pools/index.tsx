@@ -230,7 +230,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
 
   const fetchApr = async () => {
-    const lpTokens = pairs.map((p) => tokenMap[p.liquidity_token]);
+    const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
     const assetTokens = pairs.map((p) => tokenMap[p.token_asset]);
     try {
       const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
