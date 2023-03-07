@@ -96,22 +96,27 @@ button[disabled] {
   font-family: $font-family;
   src: url('./assets/fonts/IBMPlexSans-Bold.ttf');
   font-weight: 700;
+  font-display: swap;
 }
 
 @font-face {
   font-family: $font-family;
   src: url('./assets/fonts/IBMPlexSans-SemiBold.ttf');
   font-weight: 600;
+  font-display: swap;
 }
 
 @font-face {
   font-family: $font-family;
   src: url('./assets/fonts/IBMPlexSans-Medium.ttf');
   font-weight: 500;
+  font-display: swap;
 }
 
 @font-face {
   font-family: $font-family;
   src: url('./assets/fonts/IBMPlexSans-Regular.ttf');
   font-weight: 400;  
+  font-display: swap;
 }
+
