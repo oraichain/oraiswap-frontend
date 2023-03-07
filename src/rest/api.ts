@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, STABLE_DENOM } from 'config/constants';
+import { ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
@@ -12,7 +12,7 @@ import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'lib
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
 import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.types';
 
-import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
 import axios from './request';
@@ -30,8 +30,6 @@ export enum Type {
   'CLAIM_ORAIX' = 'Claim ORAIX tokens',
   'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens'
 }
-
-const oraiInfo = { native_token: { denom: ORAI } };
 
 async function fetchTokenInfo(token: TokenItemType): Promise<TokenInfo> {
   const data = token.contractAddress ? await Contract.token(token.contractAddress).tokenInfo() : undefined;
@@ -62,13 +60,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         rewards_per_sec: {
-          asset_info: token.contractAddress
-            ? {
-                token: {
-                  contract_addr: token.contractAddress
-                }
-              }
-            : { native_token: { denom: token.denom } }
+          asset_info: toAssetInfo(token)
         }
       } as StakingQueryMsg)
     };
@@ -77,9 +69,8 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
     queries
   });
 
-  return res.return_data.map((data) => {
-    if (data.success) return fromBinary(data.data);
-  });
+  // aggregate no try
+  return res.return_data.map((data) => fromBinary(data.data));
 }
 
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
@@ -88,13 +79,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         pool_info: {
-          asset_info: token.contractAddress
-            ? {
-                token: {
-                  contract_addr: token.contractAddress
-                }
-              }
-            : { native_token: { denom: token.denom } }
+          asset_info: toAssetInfo(token)
         }
       } as StakingQueryMsg)
     };
@@ -103,10 +88,8 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
   const res = await Contract.multicall.aggregate({
     queries
   });
-
-  return res.return_data.map((data) => {
-    if (data.success) return fromBinary(data.data);
-  });
+  // aggregate no try
+  return res.return_data.map((data) => fromBinary(data.data));
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
@@ -330,12 +313,12 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
         {
           orai_swap: {
             offer_asset_info: offerInfo,
-            ask_asset_info: oraiInfo
+            ask_asset_info: ORAI_INFO
           }
         },
         {
           orai_swap: {
-            offer_asset_info: oraiInfo,
+            offer_asset_info: ORAI_INFO,
             ask_asset_info: askInfo
           }
         }
