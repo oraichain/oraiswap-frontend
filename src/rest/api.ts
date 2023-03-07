@@ -12,7 +12,7 @@ import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'lib
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
 import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.types';
 
-import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
 import axios from './request';
@@ -62,13 +62,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         rewards_per_sec: {
-          asset_info: token.contractAddress
-            ? {
-                token: {
-                  contract_addr: token.contractAddress
-                }
-              }
-            : { native_token: { denom: token.denom } }
+          asset_info: toAssetInfo(token)
         }
       } as StakingQueryMsg)
     };
@@ -88,13 +82,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         pool_info: {
-          asset_info: token.contractAddress
-            ? {
-                token: {
-                  contract_addr: token.contractAddress
-                }
-              }
-            : { native_token: { denom: token.denom } }
+          asset_info: toAssetInfo(token)
         }
       } as StakingQueryMsg)
     };
