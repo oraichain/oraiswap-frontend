@@ -14,7 +14,8 @@ export const getEvmAddress = (bech32Address: string) => {
   return evmAddress;
 };
 
-export const validateNumber = (amount: number): number => {
+export const validateNumber = (amount: number | string): number => {
+  if (typeof amount === 'string') return Number(amount);
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
   return amount;
 };

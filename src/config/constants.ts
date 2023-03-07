@@ -31,9 +31,14 @@ export const GAS_ESTIMATION_BRIDGE_DEFAULT = 200000;
 export const MULTIPLIER = 1.6;
 export const HIGH_GAS_PRICE = 0.007;
 
+export const SEC_PER_YEAR = 60 * 60 * 24 * 365;
+
 /* oraiswap:configs */
 export const DEFAULT_MAX_SPREAD = 0.5;
 export const MAX_MSG_LENGTH = 1024;
+
+// commission_rate pool
+export const COMMISSION_RATE = '0.003';
 
 /* network:settings */
 export const IBC_TRANSFER_TIMEOUT = 3600;
@@ -124,4 +129,21 @@ export const NOTI_INSTALL_OWALLET = {
   message: 'You need to install OWallet or Keplr to continue.',
   customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
   textLink: 'View on store'
+};
+
+// coingeckoid token
+export const ORAI_COINGECKO_ID = 'oraichain-token';
+export const ORAIX_COINGECKO_ID = 'oraidex';
+
+// asset info token
+export const ORAI_INFO = {
+  native_token: {
+    denom: 'orai'
+  }
+};
+
+export const ORAIX_INFO = {
+  token: {
+    contract_addr: process.env.REACT_APP_ORAIX_CONTRACT
+  }
 };
