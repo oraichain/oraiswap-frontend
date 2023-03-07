@@ -1,15 +1,17 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin } from '@cosmjs/stargate';
-import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair, Pair, pairs } from 'config/pools';
+import { getPair, Pair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
+import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.types';
+
 import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
@@ -31,23 +33,16 @@ export enum Type {
 
 const oraiInfo = { native_token: { denom: ORAI } };
 
-async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
-  const data = tokenSwap.contractAddress ? await Contract.token(tokenSwap.contractAddress).tokenInfo() : undefined;
-  return toTokenInfo(tokenSwap, data);
+async function fetchTokenInfo(token: TokenItemType): Promise<TokenInfo> {
+  const data = token.contractAddress ? await Contract.token(token.contractAddress).tokenInfo() : undefined;
+  return toTokenInfo(token, data);
 }
 
 /// using multicall when query multiple
-async function fetchTokenInfos(tokenSwaps?: TokenItemType[]): Promise<
-  | TokenInfo[]
-  | {
-      [contract_addr: string]: {
-        total_supply: string;
-      };
-    }
-> {
-  const filterTokenSwaps = tokenSwaps ? tokenSwaps.filter((t) => t.contractAddress) : pairs;
+async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
+  const filterTokenSwaps = tokens.filter((t) => t.contractAddress);
   const queries = filterTokenSwaps.map((t) => ({
-    address: t.contractAddress ?? t.liquidity_token,
+    address: t.contractAddress,
     data: toBinary({
       token_info: {}
     } as TokenQueryMsg)
@@ -57,78 +52,61 @@ async function fetchTokenInfos(tokenSwaps?: TokenItemType[]): Promise<
     queries
   });
 
-  if (!tokenSwaps) return entriesResponseMultical(pairs, res);
   let ind = 0;
-  return tokenSwaps.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
+  return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
 }
 
-async function fetchAllRewardPerSecInfo(): Promise<{
-  [contract_addr: string]: {
-    assets: Array<{
-      amount: string;
-      info: Object;
-    }>;
-  };
-}> {
-  const queries = pairs.map((pair) => {
-    const tokenAsset = filteredTokens.find((item) => item.denom === pair.token_asset);
+async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<RewardsPerSecResponse[]> {
+  const queries = tokens.map((token) => {
     return {
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         rewards_per_sec: {
-          asset_info: {
-            [tokenAsset.contractAddress ? 'token' : 'native_token']: {
-              [tokenAsset.contractAddress ? 'contract_addr' : 'denom']: tokenAsset.contractAddress ?? tokenAsset.denom
-            }
-          }
+          asset_info: token.contractAddress
+            ? {
+                token: {
+                  contract_addr: token.contractAddress
+                }
+              }
+            : { native_token: { denom: token.denom } }
         }
-      })
+      } as StakingQueryMsg)
     };
   });
   const res = await Contract.multicall.aggregate({
     queries
   });
-  return entriesResponseMultical(pairs, res);
+
+  return res.return_data.map((data) => {
+    if (data.success) return fromBinary(data.data);
+  });
 }
 
-async function fetchAllTokenAssetPool(): Promise<{
-  [contract_addr: string]: {
-    total_bond_amount: string;
-  };
-}> {
-  const queries = pairs.map((pair) => {
-    const tokenAsset = filteredTokens.find((item) => item.denom === pair.token_asset);
+async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
+  const queries = tokens.map((token) => {
     return {
       address: process.env.REACT_APP_STAKING_CONTRACT,
       data: toBinary({
         pool_info: {
-          asset_info: {
-            [tokenAsset.contractAddress ? 'token' : 'native_token']: {
-              [tokenAsset.contractAddress ? 'contract_addr' : 'denom']: tokenAsset.contractAddress ?? tokenAsset.denom
-            }
-          }
+          asset_info: token.contractAddress
+            ? {
+                token: {
+                  contract_addr: token.contractAddress
+                }
+              }
+            : { native_token: { denom: token.denom } }
         }
-      })
+      } as StakingQueryMsg)
     };
   });
 
   const res = await Contract.multicall.aggregate({
     queries
   });
-  return entriesResponseMultical(pairs, res);
-}
 
-function entriesResponseMultical(pairsArr, res) {
-  const pairsData = Object.fromEntries(
-    pairsArr.map((pair, ind) => {
-      const data = res.return_data[ind];
-      if (!data.success) {
-        return [pair.liquidity_token, {}];
-      }
-      return [pair.liquidity_token, fromBinary(data.data)];
-    })
-  );
-  return pairsData;
+  return res.return_data.map((data) => {
+    if (data.success) return fromBinary(data.data);
+  });
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
@@ -761,6 +739,6 @@ export {
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
   parseTokenInfo,
-  fetchAllTokenAssetPool,
-  fetchAllRewardPerSecInfo
+  fetchAllTokenAssetPools,
+  fetchAllRewardPerSecInfos
 };
