@@ -69,6 +69,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
     queries
   });
 
+  // aggregate no try
   return res.return_data.map((data) => fromBinary(data.data));
 }
 
@@ -87,7 +88,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
   const res = await Contract.multicall.aggregate({
     queries
   });
-
+  // aggregate no try
   return res.return_data.map((data) => fromBinary(data.data));
 }
 
