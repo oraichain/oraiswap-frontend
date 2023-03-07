@@ -1,16 +1,18 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, STABLE_DENOM } from 'config/constants';
+import { ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair, Pair, poolTokens } from 'config/pools';
+import { getPair, Pair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
-import { getSubAmountDetails, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.types';
+
+import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
 import axios from './request';
@@ -29,16 +31,14 @@ export enum Type {
   'CONVERT_TOKEN_REVERSE' = 'Convert reverse IBC or CW20 Tokens'
 }
 
-const oraiInfo = { native_token: { denom: ORAI } };
-
-async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
-  const data = tokenSwap.contractAddress ? await Contract.token(tokenSwap.contractAddress).tokenInfo() : undefined;
-  return toTokenInfo(tokenSwap, data);
+async function fetchTokenInfo(token: TokenItemType): Promise<TokenInfo> {
+  const data = token.contractAddress ? await Contract.token(token.contractAddress).tokenInfo() : undefined;
+  return toTokenInfo(token, data);
 }
 
 /// using multicall when query multiple
-async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]> {
-  const filterTokenSwaps = tokenSwaps.filter((t) => t.contractAddress);
+async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
+  const filterTokenSwaps = tokens.filter((t) => t.contractAddress);
   const queries = filterTokenSwaps.map((t) => ({
     address: t.contractAddress,
     data: toBinary({
@@ -51,12 +51,45 @@ async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]
   });
 
   let ind = 0;
-  return tokenSwaps.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
+  return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
 }
 
-async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
-  const { data } = await axios.get(`${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr/all`);
-  return data.data;
+async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<RewardsPerSecResponse[]> {
+  const queries = tokens.map((token) => {
+    return {
+      address: process.env.REACT_APP_STAKING_CONTRACT,
+      data: toBinary({
+        rewards_per_sec: {
+          asset_info: toAssetInfo(token)
+        }
+      } as StakingQueryMsg)
+    };
+  });
+  const res = await Contract.multicall.aggregate({
+    queries
+  });
+
+  // aggregate no try
+  return res.return_data.map((data) => fromBinary(data.data));
+}
+
+async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
+  const queries = tokens.map((token) => {
+    return {
+      address: process.env.REACT_APP_STAKING_CONTRACT,
+      data: toBinary({
+        pool_info: {
+          asset_info: toAssetInfo(token)
+        }
+      } as StakingQueryMsg)
+    };
+  });
+
+  const res = await Contract.multicall.aggregate({
+    queries
+  });
+  // aggregate no try
+  return res.return_data.map((data) => fromBinary(data.data));
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
@@ -269,27 +302,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: oraiInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: oraiInfo,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -300,14 +333,14 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
-  console.log("operations: ", operations);
+  console.log('operations: ', operations);
 
   try {
     const data = await Contract.router.simulateSwapOperations({
       offerAmount: amount.toString(),
       operations
     });
-    console.log("simulate swap data: ", data);
+    console.log('simulate swap data: ', data);
     return data;
   } catch (error) {
     throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
@@ -683,11 +716,12 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
-  fetchAllPoolApr,
   fetchPoolApr,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
-  parseTokenInfo
+  parseTokenInfo,
+  fetchAllTokenAssetPools,
+  fetchAllRewardPerSecInfos
 };
