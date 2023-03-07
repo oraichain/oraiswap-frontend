@@ -37,10 +37,17 @@ async function fetchTokenInfo(tokenSwap: TokenItemType): Promise<TokenInfo> {
 }
 
 /// using multicall when query multiple
-async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]> {
-  const filterTokenSwaps = tokenSwaps.filter((t) => t.contractAddress);
+async function fetchTokenInfos(tokenSwaps?: TokenItemType[]): Promise<
+  | TokenInfo[]
+  | {
+      [contract_addr: string]: {
+        total_supply: string;
+      };
+    }
+> {
+  const filterTokenSwaps = tokenSwaps ? tokenSwaps.filter((t) => t.contractAddress) : pairs;
   const queries = filterTokenSwaps.map((t) => ({
-    address: t.contractAddress,
+    address: t.contractAddress ?? t.liquidity_token,
     data: toBinary({
       token_info: {}
     } as TokenQueryMsg)
@@ -50,30 +57,9 @@ async function fetchTokenInfos(tokenSwaps: TokenItemType[]): Promise<TokenInfo[]
     queries
   });
 
+  if (!tokenSwaps) return entriesResponseMultical(pairs, res);
   let ind = 0;
   return tokenSwaps.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
-}
-
-async function fetchAllPoolApr(): Promise<{ [contract_addr: string]: number }> {
-  const { data } = await axios.get(`${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr/all`);
-  return data.data;
-}
-
-async function fetchAllTokenInfo(): Promise<{
-  [contract_addr: string]: {
-    total_supply: string;
-  };
-}> {
-  const queries = pairs.map((pair) => ({
-    address: pair.liquidity_token,
-    data: toBinary({
-      token_info: {}
-    })
-  }));
-  const res = await Contract.multicall.aggregate({
-    queries
-  });
-  return entriesResponseMultical(pairs, res);
 }
 
 async function fetchAllRewardPerSecInfo(): Promise<{
@@ -769,14 +755,12 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
-  fetchAllPoolApr,
   fetchPoolApr,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
   parseTokenInfo,
-  fetchAllTokenInfo,
   fetchAllTokenAssetPool,
   fetchAllRewardPerSecInfo
 };

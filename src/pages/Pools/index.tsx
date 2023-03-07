@@ -30,9 +30,9 @@ import {
   fetchPoolInfoAmount,
   getPairAmountInfo,
   parseTokenInfo,
-  fetchAllTokenInfo,
   fetchAllTokenAssetPool,
-  fetchAllRewardPerSecInfo
+  fetchAllRewardPerSecInfo,
+  fetchTokenInfos
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
@@ -232,11 +232,11 @@ const Pools: React.FC<PoolsProps> = () => {
   const fetchApr = async () => {
     try {
       const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-        fetchAllTokenInfo(),
+        fetchTokenInfos(),
         fetchAllTokenAssetPool(),
         fetchAllRewardPerSecInfo()
       ]);
-      const aprArr = pairs.reduce((acc, cur) => {
+      const aprResult = pairs.reduce((acc, cur) => {
         const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === cur.contract_addr);
         const lpToken = allLpTokenAsset?.[cur.liquidity_token];
         const tokenSupply = allTokenInfo?.[cur.liquidity_token];
@@ -258,7 +258,7 @@ const Pools: React.FC<PoolsProps> = () => {
           [cur.contract_addr]: (100 * rewardsPerYearValue) / bondValue || 0
         };
       }, {});
-      setCachedApr(aprArr);
+      setCachedApr(aprResult);
     } catch (error) {
       console.log({ error });
     }
