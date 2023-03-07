@@ -69,9 +69,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
     queries
   });
 
-  return res.return_data.map((data) => {
-    if (data.success) return fromBinary(data.data);
-  });
+  return res.return_data.map((data) => fromBinary(data.data));
 }
 
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
@@ -90,9 +88,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
     queries
   });
 
-  return res.return_data.map((data) => {
-    if (data.success) return fromBinary(data.data);
-  });
+  return res.return_data.map((data) => fromBinary(data.data));
 }
 
 async function fetchPoolApr(contract_addr: string): Promise<number> {
