@@ -30,8 +30,8 @@ import {
   fetchPoolInfoAmount,
   getPairAmountInfo,
   parseTokenInfo,
-  fetchAllTokenAssetPool,
-  fetchAllRewardPerSecInfo,
+  fetchAllTokenAssetPools,
+  fetchAllRewardPerSecInfos,
   fetchTokenInfos
 } from 'rest/api';
 import { RootState } from 'store/configure';
@@ -230,20 +230,21 @@ const Pools: React.FC<PoolsProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
 
   const fetchApr = async () => {
+    const tokens = pairs.map((p) => tokenMap[p.liquidity_token]);
     try {
       const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-        fetchTokenInfos(),
-        fetchAllTokenAssetPool(),
-        fetchAllRewardPerSecInfo()
+        fetchTokenInfos(tokens),
+        fetchAllTokenAssetPools(tokens),
+        fetchAllRewardPerSecInfos(tokens)
       ]);
-      const aprResult = pairs.reduce((acc, cur) => {
-        const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === cur.contract_addr);
-        const lpToken = allLpTokenAsset?.[cur.liquidity_token];
-        const tokenSupply = allTokenInfo?.[cur.liquidity_token];
+      const aprResult = pairs.reduce((acc, pair, ind) => {
+        const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
+        const lpToken = allLpTokenAsset[ind];
+        const tokenSupply = allTokenInfo[ind];
         const bondValue =
           (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) /
           validateNumber(tokenSupply.total_supply);
-        const rewardsPerSec = allRewardPerSec?.[cur.liquidity_token]?.assets;
+        const rewardsPerSec = allRewardPerSec[ind]?.assets;
         let rewardsPerYearValue = 0;
         rewardsPerSec.forEach(({ amount, info }) => {
           if (isEqual(info, ORAI_INFO))
@@ -255,7 +256,7 @@ const Pools: React.FC<PoolsProps> = () => {
         });
         return {
           ...acc,
-          [cur.contract_addr]: (100 * rewardsPerYearValue) / bondValue || 0
+          [pair.contract_addr]: (100 * rewardsPerYearValue) / bondValue || 0
         };
       }, {});
       setCachedApr(aprResult);
