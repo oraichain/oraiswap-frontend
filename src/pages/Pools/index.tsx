@@ -3,19 +3,37 @@ import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
 import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, STABLE_DENOM } from 'config/constants';
+import {
+  COSMOS_DECIMALS,
+  ORAI,
+  ORAIX_COINGECKO_ID,
+  ORAIX_INFO,
+  ORAI_COINGECKO_ID,
+  ORAI_INFO,
+  SEC_PER_YEAR,
+  STABLE_DENOM
+} from 'config/constants';
 import { Contract } from 'config/contracts';
 import { Pair, pairs } from 'config/pools';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
-import { toDecimal } from 'libs/utils';
+import { toDecimal, validateNumber } from 'libs/utils';
+import isEqual from 'lodash/isEqual';
 import compact from 'lodash/compact';
 import sumBy from 'lodash/sumBy';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updatePairs } from 'reducer/token';
-import { fetchAllPoolApr, fetchPoolInfoAmount, getPairAmountInfo, parseTokenInfo } from 'rest/api';
+import {
+  fetchPoolInfoAmount,
+  getPairAmountInfo,
+  parseTokenInfo,
+  fetchAllTokenAssetPools,
+  fetchAllRewardPerSecInfos,
+  fetchTokenInfos
+} from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
@@ -209,11 +227,45 @@ const Pools: React.FC<PoolsProps> = () => {
   const [oraiPrice, setOraiPrice] = useState(0);
   const dispatch = useDispatch();
   const setCachedPairs = (payload: PairDetails) => dispatch(updatePairs(payload));
+  const { data: prices } = useCoinGeckoPrices();
 
   const fetchApr = async () => {
-    const data = await fetchAllPoolApr();
-    setCachedApr(data);
+    const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
+    const assetTokens = pairs.map((p) => tokenMap[p.token_asset]);
+    try {
+      const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
+        fetchTokenInfos(lpTokens),
+        fetchAllTokenAssetPools(assetTokens),
+        fetchAllRewardPerSecInfos(assetTokens)
+      ]);
+      const aprResult = pairs.reduce((acc, pair, ind) => {
+        const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
+        const lpToken = allLpTokenAsset[ind];
+        const tokenSupply = allTokenInfo[ind];
+        const bondValue =
+          (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) /
+          validateNumber(tokenSupply.total_supply);
+        const rewardsPerSec = allRewardPerSec[ind].assets;
+        let rewardsPerYearValue = 0;
+        rewardsPerSec.forEach(({ amount, info }) => {
+          if (isEqual(info, ORAI_INFO))
+            rewardsPerYearValue +=
+              (SEC_PER_YEAR * validateNumber(amount) * prices[ORAI_COINGECKO_ID]) / 10 ** COSMOS_DECIMALS;
+          else if (isEqual(info, ORAIX_INFO))
+            rewardsPerYearValue +=
+              (SEC_PER_YEAR * validateNumber(amount) * prices[ORAIX_COINGECKO_ID]) / 10 ** COSMOS_DECIMALS;
+        });
+        return {
+          ...acc,
+          [pair.contract_addr]: (100 * rewardsPerYearValue) / bondValue || 0
+        };
+      }, {});
+      setCachedApr(aprResult);
+    } catch (error) {
+      console.log({ error });
+    }
   };
+
   const fetchCachedPairs = async () => {
     const queries = pairs.map((pair) => ({
       address: pair.contract_addr,
@@ -325,9 +377,13 @@ const Pools: React.FC<PoolsProps> = () => {
 
   useEffect(() => {
     fetchCachedPairs();
-    fetchApr();
     fetchMyCachedPairs();
   }, []);
+
+  useEffect(() => {
+    if (!pairInfos.length) return;
+    fetchApr();
+  }, [pairInfos]);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
 
