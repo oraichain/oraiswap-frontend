@@ -67,19 +67,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex'
-  | 'usd-coin';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex'
+    | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -250,7 +250,7 @@ const otherChainTokens: TokenItemType[] = [
     name: 'USDC',
     org: ETHEREUM_ORG,
     chainId: ETHEREUM_CHAIN_ID,
-    denom: 'erc20-usdc',
+    denom: 'erc20_usdc',
     contractAddress: USDC_ETH_CONTRACT,
     rpc: ETHEREUM_RPC,
     decimals: COSMOS_DECIMALS,

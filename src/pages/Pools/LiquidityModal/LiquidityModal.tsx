@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, toDecimal } from 'libs/utils';
+import { buildMultipleMessages, getSubAmountDetails, toDecimal, toSumDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
@@ -76,8 +76,20 @@ const LiquidityModal: FC<ModalProps> = ({
   const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const dispatch = useDispatch();
-  const token1Balance = BigInt(amounts[token1?.denom] ?? '0');
-  const token2Balance = BigInt(amounts[token2?.denom] ?? '0');
+  let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
+  let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
+  let subAmounts: AmountDetails;
+  if (token1.contractAddress && token1.evmDenoms) {
+    subAmounts = getSubAmountDetails(amounts, token1);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token1.decimals);
+    token1Balance += subAmount;
+  }
+
+  if (token2.contractAddress && token2.evmDenoms) {
+    subAmounts = getSubAmountDetails(amounts, token2);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token2.decimals);
+    token2Balance += subAmount;
+  }
 
   const {
     data: token1AllowanceToPair,
