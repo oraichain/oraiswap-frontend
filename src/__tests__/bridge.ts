@@ -1,10 +1,19 @@
 import { coin } from '@cosmjs/stargate';
 import { filteredTokens } from 'config/bridgeTokens';
-import { KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI_BSC_CONTRACT } from 'config/constants';
+import {
+  KWT_BSC_CONTRACT,
+  MILKY_BSC_CONTRACT,
+  ORAI,
+  ORAICHAIN_ID,
+  ORAI_BRIDGE_ORG,
+  ORAI_BSC_CONTRACT,
+  ORAI_INFO
+} from 'config/constants';
+import { ibcInfos } from 'config/ibcInfos';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import { getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
-import { generateConvertCw20Erc20Message } from 'rest/api';
+import { generateConvertCw20Erc20Message, parseTokenInfo } from 'rest/api';
 
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
@@ -71,5 +80,27 @@ describe('bridge', () => {
       parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
     );
     expect(Array.isArray(executeContractMsgs)).toBe(true);
+  });
+
+  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
+    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
+    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_ORG);
+    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
+    expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
+  });
+
+  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
+    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
+    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_ORG);
+    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
+    expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
+  });
+
+  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
+    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
+    const { info: assetInfo } = parseTokenInfo(fromToken);
+    expect(assetInfo).toMatchObject(ORAI_INFO);
   });
 });
