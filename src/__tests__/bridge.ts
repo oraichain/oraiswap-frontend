@@ -5,7 +5,7 @@ import {
   MILKY_BSC_CONTRACT,
   ORAI,
   ORAICHAIN_ID,
-  ORAI_BRIDGE_ORG,
+  ORAI_BRIDGE_CHAIN_ID,
   ORAI_BSC_CONTRACT,
   ORAI_INFO
 } from 'config/constants';
@@ -48,7 +48,7 @@ describe('bridge', () => {
     const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
     const decimal = 18;
     const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name == 'KWT');
+    const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
     const msgConvertReverses = await generateConvertCw20Erc20Message(
       {
@@ -65,7 +65,7 @@ describe('bridge', () => {
     const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
     const decimal = 18;
     const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name == 'KWT');
+    const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
     const msgConvertReverses = await generateConvertCw20Erc20Message(
       {
@@ -84,7 +84,7 @@ describe('bridge', () => {
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
     const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
-    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_ORG);
+    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_CHAIN_ID);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
@@ -92,13 +92,13 @@ describe('bridge', () => {
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
     const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
-    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_ORG);
+    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_CHAIN_ID);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
   });
 
-  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
+  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-asset-info-token', async () => {
     const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
     const { info: assetInfo } = parseTokenInfo(fromToken);
     expect(assetInfo).toMatchObject(ORAI_INFO);
