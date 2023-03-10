@@ -87,3 +87,5 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
+
+export const USDC_ETH_CONTRACT = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';

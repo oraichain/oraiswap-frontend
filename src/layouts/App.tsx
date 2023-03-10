@@ -15,7 +15,7 @@ const App = () => {
   const [address, setAddress] = useGlobalState('address');
   const [_, setChainId] = useGlobalState('chainId');
   const [_$, setChainInfo] = useGlobalState('chainInfo');
-  const [_$$,setStatusChangeAccount] = useGlobalState('statusChangeAccount');
+  const [_$$, setStatusChangeAccount] = useGlobalState('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useGlobalState('infoEvm');
   const [_$$$, setInfoCosmos] = useGlobalState('infoCosmos');
   const updateAddress = async (chainInfos) => {
@@ -25,13 +25,13 @@ const App = () => {
       return displayToast(
         TToastType.TX_INFO,
         {
-          message: 'You must install Keplr to continue'
+          message: 'You must install Keplr to continue',
         },
         { toastId: 'install_keplr' }
       );
     }
 
-    let newAddress = await window.Keplr.getKeplrAddr(chainInfos?.chainId);
+    let newAddress = await window.Keplr.getKeplrAddr();
 
     if (isMobile()) {
       setInfoEvm({
@@ -42,8 +42,8 @@ const App = () => {
 
     if (chainInfos) {
       setStatusChangeAccount(false);
-      setChainId(chainInfos.chainId);
-      setChainInfo(chainInfos);
+      // setChainId(chainInfos.chainId);
+      // setChainInfo(chainInfos);
       if (chainInfos?.networkType === 'evm') {
         window.ethereum.chainId = chainInfos.chainId;
         setInfoEvm(chainInfos);
@@ -77,25 +77,28 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if(window.keplr) {
+    if (window.keplr) {
       keplrGasPriceCheck();
     }
-  },[])
+  }, []);
 
   const keplrGasPriceCheck = async () => {
     try {
-      const chainInfosWithoutEndpoints = await window.Keplr.getChainInfosWithoutEndpoints();
-      const gasPriceStep = chainInfosWithoutEndpoints.find(e => e.chainId == ORAICHAIN_ID)?.feeCurrencies[0]?.gasPriceStep
+      const chainInfosWithoutEndpoints =
+        await window.Keplr.getChainInfosWithoutEndpoints();
+      const gasPriceStep = chainInfosWithoutEndpoints.find(
+        (e) => e.chainId == ORAICHAIN_ID
+      )?.feeCurrencies[0]?.gasPriceStep;
       if (gasPriceStep && !gasPriceStep.low) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: "https://www.youtube.com/watch?v=QMqCVUfxDAk"
+          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk',
         });
       }
     } catch (error) {
       console.log('Error: ', error);
     }
-  }
+  };
 
   const keplrHandler = async (event?: CustomEvent) => {
     try {
@@ -108,7 +111,7 @@ const App = () => {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`
+        message: `There is an unexpected error with Keplr wallet. Please try again!`,
       });
     }
   };

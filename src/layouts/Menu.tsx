@@ -23,7 +23,7 @@ import React, {
   useContext,
   useEffect,
   useState,
-  ReactElement
+  ReactElement,
 } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
@@ -40,7 +40,7 @@ import {
   KWT_SUBNETWORK_EVM_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
-  OSMOSIS_CHAIN_ID
+  OSMOSIS_CHAIN_ID,
 } from 'config/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 
@@ -69,13 +69,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const {
     isLoading,
     error,
-    data: balance
+    data: balance,
   } = useQuery(
     ['balance', ORAI, address],
     () => fetchNativeTokenBalance(address, ORAI, chainInfo?.lcd),
     {
       enabled: address?.length > 0,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -161,18 +161,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={address}
                     className={styles.token_avatar}
                   />
-                  {handleCheckChain(KWT_SUBNETWORK_CHAIN_ID, infoCosmos) && (
-                    <KwtIcon className={styles.network_icon} />
-                  )}
-                  {handleCheckChain(COSMOS_CHAIN_ID, infoCosmos) && (
-                    <AtomCosmosIcon className={styles.network_icon} />
-                  )}
-                  {handleCheckChain(OSMOSIS_CHAIN_ID, infoCosmos) && (
-                    <OsmosisIcon className={styles.network_icon} />
-                  )}
-                  {handleCheckChain(ORAICHAIN_ID, infoCosmos) && (
-                    <ORAIIcon className={styles.network_icon} />
-                  )}
+                  <ORAIIcon className={styles.network_icon} />
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
                       size={6}
@@ -184,7 +173,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: balance || '0',
                           decimals: 6,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
@@ -199,14 +188,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     address={metamaskAddress}
                     className={styles.token_avatar}
                   />
-                  {handleCheckChain(BSC_CHAIN_ID) && (
+                  {window.Metamask.isBsc() ? (
                     <BNBIcon className={styles.network_icon} />
-                  )}
-                  {handleCheckChain(ETHEREUM_CHAIN_ID) && (
+                  ) : (
                     <img src={ethIcon} className={styles.network_icon} />
-                  )}
-                  {handleCheckChain(KWT_SUBNETWORK_EVM_CHAIN_ID) && (
-                    <KwtIcon className={styles.network_icon} />
                   )}
                   <div className={styles.token_info_balance}>
                     <CenterEllipsis
@@ -219,7 +204,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                         balance={{
                           amount: metamaskBalance,
                           decimals: 18,
-                          denom: ORAI
+                          denom: ORAI,
                         }}
                         className={styles.token_balance}
                         decimalScale={6}
@@ -272,7 +257,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_themes}>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.dark
+                [styles.active]: theme === Themes.dark,
               })}
               onClick={() => {
                 setTheme(Themes.dark);
@@ -283,7 +268,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Button>
             <Button
               className={classNames(styles.menu_theme, {
-                [styles.active]: theme === Themes.light
+                [styles.active]: theme === Themes.light,
               })}
               onClick={() => {
                 setTheme(Themes.light);
