@@ -114,30 +114,30 @@ export const getTokenChain = (token: TokenItemType) => {
   return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
 };
 
-export const handleCheckChain = (chainId: string | number, infoCosmos?: ChainInfoType) => {
-  switch (chainId) {
-    case BSC_CHAIN_ID:
-      return window.Metamask.isBsc();
-    case ETHEREUM_CHAIN_ID:
-      return window.Metamask.isEth();
-    case KWT_SUBNETWORK_EVM_CHAIN_ID:
-      return Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID);
-    case KWT_SUBNETWORK_CHAIN_ID:
-      return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
-    case COSMOS_CHAIN_ID:
-      return infoCosmos.chainId === COSMOS_CHAIN_ID;
-    case OSMOSIS_CHAIN_ID:
-      return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
-    case ORAICHAIN_ID:
-      return (
-        infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
-        infoCosmos.chainId !== COSMOS_CHAIN_ID &&
-        infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
-      );
-    default:
-      return false;
-  }
-};
+// export const handleCheckChain = (chainId: string | number, infoCosmos?: ChainInfoType) => {
+//   switch (chainId) {
+//     case BSC_CHAIN_ID:
+//       return window.Metamask.isBsc();
+//     case ETHEREUM_CHAIN_ID:
+//       return window.Metamask.isEth();
+//     case KWT_SUBNETWORK_EVM_CHAIN_ID:
+//       return Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID);
+//     case KWT_SUBNETWORK_CHAIN_ID:
+//       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
+//     case COSMOS_CHAIN_ID:
+//       return infoCosmos.chainId === COSMOS_CHAIN_ID;
+//     case OSMOSIS_CHAIN_ID:
+//       return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
+//     case ORAICHAIN_ID:
+//       return (
+//         infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
+//         infoCosmos.chainId !== COSMOS_CHAIN_ID &&
+//         infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
+//       );
+//     default:
+//       return false;
+//   }
+// };
 
 export const getDenomEvm = () => {
   if (window.Metamask.isEth()) return ERC20_ORAI;

@@ -44,7 +44,6 @@ const BondingModal: FC<ModalProps> = ({
 }) => {
   const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
-  const [address] = useConfigReducer('address');
 
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
 
@@ -57,9 +56,17 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      if (!oraiAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!'
+        });
+        return;
+      }
+
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
-        sender: address,
+        sender: oraiAddress,
         amount: parsedAmount.toString(),
         lpToken: lpTokenInfoData.contractAddress!,
         assetToken
@@ -68,7 +75,7 @@ const BondingModal: FC<ModalProps> = ({
       const msg = msgs[0];
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: address,
+        walletAddr: oraiAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds }
