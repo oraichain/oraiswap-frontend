@@ -29,8 +29,8 @@ import Menu from './Menu';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
-  const [, setChainId] = useConfigReducer('chainId');
-  const [, setChainInfo] = useConfigReducer('chainInfo');
+  // const [, setChainId] = useConfigReducer('chainId');
+  // const [, setChainInfo] = useConfigReducer('chainInfo');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
   const [, setInfoCosmos] = useConfigReducer('infoCosmos');
@@ -109,7 +109,7 @@ const App = () => {
       });
     }
 
-    let newAddress = await window.Keplr.getKeplrAddr(chainInfo?.chainId);
+    let newAddress = await window.Keplr.getKeplrAddr();
 
     if (isMobile()) {
       setInfoEvm({
@@ -120,8 +120,8 @@ const App = () => {
 
     if (chainInfo) {
       setStatusChangeAccount(false);
-      setChainId(chainInfo.chainId ?? ORAICHAIN_ID);
-      setChainInfo(chainInfo);
+      // setChainId(ORAICHAIN_ID);
+      // setChainInfo(chainInfo);
       if (chainInfo?.networkType === EVM_TYPE) {
         window.ethereum.chainId = chainInfo.chainId;
         setInfoEvm(chainInfo);
