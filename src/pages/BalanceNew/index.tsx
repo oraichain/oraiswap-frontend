@@ -498,7 +498,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const transferEvmToIBC = async (fromAmount: number) => {
     await window.Metamask.switchNetwork(from!.chainId);
-    if (!metamaskAddress || !keplrAddress) {
+    const oraiAddress = await window.Keplr.getKeplrAddr();
+    if (!metamaskAddress || !oraiAddress) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Please login both metamask and keplr!'
       });
@@ -511,7 +512,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       await window.Metamask.checkOrIncreaseAllowance(from, metamaskAddress, gravityContractAddr, fromAmount);
-      let oneStepKeplrAddr = getOneStepKeplrAddr(keplrAddress, from.contractAddress);
+      let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
       const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
       processTxResult(
         from,
@@ -589,19 +590,25 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const _fromAmount = toAmount(amount, token.decimals).toString();
-
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      if (!oraiAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!'
+        });
+        return;
+      }
       let msgs;
       if (type === 'nativeToCw20') {
         msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN,
-          sender: keplrAddress,
+          sender: oraiAddress,
           inputAmount: _fromAmount,
           inputToken: token
         });
       } else if (type === 'cw20ToNative') {
         msgs = generateConvertMsgs({
           type: Type.CONVERT_TOKEN_REVERSE,
-          sender: keplrAddress,
+          sender: oraiAddress,
           inputAmount: _fromAmount,
           inputToken: token,
           outputToken
@@ -611,7 +618,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const result = await CosmJs.execute({
         prefix: ORAI,
         address: msg.contract,
-        walletAddr: keplrAddress,
+        walletAddr: oraiAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds } as HandleOptions

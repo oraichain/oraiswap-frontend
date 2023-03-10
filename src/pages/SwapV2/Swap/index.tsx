@@ -127,13 +127,20 @@ const SwapComponent: React.FC<{
     try {
       var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
 
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      if (!oraiAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!'
+        });
+        return;
+      }
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, address);
-      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, address);
+      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, oraiAddress);
+      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
 
       const msgs = generateContractMessages({
         type: Type.SWAP,
-        sender: address,
+        sender: oraiAddress,
         amount: _fromAmount,
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!
@@ -147,7 +154,7 @@ const SwapComponent: React.FC<{
 
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
-        walletAddr: address,
+        walletAddr: oraiAddress,
         msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' }
       });
