@@ -13,7 +13,6 @@ import {
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
-  fetchPoolApr,
   getPairAmountInfo
 } from 'rest/api';
 
@@ -43,6 +42,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useConfigReducer('address');
+  const [cachedApr] = useConfigReducer('apr');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
@@ -57,13 +57,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
 
-    const [info, apr] = await Promise.all([fetchPairInfo([token1!, token2!]), fetchPoolApr(pair.contract_addr)]);
+    const info = await fetchPairInfo([token1!, token2!]);
 
     return {
       info,
       token1,
       token2,
-      apr
+      apr: cachedApr?.[pair.contract_addr] || 0
     };
   };
 
