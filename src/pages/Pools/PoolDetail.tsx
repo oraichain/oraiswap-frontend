@@ -57,7 +57,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
 
-    const [info] = await Promise.all([fetchPairInfo([token1!, token2!])]);
+    const info = await fetchPairInfo([token1!, token2!]);
 
     return {
       info,
