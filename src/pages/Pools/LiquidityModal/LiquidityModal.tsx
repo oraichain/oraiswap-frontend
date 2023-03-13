@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, toDecimal } from 'libs/utils';
+import { buildMultipleMessages, getSubAmountDetails, toDecimal, toSumDisplay } from 'libs/utils';
 import TokenBalance from 'components/TokenBalance';
 import { toAmount, toDisplay } from 'libs/utils';
 import NumberFormat from 'react-number-format';
@@ -76,8 +76,20 @@ const LiquidityModal: FC<ModalProps> = ({
   const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const dispatch = useDispatch();
-  const token1Balance = BigInt(amounts[token1?.denom] ?? '0');
-  const token2Balance = BigInt(amounts[token2?.denom] ?? '0');
+  let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
+  let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
+  let subAmounts: AmountDetails;
+  if (token1.contractAddress && token1.evmDenoms) {
+    subAmounts = getSubAmountDetails(amounts, token1);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token1.decimals);
+    token1Balance += subAmount;
+  }
+
+  if (token2.contractAddress && token2.evmDenoms) {
+    subAmounts = getSubAmountDetails(amounts, token2);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token2.decimals);
+    token2Balance += subAmount;
+  }
 
   const {
     data: token1AllowanceToPair,
@@ -185,22 +197,30 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      if (!oraiAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!'
+        });
+        return;
+      }
+
       if (token1AllowanceToPair < amount1) {
-        await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, address);
+        await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, oraiAddress);
         refetchToken1Allowance();
       }
       if (token2AllowanceToPair < amount2) {
-        await increaseAllowance('9'.repeat(30), token2InfoData!.contractAddress!, address);
+        await increaseAllowance('9'.repeat(30), token2InfoData!.contractAddress!, oraiAddress);
         refetchToken2Allowance();
       }
 
       // hard copy of from & to token info data to prevent data from changing when calling the function
-      const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, address);
-      const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, address);
+      const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, oraiAddress);
+      const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, oraiAddress);
 
       const msgs = generateContractMessages({
         type: Type.PROVIDE,
-        sender: address,
+        sender: oraiAddress,
         fromInfo: token1InfoData!,
         toInfo: token2InfoData!,
         fromAmount: amount1.toString(),
@@ -214,7 +234,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
-        walletAddr: address,
+        walletAddr: oraiAddress,
         gasAmount: { denom: ORAI, amount: '0' }
       });
       console.log('result provide tx hash: ', result);
@@ -245,9 +265,17 @@ const LiquidityModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      if (!oraiAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login both metamask and keplr!'
+        });
+        return;
+      }
+
       const msgs = await generateContractMessages({
         type: Type.WITHDRAW,
-        sender: address,
+        sender: oraiAddress,
         lpAddr: lpTokenInfoData!.contractAddress!,
         amount,
         pair: pairInfoData.contract_addr
@@ -262,7 +290,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
       const result = await CosmJs.execute({
         address: msg.contract,
-        walletAddr: address,
+        walletAddr: oraiAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
 
