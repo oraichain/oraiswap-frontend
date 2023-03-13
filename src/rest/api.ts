@@ -92,16 +92,6 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
   return res.return_data.map((data) => fromBinary(data.data));
 }
 
-async function fetchPoolApr(contract_addr: string): Promise<number> {
-  try {
-    const data = await axios.get(`${process.env.REACT_APP_ORAIX_CLAIM_URL}/apr?contract_addr=${contract_addr}`);
-    return data.data.data;
-  } catch (error) {
-    console.log(error);
-    return 0;
-  }
-}
-
 function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo): bigint {
   return BigInt(poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount || '0');
 }
@@ -716,7 +706,6 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
-  fetchPoolApr,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
