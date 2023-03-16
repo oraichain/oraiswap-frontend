@@ -318,6 +318,20 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
 
+      if (!metamaskAddress) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Please login metamask!'
+        });
+        return;
+      }
+
+      if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) {
+        displayToast(TToastType.TX_FAILED, {
+          message: 'Prefix Token not found!'
+        });
+        return;
+      }
+
       let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
       const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
       let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
