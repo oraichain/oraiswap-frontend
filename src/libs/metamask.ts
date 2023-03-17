@@ -1,7 +1,8 @@
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { TRON_CHAIN_ID } from 'config/constants';
+import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
+import { ethToTronAddress } from 'helper';
 
 import Web3 from 'web3';
 
@@ -17,6 +18,31 @@ export default class Metamask {
 
   public isTron() {
     return Number(window.ethereum?.chainId) == TRON_CHAIN_ID;
+  }
+
+  private async triggerTronSmartContract(
+    address: string,
+    functionSelector: string,
+    options = {},
+    parameters = []
+  ): Promise<any> {
+    try {
+      const tronUrl = TRON_RPC.replace('/jsonrpc', '');
+      const tronweb = new TronWeb(tronUrl, tronUrl);
+      const transaction = await tronweb.transactionBuilder.triggerSmartContract(
+        address,
+        functionSelector,
+        Object.assign({ feeLimit: 20 * 1e6 }, options),
+        parameters
+      );
+
+      if (!transaction.result || !transaction.result.result) {
+        throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
+      }
+      return transaction;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   public async switchNetwork(chainId: string | number) {
@@ -36,13 +62,25 @@ export default class Metamask {
 
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
     await this.switchNetwork(token.chainId);
+    const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
 
     if (this.isTron()) {
-      // TODO: using window.tronWeb and tronWeb instance to create transaction
+      const transaction = await this.triggerTronSmartContract(
+        ethToTronAddress(gravityContractAddr),
+        'sendToCosmos(address,string,uint256)',
+        {},
+
+        [
+          { type: 'address', value: token.contractAddress },
+          { type: 'string', to },
+          { type: 'uint256', value: balance.toString() }
+        ]
+      );
+      const txHash = await window.tronWeb.trx.sendRawTransaction(transaction);
+      return { transactionHash: txHash };
     } else {
       const web3 = new Web3(window.ethereum);
-      const gravityContractAddr = gravityContracts[token.chainId] as string;
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
       const result = await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({

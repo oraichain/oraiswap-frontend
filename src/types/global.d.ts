@@ -100,12 +100,12 @@ declare global {
     deploy(file: FileData);
   }
   interface Window {
-    TronWeb: typeof TronWeb;
     MSStream: String;
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
     web3: Web3;
+    tronWeb: TronWeb;
     ethereum: MetaMaskEthereumProvider;
     ethereumX: MetaMaskEthereumProvider;
     Metamask: Metamask;
