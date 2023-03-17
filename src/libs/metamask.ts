@@ -84,17 +84,18 @@ export default class Metamask {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
 
-    if (this.isTron() && this.checkTron()) {
-      return await this.submitTronSmartContract(
-        ethToTronAddress(gravityContractAddr),
-        'sendToCosmos(address,string,uint256)',
-        {},
-        [
-          { type: 'address', value: token.contractAddress },
-          { type: 'string', value: to },
-          { type: 'uint256', value: balance.toString() }
-        ]
-      );
+    if (this.isTron()) {
+      if (this.checkTron())
+        return await this.submitTronSmartContract(
+          ethToTronAddress(gravityContractAddr),
+          'sendToCosmos(address,string,uint256)',
+          {},
+          [
+            { type: 'address', value: token.contractAddress },
+            { type: 'string', value: to },
+            { type: 'uint256', value: balance.toString() }
+          ]
+        );
     } else {
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
@@ -117,11 +118,12 @@ export default class Metamask {
 
     const allowance = toAmount(999999999999999, token.decimals);
 
-    if (this.isTron() && this.checkTron()) {
-      return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
-        { type: 'address', value: spender },
-        { type: 'uint256', value: allowance.toString() }
-      ]);
+    if (this.isTron()) {
+      if (this.checkTron())
+        return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
+          { type: 'address', value: spender },
+          { type: 'uint256', value: allowance.toString() }
+        ]);
     } else {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
