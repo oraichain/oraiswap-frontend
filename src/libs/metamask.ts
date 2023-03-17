@@ -21,18 +21,17 @@ export default class Metamask {
   }
 
   private async triggerTronSmartContract(
+    tronWeb: TronWeb,
     address: string,
     functionSelector: string,
     options = {},
     parameters = []
   ): Promise<any> {
     try {
-      const tronUrl = TRON_RPC.replace('/jsonrpc', '');
-      const tronweb = new TronWeb(tronUrl, tronUrl);
-      const transaction = await tronweb.transactionBuilder.triggerSmartContract(
+      const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
         address,
         functionSelector,
-        Object.assign({ feeLimit: 20 * 1e6 }, options),
+        options,
         parameters
       );
 
@@ -61,25 +60,32 @@ export default class Metamask {
   }
 
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
-    await this.switchNetwork(token.chainId);
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
 
     if (this.isTron()) {
+      if (!window.tronWeb) {
+        throw new Error('Tron Wallet is not found');
+      }
+      const tronUrl = TRON_RPC.replace('/jsonrpc', '');
+      const tronWeb = new TronWeb(tronUrl, tronUrl);
       const transaction = await this.triggerTronSmartContract(
+        tronWeb,
         ethToTronAddress(gravityContractAddr),
         'sendToCosmos(address,string,uint256)',
         {},
-
         [
           { type: 'address', value: token.contractAddress },
           { type: 'string', to },
           { type: 'uint256', value: balance.toString() }
         ]
       );
-      const txHash = await window.tronWeb.trx.sendRawTransaction(transaction);
+      // sign from inject tronWeb
+      const singedTransaction = window.tronWeb.trx.sign(transaction);
+      const txHash = await tronWeb.trx.sendRawTransaction(singedTransaction);
       return { transactionHash: txHash };
     } else {
+      await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
