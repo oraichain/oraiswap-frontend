@@ -1,8 +1,9 @@
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
-import { ethToTronAddress } from 'helper';
+import { NOTI_INSTALL_OWALLET, TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
+import { ethToTronAddress, getRpcEvm } from 'helper';
 
 import Web3 from 'web3';
 
@@ -20,13 +21,29 @@ export default class Metamask {
     return Number(window.ethereum?.chainId) == TRON_CHAIN_ID;
   }
 
-  private async triggerTronSmartContract(
-    tronWeb: TronWeb,
+  private checkTron() {
+    if (!window.tronWeb) {
+      displayToast(
+        TToastType.TX_INFO,
+        { ...NOTI_INSTALL_OWALLET, message: NOTI_INSTALL_OWALLET.message.replace(/Keplr/g, 'TronLink') },
+        {
+          toastId: 'install_keplr'
+        }
+      );
+      return false;
+    }
+    return true;
+  }
+
+  private async submitTronSmartContract(
     address: string,
     functionSelector: string,
     options = {},
     parameters = []
   ): Promise<any> {
+    const tronUrl = TRON_RPC.replace('/jsonrpc', '');
+    const tronWeb = new TronWeb(tronUrl, tronUrl);
+
     try {
       const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
         address,
@@ -38,7 +55,11 @@ export default class Metamask {
       if (!transaction.result || !transaction.result.result) {
         throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
       }
-      return transaction;
+
+      // sign from inject tronWeb
+      const singedTransaction = window.tronWeb.trx.sign(transaction);
+      const txHash = await tronWeb.trx.sendRawTransaction(singedTransaction);
+      return { transactionHash: txHash };
     } catch (error) {
       throw new Error(error);
     }
@@ -63,43 +84,32 @@ export default class Metamask {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
 
-    if (this.isTron()) {
-      if (!window.tronWeb) {
-        throw new Error('Tron Wallet is not found');
-      }
-      const tronUrl = TRON_RPC.replace('/jsonrpc', '');
-      const tronWeb = new TronWeb(tronUrl, tronUrl);
-      const transaction = await this.triggerTronSmartContract(
-        tronWeb,
+    if (this.isTron() && this.checkTron()) {
+      return await this.submitTronSmartContract(
         ethToTronAddress(gravityContractAddr),
         'sendToCosmos(address,string,uint256)',
         {},
         [
           { type: 'address', value: token.contractAddress },
-          { type: 'string', to },
+          { type: 'string', value: to },
           { type: 'uint256', value: balance.toString() }
         ]
       );
-      // sign from inject tronWeb
-      const singedTransaction = window.tronWeb.trx.sign(transaction);
-      const txHash = await tronWeb.trx.sendRawTransaction(singedTransaction);
-      return { transactionHash: txHash };
     } else {
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
-      const result = await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
+      return await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
         from
       });
-      return result;
     }
   }
 
   public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
-    await this.switchNetwork(token.chainId);
     const weiAmount = toAmount(amount, token.decimals);
-    const web3 = new Web3(window.ethereum);
+    // using static rpc for querying both tron and evm
+    const web3 = new Web3(getRpcEvm());
     const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
     const currentAllowance = BigInt(await tokenContract.methods.allowance(owner, spender).call());
 
@@ -107,13 +117,19 @@ export default class Metamask {
 
     const allowance = toAmount(999999999999999, token.decimals);
 
-    if (this.isTron()) {
-      // TODO: using window.tronWeb and tronWeb instance to create transaction
+    if (this.isTron() && this.checkTron()) {
+      return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
+        { type: 'address', value: spender },
+        { type: 'uint256', value: allowance.toString() }
+      ]);
     } else {
-      const result = await tokenContract.methods.approve(spender, allowance).send({
+      // using window.ethereum for signing
+      await this.switchNetwork(token.chainId);
+      const web3 = new Web3(window.ethereum);
+      const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
+      return tokenContract.methods.approve(spender, allowance).send({
         from: owner
       });
-      return result;
     }
   }
 }
