@@ -8,6 +8,7 @@ import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import TronWeb from './tronweb';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -39,14 +40,8 @@ declare global {
     once(eventName: string | symbol, listener: (...args: any[]) => void): this;
     on(eventName: string | symbol, listener: (...args: any[]) => void): this;
     off(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    addListener(
-      eventName: string | symbol,
-      listener: (...args: any[]) => void
-    ): this;
-    removeListener(
-      eventName: string | symbol,
-      listener: (...args: any[]) => void
-    ): this;
+    addListener(eventName: string | symbol, listener: (...args: any[]) => void): this;
+    removeListener(eventName: string | symbol, listener: (...args: any[]) => void): this;
     removeAllListeners(event?: string | symbol): this;
   };
 
@@ -105,6 +100,7 @@ declare global {
     deploy(file: FileData);
   }
   interface Window {
+    TronWeb: typeof TronWeb;
     MSStream: String;
     Keystation: any;
     Wallet: Wallet;

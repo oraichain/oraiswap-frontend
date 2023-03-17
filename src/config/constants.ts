@@ -59,6 +59,9 @@ export const ETHEREUM_SCAN = 'https://etherscan.io';
 export const BSC_CHAIN_ID = 56;
 export const BSC_RPC = 'https://1rpc.io/bnb';
 export const BSC_SCAN = 'https://bscscan.com';
+export const TRON_CHAIN_ID = 0x2b6653dc;
+export const TRON_RPC = 'https://api.trongrid.io/jsonrpc';
+export const TRON_SCAN = 'https://tronscan.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 
 export const KWT_SCAN = 'https://scan.kawaii.global';

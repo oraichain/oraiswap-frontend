@@ -37,6 +37,7 @@
     "react-toastify": "^8.2.0",
     "react-use-websocket": "3.0.0",
     "redux-persist": "^6.0.0",
+    "tronweb": "^5.1.0",
     "web3": "^1.7.3"
   },
   "devDependencies": {

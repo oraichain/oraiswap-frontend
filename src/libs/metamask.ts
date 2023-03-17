@@ -3,6 +3,7 @@ import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import Web3 from 'web3';
+
 import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 

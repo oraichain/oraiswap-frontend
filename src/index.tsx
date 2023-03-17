@@ -21,6 +21,8 @@ import { GasPrice } from '@cosmjs/stargate';
 import { Provider } from 'react-redux';
 import { persistor, store } from 'store/configure';
 import { PersistGate } from 'redux-persist/integration/react';
+
+window.TronWeb = require('tronweb');
 // enable Keplr
 window.Keplr = new Keplr();
 window.Metamask = new Metamask();
