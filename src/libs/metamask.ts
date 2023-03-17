@@ -1,7 +1,8 @@
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
+import { TRON_CHAIN_ID } from 'config/constants';
+
 import Web3 from 'web3';
 
 import { AbiItem } from 'web3-utils';
@@ -12,6 +13,10 @@ export default class Metamask {
 
   public isWindowEthereum() {
     return !!window.ethereum;
+  }
+
+  public isTron() {
+    return Number(window.ethereum?.chainId) == TRON_CHAIN_ID;
   }
 
   public async switchNetwork(chainId: string | number) {
@@ -32,14 +37,19 @@ export default class Metamask {
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
     await this.switchNetwork(token.chainId);
     const balance = toAmount(amountVal, token.decimals);
-    const web3 = new Web3(window.ethereum);
-    const gravityContractAddr = gravityContracts[token.chainId] as string;
-    if (!gravityContractAddr || !from || !to) return;
-    const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
-    const result = await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
-      from
-    });
-    return result;
+
+    if (this.isTron()) {
+      // TODO: using window.tronWeb and tronWeb instance to create transaction
+    } else {
+      const web3 = new Web3(window.ethereum);
+      const gravityContractAddr = gravityContracts[token.chainId] as string;
+      if (!gravityContractAddr || !from || !to) return;
+      const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
+      const result = await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
+        from
+      });
+      return result;
+    }
   }
 
   public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
@@ -53,44 +63,13 @@ export default class Metamask {
 
     const allowance = toAmount(999999999999999, token.decimals);
 
-    const result = await tokenContract.methods.approve(spender, allowance).send({
-      from: owner
-    });
-    return result;
+    if (this.isTron()) {
+      // TODO: using window.tronWeb and tronWeb instance to create transaction
+    } else {
+      const result = await tokenContract.methods.approve(spender, allowance).send({
+        from: owner
+      });
+      return result;
+    }
   }
-
-  // public getOraiToken(denom?: string): TokenItemType | undefined {
-  //   return evmTokens.find(
-  //     (token) => token.denom === (denom ? denom : getDenomEvm())
-  //   );
-  // }
-
-  // public async getOraiBalance(
-  //   address: string | null,
-  //   inputToken?: TokenItemType,
-  //   rpc?: string,
-  //   denom?: string
-  // ) {
-  //   // must has chainId and contractAddress
-  //   const token = inputToken || this.getOraiToken(denom);
-  //   if (!token || !token.contractAddress) return '0';
-
-  //   try {
-  //     // if the same chain id using window.ethereum
-  //     const provider =
-  //       Number(token.chainId) !== Number(window.ethereum.chainId)
-  //         ? token.rpc
-  //         : window.ethereum;
-
-  //     const web3 = new Web3(rpc || provider);
-  //     const tokenInst = new web3.eth.Contract(
-  //       tokenABI as AbiItem[],
-  //       token.contractAddress
-  //     );
-  //     const balance = await tokenInst.methods.balanceOf(address).call();
-  //     return balance;
-  //   } catch (ex) {
-  //     return '0';
-  //   }
-  // }
 }

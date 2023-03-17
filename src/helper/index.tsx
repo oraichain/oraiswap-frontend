@@ -45,6 +45,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
+import { ethers } from 'ethers';
 
 interface Tokens {
   denom?: string;
@@ -178,4 +179,14 @@ export const handleCheckWallet = async () => {
       toastId: 'install_keplr'
     });
   }
+};
+
+export const tronToEthAddress = (base58: string) =>
+  '0x' + Buffer.from(ethers.utils.base58.decode(base58)).slice(1, -4).toString('hex');
+
+export const ethToTronAddress = (address: string) => {
+  const evmAddress = '0x41' + address.substring(2);
+  const hash = ethers.utils.sha256(ethers.utils.sha256(evmAddress));
+  const checkSum = hash.substring(2, 10);
+  return ethers.utils.base58.encode(evmAddress + checkSum);
 };
