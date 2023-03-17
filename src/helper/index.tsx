@@ -1,6 +1,7 @@
 import React from 'react';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
+import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
@@ -12,7 +13,6 @@ import {
   KAWAII_ORG,
   OSMOSIS_ORG,
   COSMOS_ORG,
-  ORAI_BRIDGE_ORG,
   ETHEREUM_ORG,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_RPC,
@@ -23,13 +23,16 @@ import {
   HIGH_GAS_PRICE,
   MULTIPLIER,
   BSC_SCAN,
-  ETHEREUM_SCAN
+  ETHEREUM_SCAN,
+  TRON_CHAIN_ID,
+  TRON_SCAN,
+  TRON_RPC,
+  TRON_ORG
 } from 'config/constants';
 
 import {
   BSC_CHAIN_ID,
   ETHEREUM_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
   KWT_SUBNETWORK_CHAIN_ID,
   COSMOS_CHAIN_ID,
   OSMOSIS_CHAIN_ID,
@@ -98,6 +101,12 @@ export const networks: NetworkType[] = [
     chainId: ETHEREUM_CHAIN_ID,
     Icon: ETHIcon,
     networkType: EVM_TYPE
+  },
+  {
+    title: TRON_ORG,
+    chainId: TRON_CHAIN_ID,
+    Icon: TRONIcon,
+    networkType: EVM_TYPE
   }
 ];
 
@@ -134,6 +143,8 @@ export const getRpcEvm = (infoEvm?: ChainInfoType) => {
       return BSC_RPC;
     case ETHEREUM_CHAIN_ID:
       return ETHEREUM_RPC;
+    case TRON_CHAIN_ID:
+      return TRON_RPC;
     default:
       return infoEvm?.rpc;
   }
@@ -145,6 +156,8 @@ export const getTransactionUrl = (transactionHash: string) => {
       return `${BSC_SCAN}/tx/${transactionHash}`;
     case ETHEREUM_CHAIN_ID:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
+    case TRON_CHAIN_ID:
+      return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
   }
 };
 

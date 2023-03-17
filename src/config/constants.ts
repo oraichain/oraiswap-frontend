@@ -70,6 +70,7 @@ export const KWT_SUBNETWORK_EVM_CHAIN_ID = 6886; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';
+export const TRON_ORG = 'Tron Network';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
 export const JUNO_CHAIN_ID = 'juno-1';
