@@ -98,10 +98,10 @@ export const networks: NetworkType[] = [
   }
 ];
 
-export const renderLogoNetwork = (chainId: string | number = ORAICHAIN_ID) => {
+export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
   const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);
   if (network) {
-    return <network.Icon />;
+    return <network.Icon {...props} />;
   }
 };
 
@@ -114,41 +114,26 @@ export const getTokenChain = (token: TokenItemType) => {
   return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
 };
 
-// export const handleCheckChain = (chainId: string | number, infoCosmos?: ChainInfoType) => {
-//   switch (chainId) {
-//     case BSC_CHAIN_ID:
-//       return window.Metamask.isBsc();
-//     case ETHEREUM_CHAIN_ID:
-//       return window.Metamask.isEth();
-//     case KWT_SUBNETWORK_EVM_CHAIN_ID:
-//       return Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID);
-//     case KWT_SUBNETWORK_CHAIN_ID:
-//       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
-//     case COSMOS_CHAIN_ID:
-//       return infoCosmos.chainId === COSMOS_CHAIN_ID;
-//     case OSMOSIS_CHAIN_ID:
-//       return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
-//     case ORAICHAIN_ID:
-//       return (
-//         infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
-//         infoCosmos.chainId !== COSMOS_CHAIN_ID &&
-//         infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
-//       );
-//     default:
-//       return false;
-//   }
-// };
-
 export const getDenomEvm = () => {
-  if (window.Metamask.isEth()) return ERC20_ORAI;
-  if (window.Metamask.isBsc()) return BEP20_ORAI;
-  return KAWAII_ORAI;
+  switch (Number(window.ethereum?.chainId)) {
+    case BSC_CHAIN_ID:
+      return BEP20_ORAI;
+    case ETHEREUM_CHAIN_ID:
+      return ERC20_ORAI;
+    default:
+      return KAWAII_ORAI;
+  }
 };
 
 export const getRpcEvm = (infoEvm?: ChainInfoType) => {
-  if (window.Metamask.isEth()) return ETHEREUM_RPC;
-  if (window.Metamask.isBsc()) return BSC_RPC;
-  return infoEvm?.rpc;
+  switch (Number(window.ethereum?.chainId)) {
+    case BSC_CHAIN_ID:
+      return BSC_RPC;
+    case ETHEREUM_CHAIN_ID:
+      return ETHEREUM_RPC;
+    default:
+      return infoEvm?.rpc;
+  }
 };
 
 export const objConvertTokenIbc = {

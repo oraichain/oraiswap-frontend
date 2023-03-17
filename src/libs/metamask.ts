@@ -10,15 +10,6 @@ import { toAmount } from './utils';
 export default class Metamask {
   constructor() {}
 
-  // compare in number type
-  public isBsc() {
-    return Number(window.ethereum?.chainId) === Number(BSC_CHAIN_ID);
-  }
-
-  public isEth() {
-    return Number(window.ethereum?.chainId) === Number(ETHEREUM_CHAIN_ID);
-  }
-
   public isWindowEthereum() {
     return !!window.ethereum;
   }
