@@ -21,7 +21,9 @@ import {
   KAWAII_RPC,
   NOTI_INSTALL_OWALLET,
   HIGH_GAS_PRICE,
-  MULTIPLIER
+  MULTIPLIER,
+  BSC_SCAN,
+  ETHEREUM_SCAN
 } from 'config/constants';
 
 import {
@@ -134,6 +136,15 @@ export const getRpcEvm = (infoEvm?: ChainInfoType) => {
       return ETHEREUM_RPC;
     default:
       return infoEvm?.rpc;
+  }
+};
+
+export const getTransactionUrl = (transactionHash: string) => {
+  switch (Number(window.ethereum?.chainId)) {
+    case BSC_CHAIN_ID:
+      return `${BSC_SCAN}/tx/${transactionHash}`;
+    case ETHEREUM_CHAIN_ID:
+      return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
   }
 };
 

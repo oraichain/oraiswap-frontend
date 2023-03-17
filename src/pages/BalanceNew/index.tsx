@@ -29,7 +29,7 @@ import {
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { getNetworkGasPrice, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
+import { getNetworkGasPrice, getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useInactiveListener } from 'hooks/useMetamask';
@@ -528,13 +528,7 @@ const Balance: React.FC<BalanceProps> = () => {
       await window.Metamask.checkOrIncreaseAllowance(from, metamaskAddress, gravityContractAddr, fromAmount);
       let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
       const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
-      processTxResult(
-        from,
-        result,
-        window.Metamask.isEth()
-          ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}`
-          : `${BSC_SCAN}/tx/${result?.transactionHash}`
-      );
+      processTxResult(from, result, getTransactionUrl(result?.transactionHash));
     } catch (ex: any) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
