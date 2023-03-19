@@ -44,12 +44,12 @@ declare global {
     constructor(
       optionsOrFullNode?:
         | {
-            fullNode?: string;
-            fullHost?: string;
-            solidityNode?: string;
-            eventServer?: string;
-            privateKey?: string;
-          }
+          fullNode?: string;
+          fullHost?: string;
+          solidityNode?: string;
+          eventServer?: string;
+          privateKey?: string;
+        }
         | string,
       solidityNode?: string,
       eventServer?: string,
@@ -66,8 +66,8 @@ declare global {
     defaultBlock: boolean;
     defaultPrivateKey: boolean;
     defaultAddress: {
-      hex: boolean;
-      base58: boolean;
+      hex: string;
+      base58: string;
     };
     sidechain: any;
     fullnodeVersion: string;

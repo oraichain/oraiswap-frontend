@@ -48,4 +48,5 @@ export enum Networks {
   milkomeda = 2001,
   kcc = 321,
   etherlite = 111,
+  tron = 728126428,
 }

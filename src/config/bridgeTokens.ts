@@ -39,6 +39,7 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
   ORAI_BSC_CONTRACT,
@@ -46,8 +47,12 @@ import {
   ORAI_RPC,
   OSMOSIS_ORG,
   STABLE_DENOM,
+  TRON_CHAIN_ID,
+  TRON_ORG,
+  TRON_RPC,
   USDC_ETH_CONTRACT,
-  USDT_BSC_CONTRACT
+  USDT_BSC_CONTRACT,
+  USDT_TRON_CONTRACT
 } from './constants';
 
 export type TokenItemType = {
@@ -67,19 +72,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex'
-    | 'usd-coin';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex'
+  | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -192,6 +197,20 @@ const otherChainTokens: TokenItemType[] = [
     Icon: USDT
   },
   {
+    name: 'USDT',
+    prefix: ORAI_BRIDGE_PREFIX,
+    org: 'OraiBridge',
+    chainId: ORAI_BRIDGE_CHAIN_ID,
+    coinType: 118,
+    denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
+    bridgeNetworkIdentifier: TRON_ORG,
+    rpc: ORAI_BRIDGE_RPC,
+    decimals: EVM_DECIMALS,
+    coingeckoId: 'tether',
+    cosmosBased: true,
+    Icon: USDT
+  },
+  {
     name: 'KWT',
     prefix: ORAI_BRIDGE_PREFIX,
     org: 'OraiBridge',
@@ -281,6 +300,19 @@ const otherChainTokens: TokenItemType[] = [
     rpc: BSC_RPC,
     bridgeTo: [ORAICHAIN_ID],
     decimals: EVM_DECIMALS,
+    coingeckoId: 'tether',
+    cosmosBased: false,
+    Icon: USDT
+  },
+  {
+    name: 'USDT',
+    org: TRON_ORG,
+    chainId: TRON_CHAIN_ID,
+    denom: 'trx20_usdt',
+    contractAddress: USDT_TRON_CONTRACT,
+    rpc: TRON_RPC,
+    bridgeTo: [ORAICHAIN_ID],
+    decimals: COSMOS_DECIMALS,
     coingeckoId: 'tether',
     cosmosBased: false,
     Icon: USDT
@@ -594,6 +626,15 @@ export const evmTokens = uniqBy(
   (c) => c.denom
 );
 
+export const evmChains = uniqBy(
+  flattenTokens.filter(
+    (token) =>
+      // !token.contractAddress &&
+      token.denom && !token.cosmosBased && token.coingeckoId && token.chainId !== KWT_SUBNETWORK_CHAIN_ID
+  ),
+  (c) => c.chainId
+);
+
 export const kawaiiTokens = uniqBy(
   flattenTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom
@@ -601,7 +642,8 @@ export const kawaiiTokens = uniqBy(
 
 export const gravityContracts: { [key: string]: string } = {
   [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
-  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT
+  [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT,
+  [TRON_CHAIN_ID]: process.env.REACT_APP_GRAVITY_TRON_CONTRACT,
 };
 
 export const usdtToken = uniqBy(

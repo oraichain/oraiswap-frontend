@@ -154,6 +154,7 @@ declare global {
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_BSC_CONTRACT: string;
       REACT_APP_GRAVITY_ETH_CONTRACT: string;
+      REACT_APP_GRAVITY_TRON_CONTRACT: string;
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
@@ -171,4 +172,4 @@ declare global {
   }
 }
 
-export {};
+export { };

@@ -70,7 +70,7 @@ import { getOneStepKeplrAddr } from './helpers';
 import KwtModal from './KwtModal';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -794,10 +794,10 @@ const Balance: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                        ? (fromAmount: number) => {
+                          ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                        : undefined
+                          : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />

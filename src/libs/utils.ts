@@ -114,10 +114,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-        token: {
-          contract_addr: token.contractAddress
-        }
+      token: {
+        contract_addr: token.contractAddress
       }
+    }
     : { native_token: { denom: token.denom } };
 };
 
@@ -258,7 +258,6 @@ export const processWsResponseMsg = (message: any): string => {
     if (!result.events) return null;
     const events = result.events;
     console.log('events: ', events);
-    // TODO: process multiple tokens at once if there are multiple recvpacket messages
     const packets = events['recv_packet.packet_data'];
     if (!packets) return null;
     let tokens = '';

@@ -1,3 +1,5 @@
+import { Networks } from "libs/ethereum-multicall/enums";
+
 export const CHROME = 'https://google.com/chrome';
 
 /* oraiswap:unit */
@@ -53,13 +55,13 @@ export const WECHAT = '';
 export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
-export const ETHEREUM_CHAIN_ID = 1;
+export const ETHEREUM_CHAIN_ID = Networks.mainnet;
 export const ETHEREUM_RPC = 'https://1rpc.io/eth';
 export const ETHEREUM_SCAN = 'https://etherscan.io';
-export const BSC_CHAIN_ID = 56;
+export const BSC_CHAIN_ID = Networks.bsc;
 export const BSC_RPC = 'https://1rpc.io/bnb';
 export const BSC_SCAN = 'https://bscscan.com';
-export const TRON_CHAIN_ID = 0x2b6653dc;
+export const TRON_CHAIN_ID = Networks.tron;
 export const TRON_RPC = 'https://api.trongrid.io/jsonrpc';
 export const TRON_SCAN = 'https://tronscan.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
@@ -82,6 +84,7 @@ export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
 export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
+export const ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX = 'tron-mainnet';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_SCAN = 'https://scan.orai.io';
@@ -99,6 +102,7 @@ export const ORAI_BRIDGE_PREFIX = 'oraib';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
+export const USDT_TRON_CONTRACT = '0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C';
 export const KWT_BSC_CONTRACT = '0x257a8d1E03D17B8535a182301f15290F11674b53';
 export const MILKY_BSC_CONTRACT = '0x6fE3d0F096FC932A905accd1EB1783F6e4cEc717';
 

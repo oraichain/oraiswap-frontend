@@ -597,6 +597,8 @@ export class Multicall {
         return '0xcA11bde05977b3631167028862bE2a173976CA11';
       case Networks.etherlite:
         return '0x21681750D7ddCB8d1240eD47338dC984f94AF2aC';
+      case Networks.tron:
+        return '0xa4730823CD35E98Bc9063a8a7989cB170868B251'; // TQxjd4vjQVrcifzkhnxcPr7uuy5YAckvxe
       default:
         throw new Error(
           `Network - ${network} doesn't have a multicall contract address defined. Please check your network or deploy your own contract on it.`

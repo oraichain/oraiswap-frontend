@@ -11,7 +11,7 @@ import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() {}
+  constructor() { }
 
   public isWindowEthereum() {
     return !!window.ethereum;
@@ -38,7 +38,7 @@ export default class Metamask {
   private async submitTronSmartContract(
     address: string,
     functionSelector: string,
-    options = {},
+    options: { feeLimit?: number } = { feeLimit: 40 * 1e6 }, // submitToCosmos costs about 40 TRX
     parameters = []
   ): Promise<any> {
     const tronUrl = TRON_RPC.replace('/jsonrpc', '');
@@ -87,7 +87,7 @@ export default class Metamask {
     if (this.isTron()) {
       if (this.checkTron())
         return await this.submitTronSmartContract(
-          ethToTronAddress(gravityContractAddr),
+          gravityContractAddr,
           'sendToCosmos(address,string,uint256)',
           {},
           [
@@ -120,7 +120,7 @@ export default class Metamask {
 
     if (this.isTron()) {
       if (this.checkTron())
-        return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
+        return this.submitTronSmartContract(token.contractAddress, 'approve(address,uint256)', {}, [
           { type: 'address', value: spender },
           { type: 'uint256', value: allowance.toString() }
         ]);

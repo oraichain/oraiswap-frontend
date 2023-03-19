@@ -5,6 +5,7 @@ import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { tronToEthAddress } from 'helper';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
@@ -19,6 +20,7 @@ export function useEagerConnect(isInactive, isInterval) {
   useEffect(() => {
     if (isInterval) return;
     connectEvm();
+    connectTronEvm();
   }, [pathname, isInterval]);
 
   const connectEvm = () => {
@@ -29,6 +31,13 @@ export function useEagerConnect(isInactive, isInterval) {
       web3React.activate(injected);
     }
   };
+
+  const connectTronEvm = () => {
+    if (!window.tronWeb) return;
+    // TODO: How to process tronweb wallets connected from tronlink? Should we add another tronAddress field?
+    if (!window.ethereum)
+      setMetamaskAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
+  }
 
   useEffect(() => {
     if (!window.ethereum || isInactive) return;

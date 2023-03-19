@@ -1,7 +1,7 @@
 import { StargateClient } from '@cosmjs/stargate';
 import { arrayLoadToken, handleCheckWallet } from 'helper';
 import { clearFunctionExecution, getEvmAddress, getFunctionExecution, toDisplay } from './utils';
-import { evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { evmChains, evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { BalanceResponse } from './contracts/OraiswapToken.types';
@@ -148,25 +148,25 @@ export class CacheTokens {
   }
 
   private async loadTokensEvm(evmAddress: string) {
+    console.log("foobar");
+    const result = await Promise.all(evmChains.map(chain => this.loadEvmEntries(
+      evmAddress,
+      evmTokens.filter((t) => t.chainId === chain.chainId),
+      chain.rpc,
+      chain.chainId as number
+    )));
+    console.log("result: ", result);
     const amountDetails = Object.fromEntries(
       flatten(
-        await Promise.all([
-          this.loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === BSC_CHAIN_ID),
-            BSC_RPC,
-            BSC_CHAIN_ID
-          ),
-
-          this.loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === ETHEREUM_CHAIN_ID),
-            ETHEREUM_RPC,
-            ETHEREUM_CHAIN_ID
-          )
-        ])
+        await Promise.all(evmChains.map(chain => this.loadEvmEntries(
+          evmAddress,
+          evmTokens.filter((t) => t.chainId === chain.chainId),
+          chain.rpc,
+          chain.chainId as number
+        )))
       )
     );
+    console.log("amount details: ", amountDetails);
     this.forceUpdate(amountDetails);
   }
 
