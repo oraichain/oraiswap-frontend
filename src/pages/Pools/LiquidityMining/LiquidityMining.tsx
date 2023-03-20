@@ -221,25 +221,27 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             <div className={cx('container', 'container_earning')}>
               <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
-                pendingRewards.map((r, idx) => (
-                  <div key={idx}>
-                    <div className={cx('amount')}>
-                      <TokenBalance
-                        balance={{
-                          amount: r.amount,
-                          denom: r.denom.toUpperCase(),
-                          decimals: 6
-                        }}
-                        decimalScale={6}
-                      />
-                    </div>
-                    {/* <TokenBalance
+                pendingRewards
+                  .filter((p) => p.amount)
+                  .map((r, idx) => (
+                    <div key={idx}>
+                      <div className={cx('amount')}>
+                        <TokenBalance
+                          balance={{
+                            amount: r.amount,
+                            denom: r.denom.toUpperCase(),
+                            decimals: 6
+                          }}
+                          decimalScale={6}
+                        />
+                      </div>
+                      {/* <TokenBalance
                               balance={r.usdValue}
                               className={cx('amount-usd')}
                               decimalScale={2}
                             /> */}
-                  </div>
-                ))}
+                    </div>
+                  ))}
               <button
                 className={cx('btn')}
                 onClick={() => handleBond()}
