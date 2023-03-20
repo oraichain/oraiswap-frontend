@@ -15,7 +15,7 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, gravityContracts, TokenItemType, tokenMap, tokens, kawaiiTokens } from 'config/bridgeTokens';
+import { gravityContracts, TokenItemType, tokenMap, tokens, kawaiiTokens } from 'config/bridgeTokens';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
@@ -45,6 +45,7 @@ import {
   getUsd,
   parseBep20Erc20Name,
   toAmount,
+  toDisplay,
   toSumDisplay,
   toTotalDisplay
 } from 'libs/utils';
@@ -68,11 +69,13 @@ import { MsgTransfer } from '../../libs/proto/ibc/applications/transfer/v1/tx';
 import styles from './Balance.module.scss';
 import { getOneStepKeplrAddr } from './helpers';
 import KwtModal from './KwtModal';
+import StuckOraib from './StuckOraib';
+import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
-const Balance: React.FC<BalanceProps> = () => {
+const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [keplrAddress] = useConfigReducer('address');
@@ -294,16 +297,6 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (transferAmount === 0) throw new Error('Transfer amount is empty');
       await handleCheckWallet();
-
-      // disable Oraichain -> Oraibridge Ledger
-      // const keplr = await window.Keplr.getKeplr();
-      // const key = await keplr.getKey(network.chainId);
-      // if (key.isNanoLedger) {
-      //   displayToast(TToastType.TX_FAILED, {
-      //     message: 'Ethereum signing with Ledger is not yet supported!'
-      //   });
-      //   return;
-      // }
 
       await window.Keplr.suggestChain(toToken.chainId as string);
       // enable from to send transaction
@@ -718,12 +711,44 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const navigate = useNavigate();
 
+  // Move oraib2oraichain
+  const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
+  const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading);
+
+  const moveOraibToOraichain = async () => {
+    try {
+      setMoveOraib2OraiLoading(true);
+      for(const fromToken of remainingOraib) {
+        const isKawaiiToken = kawaiiTokens.find(i => i.name === fromToken.name);
+
+        // TODO: action for MILKY, KWT.
+        if(isKawaiiToken) {
+          console.log('kawaiiToken', fromToken)
+        } else {
+          const toToken = toTokens.find(t => t.chainId === ORAICHAIN_ID && t.name === fromToken.name)
+          const transferAmount = toDisplay(fromToken.amount, fromToken.decimals);
+          await transferIbcCustom(fromToken, toToken, transferAmount)
+        }
+      }
+    } catch (error) {
+      console.log('error move stuck oraib: ', error)
+    } finally {
+      setMoveOraib2OraiLoading(false)
+    }
+  };
+
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
         <div className={styles.header}>
-          <span className={styles.totalAssets}>Total Assets</span>
-          <TokenBalance balance={totalUsd} className={styles.balance} decimalScale={2} />
+          <div className={styles.asset}>
+            <span className={styles.totalAssets}>Total Assets</span>
+            <TokenBalance balance={totalUsd} className={styles.balance} decimalScale={2} />
+          </div>
+
+          {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
+          <StuckOraib remainingOraib={remainingOraib} handleMove={moveOraibToOraichain} loading={moveOraib2OraiLoading} />
+
         </div>
         <div className={styles.divider} />
         <div className={styles.action}>
@@ -830,4 +855,4 @@ const Balance: React.FC<BalanceProps> = () => {
   );
 };
 
-export default Balance;
+export default BalanceNew;
