@@ -148,25 +148,33 @@ export class CacheTokens {
   }
 
   private async loadTokensEvm(evmAddress: string) {
-    console.log("foobar");
-    const result = await Promise.all(evmChains.map(chain => this.loadEvmEntries(
-      evmAddress,
-      evmTokens.filter((t) => t.chainId === chain.chainId),
-      chain.rpc,
-      chain.chainId as number
-    )));
-    console.log("result: ", result);
-    const amountDetails = Object.fromEntries(
-      flatten(
-        await Promise.all(evmChains.map(chain => this.loadEvmEntries(
+    console.log('foobar');
+    const result = await Promise.all(
+      evmChains.map((chain) =>
+        this.loadEvmEntries(
           evmAddress,
           evmTokens.filter((t) => t.chainId === chain.chainId),
           chain.rpc,
           chain.chainId as number
-        )))
+        )
       )
     );
-    console.log("amount details: ", amountDetails);
+    console.log('result: ', result);
+    const amountDetails = Object.fromEntries(
+      flatten(
+        await Promise.all(
+          evmChains.map((chain) =>
+            this.loadEvmEntries(
+              evmAddress,
+              evmTokens.filter((t) => t.chainId === chain.chainId),
+              chain.rpc,
+              chain.chainId as number
+            )
+          )
+        )
+      )
+    );
+    console.log('amount details: ', amountDetails);
     this.forceUpdate(amountDetails);
   }
 
@@ -176,8 +184,7 @@ export class CacheTokens {
         kwtSubnetAddress,
         kawaiiTokens.filter((t) => !!t.contractAddress),
         KAWAII_SUBNET_RPC,
-        KWT_SUBNETWORK_EVM_CHAIN_ID,
-        '0x74876644692e02459899760B8b9747965a6D3f90'
+        KWT_SUBNETWORK_EVM_CHAIN_ID
       )
     );
     // update amounts

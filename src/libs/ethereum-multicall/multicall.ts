@@ -103,12 +103,7 @@ export class Multicall {
 
   private _executionType: ExecutionType;
 
-  constructor(
-    private _options:
-      | MulticallOptionsWeb3
-      | MulticallOptionsEthers
-      | MulticallOptionsCustomJsonRpcProvider
-  ) {
+  constructor(private _options: MulticallOptionsWeb3 | MulticallOptionsEthers | MulticallOptionsCustomJsonRpcProvider) {
     if ((this._options as MulticallOptionsWeb3).web3Instance) {
       this._executionType = ExecutionType.web3;
       return;
@@ -152,30 +147,18 @@ export class Multicall {
       blockNumber: aggregateResponse.blockNumber
     };
 
-    for (
-      let response = 0;
-      response < aggregateResponse.results.length;
-      response++
-    ) {
+    for (let response = 0; response < aggregateResponse.results.length; response++) {
       const contractCallsResults = aggregateResponse.results[response];
-      const originalContractCallContext =
-        contractCallContexts[contractCallsResults.contractContextIndex];
+      const originalContractCallContext = contractCallContexts[contractCallsResults.contractContextIndex];
 
       const returnObjectResult: ContractCallReturnContext = {
-        originalContractCallContext: Utils.deepClone(
-          originalContractCallContext
-        ),
+        originalContractCallContext: Utils.deepClone(originalContractCallContext),
         callsReturnContext: []
       };
 
-      for (
-        let method = 0;
-        method < contractCallsResults.methodResults.length;
-        method++
-      ) {
+      for (let method = 0; method < contractCallsResults.methodResults.length; method++) {
         const methodContext = contractCallsResults.methodResults[method];
-        const originalContractCallMethodContext =
-          originalContractCallContext.calls[methodContext.contractMethodIndex];
+        const originalContractCallMethodContext = originalContractCallContext.calls[methodContext.contractMethodIndex];
 
         const outputTypes = this.findOutputTypesFromAbi(
           originalContractCallContext.abi,
@@ -189,8 +172,7 @@ export class Multicall {
               decoded: false,
               reference: originalContractCallMethodContext.reference,
               methodName: originalContractCallMethodContext.methodName,
-              methodParameters:
-                originalContractCallMethodContext.methodParameters,
+              methodParameters: originalContractCallMethodContext.methodParameters,
               success: false
             })
           );
@@ -211,8 +193,7 @@ export class Multicall {
                 decoded: true,
                 reference: originalContractCallMethodContext.reference,
                 methodName: originalContractCallMethodContext.methodName,
-                methodParameters:
-                  originalContractCallMethodContext.methodParameters,
+                methodParameters: originalContractCallMethodContext.methodParameters,
                 success: true
               })
             );
@@ -226,8 +207,7 @@ export class Multicall {
                 decoded: false,
                 reference: originalContractCallMethodContext.reference,
                 methodName: originalContractCallMethodContext.methodName,
-                methodParameters:
-                  originalContractCallMethodContext.methodParameters,
+                methodParameters: originalContractCallMethodContext.methodParameters,
                 success: false
               })
             );
@@ -239,17 +219,14 @@ export class Multicall {
               decoded: false,
               reference: originalContractCallMethodContext.reference,
               methodName: originalContractCallMethodContext.methodName,
-              methodParameters:
-                originalContractCallMethodContext.methodParameters,
+              methodParameters: originalContractCallMethodContext.methodParameters,
               success: true
             })
           );
         }
       }
 
-      returnObject.results[
-        returnObjectResult.originalContractCallContext.reference
-      ] = returnObjectResult;
+      returnObject.results[returnObjectResult.originalContractCallContext.reference] = returnObjectResult;
     }
 
     return returnObject;
@@ -290,16 +267,12 @@ export class Multicall {
    * Build aggregate call context
    * @param contractCallContexts The contract call contexts
    */
-  private buildAggregateCallContext(
-    contractCallContexts: ContractCallContext[]
-  ): AggregateCallContext[] {
+  private buildAggregateCallContext(contractCallContexts: ContractCallContext[]): AggregateCallContext[] {
     const aggregateCallContext: AggregateCallContext[] = [];
 
     for (let contract = 0; contract < contractCallContexts.length; contract++) {
       const contractContext = contractCallContexts[contract];
-      const executingInterface = new ethers.utils.Interface(
-        JSON.stringify(contractContext.abi)
-      );
+      const executingInterface = new ethers.utils.Interface(JSON.stringify(contractContext.abi));
 
       for (let method = 0; method < contractContext.calls.length; method++) {
         // https://github.com/ethers-io/ethers.js/issues/211
@@ -327,14 +300,8 @@ export class Multicall {
    * @param abi The abi
    * @param methodName The method name
    */
-  private findOutputTypesFromAbi(
-    abi: AbiItem[],
-    methodName: string
-  ): AbiOutput[] | undefined {
-    const contract = new ethers.Contract(
-      ethers.constants.AddressZero,
-      abi as any
-    );
+  private findOutputTypesFromAbi(abi: AbiItem[], methodName: string): AbiOutput[] | undefined {
+    const contract = new ethers.Contract(ethers.constants.AddressZero, abi as any);
     methodName = methodName.trim();
     if (contract.interface.functions[methodName]) {
       return contract.interface.functions[methodName].outputs;
@@ -353,10 +320,7 @@ export class Multicall {
    * Execute the multicall contract call
    * @param calls The calls
    */
-  private async execute(
-    calls: AggregateCallContext[],
-    options: ContractCallOptions
-  ): Promise<AggregateResponse> {
+  private async execute(calls: AggregateCallContext[], options: ContractCallOptions): Promise<AggregateResponse> {
     switch (this._executionType) {
       case ExecutionType.web3:
         return await this.executeWithWeb3(calls, options);
@@ -378,25 +342,17 @@ export class Multicall {
   ): Promise<AggregateResponse> {
     const web3 = this.getTypedOptions<MulticallOptionsWeb3>().web3Instance;
     const networkId = await web3.eth.net.getId();
-    const contract = new web3.eth.Contract(
-      this.ABI,
-      this.getContractBasedOnNetwork(networkId)
-    );
+    const contract = new web3.eth.Contract(this.ABI, this.getContractBasedOnNetwork(networkId));
     const callParams = [];
     if (options.blockNumber) {
       callParams.push(options.blockNumber);
     }
     if (this._options.tryAggregate) {
       const contractResponse = (await contract.methods
-        .tryBlockAndAggregate(
-          false,
-          this.mapCallContextToMatchContractFormat(calls)
-        )
+        .tryBlockAndAggregate(false, this.mapCallContextToMatchContractFormat(calls))
         .call(...callParams)) as AggregateContractResponse;
 
-      contractResponse.blockNumber = BigNumber.from(
-        contractResponse.blockNumber
-      );
+      contractResponse.blockNumber = BigNumber.from(contractResponse.blockNumber);
 
       return this.buildUpAggregateResponse(contractResponse, calls);
     } else {
@@ -404,9 +360,7 @@ export class Multicall {
         .aggregate(this.mapCallContextToMatchContractFormat(calls))
         .call(...callParams)) as AggregateContractResponse;
 
-      contractResponse.blockNumber = BigNumber.from(
-        contractResponse.blockNumber
-      );
+      contractResponse.blockNumber = BigNumber.from(contractResponse.blockNumber);
 
       return this.buildUpAggregateResponse(contractResponse, calls);
     }
@@ -420,30 +374,21 @@ export class Multicall {
     calls: AggregateCallContext[],
     options: ContractCallOptions
   ): Promise<AggregateResponse> {
-    let ethersProvider =
-      this.getTypedOptions<MulticallOptionsEthers>().ethersProvider;
+    let ethersProvider = this.getTypedOptions<MulticallOptionsEthers>().ethersProvider;
 
     const chainId = this._options.chainId;
 
     if (!ethersProvider) {
-      const customProvider =
-        this.getTypedOptions<MulticallOptionsCustomJsonRpcProvider>();
+      const customProvider = this.getTypedOptions<MulticallOptionsCustomJsonRpcProvider>();
       if (customProvider.nodeUrl) {
         // never change, no need to update chainId
-        ethersProvider = new ethers.providers.StaticJsonRpcProvider(
-          customProvider.nodeUrl,
-          chainId
-        );
+        ethersProvider = new ethers.providers.StaticJsonRpcProvider(customProvider.nodeUrl, chainId);
       } else {
         ethersProvider = ethers.getDefaultProvider();
       }
     }
 
-    const contract = new ethers.Contract(
-      this.getContractBasedOnNetwork(chainId),
-      this.ABI,
-      ethersProvider
-    );
+    const contract = new ethers.Contract(this.getContractBasedOnNetwork(chainId), this.ABI, ethersProvider);
     let overrideOptions = {};
     if (options.blockNumber) {
       overrideOptions = {
@@ -513,9 +458,7 @@ export class Multicall {
    * Map call contract to match contract format
    * @param calls The calls context
    */
-  private mapCallContextToMatchContractFormat(
-    calls: AggregateCallContext[]
-  ): Array<{
+  private mapCallContextToMatchContractFormat(calls: AggregateCallContext[]): Array<{
     target: string;
     callData: string;
   }> {
@@ -594,6 +537,7 @@ export class Multicall {
       case Networks.klatyn:
       case Networks.milkomeda:
       case Networks.kcc:
+      case Networks.kawaiiverse:
         return '0xcA11bde05977b3631167028862bE2a173976CA11';
       case Networks.etherlite:
         return '0x21681750D7ddCB8d1240eD47338dC984f94AF2aC';
