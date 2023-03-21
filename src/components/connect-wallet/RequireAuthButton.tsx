@@ -3,9 +3,9 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
+import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
-import { displayInstallWallet } from 'libs/utils';
 import React, { useState } from 'react';
 import ConnectWalletModal from './ConnectWalletModal';
 

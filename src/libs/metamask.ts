@@ -1,14 +1,13 @@
-import { displayToast, TToastType } from 'components/Toasts/Toast';
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
-import { ethToTronAddress, getRpcEvm } from 'helper';
+import { displayInstallWallet, getRpcEvm } from 'helper';
 
 import Web3 from 'web3';
 
 import { AbiItem } from 'web3-utils';
-import { displayInstallWallet, toAmount } from './utils';
+import { toAmount } from './utils';
 
 export default class Metamask {
   constructor() {}

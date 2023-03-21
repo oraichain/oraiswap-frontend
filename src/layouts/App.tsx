@@ -5,16 +5,11 @@ import { COSMOS_TYPE, EVM_TYPE, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNEC
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getNetworkGasPrice } from 'helper';
+import { displayInstallWallet, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { CacheTokens } from 'libs/token';
-import {
-  buildUnsubscribeMessage,
-  buildWebsocketSendMessage,
-  displayInstallWallet,
-  processWsResponseMsg
-} from 'libs/utils';
+import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import useWebSocket from 'react-use-websocket';

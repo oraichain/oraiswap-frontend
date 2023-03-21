@@ -50,7 +50,6 @@ import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
 import { ethers } from 'ethers';
-import { displayInstallWallet } from 'libs/utils';
 
 interface Tokens {
   denom?: string;
@@ -211,4 +210,18 @@ export const ethToTronAddress = (address: string) => {
   const hash = ethers.utils.sha256(ethers.utils.sha256(evmAddress));
   const checkSum = hash.substring(2, 10);
   return ethers.utils.base58.encode(evmAddress + checkSum);
+};
+
+export const displayInstallWallet = (altWallet = 'Keplr') => {
+  displayToast(
+    TToastType.TX_INFO,
+    {
+      message: `You need to install OWallet or ${altWallet} to continue.`,
+      customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+      textLink: 'View on store'
+    },
+    {
+      toastId: 'install_keplr'
+    }
+  );
 };
