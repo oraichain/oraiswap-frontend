@@ -21,7 +21,7 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
             {loading ?
                 <img src={loadingGif} alt='loading-gif' width={30} height={30} />
                 :
-                <div className={styles.stuckText} onClick={handleMove}>Move Stuck Token</div>
+                <div className={styles.stuckText} onClick={handleMove}>Move stuck token from OraiBridge to Oraichain</div>
             }
             <TooltipIcon
                 placement="bottom-end"
