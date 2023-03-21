@@ -87,7 +87,7 @@ export default class Metamask {
     if (this.isTron()) {
       if (this.checkTron())
         return await this.submitTronSmartContract(
-          gravityContractAddr,
+          ethToTronAddress(gravityContractAddr),
           'sendToCosmos(address,string,uint256)',
           {},
           [
@@ -120,7 +120,7 @@ export default class Metamask {
 
     if (this.isTron()) {
       if (this.checkTron())
-        return this.submitTronSmartContract(token.contractAddress, 'approve(address,uint256)', {}, [
+        return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
           { type: 'address', value: spender },
           { type: 'uint256', value: allowance.toString() }
         ]);
