@@ -1,14 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { Web3ReactProvider } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import {
-  COSMOS_TYPE,
-  EVM_TYPE,
-  NOTI_INSTALL_OWALLET,
-  ORAICHAIN_ID,
-  WEBSOCKET_RECONNECT_ATTEMPTS,
-  WEBSOCKET_RECONNECT_INTERVAL
-} from 'config/constants';
+import { COSMOS_TYPE, EVM_TYPE, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
@@ -16,7 +9,12 @@ import { getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { CacheTokens } from 'libs/token';
-import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
+import {
+  buildUnsubscribeMessage,
+  buildWebsocketSendMessage,
+  displayInstallWallet,
+  processWsResponseMsg
+} from 'libs/utils';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import useWebSocket from 'react-use-websocket';
@@ -104,9 +102,7 @@ const App = () => {
     // automatically update. If user is also using Oraichain wallet => dont update
     const keplr = await window.Keplr.getKeplr();
     if (!keplr) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
+      return displayInstallWallet();
     }
 
     let newAddress = await window.Keplr.getKeplrAddr();

@@ -2,16 +2,16 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { NOTI_INSTALL_OWALLET, TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
+import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
 import { ethToTronAddress, getRpcEvm } from 'helper';
 
 import Web3 from 'web3';
 
 import { AbiItem } from 'web3-utils';
-import { toAmount } from './utils';
+import { displayInstallWallet, toAmount } from './utils';
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
 
   public isWindowEthereum() {
     return !!window.ethereum;
@@ -23,13 +23,7 @@ export default class Metamask {
 
   private checkTron() {
     if (!window.tronWeb) {
-      displayToast(
-        TToastType.TX_INFO,
-        { ...NOTI_INSTALL_OWALLET, message: NOTI_INSTALL_OWALLET.message.replace(/Keplr/g, 'TronLink') },
-        {
-          toastId: 'install_keplr'
-        }
-      );
+      displayInstallWallet('TronLink');
       return false;
     }
     return true;
@@ -86,16 +80,11 @@ export default class Metamask {
 
     if (this.isTron()) {
       if (this.checkTron())
-        return await this.submitTronSmartContract(
-          gravityContractAddr,
-          'sendToCosmos(address,string,uint256)',
-          {},
-          [
-            { type: 'address', value: token.contractAddress },
-            { type: 'string', value: to },
-            { type: 'uint256', value: balance.toString() }
-          ]
-        );
+        return await this.submitTronSmartContract(gravityContractAddr, 'sendToCosmos(address,string,uint256)', {}, [
+          { type: 'address', value: token.contractAddress },
+          { type: 'string', value: to },
+          { type: 'uint256', value: balance.toString() }
+        ]);
     } else {
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);

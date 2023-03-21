@@ -1,4 +1,5 @@
 import bech32 from 'bech32';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
@@ -114,10 +115,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-      token: {
-        contract_addr: token.contractAddress
+        token: {
+          contract_addr: token.contractAddress
+        }
       }
-    }
     : { native_token: { denom: token.denom } };
 };
 
@@ -272,4 +273,18 @@ export const processWsResponseMsg = (message: any): string => {
     return tokens.substring(0, tokens.length - 2); // remove , due to concat
   }
   return null;
+};
+
+export const displayInstallWallet = (altWallet = 'Keplr') => {
+  displayToast(
+    TToastType.TX_INFO,
+    {
+      message: `You need to install OWallet or ${altWallet} to continue.`,
+      customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+      textLink: 'View on store'
+    },
+    {
+      toastId: 'install_keplr'
+    }
+  );
 };

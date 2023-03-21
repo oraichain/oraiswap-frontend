@@ -1,4 +1,4 @@
-import { Networks } from "libs/ethereum-multicall/enums";
+import { Networks } from 'libs/ethereum-multicall/enums';
 
 export const CHROME = 'https://google.com/chrome';
 
@@ -131,13 +131,6 @@ export const ORAI_BRIDGE_ORG = 'OraiBridge';
 // websocket consts
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;
 export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
-
-// noti install owallet chorme extensions
-export const NOTI_INSTALL_OWALLET = {
-  message: 'You need to install OWallet or Keplr to continue.',
-  customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
-  textLink: 'View on store'
-};
 
 // coingeckoid token
 export const ORAI_COINGECKO_ID = 'oraichain-token';

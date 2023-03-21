@@ -19,7 +19,6 @@ import {
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
-  NOTI_INSTALL_OWALLET,
   HIGH_GAS_PRICE,
   MULTIPLIER,
   BSC_SCAN,
@@ -51,6 +50,7 @@ import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
 import { ethers } from 'ethers';
+import { displayInstallWallet } from 'libs/utils';
 
 interface Tokens {
   denom?: string;
@@ -199,9 +199,7 @@ export const feeEstimate = async (tokenInfo: TokenItemType, gasDefault: number) 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
-    return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-      toastId: 'install_keplr'
-    });
+    return displayInstallWallet();
   }
 };
 

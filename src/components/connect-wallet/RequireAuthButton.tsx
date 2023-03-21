@@ -1,10 +1,11 @@
 import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
+import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
+import { displayInstallWallet } from 'libs/utils';
 import React, { useState } from 'react';
 import ConnectWalletModal from './ConnectWalletModal';
 
@@ -48,9 +49,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
 
   const connectKeplr = async () => {
     if (!(await window.Keplr.getKeplr())) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
+      return displayInstallWallet();
     }
 
     await window.Keplr.suggestChain(network.chainId);

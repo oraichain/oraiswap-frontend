@@ -72,19 +72,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex'
-  | 'usd-coin';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex'
+    | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -643,10 +643,5 @@ export const kawaiiTokens = uniqBy(
 export const gravityContracts: { [key: string]: string } = {
   [BSC_CHAIN_ID]: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
   [ETHEREUM_CHAIN_ID]: process.env.REACT_APP_GRAVITY_ETH_CONTRACT,
-  [TRON_CHAIN_ID]: process.env.REACT_APP_GRAVITY_TRON_CONTRACT,
+  [TRON_CHAIN_ID]: process.env.REACT_APP_GRAVITY_TRON_CONTRACT
 };
-
-export const usdtToken = uniqBy(
-  flattenTokens.filter((token) => token.denom === STABLE_DENOM),
-  (c) => c.denom
-);
