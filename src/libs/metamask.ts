@@ -2,7 +2,7 @@ import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
-import { displayInstallWallet, getRpcEvm } from 'helper';
+import { displayInstallWallet, ethToTronAddress, getRpcEvm } from 'helper';
 
 import Web3 from 'web3';
 
@@ -79,11 +79,16 @@ export default class Metamask {
 
     if (this.isTron()) {
       if (this.checkTron())
-        return await this.submitTronSmartContract(gravityContractAddr, 'sendToCosmos(address,string,uint256)', {}, [
-          { type: 'address', value: token.contractAddress },
-          { type: 'string', value: to },
-          { type: 'uint256', value: balance.toString() }
-        ]);
+        return await this.submitTronSmartContract(
+          ethToTronAddress(gravityContractAddr),
+          'sendToCosmos(address,string,uint256)',
+          {},
+          [
+            { type: 'address', value: token.contractAddress },
+            { type: 'string', value: to },
+            { type: 'uint256', value: balance.toString() }
+          ]
+        );
     } else {
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
@@ -108,7 +113,7 @@ export default class Metamask {
 
     if (this.isTron()) {
       if (this.checkTron())
-        return this.submitTronSmartContract(token.contractAddress, 'approve(address,uint256)', {}, [
+        return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
           { type: 'address', value: spender },
           { type: 'uint256', value: allowance.toString() }
         ]);
