@@ -50,7 +50,7 @@ describe('bridge', () => {
     const transferAmount = 10;
     const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = await generateConvertCw20Erc20Message(
+    const msgConvertReverses = generateConvertCw20Erc20Message(
       {
         [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
       },
@@ -67,7 +67,7 @@ describe('bridge', () => {
     const transferAmount = 10;
     const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = await generateConvertCw20Erc20Message(
+    const msgConvertReverses = generateConvertCw20Erc20Message(
       {
         [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
       },

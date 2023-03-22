@@ -84,7 +84,7 @@ export const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenIte
 
   // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
   if (fromToken.evmDenoms) {
-    const msgConvertReverses = await generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, amount);
+    const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, amount);
     const executeContractMsgs = getExecuteContractMsgs(
       fromAddress,
       parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
@@ -188,7 +188,7 @@ export const transferTokenErc20Cw20Map = async ({
   const evmToken = tokenMap[fromToken.evmDenoms[0]];
   const evmAmount = coin(toAmount(transferAmount, evmToken.decimals).toString(), evmToken.denom);
 
-  const msgConvertReverses = await generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
+  const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
 
   const executeContractMsgs = getExecuteContractMsgs(
     fromAddress,

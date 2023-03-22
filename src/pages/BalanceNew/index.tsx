@@ -9,7 +9,7 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { kawaiiTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { TokenItemType, tokens } from 'config/bridgeTokens';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
@@ -17,7 +17,6 @@ import {
   KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
-import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -44,9 +43,8 @@ import {
   getSubAmountDetails,
 } from 'rest/api';
 import { RootState } from 'store/configure';
-import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
-import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIBC, transferIbcCustom, transferIBCKwt, transferTokenErc20Cw20Map, transferToRemoteChainIbcWasm } from './helpers';
+import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIbcCustom, transferIBCKwt } from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
