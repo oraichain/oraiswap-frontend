@@ -4,6 +4,7 @@ import styles from './style.module.scss';
 import loadingGif from 'assets/gif/loading.gif';
 import { RemainingOraibTokenItem } from './useGetOraiBridgeBalances';
 import { TooltipIcon } from './TooltipBridgeToken';
+import { toDisplay } from 'libs/utils';
 
 interface Props {
     handleMove: () => Promise<void>;
@@ -27,7 +28,6 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
                 placement="bottom-end"
                 content={remainingOraib.map(token => {
                     const { Icon } = token
-                    const oraibDecimals = 18;
                     return (
                         <div className={styles.stuckToken}>
                             <div>
@@ -36,9 +36,7 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
                             </div>
                             <TokenBalance
                                 balance={{
-                                    amount: token.amount ?? '0',
-                                    denom: '',
-                                    decimals: oraibDecimals
+                                    amount: toDisplay(token.amount, token.decimals).toString(),
                                 }}
                                 className={styles.tokenAmount}
                                 decimalScale={Math.min(6, token.decimals)}

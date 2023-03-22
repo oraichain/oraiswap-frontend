@@ -1,12 +1,6 @@
-import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import {
-  AminoTypes,
-  Coin,
   coin,
-  DeliverTxResponse,
-  GasPrice,
-  isDeliverTxFailure,
-  SigningStargateClient
+  DeliverTxResponse, isDeliverTxFailure
 } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
@@ -15,14 +9,12 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokens, kawaiiTokens } from 'config/bridgeTokens';
+import { kawaiiTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
   KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID,
-  ORAI,
-  ORAICHAIN_ID,
+  KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID
 } from 'config/constants';
 import { ibcInfos, ibcInfosOld, oraichain2oraib } from 'config/ibcInfos';

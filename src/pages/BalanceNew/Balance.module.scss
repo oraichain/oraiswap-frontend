@@ -30,6 +30,16 @@
       color: #ffffff;
     }
   }
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .asset {
+      margin-bottom: 15px;
+    }
+  }
+
 }
 
 .action {
