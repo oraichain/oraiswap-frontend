@@ -2,7 +2,7 @@ import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-starg
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { KWT, KWT_BSC_CONTRACT, KWT_SUBNETWORK_CHAIN_ID, MILKY_BSC_CONTRACT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { KWT, KWT_BSC_CONTRACT, KWT_SUBNETWORK_CHAIN_ID, MILKY_BSC_CONTRACT, ORAI, ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_DENOM, ORAI_BRIDGE_RPC, ORAI_BRIDGE_UDENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -167,6 +167,22 @@ export const transferEvmToIBC = async (from: TokenItemType, metamaskAddress: str
   const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
   return result;
 };
+
+export const transferIBCMultiple = async (fromAddress: string, chainId: string, rpc: string, feeDenom: string, messages: MsgTransfer[]) => {
+  const encodedMessages = messages.map(message => ({ typeUrl: '/ibc.applications.transfer.v1.MsgTransfer', value: MsgTransfer.fromPartial(message) }))
+  const offlineSigner = await window.Keplr.getOfflineSigner(chainId);
+  const aminoTypes = new AminoTypes({
+    ...customAminoTypes
+  });
+  // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+  const client = await SigningStargateClient.connectWithSigner(rpc, offlineSigner, {
+    registry: customRegistry,
+    aminoTypes,
+    gasPrice: GasPrice.fromString(`${(await getNetworkGasPrice()).average}${feeDenom}`)
+  });
+  const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
+  return result;
+}
 
 export const transferTokenErc20Cw20Map = async ({
   amounts,

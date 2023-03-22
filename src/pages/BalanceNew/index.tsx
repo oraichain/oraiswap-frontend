@@ -15,8 +15,11 @@ import {
   ETHEREUM_SCAN,
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID
+  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_RPC,
+  ORAI_BRIDGE_UDENOM
 } from 'config/constants';
+import { ibcInfos } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -34,6 +37,7 @@ import {
   toTotalDisplay
 } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
+import Long from 'long';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -44,11 +48,12 @@ import {
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
-import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIbcCustom, transferIBCKwt } from './helpers';
+import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIbcCustom, transferIBCKwt, transferIBCMultiple } from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
+import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 
 interface BalanceProps { }
 
@@ -102,14 +107,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     }
   };
 
-  const processTxResult = (token: TokenItemType, result: DeliverTxResponse, customLink?: string) => {
+  const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
         message: result.rawLog
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink || `${token.rpc}/tx?hash=0x${result.transactionHash}`
+        customLink: customLink || `${rpc}/tx?hash=0x${result.transactionHash}`
       });
     }
     setTxHash(result.transactionHash);
@@ -162,7 +167,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
 
   const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, metamaskAddress);
-    processTxResult(fromToken, result);
+    processTxResult(fromToken.rpc, result);
   }
 
   const onClickTransfer = async (fromAmount: number, from: TokenItemType, to: TokenItemType) => {
@@ -190,12 +195,12 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       let result: DeliverTxResponse;
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID && !!from.contractAddress) {
         result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        processTxResult(from, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
         result = await transferIBCKwt(from, to, fromAmount, amounts);
-        processTxResult(from, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
       if (from.cosmosBased) {
@@ -204,7 +209,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       }
       result = await transferEvmToIBC(from, metamaskAddress, fromAmount);
       processTxResult(
-        from,
+        from.rpc,
         result,
         window.Metamask.isEth() // TODO: need to merge this with the dynamic chain id check update
           ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}`
@@ -232,7 +237,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       const result = await broadcastConvertTokenTx(amount, token, type, outputToken);
       if (result) {
-        processTxResult(token, result as any, `${network.explorer}/txs/${result.transactionHash}`);
+        processTxResult(token.rpc, result as any, `${network.explorer}/txs/${result.transactionHash}`);
       }
     } catch (error) {
       let finalError = '';
@@ -272,13 +277,34 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       // TODO: Transfer multiple IBC messages in a single transaction only
+      let transferMsgs: MsgTransfer[] = [];
+      // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
+      const fromAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
+      const toAddress = await window.Keplr.getKeplrAddr(ORAICHAIN_ID);
       for (const fromToken of remainingOraib) {
         const toToken = toTokens.find(t => t.chainId === ORAICHAIN_ID && t.name === fromToken.name)
-        const transferAmount = toDisplay(fromToken.amount, fromToken.decimals);
-        await handleTransferIBC(fromToken, toToken, transferAmount)
+        const ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+        const tokenAmount = coin(fromToken.amount, fromToken.denom);
+        transferMsgs.push({
+          sourcePort: ibcInfo.source,
+          sourceChannel: ibcInfo.channel,
+          token: tokenAmount,
+          sender: fromAddress,
+          receiver: toAddress,
+          memo: '',
+          timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
+            .multiply(1000000000).toString(),
+          timeoutHeight: { revisionNumber: "0", revisionHeight: "0" } // we dont need timeout height. We only use timeout timestamp
+        })
       }
+      // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
+      const result = await transferIBCMultiple(fromAddress, ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_RPC, ORAI_BRIDGE_UDENOM, transferMsgs);
+      processTxResult(ORAI_BRIDGE_RPC, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error)
+      displayToast(TToastType.TX_FAILED, {
+        message: error.message
+      });
     } finally {
       setMoveOraib2OraiLoading(false)
     }
