@@ -26,10 +26,11 @@ import {
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import SelectTokenModal from '../Modals/SelectTokenModal';
-import SettingModal from '../Modals/SettingModal';
 import styles from './index.module.scss';
 import { feeEstimate } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import SettingModal from '../Modals/SettingModal';
+import { TooltipIcon } from '../Modals/SettingTooltip';
 
 const cx = cn.bind(styles);
 
@@ -85,7 +86,6 @@ const SwapComponent: React.FC<{
   const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
   const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
-
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -115,6 +115,8 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
+
+  console.log('swapAmount', [fromAmountToken, toAmountToken])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -187,6 +189,18 @@ const SwapComponent: React.FC<{
       <div className={cx('from')}>
         <div className={cx('header')}>
           <div className={cx('title')}>FROM</div>
+
+          <TooltipIcon
+            placement="bottom-end"
+            content={<SettingModal
+              isOpen={isOpenSettingModal}
+              open={() => setIsOpenSettingModal(true)}
+              close={() => setIsOpenSettingModal(false)}
+              slippage={slippage}
+              setSlippage={setSlippage}
+            />}
+          />
+
           <button onClick={() => setRefresh(!refresh)}>
             <img className={cx('btn')} src={RefreshImg} alt="btn" />
           </button>
@@ -303,13 +317,6 @@ const SwapComponent: React.FC<{
           </div>
         )}
       </div>
-      <SettingModal
-        isOpen={isOpenSettingModal}
-        open={() => setIsOpenSettingModal(true)}
-        close={() => setIsOpenSettingModal(false)}
-        slippage={slippage}
-        setSlippage={setSlippage}
-      />
 
       {isSelectFrom ? (
         <SelectTokenModal

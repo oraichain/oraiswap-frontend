@@ -1,8 +1,9 @@
-import React, { FC, useState } from 'react';
-import Modal from 'components/Modal';
-import { TooltipIcon } from 'components/Tooltip';
-import styles from './SettingModal.module.scss';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import TransSetting from 'assets/images/trans_setting.svg';
 import cn from 'classnames/bind';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import styles from './SettingModal.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -14,55 +15,55 @@ interface ModalProps {
   setSlippage: any;
 }
 
-const SettingModal: FC<ModalProps> = ({ isOpen, close, open, slippage, setSlippage }) => {
-  const [chosenOption, setChosenOption] = useState(2);
+const options = [1, 3, 5]
+
+const SettingModal: FC<ModalProps> = ({ slippage, setSlippage }) => {
+  const [chosenOption, setChosenOption] = useState(0);
 
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false}>
-      <div className={cx('setting')}>
+    <div className={cx('setting')}>
+      <div className={cx('header')}>
         <div className={cx('title')}>
-          <div>Slippage Tolerance</div>
-          <TooltipIcon
-            content="The transfer won’t go through if the bridge rate moves
-                        unfavorably by more than this percentage when the
-                        transfer is executed."
-          />
+
+          <img className={cx('btn')} src={TransSetting} alt="btn" />
+          <div>Transaction settings</div>
         </div>
-        <div className={cx('options')}>
-          {[0.3, 0.5, 1].map((option, idx) => (
-            <div
-              className={cx('item', {
-                isChosen: chosenOption === idx
-              })}
-              key={idx}
-              onClick={() => {
-                setSlippage(option);
-                setChosenOption(idx);
-              }}
-            >
-              {option}%
-            </div>
-          ))}
+        <CloseIcon className={cx('close-icon')} />
+      </div>
+      <div className={cx("subtitle")}>Slippage tolerance</div>
+      <div className={cx('options')}>
+        {options.map((option, idx) => (
           <div
-            className={cx('item', 'border', {
-              isChosen: chosenOption === 3
+            className={cx('item', {
+              isChosen: chosenOption === idx
             })}
-            onClick={() => setChosenOption(3)}
+            key={idx}
+            onClick={() => {
+              setSlippage(option);
+              setChosenOption(idx);
+            }}
           >
-            <input
-              placeholder="0.00"
-              type={'number'}
-              className={cx('input')}
-              value={chosenOption === 3 ? slippage : ''}
-              onChange={(event) => {
-                setSlippage(+event.target.value);
-              }}
-            />
-            %
+            {option}%
           </div>
+        ))}
+        <div
+          className={cx('item', 'border', {
+            isChosen: chosenOption === 3
+          })}
+          onClick={() => setChosenOption(3)}
+        >
+          <NumberFormat
+            className={cx('input')}
+            thousandSeparator
+            decimalScale={6}
+            defaultValue={2.5}
+            type="text"
+            max={100}
+          />
+          %
         </div>
       </div>
-    </Modal>
+    </div>
   );
 };
 
