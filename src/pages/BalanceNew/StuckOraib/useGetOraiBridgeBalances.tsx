@@ -1,13 +1,14 @@
 import { Coin, StargateClient } from "@cosmjs/stargate";
 import { TokenItemType, tokens } from "config/bridgeTokens";
 import {
-    ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_RPC
+    ORAI_BRIDGE_CHAIN_ID,
+    ORAI_BRIDGE_RPC,
+    ORAI_BRIDGE_UDENOM
 } from 'config/constants';
 import { toDisplay } from 'libs/utils';
 import { useEffect, useState } from 'react';
 
 export type RemainingOraibTokenItem = TokenItemType & { amount: string };
-const ORAIB_DECIMALS = 18;
 export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean) {
     const [remainingOraib, setRemainingOraib] = useState<RemainingOraibTokenItem[]>([])
     const [otherChainTokens] = tokens
@@ -21,14 +22,18 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
             }
             const client = await StargateClient.connect(ORAI_BRIDGE_RPC);
             const data: readonly Coin[] = await client.getAllBalances(oraiBridgeAddress);
-            const remainingOraib = data.filter((item: Coin) => toDisplay(item.amount, ORAIB_DECIMALS) > 0)
-                .map((item: Coin) => {
+            const remainingOraib = data.reduce((acc, item) => {
+                // denom: "uoraib" not use => filter out
+                if (item.denom !== ORAI_BRIDGE_UDENOM) {
                     const findedOraib = otherChainTokens.find((token: TokenItemType) => token.denom.toLowerCase() === item.denom.toLowerCase())
-                    return {
+                    acc.push({
                         ...findedOraib,
                         amount: item.amount
-                    } as RemainingOraibTokenItem
-                })
+                    })
+                }
+                return acc
+            }, [] as RemainingOraibTokenItem[])
+                .filter((token: RemainingOraibTokenItem) => toDisplay(token.amount, token.decimals) > 0)
 
             setRemainingOraib(remainingOraib);
         } catch (error) {
