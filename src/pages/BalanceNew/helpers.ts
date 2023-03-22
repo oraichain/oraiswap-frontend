@@ -1,8 +1,19 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
-import { gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { KWT, KWT_BSC_CONTRACT, KWT_SUBNETWORK_CHAIN_ID, MILKY_BSC_CONTRACT, ORAI, ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_DENOM, ORAI_BRIDGE_RPC, ORAI_BRIDGE_UDENOM } from 'config/constants';
+import { gravityContracts, kawaiiTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import {
+  KWT,
+  KWT_BSC_CONTRACT,
+  KWT_SUBNETWORK_CHAIN_ID,
+  MILKY_BSC_CONTRACT,
+  ORAI,
+  ORAICHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_BRIDGE_DENOM,
+  ORAI_BRIDGE_RPC,
+  ORAI_BRIDGE_UDENOM
+} from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -14,8 +25,15 @@ import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, parseBep20Erc20Name, toAmount } from 'libs/utils';
 import Long from 'long';
-import { generateConvertCw20Erc20Message, generateConvertMsgs, parseTokenInfo, Type } from 'rest/api';
+import {
+  generateConvertCw20Erc20Message,
+  generateConvertMsgs,
+  generateMoveOraib2OraiMessages,
+  parseTokenInfo,
+  Type
+} from 'rest/api';
 import { IBCInfo } from 'types/ibc';
+import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 
 /**
  * This function converts the destination address (from BSC / ETH -> Oraichain) to an appropriate format based on the BSC / ETH token contract address
@@ -23,16 +41,10 @@ import { IBCInfo } from 'types/ibc';
  * @param contractAddress - BSC / ETH token contract address
  * @returns converted receiver address
  */
-export const getOneStepKeplrAddr = (
-  keplrAddress: string,
-  contractAddress: string
-): string => {
+export const getOneStepKeplrAddr = (keplrAddress: string, contractAddress: string): string => {
   let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
   // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
-  if (
-    contractAddress === KWT_BSC_CONTRACT ||
-    contractAddress === MILKY_BSC_CONTRACT
-  ) {
+  if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
     oneStepKeplrAddr = keplrAddress;
   }
   return oneStepKeplrAddr;
@@ -65,7 +77,12 @@ export const transferIBC = async (data: {
   return result;
 };
 
-export const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number, amounts: AmountDetails): Promise<DeliverTxResponse> => {
+export const transferIBCKwt = async (
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  transferAmount: number,
+  amounts: AmountDetails
+): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
@@ -74,8 +91,7 @@ export const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenIte
   await window.Keplr.suggestChain(fromToken.chainId as string);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
-  if (!fromAddress || !toAddress)
-    throw generateError('Please login keplr!');
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
   var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
 
@@ -125,11 +141,8 @@ export const convertTransferIBCErc20Kwt = async (
   await window.Keplr.suggestChain(fromToken.chainId as string);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
-  if (!fromAddress || !toAddress)
-    throw generateError('Please login keplr!');
-  const nativeToken = kawaiiTokens.find(
-    (token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId
-  ); // collect kawaiiverse cosmos based token for conversion
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
+  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId); // collect kawaiiverse cosmos based token for conversion
 
   const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
@@ -152,11 +165,14 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
-export const transferEvmToIBC = async (from: TokenItemType, metamaskAddress: string, fromAmount: number): Promise<any> => {
+export const transferEvmToIBC = async (
+  from: TokenItemType,
+  metamaskAddress: string,
+  fromAmount: number
+): Promise<any> => {
   await window.Metamask.switchNetwork(from!.chainId);
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!metamaskAddress || !oraiAddress)
-    throw generateError('Please login both metamask and keplr!');
+  if (!metamaskAddress || !oraiAddress) throw generateError('Please login both metamask and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!] as string;
   if (!gravityContractAddr || !from) {
     return;
@@ -168,8 +184,17 @@ export const transferEvmToIBC = async (from: TokenItemType, metamaskAddress: str
   return result;
 };
 
-export const transferIBCMultiple = async (fromAddress: string, chainId: string, rpc: string, feeDenom: string, messages: MsgTransfer[]) => {
-  const encodedMessages = messages.map(message => ({ typeUrl: '/ibc.applications.transfer.v1.MsgTransfer', value: MsgTransfer.fromPartial(message) }))
+export const transferIBCMultiple = async (
+  fromAddress: string,
+  chainId: string,
+  rpc: string,
+  feeDenom: string,
+  messages: MsgTransfer[]
+) => {
+  const encodedMessages = messages.map((message) => ({
+    typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+    value: MsgTransfer.fromPartial(message)
+  }));
   const offlineSigner = await window.Keplr.getOfflineSigner(chainId);
   const aminoTypes = new AminoTypes({
     ...customAminoTypes
@@ -182,7 +207,7 @@ export const transferIBCMultiple = async (fromAddress: string, chainId: string, 
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
   return result;
-}
+};
 
 export const transferTokenErc20Cw20Map = async ({
   amounts,
@@ -298,7 +323,13 @@ export const transferToRemoteChainIbcWasm = async (
 };
 
 // Oraichain (Orai)
-export const transferIbcCustom = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number, amounts: AmountDetails, metamaskAddress?: string): Promise<DeliverTxResponse> => {
+export const transferIbcCustom = async (
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  transferAmount: number,
+  amounts: AmountDetails,
+  metamaskAddress?: string
+): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
 
   await window.Keplr.suggestChain(toToken.chainId as string);
@@ -307,11 +338,9 @@ export const transferIbcCustom = async (fromToken: TokenItemType, toToken: Token
   // check address
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
-  if (!fromAddress || !toAddress)
-    throw generateError('Please login keplr!');
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
-  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix)
-    throw generateError('Prefix Token not found!');
+  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
   const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
@@ -321,7 +350,7 @@ export const transferIbcCustom = async (fromToken: TokenItemType, toToken: Token
     throw generateError('Please login metamask!');
   }
   // for KWT & MILKY tokens, we use the old ibc info channel
-  if (fromToken.evmDenoms || kawaiiTokens.find(i => i.name === fromToken.name))
+  if (fromToken.evmDenoms || kawaiiTokens.find((i) => i.name === fromToken.name))
     ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
 
   let result: DeliverTxResponse;
@@ -401,11 +430,11 @@ export const broadcastConvertTokenTx = async (
   amount: number,
   token: TokenItemType,
   type: 'cw20ToNative' | 'nativeToCw20',
-  outputToken?: TokenItemType): Promise<ExecuteResult> => {
+  outputToken?: TokenItemType
+): Promise<ExecuteResult> => {
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress)
-    throw generateError('Please login both metamask and Keplr!');
+  if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
   let msgs: any;
   if (type === 'nativeToCw20') {
     msgs = generateConvertMsgs({
@@ -433,4 +462,22 @@ export const broadcastConvertTokenTx = async (
     handleOptions: { funds: msg.sent_funds } as HandleOptions
   });
   return result;
-}
+};
+
+export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[]) => {
+  // TODO: Transfer multiple IBC messages in a single transaction only
+  // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
+  const fromAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
+  const toAddress = await window.Keplr.getKeplrAddr(ORAICHAIN_ID);
+  const transferMsgs = generateMoveOraib2OraiMessages(remainingOraib, fromAddress, toAddress);
+
+  // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
+  const result = await transferIBCMultiple(
+    fromAddress,
+    ORAI_BRIDGE_CHAIN_ID,
+    ORAI_BRIDGE_RPC,
+    ORAI_BRIDGE_UDENOM,
+    transferMsgs
+  );
+  return result;
+};

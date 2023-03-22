@@ -1,5 +1,4 @@
 import {
-  coin,
   DeliverTxResponse, isDeliverTxFailure
 } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -16,10 +15,8 @@ import {
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_RPC,
-  ORAI_BRIDGE_UDENOM
+  ORAI_BRIDGE_RPC
 } from 'config/constants';
-import { ibcInfos } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -31,29 +28,25 @@ import {
   getTotalUsd,
   getUsd,
   parseBep20Erc20Name,
-  toAmount,
-  toDisplay,
-  toSumDisplay,
+  toAmount, toSumDisplay,
   toTotalDisplay
 } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import Long from 'long';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  getSubAmountDetails,
+  getSubAmountDetails
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
-import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIbcCustom, transferIBCKwt, transferIBCMultiple } from './helpers';
+import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, moveOraibToOraichain, transferEvmToIBC, transferIbcCustom, transferIBCKwt } from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
-import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 
 interface BalanceProps { }
 
@@ -272,33 +265,10 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   // Move oraib2oraichain
   const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
   const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading);
-
-  const moveOraibToOraichain = async () => {
+  const handleMoveOraib2Orai = async () => {
     try {
       setMoveOraib2OraiLoading(true);
-      // TODO: Transfer multiple IBC messages in a single transaction only
-      let transferMsgs: MsgTransfer[] = [];
-      // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-      const fromAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
-      const toAddress = await window.Keplr.getKeplrAddr(ORAICHAIN_ID);
-      for (const fromToken of remainingOraib) {
-        const toToken = toTokens.find(t => t.chainId === ORAICHAIN_ID && t.name === fromToken.name)
-        const ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-        const tokenAmount = coin(fromToken.amount, fromToken.denom);
-        transferMsgs.push({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: tokenAmount,
-          sender: fromAddress,
-          receiver: toAddress,
-          memo: '',
-          timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
-            .multiply(1000000000).toString(),
-          timeoutHeight: { revisionNumber: "0", revisionHeight: "0" } // we dont need timeout height. We only use timeout timestamp
-        })
-      }
-      // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-      const result = await transferIBCMultiple(fromAddress, ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_RPC, ORAI_BRIDGE_UDENOM, transferMsgs);
+      const result = await moveOraibToOraichain(remainingOraib);
       processTxResult(ORAI_BRIDGE_RPC, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error)
@@ -320,7 +290,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           </div>
 
           {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
-          <StuckOraib remainingOraib={remainingOraib} handleMove={moveOraibToOraichain} loading={moveOraib2OraiLoading} />
+          <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
 
         </div>
         <div className={styles.divider} />
