@@ -54,7 +54,7 @@ import {
 import { RootState } from 'store/configure';
 import { IBCInfo } from 'types/ibc';
 import styles from './Balance.module.scss';
-import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIBC, transferIBCKwt, transferTokenErc20Cw20Map, transferToRemoteChainIbcWasm } from './helpers';
+import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, transferEvmToIBC, transferIBC, transferIbcCustom, transferIBCKwt, transferTokenErc20Cw20Map, transferToRemoteChainIbcWasm } from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
@@ -159,82 +159,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     [onClickToken]
   );
 
-  // Oraichain (Orai)
-  const transferIbcCustom = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
-    try {
-      if (transferAmount === 0) throw new Error('Transfer amount is empty');
-      await handleCheckWallet();
-
-      await window.Keplr.suggestChain(toToken.chainId as string);
-      // enable from to send transaction
-      await window.Keplr.suggestChain(fromToken.chainId as string);
-      // check address
-      const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
-      const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
-      if (!fromAddress || !toAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login keplr!'
-        });
-        return;
-      }
-
-      if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Prefix Token not found!'
-        });
-        return;
-      }
-
-      let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
-      const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
-      let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-      // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
-      if (!metamaskAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login metamask!'
-        });
-        return;
-      }
-      // for KWT & MILKY tokens, we use the old ibc info channel
-      if (fromToken.evmDenoms || kawaiiTokens.find(i => i.name === fromToken.name))
-        ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-      if (fromToken.evmDenoms) {
-        const result = await transferTokenErc20Cw20Map({
-          amounts,
-          transferAmount,
-          fromToken,
-          fromAddress,
-          toAddress,
-          ibcInfo,
-          ibcMemo
-        });
-        processTxResult(fromToken, result, `${network.explorer}/txs/${result.transactionHash}`);
-        return;
-      }
-      // if it includes wasm in source => ibc wasm case
-      if (ibcInfo.channel === oraichain2oraib) {
-        const result = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, toAddress, amount.amount, ibcMemo);
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
-        setTxHash(result.transactionHash);
-        return;
-      }
-      const result = await transferIBC({
-        fromToken,
-        fromAddress,
-        toAddress,
-        amount,
-        ibcInfo
-      });
-      processTxResult(fromToken, result);
-    } catch (ex: any) {
-      displayToast(TToastType.TX_FAILED, {
-        message: ex.message
-      });
-    }
-  };
-
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
@@ -246,7 +170,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     }
   };
 
+  const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
+    const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, metamaskAddress);
+    processTxResult(fromToken, result);
+  }
+
   const onClickTransfer = async (fromAmount: number, from: TokenItemType, to: TokenItemType) => {
+    await handleCheckWallet();
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
@@ -279,7 +209,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       if (from.cosmosBased) {
-        return await transferIbcCustom(from, to, fromAmount);
+        await handleTransferIBC(from, to, fromAmount);
+        return;
       }
       result = await transferEvmToIBC(from, metamaskAddress, fromAmount);
       processTxResult(
@@ -354,7 +285,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       for (const fromToken of remainingOraib) {
         const toToken = toTokens.find(t => t.chainId === ORAICHAIN_ID && t.name === fromToken.name)
         const transferAmount = toDisplay(fromToken.amount, fromToken.decimals);
-        await transferIbcCustom(fromToken, toToken, transferAmount)
+        await handleTransferIBC(fromToken, toToken, transferAmount)
       }
     } catch (error) {
       console.log('error move stuck oraib: ', error)
@@ -444,7 +375,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                     token={t}
                     onClick={tokenOraichain ? onClickTokenTo : onClickTokenFrom}
                     convertToken={convertToken}
-                    transferIBC={transferIbcCustom}
+                    transferIBC={handleTransferIBC}
                     onClickTransfer={
                       tokenOraichain
                         ? !!transferToToken

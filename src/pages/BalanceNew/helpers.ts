@@ -4,7 +4,7 @@ import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '
 import { gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { KWT, KWT_BSC_CONTRACT, KWT_SUBNETWORK_CHAIN_ID, MILKY_BSC_CONTRACT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
-import { ibcInfos, oraib2oraichain } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';
 import { TransferBackMsg } from 'libs/contracts';
@@ -12,7 +12,7 @@ import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMult
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, parseBep20Erc20Name, toAmount } from 'libs/utils';
+import { buildMultipleMessages, generateError, parseBep20Erc20Name, toAmount } from 'libs/utils';
 import Long from 'long';
 import { generateConvertCw20Erc20Message, generateConvertMsgs, parseTokenInfo, Type } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -66,7 +66,7 @@ export const transferIBC = async (data: {
 };
 
 export const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number, amounts: AmountDetails): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw new Error('Transfer amount is empty');
+  if (transferAmount === 0) throw generateError('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
   await window.Keplr.suggestChain(toToken.chainId as string);
@@ -75,7 +75,7 @@ export const transferIBCKwt = async (fromToken: TokenItemType, toToken: TokenIte
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress)
-    throw { ex: { message: 'Please login keplr!' } }
+    throw generateError('Please login keplr!');
 
   var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
 
@@ -117,7 +117,7 @@ export const convertTransferIBCErc20Kwt = async (
   toToken: TokenItemType,
   transferAmount: number
 ): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw new Error('Transfer amount is empty');
+  if (transferAmount === 0) throw generateError('Transfer amount is empty!');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
   await window.Keplr.suggestChain(toToken.chainId as string);
@@ -126,7 +126,7 @@ export const convertTransferIBCErc20Kwt = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress)
-    throw { ex: { message: 'Please login keplr!' } }
+    throw generateError('Please login keplr!');
   const nativeToken = kawaiiTokens.find(
     (token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId
   ); // collect kawaiiverse cosmos based token for conversion
@@ -156,7 +156,7 @@ export const transferEvmToIBC = async (from: TokenItemType, metamaskAddress: str
   await window.Metamask.switchNetwork(from!.chainId);
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!metamaskAddress || !oraiAddress)
-    throw { ex: { message: 'Please login both metamask and keplr!' } }
+    throw generateError('Please login both metamask and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!] as string;
   if (!gravityContractAddr || !from) {
     return;
@@ -237,9 +237,7 @@ export const transferToRemoteChainIbcWasm = async (
 ): Promise<ExecuteResult> => {
   const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
   if (!ibcWasmContractAddress)
-    throw {
-      message: 'IBC Wasm source port is invalid. Cannot transfer to the destination chain'
-    };
+    throw generateError('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
 
   const { info: assetInfo } = parseTokenInfo(fromToken);
   const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
@@ -248,7 +246,7 @@ export const transferToRemoteChainIbcWasm = async (
     await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
   } catch (error) {
     // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-    throw new Error('Cannot transfer to remote chain because cannot find mapping pair');
+    throw generateError('Cannot transfer to remote chain because cannot find mapping pair');
   }
 
   // if asset info is native => send native way, else send cw20 way
@@ -280,6 +278,65 @@ export const transferToRemoteChainIbcWasm = async (
       'auto'
     );
   }
+  return result;
+};
+
+// Oraichain (Orai)
+export const transferIbcCustom = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number, amounts: AmountDetails, metamaskAddress?: string): Promise<DeliverTxResponse> => {
+  if (transferAmount === 0) throw generateError('Transfer amount is empty');
+
+  await window.Keplr.suggestChain(toToken.chainId as string);
+  // enable from to send transaction
+  await window.Keplr.suggestChain(fromToken.chainId as string);
+  // check address
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
+  if (!fromAddress || !toAddress)
+    throw generateError('Please login keplr!');
+
+  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix)
+    throw generateError('Prefix Token not found!');
+
+  let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
+  let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+  // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
+  if (!metamaskAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
+    throw generateError('Please login metamask!');
+  }
+  // for KWT & MILKY tokens, we use the old ibc info channel
+  if (fromToken.evmDenoms || kawaiiTokens.find(i => i.name === fromToken.name))
+    ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+
+  let result: DeliverTxResponse;
+  if (fromToken.evmDenoms) {
+    result = await transferTokenErc20Cw20Map({
+      amounts,
+      transferAmount,
+      fromToken,
+      fromAddress,
+      toAddress,
+      ibcInfo,
+      ibcMemo
+    });
+  }
+  // if it includes wasm in source => ibc wasm case
+  if (ibcInfo.channel === oraichain2oraib) {
+    try {
+      // special case. We try-catch because cosmwasm stargate already check tx code for us & throw an error if code != 0 => we can safely cast to DeliverTxResponse if there's no error
+      const result = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, toAddress, amount.amount, ibcMemo);
+      return { ...result, code: 0 };
+    } catch (error) {
+      throw generateError(error.toString());
+    }
+  }
+  result = await transferIBC({
+    fromToken,
+    fromAddress,
+    toAddress,
+    amount,
+    ibcInfo
+  });
   return result;
 };
 
@@ -332,7 +389,7 @@ export const broadcastConvertTokenTx = async (
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!oraiAddress)
-    throw { ex: { message: 'Please login both metamask and keplr!' } }
+    throw generateError('Please login both metamask and Keplr!');
   let msgs: any;
   if (type === 'nativeToCw20') {
     msgs = generateConvertMsgs({
