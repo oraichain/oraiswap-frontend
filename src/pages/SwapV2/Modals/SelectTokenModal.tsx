@@ -3,7 +3,7 @@ import Modal from 'components/Modal';
 import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { getSubAmountDetails, getTotalUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
+import { getSubAmountDetails, getTotalUsd, toAmount, toDisplay, toSumDisplay, truncDecimals } from 'libs/utils';
 import { NetworkType } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
@@ -46,15 +46,17 @@ const SelectTokenModal: FC<ModalProps> = ({
               const token = item as TokenItemType;
               key = token.denom;
               title = token.name;
-              let amount: bigint | number = BigInt(amounts[token.denom]);
-              let subAmounts: AmountDetails;
-              if (token.contractAddress && token.evmDenoms) {
-                subAmounts = getSubAmountDetails(amounts, token);
-                const subAmount = toAmount(toSumDisplay(subAmounts), token.decimals);
-                amount += subAmount;
+              let sumAmountDetails: AmountDetails = {};
+              // by default, we only display the amount that matches the token denom
+              sumAmountDetails[token.denom] = amounts[token.denom];
+              let sumAmount: number = toSumDisplay(sumAmountDetails)
+              // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
+              if (token.evmDenoms) {
+                const subAmounts = getSubAmountDetails(amounts, token);
+                sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
+                sumAmount = toSumDisplay(sumAmountDetails);
               }
-              amount = toDisplay(amount, token.decimals);
-              balance = amount > 0 ? amount.toFixed(6) : '0';
+              balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
             } else {
               const network = item as NetworkType;
               key = network.chainId.toString();
