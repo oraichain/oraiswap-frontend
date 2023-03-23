@@ -2,13 +2,15 @@ import { coin } from '@cosmjs/stargate';
 import { filteredTokens } from 'config/bridgeTokens';
 import {
   KWT_BSC_CONTRACT,
+  KWT_DENOM,
   MILKY_BSC_CONTRACT,
+  MILKY_DENOM,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BSC_CONTRACT,
   ORAI_INFO
 } from 'config/constants';
-import { ibcInfos } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
@@ -140,7 +142,12 @@ describe('bridge', () => {
     }
 
     // check if the sourcePort and sourceChannel values are correct
-    const ibcInfo = ibcInfos[oraibTokens[0].chainId][toTokens[0].chainId];
+    let ibcInfo = ibcInfos[oraibTokens[0].chainId][toTokens[0].chainId];
+
+    // hardcode for MILKY & KWT because they use the old IBC channel
+    if (oraibTokens[0].denom === MILKY_DENOM || oraibTokens[0].denom === KWT_DENOM)
+      ibcInfo = ibcInfosOld[oraibTokens[0].chainId][toTokens[0].chainId];
+
     expect(transferMsgs[0].sourcePort).toEqual(ibcInfo.source);
     expect(transferMsgs[0].sourceChannel).toEqual(ibcInfo.channel);
 
