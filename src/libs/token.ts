@@ -1,7 +1,7 @@
 import { StargateClient } from '@cosmjs/stargate';
-import { arrayLoadToken, handleCheckWallet } from 'helper';
+import { arrayLoadToken, handleCheckWallet, tronToEthAddress } from 'helper';
 import { clearFunctionExecution, getEvmAddress, getFunctionExecution, toDisplay } from './utils';
-import { evmChains, evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { evmChainsWithoutTron, evmTokens, filteredTokens, kawaiiTokens, TokenItemType, tokenMap, tronChain } from 'config/bridgeTokens';
 import { updateAmounts } from 'reducer/token';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { BalanceResponse } from './contracts/OraiswapToken.types';
@@ -13,7 +13,8 @@ import {
   ETHEREUM_RPC,
   KAWAII_SUBNET_RPC,
   KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
+  TRON_CHAIN_ID
 } from 'config/constants';
 import flatten from 'lodash/flatten';
 import tokenABI from 'config/abi/erc20.json';
@@ -58,13 +59,14 @@ export class CacheTokens {
     this.forceUpdate(amountDetails);
   }
 
-  public async loadTokenAmounts(refresh = false, metamaskAddress?: string, loadCosmos = true) {
+  public async loadTokenAmounts(refresh = false, metamaskAddress?: string, loadCosmos = true, tronAddress?: string) {
     if (refresh) {
       clearFunctionExecution(
         loadCosmos && this.loadTokensCosmos,
         loadCosmos && this.loadKawaiiSubnetAmount,
         loadCosmos && this.loadCw20Balance,
-        metamaskAddress && this.loadTokensEvm
+        metamaskAddress && this.loadTokensEvm,
+        tronAddress && this.loadTokensEvm
       );
     }
 
@@ -73,7 +75,8 @@ export class CacheTokens {
     await Promise.all(
       [
         loadCosmos && getFunctionExecution(this.loadTokensCosmos),
-        metamaskAddress && getFunctionExecution(this.loadTokensEvm, [metamaskAddress]),
+        metamaskAddress && getFunctionExecution(this.loadTokensEvm, [{ metamaskAddress }]),
+        tronAddress && getFunctionExecution(this.loadTokensEvm, [{ tronAddress }]),
         loadCosmos && kwtSubnetAddress && getFunctionExecution(this.loadKawaiiSubnetAmount, [kwtSubnetAddress]),
         loadCosmos && this.address && getFunctionExecution(this.loadCw20Balance, [this.address])
       ].filter(Boolean)
@@ -147,21 +150,19 @@ export class CacheTokens {
     });
   }
 
-  private async loadTokensEvm(evmAddress: string) {
-    const result = await Promise.all(
-      evmChains.map((chain) =>
-        this.loadEvmEntries(
-          evmAddress,
-          evmTokens.filter((t) => t.chainId === chain.chainId),
-          chain.rpc,
-          chain.chainId as number
-        )
-      )
-    );
+  private async loadTokensEvm(address: { metamaskAddress?: string, tronAddress?: string }) {
+    const { metamaskAddress, tronAddress } = address;
+    if (metamaskAddress)
+      this.loadEvmAmounts(metamaskAddress, evmChainsWithoutTron);
+    else
+      this.loadEvmAmounts(tronToEthAddress(tronAddress), tronChain);
+  }
+
+  private async loadEvmAmounts(evmAddress: string, chains: TokenItemType[]) {
     const amountDetails = Object.fromEntries(
       flatten(
         await Promise.all(
-          evmChains.map((chain) =>
+          chains.map((chain) =>
             this.loadEvmEntries(
               evmAddress,
               evmTokens.filter((t) => t.chainId === chain.chainId),

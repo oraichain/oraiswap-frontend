@@ -8,6 +8,7 @@ import { ThemeProvider } from 'context/theme-context';
 import { displayInstallWallet, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEagerConnect } from 'hooks/useMetamask';
+import { useTronEventListener } from 'hooks/useTronLink';
 import { CacheTokens } from 'libs/token';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect, useMemo } from 'react';
@@ -31,6 +32,7 @@ const App = () => {
   const dispatch = useDispatch();
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
 

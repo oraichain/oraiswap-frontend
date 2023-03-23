@@ -635,6 +635,9 @@ export const evmChains = uniqBy(
   (c) => c.chainId
 );
 
+export const evmChainsWithoutTron = evmChains.filter(chain => chain.chainId !== TRON_CHAIN_ID);
+export const tronChain = evmChains.filter(chain => chain.chainId === TRON_CHAIN_ID);
+
 export const kawaiiTokens = uniqBy(
   flattenTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom

@@ -86,7 +86,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
 
   useEffect(() => {
-    if (keplrAddress) cacheTokens.loadTokenAmounts();
+    if (keplrAddress) cacheTokens.loadTokenAmounts(true);
   }, [keplrAddress]);
 
   useEffect(() => {
@@ -94,7 +94,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   }, [metamaskAddress]);
 
   useEffect(() => {
-    if (tronAddress) cacheTokens.loadTokenAmounts(true, tronAddress, false);
+    console.log("tron address: ", tronAddress);
+    if (tronAddress) cacheTokens.loadTokenAmounts(true, null, false, tronAddress);
   }, [tronAddress]);
 
   const _initEthereum = async () => {

@@ -53,9 +53,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
       if (window.tronLink) {
         await window.tronLink.request({ method: 'tron_requestAccounts' });
         if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
-        // TODO: How to process tronweb wallets connected from tronlink? Should we add another tronAddress field?
-        setTronAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
-        // setTronAddress(tronAddress);
+        setTronAddress(window.tronWeb.defaultAddress.base58);
       }
     } catch (ex) {
       console.log('error in connecting tron link: ', ex);
