@@ -5,7 +5,7 @@ import { TokenInfo } from 'types/token';
 import { AssetInfo } from './contracts';
 import { TokenInfoResponse } from './contracts/OraiswapToken.types';
 
-const truncDecimals = 6;
+export const truncDecimals = 6;
 const atomic = 10 ** truncDecimals;
 
 export const getEvmAddress = (bech32Address: string) => {
@@ -114,10 +114,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-        token: {
-          contract_addr: token.contractAddress
-        }
+      token: {
+        contract_addr: token.contractAddress
       }
+    }
     : { native_token: { denom: token.denom } };
 };
 
