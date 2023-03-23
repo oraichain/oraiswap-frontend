@@ -205,11 +205,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
-      result = await transferEvmToIBC(from, fromAmount, metamaskAddress, tronAddress);
+      result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
       processTxResult(
         from.rpc,
         result,
-        getTransactionUrl(result.transactionHash)
+        getTransactionUrl(from.chainId, result.transactionHash)
       );
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {

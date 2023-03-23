@@ -68,7 +68,7 @@ export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 
 export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
-export const KWT_SUBNETWORK_EVM_CHAIN_ID = 6886; //'0x1ae6';
+export const KWT_SUBNETWORK_EVM_CHAIN_ID = Networks.kawaiiverse; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';

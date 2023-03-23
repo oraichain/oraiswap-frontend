@@ -168,17 +168,20 @@ export const convertTransferIBCErc20Kwt = async (
 export const transferEvmToIBC = async (
   from: TokenItemType,
   fromAmount: number,
-  metamaskAddress?: string,
-  tronAddress?: string,
+  address: {
+    metamaskAddress?: string,
+    tronAddress?: string
+  }
 ): Promise<any> => {
-  const finalTransferAddress = metamaskAddress ?? ethToTronAddress(tronAddress);
+  const { metamaskAddress, tronAddress } = address;
+  // TODO: need to process this part better. We want to support both Metamask & Tronlink at the same time
+  const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if ((!finalTransferAddress) || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!] as string;
   if (!gravityContractAddr || !from) {
     return;
   }
-
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
   let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
   const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, oneStepKeplrAddr);

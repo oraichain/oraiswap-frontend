@@ -34,7 +34,7 @@ export function useEagerConnect(isInactive, isInterval) {
   };
 
   const connectTronEvm = () => {
-    if (!window.tronWeb) return;
+    if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
     // TODO: How to process tronweb wallets connected from tronlink? Should we add another tronAddress field?
     setTronAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
   }

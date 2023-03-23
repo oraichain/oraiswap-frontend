@@ -136,21 +136,8 @@ export const getDenomEvm = () => {
   }
 };
 
-export const getRpcEvm = (infoEvm?: ChainInfoType) => {
-  switch (Number(window.ethereum?.chainId)) {
-    case BSC_CHAIN_ID:
-      return BSC_RPC;
-    case ETHEREUM_CHAIN_ID:
-      return ETHEREUM_RPC;
-    case TRON_CHAIN_ID:
-      return TRON_RPC;
-    default:
-      return infoEvm?.rpc;
-  }
-};
-
-export const getTransactionUrl = (transactionHash: string) => {
-  switch (Number(window.ethereum?.chainId)) {
+export const getTransactionUrl = (chainId: string | number, transactionHash: string) => {
+  switch (Number(chainId)) {
     case BSC_CHAIN_ID:
       return `${BSC_SCAN}/tx/${transactionHash}`;
     case ETHEREUM_CHAIN_ID:
