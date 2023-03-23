@@ -2,7 +2,7 @@ import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
-import { displayInstallWallet, ethToTronAddress } from 'helper';
+import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
 
 import Web3 from 'web3';
 
@@ -95,7 +95,7 @@ export default class Metamask {
             { type: 'string', value: to },
             { type: 'uint256', value: balance.toString() }
           ],
-          from
+          tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
     } else {
       await this.switchNetwork(token.chainId);
@@ -109,11 +109,13 @@ export default class Metamask {
   }
 
   public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
+    // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
+    const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
     const weiAmount = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm
     const web3 = new Web3(token.rpc);
     const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
-    const currentAllowance = BigInt(await tokenContract.methods.allowance(owner, spender).call());
+    const currentAllowance = BigInt(await tokenContract.methods.allowance(ownerHex, spender).call());
 
     if (currentAllowance >= weiAmount) return;
 
@@ -125,14 +127,14 @@ export default class Metamask {
           { type: 'address', value: spender },
           { type: 'uint256', value: allowance.toString() }
         ],
-          owner);
+          ownerHex);
     } else {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
       const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
       return tokenContract.methods.approve(spender, allowance).send({
-        from: owner
+        from: ownerHex
       });
     }
   }
