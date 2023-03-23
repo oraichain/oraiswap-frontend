@@ -1,0 +1,50 @@
+@import 'src/styles/mixins';
+
+.bridgeBalances {
+    padding: 9px 12px;
+    border-radius: 8px;
+    background-color: #2B2D3B;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid transparent;
+
+    &:hover {
+        border-color: #A871DF;
+    }
+
+    .stuckText {
+        margin: 0 10px;
+        cursor: pointer;
+    }
+
+
+    .loading {
+        @include desktop {
+            width: 50%;
+            height: 180px;
+        }
+
+        @include flex();
+    }
+}
+
+.stuckToken {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+
+    &:hover {
+        background-color: #2B2D3B;
+    }
+
+    &>div {
+        display: flex;
+        align-items: center;
+    }
+
+    .name {
+        margin-left: 10px;
+    }
+}

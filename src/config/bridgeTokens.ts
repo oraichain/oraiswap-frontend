@@ -72,19 +72,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex'
-    | 'usd-coin';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex'
+  | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };

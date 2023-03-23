@@ -114,10 +114,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-        token: {
-          contract_addr: token.contractAddress
-        }
+      token: {
+        contract_addr: token.contractAddress
       }
+    }
     : { native_token: { denom: token.denom } };
 };
 
@@ -273,3 +273,7 @@ export const processWsResponseMsg = (message: any): string => {
   }
   return null;
 };
+
+export const generateError = (message: string) => {
+  return { ex: { message } }
+}
