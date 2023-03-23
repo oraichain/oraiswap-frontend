@@ -2,10 +2,6 @@ import React from 'react';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
-import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
-import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
 import {
   BEP20_ORAI,
   ORAICHAIN_ID,
@@ -43,13 +39,15 @@ import {
   EVM_TYPE
 } from 'config/constants';
 import { network } from 'config/networks';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, tokens } from 'config/bridgeTokens';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
 import { ethers } from 'ethers';
+import flatten from 'lodash/flatten';
+import { uniqBy } from 'lodash';
 
 interface Tokens {
   denom?: string;
@@ -64,50 +62,27 @@ export type NetworkType = {
   networkType: string;
 };
 
-export const networks: NetworkType[] = [
-  {
-    title: ORAICHAIN_ID,
-    chainId: ORAICHAIN_ID,
-    Icon: ORAIIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: KAWAII_ORG,
-    chainId: KWT_SUBNETWORK_CHAIN_ID,
-    Icon: KwtIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: OSMOSIS_ORG,
-    chainId: OSMOSIS_CHAIN_ID,
-    Icon: OsmosisIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: COSMOS_ORG,
-    chainId: COSMOS_CHAIN_ID,
-    Icon: AtomCosmosIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: BSC_ORG,
-    chainId: BSC_CHAIN_ID,
-    Icon: BNBIcon,
-    networkType: EVM_TYPE
-  },
-  {
-    title: ETHEREUM_ORG,
-    chainId: ETHEREUM_CHAIN_ID,
-    Icon: ETHIcon,
-    networkType: EVM_TYPE
-  },
-  {
-    title: TRON_ORG,
-    chainId: TRON_CHAIN_ID,
-    Icon: TRONIcon,
-    networkType: EVM_TYPE
+export const networks: NetworkType[] = uniqBy(
+  flatten(tokens).filter(token => token.chainId !== ORAI_BRIDGE_CHAIN_ID),
+  (c) => c.chainId
+).map(network => {
+  let icon = network.Icon;
+  const networkType = network.cosmosBased ? COSMOS_TYPE : EVM_TYPE;
+  switch (network.chainId) {
+    case BSC_CHAIN_ID:
+      icon = BNBIcon
+      break;
+    case ETHEREUM_CHAIN_ID:
+      icon = ETHIcon
+      break;
+    case TRON_CHAIN_ID:
+      icon = TRONIcon
+      break;
+    default:
+      break;
   }
-];
+  return { title: network.org, chainId: network.chainId, Icon: icon, networkType }
+});
 
 export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
   const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);

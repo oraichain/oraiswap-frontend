@@ -61,6 +61,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               const network = item as NetworkType;
               key = network.chainId.toString();
               title = network.title;
+              console.log(key, title, item.Icon);
               const subAmounts = Object.fromEntries(
                 Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
               );
@@ -76,7 +77,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                   close();
                 }}
               >
-                {item.Icon && <item.Icon className={cx('logo')} />}
+                <item.Icon className={cx('logo')} />
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

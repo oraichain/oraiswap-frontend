@@ -19,11 +19,13 @@ import {
   BSC_RPC,
   COSMOS_DECIMALS,
   COSMOS_ORG,
+  COSMOS_TYPE,
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_ORG,
   ETHEREUM_RPC,
   EVM_DECIMALS,
+  EVM_TYPE,
   KAWAII_CONTRACT,
   KAWAII_ORG,
   KAWAII_RPC,
@@ -57,7 +59,7 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org?: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse' | string;
+  org: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse' | 'Tron Network' | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;
