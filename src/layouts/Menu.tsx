@@ -22,6 +22,7 @@ import styles from './Menu.module.scss';
 
 import classNames from 'classnames';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { renderLogoNetwork } from 'helper';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
