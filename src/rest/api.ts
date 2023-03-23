@@ -2,7 +2,7 @@ import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import { ORAI, ORAICHAIN_ID, ORAI_INFO, STABLE_DENOM } from 'config/constants';
+import { ORAI, ORAICHAIN_ID, ORAI_INFO, STABLE_DENOM, MILKY_DENOM, KWT_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
@@ -16,8 +16,7 @@ import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.type
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
-import axios from './request';
-import { ibcInfos } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import Long from 'long';
 
@@ -296,27 +295,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -705,7 +704,11 @@ function generateMoveOraib2OraiMessages(
   let transferMsgs: MsgTransfer[] = [];
   for (const fromToken of remainingOraib) {
     const toToken = toTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === fromToken.name);
-    const ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    // hardcode for MILKY & KWT because they use the old IBC channel
+    if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
+      ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId]
+
     const tokenAmount = coin(fromToken.amount, fromToken.denom);
     transferMsgs.push({
       sourcePort: ibcInfo.source,
