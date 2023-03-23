@@ -21,7 +21,7 @@ export function useEagerConnect(isInactive, isInterval) {
   useEffect(() => {
     if (isInterval) return;
     connectEvm();
-    connectTronEvm();
+    // connectTronEvm();
   }, [pathname, isInterval]);
 
   const connectEvm = () => {

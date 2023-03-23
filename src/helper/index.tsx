@@ -136,14 +136,14 @@ export const getDenomEvm = () => {
   }
 };
 
-export const getTransactionUrl = (chainId: string | number, transactionHash: string) => {
+export const getTransactionUrl = (chainId: string | number, transactionHash: any) => {
   switch (Number(chainId)) {
     case BSC_CHAIN_ID:
       return `${BSC_SCAN}/tx/${transactionHash}`;
     case ETHEREUM_CHAIN_ID:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
     case TRON_CHAIN_ID:
-      return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
+      return `${TRON_SCAN}/#/transaction/${transactionHash.txid.replace(/^0x/, '')}`;
   }
 };
 

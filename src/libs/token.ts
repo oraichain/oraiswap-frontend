@@ -148,7 +148,6 @@ export class CacheTokens {
   }
 
   private async loadTokensEvm(evmAddress: string) {
-    console.log('foobar');
     const result = await Promise.all(
       evmChains.map((chain) =>
         this.loadEvmEntries(
@@ -159,7 +158,6 @@ export class CacheTokens {
         )
       )
     );
-    console.log('result: ', result);
     const amountDetails = Object.fromEntries(
       flatten(
         await Promise.all(

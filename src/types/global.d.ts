@@ -94,6 +94,13 @@ declare global {
     network: Network;
   }
 
+  interface TronLink {
+    ready: Bool; //Initialize to false, true after user authorization
+    request: (args: any) => {};// The method of tuning plugins for dapp website
+    sunWeb: sunWeb;
+    tronWeb: tronWeb;
+  }
+
   declare class Wallet {
     getChildKey(path?: string): Promise<ChildKeyData>;
     send(message: any);
@@ -106,6 +113,7 @@ declare global {
     Keplr: Keplr;
     web3: Web3;
     tronWeb: TronWeb;
+    tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;
     ethereumX: MetaMaskEthereumProvider;
     Metamask: Metamask;

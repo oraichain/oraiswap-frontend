@@ -206,6 +206,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
+      console.log("result: ", result);
       processTxResult(
         from.rpc,
         result,

@@ -23,6 +23,7 @@ import styles from './Menu.module.scss';
 import classNames from 'classnames';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { renderLogoNetwork } from 'helper';
+import { TRON_CHAIN_ID } from 'config/constants';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -30,6 +31,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useConfigReducer('address');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -111,8 +113,16 @@ const Menu: React.FC<{}> = React.memo((props) => {
                   </div>
                 </div>
               )}
+              {!!tronAddress && (
+                <div className={styles.token_info}>
+                  {renderLogoNetwork(TRON_CHAIN_ID, { className: styles.token_avatar })}
+                  <div className={styles.token_info_balance}>
+                    <CenterEllipsis size={6} text={tronAddress} className={styles.token_address} />
+                  </div>
+                </div>
+              )}
 
-              {!address && !metamaskAddress && <span className={styles.connect}>Connect wallet</span>}
+              {!address && !metamaskAddress && !tronAddress && <span className={styles.connect}>Connect wallet</span>}
             </RequireAuthButton>
             {renderLink('/bridge', 'Bridge', setLink, <Wallet style={{ width: 30, height: 30 }} />)}
             {renderLink('/swap', 'Swap', setLink, <Swap style={{ width: 30, height: 30 }} />)}

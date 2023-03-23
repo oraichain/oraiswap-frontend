@@ -5,6 +5,7 @@ import React from 'react';
 import styles from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
 import MetamaskImage from 'assets/images/metamask.svg';
+import TronImage from 'assets/icons/tron.svg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
@@ -17,10 +18,13 @@ interface ConnectWalletModalProps {
   open: () => void;
   address: string;
   metamaskAddress: string | null;
+  tronAddress: string | null;
   disconnectMetamask: () => Promise<void>;
   disconnectKeplr: () => Promise<void>;
   connectKeplr: () => Promise<void>;
   connectMetamask: () => Promise<void>;
+  connectTronLink: () => Promise<void>;
+  disconnectTronLink: () => Promise<void>;
 }
 
 const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
@@ -29,7 +33,10 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   connectKeplr,
   disconnectKeplr,
   connectMetamask,
+  connectTronLink,
+  disconnectTronLink,
   metamaskAddress,
+  tronAddress,
   disconnectMetamask,
   address,
   open
@@ -84,6 +91,13 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
             text="Connect Metamask"
             connect={connectMetamask}
             disconnect={disconnectMetamask}
+          />
+          <LoginWidget
+            address={tronAddress}
+            logo={TronImage}
+            text="Connect Tronlink"
+            connect={connectTronLink}
+            disconnect={disconnectTronLink}
           />
         </div>
       </div>

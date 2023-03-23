@@ -3,7 +3,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { displayInstallWallet } from 'helper';
+import { displayInstallWallet, tronToEthAddress } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import React, { useState } from 'react';
@@ -13,6 +13,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
   const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const { activate, deactivate } = useWeb3React();
 
   useEagerConnect(isInactiveMetamask, false);
@@ -42,6 +43,28 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
       deactivate();
       setIsInactiveMetamask(true);
       setMetamaskAddress(undefined);
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+
+  const connectTronLink = async () => {
+    try {
+      if (window.tronLink) {
+        await window.tronLink.request({ method: 'tron_requestAccounts' });
+        if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
+        // TODO: How to process tronweb wallets connected from tronlink? Should we add another tronAddress field?
+        setTronAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
+        // setTronAddress(tronAddress);
+      }
+    } catch (ex) {
+      console.log('error in connecting tron link: ', ex);
+    }
+  };
+
+  const disconnectTronLink = async () => {
+    try {
+      setTronAddress(undefined);
     } catch (ex) {
       console.log(ex);
     }
@@ -79,8 +102,11 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
           connectKeplr={connectKeplr}
           disconnectMetamask={disconnectMetamask}
           disconnectKeplr={disconnectKeplr}
+          connectTronLink={connectTronLink}
+          disconnectTronLink={disconnectTronLink}
           address={address}
           metamaskAddress={metamaskAddress}
+          tronAddress={tronAddress}
           isOpen={openConnectWalletModal}
           close={() => {
             setOpenConnectWalletModal(false);
