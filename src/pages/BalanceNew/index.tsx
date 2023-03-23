@@ -91,6 +91,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
 
   useInactiveListener();
 
@@ -113,6 +114,10 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     if (metamaskAddress) cacheTokens.loadTokenAmounts(true, metamaskAddress, false);
   }, [metamaskAddress]);
+
+  useEffect(() => {
+    if (tronAddress) cacheTokens.loadTokenAmounts(true, tronAddress, false);
+  }, [tronAddress]);
 
   const _initEthereum = async () => {
     try {

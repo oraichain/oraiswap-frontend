@@ -16,6 +16,7 @@ export function useEagerConnect(isInactive, isInterval) {
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [, setTronAddress] = useConfigReducer('tronAddress');
 
   useEffect(() => {
     if (isInterval) return;
@@ -35,8 +36,7 @@ export function useEagerConnect(isInactive, isInterval) {
   const connectTronEvm = () => {
     if (!window.tronWeb) return;
     // TODO: How to process tronweb wallets connected from tronlink? Should we add another tronAddress field?
-    if (!window.ethereum)
-      setMetamaskAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
+    setTronAddress(tronToEthAddress(window.tronWeb.defaultAddress.base58));
   }
 
   useEffect(() => {
