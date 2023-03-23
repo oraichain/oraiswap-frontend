@@ -274,3 +274,7 @@ export const processWsResponseMsg = (message: any): string => {
   }
   return null;
 };
+
+export const generateError = (message: string) => {
+  return { ex: { message } }
+}
