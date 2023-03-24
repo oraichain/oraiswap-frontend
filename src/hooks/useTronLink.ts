@@ -1,10 +1,10 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
-import { tronToEthAddress } from 'helper';
+import useLoadTokens from './useLoadTokens';
 
 export function useTronEventListener() {
   const [, setTronAddress] = useConfigReducer('tronAddress');
-
+  const loadTokenAmounts = useLoadTokens();
   useEffect(() => {
     window.dispatchEvent(new Event('tronLink#initialized'));
     // Example
@@ -13,7 +13,7 @@ export function useTronEventListener() {
       handleTronLink();
     } else {
       window.addEventListener('tronLink#initialized', handleTronLink, {
-        once: true,
+        once: true
       });
 
       // If the event is not dispatched by the end of the timeout,
@@ -26,23 +26,27 @@ export function useTronEventListener() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
       console.log('tronLink & tronWeb successfully detected!');
-      if (tronWeb.defaultAddress.base58)
-        setTronAddress(tronWeb.defaultAddress.base58);
+      if (tronWeb.defaultAddress.base58) {
+        const tronAddress = tronWeb.defaultAddress.base58;
+        loadTokenAmounts({ refresh: true, tronAddress });
+        setTronAddress(tronAddress);
+      }
 
       window.addEventListener('message', function (e) {
-        if (e.data.message && e.data.message.action == "setAccount") {
-          console.log("setAccount event", e.data.message)
-          console.log("current address:", e.data.message.data.address)
-          setTronAddress(e.data.message.data.address);
+        if (e.data.message && e.data.message.action == 'setAccount') {
+          const tronAddress = e.data.message.data.address;
+          console.log('setAccount event', e.data.message);
+          console.log('current address:', tronAddress);
+          loadTokenAmounts({ refresh: true, tronAddress });
+          setTronAddress(tronAddress);
         }
 
-        // Tronlink chrome v3.22.1 & Tronlink APP v4.3.4 started to support 
-        if (e.data.message && e.data.message.action == "disconnect") {
-          console.log("disconnect event", e.data.message.isTronLink)
+        // Tronlink chrome v3.22.1 & Tronlink APP v4.3.4 started to support
+        if (e.data.message && e.data.message.action == 'disconnect') {
+          console.log('disconnect event', e.data.message.isTronLink);
           setTronAddress(undefined);
         }
-
-      })
+      });
       // Access the decentralized web!
     } else {
       console.log('Please install TronLink-Extension!');

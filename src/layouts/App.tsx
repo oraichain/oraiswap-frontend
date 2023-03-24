@@ -8,7 +8,7 @@ import { displayInstallWallet, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { useTronEventListener } from 'hooks/useTronLink';
-import useLoadToken from 'hooks/useLoadTokens';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
@@ -22,7 +22,7 @@ const App = () => {
   const [address, setAddress] = useConfigReducer('address');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
-  const loadTokenAmounts = useLoadToken();
+  const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   useTronEventListener();
 

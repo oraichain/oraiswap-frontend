@@ -5,16 +5,17 @@ import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { tronToEthAddress } from 'helper';
+import useLoadTokens from './useLoadTokens';
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 56]
 });
 
-export function useEagerConnect(isInactive, isInterval) {
+export function useEagerConnect(isInactive: boolean, isInterval: boolean) {
   const web3React = useWeb3React();
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
+  const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   useEffect(() => {
@@ -40,8 +41,9 @@ export function useEagerConnect(isInactive, isInterval) {
         method: 'eth_accounts',
         params: [60]
       });
-
-      setMetamaskAddress(web3React.account || accounts?.[0]);
+      const metamaskAddress = web3React.account || accounts?.[0];
+      loadTokenAmounts({ refresh: true, metamaskAddress });
+      setMetamaskAddress(metamaskAddress);
     })();
   }, [web3React.account, chainInfo, pathname]);
 }
@@ -49,7 +51,7 @@ export function useEagerConnect(isInactive, isInterval) {
 export function useInactiveListener() {
   const { active, error, activate, deactivate, library } = useWeb3React();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-
+  const loadTokenAmounts = useLoadTokens();
   useEffect(() => {
     const { ethereum } = window;
     if (ethereum && ethereum.on) {
@@ -77,9 +79,11 @@ export function useInactiveListener() {
   // const handleChainChanged = (chainId) => {
   //   activate(injected);
   // };
-  const handleAccountsChanged = (accounts) => {
+  const handleAccountsChanged = (accounts: any[]) => {
     if (accounts.length > 0) {
-      setMetamaskAddress(accounts[0]);
+      const metamaskAddress = accounts[0];
+      loadTokenAmounts({ refresh: true, metamaskAddress });
+      setMetamaskAddress(metamaskAddress);
     }
   };
   // const handleNetworkChanged = (networkId) => {

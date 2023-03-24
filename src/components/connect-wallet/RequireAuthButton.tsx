@@ -5,6 +5,7 @@ import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { displayInstallWallet, tronToEthAddress } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import React, { useState } from 'react';
 import ConnectWalletModal from './ConnectWalletModal';
@@ -15,6 +16,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const { activate, deactivate } = useWeb3React();
+  const loadTokenAmounts = useLoadTokens();
 
   useEagerConnect(isInactiveMetamask, false);
   const onClick = () => {
@@ -53,7 +55,9 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
       if (window.tronLink) {
         await window.tronLink.request({ method: 'tron_requestAccounts' });
         if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
-        setTronAddress(window.tronWeb.defaultAddress.base58);
+        const tronAddress = window.tronWeb.defaultAddress.base58;
+        loadTokenAmounts({ refresh: true, tronAddress });
+        setTronAddress(tronAddress);
       }
     } catch (ex) {
       console.log('error in connecting tron link: ', ex);
@@ -75,6 +79,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
 
     await window.Keplr.suggestChain(network.chainId);
     const address = await window.Keplr.getKeplrAddr();
+    loadTokenAmounts({ refresh: true, oraiAddress: address });
     Contract.sender = address;
     setAddress(address as string);
   };

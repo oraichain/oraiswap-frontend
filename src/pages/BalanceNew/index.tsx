@@ -80,19 +80,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
-  useEffect(() => {
-    if (oraiAddress) loadTokenAmounts({ refresh: true, oraiAddress });
-  }, [oraiAddress]);
-
-  useEffect(() => {
-    if (metamaskAddress) loadTokenAmounts({ refresh: true, metamaskAddress });
-  }, [metamaskAddress]);
-
-  useEffect(() => {
-    console.log('tron address: ', tronAddress);
-    if (tronAddress) loadTokenAmounts({ refresh: true, tronAddress });
-  }, [tronAddress]);
-
   const _initEthereum = async () => {
     try {
       await initEthereum();
