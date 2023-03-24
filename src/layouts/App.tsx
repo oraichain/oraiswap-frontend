@@ -6,7 +6,6 @@ import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
 import { displayInstallWallet, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { useEagerConnect } from 'hooks/useMetamask';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
@@ -87,10 +86,7 @@ const App = () => {
     if (isClearPersistStorage) clearPersistStorage();
   }, []);
 
-  useEagerConnect(false, true);
   useEffect(() => {
-    // load cosmos
-    loadTokenAmounts({ oraiAddress: address });
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
