@@ -59,7 +59,16 @@ import {
 
 export type TokenItemType = {
   name: string;
-  org: 'Oraichain' | 'Cosmos Hub' | 'Osmosis' | 'OraiBridge' | 'BNB Chain' | 'Ethereum' | 'Kawaiiverse' | 'Tron Network' | string;
+  org:
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse'
+    | 'Tron Network'
+    | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -74,19 +83,19 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex'
-  | 'usd-coin';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex'
+    | 'usd-coin';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -200,7 +209,7 @@ const otherChainTokens: TokenItemType[] = [
   },
   {
     name: 'USDT',
-    prefix: ORAI_BRIDGE_PREFIX,
+    prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
     org: 'OraiBridge',
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
@@ -637,8 +646,8 @@ export const evmChains = uniqBy(
   (c) => c.chainId
 );
 
-export const evmChainsWithoutTron = evmChains.filter(chain => chain.chainId !== TRON_CHAIN_ID);
-export const tronChain = evmChains.filter(chain => chain.chainId === TRON_CHAIN_ID);
+export const evmChainsWithoutTron = evmChains.filter((chain) => chain.chainId !== TRON_CHAIN_ID);
+export const tronChain = evmChains.filter((chain) => chain.chainId === TRON_CHAIN_ID);
 
 export const kawaiiTokens = uniqBy(
   flattenTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
