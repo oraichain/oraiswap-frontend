@@ -72,7 +72,7 @@ const App = () => {
         message: `You have received ${tokenDisplay}`
       });
       // no metamaskAddress, only reload cosmos
-      loadTokenAmounts(true);
+      loadTokenAmounts({ refresh: true, oraiAddress: address });
     }
   }, [lastJsonMessage]);
 
@@ -90,7 +90,7 @@ const App = () => {
   useEagerConnect(false, true);
   useEffect(() => {
     // load cosmos
-    loadTokenAmounts();
+    loadTokenAmounts({ oraiAddress: address });
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
@@ -130,7 +130,7 @@ const App = () => {
       }
 
       const newAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts(true, null, newAddress);
+      loadTokenAmounts({ refresh: true, oraiAddress: newAddress });
       Contract.sender = newAddress;
       setAddress(newAddress);
 

@@ -102,7 +102,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    loadTokenAmounts(true);
+    loadTokenAmounts({ refresh: true, oraiAddress: address });
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {

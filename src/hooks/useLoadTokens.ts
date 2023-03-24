@@ -22,6 +22,13 @@ import { clearFunctionExecution, getEvmAddress, getFunctionExecution } from '../
 import { useDispatch } from 'react-redux';
 import { Dispatch } from '@reduxjs/toolkit';
 
+export type LoadTokenParams = {
+  refresh?: boolean;
+  metamaskAddress?: string;
+  oraiAddress?: string;
+  tronAddress?: string;
+};
+
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
   if (!address) return;
   const client = await StargateClient.connect(tokenInfo.rpc);
@@ -46,16 +53,13 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 
 async function loadTokens(
   dispatch: Dispatch,
-  refresh = false,
-  metamaskAddress?: string,
-  cosmosAddress?: string,
-  tronAddress?: string
+  { refresh = false, oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams
 ) {
   if (refresh) {
     clearFunctionExecution(
-      cosmosAddress && loadTokensCosmos,
-      cosmosAddress && loadKawaiiSubnetAmount,
-      cosmosAddress && loadCw20Balance,
+      oraiAddress && loadTokensCosmos,
+      oraiAddress && loadKawaiiSubnetAmount,
+      oraiAddress && loadCw20Balance,
       metamaskAddress && loadTokensEvm,
       tronAddress && loadTokensEvm
     );
@@ -65,11 +69,11 @@ async function loadTokens(
 
   await Promise.all(
     [
-      cosmosAddress && getFunctionExecution(loadTokensCosmos, [dispatch]),
+      oraiAddress && getFunctionExecution(loadTokensCosmos, [dispatch]),
       metamaskAddress && getFunctionExecution(loadTokensEvm, [dispatch, { metamaskAddress }]),
       tronAddress && getFunctionExecution(loadTokensEvm, [dispatch, { tronAddress }]),
-      cosmosAddress && kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [dispatch, kwtSubnetAddress]),
-      cosmosAddress && getFunctionExecution(loadCw20Balance, [dispatch, cosmosAddress])
+      oraiAddress && kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [dispatch, kwtSubnetAddress]),
+      oraiAddress && getFunctionExecution(loadCw20Balance, [dispatch, oraiAddress])
     ].filter(Boolean)
   );
 }
@@ -179,14 +183,7 @@ async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtSubnetAddress: stri
   dispatch(updateAmounts(amountDetails));
 }
 
-type LoadTokenAmounts = (
-  refresh: boolean,
-  metamaskAddress?: string,
-  cosmosAddress?: string,
-  tronAddress?: string
-) => void;
-
-export default function useLoadTokens(): LoadTokenAmounts {
+export default function useLoadTokens(): (params: LoadTokenParams) => Promise<void> {
   const dispatch = useDispatch();
   return loadTokens.bind(null, dispatch);
 }

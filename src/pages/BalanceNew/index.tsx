@@ -51,7 +51,7 @@ interface BalanceProps {}
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
-  const [keplrAddress] = useConfigReducer('address');
+  const [oraiAddress] = useConfigReducer('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [loadingRefresh, setLoadingRefresh] = useState(false);
@@ -81,16 +81,16 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   }, []);
 
   useEffect(() => {
-    if (keplrAddress) loadTokenAmounts(true);
-  }, [keplrAddress]);
+    if (oraiAddress) loadTokenAmounts({ refresh: true, oraiAddress });
+  }, [oraiAddress]);
 
   useEffect(() => {
-    if (metamaskAddress) loadTokenAmounts(true, metamaskAddress);
+    if (metamaskAddress) loadTokenAmounts({ refresh: true, metamaskAddress });
   }, [metamaskAddress]);
 
   useEffect(() => {
     console.log('tron address: ', tronAddress);
-    if (tronAddress) loadTokenAmounts(true, null, null, tronAddress);
+    if (tronAddress) loadTokenAmounts({ refresh: true, tronAddress });
   }, [tronAddress]);
 
   const _initEthereum = async () => {
@@ -152,7 +152,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts(true, metamaskAddress);
+      await loadTokenAmounts({ refresh: true, metamaskAddress });
       setLoadingRefresh(false);
     } catch (err) {
       setLoadingRefresh(false);

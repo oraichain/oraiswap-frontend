@@ -159,7 +159,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    loadTokenAmounts(true);
+    loadTokenAmounts({ refresh: true, oraiAddress: address });
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
