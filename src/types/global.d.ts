@@ -96,7 +96,7 @@ declare global {
 
   interface TronLink {
     ready: Bool; //Initialize to false, true after user authorization
-    request: (args: any) => {};// The method of tuning plugins for dapp website
+    request: ({ method }: { method: string }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
     sunWeb: sunWeb;
     tronWeb: tronWeb;
   }
@@ -180,4 +180,4 @@ declare global {
   }
 }
 
-export { };
+export {};

@@ -49,8 +49,9 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
   const connectTronLink = async () => {
     try {
       if (window.tronLink) {
-        await window.tronLink.request({ method: 'tron_requestAccounts' });
-        if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
+        const { code, message } = await window.tronLink.request({ method: 'tron_requestAccounts' });
+        // throw error when user rejected
+        if (code !== 200) throw new Error(message);
         const tronAddress = window.tronWeb.defaultAddress.base58;
         console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
