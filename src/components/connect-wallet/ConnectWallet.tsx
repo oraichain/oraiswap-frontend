@@ -3,7 +3,7 @@ import LoginWidgetDeepLink from './LoginDeepLinkMobile';
 import React from 'react';
 import styles from './ConnectWallet.module.scss';
 import MetamaskImage from 'assets/images/metamask.svg';
-import TronImage from 'assets/icons/tron.svg';
+import TronLinkImage from 'assets/images/tronlink.jpg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
@@ -79,7 +79,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
       />
       <LoginWidget
         address={tronAddress}
-        logo={TronImage}
+        logo={TronLinkImage}
         text="Connect Tronlink"
         connect={connectTronLink}
         disconnect={disconnectTronLink}
