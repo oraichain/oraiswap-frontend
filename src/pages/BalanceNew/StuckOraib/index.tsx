@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function StuckOraib({ handleMove, loading, remainingOraib }: Props) {
-  if (!remainingOraib.length) {
+  if (!remainingOraib.length || !loading) {
     return <></>;
   }
   return (

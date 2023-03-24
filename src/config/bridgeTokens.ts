@@ -7,6 +7,7 @@ import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
+import { ReactComponent as TRON } from 'assets/icons/tron-trx-logo.svg';
 import { ReactComponent as USDC } from 'assets/icons/usd_coin.svg';
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
@@ -54,21 +55,22 @@ import {
   TRON_RPC,
   USDC_ETH_CONTRACT,
   USDT_BSC_CONTRACT,
-  USDT_TRON_CONTRACT
+  USDT_TRON_CONTRACT,
+  WRAP_TRON_TRX_CONTRACT
 } from './constants';
 
 export type TokenItemType = {
   name: string;
   org:
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse'
-    | 'Tron Network'
-    | string;
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse'
+  | 'Tron Network'
+  | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -83,19 +85,20 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex'
-    | 'usd-coin';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex'
+  | 'usd-coin'
+  | 'tron';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -207,19 +210,33 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: USDT
   },
+  // {
+  //   name: 'USDT',
+  //   prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  //   org: 'OraiBridge',
+  //   chainId: ORAI_BRIDGE_CHAIN_ID,
+  //   coinType: 118,
+  //   denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
+  //   bridgeNetworkIdentifier: TRON_ORG,
+  //   rpc: ORAI_BRIDGE_RPC,
+  //   decimals: COSMOS_DECIMALS,
+  //   coingeckoId: 'tether',
+  //   cosmosBased: true,
+  //   Icon: USDT
+  // },
   {
-    name: 'USDT',
+    name: 'TRX',
     prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
     org: 'OraiBridge',
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
-    denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
+    denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + WRAP_TRON_TRX_CONTRACT,
     bridgeNetworkIdentifier: TRON_ORG,
     rpc: ORAI_BRIDGE_RPC,
-    decimals: EVM_DECIMALS,
-    coingeckoId: 'tether',
+    decimals: COSMOS_DECIMALS,
+    coingeckoId: 'tron',
     cosmosBased: true,
-    Icon: USDT
+    Icon: TRON
   },
   {
     name: 'KWT',
@@ -315,18 +332,31 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: false,
     Icon: USDT
   },
+  // {
+  //   name: 'USDT',
+  //   org: TRON_ORG,
+  //   chainId: TRON_CHAIN_ID,
+  //   denom: 'trx20_usdt',
+  //   contractAddress: USDT_TRON_CONTRACT,
+  //   rpc: TRON_RPC,
+  //   bridgeTo: [ORAICHAIN_ID],
+  //   decimals: COSMOS_DECIMALS,
+  //   coingeckoId: 'tether',
+  //   cosmosBased: false,
+  //   Icon: USDT
+  // },
   {
-    name: 'USDT',
+    name: 'TRON',
     org: TRON_ORG,
     chainId: TRON_CHAIN_ID,
-    denom: 'trx20_usdt',
-    contractAddress: USDT_TRON_CONTRACT,
+    denom: 'trx20_trx',
+    contractAddress: WRAP_TRON_TRX_CONTRACT,
     rpc: TRON_RPC,
     bridgeTo: [ORAICHAIN_ID],
     decimals: COSMOS_DECIMALS,
-    coingeckoId: 'tether',
+    coingeckoId: 'tron',
     cosmosBased: false,
-    Icon: USDT
+    Icon: TRON
   },
   {
     name: 'KWT',
@@ -477,7 +507,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'tether',
     denom: STABLE_DENOM,
     contractAddress: process.env.REACT_APP_USDT_CONTRACT,
-    bridgeTo: [BSC_ORG, TRON_ORG],
+    bridgeTo: [BSC_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
@@ -599,7 +629,22 @@ const oraichainTokens: TokenItemType[] = [
     cosmosBased: true,
     factoryV2: true,
     Icon: scORAI
-  }
+  },
+  {
+    name: 'TRON',
+    org: ORAICHAIN_ID,
+    prefix: 'orai',
+    coingeckoId: 'tron',
+    denom: STABLE_DENOM,
+    contractAddress: process.env.REACT_APP_TRX_CONTRACT,
+    bridgeTo: [TRON_ORG],
+    decimals: COSMOS_DECIMALS,
+    coinType: 118,
+    chainId: ORAICHAIN_ID,
+    rpc: ORAI_RPC,
+    cosmosBased: true,
+    Icon: TRON
+  },
 ];
 
 export const tokens = [otherChainTokens, oraichainTokens];

@@ -55,7 +55,10 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
             method: 'tron_requestAccounts'
           });
           // throw error when not connected
-          if (code !== 200) throw new Error(message);
+          if (code !== 200) {
+            displayToast(TToastType.TRONLINK_FAILED, { message });
+            return;
+          }
         }
         const tronAddress = window.tronWeb.defaultAddress.base58;
         console.log('tronAddress', tronAddress);

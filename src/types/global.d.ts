@@ -172,6 +172,7 @@ declare global {
       REACT_APP_KWT_CONTRACT: string;
       REACT_APP_MILKY_CONTRACT: string;
       REACT_APP_SCORAI_CONTRACT: string;
+      REACT_APP_TRX_CONTRACT: string;
 
       // config for ibc wasm contract (cw20-ics20)
       REACT_APP_IBC_WASM_CONTRACT: string;
@@ -180,4 +181,4 @@ declare global {
   }
 }
 
-export {};
+export { };
