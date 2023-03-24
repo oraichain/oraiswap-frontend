@@ -6,7 +6,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -29,8 +29,9 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import styles from './index.module.scss';
 import { feeEstimate } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import SettingModal from '../Modals/SettingModal';
+import SlippageModal from '../Modals/SlippageModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
+import { checkSlippage } from '../helpers';
 
 const cx = cn.bind(styles);
 
@@ -40,40 +41,17 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const { data: prices } = useCoinGeckoPrices();
-  const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
   const dispatch = useDispatch();
   const [averageRatio, setAverageRatio] = useState('0');
-  const [slippage, setSlippage] = useState(1);
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [address] = useConfigReducer('address');
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
-  const onChangeFromAmount = (amount: number | undefined) => {
-    if (!amount) return setSwapAmount([undefined, toAmountToken]);
-    setSwapAmount([amount, toAmountToken]);
-  };
-
-  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
-    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
-    let finalAmount = displayAmount;
-
-    // hardcode fee when swap token orai
-    if (fromTokenDenom === ORAI) {
-      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
-      if (type === 'max') {
-        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
-      }
-      if (type === 'half') {
-        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-      }
-    }
-    setSwapAmount([finalAmount, toAmountToken]);
-  };
 
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
@@ -116,9 +94,37 @@ const SwapComponent: React.FC<{
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
-  console.log('swapAmount', [fromAmountToken, toAmountToken])
+  const onChangeFromAmount = (amount: number | undefined) => {
+    if (!amount) return setSwapAmount([undefined, toAmountToken]);
+    setSwapAmount([amount, toAmountToken]);
+  };
+
+  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
+    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    let finalAmount = displayAmount;
+
+    // hardcode fee when swap token orai
+    if (fromTokenDenom === ORAI) {
+      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      if (type === 'max') {
+        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
+      }
+      if (type === 'half') {
+        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+      }
+    }
+    setSwapAmount([finalAmount, toAmountToken]);
+  };
 
   const handleSubmit = async () => {
+    const isOverUserSlippage = checkSlippage(fromAmountToken, averageRatio, toAmountToken, userSlippage)
+    if (isOverUserSlippage) {
+      return displayToast(TToastType.TX_INFO, {
+        message: 'Warning: Actual received amount is less than max received amount.'
+      });
+    }
+
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
@@ -150,9 +156,7 @@ const SwapComponent: React.FC<{
 
       const msg = msgs[0];
 
-      var messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
-
-      console.log('TO', messages);
+      const messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
 
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
@@ -183,27 +187,23 @@ const SwapComponent: React.FC<{
 
   const FromIcon = fromToken?.Icon;
   const ToIcon = toToken?.Icon;
+  const [visible, setVisible] = useState(false);
 
   return (
     <div className={cx('swap-box')}>
       <div className={cx('from')}>
         <div className={cx('header')}>
           <div className={cx('title')}>FROM</div>
-
           <TooltipIcon
             placement="bottom-end"
-            content={<SettingModal
-              isOpen={isOpenSettingModal}
-              open={() => setIsOpenSettingModal(true)}
-              close={() => setIsOpenSettingModal(false)}
-              slippage={slippage}
-              setSlippage={setSlippage}
-            />}
+            visible={visible}
+            setVisible={setVisible}
+            content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
           />
-
           <button onClick={() => setRefresh(!refresh)}>
             <img className={cx('btn')} src={RefreshImg} alt="btn" />
           </button>
+
         </div>
         <div className={cx('balance')}>
           <TokenBalance
@@ -317,7 +317,6 @@ const SwapComponent: React.FC<{
           </div>
         )}
       </div>
-
       {isSelectFrom ? (
         <SelectTokenModal
           isOpen={isSelectFrom}

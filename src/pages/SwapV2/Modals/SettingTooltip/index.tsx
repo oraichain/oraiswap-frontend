@@ -1,7 +1,7 @@
-import React, { FC, useState } from 'react';
 import Tippy, { TippyProps } from '@tippyjs/react';
+import { ReactComponent as SettingImg } from 'assets/images/setting-icon.svg';
 import classNames from 'classnames';
-import { ReactComponent as SettingImg } from 'assets/images/setting.svg';
+import React, { FC } from 'react';
 
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
@@ -21,16 +21,15 @@ const TooltipTippyProps: TippyProps = {
 };
 
 interface Props extends Omit<TippyProps, 'children'> {
-  onClick?: () => void;
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>
+  visible: boolean;
 }
 
-const SettingTooltip: FC<Props> = ({ className, onClick, children, ...props }) => {
-  const [visible, setVisible] = useState(false);
-  const show = () => setVisible(true);
+const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
   const hide = () => setVisible(false);
 
   const button = (
-    <span className={classNames(styles.button, className)} onClick={visible ? hide : show}>
+    <span className={classNames(styles.button, className)} onClick={() => setVisible(!visible)} >
       {children}
     </span>
   );
@@ -46,7 +45,7 @@ const SettingTooltip: FC<Props> = ({ className, onClick, children, ...props }) =
         },
       ],
     }}
-      {...TooltipTippyProps} {...props} hideOnClick={props.visible}>
+      {...TooltipTippyProps} {...props} >
       {button}
     </Tippy>
   ) : (
@@ -54,15 +53,17 @@ const SettingTooltip: FC<Props> = ({ className, onClick, children, ...props }) =
   );
 };
 
-export const TooltipIcon: FC<Props> = ({ children, ...props }) => (
-  <div className={styles.flex}>
-    {children}
-    <div className={styles.icon}>
-      <SettingTooltip {...props}>
-        <SettingImg />
-      </SettingTooltip>
+export const TooltipIcon: FC<Props> = ({ children, ...props }) => {
+  return (
+    <div className={styles.flex}>
+      {children}
+      <div className={styles.icon} >
+        <SettingTooltip {...props} visible={props.visible} setVisible={props.setVisible}>
+          <SettingImg />
+        </SettingTooltip>
+      </div>
     </div>
-  </div>
-);
+  )
+}
 
 export default SettingTooltip;

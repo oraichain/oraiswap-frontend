@@ -2,7 +2,8 @@ import { filteredTokens } from 'config/bridgeTokens';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID } from 'config/constants';
 import { feeEstimate } from 'helper';
 import { buildMultipleMessages, toAmount, toDisplay } from 'libs/utils';
-import { generateContractMessages, SwapQuery, Type } from 'rest/api';
+import { checkSlippage } from 'pages/SwapV2/helpers';
+import { generateContractMessages, Type } from 'rest/api';
 
 describe('swap', () => {
   it('max amount', () => {
@@ -64,5 +65,27 @@ describe('swap', () => {
     const msg = msgs[0];
     const messages = buildMultipleMessages(msg, [], []);
     expect(Array.isArray(messages)).toBe(true);
+  });
+
+  describe('check slippage', () => {
+    it('returns true when slippage is greater than userSlippage', () => {
+      const fromAmountToken = 1;
+      const averageRatio = '10';
+      const actualReceived = 9.5;
+      const userSlippage = 1;
+
+      const result = checkSlippage(fromAmountToken, averageRatio, actualReceived, userSlippage);
+      expect(result).toEqual(true);
+    });
+
+    it('returns false when slippage is less than or equal to userSlippage', () => {
+      const fromAmountToken = 1;
+      const averageRatio = '10';
+      const actualReceived = 9.5;
+      const userSlippage = 10;
+
+      const result = checkSlippage(fromAmountToken, averageRatio, actualReceived, userSlippage);
+      expect(result).toEqual(false);
+    });
   });
 });
