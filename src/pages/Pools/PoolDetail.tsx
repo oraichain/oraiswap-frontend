@@ -1,34 +1,34 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import styles from './PoolDetail.module.scss';
 import cn from 'classnames/bind';
-import { useParams } from 'react-router-dom';
-import LiquidityModal from './LiquidityModal/LiquidityModal';
-import BondingModal from './BondingModal/BondingModal';
-import Content from 'layouts/Content';
 import Pie from 'components/Pie';
 import { getPair, Pair, pairs, poolTokens } from 'config/pools';
+import Content from 'layouts/Content';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   fetchPairInfo,
-  fetchTokenInfo,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
+  fetchTokenInfo,
   getPairAmountInfo
 } from 'rest/api';
+import BondingModal from './BondingModal/BondingModal';
+import LiquidityModal from './LiquidityModal/LiquidityModal';
+import styles from './PoolDetail.module.scss';
 
-import { TokenItemType } from 'config/bridgeTokens';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
-import UnbondModal from './UnbondModal/UnbondModal';
-import LiquidityMining from './LiquidityMining/LiquidityMining';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { RootState } from 'store/configure';
-import { useDispatch, useSelector } from 'react-redux';
+import { TokenItemType } from 'config/bridgeTokens';
 import { Contract } from 'config/contracts';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { updateLpPools } from 'reducer/token';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { toDecimal } from 'libs/utils';
-import { CacheTokens } from 'libs/token';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateLpPools } from 'reducer/token';
+import { RootState } from 'store/configure';
+import LiquidityMining from './LiquidityMining/LiquidityMining';
+import UnbondModal from './UnbondModal/UnbondModal';
 
 const cx = cn.bind(styles);
 
@@ -47,6 +47,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const loadTokenAmounts = useLoadTokens();
 
   const getPairInfo = async () => {
     if (!poolUrl) return;
@@ -97,13 +98,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     setCachedLpPools(lpTokenData);
   };
 
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
-
   const onBondingAction = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    cacheTokens.loadTokenAmounts(true);
+    loadTokenAmounts(true);
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {

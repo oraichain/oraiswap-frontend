@@ -30,6 +30,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useConfigReducer('address');
+  const [infoCosmos] = useConfigReducer('infoCosmos');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [open, setOpen] = useState(false);
@@ -75,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   };
 
   const mobileMode = isMobile();
-
+  console.log(infoCosmos);
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
   return (
@@ -130,14 +131,14 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => { },
+              () => {},
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
             {renderLink(
               'https://payment.orai.io/',
               'Buy ORAI (Fiat)',
-              () => { },
+              () => {},
               <BuyFiat style={{ width: 30, height: 30 }} />,
               true
             )}

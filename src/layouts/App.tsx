@@ -1,7 +1,6 @@
-import { isMobile } from '@walletconnect/browser-utils';
 import { Web3ReactProvider } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { COSMOS_TYPE, EVM_TYPE, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
+import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
@@ -9,12 +8,10 @@ import { displayInstallWallet, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEagerConnect } from 'hooks/useMetamask';
 import { useTronEventListener } from 'hooks/useTronLink';
-import { CacheTokens } from 'libs/token';
+import useLoadToken from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
-import { ChainInfoType } from 'reducer/config';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import Web3 from 'web3';
@@ -23,15 +20,10 @@ import Menu from './Menu';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
-  // const [, setChainId] = useConfigReducer('chainId');
-  // const [, setChainInfo] = useConfigReducer('chainInfo');
+
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
-  const [infoEvm, setInfoEvm] = useConfigReducer('infoEvm');
-  const [, setInfoCosmos] = useConfigReducer('infoCosmos');
+  const loadTokenAmounts = useLoadToken();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
-  const dispatch = useDispatch();
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -80,7 +72,7 @@ const App = () => {
         message: `You have received ${tokenDisplay}`
       });
       // no metamaskAddress, only reload cosmos
-      cacheTokens.loadTokenAmounts(true);
+      loadTokenAmounts(true);
     }
   }, [lastJsonMessage]);
 
@@ -95,53 +87,10 @@ const App = () => {
     if (isClearPersistStorage) clearPersistStorage();
   }, []);
 
-  const updateAddress = async (chainInfo: ChainInfoType) => {
-    // automatically update. If user is also using Oraichain wallet => dont update
-    const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
-      return displayInstallWallet();
-    }
-
-    let newAddress = await window.Keplr.getKeplrAddr();
-
-    if (isMobile()) {
-      setInfoEvm({
-        ...infoEvm,
-        chainId: window.ethereum.chainId
-      });
-    }
-
-    if (chainInfo) {
-      setStatusChangeAccount(false);
-      // setChainId(ORAICHAIN_ID);
-      // setChainInfo(chainInfo);
-      if (chainInfo?.networkType === EVM_TYPE) {
-        window.ethereum.chainId = chainInfo.chainId;
-        setInfoEvm(chainInfo);
-      }
-      if (chainInfo?.networkType === COSMOS_TYPE) setInfoCosmos(chainInfo);
-    }
-
-    if (newAddress) {
-      if (newAddress === address) {
-        // same address, trigger update by clear address then re-update
-        setAddress('');
-      } else {
-        cacheTokens.loadTokenAmounts(true, metamaskAddress);
-      }
-      // finally update new address
-      if (!chainInfo?.chainId) {
-        setStatusChangeAccount(true);
-      }
-
-      Contract.sender = newAddress;
-      setAddress(newAddress);
-    }
-  };
   useEagerConnect(false, true);
   useEffect(() => {
     // load cosmos
-    cacheTokens.loadTokenAmounts();
+    loadTokenAmounts();
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
@@ -171,10 +120,20 @@ const App = () => {
     }
   };
 
-  const keplrHandler = async (event?: CustomEvent) => {
+  const keplrHandler = async () => {
     try {
       console.log('Key store in Keplr is changed. You may need to refetch the account info.');
-      await updateAddress(event?.detail?.data);
+      // automatically update. If user is also using Oraichain wallet => dont update
+      const keplr = await window.Keplr.getKeplr();
+      if (!keplr) {
+        return displayInstallWallet();
+      }
+
+      const newAddress = await window.Keplr.getKeplrAddr();
+      loadTokenAmounts(true, null, newAddress);
+      Contract.sender = newAddress;
+      setAddress(newAddress);
+
       // window.location.reload();
     } catch (error) {
       console.log('Error: ', error.message);

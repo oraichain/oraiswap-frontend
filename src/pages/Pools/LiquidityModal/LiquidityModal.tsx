@@ -1,30 +1,33 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import Modal from 'components/Modal';
-import styles from './LiquidityModal.module.scss';
-import cn from 'classnames/bind';
 import { useQuery } from '@tanstack/react-query';
-import { generateContractMessages, fetchTokenAllowance, ProvideQuery, generateConvertErc20Cw20Message } from 'rest/api';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleMessages, getSubAmountDetails, toDecimal, toSumDisplay } from 'libs/utils';
-import TokenBalance from 'components/TokenBalance';
-import { toAmount, toDisplay } from 'libs/utils';
-import NumberFormat from 'react-number-format';
+import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
+import FluentAddImg from 'assets/images/fluent_add.svg';
+import cn from 'classnames/bind';
+import Loader from 'components/Loader';
+import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { Type } from 'rest/api';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import TokenBalance from 'components/TokenBalance';
+import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
-import Loader from 'components/Loader';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { TokenInfo } from 'types/token';
-import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
-import FluentAddImg from 'assets/images/fluent_add.svg';
-import ArrowDownImg from 'assets/images/fluent-arrow-down.svg';
-import { CacheTokens } from 'libs/token';
-import { useDispatch } from 'react-redux';
 import { PairInfo } from 'libs/contracts';
+import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import useLoadTokens from 'hooks/useLoadTokens';
+import { buildMultipleMessages, getSubAmountDetails, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
+import { FC, useEffect, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { useSelector } from 'react-redux';
+import {
+  fetchTokenAllowance,
+  generateContractMessages,
+  generateConvertErc20Cw20Message,
+  ProvideQuery,
+  Type
+} from 'rest/api';
+import { RootState } from 'store/configure';
+import { TokenInfo } from 'types/token';
+import styles from './LiquidityModal.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -75,7 +78,9 @@ const LiquidityModal: FC<ModalProps> = ({
   const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
   const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const dispatch = useDispatch();
+
+  const loadTokenAmounts = useLoadTokens();
+
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
   let subAmounts: AmountDetails;
@@ -150,12 +155,11 @@ const LiquidityModal: FC<ModalProps> = ({
     const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
-    cacheTokens.loadTokenAmounts(true);
+    loadTokenAmounts(true);
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {

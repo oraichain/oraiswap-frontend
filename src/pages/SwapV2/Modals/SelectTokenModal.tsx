@@ -49,7 +49,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               let sumAmountDetails: AmountDetails = {};
               // by default, we only display the amount that matches the token denom
               sumAmountDetails[token.denom] = amounts[token.denom];
-              let sumAmount: number = toSumDisplay(sumAmountDetails)
+              let sumAmount: number = toSumDisplay(sumAmountDetails);
               // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
               if (token.evmDenoms) {
                 const subAmounts = getSubAmountDetails(amounts, token);
@@ -61,7 +61,6 @@ const SelectTokenModal: FC<ModalProps> = ({
               const network = item as NetworkType;
               key = network.chainId.toString();
               title = network.title;
-              console.log(key, title, item.Icon);
               const subAmounts = Object.fromEntries(
                 Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
               );
