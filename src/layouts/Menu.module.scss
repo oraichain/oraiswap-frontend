@@ -23,55 +23,6 @@
   }
 }
 
-.token_info {
-  background: #2D2938;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-  width: 100%;
-  position: relative;
-  &:last-child {
-    margin-bottom: 30px;    
-  }
-}
-
-.network_icon {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 24px;
-  height: 24px;
-}
-
-.token_address {
-  color: #bfa7f2;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.token_avatar {
-  box-sizing: border-box;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
-}
-
-.token_info_balance {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.token_balance {
-  font-size: 16px;
-  font-weight: 500;
-  color: #EBEBEB;
-  margin-top: 3px;
-}
-
 .logo {
   display: flex;
   align-items: center;

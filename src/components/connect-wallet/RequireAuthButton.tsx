@@ -3,15 +3,14 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { displayInstallWallet, tronToEthAddress } from 'helper';
+import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import React, { useState } from 'react';
-import ConnectWalletModal from './ConnectWalletModal';
+import ConnectWallet from './ConnectWallet';
 
-const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => {
-  const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
+const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
@@ -19,9 +18,6 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
   const loadTokenAmounts = useLoadTokens();
 
   useEagerConnect(isInactiveMetamask, false);
-  const onClick = () => {
-    setOpenConnectWalletModal(true);
-  };
 
   const connectMetamask = async () => {
     try {
@@ -97,31 +93,17 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
   };
 
   return (
-    <React.Fragment>
-      <button {...props} onClick={onClick}>
-        {props.children}
-      </button>
-      {openConnectWalletModal && (
-        <ConnectWalletModal
-          connectMetamask={connectMetamask}
-          connectKeplr={connectKeplr}
-          disconnectMetamask={disconnectMetamask}
-          disconnectKeplr={disconnectKeplr}
-          connectTronLink={connectTronLink}
-          disconnectTronLink={disconnectTronLink}
-          address={address}
-          metamaskAddress={metamaskAddress}
-          tronAddress={tronAddress}
-          isOpen={openConnectWalletModal}
-          close={() => {
-            setOpenConnectWalletModal(false);
-          }}
-          open={() => {
-            setOpenConnectWalletModal(true);
-          }}
-        />
-      )}
-    </React.Fragment>
+    <ConnectWallet
+      connectMetamask={connectMetamask}
+      connectKeplr={connectKeplr}
+      disconnectMetamask={disconnectMetamask}
+      disconnectKeplr={disconnectKeplr}
+      connectTronLink={connectTronLink}
+      disconnectTronLink={disconnectTronLink}
+      address={address}
+      metamaskAddress={metamaskAddress}
+      tronAddress={tronAddress}
+    />
   );
 };
 

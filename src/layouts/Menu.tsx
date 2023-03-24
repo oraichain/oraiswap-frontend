@@ -97,34 +97,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Link>
           )}
           <div className={styles.menu_items}>
-            <RequireAuthButton address={address} setAddress={setAddress}>
-              {address && (
-                <div className={styles.token_info}>
-                  <ORAIIcon className={styles.token_avatar} />
-                  <div className={styles.token_info_balance}>
-                    <CenterEllipsis size={6} text={address} className={styles.token_address} />
-                  </div>
-                </div>
-              )}
-              {!!metamaskAddress && (
-                <div className={styles.token_info}>
-                  {renderLogoNetwork(window.ethereum?.chainId, { className: styles.token_avatar })}
-                  <div className={styles.token_info_balance}>
-                    <CenterEllipsis size={6} text={metamaskAddress} className={styles.token_address} />
-                  </div>
-                </div>
-              )}
-              {!!tronAddress && (
-                <div className={styles.token_info}>
-                  {renderLogoNetwork(TRON_CHAIN_ID, { className: styles.token_avatar })}
-                  <div className={styles.token_info_balance}>
-                    <CenterEllipsis size={6} text={tronAddress} className={styles.token_address} />
-                  </div>
-                </div>
-              )}
-
-              {!address && !metamaskAddress && !tronAddress && <span className={styles.connect}>Connect wallet</span>}
-            </RequireAuthButton>
+            <RequireAuthButton address={address} setAddress={setAddress} />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet style={{ width: 30, height: 30 }} />)}
             {renderLink('/swap', 'Swap', setLink, <Swap style={{ width: 30, height: 30 }} />)}
             {renderLink('/pools', 'Pools', setLink, <Pools style={{ width: 30, height: 30 }} />)}
