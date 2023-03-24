@@ -56,6 +56,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
         await window.tronLink.request({ method: 'tron_requestAccounts' });
         if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) return;
         const tronAddress = window.tronWeb.defaultAddress.base58;
+        console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
       }
@@ -79,6 +80,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
 
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
+    console.log('oraiAddress', oraiAddress);
     loadTokenAmounts({ oraiAddress });
     Contract.sender = oraiAddress;
     setAddress(oraiAddress);
