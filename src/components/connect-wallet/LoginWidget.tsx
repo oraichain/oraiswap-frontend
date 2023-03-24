@@ -6,17 +6,20 @@ import { ReactComponent as Logout } from 'assets/icons/logout.svg';
 
 const cx = cn.bind(styles);
 
-const noop = () => {};
-
 export const LoginWidget: FC<{
   logo: string;
   text: string;
   address: string | null;
-  connect: () => Promise<void>;
+  connect?: () => Promise<void>;
   disconnect: () => Promise<void>;
 }> = ({ logo, text, address, connect, disconnect }) => {
+  const onClick = () => {
+    if (!address && connect) {
+      connect();
+    }
+  };
   return (
-    <div className={cx('item')} onClick={address ? noop : connect}>
+    <div className={cx('item')} onClick={onClick}>
       <img src={logo} className={cx('logo')} />
       <div className={cx('grow')}>
         {address ? (

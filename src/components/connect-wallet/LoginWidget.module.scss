@@ -54,18 +54,7 @@ button.connect {
 
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    .network-title {
-      font-style: normal;
-      font-weight: 600;
-      font-size: 18px;
-      line-height: 100%;
-      /* identical to box height, or 18px */
-
-      /* aiRight/White */
-
-      color: #ffffff;
-    }
+    gap: 10px;    
 
     .des {
       font-style: normal;

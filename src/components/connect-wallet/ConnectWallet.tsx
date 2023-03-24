@@ -1,5 +1,4 @@
 import LoginWidget from './LoginWidget';
-import LoginWidgetDeepLink from './LoginDeepLinkMobile';
 import React from 'react';
 import styles from './ConnectWallet.module.scss';
 import MetamaskImage from 'assets/images/metamask.svg';
@@ -45,20 +44,10 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
                 : `owallet://open_url?url=${encodeURIComponent('https://oraidex.io')}`
             }
           >
-            <LoginWidgetDeepLink
-              text="Connect OWallet"
-              address={address}
-              logo={OWalletImage}
-              disconnect={disconnectKeplr}
-            />
+            <LoginWidget text="Connect OWallet" address={address} logo={OWalletImage} disconnect={disconnectKeplr} />
           </a>
         ) : (
-          <LoginWidgetDeepLink
-            text="Connect OWallet"
-            address={address}
-            logo={OWalletImage}
-            disconnect={disconnectKeplr}
-          />
+          <LoginWidget text="Connect OWallet" address={address} logo={OWalletImage} disconnect={disconnectKeplr} />
         )
       ) : (
         <LoginWidget
