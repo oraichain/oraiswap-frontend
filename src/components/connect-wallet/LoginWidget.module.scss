@@ -37,6 +37,10 @@ button.connect {
   align-items: center;
   padding: 10px;
 
+  &:last-child {
+    margin-bottom: 30px;
+  }
+
   &:hover {
     cursor: pointer;
     background: #333642 !important;
