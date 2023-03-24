@@ -125,7 +125,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        loadTokenAmounts({ refresh: true, oraiAddress: address });
+        loadTokenAmounts({ oraiAddress: address });
         setActionLoading(false);
         onBondingAction();
         return;

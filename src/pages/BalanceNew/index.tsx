@@ -139,7 +139,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts({ refresh: true, metamaskAddress });
+      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
       setLoadingRefresh(false);
     } catch (err) {
       setLoadingRefresh(false);

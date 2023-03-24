@@ -164,7 +164,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        loadTokenAmounts({ refresh: true, oraiAddress });
+        loadTokenAmounts({ oraiAddress });
         setSwapLoading(false);
       }
     } catch (error) {

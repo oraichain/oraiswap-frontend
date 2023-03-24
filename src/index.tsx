@@ -71,8 +71,8 @@ const startApp = async () => {
         gasPrice: GasPrice.fromString(`0${network.denom}`)
       });
     } else {
-      // can not signer
-      window.client = await CosmWasmClient.connect(network.rpc);
+      // go to catch
+      throw new Error('Keplr not connected!');
     }
   } catch (ex) {
     window.client = await CosmWasmClient.connect(network.rpc);

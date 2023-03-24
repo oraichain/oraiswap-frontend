@@ -114,10 +114,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-      token: {
-        contract_addr: token.contractAddress
+        token: {
+          contract_addr: token.contractAddress
+        }
       }
-    }
     : { native_token: { denom: token.denom } };
 };
 
@@ -131,55 +131,6 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
   }));
   return messages;
 };
-
-export const delay = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
-
-const cache = {};
-
-export function clearFunctionExecution(...keys: (Function | string)[]) {
-  for (const methodOrKey of keys) {
-    if (!methodOrKey) continue;
-    const key = typeof methodOrKey === 'string' ? methodOrKey : methodOrKey.name;
-    delete cache[key];
-  }
-}
-
-export async function getFunctionExecution(
-  method: Function,
-  args: any[] = [],
-  cacheKey: string = null,
-  expiredIn = 60000
-) {
-  const key = cacheKey || method.name;
-  if (cache[key] !== undefined) {
-    while (cache[key].pending) {
-      await delay(500);
-      if (!cache[key]) return undefined;
-    }
-    return cache[key].value;
-  }
-
-  cache[key] = { expired: Date.now() + expiredIn, pending: true };
-  const value = await method(...args);
-  if (cache[key]) {
-    cache[key].pending = false;
-    cache[key].value = value;
-  }
-  return value;
-}
-
-// Interval to clear cache;
-setInterval(function () {
-  if (Object.keys(cache).length > 0) {
-    let currentTime = Date.now();
-    Object.keys(cache).forEach((key) => {
-      if (currentTime > cache[key].expired) {
-        delete cache[key];
-        // console.log(`${key}'s cache deleted`);
-      }
-    });
-  }
-}, 1000);
 
 export const formateNumberDecimals = (price, decimals = 2) => {
   return new Intl.NumberFormat('en-US', {
@@ -275,5 +226,5 @@ export const processWsResponseMsg = (message: any): string => {
 };
 
 export const generateError = (message: string) => {
-  return { ex: { message } }
-}
+  return { ex: { message } };
+};

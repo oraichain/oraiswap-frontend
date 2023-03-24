@@ -17,7 +17,7 @@ import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { BalanceResponse } from '../libs/contracts/OraiswapToken.types';
 import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
-import { clearFunctionExecution, getEvmAddress, getFunctionExecution } from '../libs/utils';
+import { getEvmAddress } from '../libs/utils';
 
 import { useDispatch } from 'react-redux';
 import { Dispatch } from '@reduxjs/toolkit';
@@ -51,29 +51,16 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   dispatch(updateAmounts(amountDetails));
 }
 
-async function loadTokens(
-  dispatch: Dispatch,
-  { refresh = false, oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams
-) {
-  if (refresh) {
-    clearFunctionExecution(
-      oraiAddress && loadTokensCosmos,
-      oraiAddress && loadKawaiiSubnetAmount,
-      oraiAddress && loadCw20Balance,
-      metamaskAddress && loadTokensEvm,
-      tronAddress && loadTokensEvm
-    );
-  }
-
+async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
   const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
 
   await Promise.all(
     [
-      oraiAddress && getFunctionExecution(loadTokensCosmos, [dispatch]),
-      metamaskAddress && getFunctionExecution(loadTokensEvm, [dispatch, { metamaskAddress }]),
-      tronAddress && getFunctionExecution(loadTokensEvm, [dispatch, { tronAddress }]),
-      oraiAddress && kwtSubnetAddress && getFunctionExecution(loadKawaiiSubnetAmount, [dispatch, kwtSubnetAddress]),
-      oraiAddress && getFunctionExecution(loadCw20Balance, [dispatch, oraiAddress])
+      oraiAddress && loadTokensCosmos(dispatch),
+      oraiAddress && kwtSubnetAddress && loadKawaiiSubnetAmount(dispatch, kwtSubnetAddress),
+      oraiAddress && loadCw20Balance(dispatch, oraiAddress),
+      metamaskAddress && loadTokensEvm(dispatch, { metamaskAddress }),
+      tronAddress && loadTokensEvm(dispatch, { tronAddress })
     ].filter(Boolean)
   );
 }
@@ -166,7 +153,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: To
       )
     )
   );
-  console.log('amount details: ', amountDetails);
+
   dispatch(updateAmounts(amountDetails));
 }
 

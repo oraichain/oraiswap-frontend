@@ -72,7 +72,7 @@ const App = () => {
         message: `You have received ${tokenDisplay}`
       });
       // no metamaskAddress, only reload cosmos
-      loadTokenAmounts({ refresh: true, oraiAddress: address });
+      loadTokenAmounts({ oraiAddress: address });
     }
   }, [lastJsonMessage]);
 
@@ -129,10 +129,10 @@ const App = () => {
         return displayInstallWallet();
       }
 
-      const newAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ refresh: true, oraiAddress: newAddress });
-      Contract.sender = newAddress;
-      setAddress(newAddress);
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      loadTokenAmounts({ oraiAddress });
+      Contract.sender = oraiAddress;
+      setAddress(oraiAddress);
 
       // window.location.reload();
     } catch (error) {

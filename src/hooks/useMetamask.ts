@@ -42,7 +42,7 @@ export function useEagerConnect(isInactive: boolean, isInterval: boolean) {
         params: [60]
       });
       const metamaskAddress = web3React.account || accounts?.[0];
-      loadTokenAmounts({ refresh: true, metamaskAddress });
+      loadTokenAmounts({ metamaskAddress });
       setMetamaskAddress(metamaskAddress);
     })();
   }, [web3React.account, chainInfo, pathname]);
@@ -82,7 +82,7 @@ export function useInactiveListener() {
   const handleAccountsChanged = (accounts: any[]) => {
     if (accounts.length > 0) {
       const metamaskAddress = accounts[0];
-      loadTokenAmounts({ refresh: true, metamaskAddress });
+      loadTokenAmounts({ metamaskAddress });
       setMetamaskAddress(metamaskAddress);
     }
   };

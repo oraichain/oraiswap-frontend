@@ -28,7 +28,7 @@ export function useTronEventListener() {
       console.log('tronLink & tronWeb successfully detected!');
       if (tronWeb.defaultAddress.base58) {
         const tronAddress = tronWeb.defaultAddress.base58;
-        loadTokenAmounts({ refresh: true, tronAddress });
+        loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
       }
 
@@ -37,7 +37,7 @@ export function useTronEventListener() {
           const tronAddress = e.data.message.data.address;
           console.log('setAccount event', e.data.message);
           console.log('current address:', tronAddress);
-          loadTokenAmounts({ refresh: true, tronAddress });
+          loadTokenAmounts({ tronAddress });
           setTronAddress(tronAddress);
         }
 
