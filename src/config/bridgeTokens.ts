@@ -210,20 +210,20 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: true,
     Icon: USDT
   },
-  // {
-  //   name: 'USDT',
-  //   prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  //   org: 'OraiBridge',
-  //   chainId: ORAI_BRIDGE_CHAIN_ID,
-  //   coinType: 118,
-  //   denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
-  //   bridgeNetworkIdentifier: TRON_ORG,
-  //   rpc: ORAI_BRIDGE_RPC,
-  //   decimals: COSMOS_DECIMALS,
-  //   coingeckoId: 'tether',
-  //   cosmosBased: true,
-  //   Icon: USDT
-  // },
+  {
+    name: 'USDT',
+    prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+    org: 'OraiBridge',
+    chainId: ORAI_BRIDGE_CHAIN_ID,
+    coinType: 118,
+    denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
+    bridgeNetworkIdentifier: TRON_ORG,
+    rpc: ORAI_BRIDGE_RPC,
+    decimals: COSMOS_DECIMALS,
+    coingeckoId: 'tether',
+    cosmosBased: true,
+    Icon: USDT
+  },
   {
     name: 'TRX',
     prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
@@ -332,19 +332,19 @@ const otherChainTokens: TokenItemType[] = [
     cosmosBased: false,
     Icon: USDT
   },
-  // {
-  //   name: 'USDT',
-  //   org: TRON_ORG,
-  //   chainId: TRON_CHAIN_ID,
-  //   denom: 'trx20_usdt',
-  //   contractAddress: USDT_TRON_CONTRACT,
-  //   rpc: TRON_RPC,
-  //   bridgeTo: [ORAICHAIN_ID],
-  //   decimals: COSMOS_DECIMALS,
-  //   coingeckoId: 'tether',
-  //   cosmosBased: false,
-  //   Icon: USDT
-  // },
+  {
+    name: 'USDT',
+    org: TRON_ORG,
+    chainId: TRON_CHAIN_ID,
+    denom: 'trx20_usdt',
+    contractAddress: USDT_TRON_CONTRACT,
+    rpc: TRON_RPC,
+    bridgeTo: [ORAICHAIN_ID],
+    decimals: COSMOS_DECIMALS,
+    coingeckoId: 'tether',
+    cosmosBased: false,
+    Icon: USDT
+  },
   {
     name: 'TRON',
     org: TRON_ORG,

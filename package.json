@@ -9,7 +9,6 @@
     "@cosmjs/cosmwasm-stargate": "^0.29.5",
     "@cosmjs/proto-signing": "^0.29.5",
     "@cosmjs/stargate": "^0.29.5",
-    "@cosmjs/tendermint-rpc": "^0.29.5",
     "@oraichain/kawaiiverse-txs": "0.0.2",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.40.0",
@@ -91,7 +90,6 @@
   "resolutions": {
     "bech32": "1.1.4",
     "react-error-overlay": "6.0.11",
-    "@cosmjs/tendermint-rpc": "0.29.5",
     "@cosmjs/proto-signing": "0.29.5",
     "@cosmjs/math": "0.29.5",
     "@cosmjs/crypto": "0.29.5",
