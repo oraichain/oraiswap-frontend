@@ -507,7 +507,7 @@ const oraichainTokens: TokenItemType[] = [
     coingeckoId: 'tether',
     denom: STABLE_DENOM,
     contractAddress: process.env.REACT_APP_USDT_CONTRACT,
-    bridgeTo: [BSC_ORG],
+    bridgeTo: [BSC_ORG, TRON_ORG],
     decimals: COSMOS_DECIMALS,
     coinType: 118,
     chainId: ORAICHAIN_ID,
