@@ -18,7 +18,7 @@ describe('bigint', () => {
     const amount = 2000000;
     const decimal = 18;
     const res = toAmount(amount, decimal).toString();
-    expect(res).toBe('2000000000000000000000000'); // TODO: how to handle this? BigInt seems to break as well when the amount is too large
+    expect(res).toBe('2000000000000000000000000');
   });
 
   it('toAmount-float-high-decimal-points-should-not-round-up', async () => {

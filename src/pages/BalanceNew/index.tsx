@@ -1,6 +1,4 @@
-import {
-  DeliverTxResponse, isDeliverTxFailure
-} from '@cosmjs/stargate';
+import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
 import CheckBox from 'components/CheckBox';
@@ -10,50 +8,50 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import {
-  BSC_SCAN,
-  ETHEREUM_SCAN,
   KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID,
+  KWT_SUBNETWORK_CHAIN_ID,
+  ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_RPC
 } from 'config/constants';
 import { network } from 'config/networks';
-import { handleCheckWallet, networks, renderLogoNetwork } from 'helper';
+import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
-import { CacheTokens } from 'libs/token';
-import {
-  getTotalUsd,
-  getUsd,
-  parseBep20Erc20Name,
-  toAmount, toSumDisplay,
-  toTotalDisplay
-} from 'libs/utils';
+import useLoadTokens from 'hooks/useLoadTokens';
+import { getTotalUsd, getUsd, parseBep20Erc20Name, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  getSubAmountDetails
-} from 'rest/api';
+import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
-import { broadcastConvertTokenTx, convertKwt, convertTransferIBCErc20Kwt, findDefaultToToken, moveOraibToOraichain, transferEvmToIBC, transferIbcCustom, transferIBCKwt } from './helpers';
+import {
+  broadcastConvertTokenTx,
+  convertKwt,
+  convertTransferIBCErc20Kwt,
+  findDefaultToToken,
+  moveOraibToOraichain,
+  transferEvmToIBC,
+  transferIbcCustom,
+  transferIBCKwt
+} from './helpers';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
-  const [keplrAddress] = useConfigReducer('address');
+  const [oraiAddress] = useConfigReducer('address');
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [loadingRefresh, setLoadingRefresh] = useState(false);
@@ -61,14 +59,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
-
+  const loadTokenAmounts = useLoadTokens();
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
-  const [txHash, setTxHash] = useState('');
-  const dispatch = useDispatch();
+  const [, setTxHash] = useState('');
 
   const { data: prices } = useCoinGeckoPrices();
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
 
   useInactiveListener();
 
@@ -81,16 +79,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   useEffect(() => {
     _initEthereum();
   }, []);
-
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address: keplrAddress }), [dispatch, keplrAddress]);
-
-  useEffect(() => {
-    if (keplrAddress) cacheTokens.loadTokenAmounts();
-  }, [keplrAddress]);
-
-  useEffect(() => {
-    if (metamaskAddress) cacheTokens.loadTokenAmounts(true, metamaskAddress, false);
-  }, [metamaskAddress]);
 
   const _initEthereum = async () => {
     try {
@@ -151,7 +139,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await cacheTokens.loadTokenAmounts(true, metamaskAddress);
+      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
       setLoadingRefresh(false);
     } catch (err) {
       setLoadingRefresh(false);
@@ -161,7 +149,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, metamaskAddress);
     processTxResult(fromToken.rpc, result);
-  }
+  };
 
   const onClickTransfer = async (fromAmount: number, from: TokenItemType, to: TokenItemType) => {
     await handleCheckWallet();
@@ -200,14 +188,9 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
-      result = await transferEvmToIBC(from, metamaskAddress, fromAmount);
-      processTxResult(
-        from.rpc,
-        result,
-        window.Metamask.isEth() // TODO: need to merge this with the dynamic chain id check update
-          ? `${ETHEREUM_SCAN}/tx/${result?.transactionHash}`
-          : `${BSC_SCAN}/tx/${result?.transactionHash}`
-      );
+      result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
+      console.log('result: ', result);
+      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -271,12 +254,12 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       const result = await moveOraibToOraichain(remainingOraib);
       processTxResult(ORAI_BRIDGE_RPC, result);
     } catch (error) {
-      console.log('error move stuck oraib: ', error)
+      console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {
         message: error.message
       });
     } finally {
-      setMoveOraib2OraiLoading(false)
+      setMoveOraib2OraiLoading(false);
     }
   };
 
@@ -290,8 +273,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           </div>
 
           {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
-          <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
-
+          <StuckOraib
+            remainingOraib={remainingOraib}
+            handleMove={handleMoveOraib2Orai}
+            loading={moveOraib2OraiLoading}
+          />
         </div>
         <div className={styles.divider} />
         <div className={styles.action}>
@@ -368,10 +354,10 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                          ? (fromAmount: number) => {
+                        ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                          : undefined
+                        : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />

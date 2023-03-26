@@ -47,5 +47,7 @@ export enum Networks {
   klatyn = 8217,
   milkomeda = 2001,
   kcc = 321,
+  kawaiiverse = 6886,
   etherlite = 111,
+  tron = 728126428
 }

@@ -49,7 +49,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               let sumAmountDetails: AmountDetails = {};
               // by default, we only display the amount that matches the token denom
               sumAmountDetails[token.denom] = amounts[token.denom];
-              let sumAmount: number = toSumDisplay(sumAmountDetails)
+              let sumAmount: number = toSumDisplay(sumAmountDetails);
               // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
               if (token.evmDenoms) {
                 const subAmounts = getSubAmountDetails(amounts, token);
@@ -76,7 +76,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                   close();
                 }}
               >
-                {item.Icon && <item.Icon className={cx('logo')} />}
+                <item.Icon className={cx('logo')} />
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

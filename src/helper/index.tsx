@@ -1,10 +1,7 @@
 import React from 'react';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
-import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
-import { ReactComponent as AtomCosmosIcon } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as OsmosisIcon } from 'assets/icons/osmosis.svg';
+import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
 import {
   BEP20_ORAI,
   ORAICHAIN_ID,
@@ -12,22 +9,25 @@ import {
   KAWAII_ORG,
   OSMOSIS_ORG,
   COSMOS_ORG,
-  ORAI_BRIDGE_ORG,
   ETHEREUM_ORG,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_RPC,
   OSMOSIS_NETWORK_RPC,
   COSMOS_NETWORK_RPC,
   KAWAII_RPC,
-  NOTI_INSTALL_OWALLET,
   HIGH_GAS_PRICE,
-  MULTIPLIER
+  MULTIPLIER,
+  BSC_SCAN,
+  ETHEREUM_SCAN,
+  TRON_CHAIN_ID,
+  TRON_SCAN,
+  TRON_RPC,
+  TRON_ORG
 } from 'config/constants';
 
 import {
   BSC_CHAIN_ID,
   ETHEREUM_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
   KWT_SUBNETWORK_CHAIN_ID,
   COSMOS_CHAIN_ID,
   OSMOSIS_CHAIN_ID,
@@ -39,12 +39,15 @@ import {
   EVM_TYPE
 } from 'config/constants';
 import { network } from 'config/networks';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, tokens } from 'config/bridgeTokens';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ChainInfoType } from 'reducer/config';
 import { FeeCurrency } from '@keplr-wallet/types';
+import { ethers } from 'ethers';
+import flatten from 'lodash/flatten';
+import { uniqBy } from 'lodash';
 
 interface Tokens {
   denom?: string;
@@ -59,49 +62,32 @@ export type NetworkType = {
   networkType: string;
 };
 
-export const networks: NetworkType[] = [
-  {
-    title: ORAICHAIN_ID,
-    chainId: ORAICHAIN_ID,
-    Icon: ORAIIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: KAWAII_ORG,
-    chainId: KWT_SUBNETWORK_CHAIN_ID,
-    Icon: KwtIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: OSMOSIS_ORG,
-    chainId: OSMOSIS_CHAIN_ID,
-    Icon: OsmosisIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: COSMOS_ORG,
-    chainId: COSMOS_CHAIN_ID,
-    Icon: AtomCosmosIcon,
-    networkType: COSMOS_TYPE
-  },
-  {
-    title: BSC_ORG,
-    chainId: BSC_CHAIN_ID,
-    Icon: BNBIcon,
-    networkType: EVM_TYPE
-  },
-  {
-    title: ETHEREUM_ORG,
-    chainId: ETHEREUM_CHAIN_ID,
-    Icon: ETHIcon,
-    networkType: EVM_TYPE
+export const networks: NetworkType[] = uniqBy(
+  flatten(tokens).filter(token => token.chainId !== ORAI_BRIDGE_CHAIN_ID),
+  (c) => c.chainId
+).map(network => {
+  let icon = network.Icon;
+  const networkType = network.cosmosBased ? COSMOS_TYPE : EVM_TYPE;
+  switch (network.chainId) {
+    case BSC_CHAIN_ID:
+      icon = BNBIcon
+      break;
+    case ETHEREUM_CHAIN_ID:
+      icon = ETHIcon
+      break;
+    case TRON_CHAIN_ID:
+      icon = TRONIcon
+      break;
+    default:
+      break;
   }
-];
+  return { title: network.org, chainId: network.chainId, Icon: icon, networkType }
+});
 
-export const renderLogoNetwork = (chainId: string | number = ORAICHAIN_ID) => {
+export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
   const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);
   if (network) {
-    return <network.Icon />;
+    return <network.Icon {...props} />;
   }
 };
 
@@ -114,41 +100,26 @@ export const getTokenChain = (token: TokenItemType) => {
   return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
 };
 
-// export const handleCheckChain = (chainId: string | number, infoCosmos?: ChainInfoType) => {
-//   switch (chainId) {
-//     case BSC_CHAIN_ID:
-//       return window.Metamask.isBsc();
-//     case ETHEREUM_CHAIN_ID:
-//       return window.Metamask.isEth();
-//     case KWT_SUBNETWORK_EVM_CHAIN_ID:
-//       return Number(window?.ethereum?.chainId) === Number(KWT_SUBNETWORK_EVM_CHAIN_ID);
-//     case KWT_SUBNETWORK_CHAIN_ID:
-//       return infoCosmos.chainId === KWT_SUBNETWORK_CHAIN_ID;
-//     case COSMOS_CHAIN_ID:
-//       return infoCosmos.chainId === COSMOS_CHAIN_ID;
-//     case OSMOSIS_CHAIN_ID:
-//       return infoCosmos.chainId === OSMOSIS_CHAIN_ID;
-//     case ORAICHAIN_ID:
-//       return (
-//         infoCosmos.chainId !== OSMOSIS_CHAIN_ID &&
-//         infoCosmos.chainId !== COSMOS_CHAIN_ID &&
-//         infoCosmos.chainId !== KWT_SUBNETWORK_CHAIN_ID
-//       );
-//     default:
-//       return false;
-//   }
-// };
-
 export const getDenomEvm = () => {
-  if (window.Metamask.isEth()) return ERC20_ORAI;
-  if (window.Metamask.isBsc()) return BEP20_ORAI;
-  return KAWAII_ORAI;
+  switch (Number(window.ethereum?.chainId)) {
+    case BSC_CHAIN_ID:
+      return BEP20_ORAI;
+    case ETHEREUM_CHAIN_ID:
+      return ERC20_ORAI;
+    default:
+      return KAWAII_ORAI;
+  }
 };
 
-export const getRpcEvm = (infoEvm?: ChainInfoType) => {
-  if (window.Metamask.isEth()) return ETHEREUM_RPC;
-  if (window.Metamask.isBsc()) return BSC_RPC;
-  return infoEvm?.rpc;
+export const getTransactionUrl = (chainId: string | number, transactionHash: any) => {
+  switch (Number(chainId)) {
+    case BSC_CHAIN_ID:
+      return `${BSC_SCAN}/tx/${transactionHash}`;
+    case ETHEREUM_CHAIN_ID:
+      return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
+    case TRON_CHAIN_ID:
+      return `${TRON_SCAN}/#/transaction/${transactionHash.txid.replace(/^0x/, '')}`;
+  }
 };
 
 export const objConvertTokenIbc = {
@@ -189,8 +160,30 @@ export const feeEstimate = async (tokenInfo: TokenItemType, gasDefault: number) 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
-    return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-      toastId: 'install_keplr'
-    });
+    return displayInstallWallet();
   }
+};
+
+export const tronToEthAddress = (base58: string) =>
+  '0x' + Buffer.from(ethers.utils.base58.decode(base58)).slice(1, -4).toString('hex');
+
+export const ethToTronAddress = (address: string) => {
+  const evmAddress = '0x41' + address.substring(2);
+  const hash = ethers.utils.sha256(ethers.utils.sha256(evmAddress));
+  const checkSum = hash.substring(2, 10);
+  return ethers.utils.base58.encode(evmAddress + checkSum);
+};
+
+export const displayInstallWallet = (altWallet = 'Keplr') => {
+  displayToast(
+    TToastType.TX_INFO,
+    {
+      message: `You need to install OWallet or ${altWallet} to continue.`,
+      customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+      textLink: 'View on store'
+    },
+    {
+      toastId: 'install_keplr'
+    }
+  );
 };

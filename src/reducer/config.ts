@@ -16,6 +16,7 @@ export type ChainInfoType = {
 export interface ConfigState {
   address: string;
   metamaskAddress: string | null;
+  tronAddress: string | null;
   chainId: string;
   chainInfo: ChainInfoType;
   infoEvm: ChainInfoType;
@@ -36,6 +37,7 @@ export interface ConfigState {
 const initialState: ConfigState = {
   address: '',
   metamaskAddress: '',
+  tronAddress: '',
   chainId: 'Oraichain',
   filterNetwork: 'Oraichain',
   chainInfo: {},

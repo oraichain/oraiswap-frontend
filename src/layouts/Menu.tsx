@@ -22,13 +22,17 @@ import styles from './Menu.module.scss';
 
 import classNames from 'classnames';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { renderLogoNetwork } from 'helper';
+import { TRON_CHAIN_ID } from 'config/constants';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useConfigReducer('address');
+  const [infoCosmos] = useConfigReducer('infoCosmos');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -72,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
   };
 
   const mobileMode = isMobile();
-
+  console.log(infoCosmos);
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
   return (
@@ -93,44 +97,21 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Link>
           )}
           <div className={styles.menu_items}>
-            <RequireAuthButton address={address} setAddress={setAddress}>
-              {address && (
-                <div className={styles.token_info}>
-                  <ORAIIcon className={styles.token_avatar} />
-                  <div className={styles.token_info_balance}>
-                    <CenterEllipsis size={6} text={address} className={styles.token_address} />
-                  </div>
-                </div>
-              )}
-              {!!metamaskAddress && (
-                <div className={styles.token_info}>
-                  {window.Metamask.isBsc() ? (
-                    <BNBIcon className={styles.token_avatar} />
-                  ) : (
-                    <EthereumIcon className={styles.token_avatar} />
-                  )}
-                  <div className={styles.token_info_balance}>
-                    <CenterEllipsis size={6} text={metamaskAddress} className={styles.token_address} />
-                  </div>
-                </div>
-              )}
-
-              {!address && !metamaskAddress && <span className={styles.connect}>Connect wallet</span>}
-            </RequireAuthButton>
+            <RequireAuthButton address={address} setAddress={setAddress} />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet style={{ width: 30, height: 30 }} />)}
             {renderLink('/swap', 'Swap', setLink, <Swap style={{ width: 30, height: 30 }} />)}
             {renderLink('/pools', 'Pools', setLink, <Pools style={{ width: 30, height: 30 }} />)}
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => { },
+              () => {},
               <InfoIcon style={{ width: 30, height: 30 }} />,
               true
             )}
             {renderLink(
               'https://payment.orai.io/',
               'Buy ORAI (Fiat)',
-              () => { },
+              () => {},
               <BuyFiat style={{ width: 30, height: 30 }} />,
               true
             )}

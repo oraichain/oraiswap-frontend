@@ -9,13 +9,14 @@ import { tokenMap } from 'config/bridgeTokens';
 import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
-import useConfigReducer from 'hooks/useConfigReducer';
+import { feeEstimate } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CosmJs from 'libs/cosmjs';
-import { CacheTokens } from 'libs/token';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   fetchTokenInfos,
   generateContractMessages,
@@ -28,8 +29,6 @@ import { RootState } from 'store/configure';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import SettingModal from '../Modals/SettingModal';
 import styles from './index.module.scss';
-import { feeEstimate } from 'helper';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const cx = cn.bind(styles);
 
@@ -43,14 +42,16 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
-  const dispatch = useDispatch();
+
   const [averageRatio, setAverageRatio] = useState('0');
   const [slippage, setSlippage] = useState(1);
-  const [address] = useConfigReducer('address');
+
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+
+  const loadTokenAmounts = useLoadTokens();
+
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -163,7 +164,7 @@ const SwapComponent: React.FC<{
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokenAmounts(true);
+        loadTokenAmounts({ oraiAddress });
         setSwapLoading(false);
       }
     } catch (error) {

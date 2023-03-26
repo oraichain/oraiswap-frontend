@@ -11,19 +11,15 @@ const CenterEllipsis: React.FC<{
   return (
     <Tooltip
       content={content}
-      onClick={() => {
-        navigator.clipboard.writeText(text.toString());
-        setContent('Address copied!');
-      }}
       onUntrigger={() => {
         setContent(text);
       }}
       maxWidth={'none'}
     >
-      <span
-        className={className}
-        style={{ overflow: 'hidden', marginBottom: 0 }}
-      >{`${text.slice(0, size)}...${text.slice(-size)}`}</span>
+      <span className={className} style={{ overflow: 'hidden', marginBottom: 0 }}>{`${text.slice(
+        0,
+        size
+      )}...${text.slice(-size)}`}</span>
     </Tooltip>
   );
 };

@@ -25,26 +25,21 @@ button.connected {
 button.connect {
   text-transform: none;
   img {
-    margin-right: 10px;
+    margin-right: 10px;    
   }
 }
 
-.item-orai {
-  background: #1e1e21;
-  border-radius: 8px;
-  display: flex;
-  gap: 10px;
-  flex-direction: row;
-  justify-content: center;
-}
-
 .item {
-  background: #1e1e21;
+  background: #2d2938;
   border-radius: 8px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding: 16px;
+  padding: 10px;
+
+  &:last-child {
+    margin-bottom: 30px;
+  }
 
   &:hover {
     cursor: pointer;
@@ -52,8 +47,10 @@ button.connect {
   }
 
   .logo {
-    width: 54px;
-    height: 54px;
+    box-sizing: border-box;    
+    width: 40px;
+    height: 40px;    
+    border-radius: 8px;
   }
 
   .grow {
@@ -61,18 +58,7 @@ button.connect {
 
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    .network-title {
-      font-style: normal;
-      font-weight: 600;
-      font-size: 18px;
-      line-height: 100%;
-      /* identical to box height, or 18px */
-
-      /* aiRight/White */
-
-      color: #ffffff;
-    }
+    gap: 10px;    
 
     .des {
       font-style: normal;
@@ -80,12 +66,8 @@ button.connect {
       font-size: 14px;
       line-height: 150%;
       /* identical to box height, or 21px */
-
-      font-feature-settings: 'ss03' on;
-
-      /* aiRight/Gray 3 */
-
-      color: #777e90;
+      font-feature-settings: 'ss03' on;    
+      color: #bfa7f2;  
     }
   }
 

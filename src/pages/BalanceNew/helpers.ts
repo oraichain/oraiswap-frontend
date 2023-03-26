@@ -17,7 +17,7 @@ import {
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { getNetworkGasPrice } from 'helper';
+import { ethToTronAddress, getNetworkGasPrice } from 'helper';
 import { TransferBackMsg } from 'libs/contracts';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -167,20 +167,24 @@ export const convertTransferIBCErc20Kwt = async (
 
 export const transferEvmToIBC = async (
   from: TokenItemType,
-  metamaskAddress: string,
-  fromAmount: number
+  fromAmount: number,
+  address: {
+    metamaskAddress?: string,
+    tronAddress?: string
+  }
 ): Promise<any> => {
-  await window.Metamask.switchNetwork(from!.chainId);
+  const { metamaskAddress, tronAddress } = address;
+  // TODO: need to process this part better. We want to support both Metamask & Tronlink at the same time
+  const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!metamaskAddress || !oraiAddress) throw generateError('Please login both metamask and keplr!');
+  if ((!finalTransferAddress) || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!] as string;
   if (!gravityContractAddr || !from) {
     return;
   }
-
-  await window.Metamask.checkOrIncreaseAllowance(from, metamaskAddress, gravityContractAddr, fromAmount);
+  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
   let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, metamaskAddress, oneStepKeplrAddr);
+  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, oneStepKeplrAddr);
   return result;
 };
 

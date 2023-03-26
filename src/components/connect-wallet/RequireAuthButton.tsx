@@ -1,23 +1,23 @@
 import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { BSC_CHAIN_ID, NOTI_INSTALL_OWALLET } from 'config/constants';
+import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
+import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
 import React, { useState } from 'react';
-import ConnectWalletModal from './ConnectWalletModal';
+import ConnectWallet from './ConnectWallet';
 
-const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => {
-  const [openConnectWalletModal, setOpenConnectWalletModal] = useState(false);
+const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const { activate, deactivate } = useWeb3React();
+  const loadTokenAmounts = useLoadTokens();
 
   useEagerConnect(isInactiveMetamask, false);
-  const onClick = () => {
-    setOpenConnectWalletModal(true);
-  };
 
   const connectMetamask = async () => {
     try {
@@ -46,17 +46,49 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
     }
   };
 
+  const connectTronLink = async () => {
+    try {
+      // if not requestAccounts before
+      if (window.tronLink) {
+        if (!window.tronWeb.defaultAddress?.base58) {
+          const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          // throw error when not connected
+          if (code !== 200) {
+            displayToast(TToastType.TRONLINK_FAILED, { message });
+            return;
+          }
+        }
+        const tronAddress = window.tronWeb.defaultAddress.base58;
+        console.log('tronAddress', tronAddress);
+        loadTokenAmounts({ tronAddress });
+        setTronAddress(tronAddress);
+      }
+    } catch (ex) {
+      console.log('error in connecting tron link: ', ex);
+    }
+  };
+
+  const disconnectTronLink = async () => {
+    try {
+      setTronAddress(undefined);
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+
   const connectKeplr = async () => {
     if (!(await window.Keplr.getKeplr())) {
-      return displayToast(TToastType.TX_INFO, NOTI_INSTALL_OWALLET, {
-        toastId: 'install_keplr'
-      });
+      return displayInstallWallet();
     }
 
     await window.Keplr.suggestChain(network.chainId);
-    const address = await window.Keplr.getKeplrAddr();
-    Contract.sender = address;
-    setAddress(address as string);
+    const oraiAddress = await window.Keplr.getKeplrAddr();
+    console.log('oraiAddress', oraiAddress);
+    loadTokenAmounts({ oraiAddress });
+    Contract.sender = oraiAddress;
+    setAddress(oraiAddress);
   };
 
   const disconnectKeplr = async () => {
@@ -70,28 +102,17 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress, ...props }) => 
   };
 
   return (
-    <React.Fragment>
-      <button {...props} onClick={onClick}>
-        {props.children}
-      </button>
-      {openConnectWalletModal && (
-        <ConnectWalletModal
-          connectMetamask={connectMetamask}
-          connectKeplr={connectKeplr}
-          disconnectMetamask={disconnectMetamask}
-          disconnectKeplr={disconnectKeplr}
-          address={address}
-          metamaskAddress={metamaskAddress}
-          isOpen={openConnectWalletModal}
-          close={() => {
-            setOpenConnectWalletModal(false);
-          }}
-          open={() => {
-            setOpenConnectWalletModal(true);
-          }}
-        />
-      )}
-    </React.Fragment>
+    <ConnectWallet
+      connectMetamask={connectMetamask}
+      connectKeplr={connectKeplr}
+      disconnectMetamask={disconnectMetamask}
+      disconnectKeplr={disconnectKeplr}
+      connectTronLink={connectTronLink}
+      disconnectTronLink={disconnectTronLink}
+      address={address}
+      metamaskAddress={metamaskAddress}
+      tronAddress={tronAddress}
+    />
   );
 };
 

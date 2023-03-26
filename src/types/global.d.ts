@@ -8,6 +8,7 @@ import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
 import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import TronWeb from './tronweb';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -93,6 +94,13 @@ declare global {
     network: Network;
   }
 
+  interface TronLink {
+    ready: Bool; //Initialize to false, true after user authorization
+    request: ({ method }: { method: 'tron_requestAccounts' }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
+    sunWeb: sunWeb;
+    tronWeb: tronWeb;
+  }
+
   declare class Wallet {
     getChildKey(path?: string): Promise<ChildKeyData>;
     send(message: any);
@@ -104,6 +112,8 @@ declare global {
     Wallet: Wallet;
     Keplr: Keplr;
     web3: Web3;
+    tronWeb: TronWeb;
+    tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;
     ethereumX: MetaMaskEthereumProvider;
     Metamask: Metamask;
@@ -152,6 +162,7 @@ declare global {
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_BSC_CONTRACT: string;
       REACT_APP_GRAVITY_ETH_CONTRACT: string;
+      REACT_APP_GRAVITY_TRON_CONTRACT: string;
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
@@ -161,6 +172,7 @@ declare global {
       REACT_APP_KWT_CONTRACT: string;
       REACT_APP_MILKY_CONTRACT: string;
       REACT_APP_SCORAI_CONTRACT: string;
+      REACT_APP_TRX_CONTRACT: string;
 
       // config for ibc wasm contract (cw20-ics20)
       REACT_APP_IBC_WASM_CONTRACT: string;
@@ -169,4 +181,4 @@ declare global {
   }
 }
 
-export {};
+export { };
