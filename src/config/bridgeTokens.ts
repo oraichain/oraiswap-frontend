@@ -644,6 +644,7 @@ const oraichainTokens: TokenItemType[] = [
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
+    factoryV2: true,
     Icon: TRON
   },
 ];
