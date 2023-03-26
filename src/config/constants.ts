@@ -12,6 +12,7 @@ export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
+export const TRON_DENOM = 'trx';
 export const UOSMOS_DENOM = 'uosmo';
 export const UATOM_DENOM = 'uatom';
 export const BEP20_ORAI = 'bep20_orai';
