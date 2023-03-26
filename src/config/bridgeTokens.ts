@@ -7,7 +7,7 @@ import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
 import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
 import { ReactComponent as USDT } from 'assets/icons/tether.svg';
-import { ReactComponent as TRON } from 'assets/icons/tron-trx-logo.svg';
+import { ReactComponent as TRON } from 'assets/icons/tron.svg';
 import { ReactComponent as USDC } from 'assets/icons/usd_coin.svg';
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
@@ -63,15 +63,15 @@ import {
 export type TokenItemType = {
   name: string;
   org:
-  | 'Oraichain'
-  | 'Cosmos Hub'
-  | 'Osmosis'
-  | 'OraiBridge'
-  | 'BNB Chain'
-  | 'Ethereum'
-  | 'Kawaiiverse'
-  | 'Tron Network'
-  | string;
+    | 'Oraichain'
+    | 'Cosmos Hub'
+    | 'Osmosis'
+    | 'OraiBridge'
+    | 'BNB Chain'
+    | 'Ethereum'
+    | 'Kawaiiverse'
+    | 'Tron Network'
+    | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -86,20 +86,20 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-  | 'oraichain-token'
-  | 'osmosis'
-  | 'cosmos'
-  | 'ethereum'
-  | 'bnb'
-  | 'airight'
-  | 'oraidex'
-  | 'tether'
-  | 'kawaii-islands'
-  | 'milky-token'
-  | 'scorai'
-  | 'oraidex'
-  | 'usd-coin'
-  | 'tron';
+    | 'oraichain-token'
+    | 'osmosis'
+    | 'cosmos'
+    | 'ethereum'
+    | 'bnb'
+    | 'airight'
+    | 'oraidex'
+    | 'tether'
+    | 'kawaii-islands'
+    | 'milky-token'
+    | 'scorai'
+    | 'oraidex'
+    | 'usd-coin'
+    | 'tron';
   cosmosBased: Boolean;
   type?: string;
 };
@@ -347,7 +347,7 @@ const otherChainTokens: TokenItemType[] = [
     Icon: USDT
   },
   {
-    name: 'TRON',
+    name: 'TRX',
     org: TRON_ORG,
     chainId: TRON_CHAIN_ID,
     denom: 'trx20_trx',
@@ -632,7 +632,7 @@ const oraichainTokens: TokenItemType[] = [
     Icon: scORAI
   },
   {
-    name: 'TRON',
+    name: 'TRX',
     org: ORAICHAIN_ID,
     prefix: 'orai',
     coingeckoId: 'tron',
@@ -646,7 +646,7 @@ const oraichainTokens: TokenItemType[] = [
     cosmosBased: true,
     factoryV2: true,
     Icon: TRON
-  },
+  }
 ];
 
 export const tokens = [otherChainTokens, oraichainTokens];
