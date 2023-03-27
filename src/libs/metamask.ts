@@ -10,7 +10,7 @@ import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
 
   public isWindowEthereum() {
     return !!window.ethereum;
@@ -20,12 +20,13 @@ export default class Metamask {
     return Number(chainId) == TRON_CHAIN_ID;
   }
 
-  private checkTron() {
-    if (!window.tronWeb) {
-      displayInstallWallet('TronLink');
-      return false;
+  public static checkTron() {
+    if (window.tronWeb && window.tronLink) {
+      return true;
     }
-    return true;
+
+    displayInstallWallet('TronLink');
+    return false;
   }
 
   private async submitTronSmartContract(
@@ -33,13 +34,13 @@ export default class Metamask {
     functionSelector: string,
     options: { feeLimit?: number } = { feeLimit: 40 * 1e6 }, // submitToCosmos costs about 40 TRX
     parameters = [],
-    issuerAddress: string,
+    issuerAddress: string
   ): Promise<any> {
     const tronUrl = TRON_RPC.replace('/jsonrpc', '');
     const tronWeb = new TronWeb(tronUrl, tronUrl);
 
     try {
-      console.log("before building tx: ", issuerAddress);
+      console.log('before building tx: ', issuerAddress);
       const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
         address,
         functionSelector,
@@ -47,16 +48,16 @@ export default class Metamask {
         parameters,
         ethToTronAddress(issuerAddress)
       );
-      console.log("transaction builder: ", transaction);
+      console.log('transaction builder: ', transaction);
 
       if (!transaction.result || !transaction.result.result) {
         throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
       }
-      console.log("before signing");
+      console.log('before signing');
 
       // sign from inject tronWeb
       const singedTransaction = await window.tronWeb.trx.sign(transaction.transaction);
-      console.log("signed tx: ", singedTransaction);
+      console.log('signed tx: ', singedTransaction);
       const txHash = await tronWeb.trx.sendRawTransaction(singedTransaction);
       return { transactionHash: txHash };
     } catch (error) {
@@ -82,10 +83,10 @@ export default class Metamask {
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
-    console.log("gravity tron address: ", gravityContractAddr);
+    console.log('gravity tron address: ', gravityContractAddr);
 
     if (this.isTron(token.chainId)) {
-      if (this.checkTron())
+      if (Metamask.checkTron())
         return await this.submitTronSmartContract(
           ethToTronAddress(gravityContractAddr),
           'sendToCosmos(address,string,uint256)',
@@ -122,12 +123,17 @@ export default class Metamask {
     const allowance = toAmount(999999999999999, token.decimals);
 
     if (this.isTron(token.chainId)) {
-      if (this.checkTron())
-        return this.submitTronSmartContract(ethToTronAddress(token.contractAddress), 'approve(address,uint256)', {}, [
-          { type: 'address', value: spender },
-          { type: 'uint256', value: allowance.toString() }
-        ],
-          ownerHex);
+      if (Metamask.checkTron())
+        return this.submitTronSmartContract(
+          ethToTronAddress(token.contractAddress),
+          'approve(address,uint256)',
+          {},
+          [
+            { type: 'address', value: spender },
+            { type: 'uint256', value: allowance.toString() }
+          ],
+          ownerHex
+        );
     } else {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);

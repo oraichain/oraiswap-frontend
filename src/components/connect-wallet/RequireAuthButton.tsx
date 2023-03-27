@@ -7,6 +7,7 @@ import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
+import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
 
@@ -49,7 +50,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
   const connectTronLink = async () => {
     try {
       // if not requestAccounts before
-      if (window.tronLink) {
+      if (Metamask.checkTron()) {
         if (!window.tronWeb.defaultAddress?.base58) {
           const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
             method: 'tron_requestAccounts'
