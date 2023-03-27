@@ -169,15 +169,15 @@ export const transferEvmToIBC = async (
   from: TokenItemType,
   fromAmount: number,
   address: {
-    metamaskAddress?: string,
-    tronAddress?: string
+    metamaskAddress?: string;
+    tronAddress?: string;
   }
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
   // TODO: need to process this part better. We want to support both Metamask & Tronlink at the same time
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if ((!finalTransferAddress) || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
+  if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!] as string;
   if (!gravityContractAddr || !from) {
     return;
@@ -332,7 +332,7 @@ export const transferIbcCustom = async (
   toToken: TokenItemType,
   transferAmount: number,
   amounts: AmountDetails,
-  metamaskAddress?: string
+  transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
 
@@ -347,10 +347,10 @@ export const transferIbcCustom = async (
   if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
-  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + metamaskAddress : '';
+  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + transferAddress : '';
   let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
-  if (!metamaskAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
+  if (!transferAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
     throw generateError('Please login metamask!');
   }
   // for KWT & MILKY tokens, we use the old ibc info channel
