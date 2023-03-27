@@ -67,6 +67,7 @@ button.connect {
       line-height: 150%;
       /* identical to box height, or 21px */
       font-feature-settings: 'ss03' on;    
+      user-select: none;
       color: #bfa7f2;  
     }
   }

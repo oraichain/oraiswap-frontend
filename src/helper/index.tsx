@@ -1,53 +1,43 @@
-import React from 'react';
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
 import {
   BEP20_ORAI,
+  BSC_SCAN,
+  COSMOS_NETWORK_RPC,
+  ETHEREUM_SCAN,
+  HIGH_GAS_PRICE,
+  KAWAII_RPC,
+  MULTIPLIER,
   ORAICHAIN_ID,
-  BSC_ORG,
-  KAWAII_ORG,
-  OSMOSIS_ORG,
-  COSMOS_ORG,
-  ETHEREUM_ORG,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_RPC,
   OSMOSIS_NETWORK_RPC,
-  COSMOS_NETWORK_RPC,
-  KAWAII_RPC,
-  HIGH_GAS_PRICE,
-  MULTIPLIER,
-  BSC_SCAN,
-  ETHEREUM_SCAN,
   TRON_CHAIN_ID,
-  TRON_SCAN,
-  TRON_RPC,
-  TRON_ORG
+  TRON_SCAN
 } from 'config/constants';
+import React from 'react';
 
+import { TokenItemType, tokens } from 'config/bridgeTokens';
 import {
   BSC_CHAIN_ID,
-  ETHEREUM_CHAIN_ID,
-  KWT_SUBNETWORK_CHAIN_ID,
   COSMOS_CHAIN_ID,
-  OSMOSIS_CHAIN_ID,
-  ERC20_ORAI,
-  KAWAII_ORAI,
-  ETHEREUM_RPC,
-  BSC_RPC,
   COSMOS_TYPE,
-  EVM_TYPE
+  ERC20_ORAI,
+  ETHEREUM_CHAIN_ID,
+  EVM_TYPE,
+  KAWAII_ORAI,
+  KWT_SUBNETWORK_CHAIN_ID,
+  OSMOSIS_CHAIN_ID
 } from 'config/constants';
 import { network } from 'config/networks';
-import { TokenItemType, tokens } from 'config/bridgeTokens';
 
+import { FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
-import { ChainInfoType } from 'reducer/config';
-import { FeeCurrency } from '@keplr-wallet/types';
 import { ethers } from 'ethers';
-import flatten from 'lodash/flatten';
 import { uniqBy } from 'lodash';
+import flatten from 'lodash/flatten';
 
 interface Tokens {
   denom?: string;
@@ -63,25 +53,25 @@ export type NetworkType = {
 };
 
 export const networks: NetworkType[] = uniqBy(
-  flatten(tokens).filter(token => token.chainId !== ORAI_BRIDGE_CHAIN_ID),
+  flatten(tokens).filter((token) => token.chainId !== ORAI_BRIDGE_CHAIN_ID),
   (c) => c.chainId
-).map(network => {
+).map((network) => {
   let icon = network.Icon;
   const networkType = network.cosmosBased ? COSMOS_TYPE : EVM_TYPE;
   switch (network.chainId) {
     case BSC_CHAIN_ID:
-      icon = BNBIcon
+      icon = BNBIcon;
       break;
     case ETHEREUM_CHAIN_ID:
-      icon = ETHIcon
+      icon = ETHIcon;
       break;
     case TRON_CHAIN_ID:
-      icon = TRONIcon
+      icon = TRONIcon;
       break;
     default:
       break;
   }
-  return { title: network.org, chainId: network.chainId, Icon: icon, networkType }
+  return { title: network.org, chainId: network.chainId, Icon: icon, networkType };
 });
 
 export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
