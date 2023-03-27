@@ -150,10 +150,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
 
   const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     let transferAddress = metamaskAddress;
-    if (
-      toToken.chainId === ORAI_BRIDGE_CHAIN_ID &&
-      toToken.denom === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + WRAP_TRON_TRX_CONTRACT
-    ) {
+    // check tron network and convert address
+    if (toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
       transferAddress = tronToEthAddress(tronAddress);
     }
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
