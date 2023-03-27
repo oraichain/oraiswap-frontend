@@ -12,10 +12,12 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_RPC
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  ORAI_BRIDGE_RPC,
+  WRAP_TRON_TRX_CONTRACT
 } from 'config/constants';
 import { network } from 'config/networks';
-import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork } from 'helper';
+import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useInactiveListener } from 'hooks/useMetamask';
@@ -147,7 +149,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
-    const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, metamaskAddress);
+    let transferAddress = metamaskAddress;
+    if (
+      toToken.chainId === ORAI_BRIDGE_CHAIN_ID &&
+      toToken.denom === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + WRAP_TRON_TRX_CONTRACT
+    ) {
+      transferAddress = tronToEthAddress(tronAddress);
+    }
+    const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
     processTxResult(fromToken.rpc, result);
   };
 
