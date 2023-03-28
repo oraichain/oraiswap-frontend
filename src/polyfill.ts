@@ -4,6 +4,15 @@ import { BSC_CHAIN_ID } from 'config/constants';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { isMobile } from '@walletconnect/browser-utils';
 import _BigInt from 'big-integer';
+import Keplr from 'libs/keplr';
+import Metamask from 'libs/metamask';
+
+// inject TronWeb class
+(window as any).TronWeb = require('tronweb');
+
+// enable Keplr
+window.Keplr = new Keplr();
+window.Metamask = new Metamask();
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;

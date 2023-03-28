@@ -10,24 +10,41 @@
 
 .header {
   display: flex;
-  flex-direction: column;
-  max-width: 579px;
-  .totalAssets {
-    font-style: normal;
-    font-weight: 600;
-    font-size: 24px;
-    color: #777e90;
+  justify-content: space-between;
+  align-items: center;
+
+  .asset {
+    display: flex;
+    flex-direction: column;
+
+    .totalAssets {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 24px;
+      color: #777e90;
+    }
+
+    .balance {
+      font-weight: 600;
+      font-size: 40px;
+      color: #ffffff;
+    }
   }
 
-  .balance {
-    font-weight: 600;
-    font-size: 40px;
-    color: #ffffff;
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .asset {
+      margin-bottom: 15px;
+    }
   }
+
 }
 
 .action {
   display: flex;
+
   @include desktop {
     @media (min-width: 1270px) {
       justify-content: center;
@@ -38,27 +55,34 @@
 .search {
   margin-top: 25px;
   display: flex;
+
   @include desktop {
     @media (max-width: 1024px) {
       width: 100%;
     }
+
     @media (max-width: 1270px) {
       width: 100%;
     }
+
     align-items: center;
     justify-content: space-between;
     width: 50%;
   }
+
   @include mobile {
     width: 100%;
     flex-direction: column;
   }
+
   &_filter {
     width: 50%;
     cursor: pointer;
+
     @include mobile {
       width: 100%;
     }
+
     background: #2b2d3b;
     text-align: center;
     margin-right: 20px;
@@ -66,20 +90,24 @@
     padding: 6px 12px;
     height: 56px;
   }
+
   &_box {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
+
   &_flex {
     display: flex;
     align-items: center;
   }
+
   &_text {
     font-size: 16px;
     font-weight: 600;
     padding-left: 10px;
   }
+
   &_form {
     width: 420px;
     background: #2b2d3b;
@@ -89,21 +117,25 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
+
     @include mobile {
       width: 100% !important;
       margin-top: 20px;
     }
   }
+
   &_logo {
     display: flex;
     align-items: center;
   }
+
   input {
     width: 93%;
     font-weight: 600;
     height: 56px;
     font-size: 16px;
     color: white;
+
     @include mobile {
       margin-top: 12px;
       width: 100%;
@@ -156,20 +188,25 @@
 .tokens {
   display: flex;
   justify-content: center;
+
   &_form {
     @include desktop {
       @media (max-width: 1024px) {
         width: 100%;
       }
+
       @media (max-width: 1270px) {
         width: 100%;
       }
+
       width: 50%;
     }
+
     @include mobile {
       width: 100%;
     }
   }
+
   &_element {
     margin-bottom: 20px;
     background-color: #191b21;
@@ -182,26 +219,34 @@
   justify-content: center;
   padding-top: 12px;
   width: 100%;
+
   .box {
     width: 100%;
+
     @include desktop {
       @media (max-width: 1024px) {
         width: 100%;
       }
+
       @media (max-width: 1270px) {
         width: 100%;
       }
+
       width: 50%;
     }
+
     display: flex;
     justify-content: space-between;
+
     .refresh {
       cursor: pointer;
       display: flex;
       align-items: center;
+
       span {
         padding-right: 8px;
       }
+
       :hover {
         color: #a871df;
       }

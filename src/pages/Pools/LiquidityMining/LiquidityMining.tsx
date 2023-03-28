@@ -1,24 +1,22 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import styles from './LiquidityMining.module.scss';
+import miningImage from 'assets/images/Liquidity_mining_illus.png';
 import cn from 'classnames/bind';
-import { Type, generateMiningMsgs, WithdrawMining } from 'rest/api';
-import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import TokenBalance from 'components/TokenBalance';
+import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import CosmJs from 'libs/cosmjs';
+import TokenBalance from 'components/TokenBalance';
+import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
-import Loader from 'components/Loader';
-import { TokenInfo } from 'types/token';
 import useConfigReducer from 'hooks/useConfigReducer';
-import miningImage from 'assets/images/Liquidity_mining_illus.png';
-import isEqual from 'lodash/isEqual';
-import { RewardInfoResponseItem } from 'libs/contracts';
-import { toDecimal } from 'libs/utils';
-import { Asset } from 'libs/contracts';
+import { Asset, RewardInfoResponseItem } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
-import { CacheTokens } from 'libs/token';
-import { useDispatch } from 'react-redux';
+import CosmJs from 'libs/cosmjs';
+import useLoadTokens from 'hooks/useLoadTokens';
+import { toDecimal } from 'libs/utils';
+import isEqual from 'lodash/isEqual';
+import React, { useEffect, useState } from 'react';
+import { generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
+import { TokenInfo } from 'types/token';
+import styles from './LiquidityMining.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -59,7 +57,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
-  const dispatch = useDispatch();
+  const loadTokenAmounts = useLoadTokens();
+
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
       // let interval = setInterval(() => setNewReward(), 1000);
@@ -73,26 +72,27 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
     const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
 
-    let res = rewardPerSecInfoData.map((r) => {
-      const pendingWithdraw = BigInt(
-        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
-      );
+    let res = rewardPerSecInfoData
+      .filter((p) => parseInt(p.amount))
+      .map((r) => {
+        const pendingWithdraw = BigInt(
+          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
+        );
 
-      const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
+        const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
 
-      const token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
+        const token =
+          'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
 
-      return {
-        ...token,
-        amount,
-        pendingWithdraw
-      };
-    });
+        return {
+          ...token,
+          amount,
+          pendingWithdraw
+        };
+      });
 
     setPendingRewards(res);
   };
-
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
 
   const handleBond = async () => {
     setActionLoading(true);
@@ -128,7 +128,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokenAmounts(true);
+        loadTokenAmounts({ oraiAddress: address });
         setActionLoading(false);
         onBondingAction();
         return;

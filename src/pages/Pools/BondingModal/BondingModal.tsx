@@ -150,7 +150,7 @@ const BondingModal: FC<ModalProps> = ({
               // type="input"
               value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
               onChange={(e: { target: { value: string } }) => {
-                setBondAmount(toAmount(Number(e.target.value), lpTokenInfoData.decimals));
+                setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.decimals));
               }}
             />
           </div>

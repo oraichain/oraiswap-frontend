@@ -23,56 +23,6 @@
   }
 }
 
-.token_info {
-  background: #2D2938;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  margin: 32px 10px 0 0;
-  width: 100%;
-  position: relative;
-  &:last-child {
-    margin-bottom: 32px;
-    margin-top: 15px;
-  }
-}
-
-.network_icon {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 24px;
-  height: 24px;
-}
-
-.token_address {
-  color: #bfa7f2;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.token_avatar {
-  box-sizing: border-box;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
-}
-
-.token_info_balance {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.token_balance {
-  font-size: 16px;
-  font-weight: 500;
-  color: #EBEBEB;
-  margin-top: 3px;
-}
-
 .logo {
   display: flex;
   align-items: center;
@@ -110,14 +60,14 @@
   align-items: center;
   border-radius: 8px;
   padding: 12px 16px;
-  margin-top: 10px;
+  margin-bottom: 10px;
   &:hover {
     background: #2d2938;
     cursor: pointer;
   }
 
   &.active {
-    background: #612FCA;
+    background: #612fca;
   }
 
   &_text {
@@ -166,13 +116,12 @@
 
 .menu_footer {
   text-align: center;
-  margin-bottom: 40px;
   color: #777e90;
 }
 
 .connect {
   color: #fff;
-  background: #612FCA;
+  background: #612fca;
   border-radius: 8px;
   font-weight: 400;
   font-size: 14px;

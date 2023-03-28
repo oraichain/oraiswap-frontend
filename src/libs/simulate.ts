@@ -1,8 +1,15 @@
-import { CosmWasmClient, ExecuteResult, InstantiateResult, JsonObject, UploadResult } from '@cosmjs/cosmwasm-stargate';
+import {
+  CosmWasmClient,
+  ExecuteResult,
+  InstantiateOptions,
+  InstantiateResult,
+  JsonObject,
+  UploadResult
+} from '@cosmjs/cosmwasm-stargate';
 import { CWSimulateApp, CWSimulateAppOptions, AppResponse } from '@terran-one/cw-simulate';
 import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
-import { Coin } from '@cosmjs/stargate';
+import { Coin, StdFee } from '@cosmjs/stargate';
 
 export class SimulateCosmWasmClient extends CosmWasmClient {
   private readonly app: CWSimulateApp;
@@ -36,10 +43,17 @@ export class SimulateCosmWasmClient extends CosmWasmClient {
     codeId: number,
     msg: JsonObject,
     label: string,
-    funds: Coin[] = []
+    _fee?: StdFee | 'auto' | number,
+    options?: InstantiateOptions
   ): Promise<InstantiateResult> {
     // instantiate the contract
-    const result = await this.app.wasm.instantiateContract(senderAddress, funds, codeId, msg, label);
+    const result = await this.app.wasm.instantiateContract(
+      senderAddress,
+      (options?.funds as Coin[]) ?? [],
+      codeId,
+      msg,
+      label
+    );
     const response = result.val as AppResponse;
     // pull out the contract address
     const contractAddress = response.events[0].attributes[0].value;
@@ -58,12 +72,12 @@ export class SimulateCosmWasmClient extends CosmWasmClient {
     senderAddress: string,
     contractAddress: string,
     msg: JsonObject,
-    funds: Coin[] = []
+    _fee: StdFee | 'auto' | number,
+    _memo?: string,
+    funds?: readonly Coin[]
   ): Promise<ExecuteResult> {
-    const result = await this.app.wasm.executeContract(senderAddress, funds, contractAddress, msg);
-
+    const result = await this.app.wasm.executeContract(senderAddress, (funds as Coin[]) ?? [], contractAddress, msg);
     const response = result.val as AppResponse;
-
     return {
       logs: [],
       height: this.app.height,

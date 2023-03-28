@@ -1,11 +1,12 @@
+import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { Coin } from '@cosmjs/stargate';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
+import { coin, Coin } from '@cosmjs/stargate';
+import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { ORAI, ORAICHAIN_ID, ORAI_INFO, STABLE_DENOM, MILKY_DENOM, KWT_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
-import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
+import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
@@ -15,7 +16,9 @@ import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.type
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { TokenInfo } from 'types/token';
-import axios from './request';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
+import Long from 'long';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -225,7 +228,7 @@ function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: Toke
   return msgConverts;
 }
 
-async function generateConvertCw20Erc20Message(
+function generateConvertCw20Erc20Message(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
   sender: string,
@@ -342,9 +345,10 @@ export type SwapQuery = {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   amount: number | string;
-  max_spread: number | string;
-  belief_price: number | string;
+  max_spread?: number | string;
+  belief_price?: number | string;
   sender: string;
+  minimumReceive: Uint128;
 };
 
 export type ProvideQuery = {
@@ -398,7 +402,8 @@ function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo)
+          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo),
+          minimum_receive: swapQuery.minimumReceive
         }
       };
       // if cw20 => has to send through cw20 contract
@@ -691,6 +696,38 @@ function generateClaimMsg(msg: Claim) {
   };
 }
 
+// Generate multiple IBC messages in a single transaction to transfer from Oraibridge to Oraichain.
+function generateMoveOraib2OraiMessages(
+  remainingOraib: RemainingOraibTokenItem[],
+  fromAddress: string,
+  toAddress: string
+) {
+  const [, toTokens] = tokens;
+  let transferMsgs: MsgTransfer[] = [];
+  for (const fromToken of remainingOraib) {
+    const toToken = toTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === fromToken.name);
+    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    // hardcode for MILKY & KWT because they use the old IBC channel
+    if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
+      ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
+
+    const tokenAmount = coin(fromToken.amount, fromToken.denom);
+    transferMsgs.push({
+      sourcePort: ibcInfo.source,
+      sourceChannel: ibcInfo.channel,
+      token: tokenAmount,
+      sender: fromAddress,
+      receiver: toAddress,
+      memo: '',
+      timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
+        .multiply(1000000000)
+        .toString(),
+      timeoutHeight: { revisionNumber: '0', revisionHeight: '0' } // we dont need timeout height. We only use timeout timestamp
+    });
+  }
+  return transferMsgs;
+}
+
 export {
   fetchPairInfo,
   fetchTokenInfo,
@@ -712,5 +749,6 @@ export {
   generateConvertCw20Erc20Message,
   parseTokenInfo,
   fetchAllTokenAssetPools,
-  fetchAllRewardPerSecInfos
+  fetchAllRewardPerSecInfos,
+  generateMoveOraib2OraiMessages
 };

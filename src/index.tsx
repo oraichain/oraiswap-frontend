@@ -5,14 +5,12 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './index.scss';
 import ScrollToTop from './layouts/ScrollToTop';
 import App from './layouts/App';
-import Keplr from 'libs/keplr';
 import { network } from 'config/networks';
 import { ToastProvider } from 'components/Toasts/context';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Metamask from 'libs/metamask';
-import { KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID, TRON_RPC } from 'config/constants';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
@@ -21,9 +19,7 @@ import { GasPrice } from '@cosmjs/stargate';
 import { Provider } from 'react-redux';
 import { persistor, store } from 'store/configure';
 import { PersistGate } from 'redux-persist/integration/react';
-// enable Keplr
-window.Keplr = new Keplr();
-window.Metamask = new Metamask();
+
 const queryClient = new QueryClient();
 
 if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
@@ -68,8 +64,8 @@ const startApp = async () => {
         gasPrice: GasPrice.fromString(`0${network.denom}`)
       });
     } else {
-      // can not signer
-      window.client = await CosmWasmClient.connect(network.rpc);
+      // go to catch
+      throw new Error('Keplr not connected!');
     }
   } catch (ex) {
     window.client = await CosmWasmClient.connect(network.rpc);

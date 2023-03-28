@@ -1,8 +1,10 @@
-import { filteredTokens } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID } from 'config/constants';
+import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI } from 'config/constants';
+import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
-import { buildMultipleMessages, toAmount, toDisplay } from 'libs/utils';
-import { generateContractMessages, SwapQuery, Type } from 'rest/api';
+import { toAmount, toDisplay } from 'libs/utils';
+import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
+import { generateContractMessages, Type } from 'rest/api';
 
 describe('swap', () => {
   it('max amount', () => {
@@ -47,22 +49,98 @@ describe('swap', () => {
     expect(finalAmount).toBe(0.499999);
   });
 
-  it('generate msgs contract for swap action', () => {
+  describe('generate msgs contract for swap action', () => {
     const address = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
     const fromAmountToken = 10;
     const fromTokenDecimals = 6;
-    const fromTokenInfoData = filteredTokens.find((item) => item.name == 'AIRI' && item.chainId == ORAICHAIN_ID);
-    const toTokenInfoData = filteredTokens.find((item) => item.name == 'ORAIX' && item.chainId == ORAICHAIN_ID);
+    const fromTokenHaveContract = filteredTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
+    const fromTokenNoContract = filteredTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
+    const toTokenInfoData = filteredTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
-    const msgs = generateContractMessages({
-      type: Type.SWAP,
-      sender: address,
-      amount: _fromAmount,
-      fromInfo: fromTokenInfoData,
-      toInfo: toTokenInfoData
-    } as any);
-    const msg = msgs[0];
-    const messages = buildMultipleMessages(msg, [], []);
-    expect(Array.isArray(messages)).toBe(true);
+    const simulateData = { amount: '1000000' };
+    const amounts = {
+      airi: '2000000'
+    };
+    const userSlippage = 0.01;
+    const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
+
+    it('return expected minimum receive', () => {
+      expect(minimumReceive).toBe('990000');
+    });
+
+    it('return msgs generate contract', () => {
+      testMsgs(fromTokenHaveContract, toTokenInfoData);
+      testMsgs(fromTokenNoContract, toTokenInfoData);
+    });
+
+    function testMsgs(fromTokenInfoData: TokenItemType, toTokenInfoData: TokenItemType) {
+      const msgs = generateContractMessages({
+        type: Type.SWAP,
+        sender: address,
+        amount: _fromAmount,
+        fromInfo: fromTokenInfoData,
+        toInfo: toTokenInfoData,
+        minimumReceive
+      } as any);
+      const msg = msgs[0];
+
+      // check if the contract address, msg and sender are correct
+      if (fromTokenInfoData.contractAddress) {
+        expect(msg.contract).toEqual(fromTokenInfoData.contractAddress);
+        expect(JSON.parse(msg.msg.toString()).send.contract).toEqual(network.router);
+        expect(JSON.parse(msg.msg.toString()).send.amount).toEqual(_fromAmount);
+      } else {
+        expect(msg.contract).toEqual(network.router);
+        // check swap operation msg when pair is false
+        expect(JSON.parse(msg.msg.toString())).toEqual({
+          execute_swap_operations: {
+            operations: [
+              {
+                orai_swap: {
+                  offer_asset_info: {
+                    native_token: {
+                      denom: fromTokenInfoData.denom
+                    }
+                  },
+                  ask_asset_info: {
+                    native_token: {
+                      denom: ORAI
+                    }
+                  }
+                }
+              },
+              {
+                orai_swap: {
+                  offer_asset_info: {
+                    native_token: {
+                      denom: ORAI
+                    }
+                  },
+                  ask_asset_info: {
+                    token: {
+                      contract_addr: toTokenInfoData.contractAddress
+                    }
+                  }
+                }
+              }
+            ],
+            minimum_receive: '990000'
+          }
+        });
+      }
+      expect(msg.sender).toEqual(address);
+      expect(msg.sent_funds).toBeDefined();
+
+      const multipleMsgs = generateMsgsSwap(
+        fromTokenInfoData,
+        fromAmountToken,
+        toTokenInfoData,
+        amounts,
+        simulateData,
+        userSlippage,
+        address
+      );
+      expect(Array.isArray(multipleMsgs)).toBe(true);
+    }
   });
 });

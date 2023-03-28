@@ -14,6 +14,7 @@ const fallback = {
   url: false,
   path: false,
   assert: false,
+  querystring: false,
   http: require.resolve('stream-http'),
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),

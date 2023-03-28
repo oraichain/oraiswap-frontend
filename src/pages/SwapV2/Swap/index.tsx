@@ -6,30 +6,26 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
-import useConfigReducer from 'hooks/useConfigReducer';
+import { feeEstimate, handleCheckAddress } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
-import { CacheTokens } from 'libs/token';
-import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
-  fetchTokenInfos,
-  generateContractMessages,
-  generateConvertErc20Cw20Message,
-  simulateSwap,
-  SwapQuery,
-  Type
+  fetchTokenInfos, simulateSwap
 } from 'rest/api';
 import { RootState } from 'store/configure';
+import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
-import SettingModal from '../Modals/SettingModal';
+import { TooltipIcon } from '../Modals/SettingTooltip';
+import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
-import { feeEstimate } from 'helper';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const cx = cn.bind(styles);
 
@@ -39,18 +35,18 @@ const SwapComponent: React.FC<{
   setSwapTokens: (denoms: [string, string]) => void;
 }> = ({ fromTokenDenom, toTokenDenom, setSwapTokens }) => {
   const { data: prices } = useCoinGeckoPrices();
-  const [isOpenSettingModal, setIsOpenSettingModal] = useState(false);
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
-  const dispatch = useDispatch();
   const [averageRatio, setAverageRatio] = useState('0');
-  const [slippage, setSlippage] = useState(1);
-  const [address] = useConfigReducer('address');
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+
+  const loadTokenAmounts = useLoadTokens();
+
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -85,7 +81,6 @@ const SwapComponent: React.FC<{
   const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
   const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
-
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -125,32 +120,17 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
+      const oraiAddress = await handleCheckAddress();
 
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      if (!oraiAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
-      // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, oraiAddress);
-      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
-
-      const msgs = generateContractMessages({
-        type: Type.SWAP,
-        sender: oraiAddress,
-        amount: _fromAmount,
-        fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!
-      } as SwapQuery);
-
-      const msg = msgs[0];
-
-      var messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
-
-      console.log('TO', messages);
+      const messages = generateMsgsSwap(
+        fromTokenInfoData,
+        fromAmountToken,
+        toTokenInfoData,
+        amounts,
+        simulateData,
+        userSlippage,
+        oraiAddress
+      );
 
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
@@ -158,12 +138,12 @@ const SwapComponent: React.FC<{
         msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' }
       });
-
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokenAmounts(true);
+        loadTokenAmounts({ oraiAddress });
+
         setSwapLoading(false);
       }
     } catch (error) {
@@ -187,6 +167,12 @@ const SwapComponent: React.FC<{
       <div className={cx('from')}>
         <div className={cx('header')}>
           <div className={cx('title')}>FROM</div>
+          <TooltipIcon
+            placement="bottom-end"
+            visible={visible}
+            setVisible={setVisible}
+            content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+          />
           <button onClick={() => setRefresh(!refresh)}>
             <img className={cx('btn')} src={RefreshImg} alt="btn" />
           </button>
@@ -271,9 +257,18 @@ const SwapComponent: React.FC<{
           <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
         </div>
       </div>
-      <button className={cx('swap-btn')} onClick={handleSubmit} disabled={swapLoading}>
+      <button
+        className={cx('swap-btn')}
+        onClick={handleSubmit}
+        disabled={swapLoading || !fromAmountToken || !toAmountToken}
+      >
         {swapLoading && <Loader width={40} height={40} />}
-        <span>Swap</span>
+        {/* hardcode check minimum tron */}
+        {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+          <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+        ) : (
+          <span>Swap</span>
+        )}
       </button>
       <div className={cx('detail')}>
         <div className={cx('row')}>
@@ -303,14 +298,6 @@ const SwapComponent: React.FC<{
           </div>
         )}
       </div>
-      <SettingModal
-        isOpen={isOpenSettingModal}
-        open={() => setIsOpenSettingModal(true)}
-        close={() => setIsOpenSettingModal(false)}
-        slippage={slippage}
-        setSlippage={setSlippage}
-      />
-
       {isSelectFrom ? (
         <SelectTokenModal
           isOpen={isSelectFrom}

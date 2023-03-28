@@ -2,18 +2,20 @@ import { coin } from '@cosmjs/stargate';
 import { filteredTokens } from 'config/bridgeTokens';
 import {
   KWT_BSC_CONTRACT,
+  KWT_DENOM,
   MILKY_BSC_CONTRACT,
-  ORAI,
+  MILKY_DENOM,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BSC_CONTRACT,
   ORAI_INFO
 } from 'config/constants';
-import { ibcInfos } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
+import Long from 'long';
 import { getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
-import { generateConvertCw20Erc20Message, parseTokenInfo } from 'rest/api';
+import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
@@ -50,7 +52,7 @@ describe('bridge', () => {
     const transferAmount = 10;
     const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = await generateConvertCw20Erc20Message(
+    const msgConvertReverses = generateConvertCw20Erc20Message(
       {
         [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
       },
@@ -67,7 +69,7 @@ describe('bridge', () => {
     const transferAmount = 10;
     const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = await generateConvertCw20Erc20Message(
+    const msgConvertReverses = generateConvertCw20Erc20Message(
       {
         [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
       },
@@ -102,5 +104,65 @@ describe('bridge', () => {
     const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
     const { info: assetInfo } = parseTokenInfo(fromToken);
     expect(assetInfo).toMatchObject(ORAI_INFO);
+  });
+
+  it('bridge-move-oraibridge-to-oraichain-should-return-only-transfer-IBC-msgs', async () => {
+    const bridgeTokenNames = ['AIRI', 'USDT'];
+    const amount = '100000000000000000';
+    const oraibTokens = filteredTokens
+      .filter((t) => bridgeTokenNames.includes(t.name) && t.chainId === ORAI_BRIDGE_CHAIN_ID)
+      .map((t) => {
+        return {
+          ...t,
+          amount
+        };
+      });
+
+    const toTokens = oraibTokens.map((oraibToken) => {
+      return filteredTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === oraibToken.name);
+    });
+
+    const fromAddress = 'oraib14n3tx8s5ftzhlxvq0w5962v60vd82h305kec0j';
+    const toAddress = 'orai14n3tx8s5ftzhlxvq0w5962v60vd82h30rha573';
+    const transferMsgs = generateMoveOraib2OraiMessages(oraibTokens, fromAddress, toAddress);
+
+    // check if transferMsgs is an array
+    expect(Array.isArray(transferMsgs)).toBe(true);
+
+    // check if each object in the transferMsgs array has the required properties
+    for (const msg of transferMsgs) {
+      expect(msg).toHaveProperty('sourcePort');
+      expect(msg).toHaveProperty('sourceChannel');
+      expect(msg).toHaveProperty('token');
+      expect(msg).toHaveProperty('sender');
+      expect(msg).toHaveProperty('receiver');
+      expect(msg).toHaveProperty('memo');
+      expect(msg).toHaveProperty('timeoutTimestamp');
+      expect(msg).toHaveProperty('timeoutHeight');
+    }
+
+    // check if the sourcePort and sourceChannel values are correct
+    let ibcInfo = ibcInfos[oraibTokens[0].chainId][toTokens[0].chainId];
+
+    // hardcode for MILKY & KWT because they use the old IBC channel
+    if (oraibTokens[0].denom === MILKY_DENOM || oraibTokens[0].denom === KWT_DENOM)
+      ibcInfo = ibcInfosOld[oraibTokens[0].chainId][toTokens[0].chainId];
+
+    expect(transferMsgs[0].sourcePort).toEqual(ibcInfo.source);
+    expect(transferMsgs[0].sourceChannel).toEqual(ibcInfo.channel);
+
+    // check if the sender and receiver addresses are correct
+    expect(transferMsgs[0].sender).toEqual(fromAddress);
+    expect(transferMsgs[0].receiver).toEqual(toAddress);
+
+    // check if the token amount is correct
+    expect(transferMsgs[0].token.amount).toEqual(amount);
+
+    // check if the timeout timestamp is correct
+    const currentTime = Math.floor(Date.now() / 1000);
+    const expectedTimeoutTimestamp = Long.fromNumber(currentTime + ibcInfo.timeout)
+      .multiply(1000000000)
+      .toString();
+    expect(transferMsgs[0].timeoutTimestamp).toEqual(expectedTimeoutTimestamp);
   });
 });

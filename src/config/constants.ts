@@ -1,3 +1,5 @@
+import { Networks } from 'libs/ethereum-multicall/enums';
+
 export const CHROME = 'https://google.com/chrome';
 
 /* oraiswap:unit */
@@ -10,6 +12,7 @@ export const LP = 'LP';
 export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
+export const TRON_DENOM = 'trx';
 export const UOSMOS_DENOM = 'uosmo';
 export const UATOM_DENOM = 'uatom';
 export const BEP20_ORAI = 'bep20_orai';
@@ -53,20 +56,24 @@ export const WECHAT = '';
 export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
 
 // bsc and eth information
-export const ETHEREUM_CHAIN_ID = 1;
+export const ETHEREUM_CHAIN_ID = Networks.mainnet;
 export const ETHEREUM_RPC = 'https://1rpc.io/eth';
 export const ETHEREUM_SCAN = 'https://etherscan.io';
-export const BSC_CHAIN_ID = 56;
+export const BSC_CHAIN_ID = Networks.bsc;
 export const BSC_RPC = 'https://1rpc.io/bnb';
 export const BSC_SCAN = 'https://bscscan.com';
+export const TRON_CHAIN_ID = Networks.tron;
+export const TRON_RPC = 'https://api.trongrid.io/jsonrpc';
+export const TRON_SCAN = 'https://tronscan.org';
 export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 
 export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
-export const KWT_SUBNETWORK_EVM_CHAIN_ID = 6886; //'0x1ae6';
+export const KWT_SUBNETWORK_EVM_CHAIN_ID = Networks.kawaiiverse; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';
+export const TRON_ORG = 'Tron Network';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
 export const JUNO_CHAIN_ID = 'juno-1';
@@ -78,6 +85,7 @@ export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
 export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
+export const ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX = 'trontrx-mainnet';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
 export const ORAI_SCAN = 'https://scan.orai.io';
@@ -95,6 +103,8 @@ export const ORAI_BRIDGE_PREFIX = 'oraib';
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
 export const USDT_BSC_CONTRACT = '0x55d398326f99059fF775485246999027B3197955';
+export const USDT_TRON_CONTRACT = '0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C';
+export const WRAP_TRON_TRX_CONTRACT = '0x891cdb91d149f23B1a45D9c5Ca78a88d0cB44C18';
 export const KWT_BSC_CONTRACT = '0x257a8d1E03D17B8535a182301f15290F11674b53';
 export const MILKY_BSC_CONTRACT = '0x6fE3d0F096FC932A905accd1EB1783F6e4cEc717';
 
@@ -124,13 +134,6 @@ export const ORAI_BRIDGE_ORG = 'OraiBridge';
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;
 export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
 
-// noti install owallet chorme extensions
-export const NOTI_INSTALL_OWALLET = {
-  message: 'You need to install OWallet or Keplr to continue.',
-  customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
-  textLink: 'View on store'
-};
-
 // coingeckoid token
 export const ORAI_COINGECKO_ID = 'oraichain-token';
 export const ORAIX_COINGECKO_ID = 'oraidex';
@@ -147,3 +150,8 @@ export const ORAIX_INFO = {
     contract_addr: process.env.REACT_APP_ORAIX_CONTRACT
   }
 };
+
+// slippage swap
+export const OPTIONS_SLIPPAGE = [1, 3, 5];
+export const DEFAULT_SLIPPAGE = OPTIONS_SLIPPAGE[0];
+export const DEFAULT_MANUAL_SLIPPAGE = 2.5;
