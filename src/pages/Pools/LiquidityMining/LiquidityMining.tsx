@@ -72,21 +72,24 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
     const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
 
-    let res = rewardPerSecInfoData.map((r) => {
-      const pendingWithdraw = BigInt(
-        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
-      );
+    let res = rewardPerSecInfoData
+      .filter((p) => parseInt(p.amount))
+      .map((r) => {
+        const pendingWithdraw = BigInt(
+          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
+        );
 
-      const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
+        const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
 
-      const token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
+        const token =
+          'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
 
-      return {
-        ...token,
-        amount,
-        pendingWithdraw
-      };
-    });
+        return {
+          ...token,
+          amount,
+          pendingWithdraw
+        };
+      });
 
     setPendingRewards(res);
   };
@@ -218,27 +221,25 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             <div className={cx('container', 'container_earning')}>
               <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
-                pendingRewards
-                  .filter((p) => p.amount)
-                  .map((r, idx) => (
-                    <div key={idx}>
-                      <div className={cx('amount')}>
-                        <TokenBalance
-                          balance={{
-                            amount: r.amount,
-                            denom: r.denom.toUpperCase(),
-                            decimals: 6
-                          }}
-                          decimalScale={6}
-                        />
-                      </div>
-                      {/* <TokenBalance
+                pendingRewards.map((r, idx) => (
+                  <div key={idx}>
+                    <div className={cx('amount')}>
+                      <TokenBalance
+                        balance={{
+                          amount: r.amount,
+                          denom: r.denom.toUpperCase(),
+                          decimals: 6
+                        }}
+                        decimalScale={6}
+                      />
+                    </div>
+                    {/* <TokenBalance
                               balance={r.usdValue}
                               className={cx('amount-usd')}
                               decimalScale={2}
                             /> */}
-                    </div>
-                  ))}
+                  </div>
+                ))}
               <button
                 className={cx('btn')}
                 onClick={() => handleBond()}
