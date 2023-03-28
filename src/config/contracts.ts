@@ -1,4 +1,4 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { contracts } from 'libs/contracts';
 import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
 import { MulticallQueryClient } from 'libs/contracts/Multicall.client';
@@ -26,29 +26,16 @@ type ContractName =
   | 'multicall';
 
 export class Contract {
-  private static _sender: string = null;
-
-  static set sender(sender: string) {
-    this._sender = sender;
-  }
-
-  private static getContract(
-    type: ContractName,
-    address: string,
-    signing: boolean = true,
-    className?: string
-  ): any {
+  public static sender: string = null;
+  public static client: CosmWasmClient = null;
+  private static getContract(type: ContractName, address: string, signing: boolean = true, className?: string): any {
     const key = '_' + type;
-    const name =
-      className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    const name = className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
     if (!this[key]) {
-      const args = signing ? [this._sender, address] : [address];
-      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](
-        window.client,
-        ...args
-      );
+      const args = signing ? [this.sender, address] : [address];
+      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](this.client ?? window.client, ...args);
     } else {
-      this[key].sender = this._sender;
+      this[key].sender = this.sender;
       this[key].contractAddress = address;
     }
     return this[key];
@@ -64,8 +51,8 @@ export class Contract {
 
   static get factory_v2(): OraiswapFactoryClient {
     return new OraiswapFactoryClient(
-      window.client as SigningCosmWasmClient,
-      this._sender,
+      (this.client ?? window.client) as SigningCosmWasmClient,
+      this.sender,
       network.factory_v2
     );
   }

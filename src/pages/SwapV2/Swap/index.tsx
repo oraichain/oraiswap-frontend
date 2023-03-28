@@ -6,10 +6,17 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
+<<<<<<< HEAD
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
 import { feeEstimate, handleCheckAddress } from 'helper';
+=======
+import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
+import { network } from 'config/networks';
+import { poolTokens } from 'config/pools';
+import { feeEstimate } from 'helper';
+>>>>>>> 3d731095741873506162410526bb50735b5ebb00
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -28,9 +35,12 @@ import {
 import { RootState } from 'store/configure';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import styles from './index.module.scss';
+<<<<<<< HEAD
 import SlippageModal from '../Modals/SlippageModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import { calculateMinReceive, generateMsgsSwap } from '../helpers';
+=======
+>>>>>>> 3d731095741873506162410526bb50735b5ebb00
 
 const cx = cn.bind(styles);
 
@@ -45,9 +55,14 @@ const SwapComponent: React.FC<{
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
 
   const [averageRatio, setAverageRatio] = useState('0');
+<<<<<<< HEAD
 
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [visible, setVisible] = useState(false);
+=======
+  const [slippage, setSlippage] = useState(1);
+
+>>>>>>> 3d731095741873506162410526bb50735b5ebb00
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -124,6 +139,12 @@ const SwapComponent: React.FC<{
         message: 'From amount should be higher than 0!'
       });
 
+    // TODO: need remove after migrate contract trx // hardcode check token trx <=5
+    if (fromToken.denom === TRON_DENOM && fromAmountToken < 10)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'TRX token amount should be higher than 10!'
+      });
+
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -150,6 +171,8 @@ const SwapComponent: React.FC<{
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         loadTokenAmounts({ oraiAddress });
+
+        setSwapLoading(false);
       }
     } catch (error) {
       let finalError = '';
