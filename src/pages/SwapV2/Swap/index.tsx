@@ -6,7 +6,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
+import { GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
 import { feeEstimate } from 'helper';
@@ -121,6 +121,12 @@ const SwapComponent: React.FC<{
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
+      });
+
+    // TODO: need remove after migrate contract trx // hardcode check token trx <=5
+    if (fromToken.denom === TRON_DENOM && fromAmountToken < 10)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'TRX token amount should be higher than 10!'
       });
 
     setSwapLoading(true);

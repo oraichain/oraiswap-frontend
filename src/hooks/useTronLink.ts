@@ -26,7 +26,7 @@ export function useTronEventListener() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
       console.log('tronLink & tronWeb successfully detected!');
-      if (tronWeb.defaultAddress.base58) {
+      if (tronWeb?.defaultAddress?.base58) {
         const tronAddress = tronWeb.defaultAddress.base58;
         console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
