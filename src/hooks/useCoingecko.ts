@@ -9,7 +9,8 @@ import useConfigReducer from './useConfigReducer';
  * @returns
  */
 export const buildCoinGeckoPricesURL = (tokens: readonly string[]): string =>
-  `https://api.coingecko.com/api/v3/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
+  // `https://api.coingecko.com/api/v3/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
+  `https://price.market.orai.io/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
 
 /**
  * Prices of each token.
