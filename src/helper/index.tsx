@@ -177,3 +177,11 @@ export const displayInstallWallet = (altWallet = 'Keplr') => {
     }
   );
 };
+
+export const handleCheckAddress = async (): Promise<string> => {
+  const oraiAddress = await window.Keplr.getKeplrAddr();
+  if (!oraiAddress) {
+    throw new Error("Please login both metamask and keplr!")
+  }
+  return oraiAddress
+};

@@ -74,7 +74,6 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
   const disconnectTronLink = async () => {
     try {
       setTronAddress(undefined);
-
       // remove account storage tron owallet
       localStorage.removeItem('tronWeb.defaultAddress');
     } catch (ex) {
