@@ -1,18 +1,17 @@
+import { Coin, StargateClient } from "@cosmjs/stargate";
 import { TokenItemType, tokens } from "config/bridgeTokens";
 import {
     ORAI_BRIDGE_CHAIN_ID,
-    ORAI_BRIDGE_LCD
+    ORAI_BRIDGE_RPC,
+    ORAI_BRIDGE_UDENOM
 } from 'config/constants';
 import { toDisplay } from 'libs/utils';
 import { useEffect, useState } from 'react';
-import token from "reducer/token";
-import axios from 'rest/request';
-import { Balance, BalancesOraiBridge } from '../type';
 
 export type RemainingOraibTokenItem = TokenItemType & { amount: string };
-const ORAIB_DECIMALS = 18;
 export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean) {
     const [remainingOraib, setRemainingOraib] = useState<RemainingOraibTokenItem[]>([])
+    const [otherChainTokens] = tokens
 
     const getBalanceOraibridge = async () => {
         try {
@@ -21,16 +20,20 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
                 setRemainingOraib([]);
                 return;
             }
-            const { data }: { data: BalancesOraiBridge } = await axios.get(`${ORAI_BRIDGE_LCD}/cosmos/bank/v1beta1/balances/${oraiBridgeAddress}`);
-            const [otherChainTokens] = tokens
-            const remainingOraib = data.balances.filter((item: Balance) => toDisplay(item.amount, ORAIB_DECIMALS) > 0)
-                .map((item: Balance) => {
+            const client = await StargateClient.connect(ORAI_BRIDGE_RPC);
+            const data: readonly Coin[] = await client.getAllBalances(oraiBridgeAddress);
+            const remainingOraib = data.reduce((acc, item) => {
+                // denom: "uoraib" not use => filter out
+                if (item.denom !== ORAI_BRIDGE_UDENOM) {
                     const findedOraib = otherChainTokens.find((token: TokenItemType) => token.denom.toLowerCase() === item.denom.toLowerCase())
-                    return {
+                    acc.push({
                         ...findedOraib,
-                        amount: item.amount 
-                    } as RemainingOraibTokenItem
-                })
+                        amount: item.amount
+                    })
+                }
+                return acc
+            }, [] as RemainingOraibTokenItem[])
+                .filter((token: RemainingOraibTokenItem) => toDisplay(token.amount, token.decimals) > 0)
 
             setRemainingOraib(remainingOraib);
         } catch (error) {
@@ -41,6 +44,7 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
     // refetch balance
     useEffect(() => {
         !moveOraib2OraiLoading && getBalanceOraibridge();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [moveOraib2OraiLoading]);
 
     return { remainingOraib }

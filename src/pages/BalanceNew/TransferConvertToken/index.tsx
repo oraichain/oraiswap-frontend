@@ -6,7 +6,7 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { evmChains, filteredTokens, gravityContracts, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import {
   BSC_ORG,
   COSMOS_TYPE,
@@ -17,7 +17,9 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID
+  ORAI_BRIDGE_CHAIN_ID,
+  TRON_CHAIN_ID,
+  TRON_ORG
 } from 'config/constants';
 import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -46,7 +48,6 @@ interface TransferConvertProps {
   subAmounts?: object;
 }
 
-const onClickTransferList = [BSC_ORG, ETHEREUM_ORG];
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
@@ -108,9 +109,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network) => {
     try {
       let address: string = '';
-      if (network.networkType == EVM_TYPE) {
+      if (network.networkType == EVM_TYPE && network.chainId !== TRON_CHAIN_ID) {
         if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
         address = await window.Metamask!.getEthAddress();
+      }
+      if (network.chainId === TRON_CHAIN_ID) {
+        address = await window.tronWeb.defaultAddress.base58;
       }
       if (network.networkType == COSMOS_TYPE) {
         address = await window.Keplr.getKeplrAddr(network.chainId);
@@ -294,7 +298,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
           if (
             (token.cosmosBased && token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 && name) ||
-            onClickTransferList.includes(token?.org)
+            evmChains.find((chain) => chain.chainId === token.chainId)
           ) {
             return (
               <>
@@ -312,7 +316,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       }
                       if (
                         onClickTransfer &&
-                        (filterNetwork == KAWAII_ORG || onClickTransferList.includes(token?.org))
+                        (filterNetwork == KAWAII_ORG || evmChains.find((chain) => chain.chainId === token.chainId))
                       ) {
                         return await onClickTransfer(convertAmount);
                       }
@@ -323,6 +327,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       );
                       // convert reverse before transferring
                       await transferIBC(token, to, convertAmount);
+                    } catch (error) {
+                      console.log({ error });
                     } finally {
                       setTransferLoading(false);
                     }

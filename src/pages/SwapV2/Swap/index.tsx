@@ -9,13 +9,14 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
-import useConfigReducer from 'hooks/useConfigReducer';
+import { feeEstimate, handleCheckAddress } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import CosmJs from 'libs/cosmjs';
-import { CacheTokens } from 'libs/token';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { buildMultipleMessages, toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   fetchTokenInfos,
   generateContractMessages,
@@ -27,11 +28,9 @@ import {
 import { RootState } from 'store/configure';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import styles from './index.module.scss';
-import { feeEstimate } from 'helper';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import SlippageModal from '../Modals/SlippageModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
-import { checkSlippage } from '../helpers';
+import { calculateMinReceive, generateMsgsSwap } from '../helpers';
 
 const cx = cn.bind(styles);
 
@@ -44,14 +43,39 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
-  const dispatch = useDispatch();
+
   const [averageRatio, setAverageRatio] = useState('0');
+
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
-  const [address] = useConfigReducer('address');
+  const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const cacheTokens = useMemo(() => CacheTokens.factory({ dispatch, address }), [dispatch, address]);
+
+  const loadTokenAmounts = useLoadTokens();
+
+  const onChangeFromAmount = (amount: number | undefined) => {
+    if (!amount) return setSwapAmount([undefined, toAmountToken]);
+    setSwapAmount([amount, toAmountToken]);
+  };
+
+  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
+    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    let finalAmount = displayAmount;
+
+    // hardcode fee when swap token orai
+    if (fromTokenDenom === ORAI) {
+      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      if (type === 'max') {
+        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
+      }
+      if (type === 'half') {
+        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+      }
+    }
+    setSwapAmount([finalAmount, toAmountToken]);
+  };
 
   const fromToken = tokenMap[fromTokenDenom];
   const toToken = tokenMap[toTokenDenom];
@@ -94,37 +118,7 @@ const SwapComponent: React.FC<{
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
-  const onChangeFromAmount = (amount: number | undefined) => {
-    if (!amount) return setSwapAmount([undefined, toAmountToken]);
-    setSwapAmount([amount, toAmountToken]);
-  };
-
-  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
-    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
-    let finalAmount = displayAmount;
-
-    // hardcode fee when swap token orai
-    if (fromTokenDenom === ORAI) {
-      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
-      if (type === 'max') {
-        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
-      }
-      if (type === 'half') {
-        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-      }
-    }
-    setSwapAmount([finalAmount, toAmountToken]);
-  };
-
   const handleSubmit = async () => {
-    const isOverUserSlippage = checkSlippage(fromAmountToken, averageRatio, toAmountToken, userSlippage)
-    if (isOverUserSlippage) {
-      return displayToast(TToastType.TX_INFO, {
-        message: 'Warning: Actual received amount is less than max received amount.'
-      });
-    }
-
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
@@ -133,30 +127,17 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      var _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
+      const oraiAddress = await handleCheckAddress();
 
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      if (!oraiAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
-      // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, oraiAddress);
-      const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
-
-      const msgs = generateContractMessages({
-        type: Type.SWAP,
-        sender: oraiAddress,
-        amount: _fromAmount,
-        fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!
-      } as SwapQuery);
-
-      const msg = msgs[0];
-
-      const messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
+      const messages = generateMsgsSwap(
+        fromTokenInfoData,
+        fromAmountToken,
+        toTokenInfoData,
+        amounts,
+        simulateData,
+        userSlippage,
+        oraiAddress
+      );
 
       const result = await CosmJs.executeMultiple({
         prefix: ORAI,
@@ -164,13 +145,11 @@ const SwapComponent: React.FC<{
         msgs: messages,
         gasAmount: { denom: ORAI, amount: '0' }
       });
-
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        cacheTokens.loadTokenAmounts(true);
-        setSwapLoading(false);
+        loadTokenAmounts({ oraiAddress });
       }
     } catch (error) {
       let finalError = '';
@@ -187,7 +166,6 @@ const SwapComponent: React.FC<{
 
   const FromIcon = fromToken?.Icon;
   const ToIcon = toToken?.Icon;
-  const [visible, setVisible] = useState(false);
 
   return (
     <div className={cx('swap-box')}>
@@ -203,7 +181,6 @@ const SwapComponent: React.FC<{
           <button onClick={() => setRefresh(!refresh)}>
             <img className={cx('btn')} src={RefreshImg} alt="btn" />
           </button>
-
         </div>
         <div className={cx('balance')}>
           <TokenBalance

@@ -39,6 +39,7 @@ export enum TToastType {
   TX_INFO,
   KEPLR_FAILED,
   METAMASK_FAILED,
+  TRONLINK_FAILED,
 }
 
 interface IToastExtra {
@@ -73,6 +74,11 @@ export type DisplayToastFn = ((
   ) => void) &
   ((
     type: TToastType.METAMASK_FAILED,
+    extraData?: Partial<Pick<IToastExtra, 'message'>>,
+    options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.TRONLINK_FAILED,
     extraData?: Partial<Pick<IToastExtra, 'message'>>,
     options?: Partial<ToastOptions>
   ) => void) &
@@ -134,7 +140,12 @@ export const displayToast: DisplayToastFn = (
       );
     case TToastType.METAMASK_FAILED:
       return toast(
-        <ToastMetamaksFailed message={inputExtraData.message} />,
+        <ToastMetamaskFailed message={inputExtraData.message} />,
+        inputOptions
+      );
+    case TToastType.TRONLINK_FAILED:
+      return toast(
+        <ToastTronLinkFailed message={inputExtraData.message} />,
         inputOptions
       );
     default:
@@ -192,13 +203,25 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({
   </div>
 );
 
-const ToastMetamaksFailed: FunctionComponent<{ message: string }> = ({
+const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({
   message,
 }) => (
   <div className={classNames(styles.toast_content, styles.toast_failed)}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Metamask failed</h6>
+      <p>{message}</p>
+    </section>
+  </div>
+);
+
+const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({
+  message,
+}) => (
+  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+    <FailedIcon />
+    <section className={styles.toast_section}>
+      <h6>Tronlink failed</h6>
       <p>{message}</p>
     </section>
   </div>

@@ -9,7 +9,6 @@
     "@cosmjs/cosmwasm-stargate": "^0.29.5",
     "@cosmjs/proto-signing": "^0.29.5",
     "@cosmjs/stargate": "^0.29.5",
-    "@cosmjs/tendermint-rpc": "^0.29.5",
     "@oraichain/kawaiiverse-txs": "0.0.2",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.40.0",
@@ -37,6 +36,7 @@
     "react-toastify": "^8.2.0",
     "react-use-websocket": "3.0.0",
     "redux-persist": "^6.0.0",
+    "tronweb": "^5.1.0",
     "web3": "^1.7.3"
   },
   "devDependencies": {
@@ -67,8 +67,8 @@
   },
   "scripts": {
     "vendor": "node scripts/vendor.js",
-    "start": "cross-env GENERATE_SOURCEMAP=false react-app-rewired start",
-    "build": "cross-env GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
+    "start": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false react-app-rewired start",
+    "build": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
     "test": "react-app-rewired test",
     "postinstall": "patch-package"
   },
@@ -90,7 +90,6 @@
   "resolutions": {
     "bech32": "1.1.4",
     "react-error-overlay": "6.0.11",
-    "@cosmjs/tendermint-rpc": "0.29.5",
     "@cosmjs/proto-signing": "0.29.5",
     "@cosmjs/math": "0.29.5",
     "@cosmjs/crypto": "0.29.5",

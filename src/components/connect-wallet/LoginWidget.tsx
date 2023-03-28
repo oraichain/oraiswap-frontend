@@ -10,33 +10,30 @@ export const LoginWidget: FC<{
   logo: string;
   text: string;
   address: string | null;
-  connect: () => Promise<void>;
+  connect?: () => Promise<void>;
   disconnect: () => Promise<void>;
 }> = ({ logo, text, address, connect, disconnect }) => {
+  const onClick = () => {
+    if (!address && connect) {
+      connect();
+    }
+  };
   return (
-    <div className={cx('item')} onClick={address ? disconnect : connect}>
+    <div className={cx('item')} onClick={onClick}>
       <img src={logo} className={cx('logo')} />
       <div className={cx('grow')}>
         {address ? (
-          <>
-            <div className={cx('network-title')}>{text}</div>
-            <div className={cx('des')}>
-              <CenterEllipsis size={6} text={address} />
-            </div>
-          </>
+          <div className={cx('des')}>
+            <CenterEllipsis size={6} text={address} />
+          </div>
         ) : (
-          <>
-            <div className={cx('network-title')}>{text}</div>
-            <div className={cx('des')}>Connect using browser wallet</div>
-          </>
+          <div className={cx('des')}>{text}</div>
         )}
       </div>
-      {address && !!disconnect ? (
-        <div>
+      {address && (
+        <div onClick={disconnect}>
           <Logout />
         </div>
-      ) : (
-        <></>
       )}
     </div>
   );
