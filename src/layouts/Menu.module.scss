@@ -60,14 +60,14 @@
   align-items: center;
   border-radius: 8px;
   padding: 12px 16px;
-  margin-top: 10px;
+  margin-bottom: 10px;
   &:hover {
     background: #2d2938;
     cursor: pointer;
   }
 
   &.active {
-    background: #612FCA;
+    background: #612fca;
   }
 
   &_text {
@@ -115,13 +115,13 @@
 }
 
 .menu_footer {
-  text-align: center;  
+  text-align: center;
   color: #777e90;
 }
 
 .connect {
   color: #fff;
-  background: #612FCA;
+  background: #612fca;
   border-radius: 8px;
   font-weight: 400;
   font-size: 14px;

@@ -1,5 +1,6 @@
 import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
+import { ReactComponent as Faucet } from 'assets/icons/faucet.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
 import { ReactComponent as EthereumIcon } from 'assets/icons/ethereum.svg';
@@ -113,6 +114,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
               'Buy ORAI (Fiat)',
               () => {},
               <BuyFiat style={{ width: 30, height: 30 }} />,
+              true
+            )}
+            {renderLink(
+              'https://faucet.mainnet.orai.io/',
+              'Faucet',
+              () => {},
+              <Faucet style={{ width: 30, height: 30 }} />,
               true
             )}
           </div>

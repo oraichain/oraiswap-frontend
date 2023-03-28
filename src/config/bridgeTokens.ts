@@ -227,7 +227,7 @@ const otherChainTokens: TokenItemType[] = [
     Icon: USDT
   },
   {
-    name: 'TRX',
+    name: 'wTRX',
     prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
     org: 'OraiBridge',
     chainId: ORAI_BRIDGE_CHAIN_ID,
@@ -348,7 +348,7 @@ const otherChainTokens: TokenItemType[] = [
     Icon: USDT
   },
   {
-    name: 'TRX',
+    name: 'wTRX',
     org: TRON_ORG,
     chainId: TRON_CHAIN_ID,
     denom: 'trx20_trx',
@@ -633,7 +633,7 @@ const oraichainTokens: TokenItemType[] = [
     Icon: scORAI
   },
   {
-    name: 'TRX',
+    name: 'wTRX',
     org: ORAICHAIN_ID,
     prefix: 'orai',
     coingeckoId: 'tron',
