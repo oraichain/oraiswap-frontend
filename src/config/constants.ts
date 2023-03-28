@@ -150,3 +150,8 @@ export const ORAIX_INFO = {
     contract_addr: process.env.REACT_APP_ORAIX_CONTRACT
   }
 };
+
+// slippage swap
+export const OPTIONS_SLIPPAGE = [1, 3, 5];
+export const DEFAULT_SLIPPAGE = OPTIONS_SLIPPAGE[0];
+export const DEFAULT_MANUAL_SLIPPAGE = 2.5;

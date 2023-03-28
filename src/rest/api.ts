@@ -6,7 +6,7 @@ import { ORAI, ORAICHAIN_ID, ORAI_INFO, STABLE_DENOM, MILKY_DENOM, KWT_DENOM } f
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
-import { AssetInfo, PairInfo, SwapOperation } from 'libs/contracts';
+import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
@@ -295,27 +295,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: ORAI_INFO
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: ORAI_INFO,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -345,9 +345,10 @@ export type SwapQuery = {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
   amount: number | string;
-  max_spread: number | string;
-  belief_price: number | string;
+  max_spread?: number | string;
+  belief_price?: number | string;
   sender: string;
+  minimumReceive: Uint128;
 };
 
 export type ProvideQuery = {
@@ -401,7 +402,8 @@ function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo)
+          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo),
+          minimum_receive: swapQuery.minimumReceive
         }
       };
       // if cw20 => has to send through cw20 contract
@@ -707,7 +709,7 @@ function generateMoveOraib2OraiMessages(
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     // hardcode for MILKY & KWT because they use the old IBC channel
     if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
-      ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId]
+      ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
 
     const tokenAmount = coin(fromToken.amount, fromToken.denom);
     transferMsgs.push({
