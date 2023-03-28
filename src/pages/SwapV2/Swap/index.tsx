@@ -123,12 +123,6 @@ const SwapComponent: React.FC<{
         message: 'From amount should be higher than 0!'
       });
 
-    // TODO: need remove after migrate contract trx // hardcode check token trx <=5
-    if (fromToken.denom === TRON_DENOM && fromAmountToken < 10)
-      return displayToast(TToastType.TX_FAILED, {
-        message: 'TRX token amount should be higher than 10!'
-      });
-
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -278,9 +272,17 @@ const SwapComponent: React.FC<{
           <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
         </div>
       </div>
-      <button className={cx('swap-btn')} onClick={handleSubmit} disabled={swapLoading}>
+      <button
+        className={cx('swap-btn')}
+        onClick={handleSubmit}
+        disabled={swapLoading || !fromAmountToken || !toAmountToken}
+      >
         {swapLoading && <Loader width={40} height={40} />}
-        <span>Swap</span>
+        {!swapLoading && (!fromAmountToken || !toAmountToken) ? (
+          <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+        ) : (
+          <span>Swap</span>
+        )}
       </button>
       <div className={cx('detail')}>
         <div className={cx('row')}>

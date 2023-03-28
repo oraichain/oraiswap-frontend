@@ -102,6 +102,7 @@ export type TokenItemType = {
     | 'tron';
   cosmosBased: Boolean;
   type?: string;
+  minAmountSwap?: number;
 };
 
 // other chains, oraichain
@@ -644,6 +645,7 @@ const oraichainTokens: TokenItemType[] = [
     chainId: ORAICHAIN_ID,
     rpc: ORAI_RPC,
     cosmosBased: true,
+    minAmountSwap: 10,
     factoryV2: true,
     Icon: TRON
   }
