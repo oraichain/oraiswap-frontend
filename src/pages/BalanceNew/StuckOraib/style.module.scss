@@ -1,5 +1,9 @@
 @import 'src/styles/mixins';
 
+.icon{
+    margin-right: 20px;
+}
+
 .bridgeBalances {
     padding: 9px 12px;
     border-radius: 8px;
@@ -8,7 +12,9 @@
     align-items: center;
     justify-content: space-between;
     border: 1px solid transparent;
-
+    position: sticky;
+    top: 0;        
+    float: right;
     &:hover {
         border-color: #A871DF;
     }
