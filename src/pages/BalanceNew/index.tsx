@@ -48,7 +48,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -273,18 +273,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
+        {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
+        <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
         <div className={styles.header}>
           <div className={styles.asset}>
             <span className={styles.totalAssets}>Total Assets</span>
             <TokenBalance balance={totalUsd} className={styles.balance} decimalScale={2} />
           </div>
-
-          {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
-          <StuckOraib
-            remainingOraib={remainingOraib}
-            handleMove={handleMoveOraib2Orai}
-            loading={moveOraib2OraiLoading}
-          />
         </div>
         <div className={styles.divider} />
         <div className={styles.action}>
@@ -361,10 +356,10 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                          ? (fromAmount: number) => {
+                        ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                          : undefined
+                        : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
                   />
