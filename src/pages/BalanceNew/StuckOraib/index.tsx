@@ -32,8 +32,8 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
           const { Icon } = token;
           return (
             <div key={token.denom} className={styles.stuckToken}>
-              <div>
-                <Icon width={20} height={20} className={styles.icon} />
+              <div className={styles.icon}>
+                <Icon width={20} height={20} />
                 <span className={styles.name}>{token.name}</span>
               </div>
               <TokenBalance
