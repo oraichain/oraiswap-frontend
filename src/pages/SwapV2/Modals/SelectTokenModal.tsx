@@ -32,6 +32,10 @@ const SelectTokenModal: FC<ModalProps> = ({
   prices,
   amounts
 }) => {
+  React.useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
+  });
+
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>
