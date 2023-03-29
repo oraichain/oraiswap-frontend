@@ -27,7 +27,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-
+    max-height: calc(100vh - 300px);
+    overflow: auto;
     .item {
       background: #1e1e21;
       border-radius: 8px;
