@@ -5,6 +5,7 @@
   justify-content: center;
   align-items: center;
   height: 60px;
+
   iframe {
     border: none;
     width: 200px;
@@ -24,8 +25,9 @@ button.connected {
 
 button.connect {
   text-transform: none;
+
   img {
-    margin-right: 10px;    
+    margin-right: 10px;
   }
 }
 
@@ -35,10 +37,10 @@ button.connect {
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 10px;
+  padding: 8px;
 
   &:last-child {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
   }
 
   &:hover {
@@ -47,9 +49,9 @@ button.connect {
   }
 
   .logo {
-    box-sizing: border-box;    
-    width: 40px;
-    height: 40px;    
+    box-sizing: border-box;
+    width: 36px;
+    height: 36px;
     border-radius: 8px;
   }
 
@@ -58,7 +60,7 @@ button.connect {
 
     display: flex;
     flex-direction: column;
-    gap: 10px;    
+    gap: 10px;
 
     .des {
       font-style: normal;
@@ -66,9 +68,9 @@ button.connect {
       font-size: 14px;
       line-height: 150%;
       /* identical to box height, or 21px */
-      font-feature-settings: 'ss03' on;    
+      font-feature-settings: 'ss03' on;
       user-select: none;
-      color: #bfa7f2;  
+      color: #bfa7f2;
     }
   }
 
