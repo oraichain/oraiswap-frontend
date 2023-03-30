@@ -1,6 +1,10 @@
 @import 'src/styles/mixins';
 @import 'src/styles/variables';
 
+.open {
+  overflow: hidden;
+}
+
 .modal {
   width: 100vw;
   max-width: $modal-width;

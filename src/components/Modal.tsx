@@ -5,16 +5,12 @@ import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 
 ReactModal.setAppElement('#oraiswap');
 
-const Modal: FC<Modal> = ({
-  className,
-  isOpen,
-  close,
-  children,
-  isCloseBtn = false
-}) => (
+const Modal: FC<Modal> = ({ className, isOpen, close, children, isCloseBtn = false }) => (
   <ReactModal
     className={`${styles.modal} ${className || ''}`}
     overlayClassName={`${styles.overlay} ${className || ''}`}
+    preventScroll
+    htmlOpenClassName={styles.open}
     isOpen={isOpen}
     onRequestClose={close}
   >
