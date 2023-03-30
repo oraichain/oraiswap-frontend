@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import Modal from 'components/Modal';
 import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
@@ -32,10 +32,6 @@ const SelectTokenModal: FC<ModalProps> = ({
   prices,
   amounts
 }) => {
-  React.useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-  });
-
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select')}>
