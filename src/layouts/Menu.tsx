@@ -1,12 +1,9 @@
-import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
-import { ReactComponent as Faucet } from 'assets/icons/faucet.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as Dark } from 'assets/icons/dark.svg';
-import { ReactComponent as EthereumIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as Light } from 'assets/icons/light.svg';
+import { ReactComponent as Faucet } from 'assets/icons/faucet.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import { ReactComponent as ORAIIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
@@ -15,7 +12,6 @@ import LogoFullImg from 'assets/images/OraiDEX_full_light.svg';
 import { ThemeContext } from 'context/theme-context';
 
 import { isMobile } from '@walletconnect/browser-utils';
-import CenterEllipsis from 'components/CenterEllipsis';
 import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import React, { memo, ReactElement, useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -23,8 +19,6 @@ import styles from './Menu.module.scss';
 
 import classNames from 'classnames';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { renderLogoNetwork } from 'helper';
-import { TRON_CHAIN_ID } from 'config/constants';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -32,8 +26,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [address, setAddress] = useConfigReducer('address');
   const [infoCosmos] = useConfigReducer('infoCosmos');
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [tronAddress] = useConfigReducer('tronAddress');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -85,7 +77,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       {mobileMode && (
         <div className={styles.logo}>
           <Link to={'/'} onClick={() => setLink('/')}>
-            <img src={LogoFullImg} />
+            <img src={LogoFullImg} alt='logo' />
           </Link>
           <ToggleIcon onClick={handleToggle} />
         </div>
@@ -94,65 +86,65 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <img src={LogoFullImg} />
+              <img src={LogoFullImg} alt='logo' />
             </Link>
           )}
           <div className={styles.menu_items}>
             <RequireAuthButton address={address} setAddress={setAddress} />
-            {renderLink('/bridge', 'Bridge', setLink, <Wallet style={{ width: 30, height: 30 }} />)}
-            {renderLink('/swap', 'Swap', setLink, <Swap style={{ width: 30, height: 30 }} />)}
-            {renderLink('/pools', 'Pools', setLink, <Pools style={{ width: 30, height: 30 }} />)}
+            {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
+            {renderLink('/swap', 'Swap', setLink, <Swap />)}
+            {renderLink('/pools', 'Pools', setLink, <Pools />)}
             {renderLink(
               'https://info.oraidex.io/',
               'Info',
-              () => {},
-              <InfoIcon style={{ width: 30, height: 30 }} />,
+              () => { },
+              <InfoIcon />,
               true
             )}
             {renderLink(
               'https://payment.orai.io/',
               'Buy ORAI (Fiat)',
-              () => {},
-              <BuyFiat style={{ width: 30, height: 30 }} />,
+              () => { },
+              <BuyFiat />,
               true
             )}
             {renderLink(
               'https://faucet.mainnet.orai.io/',
               'Faucet',
-              () => {},
-              <Faucet style={{ width: 30, height: 30 }} />,
+              () => { },
+              <Faucet />,
               true
             )}
           </div>
         </div>
 
-        <div>
-          <div className={styles.menu_themes}>
-            <button
+        <div className={styles.menu_footer}>
+          {theme === 'dark'
+            ? <button
               className={classNames(styles.menu_theme, {
                 [styles.active]: theme === 'dark'
+              })}
+              onClick={() => {
+                setTheme("light");
+              }}
+            >
+              <Dark style={{ width: 14, height: 14 }} />
+            </button>
+            : <button
+              className={classNames(styles.menu_theme, {
+                [styles.active]: theme === 'light'
               })}
               onClick={() => {
                 setTheme('dark');
               }}
             >
-              <Dark style={{ width: 15, height: 15 }} />
-              <span className={styles.menu_theme_text}>Dark</span>
+              <Light style={{ width: 14, height: 14 }} />
             </button>
-            <button
-              className={classNames(styles.menu_theme, {
-                [styles.active]: theme === 'light'
-              })}
-              onClick={() => {
-                setTheme('light');
-              }}
-            >
-              <Light style={{ width: 15, height: 15 }} />
-              <span className={styles.menu_theme_text}>Light</span>
-            </button>
-          </div>
-
-          <div className={styles.menu_footer}>© 2020 - 2023 Oraichain Foundation</div>
+          }
+          <span>
+            {/* © 2020 - 2023 Oraichain Foundation */}
+            © 2022 Powered by Oraichain
+          </span>
         </div>
       </div>
     </>
