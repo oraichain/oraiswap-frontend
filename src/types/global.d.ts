@@ -6,7 +6,6 @@ import { Keplr as keplr } from '@keplr-wallet/types';
 import Web3 from 'web3';
 import Metamask from '../libs/metamask';
 import { AbstractProvider } from 'web3-core';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import TronWeb from './tronweb';
 
@@ -121,7 +120,6 @@ declare global {
       postMessage(msg: string): void;
     };
     keplr: keplr;
-    client: CosmWasmClient;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
@@ -181,4 +179,4 @@ declare global {
   }
 }
 
-export { };
+export {};

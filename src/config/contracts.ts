@@ -33,7 +33,7 @@ export class Contract {
     const name = className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
     if (!this[key]) {
       const args = signing ? [this.sender, address] : [address];
-      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](this.client ?? window.client, ...args);
+      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](this.client, ...args);
     } else {
       this[key].sender = this.sender;
       this[key].contractAddress = address;
@@ -50,11 +50,7 @@ export class Contract {
   }
 
   static get factory_v2(): OraiswapFactoryClient {
-    return new OraiswapFactoryClient(
-      (this.client ?? window.client) as SigningCosmWasmClient,
-      this.sender,
-      network.factory_v2
-    );
+    return new OraiswapFactoryClient(this.client as SigningCosmWasmClient, this.sender, network.factory_v2);
   }
 
   static get router(): OraiswapRouterClient {
