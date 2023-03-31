@@ -1,15 +1,15 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { contracts } from 'libs/contracts';
-import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
-import { MulticallQueryClient } from 'libs/contracts/Multicall.client';
-import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
-import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
-import { OraiswapOracleClient } from 'libs/contracts/OraiswapOracle.client';
-import { OraiswapPairClient } from 'libs/contracts/OraiswapPair.client';
-import { OraiswapRewarderClient } from 'libs/contracts/OraiswapRewarder.client';
-import { OraiswapRouterClient } from 'libs/contracts/OraiswapRouter.client';
-import { OraiswapStakingClient } from 'libs/contracts/OraiswapStaking.client';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
+import { contracts } from '../libs/contracts';
+import { Cw20Ics20Client } from '../libs/contracts/Cw20Ics20.client';
+import { MulticallQueryClient } from '../libs/contracts/Multicall.client';
+import { OraiswapConverterClient } from '../libs/contracts/OraiswapConverter.client';
+import { OraiswapFactoryClient } from '../libs/contracts/OraiswapFactory.client';
+import { OraiswapOracleClient } from '../libs/contracts/OraiswapOracle.client';
+import { OraiswapPairClient } from '../libs/contracts/OraiswapPair.client';
+import { OraiswapRewarderClient } from '../libs/contracts/OraiswapRewarder.client';
+import { OraiswapRouterClient } from '../libs/contracts/OraiswapRouter.client';
+import { OraiswapStakingClient } from '../libs/contracts/OraiswapStaking.client';
+import { OraiswapTokenClient } from '../libs/contracts/OraiswapToken.client';
 import { network } from './networks';
 
 type ContractName =
