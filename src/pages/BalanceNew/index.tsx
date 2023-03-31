@@ -63,7 +63,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
   const [, setTxHash] = useState('');
 
-  const [[oraichainToken, otherChainToken], setTokenBridge] = useState<TokenItemType[]>([])
+  const [[from, to], setTokenBridge] = useState<TokenItemType[]>([])
 
   const { data: prices } = useCoinGeckoPrices();
 
@@ -104,27 +104,15 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   };
 
   const onClickToken = useCallback(
-    (type: string, token: TokenItemType) => {
-      if (type === 'orai') {
-        if (isEqual(oraichainToken, token)) {
-          setTokenBridge([undefined, undefined])
-        } else {
-          const name = parseBep20Erc20Name(token.name);
-          const otherChainToken = otherChainTokens.find(
-            (t) => t.cosmosBased && t.name.includes(name) && t.chainId !== ORAI_BRIDGE_CHAIN_ID
-          );
-          setTokenBridge([token, otherChainToken])
-        }
-      } else {
-        if (isEqual(otherChainToken, token)) {
-          setTokenBridge([undefined, undefined])
-        } else {
-          const oraichainToken = findDefaultToToken(oraichainTokens, token);
-          setTokenBridge([oraichainToken, token])
-        }
+    (token: TokenItemType) => {
+      if (isEqual(from, token)) {
+        setTokenBridge([undefined, undefined])
+        return;
       }
+      const toToken = findDefaultToToken(token);
+      setTokenBridge([token, toToken])
     },
-    [otherChainTokens, oraichainTokens, otherChainToken, oraichainToken]
+    [otherChainTokens, oraichainTokens, from, to]
   );
 
   const refreshBalances = async () => {
@@ -171,16 +159,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       let result: DeliverTxResponse;
 
-      // [ERC20 KWT, ERC20 MILKY] ==> ORAICHAIN
-      if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID && !!from.contractAddress) {
-        result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
-        return;
-      }
-
-      // [KWT, MILKY] ==> ORAICHAIN
+      // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
-        result = await transferIBCKwt(from, to, fromAmount, amounts);
+        // convert erc20 to native ==> ORAICHAIN
+        if (!!from.contractAddress)
+          result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        else
+          result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
@@ -314,8 +299,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           <div className={styles.tokens}>
             <div className={styles.tokens_form}>
               {getFilterTokens(filterNetwork).map((t: TokenItemType) => {
-                const isFromOraichain = filterNetwork === ORAICHAIN_ID;
-
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
                 let usd = getUsd(amount, t, prices);
@@ -332,16 +315,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={[amount.toString(), usd]}
                     subAmounts={subAmounts}
-                    active={oraichainToken?.denom === t.denom || otherChainToken?.denom === t.denom}
+                    active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
-                    onClick={() => onClickToken(isFromOraichain ? "orai" : "other-chain", t)}
+                    onClick={() => onClickToken(t)}
                     convertToken={convertToken}
                     transferIBC={handleTransferIBC}
                     onClickTransfer={
                       async (fromAmount: number) => {
-                        return isFromOraichain
-                          ? await onClickTransfer(fromAmount, oraichainToken, otherChainToken)
-                          : await onClickTransfer(fromAmount, otherChainToken, oraichainToken)
+                        await onClickTransfer(fromAmount, from, to)
                       }
                     }
                     convertKwt={convertKwt}
