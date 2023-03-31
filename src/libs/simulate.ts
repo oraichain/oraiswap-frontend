@@ -19,6 +19,15 @@ export class SimulateCosmWasmClient extends SigningCosmWasmClient {
     this.app = new CWSimulateApp(option);
   }
 
+  public setBalance(address: string, amount: Coin[]) {
+    return this.app.bank.setBalance(address, amount);
+  }
+
+  public getBalance(address: string, searchDenom: string): Promise<Coin> {
+    const coin = this.app.bank.getBalance(address).find((coin) => coin.denom === searchDenom);
+    return Promise.resolve(coin);
+  }
+
   public upload(
     senderAddress: string,
     wasmCode: Uint8Array,
@@ -52,22 +61,21 @@ export class SimulateCosmWasmClient extends SigningCosmWasmClient {
     options?: InstantiateOptions
   ): Promise<InstantiateResult> {
     // instantiate the contract
-    const result = await this.app.wasm.instantiateContract(
-      senderAddress,
-      (options?.funds as Coin[]) ?? [],
-      codeId,
-      msg,
-      label
-    );
-    const response = result.val as AppResponse;
+    const result = (
+      await this.app.wasm.instantiateContract(senderAddress, (options?.funds as Coin[]) ?? [], codeId, msg, label)
+    ).val;
+    if (typeof result === 'string') {
+      throw new Error(result);
+    }
+
     // pull out the contract address
-    const contractAddress = response.events[0].attributes[0].value;
+    const contractAddress = result.events[0].attributes[0].value;
     return {
       contractAddress,
       logs: [],
       height: this.app.height,
       transactionHash: '',
-      events: response.events,
+      events: result.events,
       gasWanted: 0,
       gasUsed: 0
     };
@@ -81,13 +89,18 @@ export class SimulateCosmWasmClient extends SigningCosmWasmClient {
     _memo?: string,
     funds?: readonly Coin[]
   ): Promise<ExecuteResult> {
-    const result = await this.app.wasm.executeContract(senderAddress, (funds as Coin[]) ?? [], contractAddress, msg);
-    const response = result.val as AppResponse;
+    const result = (await this.app.wasm.executeContract(senderAddress, (funds as Coin[]) ?? [], contractAddress, msg))
+      .val;
+
+    if (typeof result === 'string') {
+      throw new Error(result);
+    }
+
     return {
       logs: [],
       height: this.app.height,
       transactionHash: '',
-      events: response.events,
+      events: result.events,
       gasWanted: 0,
       gasUsed: 0
     };
