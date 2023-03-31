@@ -1,5 +1,5 @@
 import {
-  CosmWasmClient,
+  SigningCosmWasmClient,
   ExecuteResult,
   InstantiateOptions,
   InstantiateResult,
@@ -11,19 +11,24 @@ import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { Coin, StdFee } from '@cosmjs/stargate';
 
-export class SimulateCosmWasmClient extends CosmWasmClient {
+export class SimulateCosmWasmClient extends SigningCosmWasmClient {
   private readonly app: CWSimulateApp;
 
   public constructor(option: CWSimulateAppOptions) {
-    super(null);
+    super(null, null, {});
     this.app = new CWSimulateApp(option);
   }
 
-  public upload(senderAddress: string, wasmCode: Uint8Array): UploadResult {
+  public upload(
+    senderAddress: string,
+    wasmCode: Uint8Array,
+    _fee?: StdFee | 'auto' | number,
+    _memo?: string
+  ): Promise<UploadResult> {
     // import the wasm bytecode
     const originalChecksum = toHex(sha256(wasmCode));
     const codeId = this.app.wasm.create(senderAddress, wasmCode);
-    return {
+    return Promise.resolve({
       originalSize: wasmCode.length,
       originalChecksum: toHex(sha256(wasmCode)),
       compressedSize: wasmCode.length,
@@ -35,7 +40,7 @@ export class SimulateCosmWasmClient extends CosmWasmClient {
       events: [],
       gasWanted: 0,
       gasUsed: 0
-    };
+    });
   }
 
   public async instantiate(
