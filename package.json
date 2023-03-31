@@ -64,15 +64,13 @@
     "sass": "^1.53.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "ts-jest": "^29.0.5",
-    "jest": "^29.5.0",
     "typescript": "^4.2.4"
   },
   "scripts": {
     "vendor": "node scripts/vendor.js",
     "start": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false react-app-rewired start",
     "build": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
-    "test": "jest",
+    "test": "react-app-rewired test",
     "postinstall": "patch-package"
   },
   "eslintConfig": {
@@ -97,12 +95,5 @@
     "@cosmjs/math": "0.29.5",
     "@cosmjs/crypto": "0.29.5",
     "@types/react": "17.0.43"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "transformIgnorePatterns": [
-      "node_modules/(?!@terran-one)"
-    ]
   }
 }

@@ -1,4 +1,4 @@
-import { Networks } from '../libs/ethereum-multicall/enums';
+import { Networks } from 'libs/ethereum-multicall/enums';
 
 export const CHROME = 'https://google.com/chrome';
 

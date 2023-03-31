@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import path from 'path';
-import { SimulateCosmWasmClient } from '../../src/libs/simulate';
-import { InstantiateMsg as OraiswapInstantiateMsg } from '../../src/libs/contracts/OraiswapToken.types';
-import { Contract } from '../../src/config/contracts';
+import { SimulateCosmWasmClient } from 'libs/simulate';
+import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
+import { Contract } from 'config/contracts';
 
 describe('token', () => {
   let senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
