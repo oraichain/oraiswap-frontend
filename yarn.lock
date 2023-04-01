@@ -2926,7 +2926,7 @@
 
 "@terran-one/cosmwasm-vm-js@https://github.com/oraichain/cosmwasm-vm-js.git":
   version "0.2.16"
-  resolved "https://github.com/oraichain/cosmwasm-vm-js.git#8b74d550d681421fabe8e92fef6e94719af12c6a"
+  resolved "https://github.com/oraichain/cosmwasm-vm-js.git#c4904b44f1207fc3e60b16f4d5ac9efbc9f47fc9"
   dependencies:
     "@cosmjs/crypto" "^0.28.4"
     "@cosmjs/encoding" "^0.28.4"
@@ -2935,7 +2935,6 @@
     "@types/elliptic" "^6.4.14"
     "@types/secp256k1" "^4.0.3"
     bech32 "1.1.4"
-    cosmwasm-vm-js-zk "https://github.com/oraichain/cosmwasm-vm-js-zk.git"
     elliptic "^6.5.4"
     immutable "^4.1.0"
     process "^0.11.10"
@@ -2945,7 +2944,7 @@
 
 "@terran-one/cw-simulate@https://github.com/oraichain/cw-simulate.git":
   version "2.8.4"
-  resolved "https://github.com/oraichain/cw-simulate.git#325b0b4ddf300d2212801d53718368d304c28fd1"
+  resolved "https://github.com/oraichain/cw-simulate.git#ad751d4a873842f688e3228beb0b411c306dfc7f"
   dependencies:
     "@cosmjs/amino" "^0.28.13"
     "@cosmjs/crypto" "^0.28.13"
@@ -5761,10 +5760,6 @@ cosmjs-types@^0.5.2:
   dependencies:
     long "^4.0.0"
     protobufjs "~6.11.2"
-
-"cosmwasm-vm-js-zk@https://github.com/oraichain/cosmwasm-vm-js-zk.git":
-  version "0.0.0"
-  resolved "https://github.com/oraichain/cosmwasm-vm-js-zk.git#8260b0d61ad1bbb23be26b7fda2ca2a6d8a12bb1"
 
 crc-32@^1.2.0:
   version "1.2.2"
