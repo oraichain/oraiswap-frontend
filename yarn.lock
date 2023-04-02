@@ -2277,10 +2277,10 @@
     axios "^0.27.2"
     long "^4.0.0"
 
-"@kiruse/serde@^0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@kiruse/serde/-/serde-0.6.3.tgz#7f8facd3a834ba77014e5c599c1461704d5b049e"
-  integrity sha512-QeiX1E2Jv2lQbcVy5BhW2NoJODi5COKZmUvIDZk9Lwabx8WnLwy3v6RC5bKpVWbK/pOltvK32wYWr3gMrq5Nmg==
+"@kiruse/serde@^0.8.0-rc.6":
+  version "0.8.0-rc.6"
+  resolved "https://registry.yarnpkg.com/@kiruse/serde/-/serde-0.8.0-rc.6.tgz#7de5aa930527ea2574eb47f154c40b03a2ffd12c"
+  integrity sha512-IshfGBpFGjm89SPn4hnqEC7OIFZCtFvNoakzGy0uBh4qvLufvxXVahwIgbEXs24wF8av77i5fsyFeXqtuoASwg==
   dependencies:
     hash-sum "^2.0.0"
 
@@ -2944,12 +2944,12 @@
 
 "@terran-one/cw-simulate@https://github.com/oraichain/cw-simulate.git":
   version "2.8.4"
-  resolved "https://github.com/oraichain/cw-simulate.git#b6493c5894c2fc566f7833ed28ef776aa8ec3026"
+  resolved "https://github.com/oraichain/cw-simulate.git#411b32e8949875af624e63c34f6776b08c2e8969"
   dependencies:
     "@cosmjs/amino" "^0.28.13"
     "@cosmjs/crypto" "^0.28.13"
     "@cosmjs/encoding" "^0.28.13"
-    "@kiruse/serde" "^0.6.3"
+    "@kiruse/serde" "^0.8.0-rc.6"
     "@terran-one/cosmwasm-vm-js" "https://github.com/oraichain/cosmwasm-vm-js.git"
     immutable "^4.1.0"
     lobyte "^0.0.3"
