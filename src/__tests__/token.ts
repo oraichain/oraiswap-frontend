@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
-import { SimulateCosmWasmClient } from 'libs/simulate';
+import { SimulateCosmWasmClient } from '@terran-one/cw-simulate';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
 import { Contract } from 'config/contracts';
 
