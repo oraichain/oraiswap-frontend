@@ -45,6 +45,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 }
 
 const startApp = async () => {
+  Contract.client = await CosmWasmClient.connect(network.rpc);
   render(
     <StrictMode>
       <Provider store={store}>
