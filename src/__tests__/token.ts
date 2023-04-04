@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
-import { SimulateCosmWasmClient } from 'libs/simulate';
+import { SimulateCosmWasmClient } from '@terran-one/cw-simulate';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
 import { Contract } from 'config/contracts';
 
@@ -12,15 +12,13 @@ describe('token', () => {
     bech32Prefix: 'orai'
   });
   // for Contract singleton
-  window.client = client;
+  Contract.client = client;
 
   beforeAll(async () => {
     // init airi token
-    const wasmBytecode = readFileSync(
-      path.resolve(__dirname, 'oraiswap_token.wasm')
-    );
+    const wasmBytecode = readFileSync(path.resolve(__dirname, 'oraiswap_token.wasm'));
 
-    const { codeId } = client.upload(senderAddress, wasmBytecode);
+    const { codeId } = await client.upload(senderAddress, wasmBytecode);
     const initAiriRes = await client.instantiate(
       senderAddress,
       codeId,

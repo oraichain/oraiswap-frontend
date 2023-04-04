@@ -129,5 +129,10 @@ module.exports = {
     );
 
     return rewiredEsbuild(config, env);
+  },
+  jest: (config) => {
+    config.transformIgnorePatterns = ['node_modules/(?!@terran-one)'];
+    config.setupFiles = ['<rootDir>/jest.setup.ts'];
+    return config;
   }
 };

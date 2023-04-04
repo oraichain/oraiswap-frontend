@@ -1,14 +1,10 @@
-import { Network } from 'bip32';
-import { Buffer } from 'buffer';
-import { KVStore } from '@keplr-wallet/common';
-import Keplr from '../libs/keplr';
 import { Keplr as keplr } from '@keplr-wallet/types';
-import Web3 from 'web3';
-import Metamask from '../libs/metamask';
-import { AbstractProvider } from 'web3-core';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { Network } from 'bip32';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import TronWeb from './tronweb';
+import Web3 from 'web3';
+import { AbstractProvider } from 'web3-core';
+import Keplr from '../libs/keplr';
+import Metamask from '../libs/metamask';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -121,7 +117,6 @@ declare global {
       postMessage(msg: string): void;
     };
     keplr: keplr;
-    client: CosmWasmClient;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
   }
@@ -181,4 +176,4 @@ declare global {
   }
 }
 
-export { };
+export {};

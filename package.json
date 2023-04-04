@@ -45,7 +45,7 @@
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/types": "^0.11.38",
     "@sentry/webpack-plugin": "^1.20.0",
-    "@terran-one/cw-simulate": "^2.8.4",
+    "@terran-one/cw-simulate": "https://github.com/oraichain/cw-simulate.git",
     "@types/classnames": "^2.2.10",
     "@types/jest": "^26.0.14",
     "@types/lodash": "^4.14.182",
@@ -94,10 +94,5 @@
     "@cosmjs/math": "0.29.5",
     "@cosmjs/crypto": "0.29.5",
     "@types/react": "17.0.43"
-  },
-  "jest": {
-    "setupFiles": [
-      "<rootDir>/jest.setup.ts"
-    ]
   }
 }
