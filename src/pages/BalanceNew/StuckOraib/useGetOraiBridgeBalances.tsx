@@ -1,11 +1,15 @@
-import { Coin, StargateClient } from '@cosmjs/stargate';
-import { TokenItemType, tokens } from 'config/bridgeTokens';
-import { ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_RPC, ORAI_BRIDGE_UDENOM } from 'config/constants';
+import { Coin } from '@cosmjs/stargate';
+import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_UDENOM } from 'config/constants';
 import { toDisplay } from 'libs/utils';
+import uniqBy from 'lodash/uniqBy';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
 
 export type RemainingOraibTokenItem = TokenItemType & { amount: string };
 export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean) {
+  const amounts = useSelector((state: RootState) => state.token.amounts);
   const [remainingOraib, setRemainingOraib] = useState<RemainingOraibTokenItem[]>([]);
   const [otherChainTokens] = tokens;
 
@@ -16,8 +20,14 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
         setRemainingOraib([]);
         return;
       }
-      const client = await StargateClient.connect(ORAI_BRIDGE_RPC);
-      const data: readonly Coin[] = await client.getAllBalances(oraiBridgeAddress);
+
+      const data: readonly Coin[] = uniqBy(
+        filteredTokens.filter((token) => !token.contractAddress && token.chainId === ORAI_BRIDGE_CHAIN_ID),
+        (c) => c.denom
+      )
+        .map((token) => ({ denom: token.denom, amount: amounts[token.denom] }))
+        .filter((coin) => Number(coin.amount) > 0);
+
       const remainingOraib = data
         .reduce((acc, item) => {
           // denom: "uoraib" not use => filter out

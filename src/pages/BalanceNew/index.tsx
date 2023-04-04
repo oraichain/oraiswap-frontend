@@ -13,22 +13,21 @@ import {
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  ORAI_BRIDGE_RPC,
-  WRAP_TRON_TRX_CONTRACT
+  ORAI_BRIDGE_RPC
 } from 'config/constants';
 import { network } from 'config/networks';
 import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
-import useLoadTokens from 'hooks/useLoadTokens';
 import { getTotalUsd, getUsd, parseBep20Erc20Name, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';

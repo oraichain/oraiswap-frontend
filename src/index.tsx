@@ -83,12 +83,8 @@ const startApp = async () => {
         prefix: network.prefix,
         gasPrice: GasPrice.fromString(`0${network.denom}`)
       });
-    } else {
-      // go to catch
-      throw new Error('Keplr not connected!');
     }
   } catch (ex) {
-    Contract.client = await CosmWasmClient.connect(network.rpc);
     console.log(ex);
   }
 };

@@ -1,5 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
+import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import {
   evmChainsWithoutTron,
@@ -10,17 +11,37 @@ import {
   tokenMap,
   tronChain
 } from 'config/bridgeTokens';
-import { KAWAII_SUBNET_RPC, KWT_SUBNETWORK_CHAIN_ID, KWT_SUBNETWORK_EVM_CHAIN_ID } from 'config/constants';
+import {
+  COSMOS_CHAIN_ID,
+  KAWAII_SUBNET_RPC,
+  KWT_SUBNETWORK_CHAIN_ID,
+  KWT_SUBNETWORK_EVM_CHAIN_ID,
+  ORAI,
+  ORAICHAIN_ID,
+  ORAI_BRIDGE_CHAIN_ID,
+  ORAI_RPC,
+  OSMOSIS_CHAIN_ID
+} from 'config/constants';
 import { Contract } from 'config/contracts';
-import { arrayLoadToken, handleCheckWallet, tronToEthAddress } from 'helper';
+import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { BalanceResponse } from '../libs/contracts/OraiswapToken.types';
 import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
 import { getEvmAddress } from '../libs/utils';
 
-import { useDispatch } from 'react-redux';
 import { Dispatch } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
+
+import {
+  COSMOS_NETWORK_RPC,
+  COSMOS_PREFIX,
+  KAWAII_RPC,
+  ORAI_BRIDGE_PREFIX,
+  ORAI_BRIDGE_RPC,
+  OSMOSIS_NETWORK_RPC,
+  OSMOSIS_PREFIX
+} from 'config/constants';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -29,11 +50,17 @@ export type LoadTokenParams = {
   tronAddress?: string;
 };
 
+export const cosmosNetworks: { chainId: string; prefix: string; rpc: string }[] = [
+  { chainId: ORAI_BRIDGE_CHAIN_ID, prefix: ORAI_BRIDGE_PREFIX, rpc: ORAI_BRIDGE_RPC },
+  { chainId: OSMOSIS_CHAIN_ID, prefix: OSMOSIS_PREFIX, rpc: OSMOSIS_NETWORK_RPC },
+  { chainId: COSMOS_CHAIN_ID, prefix: COSMOS_PREFIX, rpc: COSMOS_NETWORK_RPC },
+  { chainId: ORAICHAIN_ID, prefix: ORAI, rpc: ORAI_RPC }
+];
+
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
   if (!address) return;
   const client = await StargateClient.connect(tokenInfo.rpc);
   const amountAll = await client.getAllBalances(address);
-
   let amountDetails: AmountDetails = {};
 
   // reset native balances
@@ -52,23 +79,24 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 }
 
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  const kwtSubnetAddress = getEvmAddress(await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID));
-
   await Promise.all(
     [
-      oraiAddress && loadTokensCosmos(dispatch),
-      oraiAddress && kwtSubnetAddress && loadKawaiiSubnetAmount(dispatch, kwtSubnetAddress),
+      oraiAddress && loadTokensCosmos(dispatch, oraiAddress),
       oraiAddress && loadCw20Balance(dispatch, oraiAddress),
-      metamaskAddress && loadTokensEvm(dispatch, { metamaskAddress }),
-      tronAddress && loadTokensEvm(dispatch, { tronAddress })
+      // different cointype but also require keplr connected by checking oraiAddress
+      oraiAddress && loadKawaiiSubnetAmount(dispatch),
+      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChainsWithoutTron),
+      tronAddress && loadEvmAmounts(dispatch, tronToEthAddress(tronAddress), tronChain)
     ].filter(Boolean)
   );
 }
 
-async function loadTokensCosmos(dispatch: Dispatch) {
+async function loadTokensCosmos(dispatch: Dispatch, address: string) {
   await handleCheckWallet();
-  for (const token of arrayLoadToken) {
-    window.Keplr.getKeplrAddr(token.chainId).then((address) => loadNativeBalance(dispatch, address, token));
+  const { words, prefix } = bech32.decode(address);
+  for (const network of cosmosNetworks) {
+    const cosmosAddress = network.prefix === prefix ? address : bech32.encode(network.prefix, words);
+    loadNativeBalance(dispatch, cosmosAddress, network);
   }
 }
 
@@ -132,12 +160,6 @@ async function loadEvmEntries(
   });
 }
 
-async function loadTokensEvm(dispatch: Dispatch, address: { metamaskAddress?: string; tronAddress?: string }) {
-  const { metamaskAddress, tronAddress } = address;
-  if (metamaskAddress) loadEvmAmounts(dispatch, metamaskAddress, evmChainsWithoutTron);
-  else loadEvmAmounts(dispatch, tronToEthAddress(tronAddress), tronChain);
-}
-
 async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: TokenItemType[]) {
   const amountDetails = Object.fromEntries(
     flatten(
@@ -157,7 +179,14 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: To
   dispatch(updateAmounts(amountDetails));
 }
 
-async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtSubnetAddress: string) {
+async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
+  const kwtAddress = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
+  if (!kwtAddress) return;
+
+  loadNativeBalance(dispatch, kwtAddress, { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC });
+
+  const kwtSubnetAddress = getEvmAddress(kwtAddress);
+
   let amountDetails = Object.fromEntries(
     await loadEvmEntries(
       kwtSubnetAddress,

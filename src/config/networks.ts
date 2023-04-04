@@ -1,9 +1,9 @@
 import { NetworkConfig } from 'types/network';
-import { ORAI_LCD, ORAI_RPC, ORAI_SCAN } from './constants';
+import { ORAI, ORAI_LCD, ORAI_RPC, ORAI_SCAN } from './constants';
 
 export const network: NetworkConfig = {
   chainId: 'Oraichain',
-  prefix: 'orai',
+  prefix: ORAI,
   denom: 'orai',
   coinType: 118,
   lcd: ORAI_LCD,
@@ -30,8 +30,4 @@ export interface NetworkItem {
 }
 
 // sadly our Oraichain is not added into keplr yet
-export const mobileBlacklistNetworks: string[] = [
-  network.chainId
-  // 'cosmoshub-4',
-  // 'columbus-5'
-];
+export const mobileBlacklistNetworks: string[] = [network.chainId];

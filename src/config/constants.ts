@@ -75,8 +75,8 @@ export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';
 export const TRON_ORG = 'Tron Network';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
+export const COSMOS_PREFIX = 'cosmos';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
-export const JUNO_CHAIN_ID = 'juno-1';
 
 export const COSMOS_TYPE = 'cosmos';
 export const EVM_TYPE = 'evm';
@@ -97,6 +97,7 @@ export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
 export const OSMOSIS_NETWORK_LCD = 'https://lcd-osmosis.blockapsis.com';
 export const COSMOS_NETWORK_LCD = 'https://lcd-cosmos.oraidex.io';
 export const OSMOSIS_NETWORK_RPC = 'https://rpc-osmosis.blockapsis.com';
+export const OSMOSIS_PREFIX = 'osmo';
 export const COSMOS_NETWORK_RPC = 'https://rpc-cosmos.oraidex.io';
 export const ORAI_BRIDGE_PREFIX = 'oraib';
 

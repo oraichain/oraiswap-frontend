@@ -4,32 +4,18 @@ import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
 import {
   BEP20_ORAI,
   BSC_SCAN,
-  COSMOS_NETWORK_RPC,
   ETHEREUM_SCAN,
   HIGH_GAS_PRICE,
-  KAWAII_RPC,
   MULTIPLIER,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_RPC,
-  OSMOSIS_NETWORK_RPC,
   TRON_CHAIN_ID,
   TRON_SCAN
 } from 'config/constants';
 import React from 'react';
 
 import { TokenItemType, tokens } from 'config/bridgeTokens';
-import {
-  BSC_CHAIN_ID,
-  COSMOS_CHAIN_ID,
-  COSMOS_TYPE,
-  ERC20_ORAI,
-  ETHEREUM_CHAIN_ID,
-  EVM_TYPE,
-  KAWAII_ORAI,
-  KWT_SUBNETWORK_CHAIN_ID,
-  OSMOSIS_CHAIN_ID
-} from 'config/constants';
+import { BSC_CHAIN_ID, COSMOS_TYPE, ERC20_ORAI, ETHEREUM_CHAIN_ID, EVM_TYPE, KAWAII_ORAI } from 'config/constants';
 import { network } from 'config/networks';
 
 import { FeeCurrency } from '@keplr-wallet/types';
@@ -112,21 +98,6 @@ export const getTransactionUrl = (chainId: string | number, transactionHash: any
   }
 };
 
-export const objConvertTokenIbc = {
-  usdt: process.env.REACT_APP_USDTBSC_ORAICHAIN_DENOM,
-  kwt: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
-  milky: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
-  airi: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM
-};
-
-export const arrayLoadToken = [
-  { chainId: ORAI_BRIDGE_CHAIN_ID, rpc: ORAI_BRIDGE_RPC },
-  { chainId: OSMOSIS_CHAIN_ID, rpc: OSMOSIS_NETWORK_RPC },
-  { chainId: COSMOS_CHAIN_ID, rpc: COSMOS_NETWORK_RPC },
-  { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC },
-  { chainId: network.chainId, rpc: network.rpc }
-];
-
 export const getNetworkGasPrice = async () => {
   let chainInfosWithoutEndpoints: Array<{
     chainId: string;
@@ -181,7 +152,7 @@ export const displayInstallWallet = (altWallet = 'Keplr') => {
 export const handleCheckAddress = async (): Promise<string> => {
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!oraiAddress) {
-    throw new Error("Please login both metamask and keplr!")
+    throw new Error('Please login both metamask and keplr!');
   }
-  return oraiAddress
+  return oraiAddress;
 };

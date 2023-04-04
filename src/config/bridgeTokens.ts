@@ -18,8 +18,10 @@ import {
   BSC_CHAIN_ID,
   BSC_ORG,
   BSC_RPC,
+  COSMOS_CHAIN_ID,
   COSMOS_DECIMALS,
   COSMOS_ORG,
+  COSMOS_PREFIX,
   COSMOS_TYPE,
   ERC20_ORAI,
   ETHEREUM_CHAIN_ID,
@@ -43,12 +45,15 @@ import {
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  ORAI_BRIDGE_ORG,
   ORAI_BRIDGE_PREFIX,
   ORAI_BRIDGE_RPC,
   ORAI_BSC_CONTRACT,
   ORAI_ETH_CONTRACT,
   ORAI_RPC,
+  OSMOSIS_CHAIN_ID,
   OSMOSIS_ORG,
+  OSMOSIS_PREFIX,
   STABLE_DENOM,
   TRON_CHAIN_ID,
   TRON_DENOM,
@@ -111,12 +116,12 @@ const otherChainTokens: TokenItemType[] = [
     name: 'ATOM',
     org: 'Cosmos Hub',
     coinType: 118,
-    prefix: 'cosmos',
+    prefix: COSMOS_PREFIX,
     coingeckoId: 'cosmos',
     denom: 'uatom',
     decimals: COSMOS_DECIMALS,
     bridgeTo: [ORAICHAIN_ID],
-    chainId: 'cosmoshub-4',
+    chainId: COSMOS_CHAIN_ID,
     rpc: 'https://rpc-cosmos.oraidex.io',
     // lcd: 'https://lcd-cosmoshub.blockapsis.com',
     cosmosBased: true,
@@ -127,10 +132,10 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'OSMO',
     org: 'Osmosis',
-    prefix: 'osmo',
+    prefix: OSMOSIS_PREFIX,
     denom: 'uosmo',
     coinType: 118,
-    chainId: 'osmosis-1',
+    chainId: OSMOSIS_CHAIN_ID,
     rpc: 'https://rpc.osmosis.interbloc.org',
     // lcd: 'https://lcd-osmosis.keplr.app',
     // lcd: 'https://lcd.osmosis.zone',
@@ -145,7 +150,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'ORAI',
     prefix: ORAI_BRIDGE_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
@@ -159,7 +164,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'ORAI',
     prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + ORAI_ETH_CONTRACT,
@@ -173,7 +178,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'USDC',
     prefix: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDC_ETH_CONTRACT,
@@ -187,7 +192,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'AIRI',
     prefix: ORAI_BRIDGE_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
@@ -201,7 +206,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'USDT',
     prefix: ORAI_BRIDGE_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_DENOM_PREFIX + USDT_BSC_CONTRACT,
@@ -215,7 +220,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'USDT',
     prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
@@ -229,7 +234,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'wTRX',
     prefix: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     coinType: 118,
     denom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + WRAP_TRON_TRX_CONTRACT,
@@ -243,7 +248,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'KWT',
     prefix: ORAI_BRIDGE_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     bridgeNetworkIdentifier: BSC_ORG,
     coinType: 118,
@@ -257,7 +262,7 @@ const otherChainTokens: TokenItemType[] = [
   {
     name: 'MILKY',
     prefix: ORAI_BRIDGE_PREFIX,
-    org: 'OraiBridge',
+    org: ORAI_BRIDGE_ORG,
     chainId: ORAI_BRIDGE_CHAIN_ID,
     bridgeNetworkIdentifier: BSC_ORG,
     coinType: 118,
@@ -388,7 +393,7 @@ const otherChainTokens: TokenItemType[] = [
   },
   {
     name: 'MILKY',
-    org: 'Kawaiiverse',
+    org: KAWAII_ORG,
     coingeckoId: 'milky-token',
     denom: process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM,
     decimals: EVM_DECIMALS,
@@ -402,7 +407,7 @@ const otherChainTokens: TokenItemType[] = [
   },
   {
     name: 'ERC20 MILKY',
-    org: 'Kawaiiverse',
+    org: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: 'erc20_milky',
     bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
@@ -417,7 +422,7 @@ const otherChainTokens: TokenItemType[] = [
   },
   {
     name: 'KWT',
-    org: 'Kawaiiverse',
+    org: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     denom: process.env.REACT_APP_KWT_SUB_NETWORK_DENOM,
     decimals: EVM_DECIMALS,
@@ -431,7 +436,7 @@ const otherChainTokens: TokenItemType[] = [
   },
   {
     name: 'ERC20 KWT',
-    org: 'Kawaiiverse',
+    org: KAWAII_ORG,
     chainId: KWT_SUBNETWORK_CHAIN_ID,
     bridgeTo: [ORAICHAIN_ID, KAWAII_ORG],
     denom: 'erc20_kwt',
@@ -449,7 +454,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'ORAI',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coinType: 118,
     denom: 'orai',
     coingeckoId: 'oraichain-token',
@@ -490,7 +495,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'AIRI',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'airight',
     denom: 'airi',
     contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
@@ -505,7 +510,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'USDT',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'tether',
     denom: STABLE_DENOM,
     contractAddress: process.env.REACT_APP_USDT_CONTRACT,
@@ -520,7 +525,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'USDC',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'usd-coin',
     denom: 'usdc',
     contractAddress: process.env.REACT_APP_USDC_CONTRACT,
@@ -537,7 +542,7 @@ const oraichainTokens: TokenItemType[] = [
     name: 'OSMO',
     org: ORAICHAIN_ID,
     denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
-    prefix: 'orai',
+    prefix: ORAI,
     coinType: 118,
     chainId: ORAICHAIN_ID,
     bridgeTo: [OSMOSIS_ORG],
@@ -562,7 +567,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'KWT',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'kawaii-islands',
     denom: 'kwt',
     contractAddress: process.env.REACT_APP_KWT_CONTRACT,
@@ -590,7 +595,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'MILKY',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'milky-token',
     denom: 'milky',
     contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
@@ -606,7 +611,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'ORAIX',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coinType: 118,
     denom: 'oraix',
     contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
@@ -620,7 +625,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'scORAI',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coinType: 118,
     denom: 'scorai',
     contractAddress: process.env.REACT_APP_SCORAI_CONTRACT,
@@ -635,7 +640,7 @@ const oraichainTokens: TokenItemType[] = [
   {
     name: 'wTRX',
     org: ORAICHAIN_ID,
-    prefix: 'orai',
+    prefix: ORAI,
     coingeckoId: 'tron',
     denom: TRON_DENOM,
     contractAddress: process.env.REACT_APP_TRX_CONTRACT,
@@ -699,7 +704,7 @@ export const evmChainsWithoutTron = evmChains.filter((chain) => chain.chainId !=
 export const tronChain = evmChains.filter((chain) => chain.chainId === TRON_CHAIN_ID);
 
 export const kawaiiTokens = uniqBy(
-  flattenTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
+  filteredTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom
 );
 

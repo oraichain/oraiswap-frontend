@@ -34,8 +34,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
       coinMinimalDenom: 'orai',
       coinDecimals: 6,
       coinGeckoId: 'oraichain-token',
-      coinImageUrl:
-        'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
     },
     walletUrl: 'https://api.wallet.orai.io',
     bip44: {
@@ -73,8 +72,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
       coinMinimalDenom: ORAI_BRIDGE_UDENOM,
       coinDecimals: 6,
       coinGeckoId: 'oraichain-token',
-      coinImageUrl:
-        'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png'
     },
     bip44: {
       coinType: 118
@@ -133,13 +131,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
       average: 0.000025,
       high: 0.00004
     },
-    features: [
-      'ibc-transfer',
-      'ibc-go',
-      'stargate',
-      'eth-address-gen',
-      'eth-key-sign'
-    ]
+    features: ['ibc-transfer', 'ibc-go', 'stargate', 'eth-address-gen', 'eth-key-sign']
   }
 ];
 
