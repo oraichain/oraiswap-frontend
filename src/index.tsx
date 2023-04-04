@@ -45,6 +45,24 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 }
 
 const startApp = async () => {
+  render(
+    <StrictMode>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ToastProvider>
+            <Router>
+              <ScrollToTop />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </Router>
+            <ToastContainer transition={Bounce} />
+          </ToastProvider>
+        </PersistGate>
+      </Provider>
+    </StrictMode>,
+    document.getElementById('oraiswap')
+  );
   try {
     const keplr = await window.Keplr.getKeplr();
 
@@ -71,25 +89,6 @@ const startApp = async () => {
   } catch (ex) {
     Contract.client = await CosmWasmClient.connect(network.rpc);
     console.log(ex);
-  } finally {
-    render(
-      <StrictMode>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <ToastProvider>
-              <Router>
-                <ScrollToTop />
-                <QueryClientProvider client={queryClient}>
-                  <App />
-                </QueryClientProvider>
-              </Router>
-              <ToastContainer transition={Bounce} />
-            </ToastProvider>
-          </PersistGate>
-        </Provider>
-      </StrictMode>,
-      document.getElementById('oraiswap')
-    );
   }
 };
 
