@@ -1,6 +1,7 @@
-import {AllowMsg, Cw20ReceiveMsg, TransferMsg, SwapMsg, JoinPoolMsg, ExitPoolMsg, CreateLockupMsg, LockTokensMsg, ClaimTokensMsg, UnlockTokensMsg, ExternalTokenMsg, Amount, ChannelInfo, AllowedInfo, AllowedTokenInfo} from "./types";
+import {AllowMsg, Uint128, Binary, AssetInfo, Addr, Cw20ReceiveMsg, TransferMsg, TransferBackMsg, UpdatePairMsg, DeletePairMsg, Amount, Coin, Cw20Coin, ChannelInfo, IbcEndpoint, AllowedInfo, PairQuery, MappingMetadata, ArrayOfPairQuery} from "./types";
 export interface InstantiateMsg {
   allowlist: AllowMsg[];
+  default_gas_limit?: number | null;
   default_timeout: number;
   gov_contract: string;
 }
@@ -9,29 +10,21 @@ export type ExecuteMsg = {
 } | {
   transfer: TransferMsg;
 } | {
-  swap: SwapMsg;
+  transfer_to_remote: TransferBackMsg;
 } | {
-  join_pool: JoinPoolMsg;
+  update_mapping_pair: UpdatePairMsg;
 } | {
-  exit_pool: ExitPoolMsg;
-} | {
-  create_lockup: CreateLockupMsg;
-} | {
-  lock_tokens: LockTokensMsg;
-} | {
-  claim_tokens: ClaimTokensMsg;
-} | {
-  unlock_tokens: UnlockTokensMsg;
+  delete_mapping_pair: DeletePairMsg;
 } | {
   allow: AllowMsg;
-} | {
-  allow_external_token: ExternalTokenMsg;
 } | {
   update_admin: {
     admin: string;
   };
 };
 export type QueryMsg = {
+  port: {};
+} | {
   list_channels: {};
 } | {
   channel: {
@@ -46,23 +39,24 @@ export type QueryMsg = {
     contract: string;
   };
 } | {
-  external_token: {
-    denom: string;
-  };
-} | {
   list_allowed: {
     limit?: number | null;
+    order?: number | null;
     start_after?: string | null;
   };
 } | {
-  list_external_tokens: {
+  pair_mappings: {
     limit?: number | null;
+    order?: number | null;
     start_after?: string | null;
   };
 } | {
-  lockup: {
-    channel: string;
-    owner: string;
+  pair_mapping: {
+    key: string;
+  };
+} | {
+  pair_mappings_from_asset_info: {
+    asset_info: AssetInfo;
   };
 };
 export interface AdminResponse {
@@ -78,12 +72,9 @@ export interface ChannelResponse {
   total_sent: Amount[];
 }
 export interface ConfigResponse {
+  default_gas_limit?: number | null;
   default_timeout: number;
   gov_contract: string;
-}
-export interface AllowedTokenResponse {
-  contract?: string | null;
-  is_allowed: boolean;
 }
 export interface ListAllowedResponse {
   allow: AllowedInfo[];
@@ -91,10 +82,6 @@ export interface ListAllowedResponse {
 export interface ListChannelsResponse {
   channels: ChannelInfo[];
 }
-export interface ListExternalTokensResponse {
-  tokens: AllowedTokenInfo[];
-}
-export interface LockupResponse {
-  address: string;
-  owner: string;
+export interface PortResponse {
+  port_id: string;
 }

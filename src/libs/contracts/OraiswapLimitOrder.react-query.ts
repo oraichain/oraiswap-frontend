@@ -158,7 +158,7 @@ export function useOraiswapLimitOrderContractInfoQuery<TData = ContractInfoRespo
     enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
   });
 }
-export interface OraiswapLimitOrderRemoveOrderBookMutation {
+export interface OraiswapLimitOrderRemoveOrderBookPairMutation {
   client: OraiswapLimitOrderClient;
   msg: {
     assetInfos: AssetInfo[];
@@ -169,8 +169,8 @@ export interface OraiswapLimitOrderRemoveOrderBookMutation {
     $funds?: Coin[];
   };
 }
-export function useOraiswapLimitOrderRemoveOrderBookMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapLimitOrderRemoveOrderBookMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, OraiswapLimitOrderRemoveOrderBookMutation>(({
+export function useOraiswapLimitOrderRemoveOrderBookPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapLimitOrderRemoveOrderBookPairMutation>, "mutationFn">) {
+  return useMutation<ExecuteResult, Error, OraiswapLimitOrderRemoveOrderBookPairMutation>(({
     client,
     msg,
     args: {
@@ -178,7 +178,7 @@ export function useOraiswapLimitOrderRemoveOrderBookMutation(options?: Omit<UseM
       $memo,
       $funds
     } = {}
-  }) => client.removeOrderBook(msg, $fee, $memo, $funds), options);
+  }) => client.removeOrderBookPair(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapLimitOrderExecuteOrderBookPairMutation {
   client: OraiswapLimitOrderClient;
@@ -201,30 +201,6 @@ export function useOraiswapLimitOrderExecuteOrderBookPairMutation(options?: Omit
       $funds
     } = {}
   }) => client.executeOrderBookPair(msg, $fee, $memo, $funds), options);
-}
-export interface OraiswapLimitOrderExecuteOrderMutation {
-  client: OraiswapLimitOrderClient;
-  msg: {
-    askAsset: Asset;
-    offerInfo: AssetInfo;
-    orderId: number;
-  };
-  args?: {
-    $fee?: number | StdFee | "auto";
-    $memo?: string;
-    $funds?: Coin[];
-  };
-}
-export function useOraiswapLimitOrderExecuteOrderMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapLimitOrderExecuteOrderMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, OraiswapLimitOrderExecuteOrderMutation>(({
-    client,
-    msg,
-    args: {
-      $fee,
-      $memo,
-      $funds
-    } = {}
-  }) => client.executeOrder(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapLimitOrderCancelOrderMutation {
   client: OraiswapLimitOrderClient;
@@ -275,10 +251,10 @@ export function useOraiswapLimitOrderSubmitOrderMutation(options?: Omit<UseMutat
 export interface OraiswapLimitOrderCreateOrderBookPairMutation {
   client: OraiswapLimitOrderClient;
   msg: {
-    askInfo: AssetInfo;
-    minOfferAmount: Uint128;
-    offerInfo: AssetInfo;
-    precision?: Decimal;
+    baseCoinInfo: AssetInfo;
+    minQuoteCoinAmount: Uint128;
+    quoteCoinInfo: AssetInfo;
+    spread?: Decimal;
   };
   args?: {
     $fee?: number | StdFee | "auto";

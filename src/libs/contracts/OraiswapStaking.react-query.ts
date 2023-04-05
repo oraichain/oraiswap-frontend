@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Addr, Uint128, AssetInfo, Decimal, Cw20ReceiveMsg, Asset} from "./types";
-import { ConfigResponse, PoolInfoResponse, RewardInfoResponse, ArrayOfRewardInfoResponse, RewardsPerSecResponse} from "./OraiswapStaking.types";
+import {Addr, Uint128, Binary, AssetInfo, Decimal, Cw20ReceiveMsg, Asset, RewardInfoResponseItem} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, PoolInfoResponse, RewardInfoResponse, ArrayOfRewardInfoResponse, RewardsPerSecResponse} from "./OraiswapStaking.types";
 import { OraiswapStakingQueryClient, OraiswapStakingClient } from "./OraiswapStaking.client";
 export interface OraiswapStakingReactQuery<TResponse, TData = TResponse> {
   client: OraiswapStakingQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
+    initialData?: undefined;
   };
 }
 export interface OraiswapStakingRewardInfosQuery<TData> extends OraiswapStakingReactQuery<ArrayOfRewardInfoResponse, TData> {
@@ -104,9 +104,9 @@ export interface OraiswapStakingUpdateListStakersMutation {
     stakers: Addr[];
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingUpdateListStakersMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingUpdateListStakersMutation>, "mutationFn">) {
@@ -114,11 +114,11 @@ export function useOraiswapStakingUpdateListStakersMutation(options?: Omit<UseMu
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updateListStakers(msg, fee, memo, funds), options);
+  }) => client.updateListStakers(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingAutoStakeHookMutation {
   client: OraiswapStakingClient;
@@ -129,9 +129,9 @@ export interface OraiswapStakingAutoStakeHookMutation {
     stakingToken: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingAutoStakeHookMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingAutoStakeHookMutation>, "mutationFn">) {
@@ -139,11 +139,11 @@ export function useOraiswapStakingAutoStakeHookMutation(options?: Omit<UseMutati
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.autoStakeHook(msg, fee, memo, funds), options);
+  }) => client.autoStakeHook(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingAutoStakeMutation {
   client: OraiswapStakingClient;
@@ -152,9 +152,9 @@ export interface OraiswapStakingAutoStakeMutation {
     slippageTolerance?: Decimal;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingAutoStakeMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingAutoStakeMutation>, "mutationFn">) {
@@ -162,11 +162,11 @@ export function useOraiswapStakingAutoStakeMutation(options?: Omit<UseMutationOp
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.autoStake(msg, fee, memo, funds), options);
+  }) => client.autoStake(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingWithdrawOthersMutation {
   client: OraiswapStakingClient;
@@ -175,9 +175,9 @@ export interface OraiswapStakingWithdrawOthersMutation {
     stakerAddrs: Addr[];
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingWithdrawOthersMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingWithdrawOthersMutation>, "mutationFn">) {
@@ -185,11 +185,11 @@ export function useOraiswapStakingWithdrawOthersMutation(options?: Omit<UseMutat
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.withdrawOthers(msg, fee, memo, funds), options);
+  }) => client.withdrawOthers(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingWithdrawMutation {
   client: OraiswapStakingClient;
@@ -197,9 +197,9 @@ export interface OraiswapStakingWithdrawMutation {
     assetInfo?: AssetInfo;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingWithdrawMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingWithdrawMutation>, "mutationFn">) {
@@ -207,11 +207,11 @@ export function useOraiswapStakingWithdrawMutation(options?: Omit<UseMutationOpt
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.withdraw(msg, fee, memo, funds), options);
+  }) => client.withdraw(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingUnbondMutation {
   client: OraiswapStakingClient;
@@ -220,9 +220,9 @@ export interface OraiswapStakingUnbondMutation {
     assetInfo: AssetInfo;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingUnbondMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingUnbondMutation>, "mutationFn">) {
@@ -230,11 +230,11 @@ export function useOraiswapStakingUnbondMutation(options?: Omit<UseMutationOptio
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.unbond(msg, fee, memo, funds), options);
+  }) => client.unbond(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingDepositRewardMutation {
   client: OraiswapStakingClient;
@@ -242,9 +242,9 @@ export interface OraiswapStakingDepositRewardMutation {
     rewards: Asset[];
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingDepositRewardMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingDepositRewardMutation>, "mutationFn">) {
@@ -252,11 +252,11 @@ export function useOraiswapStakingDepositRewardMutation(options?: Omit<UseMutati
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.depositReward(msg, fee, memo, funds), options);
+  }) => client.depositReward(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingUpdateRewardsPerSecMutation {
   client: OraiswapStakingClient;
@@ -265,9 +265,9 @@ export interface OraiswapStakingUpdateRewardsPerSecMutation {
     assets: Asset[];
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingUpdateRewardsPerSecMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingUpdateRewardsPerSecMutation>, "mutationFn">) {
@@ -275,11 +275,11 @@ export function useOraiswapStakingUpdateRewardsPerSecMutation(options?: Omit<Use
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updateRewardsPerSec(msg, fee, memo, funds), options);
+  }) => client.updateRewardsPerSec(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingDeprecateStakingTokenMutation {
   client: OraiswapStakingClient;
@@ -288,9 +288,9 @@ export interface OraiswapStakingDeprecateStakingTokenMutation {
     newStakingToken: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingDeprecateStakingTokenMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingDeprecateStakingTokenMutation>, "mutationFn">) {
@@ -298,11 +298,11 @@ export function useOraiswapStakingDeprecateStakingTokenMutation(options?: Omit<U
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.deprecateStakingToken(msg, fee, memo, funds), options);
+  }) => client.deprecateStakingToken(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingRegisterAssetMutation {
   client: OraiswapStakingClient;
@@ -311,9 +311,9 @@ export interface OraiswapStakingRegisterAssetMutation {
     stakingToken: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingRegisterAssetMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingRegisterAssetMutation>, "mutationFn">) {
@@ -321,11 +321,11 @@ export function useOraiswapStakingRegisterAssetMutation(options?: Omit<UseMutati
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.registerAsset(msg, fee, memo, funds), options);
+  }) => client.registerAsset(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingUpdateConfigMutation {
   client: OraiswapStakingClient;
@@ -334,9 +334,9 @@ export interface OraiswapStakingUpdateConfigMutation {
     rewarder?: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingUpdateConfigMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingUpdateConfigMutation>, "mutationFn">) {
@@ -344,19 +344,23 @@ export function useOraiswapStakingUpdateConfigMutation(options?: Omit<UseMutatio
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updateConfig(msg, fee, memo, funds), options);
+  }) => client.updateConfig(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapStakingReceiveMutation {
   client: OraiswapStakingClient;
-  msg: Cw20ReceiveMsg;
+  msg: {
+    amount: Uint128;
+    msg: Binary;
+    sender: string;
+  };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapStakingReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapStakingReceiveMutation>, "mutationFn">) {
@@ -364,9 +368,9 @@ export function useOraiswapStakingReceiveMutation(options?: Omit<UseMutationOpti
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.receive(msg, fee, memo, funds), options);
+  }) => client.receive(msg, $fee, $memo, $funds), options);
 }

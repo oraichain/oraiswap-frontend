@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import { AssetInfo, PairInfo} from "./types";
-import { ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
+import {Addr, AssetInfo, PairInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
 export interface OraiswapFactoryReadOnlyInterface {
   contractAddress: string;
   config: () => Promise<ConfigResponse>;
@@ -78,12 +78,19 @@ export interface OraiswapFactoryInterface extends OraiswapFactoryReadOnlyInterfa
     owner?: string;
     pairCodeId?: number;
     tokenCodeId?: number;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   createPair: ({
-    assetInfos
+    assetInfos,
+    pairAdmin
   }: {
     assetInfos: AssetInfo[];
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+    pairAdmin?: string;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  addPair: ({
+    pairInfo
+  }: {
+    pairInfo: PairInfo;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class OraiswapFactoryClient extends OraiswapFactoryQueryClient implements OraiswapFactoryInterface {
   client: SigningCosmWasmClient;
@@ -97,6 +104,7 @@ export class OraiswapFactoryClient extends OraiswapFactoryQueryClient implements
     this.contractAddress = contractAddress;
     this.updateConfig = this.updateConfig.bind(this);
     this.createPair = this.createPair.bind(this);
+    this.addPair = this.addPair.bind(this);
   }
 
   updateConfig = async ({
@@ -107,24 +115,38 @@ export class OraiswapFactoryClient extends OraiswapFactoryQueryClient implements
     owner?: string;
     pairCodeId?: number;
     tokenCodeId?: number;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       update_config: {
         owner,
         pair_code_id: pairCodeId,
         token_code_id: tokenCodeId
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   createPair = async ({
-    assetInfos
+    assetInfos,
+    pairAdmin
   }: {
     assetInfos: AssetInfo[];
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+    pairAdmin?: string;
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       create_pair: {
-        asset_infos: assetInfos
+        asset_infos: assetInfos,
+        pair_admin: pairAdmin
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
+  };
+  addPair = async ({
+    pairInfo
+  }: {
+    pairInfo: PairInfo;
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+    return await this.client.execute(this.sender, this.contractAddress, {
+      add_pair: {
+        pair_info: pairInfo
+      }
+    }, $fee, $memo, $funds);
   };
 }
