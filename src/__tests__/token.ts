@@ -16,9 +16,9 @@ describe('token', () => {
 
   beforeAll(async () => {
     // init airi token
-    const wasmBytecode = readFileSync(path.resolve(__dirname, 'oraiswap_token.wasm'));
+    const wasmBytecode = readFileSync(path.resolve(__dirname, 'testdata', 'oraiswap_token.wasm'));
 
-    const { codeId } = await client.upload(senderAddress, wasmBytecode);
+    const { codeId } = await client.upload(senderAddress, wasmBytecode, 'auto');
     const initAiriRes = await client.instantiate(
       senderAddress,
       codeId,
@@ -28,7 +28,8 @@ describe('token', () => {
         name: 'Airight token',
         initial_balances: [{ address: senderAddress, amount: '1000000000' }]
       } as OraiswapInstantiateMsg,
-      'token'
+      'token',
+      'auto'
     );
     airiContractAddress = initAiriRes.contractAddress;
   });

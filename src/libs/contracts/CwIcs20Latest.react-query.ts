@@ -124,6 +124,7 @@ export function useCwIcs20LatestConfigQuery<TData = ConfigResponse>({
 }
 export interface CwIcs20LatestChannelQuery<TData> extends CwIcs20LatestReactQuery<ChannelResponse, TData> {
   args: {
+    forward?: boolean;
     id: string;
   };
 }
@@ -133,6 +134,7 @@ export function useCwIcs20LatestChannelQuery<TData = ChannelResponse>({
   options
 }: CwIcs20LatestChannelQuery<TData>) {
   return useQuery<ChannelResponse, Error, TData>(["cwIcs20LatestChannel", client?.contractAddress, JSON.stringify(args)], () => client ? client.channel({
+    forward: args.forward,
     id: args.id
   }) : Promise.reject(new Error("Invalid client")), { ...options,
     enabled: !!client && (options?.enabled != undefined ? options.enabled : true)

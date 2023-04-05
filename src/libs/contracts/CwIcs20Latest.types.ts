@@ -4,6 +4,7 @@ export interface InstantiateMsg {
   default_gas_limit?: number | null;
   default_timeout: number;
   gov_contract: string;
+  swap_router_contract: string;
 }
 export type ExecuteMsg = {
   receive: Cw20ReceiveMsg;
@@ -28,6 +29,7 @@ export type QueryMsg = {
   list_channels: {};
 } | {
   channel: {
+    forward?: boolean | null;
     id: string;
   };
 } | {

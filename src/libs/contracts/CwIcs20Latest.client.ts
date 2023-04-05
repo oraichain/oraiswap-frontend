@@ -13,8 +13,10 @@ export interface CwIcs20LatestReadOnlyInterface {
   port: () => Promise<PortResponse>;
   listChannels: () => Promise<ListChannelsResponse>;
   channel: ({
+    forward,
     id
   }: {
+    forward?: boolean;
     id: string;
   }) => Promise<ChannelResponse>;
   config: () => Promise<ConfigResponse>;
@@ -83,12 +85,15 @@ export class CwIcs20LatestQueryClient implements CwIcs20LatestReadOnlyInterface 
     });
   };
   channel = async ({
+    forward,
     id
   }: {
+    forward?: boolean;
     id: string;
   }): Promise<ChannelResponse> => {
     return this.client.queryContractSmart(this.contractAddress, {
       channel: {
+        forward,
         id
       }
     });
