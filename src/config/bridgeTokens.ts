@@ -68,15 +68,15 @@ import {
 export type TokenItemType = {
   name: string;
   org:
-    | 'Oraichain'
-    | 'Cosmos Hub'
-    | 'Osmosis'
-    | 'OraiBridge'
-    | 'BNB Chain'
-    | 'Ethereum'
-    | 'Kawaiiverse'
-    | 'Tron Network'
-    | string;
+  | 'Oraichain'
+  | 'Cosmos Hub'
+  | 'Osmosis'
+  | 'OraiBridge'
+  | 'BNB Chain'
+  | 'Ethereum'
+  | 'Kawaiiverse'
+  | 'Tron Network'
+  | string;
   denom: string;
   prefix?: string;
   contractAddress?: string;
@@ -91,20 +91,20 @@ export type TokenItemType = {
   maxGas?: number;
   factoryV2?: boolean;
   coingeckoId:
-    | 'oraichain-token'
-    | 'osmosis'
-    | 'cosmos'
-    | 'ethereum'
-    | 'bnb'
-    | 'airight'
-    | 'oraidex'
-    | 'tether'
-    | 'kawaii-islands'
-    | 'milky-token'
-    | 'scorai'
-    | 'oraidex'
-    | 'usd-coin'
-    | 'tron';
+  | 'oraichain-token'
+  | 'osmosis'
+  | 'cosmos'
+  | 'ethereum'
+  | 'bnb'
+  | 'airight'
+  | 'oraidex'
+  | 'tether'
+  | 'kawaii-islands'
+  | 'milky-token'
+  | 'scorai'
+  | 'oraidex'
+  | 'usd-coin'
+  | 'tron';
   cosmosBased: Boolean;
   type?: string;
   minAmountSwap?: number;
@@ -657,7 +657,7 @@ const oraichainTokens: TokenItemType[] = [
 ];
 
 export const tokens = [otherChainTokens, oraichainTokens];
-const flattenTokens = flatten(tokens);
+export const flattenTokens = flatten(tokens);
 
 export const tokenMap = Object.fromEntries(flattenTokens.map((c) => [c.denom, c]));
 

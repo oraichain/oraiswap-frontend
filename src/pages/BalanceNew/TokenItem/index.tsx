@@ -1,10 +1,8 @@
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
-import { TooltipIcon } from 'components/Tooltip';
-import { isMobile } from '@walletconnect/browser-utils';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: [string, number];
@@ -38,7 +36,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
       className={classNames(styles.tokenWrapper, { [styles.active]: active }, className)}
       onClick={(event) => {
         event.stopPropagation();
-        onClick?.(token);
+        onClick();
       }}
     >
       <div className={styles.balanceAmountInfo}>
@@ -75,15 +73,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             convertKwt={convertKwt}
           />
         )}
-
-        {/* // TODO: {active && token.contractAddress && token.cosmosBased && (
-          <ConvertToNative
-            name={evmName}
-            token={token}
-            amountDetail={amountDetail}
-            convertToken={convertToken}
-          />
-        )} */}
       </div>
     </div>
   );

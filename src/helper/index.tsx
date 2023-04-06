@@ -113,7 +113,7 @@ export const getNetworkGasPrice = async () => {
 };
 
 //hardcode fee
-export const feeEstimate = async (tokenInfo: TokenItemType, gasDefault: number) => {
+export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
   return (gasDefault * MULTIPLIER * HIGH_GAS_PRICE) / 10 ** tokenInfo?.decimals;
 };

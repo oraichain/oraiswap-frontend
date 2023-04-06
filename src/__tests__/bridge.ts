@@ -3,6 +3,7 @@ import { filteredTokens } from 'config/bridgeTokens';
 import {
   KWT_BSC_CONTRACT,
   KWT_DENOM,
+  KWT_SUBNETWORK_CHAIN_ID,
   MILKY_BSC_CONTRACT,
   MILKY_DENOM,
   ORAICHAIN_ID,
@@ -35,73 +36,64 @@ describe('bridge', () => {
     expect(res).toBe(keplrAddress);
   });
 
-  it('bridge-transfer-token-erc20-cw20-should-return-only-evm-amount', async () => {
-    const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
-    const decimal = 18;
+  it('bridge-convert-kwt-should-return-only-evm-amount', async () => {
     const transferAmount = 10;
-    const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
+    const fromToken = filteredTokens.find((item) => item.name === 'KWT' && item.chainId === KWT_SUBNETWORK_CHAIN_ID);
+    const evmAmount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
     expect(evmAmount).toMatchObject({
-      amount: '10000000000000000000',
-      denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM
+      amount: '10000000000000000000', // 10 * 10**18
+      denom: fromToken.denom
     });
   });
 
-  it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
+  describe('bridge-transfer-token-erc20-cw20', () => {
     const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
     const decimal = 18;
     const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
+    const fromToken = filteredTokens.find((item) => item.name === 'KWT' && item.chainId === ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = generateConvertCw20Erc20Message(
-      {
-        [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
-      },
-      fromToken,
-      keplrAddress,
-      evmAmount
-    );
-    expect(Array.isArray(msgConvertReverses)).toBe(true);
-  });
+    const amounts: AmountDetails = {
+      kwt: '1000000000',
+      [denom]: '9000000000000000000' // 9 * 10*18
+    };
+    const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, keplrAddress, evmAmount);
 
-  it('bridge-transfer-token-erc20-cw20-should-return-only-execute-convert-reverses', async () => {
-    const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
-    const decimal = 18;
-    const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name == 'KWT' && item.chainId == ORAICHAIN_ID);
-    const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
-    const msgConvertReverses = generateConvertCw20Erc20Message(
-      {
-        [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM]: '1000000000000000000'
-      },
-      fromToken,
-      keplrAddress,
-      evmAmount
-    );
-    const executeContractMsgs = getExecuteContractMsgs(
-      keplrAddress,
-      parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
-    );
-    expect(Array.isArray(executeContractMsgs)).toBe(true);
+    it('bridge-transfer-token-erc20-cw20-should-return-only-evm-amount', async () => {
+      expect(evmAmount).toMatchObject({
+        amount: '10000000000000000000', // 10 * 10**18
+        denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM
+      });
+    });
+
+    it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
+      // check if the sender and contract address are correct
+      for (const msg of msgConvertReverses) {
+        expect(msg.contract).toBe(fromToken.contractAddress);
+        expect(msg.sender).toBe(keplrAddress);
+      }
+
+      expect(Array.isArray(msgConvertReverses)).toBe(true);
+    });
+
+    it('bridge-transfer-token-erc20-cw20-should-return-only-execute-convert-reverses', async () => {
+      const executeContractMsgs = getExecuteContractMsgs(
+        keplrAddress,
+        parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
+      );
+      expect(Array.isArray(executeContractMsgs)).toBe(true);
+    });
   });
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
-    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
-    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_CHAIN_ID);
-    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-    const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
-    expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
-  });
-
-  it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
-    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
-    const toToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAI_BRIDGE_CHAIN_ID);
+    const fromToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
+    const toToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAI_BRIDGE_CHAIN_ID);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
   });
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-asset-info-token', async () => {
-    const fromToken = filteredTokens.find((item) => item.name == 'ORAI' && item.chainId == ORAICHAIN_ID);
+    const fromToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
     const { info: assetInfo } = parseTokenInfo(fromToken);
     expect(assetInfo).toMatchObject(ORAI_INFO);
   });
