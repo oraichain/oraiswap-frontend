@@ -12,10 +12,12 @@ const cosmosChain = new CWSimulateApp({
   chainId: 'cosmoshub-4',
   bech32Prefix: 'cosmos'
 });
-const oraiChain = new CWSimulateApp({
+// oraichain support cosmwasm
+const oraiClient = new SimulateCosmWasmClient({
   chainId: 'Oraichain',
   bech32Prefix: 'orai'
 });
+
 const oraiSenderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
 const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
 const routerContractAddress = 'orai1x7s4a42y8scugcac5vj2zre96z86lhntq7qg23';
@@ -27,13 +29,12 @@ describe.only('IBCModule', () => {
   let cosmosPort: string = 'transfer';
   let ics20Contract: CwIcs20LatestClient;
   beforeEach(async () => {
-    const client = new SimulateCosmWasmClient(oraiChain);
-    const { codeId } = await client.upload(
+    const { codeId } = await oraiClient.upload(
       oraiSenderAddress,
       readFileSync(path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm')),
       'auto'
     );
-    const { contractAddress } = await client.instantiate(
+    const { contractAddress } = await oraiClient.instantiate(
       oraiSenderAddress,
 
       codeId,
@@ -48,11 +49,11 @@ describe.only('IBCModule', () => {
     );
 
     oraiPort = 'wasm.' + contractAddress;
-    ics20Contract = new CwIcs20LatestClient(client, oraiSenderAddress, contractAddress);
+    ics20Contract = new CwIcs20LatestClient(oraiClient, oraiSenderAddress, contractAddress);
   });
 
   it('handle ibc', async () => {
-    cosmosChain.ibc.relay('channel-0', oraiPort, oraiChain);
+    cosmosChain.ibc.relay('channel-0', oraiPort, oraiClient.app);
 
     await cosmosChain.ibc.sendChannelOpen({
       open_init: {
@@ -105,7 +106,7 @@ describe.only('IBCModule', () => {
     });
 
     // topup
-    oraiChain.bank.setBalance(ics20Contract.contractAddress, coins('10000000000000', 'orai'));
+    oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins('10000000000000', 'orai'));
 
     // now send ibc package
     const icsPackage: FungibleTokenPacketData = {
@@ -137,7 +138,7 @@ describe.only('IBCModule', () => {
       relayer: cosmosSenderAddress
     });
 
-    const bobBalance = oraiChain.bank.getBalance(bobAddress);
+    const bobBalance = oraiClient.app.bank.getBalance(bobAddress);
     expect(bobBalance).toEqual(coins('100000000', 'orai'));
   });
 });
