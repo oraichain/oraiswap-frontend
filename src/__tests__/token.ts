@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import path from 'path';
 import { SimulateCosmWasmClient } from '@terran-one/cw-simulate';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
@@ -16,12 +15,9 @@ describe('token', () => {
 
   beforeAll(async () => {
     // init airi token
-    const wasmBytecode = readFileSync(path.resolve(__dirname, 'testdata', 'oraiswap_token.wasm'));
-
-    const { codeId } = await client.upload(senderAddress, wasmBytecode, 'auto');
-    const initAiriRes = await client.instantiate(
+    const initAiriRes = await client.deploy(
       senderAddress,
-      codeId,
+      path.resolve(__dirname, 'testdata', 'oraiswap_token.wasm'),
       {
         decimals: 6,
         symbol: 'AIRI',
