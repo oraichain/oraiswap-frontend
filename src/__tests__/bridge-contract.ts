@@ -75,7 +75,7 @@ describe.only('IBCModule', () => {
     airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
 
     // init ibc channel between two chains
-    cosmosChain.ibc.relay('channel-0', oraiPort, oraiClient.app);
+    oraiClient.app.ibc.relay('channel-0', oraiPort, 'channel-0', cosmosPort, cosmosChain);
     await cosmosChain.ibc.sendChannelOpen({
       open_init: {
         channel: {
@@ -401,6 +401,10 @@ describe.only('IBCModule', () => {
     });
 
     // try to send back to cosmos from oraichain, which will pass
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
+      console.log('handle midle ware for ibc', msg, app);
+    });
+
     const transferBackMsg: TransferBackMsg = {
       local_channel_id: channel,
       remote_address: cosmosSenderAddress,
