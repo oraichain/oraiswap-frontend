@@ -1,7 +1,7 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
-import { gravityContracts, kawaiiTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
   KWT,
   KWT_BSC_CONTRACT,
@@ -389,13 +389,8 @@ export const transferIbcCustom = async (
   return result;
 };
 
-export const findDefaultToToken = (toTokens: TokenItemType[], from: TokenItemType) => {
-  if (from?.chainId === KWT_SUBNETWORK_CHAIN_ID) {
-    const name = parseBep20Erc20Name(from.name);
-    return toTokens.find((t) => t.name.includes(name));
-  }
-
-  return toTokens.find((t) => !from || (from.chainId !== ORAI_BRIDGE_CHAIN_ID && t.name === from.name));
+export const findDefaultToToken = (from: TokenItemType) => {
+  return flattenTokens.find(t => from.bridgeTo && from.bridgeTo.includes(t.org) && t.name.includes(from.name))
 };
 
 export const convertKwt = async (transferAmount: number, fromToken: TokenItemType): Promise<DeliverTxResponse> => {

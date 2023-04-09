@@ -52,13 +52,13 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
+  const onMaxFromAmount = (amount: bigint, type: 'max' | 'half') => {
     const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
     let finalAmount = displayAmount;
 
     // hardcode fee when swap token orai
     if (fromTokenDenom === ORAI) {
-      const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
+      const useFeeEstimate = feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
       const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
       if (type === 'max') {
         finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;

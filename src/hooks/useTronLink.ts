@@ -34,15 +34,15 @@ export function useTronEventListener() {
       }
 
       window.addEventListener('message', function (e) {
-        if (e.data.message && e.data.message.action == 'setAccount') {
-          const tronAddress = e.data.message.data.address;
+        if (e?.data?.message && e.data.message.action == 'setAccount') {
+          const tronAddress = e.data.message?.data?.address;
           console.log('tronAddress', tronAddress);
           loadTokenAmounts({ tronAddress });
           setTronAddress(tronAddress);
         }
 
         // Tronlink chrome v3.22.1 & Tronlink APP v4.3.4 started to support
-        if (e.data.message && e.data.message.action == 'disconnect') {
+        if (e?.data?.message && e.data.message.action == 'disconnect') {
           console.log('disconnect event', e.data.message.isTronLink);
           setTronAddress(undefined);
         }
