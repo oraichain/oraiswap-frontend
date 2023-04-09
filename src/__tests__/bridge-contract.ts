@@ -42,7 +42,7 @@ describe.only('IBCModule', () => {
       chainId: 'Oraichain',
       bech32Prefix: 'orai'
     });
-    const { contractAddress } = await oraiClient.deploy(
+    const { contractAddress } = await oraiClient.deploy<CwIcs20LatestTypes.InstantiateMsg>(
       oraiSenderAddress,
       path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm'),
       {
@@ -50,7 +50,7 @@ describe.only('IBCModule', () => {
         default_timeout: 3600,
         gov_contract: oraiSenderAddress, // mulitsig contract
         swap_router_contract: routerContractAddress
-      } as CwIcs20LatestTypes.InstantiateMsg,
+      },
       'cw-ics20'
     );
 
@@ -58,7 +58,7 @@ describe.only('IBCModule', () => {
     ics20Contract = new CwIcs20LatestClient(oraiClient, oraiSenderAddress, contractAddress);
 
     // init cw20 AIRI token
-    const { contractAddress: airiAddress } = await oraiClient.deploy(
+    const { contractAddress: airiAddress } = await oraiClient.deploy<OraiswapInstantiateMsg>(
       oraiSenderAddress,
       path.join(__dirname, 'testdata', 'oraiswap_token.wasm'),
       {
@@ -69,7 +69,7 @@ describe.only('IBCModule', () => {
         mint: {
           minter: oraiSenderAddress
         }
-      } as OraiswapInstantiateMsg,
+      },
       'cw-ics20'
     );
     airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
@@ -352,7 +352,7 @@ describe.only('IBCModule', () => {
         msg: Buffer.from(JSON.stringify(transferBackMsg)).toString('base64')
       });
     } catch (error) {
-      expect(error).toEqual(new Error("Insufficient funds to redeem voucher on channel"));
+      expect(error).toEqual(new Error('Insufficient funds to redeem voucher on channel'));
     }
   });
 
