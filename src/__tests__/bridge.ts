@@ -1,21 +1,30 @@
 import { coin } from '@cosmjs/stargate';
-import { filteredTokens } from 'config/bridgeTokens';
+import { TokenItemType, filteredTokens, flattenTokens } from 'config/bridgeTokens';
 import {
+  BSC_CHAIN_ID,
+  BSC_SCAN,
+  COSMOS_CHAIN_ID,
+  ETHEREUM_CHAIN_ID,
+  ETHEREUM_SCAN,
   KWT_BSC_CONTRACT,
   KWT_DENOM,
+  KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
   MILKY_BSC_CONTRACT,
   MILKY_DENOM,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BSC_CONTRACT,
-  ORAI_INFO
+  ORAI_INFO,
+  TRON_CHAIN_ID,
+  TRON_SCAN
 } from 'config/constants';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { getTransactionUrl } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
-import { getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
+import { findDefaultToToken, getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
@@ -96,6 +105,33 @@ describe('bridge', () => {
     const fromToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
     const { info: assetInfo } = parseTokenInfo(fromToken);
     expect(assetInfo).toMatchObject(ORAI_INFO);
+  });
+
+  it.each([
+    [flattenTokens.find((item) => item.name === 'ERC20 MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID), ORAICHAIN_ID, "MILKY", "milky-token"],
+    [flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID), ORAICHAIN_ID, "MILKY", "milky-token"],
+    [flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === ORAICHAIN_ID), BSC_CHAIN_ID, "MILKY", "milky-token"],
+    [flattenTokens.find((item) => item.coingeckoId === "cosmos" && item.chainId === COSMOS_CHAIN_ID), ORAICHAIN_ID, "ATOM", "cosmos"],
+    [flattenTokens.find((item) => item.coingeckoId === "cosmos" && item.chainId === ORAICHAIN_ID), COSMOS_CHAIN_ID, "ATOM", "cosmos"],
+    [flattenTokens.find((item) => item.coingeckoId === "oraichain-token" && item.chainId === BSC_CHAIN_ID), ORAICHAIN_ID, "ORAI", "oraichain-token"],
+    [flattenTokens.find((item) => item.coingeckoId === "tether" && item.chainId === TRON_CHAIN_ID), ORAICHAIN_ID, "USDT", "tether"],
+    [flattenTokens.find((item) => item.coingeckoId === "tether" && item.chainId === ORAICHAIN_ID), BSC_CHAIN_ID, "USDT", "tether"],
+  ])("bridge-test-find-default-to-token", (from: TokenItemType, expectedChainId: string, expectedName: string, expectedCoingeckoId: string) => {
+    const toToken = findDefaultToToken(from);
+    expect(toToken.chainId).toBe(expectedChainId);
+    expect(toToken.name).toContain(expectedName)
+    expect(toToken.coingeckoId).toBe(expectedCoingeckoId);
+  });
+
+  it.each([
+    [BSC_CHAIN_ID, "0x", `${BSC_SCAN}/tx/0x`],
+    [ETHEREUM_CHAIN_ID, "0x", `${ETHEREUM_SCAN}/tx/0x`],
+    [KWT_SUBNETWORK_CHAIN_ID, "0x", `${KWT_SCAN}/tx/0x`],
+    [TRON_CHAIN_ID, { txid: "0x1234" }, `${TRON_SCAN}/#/transaction/1234`],
+    [ORAICHAIN_ID, "0x", null],
+  ])("bridge-test-get-transaciton-url", (chainId: string | number, transactionHash: any, expectedUrl: string) => {
+    const url = getTransactionUrl(chainId, transactionHash);
+    expect(url).toBe(expectedUrl);
   });
 
   it('bridge-move-oraibridge-to-oraichain-should-return-only-transfer-IBC-msgs', async () => {

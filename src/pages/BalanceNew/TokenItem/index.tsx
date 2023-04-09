@@ -6,9 +6,8 @@ import TransferConvertToken from '../TransferConvertToken';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string, usd: number };
-  transferIBC?: any;
   name?: string;
-  onClickTransfer?: any;
+  onClickTransfer: any;
   active: Boolean;
   className?: string;
   onClick?: Function;
@@ -23,7 +22,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  transferIBC,
   onClickTransfer,
   convertKwt,
   subAmounts
@@ -64,7 +62,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             subAmounts={subAmounts}
             amountDetail={amountDetail}
-            transferIBC={transferIBC}
             onClickTransfer={onClickTransfer}
             convertKwt={convertKwt}
           />

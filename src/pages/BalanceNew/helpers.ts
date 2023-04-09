@@ -389,7 +389,8 @@ export const transferIbcCustom = async (
 };
 
 export const findDefaultToToken = (from: TokenItemType) => {
-  return flattenTokens.find(t => from.bridgeTo && from.bridgeTo.includes(t.org) && t.name.includes(from.name))
+  if (!from.bridgeTo) return;
+  return flattenTokens.find(t => from.bridgeTo.includes(t.org) && from.name.includes(t.name) && from.chainId !== t.chainId)
 };
 
 export const convertKwt = async (transferAmount: number, fromToken: TokenItemType): Promise<DeliverTxResponse> => {
