@@ -182,34 +182,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     }
   };
 
-  const convertToken = async (
-    amount: number,
-    token: TokenItemType,
-    type: 'cw20ToNative' | 'nativeToCw20',
-    outputToken?: TokenItemType
-  ) => {
-    if (amount <= 0)
-      return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
-      });
-
-    displayToast(TToastType.TX_BROADCASTING);
-    try {
-      const result = await broadcastConvertTokenTx(amount, token, type, outputToken);
-      if (result) {
-        processTxResult(token.rpc, result as any, `${network.explorer}/txs/${result.transactionHash}`);
-      }
-    } catch (error) {
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = `${error}`;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
-    }
-  };
-
   const getFilterTokens = (chainId: string | number): TokenItemType[] => {
     return [...otherChainTokens, ...oraichainTokens]
       .filter((token) => {
@@ -312,12 +284,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                   <TokenItem
                     className={styles.tokens_element}
                     key={t.denom}
-                    amountDetail={[amount.toString(), usd]}
+                    amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
                     active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
                     onClick={() => onClickToken(t)}
-                    convertToken={convertToken}
                     transferIBC={handleTransferIBC}
                     onClickTransfer={
                       async (fromAmount: number) => {

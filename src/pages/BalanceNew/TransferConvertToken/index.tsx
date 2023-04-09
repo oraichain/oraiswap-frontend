@@ -34,8 +34,7 @@ const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
 
 interface TransferConvertProps {
   token: TokenItemType;
-  amountDetail?: [string, number];
-  convertToken?: any;
+  amountDetail?: { amount: string, usd: number },
   transferIBC?: any;
   convertKwt?: any;
   onClickTransfer?: any;
@@ -70,20 +69,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     getAddressTransfer(findNetwork);
   }, [token?.chainId]);
 
-  const [amount, usd] = amountDetail;
-  const name = token.name;
-  const ibcConvertToken = filteredTokens.filter(
-    (t) =>
-      t.cosmosBased &&
-      (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
-      token.chainId === ORAICHAIN_ID &&
-      t.chainId !== ORAI_BRIDGE_CHAIN_ID
-  );
-
   // list of tokens where it exists in at least two different chains
   const listedTokens = filteredTokens.filter((t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId);
   const maxAmount = toDisplay(
-    amount, // amount detail here can be undefined
+    amountDetail.amount, // amount detail here can be undefined
     token?.decimals
   );
 
@@ -97,7 +86,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return true;
   };
 
-  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer) return <></>;
+  if (!token.name && token.chainId !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer) return <></>;
 
   const getAddressTransfer = async (network) => {
     try {
@@ -247,7 +236,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       }
                     }
 
-                    setConvertAmount([finalAmount * coeff, usd * coeff]);
+                    setConvertAmount([finalAmount * coeff, amountDetail.usd * coeff]);
                   }}
                 >
                   {text}
@@ -289,12 +278,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             );
           }
 
-          /** 
-           * TODO: we can remove token.chainId !== ORAI_BRIDGE_CHAIN_ID because we filter it
-           * in getFilterTokens from BalanceNews. and remove "name" because all token have name.
-           */
           if (
-            // (token.cosmosBased && token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 && name) ||
             (token.cosmosBased && listedTokens.length > 0) ||
             evmChains.find((chain) => chain.chainId === token.chainId)
           ) {
@@ -308,15 +292,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     const isValid = checkValidAmount();
                     if (!isValid) return;
                     setTransferLoading(true);
-
-                    /**
-                     * TODO: remove this condition
-                     * because token.bridgeNetworkIdentifier just appear in network with chainId: ORAI_BRIDGE_CHAIN_ID 
-                     * but now we dont have this network in bridge.
-                     */
-                    // if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
-                    //   return await convertToken(convertAmount, token, 'nativeToCw20');
-                    // }
 
                     // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
                     if (
@@ -350,39 +325,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               </button>
             );
           }
-
-
-          /** 
-           *  TODO: we can remove this render condition because conditions above covered all token to bridge.
-           * first render condition: render token from Kawaiiverse
-           * second render condition: render token based cosmos  and not based cosmos ( evm tokens ).
-           */
-          // if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken.length) {
-          //   return (
-          //     <button
-          //       className={styles.tfBtn}
-          //       disabled={transferLoading || !addressTransfer}
-          //       onClick={async (event) => {
-          //         event.stopPropagation();
-          //         try {
-          //           const isValid = checkValidAmount();
-          //           if (!isValid) return;
-          //           setTransferLoading(true);
-          //           const ibcConvert = ibcConvertToken.find((ibc) => ibc.bridgeNetworkIdentifier === filterNetwork);
-          //           await convertToken(convertAmount, token, 'cw20ToNative', ibcConvert);
-          //         } finally {
-          //           setTransferLoading(false);
-          //         }
-          //       }}
-          //     >
-          //       {transferLoading && <Loader width={20} height={20} />}
-          //       <span>
-          //         Transfersss
-          //         <strong style={{ marginLeft: 5 }}>{filterNetwork}</strong>
-          //       </span>
-          //     </button>
-          //   );
-          // }
         })()}
       </div>
     </div>
