@@ -20,13 +20,13 @@ export function generateMsgsSwap(
   oraiAddress: string
 ) {
   try {
-    const _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.decimals).toString();
+    const _fromAmount = toAmount(fromAmountToken, fromTokenInfoData.coinDecimals).toString();
 
     // hard copy of from & to token info data to prevent data from changing when calling the function
     const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, oraiAddress);
     const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
 
-    const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, fromTokenInfoData.decimals);
+    const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, fromTokenInfoData.coinDecimals);
     console.log({ minimumReceive });
     const msgs = generateContractMessages({
       type: Type.SWAP,

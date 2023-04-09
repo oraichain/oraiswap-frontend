@@ -69,7 +69,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
   };
 
   const mobileMode = isMobile();
-  console.log(infoCosmos);
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
   return (

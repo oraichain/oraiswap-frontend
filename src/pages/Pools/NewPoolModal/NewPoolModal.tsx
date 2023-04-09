@@ -41,8 +41,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const tokenObj1 = poolTokens.find((token) => token.denom === token1);
-  const tokenObj2 = poolTokens.find((token) => token.denom === token2);
+  const tokenObj1 = poolTokens.find((token) => token.coinDenom === token1);
+  const tokenObj2 = poolTokens.find((token) => token.coinDenom === token2);
 
   const { data: token1InfoData } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
     enabled: !!tokenObj1
@@ -52,15 +52,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     enabled: !!tokenObj2
   });
 
-  const token1Balance = BigInt(amounts[tokenObj1?.denom] ?? '0');
-  const token2Balance = BigInt(amounts[tokenObj2?.denom] ?? '0');
+  const token1Balance = BigInt(amounts[tokenObj1?.coinDenom] ?? '0');
+  const token2Balance = BigInt(amounts[tokenObj2?.coinDenom] ?? '0');
 
   const Token1Icon = tokenObj1?.Icon;
   const Token2Icon = tokenObj2?.Icon;
 
   const getBalanceValue = (tokenSymbol: string | undefined, amount: number | string) => {
     if (!tokenSymbol) return 0;
-    const coingeckoId = poolTokens.find((token) => token.name === tokenSymbol)?.coingeckoId;
+    const coingeckoId = poolTokens.find((token) => token.name === tokenSymbol)?.coinGeckoId;
     const pricePer = prices[coingeckoId!] ?? 0;
 
     return pricePer * +amount;
@@ -176,18 +176,18 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           />
           <div
             className={cx('btn')}
-            onClick={() => setAmountToken1(toDisplay(token1Balance, token1InfoData?.decimals))}
+            onClick={() => setAmountToken1(toDisplay(token1Balance, token1InfoData?.coinDecimals))}
           >
             MAX
           </div>
           <div
             className={cx('btn')}
-            onClick={() => setAmountToken1(toDisplay(token1Balance / BigInt(2), token1InfoData?.decimals))}
+            onClick={() => setAmountToken1(toDisplay(token1Balance / BigInt(2), token1InfoData?.coinDecimals))}
           >
             HALF
           </div>
           <TokenBalance
-            balance={getBalanceValue(token1InfoData?.symbol ?? '', toDisplay(token1Balance, token1InfoData?.decimals))}
+            balance={getBalanceValue(token1InfoData?.symbol ?? '', toDisplay(token1Balance, token1InfoData?.coinDecimals))}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -230,18 +230,18 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           />
           <div
             className={cx('btn')}
-            onClick={() => setAmountToken2(toDisplay(token2Balance, token2InfoData?.decimals))}
+            onClick={() => setAmountToken2(toDisplay(token2Balance, token2InfoData?.coinDecimals))}
           >
             MAX
           </div>
           <div
             className={cx('btn')}
-            onClick={() => setAmountToken2(toDisplay(token2Balance / BigInt(2), token2InfoData?.decimals))}
+            onClick={() => setAmountToken2(toDisplay(token2Balance / BigInt(2), token2InfoData?.coinDecimals))}
           >
             HALF
           </div>
           <TokenBalance
-            balance={getBalanceValue(token2InfoData?.symbol ?? '', toDisplay(token2Balance, token2InfoData?.decimals))}
+            balance={getBalanceValue(token2InfoData?.symbol ?? '', toDisplay(token2Balance, token2InfoData?.coinDecimals))}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -331,10 +331,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="text"
-              // value={supplyToken2 ? supplyToken2 : ''}
-              // onValueChange={({ floatValue }) => {
-              //   setSupplyToken2(floatValue);
-              // }}
+            // value={supplyToken2 ? supplyToken2 : ''}
+            // onValueChange={({ floatValue }) => {
+            //   setSupplyToken2(floatValue);
+            // }}
             />
             <span>%</span>
           </div>
@@ -353,7 +353,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => {}}>
+        <div className={cx('swap-btn')} onClick={() => { }}>
           Create
         </div>
       </div>
@@ -405,7 +405,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         prices={prices}
         setToken={(token1: string) => {
           setToken1(token1);
-          setListToken2Option(poolTokens.filter((t) => t.denom !== token1));
+          setListToken2Option(poolTokens.filter((t) => t.coinDenom !== token1));
         }}
         amounts={amounts}
         listToken={listToken1Option}
@@ -418,7 +418,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         amounts={amounts}
         setToken={(token2: string) => {
           setToken2(token2);
-          setListToken1Option(poolTokens.filter((t) => t.denom !== token2));
+          setListToken1Option(poolTokens.filter((t) => t.coinDenom !== token2));
         }}
         listToken={listToken2Option}
       />

@@ -99,7 +99,7 @@ describe('swap', () => {
                 orai_swap: {
                   offer_asset_info: {
                     native_token: {
-                      denom: fromTokenInfoData.denom
+                      denom: fromTokenInfoData.coinDenom
                     }
                   },
                   ask_asset_info: {

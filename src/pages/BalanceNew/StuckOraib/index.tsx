@@ -31,17 +31,17 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
         content={remainingOraib.map((token) => {
           const { Icon } = token;
           return (
-            <div key={token.denom} className={styles.stuckToken}>
+            <div key={token.coinDenom} className={styles.stuckToken}>
               <div className={styles.icon}>
                 <Icon width={20} height={20} />
                 <span className={styles.name}>{token.name}</span>
               </div>
               <TokenBalance
                 balance={{
-                  amount: toDisplay(token.amount, token.decimals).toString()
+                  amount: toDisplay(token.amount, token.coinDecimals).toString()
                 }}
                 className={styles.tokenAmount}
-                decimalScale={Math.min(6, token.decimals)}
+                decimalScale={Math.min(6, token.coinDecimals)}
               />
             </div>
           );

@@ -26,7 +26,7 @@ export type CoinGeckoPrices<T extends string> = {
 export const useCoinGeckoPrices = <T extends string>(
   options: Omit<UseQueryOptions<CoinGeckoPrices<T>, unknown, CoinGeckoPrices<T>, string[]>, 'queryKey' | 'queryFn'> = {}
 ): UseQueryResult<CoinGeckoPrices<T>, unknown> => {
-  const tokens = [...new Set(filteredTokens.map((t) => t.coingeckoId))];
+  const tokens = [...new Set(filteredTokens.map((t) => t.coinGeckoId))];
   tokens.sort();
 
   // use cached first then update by query, if is limited then return cached version

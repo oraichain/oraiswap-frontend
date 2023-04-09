@@ -81,18 +81,18 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const loadTokenAmounts = useLoadTokens();
 
-  let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
-  let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
+  let token1Balance = BigInt(amounts[token1?.coinDenom] ?? '0');
+  let token2Balance = BigInt(amounts[token2?.coinDenom] ?? '0');
   let subAmounts: AmountDetails;
   if (token1.contractAddress && token1.evmDenoms) {
     subAmounts = getSubAmountDetails(amounts, token1);
-    const subAmount = toAmount(toSumDisplay(subAmounts), token1.decimals);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token1.coinDecimals);
     token1Balance += subAmount;
   }
 
   if (token2.contractAddress && token2.evmDenoms) {
     subAmounts = getSubAmountDetails(amounts, token2);
-    const subAmount = toAmount(toSumDisplay(subAmounts), token2.decimals);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token2.coinDecimals);
     token2Balance += subAmount;
   }
 
@@ -135,7 +135,7 @@ const LiquidityModal: FC<ModalProps> = ({
   }, [pairAmountInfoData]);
 
   const getValueUsd = (token: TokenItemType, amount: string | bigint) => {
-    return toDisplay(amount, token!.decimals) * prices[token!.coingeckoId];
+    return toDisplay(amount, token!.coinDecimals) * prices[token!.coinGeckoId];
   };
 
   const onChangeAmount1 = (value: bigint) => {
@@ -345,7 +345,7 @@ const LiquidityModal: FC<ModalProps> = ({
             balance={{
               amount: token1Balance.toString(),
               denom: token1InfoData?.name ?? '',
-              decimals: token1InfoData?.decimals
+              decimals: token1InfoData?.coinDecimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -376,17 +376,17 @@ const LiquidityModal: FC<ModalProps> = ({
             decimalScale={6}
             placeholder={'0'}
             // type="input"
-            value={toDisplay(amountToken1, token1InfoData.decimals)}
+            value={toDisplay(amountToken1, token1InfoData?.coinDecimals)}
             // onValueChange={({ floatValue }) => onChangeAmount1(floatValue)}
             allowNegative={false}
             onChange={(e: any) => {
-              onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1InfoData.decimals));
+              onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1InfoData.coinDecimals));
             }}
           />
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -397,7 +397,7 @@ const LiquidityModal: FC<ModalProps> = ({
             balance={{
               amount: token2Balance.toString(),
               denom: token2InfoData?.name ?? '',
-              decimals: token2InfoData?.decimals
+              decimals: token2InfoData?.coinDecimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -429,9 +429,9 @@ const LiquidityModal: FC<ModalProps> = ({
             placeholder={'0'}
             // type="input"
             allowNegative={false}
-            value={toDisplay(amountToken2, token2InfoData.decimals)}
+            value={toDisplay(amountToken2, token2InfoData.coinDecimals)}
             onChange={(e: any) => {
-              onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2InfoData.decimals));
+              onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2InfoData.coinDecimals));
             }}
           />
         </div>
@@ -457,7 +457,7 @@ const LiquidityModal: FC<ModalProps> = ({
             balance={{
               amount: lpTokenBalance,
               denom: lpTokenInfoData?.symbol,
-              decimals: lpTokenInfoData?.decimals
+              decimals: lpTokenInfoData?.coinDecimals
             }}
             decimalScale={6}
           />
@@ -518,7 +518,7 @@ const LiquidityModal: FC<ModalProps> = ({
             balance={{
               amount: lpTokenBalance,
               denom: lpTokenInfoData?.symbol,
-              decimals: lpTokenInfoData?.decimals
+              decimals: lpTokenInfoData?.coinDecimals
             }}
             prefix="LP Token Balance: "
             decimalScale={6}
@@ -538,9 +538,9 @@ const LiquidityModal: FC<ModalProps> = ({
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
-            value={toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
+            value={toDisplay(lpAmountBurn, lpTokenInfoData?.coinDecimals)}
             allowNegative={false}
-            onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))}
+            onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.coinDecimals))}
           />
         </div>
         <div className={cx('options')}>
@@ -600,7 +600,7 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={{
                     amount: lp1BurnAmount,
-                    decimals: token1.decimals
+                    decimals: token1.coinDecimals
                   }}
                   decimalScale={6}
                   prefix={''}
@@ -620,7 +620,7 @@ const LiquidityModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={{
                     amount: lp2BurnAmount,
-                    decimals: token2.decimals
+                    decimals: token2.coinDecimals
                   }}
                   decimalScale={6}
                   prefix={''}

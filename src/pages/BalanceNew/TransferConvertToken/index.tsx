@@ -1,4 +1,3 @@
-import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import classNames from 'classnames';
@@ -6,31 +5,24 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { evmChains, filteredTokens, gravityContracts, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cosmosNetworks, evmChains, evmChainsWithoutTron, filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import {
-  BSC_ORG,
-  COSMOS_TYPE,
-  ETHEREUM_ORG,
-  EVM_TYPE,
   GAS_ESTIMATION_BRIDGE_DEFAULT,
   KAWAII_ORG,
   KWT_SUBNETWORK_CHAIN_ID,
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  TRON_CHAIN_ID,
-  TRON_ORG
+  TRON_CHAIN_ID
 } from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
+import { networksWithoutOraib } from 'config/bridgeTokens';
+import { feeEstimate, filterChainBridge, getTokenChain, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
 import styles from './index.module.scss';
-
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
   [0.5, '50%'],
@@ -46,6 +38,7 @@ interface TransferConvertProps {
   convertKwt?: any;
   onClickTransfer?: any;
   subAmounts?: object;
+  fromNetwork: string | number;
 }
 
 const TransferConvertToken: FC<TransferConvertProps> = ({
@@ -55,11 +48,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   transferIBC,
   convertKwt,
   onClickTransfer,
-  subAmounts
+  subAmounts,
+  fromNetwork
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useState('');
+  const [toNetwork, setToNetwork] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
@@ -72,10 +66,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   useEffect(() => {
     const chainDefault = getTokenChain(token);
-    setFilterNetwork(chainDefault);
-    const findNetwork = networks.find((net) => net.title == chainDefault);
+    setToNetwork(chainDefault);
+    const findNetwork = networksWithoutOraib.find((net) => net.chainName === chainDefault);
     getAddressTransfer(findNetwork);
-  }, [token?.chainId]);
+  }, [fromNetwork, token]);
 
   const [amount, usd] = amountDetail;
   const name = token.name;
@@ -83,15 +77,16 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     (t) =>
       t.cosmosBased &&
       (t.name === `ERC20 ${token.name}` || t.name === `BEP20 ${token.name}`) &&
-      token.chainId === ORAICHAIN_ID &&
-      t.chainId !== ORAI_BRIDGE_CHAIN_ID
+      fromNetwork === ORAICHAIN_ID &&
+      !t.bridgeNetworkIdentifier
   );
 
   // list of tokens where it exists in at least two different chains
-  const listedTokens = filteredTokens.filter((t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId);
+  const listedTokens = filteredTokens.filter((t) => t.chainId !== fromNetwork && t.coinGeckoId === token.coinGeckoId);
+
   const maxAmount = toDisplay(
     amount, // amount detail here can be undefined
-    token?.decimals
+    token?.coinDecimals
   );
 
   const checkValidAmount = () => {
@@ -104,19 +99,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return true;
   };
 
-  if (!name && !ibcConvertToken && token.chainId !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer) return <></>;
+  if (!name && !ibcConvertToken && fromNetwork !== KWT_SUBNETWORK_CHAIN_ID && !onClickTransfer) return <></>;
 
   const getAddressTransfer = async (network) => {
     try {
       let address: string = '';
-      if (network.networkType == EVM_TYPE && network.chainId !== TRON_CHAIN_ID) {
+      if (evmChainsWithoutTron.find(i => i.chainId == network.chainId)) {
         if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
         address = await window.Metamask!.getEthAddress();
       }
       if (network.chainId === TRON_CHAIN_ID) {
         address = await window.tronWeb.defaultAddress.base58;
       }
-      if (network.networkType == COSMOS_TYPE) {
+
+      if (cosmosNetworks.find(i => i.chainId == network.chainId) || network.chainId === KWT_SUBNETWORK_CHAIN_ID) {
         address = await window.Keplr.getKeplrAddr(network.chainId);
       }
       setAddressTransfer(address);
@@ -139,10 +135,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   balance={{
                     amount: subAmount,
                     denom: evmToken.name,
-                    decimals: evmToken.decimals
+                    decimals: evmToken.coinDecimals
                   }}
                   className={styles.tokenAmount}
-                  decimalScale={token.decimals}
+                  decimalScale={token.coinDecimals}
                 />
               </div>
             );
@@ -168,8 +164,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               >
                 <div className={styles.search_box}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                    <span className={styles.search_text}>{filterNetwork}</span>
+                    <div className={styles.search_logo}>{renderLogoNetwork(toNetwork)}</div>
+                    <span className={styles.search_text}>{toNetwork}</span>
                   </div>
                   <div>
                     <ArrowDownIcon />
@@ -179,8 +175,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               {isOpen && (
                 <div>
                   <ul className={styles.items}>
-                    {networks &&
-                      networks
+                    {networksWithoutOraib &&
+                      networksWithoutOraib
                         .filter((item) => filterChainBridge(token, item))
                         .map((network) => {
                           return (
@@ -188,7 +184,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                               key={network.chainId}
                               onClick={async (e) => {
                                 e.stopPropagation();
-                                setFilterNetwork(network?.title);
+                                setToNetwork(network?.chainId);
                                 await getAddressTransfer(network);
                                 setIsOpen(false);
                               }}
@@ -199,8 +195,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                   alignItems: 'center'
                                 }}
                               >
-                                <div>{renderLogoNetwork(network.chainId)}</div>
-                                <div className={styles.items_title}>{network.title}</div>
+                                <div><network.Icon /></div>
+                                <div className={styles.items_title}>{network.chainName}</div>
                               </div>
                             </li>
                           );
@@ -218,7 +214,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               <NumberFormat
                 placeholder="0"
                 thousandSeparator
-                decimalScale={Math.min(6, token?.decimals)}
+                decimalScale={Math.min(6, token?.coinDecimals)}
                 customInput={Input}
                 value={convertAmount}
                 onClick={(event) => {
@@ -226,7 +222,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const usdValue = floatValue * (prices[token.coingeckoId] ?? 0);
+                  const usdValue = floatValue * (prices[token.coinGeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
                 className={styles.amount}
@@ -245,7 +241,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     event.stopPropagation();
                     // hardcode estimate fee oraichain
                     let finalAmount = maxAmount;
-                    if (token?.denom === ORAI) {
+                    if (token?.coinDenom === ORAI) {
                       const useFeeEstimate = await feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
                       if (coeff === 1) {
                         finalAmount = useFeeEstimate > finalAmount ? 0 : finalAmount - useFeeEstimate;
@@ -266,7 +262,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          if (token.chainId === KWT_SUBNETWORK_CHAIN_ID) {
+          if (fromNetwork === KWT_SUBNETWORK_CHAIN_ID) {
             return (
               <>
                 <button
@@ -278,7 +274,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
-                      if (filterNetwork === ORAICHAIN_ID) {
+                      if (toNetwork === ORAICHAIN_ID) {
                         return await onClickTransfer(convertAmount);
                       }
                       await convertKwt(convertAmount, token);
@@ -289,7 +285,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {filterNetwork === ORAICHAIN_ID ? 'Transfer' : 'Convert'} <strong>{filterNetwork}</strong>
+                    {toNetwork === ORAICHAIN_ID ? 'Transfer' : 'Convert'} <strong>{toNetwork}</strong>
                   </span>
                 </button>
               </>
@@ -297,8 +293,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           }
 
           if (
-            (token.cosmosBased && token.chainId !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 && name) ||
-            evmChains.find((chain) => chain.chainId === token.chainId)
+            (token.cosmosBased && fromNetwork !== ORAI_BRIDGE_CHAIN_ID && listedTokens.length > 0 && name) ||
+            evmChains.find((chain) => chain.chainId === fromNetwork)
           ) {
             return (
               <>
@@ -311,19 +307,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       const isValid = checkValidAmount();
                       if (!isValid) return;
                       setTransferLoading(true);
-                      if (token.bridgeNetworkIdentifier && filterNetwork == ORAICHAIN_ID) {
+                      if (token.bridgeNetworkIdentifier && toNetwork === ORAICHAIN_ID) {
                         return await convertToken(convertAmount, token, 'nativeToCw20');
                       }
                       if (
                         onClickTransfer &&
-                        (filterNetwork == KAWAII_ORG || evmChains.find((chain) => chain.chainId === token.chainId))
+                        (toNetwork === KAWAII_ORG || evmChains.find((chain) => chain.chainId === fromNetwork))
                       ) {
                         return await onClickTransfer(convertAmount);
                       }
                       const to = filteredTokens.find((t) =>
                         t.chainId === ORAI_BRIDGE_CHAIN_ID && t?.bridgeNetworkIdentifier
-                          ? t.bridgeNetworkIdentifier === filterNetwork && t.coingeckoId === token.coingeckoId
-                          : t.coingeckoId === token.coingeckoId && t.org === filterNetwork
+                          ? t.bridgeNetworkIdentifier === toNetwork && t.coinGeckoId === token.coinGeckoId
+                          : t.coinGeckoId === token.coinGeckoId && t.org === toNetwork
                       );
                       // convert reverse before transferring
                       await transferIBC(token, to, convertAmount);
@@ -336,14 +332,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 >
                   {transferLoading && <Loader width={20} height={20} />}
                   <span>
-                    {'Transfer'} <strong>{filterNetwork}</strong>
+                    {'Transfer'} <strong>{toNetwork}</strong>
                   </span>
                 </button>
               </>
             );
           }
 
-          if (token.chainId !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken.length) {
+          if (fromNetwork !== ORAI_BRIDGE_CHAIN_ID && ibcConvertToken.length) {
             return (
               <button
                 className={styles.tfBtn}
@@ -354,7 +350,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     const isValid = checkValidAmount();
                     if (!isValid) return;
                     setTransferLoading(true);
-                    const ibcConvert = ibcConvertToken.find((ibc) => ibc.bridgeNetworkIdentifier === filterNetwork);
+                    const ibcConvert = ibcConvertToken.find((ibc) => ibc.bridgeNetworkIdentifier === toNetwork);
                     await convertToken(convertAmount, token, 'cw20ToNative', ibcConvert);
                   } finally {
                     setTransferLoading(false);
@@ -364,7 +360,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 {transferLoading && <Loader width={20} height={20} />}
                 <span>
                   Transfer
-                  <strong style={{ marginLeft: 5 }}>{filterNetwork}</strong>
+                  <strong style={{ marginLeft: 5 }}>{toNetwork}</strong>
                 </span>
               </button>
             );

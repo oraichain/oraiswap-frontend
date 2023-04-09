@@ -88,7 +88,7 @@ export const pairs: Pair[] = [
 
 export const pairDenoms = uniq(flatten(pairs.map((pair) => pair.asset_denoms)));
 
-export const poolTokens = filteredTokens.filter((token) => pairDenoms.includes(token.denom));
+export const poolTokens = filteredTokens.filter((token) => pairDenoms.includes(token.coinDenom));
 
 export const getPair = (denom1: string | string[], denom2?: string): Pair | undefined => {
   const asset_denoms = typeof denom1 === 'string' ? [denom1, denom2] : denom1;

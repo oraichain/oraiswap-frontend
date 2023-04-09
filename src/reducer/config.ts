@@ -3,8 +3,8 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { KeyFilterPool } from 'pages/Pools';
-import { PERSIST_VER } from 'store/constants';
-// import { PERSIST_VERSION } from 'store/configure';
+import { embedNetworkInfos } from 'config/networkInfos';
+import { ORAICHAIN_ID } from 'config/constants';
 
 export type ChainInfoType = {
   networkType?: string;
@@ -13,6 +13,17 @@ export type ChainInfoType = {
   lcd?: string;
 };
 
+export type NetworkBridgeType = {
+  rpc: string;
+  chainId: string | number;
+  chainName: string;
+};
+
+export function getDefaultNetwork(): NetworkBridgeType {
+  const { rpc, chainId, chainName } = embedNetworkInfos.find((network) => network.chainId === ORAICHAIN_ID);
+  return { rpc, chainId, chainName };
+}
+
 export interface ConfigState {
   address: string;
   metamaskAddress: string | null;
@@ -20,7 +31,6 @@ export interface ConfigState {
   chainId: string;
   chainInfo: ChainInfoType;
   infoEvm: ChainInfoType;
-  filterNetwork: string;
   infoCosmos: ChainInfoType;
   statusChangeAccount: boolean;
   hideOtherSmallAmount: boolean;
@@ -31,7 +41,7 @@ export interface ConfigState {
     [key: string]: number;
   };
   filterDefaultPool: KeyFilterPool;
-  persistVersion: number;
+  fromNetwork: NetworkBridgeType;
 }
 
 const initialState: ConfigState = {
@@ -39,7 +49,6 @@ const initialState: ConfigState = {
   metamaskAddress: '',
   tronAddress: '',
   chainId: 'Oraichain',
-  filterNetwork: 'Oraichain',
   chainInfo: {},
   infoEvm: {},
   infoCosmos: {},
@@ -50,7 +59,7 @@ const initialState: ConfigState = {
   coingecko: {},
   apr: {},
   filterDefaultPool: KeyFilterPool.all_pool,
-  persistVersion: PERSIST_VER,
+  fromNetwork: getDefaultNetwork()
 };
 
 export const configSlice = createSlice({
@@ -58,10 +67,7 @@ export const configSlice = createSlice({
   initialState,
   reducers: {
     updateConfig: {
-      reducer(
-        state,
-        action: PayloadAction<string, string, ConfigState[keyof ConfigState]>
-      ) {
+      reducer(state, action: PayloadAction<string, string, ConfigState[keyof ConfigState]>) {
         state[action.payload] = action.meta;
       },
       prepare(key: string, value: ConfigState[keyof ConfigState]) {

@@ -43,7 +43,7 @@ export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecima
 };
 
 export const getUsd = (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>): number => {
-  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0);
+  return toDisplay(amount, tokenInfo.coinDecimals) * (prices[tokenInfo.coinGeckoId] ?? 0);
 };
 
 export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<string>): number => {
@@ -51,8 +51,8 @@ export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<stri
   for (const denom in amounts) {
     const tokenInfo = tokenMap[denom];
     if (!tokenInfo) continue;
-    const amount = toDisplay(amounts[denom], tokenInfo.decimals);
-    usd += amount * (prices[tokenInfo.coingeckoId] ?? 0);
+    const amount = toDisplay(amounts[denom], tokenInfo.coinDecimals);
+    usd += amount * (prices[tokenInfo.coinGeckoId] ?? 0);
   }
   return usd;
 };
@@ -72,12 +72,12 @@ export const toSubDisplay = (amounts: AmountDetails, tokenInfo: TokenItemType): 
 };
 
 export const toTotalDisplay = (amounts: AmountDetails, tokenInfo: TokenItemType): number => {
-  return toDisplay(amounts[tokenInfo.denom], tokenInfo.decimals) + toSubDisplay(amounts, tokenInfo);
+  return toDisplay(amounts[tokenInfo.coinDenom], tokenInfo.coinDecimals) + toSubDisplay(amounts, tokenInfo);
 };
 
 export const toSubAmount = (amounts: AmountDetails, tokenInfo: TokenItemType): bigint => {
   const displayAmount = toSubDisplay(amounts, tokenInfo);
-  return toAmount(displayAmount, tokenInfo.decimals);
+  return toAmount(displayAmount, tokenInfo.coinDecimals);
 };
 
 export const toSumDisplay = (amounts: AmountDetails): number => {
@@ -88,7 +88,7 @@ export const toSumDisplay = (amounts: AmountDetails): number => {
     // update later
     const balance = amounts[denom];
     if (!balance) continue;
-    amount += toDisplay(balance, tokenMap[denom].decimals);
+    amount += toDisplay(balance, tokenMap[denom].coinDecimals);
   }
   return amount;
 };
@@ -118,7 +118,7 @@ export const toAssetInfo = (token: TokenInfo): AssetInfo => {
           contract_addr: token.contractAddress
         }
       }
-    : { native_token: { denom: token.denom } };
+    : { native_token: { denom: token.coinDenom } };
 };
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
@@ -216,8 +216,8 @@ export const processWsResponseMsg = (message: any): string => {
       const packet = JSON.parse(packetRaw);
       // we look for the true denom information with decimals to process
       // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
-      const receivedToken = filteredTokens.find((token) => token.denom === packet.denom);
-      const displayAmount = toDisplay(packet.amount, receivedToken.decimals);
+      const receivedToken = filteredTokens.find((token) => token.coinDenom === packet.denom);
+      const displayAmount = toDisplay(packet.amount, receivedToken.coinDecimals);
       tokens = tokens.concat(`${displayAmount} ${receivedToken.name}, `);
     }
     return tokens.substring(0, tokens.length - 2); // remove , due to concat

@@ -176,7 +176,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   <TokenBalance
                     balance={{
                       amount: BigInt(rewardInfoFirst?.bond_amount ?? '0'),
-                      decimals: lpTokenInfoData.decimals,
+                      decimals: lpTokenInfoData.coinDecimals,
                       denom: lpTokenInfoData?.symbol
                     }}
                     className={cx('amount')}
@@ -227,7 +227,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       <TokenBalance
                         balance={{
                           amount: r.amount,
-                          denom: r.denom.toUpperCase(),
+                          denom: r.coinDenom.toUpperCase(),
                           decimals: 6
                         }}
                         decimalScale={6}

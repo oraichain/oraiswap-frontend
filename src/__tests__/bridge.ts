@@ -145,7 +145,7 @@ describe('bridge', () => {
     let ibcInfo = ibcInfos[oraibTokens[0].chainId][toTokens[0].chainId];
 
     // hardcode for MILKY & KWT because they use the old IBC channel
-    if (oraibTokens[0].denom === MILKY_DENOM || oraibTokens[0].denom === KWT_DENOM)
+    if (oraibTokens[0].coinDenom === MILKY_DENOM || oraibTokens[0].coinDenom === KWT_DENOM)
       ibcInfo = ibcInfosOld[oraibTokens[0].chainId][toTokens[0].chainId];
 
     expect(transferMsgs[0].sourcePort).toEqual(ibcInfo.source);

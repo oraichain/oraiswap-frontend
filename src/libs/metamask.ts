@@ -82,7 +82,7 @@ export default class Metamask {
 
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
-    const balance = toAmount(amountVal, token.decimals);
+    const balance = toAmount(amountVal, token.coinDecimals);
     console.log('gravity tron address: ', gravityContractAddr);
 
     if (this.isTron(token.chainId)) {
@@ -112,7 +112,7 @@ export default class Metamask {
   public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
     // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
-    const weiAmount = toAmount(amount, token.decimals);
+    const weiAmount = toAmount(amount, token.coinDecimals);
     // using static rpc for querying both tron and evm
     const web3 = new Web3(token.rpc);
     const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
@@ -120,7 +120,7 @@ export default class Metamask {
 
     if (currentAllowance >= weiAmount) return;
 
-    const allowance = toAmount(999999999999999, token.decimals);
+    const allowance = toAmount(999999999999999, token.coinDecimals);
 
     if (this.isTron(token.chainId)) {
       if (Metamask.checkTron())

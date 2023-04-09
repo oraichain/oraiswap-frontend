@@ -32,7 +32,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -54,9 +54,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
 
     pair = getPair(poolUrl.split('_'));
     if (!pair) return;
-    const token1 = poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
+    const token1 = poolTokens.find((token) => token.coinDenom === pair!.asset_denoms[0]);
 
-    const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
+    const token2 = poolTokens.find((token) => token.coinDenom === pair!.asset_denoms[1]);
 
     const info = await fetchPairInfo([token1!, token2!]);
 
@@ -220,7 +220,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: lpTokenBalance,
-                              decimals: lpTokenInfoData.decimals,
+                              decimals: lpTokenInfoData.coinDecimals,
                               denom: lpTokenInfoData.symbol
                             }}
                             decimalScale={6}
@@ -242,7 +242,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity1,
-                              decimals: pairInfoData.token1.decimals
+                              decimals: pairInfoData.token1.coinDecimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -260,7 +260,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: liquidity2,
-                              decimals: pairInfoData.token2.decimals
+                              decimals: pairInfoData.token2.coinDecimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -290,7 +290,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData.token1Amount,
-                              decimals: pairInfoData.token1.decimals
+                              decimals: pairInfoData.token1.coinDecimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}
@@ -311,7 +311,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                           <TokenBalance
                             balance={{
                               amount: pairAmountInfoData.token2Amount,
-                              decimals: pairInfoData.token2.decimals
+                              decimals: pairInfoData.token2.coinDecimals
                             }}
                             className={cx('amount')}
                             decimalScale={6}

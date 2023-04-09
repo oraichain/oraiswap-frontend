@@ -93,7 +93,7 @@ export const transferIBCKwt = async (
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
-  var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  var amount = coin(toAmount(transferAmount, fromToken.coinDecimals).toString(), fromToken.coinDenom);
 
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   var customMessages: any[];
@@ -142,9 +142,9 @@ export const convertTransferIBCErc20Kwt = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId); // collect kawaiiverse cosmos based token for conversion
+  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coinGeckoId === fromToken.coinGeckoId); // collect kawaiiverse cosmos based token for conversion
 
-  const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
+  const amount = coin(toAmount(transferAmount, fromToken.coinDecimals).toString(), nativeToken.coinDenom);
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
   const result = await KawaiiverseJs.convertIbcTransferERC20({
@@ -231,7 +231,7 @@ export const transferTokenErc20Cw20Map = async ({
   ibcMemo?: string;
 }): Promise<DeliverTxResponse> => {
   const evmToken = tokenMap[fromToken.evmDenoms[0]];
-  const evmAmount = coin(toAmount(transferAmount, evmToken.decimals).toString(), evmToken.denom);
+  const evmAmount = coin(toAmount(transferAmount, evmToken.coinDecimals).toString(), evmToken.coinDenom);
 
   const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
 
@@ -298,13 +298,13 @@ export const transferToRemoteChainIbcWasm = async (
   const msg = {
     localChannelId: ibcInfo.channel,
     remoteAddress: toAddress,
-    remoteDenom: toToken.denom,
+    remoteDenom: toToken.coinDenom,
     timeout: ibcInfo.timeout,
     memo: ibcMemo
   };
   let result: ExecuteResult;
   if (assetInfo.native_token) {
-    result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
+    result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.coinDenom }]);
   } else {
     const transferBackMsgCw20Msg: TransferBackMsg = {
       local_channel_id: msg.localChannelId,
@@ -344,10 +344,10 @@ export const transferIbcCustom = async (
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
-  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) throw generateError('Prefix Token not found!');
+  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.bridgePrefix) throw generateError('Prefix Token not found!');
 
-  let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
-  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + transferAddress : '';
+  let amount = coin(toAmount(transferAmount, fromToken.coinDecimals).toString(), fromToken.coinDenom);
+  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.bridgePrefix + transferAddress : '';
   let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
   if (!transferAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
@@ -409,7 +409,7 @@ export const convertKwt = async (transferAmount: number, fromToken: TokenItemTyp
     return;
   }
 
-  const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  const amount = coin(toAmount(transferAmount, fromToken.coinDecimals).toString(), fromToken.coinDenom);
 
   let result: DeliverTxResponse;
 
@@ -436,7 +436,7 @@ export const broadcastConvertTokenTx = async (
   type: 'cw20ToNative' | 'nativeToCw20',
   outputToken?: TokenItemType
 ): Promise<ExecuteResult> => {
-  const _fromAmount = toAmount(amount, token.decimals).toString();
+  const _fromAmount = toAmount(amount, token.coinDecimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
   let msgs: any;

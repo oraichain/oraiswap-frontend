@@ -22,7 +22,7 @@ const SwapChart: React.FC<{
   const [price24hChange, setPrice24hChange] = useState<number | null>(null);
   const [infoToken, setInfoToken] = useState<InfoToken | null>(null);
 
-  const tokenName = poolTokens.find((el) => el.denom === fromTokenDenom)?.name;
+  const tokenName = poolTokens.find((el) => el.coinDenom === fromTokenDenom)?.name;
 
   useEffect(() => {
     if (infoToken?.price24hChange) {
@@ -41,7 +41,7 @@ const SwapChart: React.FC<{
   }, [typeData, tokenName]);
 
   const IconFromToken = useMemo(() => {
-    return poolTokens.find((el) => el.denom === fromTokenDenom)?.Icon;
+    return poolTokens.find((el) => el.coinDenom === fromTokenDenom)?.Icon;
   }, [fromTokenDenom]);
 
   const getInfoToken = useCallback(async () => {
@@ -80,7 +80,7 @@ const SwapChart: React.FC<{
                     <IconFromToken />
                   </div>
                   <span className={cx('item-text')}>
-                    {poolTokens.find((el) => el.denom === fromTokenDenom)?.name?.toUpperCase()}
+                    {poolTokens.find((el) => el.coinDenom === fromTokenDenom)?.name?.toUpperCase()}
                   </span>
                 </div>
                 <span className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}>

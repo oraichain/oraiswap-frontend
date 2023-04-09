@@ -71,6 +71,7 @@ export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const KWT_SUBNETWORK_EVM_CHAIN_ID = Networks.kawaiiverse; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
+export const ORAICHAIN_ORG = 'Oraichain';
 export const BSC_ORG = 'BNB Chain';
 export const ETHEREUM_ORG = 'Ethereum';
 export const TRON_ORG = 'Tron Network';
@@ -138,6 +139,17 @@ export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
 // coingeckoid token
 export const ORAI_COINGECKO_ID = 'oraichain-token';
 export const ORAIX_COINGECKO_ID = 'oraidex';
+export const COSMOS_COINGECKO_ID = 'cosmos';
+export const OSMOSIS_COINGECKO_ID = 'osmosis';
+export const TRON_COINGECKO_ID = 'tron';
+export const AIRIGHT_COINGECKO_ID = 'airight';
+export const MILKY_COINGECKO_ID = 'milky-token';
+export const KWT_COINGECKO_ID = 'kawaii-islands';
+export const USDT_COINGECKO_ID = 'tether';
+
+// coin icon url
+export const ORAI_ICON_URL = 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png';
+export const COSMOS_ICON_URL = 'https://s2.coinmarketcap.com/static/img/coins/64x64/7533.png';
 
 // asset info token
 export const ORAI_INFO = {

@@ -127,7 +127,7 @@ const BondingModal: FC<ModalProps> = ({
               balance={{
                 amount: lpTokenBalance,
                 denom: lpTokenInfoData?.symbol,
-                decimals: lpTokenInfoData?.decimals
+                decimals: lpTokenInfoData?.coinDecimals
               }}
               decimalScale={6}
               prefix="Balance: "
@@ -148,9 +148,9 @@ const BondingModal: FC<ModalProps> = ({
               decimalScale={6}
               placeholder={'0'}
               // type="input"
-              value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
+              value={toDisplay(bondAmount, lpTokenInfoData.coinDecimals)}
               onChange={(e: { target: { value: string } }) => {
-                setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.decimals));
+                setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.coinDecimals));
               }}
             />
           </div>

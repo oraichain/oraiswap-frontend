@@ -38,7 +38,7 @@ import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -87,7 +87,7 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
       className={styles.pairbox}
       onClick={() =>
         navigate(
-          `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(token2.denom)}`
+          `/pool/${encodeURIComponent(token1.coinDenom)}_${encodeURIComponent(token2.coinDenom)}`
           // { replace: true }
         )
       }
@@ -159,7 +159,7 @@ const ListPools = memo<{
       const searchReg = new RegExp(text, 'i');
       const ret = listPairs.filter((pairInfo) =>
         pairInfo.pair.asset_denoms.some((denom) =>
-          filteredTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
+          filteredTokens.find((token) => token.coinDenom === denom && token.name.search(searchReg) !== -1)
         )
       );
       setFilteredPairInfos(ret);
@@ -350,7 +350,7 @@ const Pools: React.FC<PoolsProps> = () => {
     }
 
     const poolList: PairInfoData[] = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
-    const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
+    const oraiUsdtPool = poolList.find((pool) => pool.fromToken.coinDenom === ORAI && pool.toToken.coinDenom === STABLE_DENOM);
 
     if (!oraiUsdtPool) {
       // retry after 3 seconds

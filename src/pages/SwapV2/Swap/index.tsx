@@ -53,13 +53,13 @@ const SwapComponent: React.FC<{
   };
 
   const onMaxFromAmount = async (amount: bigint, type: 'max' | 'half') => {
-    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    const displayAmount = toDisplay(amount, fromTokenInfoData?.coinDecimals);
     let finalAmount = displayAmount;
 
     // hardcode fee when swap token orai
     if (fromTokenDenom === ORAI) {
       const useFeeEstimate = await feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.coinDecimals);
       if (type === 'max') {
         finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
       }
@@ -79,15 +79,15 @@ const SwapComponent: React.FC<{
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
-  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
-  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
+  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.coinDenom] ?? '0') + subAmountFrom : BigInt(0);
+  const toTokenBalance = toToken ? BigInt(amounts[toToken.coinDenom] ?? '0') + subAmountTo : BigInt(0);
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
+        amount: toAmount(fromAmountToken, fromTokenInfoData!.coinDecimals).toString()
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
@@ -98,17 +98,17 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(1, fromTokenInfoData!.decimals).toString()
+        amount: toAmount(1, fromTokenInfoData!.coinDecimals).toString()
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
 
   useEffect(() => {
-    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
+    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.coinDecimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
+    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.coinDecimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   const handleSubmit = async () => {
@@ -181,7 +181,7 @@ const SwapComponent: React.FC<{
           <TokenBalance
             balance={{
               amount: fromTokenBalance,
-              decimals: fromTokenInfoData?.decimals,
+              decimals: fromTokenInfoData?.coinDecimals,
               denom: fromTokenInfoData?.symbol ?? ''
             }}
             prefix="Balance: "
@@ -237,7 +237,7 @@ const SwapComponent: React.FC<{
             balance={{
               amount: toTokenBalance,
               denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals
+              decimals: toTokenInfoData?.coinDecimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -264,7 +264,7 @@ const SwapComponent: React.FC<{
       >
         {swapLoading && <Loader width={40} height={40} />}
         {/* hardcode check minimum tron */}
-        {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+        {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.coinDenom === TRON_DENOM ? (
           <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
         ) : (
           <span>Swap</span>
@@ -279,7 +279,7 @@ const SwapComponent: React.FC<{
             balance={{
               amount: simulateData?.amount,
               denom: toTokenInfoData?.symbol,
-              decimals: toTokenInfoData?.decimals
+              decimals: toTokenInfoData?.coinDecimals
             }}
             decimalScale={6}
           />
@@ -290,7 +290,7 @@ const SwapComponent: React.FC<{
           </div>
           <span>0.3 %</span>
         </div>
-        {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
+        {(fromToken?.coinDenom === MILKY || toToken?.coinDenom === MILKY) && (
           <div className={cx('row')}>
             <div className={cx('title')}>
               <span>*Additional: 5% entry tax rate for MILKY transactions</span>
@@ -305,7 +305,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectFrom(false)}
           prices={prices}
           listToken={poolTokens.filter((token) =>
-            toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
+            toTokenDenom === MILKY ? token.coinDenom === STABLE_DENOM : token.coinDenom !== toTokenDenom
           )}
           amounts={amounts}
           setToken={(denom) => {
@@ -320,7 +320,7 @@ const SwapComponent: React.FC<{
           prices={prices}
           amounts={amounts}
           listToken={poolTokens.filter((token) =>
-            fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
+            fromTokenDenom === MILKY ? token.coinDenom === STABLE_DENOM : token.coinDenom !== fromTokenDenom
           )}
           setToken={(denom) => {
             setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);

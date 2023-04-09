@@ -116,7 +116,7 @@ const UnbondModal: FC<ModalProps> = ({
               balance={{
                 amount: bondAmount,
                 denom: lpTokenInfoData.symbol,
-                decimals: lpTokenInfoData.decimals
+                decimals: lpTokenInfoData.coinDecimals
               }}
               prefix="Bonded Token Balance: "
               decimalScale={6}
@@ -130,8 +130,8 @@ const UnbondModal: FC<ModalProps> = ({
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
-              value={toDisplay(unbondAmount, lpTokenInfoData.decimals)}
-              onValueChange={({ floatValue }) => setUnbondAmount(toAmount(floatValue, lpTokenInfoData.decimals))}
+              value={toDisplay(unbondAmount, lpTokenInfoData.coinDecimals)}
+              onValueChange={({ floatValue }) => setUnbondAmount(toAmount(floatValue, lpTokenInfoData.coinDecimals))}
             />
           </div>
           <div className={cx('options')}>

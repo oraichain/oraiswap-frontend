@@ -1,10 +1,8 @@
 import classNames from 'classnames';
-import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
-import { TooltipIcon } from 'components/Tooltip';
-import { isMobile } from '@walletconnect/browser-utils';
+import styles from './index.module.scss';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: [string, number];
@@ -18,6 +16,7 @@ interface TokenItemProps {
   onBlur?: Function;
   convertKwt?: any;
   subAmounts?: AmountDetails;
+  fromNetwork: string | number;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -30,7 +29,8 @@ const TokenItem: React.FC<TokenItemProps> = ({
   transferIBC,
   onClickTransfer,
   convertKwt,
-  subAmounts
+  subAmounts,
+  fromNetwork
 }) => {
   const [amount, usd] = amountDetail;
   return (
@@ -54,10 +54,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
               balance={{
                 amount: amount ?? '0',
                 denom: '',
-                decimals: token.decimals
+                decimals: token.coinDecimals
               }}
               className={styles.tokenAmount}
-              decimalScale={Math.min(6, token.decimals)}
+              decimalScale={Math.min(6, token.coinDecimals)}
             />
           </div>
           <TokenBalance balance={usd} className={styles.subLabel} decimalScale={2} />
@@ -73,6 +73,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
             transferIBC={transferIBC}
             onClickTransfer={onClickTransfer}
             convertKwt={convertKwt}
+            fromNetwork={fromNetwork}
           />
         )}
 

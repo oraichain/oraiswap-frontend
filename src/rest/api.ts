@@ -109,7 +109,7 @@ async function getPairAmountInfo(
   // default is usdt
   let tokenPrice = 0;
 
-  if (fromToken.denom === ORAI) {
+  if (fromToken.coinDenom === ORAI) {
     const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
@@ -121,7 +121,7 @@ async function getPairAmountInfo(
   return {
     token1Amount: poolData.offerPoolAmount.toString(),
     token2Amount: poolData.askPoolAmount.toString(),
-    tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
+    tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.coinDecimals) * tokenPrice
   };
 }
 
@@ -135,7 +135,7 @@ async function fetchPoolInfoAmount(
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
 
-  const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
+  const pair = getPair(fromTokenInfo.coinDenom, toTokenInfo.coinDenom);
 
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
@@ -143,8 +143,8 @@ async function fetchPoolInfoAmount(
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
-    const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
+    const fromPairInfo = getPair(fromTokenInfo.coinDenom, ORAI) as Pair;
+    const toPairInfo = getPair(ORAI, toTokenInfo.coinDenom) as Pair;
     const fromPoolInfo =
       cachedPairs?.[fromPairInfo.contract_addr] || (await Contract.pair(fromPairInfo.contract_addr).pool());
     const toPoolInfo =
@@ -244,16 +244,16 @@ function generateConvertCw20Erc20Message(
     // if this wallet already has enough native ibc bridge balance => no need to convert reverse
     if (+amounts[sendCoin.denom] >= +sendCoin.amount) break;
 
-    const balance = amounts[tokenInfo.denom];
+    const balance = amounts[tokenInfo.coinDenom];
 
     const evmToken = tokenMap[denom];
 
     if (balance) {
       const outputToken: TokenItemType = {
         ...tokenInfo,
-        denom: evmToken.denom,
+        coinDenom: evmToken.coinDenom,
         contractAddress: undefined,
-        decimals: evmToken.decimals
+        coinDecimals: evmToken.coinDecimals
       };
       const msgConvert = generateConvertMsgs({
         type: Type.CONVERT_TOKEN_REVERSE,
@@ -272,10 +272,10 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
-        fund: { denom: tokenInfo.denom, amount: amount.toString() },
-        info: { native_token: { denom: tokenInfo.denom } }
+        fund: { denom: tokenInfo.coinDenom, amount: amount.toString() },
+        info: { native_token: { denom: tokenInfo.coinDenom } }
       };
-    return { info: { native_token: { denom: tokenInfo.denom } } };
+    return { info: { native_token: { denom: tokenInfo.coinDenom } } };
   }
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
@@ -325,7 +325,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo);
 
-  const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
+  const operations = generateSwapOperationMsgs([fromInfo.coinDenom, toInfo.coinDenom], offerInfo, askInfo);
   console.log('operations: ', operations);
 
   try {
@@ -402,7 +402,11 @@ function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo),
+          operations: generateSwapOperationMsgs(
+            [swapQuery.fromInfo.coinDenom, swapQuery.toInfo.coinDenom],
+            offerInfo,
+            askInfo
+          ),
           minimum_receive: swapQuery.minimumReceive
         }
       };
@@ -708,10 +712,10 @@ function generateMoveOraib2OraiMessages(
     const toToken = toTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === fromToken.name);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     // hardcode for MILKY & KWT because they use the old IBC channel
-    if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
+    if (fromToken.coinDenom === MILKY_DENOM || fromToken.coinDenom === KWT_DENOM)
       ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
 
-    const tokenAmount = coin(fromToken.amount, fromToken.denom);
+    const tokenAmount = coin(fromToken.amount, fromToken.coinDenom);
     transferMsgs.push({
       sourcePort: ibcInfo.source,
       sourceChannel: ibcInfo.channel,

@@ -12,7 +12,6 @@ import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMs
 import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
-import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
@@ -22,7 +21,6 @@ const App = () => {
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
-  const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -74,17 +72,6 @@ const App = () => {
       loadTokenAmounts({ oraiAddress: address });
     }
   }, [lastJsonMessage]);
-
-  // clear persist storage when update version
-  useEffect(() => {
-    const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
-    const clearPersistStorage = () => {
-      localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
-      setPersistVersion(PERSIST_VER);
-    };
-
-    if (isClearPersistStorage) clearPersistStorage();
-  }, []);
 
   useEffect(() => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders

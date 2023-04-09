@@ -6,7 +6,7 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokens } from 'config/bridgeTokens';
+import { evmMapToken, TokenItemType, tokens } from 'config/bridgeTokens';
 import {
   KWT_SCAN,
   KWT_SUBNETWORK_CHAIN_ID,
@@ -15,8 +15,9 @@ import {
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   ORAI_BRIDGE_RPC
 } from 'config/constants';
+import { networksWithoutOraib } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -25,7 +26,6 @@ import Content from 'layouts/Content';
 import { getTotalUsd, getUsd, parseBep20Erc20Name, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
-import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -46,8 +46,10 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
+import { ChainInfoCustom } from 'config/networkInfos';
+import useInitEthereum from 'hooks/useInitEthereum';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -56,19 +58,17 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [from, setFrom] = useState<TokenItemType>();
   const [to, setTo] = useState<TokenItemType>();
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useConfigReducer('filterNetwork');
+  const [fromNetwork, setFromNetwork] = useConfigReducer('fromNetwork');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
   const loadTokenAmounts = useLoadTokens();
   const [[fromTokens, toTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
   const [, setTxHash] = useState('');
-
   const { data: prices } = useCoinGeckoPrices();
-
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-
+  useInitEthereum();
   useInactiveListener();
 
   useEffect(() => {
@@ -77,26 +77,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     setTokens(tokens.map((childTokens) => childTokens.filter((t) => t.name.includes(_tokenUrl))));
   }, [tokenUrl]);
 
-  useEffect(() => {
-    _initEthereum();
-  }, []);
-
-  const _initEthereum = async () => {
-    try {
-      await initEthereum();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
+  const processTxResult = (result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
       displayToast(TToastType.TX_FAILED, {
         message: result.rawLog
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink || `${rpc}/tx?hash=0x${result.transactionHash}`
+        customLink: customLink || `${fromNetwork.rpc}/tx?hash=0x${result.transactionHash}`
       });
     }
     setTxHash(result.transactionHash);
@@ -150,11 +138,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
     let transferAddress = metamaskAddress;
     // check tron network and convert address
-    if (toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
+    if (toToken.bridgePrefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
       transferAddress = tronToEthAddress(tronAddress);
     }
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
-    processTxResult(fromToken.rpc, result);
+    processTxResult(result);
   };
 
   const onClickTransfer = async (fromAmount: number, from: TokenItemType, to: TokenItemType) => {
@@ -166,11 +154,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const tokenAmount = amounts[from.denom];
+    const tokenAmount = amounts[from.coinDenom];
     const subAmounts = getSubAmountDetails(amounts, from);
-    const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
+    const subAmount = toAmount(toSumDisplay(subAmounts), from.coinDecimals);
     const fromBalance = from && tokenAmount ? subAmount + BigInt(tokenAmount) : BigInt(0);
-    if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
+    if (fromAmount <= 0 || toAmount(fromAmount, from.coinDecimals) > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Your balance is insufficient to make this transfer'
       });
@@ -182,12 +170,12 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       let result: DeliverTxResponse;
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID && !!from.contractAddress) {
         result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        processTxResult(result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
         result = await transferIBCKwt(from, to, fromAmount, amounts);
-        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        processTxResult(result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
       if (from.cosmosBased) {
@@ -195,8 +183,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
-      console.log('result: ', result);
-      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+      processTxResult(result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
@@ -219,7 +206,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       const result = await broadcastConvertTokenTx(amount, token, type, outputToken);
       if (result) {
-        processTxResult(token.rpc, result as any, `${network.explorer}/txs/${result.transactionHash}`);
+        processTxResult(result as any, `${network.explorer}/txs/${result.transactionHash}`);
       }
     } catch (error) {
       let finalError = '';
@@ -233,17 +220,17 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   };
 
   const getFilterTokens = (chainId: string | number): TokenItemType[] => {
-    return [...fromTokens, ...toTokens]
+    return networksWithoutOraib.find(network => network.chainId === chainId).chainCurrencies
       .filter((token) => {
         // not display because it is evm map and no bridge to option
-        if (!token.bridgeTo && !token.prefix) return false;
+        if (evmMapToken.find(t => t.name === token.name)) return false;
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
         return token.chainId == chainId;
       })
       .sort((a, b) => {
-        return toTotalDisplay(amounts, b) * prices[b.coingeckoId] - toTotalDisplay(amounts, a) * prices[a.coingeckoId];
+        return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
       });
   };
 
@@ -258,7 +245,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(ORAI_BRIDGE_RPC, result);
+      processTxResult(result, `${ORAI_BRIDGE_RPC}/tx/${result.transactionHash}`);
     } catch (error) {
       console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {
@@ -286,8 +273,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
             <div className={styles.search_filter} onClick={() => setIsSelectNetwork(true)}>
               <div className={styles.search_box}>
                 <div className={styles.search_flex}>
-                  <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                  <span className={styles.search_text}>{networks.find((n) => n.chainId == filterNetwork)?.title}</span>
+                  <div className={styles.search_logo}>{renderLogoNetwork(fromNetwork.chainId)}</div>
+                  <span className={styles.search_text}>{fromNetwork?.chainName}</span>
                 </div>
                 <div>
                   <ArrowDownIcon />
@@ -319,9 +306,9 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         <LoadingBox loading={loadingRefresh}>
           <div className={styles.tokens}>
             <div className={styles.tokens_form}>
-              {getFilterTokens(filterNetwork).map((t: TokenItemType) => {
+              {getFilterTokens(fromNetwork.chainId).map((t: TokenItemType) => {
                 const name = parseBep20Erc20Name(t.name);
-                const tokenOraichain = filterNetwork == ORAICHAIN_ID;
+                const tokenOraichain = fromNetwork.chainId == ORAICHAIN_ID;
                 const transferToToken =
                   tokenOraichain &&
                   fromTokens.find(
@@ -329,22 +316,22 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                   );
 
                 // check balance cw20
-                let amount = BigInt(amounts[t.denom] ?? 0);
+                let amount = BigInt(amounts[t.coinDenom] ?? 0);
                 let usd = getUsd(amount, t, prices);
                 let subAmounts: AmountDetails;
                 if (t.contractAddress && t.evmDenoms) {
                   subAmounts = getSubAmountDetails(amounts, t);
-                  const subAmount = toAmount(toSumDisplay(subAmounts), t.decimals);
+                  const subAmount = toAmount(toSumDisplay(subAmounts), t.coinDecimals);
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
                 return (
                   <TokenItem
                     className={styles.tokens_element}
-                    key={t.denom}
+                    key={t.coinDenom}
                     amountDetail={[amount.toString(), usd]}
                     subAmounts={subAmounts}
-                    active={tokenOraichain ? to?.denom === t.denom : from?.denom === t.denom}
+                    active={tokenOraichain ? to?.coinDenom === t.coinDenom : from?.coinDenom === t.coinDenom}
                     token={t}
                     onClick={tokenOraichain ? onClickTokenTo : onClickTokenFrom}
                     convertToken={convertToken}
@@ -355,12 +342,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                           ? (fromAmount: number) => onClickTransfer(fromAmount, to, transferToToken)
                           : undefined
                         : !!to
-                        ? (fromAmount: number) => {
+                          ? (fromAmount: number) => {
                             onClickTransfer(fromAmount, from, to);
                           }
-                        : undefined
+                          : undefined
                     }
                     convertKwt={t.chainId === KWT_SUBNETWORK_CHAIN_ID ? convertKwt : undefined}
+                    fromNetwork={fromNetwork.chainId}
                   />
                 );
               })}
@@ -375,13 +363,18 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           prices={prices}
           amounts={amounts}
           type="network"
-          listToken={networks}
-          setToken={(chainId) => {
-            setFilterNetwork(chainId);
+          listToken={networksWithoutOraib}
+          setToken={(network: ChainInfoCustom) => {
+            const { rpc, chainId, chainName } = network;
+            setFromNetwork({
+              rpc,
+              chainId,
+              chainName
+            })
           }}
         />
       </div>
-    </Content>
+    </Content >
   );
 };
 

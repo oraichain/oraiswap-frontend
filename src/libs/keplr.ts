@@ -5,6 +5,7 @@ import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
+import { embedNetworkInfos } from 'config/networkInfos';
 
 export default class Keplr {
   constructor() {}
@@ -33,7 +34,8 @@ export default class Keplr {
 
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
-    const chainInfo = embedChainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+    // const chainInfo = embedChainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+    const chainInfo = embedNetworkInfos.find((chainInfo) => chainInfo.chainId == chainId);
 
     // do nothing without chainInfo
     if (!chainInfo) return;
