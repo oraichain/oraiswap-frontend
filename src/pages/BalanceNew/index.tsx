@@ -157,7 +157,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       let result: DeliverTxResponse;
-
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
         // convert erc20 to native ==> ORAICHAIN
@@ -173,39 +172,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
-      console.log('result: ', result);
+      console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
         message: ex.message
-      });
-    }
-  };
-
-  const convertToken = async (
-    amount: number,
-    token: TokenItemType,
-    type: 'cw20ToNative' | 'nativeToCw20',
-    outputToken?: TokenItemType
-  ) => {
-    if (amount <= 0)
-      return displayToast(TToastType.TX_FAILED, {
-        message: 'From amount should be higher than 0!'
-      });
-
-    displayToast(TToastType.TX_BROADCASTING);
-    try {
-      const result = await broadcastConvertTokenTx(amount, token, type, outputToken);
-      if (result) {
-        processTxResult(token.rpc, result as any, `${network.explorer}/txs/${result.transactionHash}`);
-      }
-    } catch (error) {
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = `${error}`;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
       });
     }
   };
@@ -312,19 +283,26 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                   <TokenItem
                     className={styles.tokens_element}
                     key={t.denom}
-                    amountDetail={[amount.toString(), usd]}
+                    amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
                     active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
                     onClick={() => onClickToken(t)}
-                    convertToken={convertToken}
-                    transferIBC={handleTransferIBC}
                     onClickTransfer={
-                      async (fromAmount: number) => {
-                        await onClickTransfer(fromAmount, from, to)
+                      async (fromAmount: number, transferFrom?: TokenItemType, transferTo?: TokenItemType) => {
+                        await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to)
                       }
                     }
-                    convertKwt={convertKwt}
+                    convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
+                      try {
+                        const result = await convertKwt(transferAmount, fromToken);
+                        processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+                      } catch (ex) {
+                        displayToast(TToastType.TX_FAILED, {
+                          message: ex.message
+                        });
+                      }
+                    }}
                   />
                 );
               })}

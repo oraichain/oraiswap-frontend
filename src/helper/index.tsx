@@ -6,6 +6,8 @@ import {
   BSC_SCAN,
   ETHEREUM_SCAN,
   HIGH_GAS_PRICE,
+  KWT_SCAN,
+  KWT_SUBNETWORK_CHAIN_ID,
   MULTIPLIER,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
@@ -88,13 +90,17 @@ export const getDenomEvm = () => {
 };
 
 export const getTransactionUrl = (chainId: string | number, transactionHash: any) => {
-  switch (Number(chainId)) {
+  switch (chainId) {
     case BSC_CHAIN_ID:
       return `${BSC_SCAN}/tx/${transactionHash}`;
     case ETHEREUM_CHAIN_ID:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
+    case KWT_SUBNETWORK_CHAIN_ID:
+      return `${KWT_SCAN}/tx/${transactionHash}`;
     case TRON_CHAIN_ID:
       return `${TRON_SCAN}/#/transaction/${transactionHash.txid.replace(/^0x/, '')}`;
+    default:
+      return null;
   }
 };
 

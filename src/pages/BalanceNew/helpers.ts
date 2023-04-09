@@ -174,7 +174,6 @@ export const transferEvmToIBC = async (
   }
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
-  // TODO: need to process this part better. We want to support both Metamask & Tronlink at the same time
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
@@ -390,7 +389,8 @@ export const transferIbcCustom = async (
 };
 
 export const findDefaultToToken = (from: TokenItemType) => {
-  return flattenTokens.find(t => from.bridgeTo && from.bridgeTo.includes(t.org) && t.name.includes(from.name))
+  if (!from.bridgeTo) return;
+  return flattenTokens.find(t => from.bridgeTo.includes(t.org) && from.name.includes(t.name) && from.chainId !== t.chainId)
 };
 
 export const convertKwt = async (transferAmount: number, fromToken: TokenItemType): Promise<DeliverTxResponse> => {
@@ -464,7 +464,6 @@ export const broadcastConvertTokenTx = async (
 };
 
 export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[]) => {
-  // TODO: Transfer multiple IBC messages in a single transaction only
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
   const fromAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
   const toAddress = await window.Keplr.getKeplrAddr(ORAICHAIN_ID);
