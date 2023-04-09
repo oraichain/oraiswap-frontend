@@ -5,11 +5,9 @@ import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
 interface TokenItemProps {
   token: TokenItemType;
-  amountDetail?: [string, number];
-  convertToken?: any;
-  transferIBC?: any;
+  amountDetail?: { amount: string, usd: number };
   name?: string;
-  onClickTransfer?: any;
+  onClickTransfer: any;
   active: Boolean;
   className?: string;
   onClick?: Function;
@@ -24,13 +22,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
   active,
   className,
   onClick,
-  convertToken,
-  transferIBC,
   onClickTransfer,
   convertKwt,
   subAmounts
 }) => {
-  const [amount, usd] = amountDetail;
   return (
     <div
       className={classNames(styles.tokenWrapper, { [styles.active]: active }, className)}
@@ -50,7 +45,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           <div className={styles.row}>
             <TokenBalance
               balance={{
-                amount: amount ?? '0',
+                amount: amountDetail.amount ?? '0',
                 denom: '',
                 decimals: token.decimals
               }}
@@ -58,7 +53,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
               decimalScale={Math.min(6, token.decimals)}
             />
           </div>
-          <TokenBalance balance={usd} className={styles.subLabel} decimalScale={2} />
+          <TokenBalance balance={amountDetail.usd} className={styles.subLabel} decimalScale={2} />
         </div>
       </div>
       <div>
@@ -67,8 +62,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             token={token}
             subAmounts={subAmounts}
             amountDetail={amountDetail}
-            convertToken={convertToken}
-            transferIBC={transferIBC}
             onClickTransfer={onClickTransfer}
             convertKwt={convertKwt}
           />
