@@ -7,22 +7,15 @@ import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
-import {
-  KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  ORAI_BRIDGE_RPC
-} from 'config/constants';
-import { network } from 'config/networks';
+import { embedChainInfos } from 'config/chainInfos';
+import { KWT_SCAN, KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
-import { getTotalUsd, getUsd, parseBep20Erc20Name, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, getUsd, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
@@ -33,7 +26,6 @@ import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
-  broadcastConvertTokenTx,
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
@@ -205,7 +197,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(ORAI_BRIDGE_RPC, result);
+      processTxResult(embedChainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {
@@ -234,7 +226,9 @@ const BalanceNew: React.FC<BalanceProps> = () => {
               <div className={styles.search_box}>
                 <div className={styles.search_flex}>
                   <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                  <span className={styles.search_text}>{networks.find((n) => n.chainId == filterNetwork)?.title}</span>
+                  <span className={styles.search_text}>
+                    {networks.find((n) => n.chainId == filterNetwork)?.chainName}
+                  </span>
                 </div>
                 <div>
                   <ArrowDownIcon />
@@ -317,7 +311,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           prices={prices}
           amounts={amounts}
           type="network"
-          listToken={networks}
+          items={networks}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}

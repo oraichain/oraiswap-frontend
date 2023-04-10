@@ -1,7 +1,7 @@
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
 import {
-  ChainInfoCustom,
+  CustomChainInfo,
   CoinGeckoId,
   CoinIcon,
   embedChainInfos,
@@ -44,7 +44,7 @@ const minAmountSwapMap = {
   trx: 10
 };
 
-export const getTokensFromNetwork = (network: ChainInfoCustom): TokenItemType[] => {
+export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] => {
   return network.currencies.map((currency) => ({
     name: currency.coinDenom,
     org: network.chainName,

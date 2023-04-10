@@ -3,24 +3,15 @@ import { StargateClient } from '@cosmjs/stargate';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import {
+  cosmosTokens,
   evmChainsWithoutTron,
   evmTokens,
-  cosmosTokens,
   kawaiiTokens,
   TokenItemType,
   tokenMap,
   tronChain
 } from 'config/bridgeTokens';
-import {
-  COSMOS_CHAIN_ID,
-  KAWAII_SUBNET_RPC,
-  KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
-  ORAI,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  OSMOSIS_CHAIN_ID
-} from 'config/constants';
+import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
@@ -32,15 +23,6 @@ import { getEvmAddress } from '../libs/utils';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import {
-  COSMOS_NETWORK_RPC,
-  COSMOS_PREFIX,
-  KAWAII_RPC,
-  ORAI_BRIDGE_PREFIX,
-  ORAI_BRIDGE_RPC,
-  OSMOSIS_NETWORK_RPC,
-  OSMOSIS_PREFIX
-} from 'config/constants';
 import { embedChainInfos } from 'config/chainInfos';
 
 export type LoadTokenParams = {
@@ -177,17 +159,17 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: To
 async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
   const kwtAddress = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
   if (!kwtAddress) return;
-
-  loadNativeBalance(dispatch, kwtAddress, { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC });
+  const kawaiiInfo = embedChainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
 
   const kwtSubnetAddress = getEvmAddress(kwtAddress);
-
+  const kawaiiEvmInfo = embedChainInfos.find((c) => c.chainId === '0x1ae6');
   let amountDetails = Object.fromEntries(
     await loadEvmEntries(
       kwtSubnetAddress,
       kawaiiTokens.filter((t) => !!t.contractAddress),
-      KAWAII_SUBNET_RPC,
-      KWT_SUBNETWORK_EVM_CHAIN_ID
+      kawaiiEvmInfo.rpc,
+      Number(kawaiiEvmInfo.chainId)
     )
   );
   // update amounts

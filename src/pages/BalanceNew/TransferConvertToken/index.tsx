@@ -5,10 +5,10 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { evmChains, cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { NetworkChainId } from 'config/chainInfos';
-import { COSMOS_TYPE, EVM_TYPE, GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks, NetworkType, renderLogoNetwork } from 'helper';
+import { cosmosTokens, evmChains, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { CustomChainInfo, NetworkChainId } from 'config/chainInfos';
+import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
@@ -54,7 +54,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   useEffect(() => {
     const chainDefault = getTokenChain(token);
     setFilterNetwork(chainDefault);
-    const findNetwork = networks.find((net) => net.title == chainDefault);
+    const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
   }, [token?.chainId]);
 
@@ -75,23 +75,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return true;
   };
 
-  const getAddressTransfer = async (network: NetworkType) => {
+  const getAddressTransfer = async (network: CustomChainInfo) => {
+    let address: string = '';
     try {
-      let address: string = '';
-      if (network.networkType == EVM_TYPE && network.chainId !== '0x2b6653dc') {
-        if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
-        address = await window.Metamask!.getEthAddress();
-      }
-      if (network.chainId === '0x2b6653dc') {
-        address = window.tronWeb.defaultAddress.base58;
-      }
-      if (network.networkType == COSMOS_TYPE) {
+      if (network.networkType == 'evm') {
+        if (network.chainId === '0x2b6653dc') {
+          address = window.tronWeb.defaultAddress.base58;
+        } else {
+          if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
+        }
+      } else {
         address = await window.Keplr.getKeplrAddr(network.chainId.toString());
       }
-      setAddressTransfer(address);
-    } catch (error) {
-      setAddressTransfer('');
-    }
+    } catch (error) {}
+    setAddressTransfer(address);
   };
 
   const onTransferConvert = async (event: React.MouseEvent) => {
@@ -209,7 +206,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                               }}
                             >
                               <div>{renderLogoNetwork(network.chainId)}</div>
-                              <div className={styles.items_title}>{network.title}</div>
+                              <div className={styles.items_title}>{network.chainName}</div>
                             </div>
                           </li>
                         );

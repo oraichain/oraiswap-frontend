@@ -1,8 +1,7 @@
 import { NetworkConfig } from 'types/network';
-import { ChainInfoCustom, oraichainNetwork } from './chainInfos';
-import { ORAI_SCAN } from './constants';
+import { CustomChainInfo, oraichainNetwork } from './chainInfos';
 
-export const network: ChainInfoCustom & NetworkConfig = {
+export const network: CustomChainInfo & NetworkConfig = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
   denom: 'orai',
@@ -16,7 +15,7 @@ export const network: ChainInfoCustom & NetworkConfig = {
   rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
   converter: process.env.REACT_APP_CONVERTER_CONTRACT,
   multicall: process.env.REACT_APP_MULTICALL_CONTRACT,
-  explorer: ORAI_SCAN
+  explorer: 'https://scan.orai.io'
 };
 
 export interface NetworkItem {

@@ -1,5 +1,5 @@
 import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI, COSMOS_DECIMALS } from 'config/constants';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -17,7 +17,7 @@ describe('swap', () => {
 
   it('max amount with denom orai', () => {
     const amount = 999999n;
-    const decimals = COSMOS_DECIMALS;
+    const decimals = 6;
     const oraiDecimals = { decimals };
 
     const displayAmount = toDisplay(amount, decimals);

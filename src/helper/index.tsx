@@ -1,6 +1,3 @@
-import { ReactComponent as BNBIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as ETHIcon } from 'assets/icons/ethereum.svg';
-import { ReactComponent as TRONIcon } from 'assets/icons/tron.svg';
 import {
   BEP20_ORAI,
   BSC_SCAN,
@@ -10,21 +7,17 @@ import {
   KWT_SUBNETWORK_CHAIN_ID,
   MULTIPLIER,
   ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
   TRON_CHAIN_ID,
   TRON_SCAN
 } from 'config/constants';
-import React from 'react';
 
-import { TokenItemType, tokens } from 'config/bridgeTokens';
-import { BSC_CHAIN_ID, COSMOS_TYPE, ERC20_ORAI, ETHEREUM_CHAIN_ID, EVM_TYPE, KAWAII_ORAI } from 'config/constants';
+import { TokenItemType } from 'config/bridgeTokens';
+import { BSC_CHAIN_ID, ERC20_ORAI, ETHEREUM_CHAIN_ID, KAWAII_ORAI } from 'config/constants';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { CustomChainInfo, embedChainInfos, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { uniqBy } from 'lodash';
-import flatten from 'lodash/flatten';
-import { NetworkChainId } from 'config/chainInfos';
 
 interface Tokens {
   denom?: string;
@@ -32,45 +25,18 @@ interface Tokens {
   bridgeTo?: Array<string>;
 }
 
-export type NetworkType = {
-  title: string;
-  chainId: NetworkChainId;
-  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
-  networkType: string;
-};
-
-export const networks: NetworkType[] = uniqBy(
-  flatten(tokens).filter((token) => token.chainId !== ORAI_BRIDGE_CHAIN_ID),
-  (c) => c.chainId
-).map((network) => {
-  let icon = network.Icon;
-  const networkType = network.cosmosBased ? COSMOS_TYPE : EVM_TYPE;
-  switch (Number(network.chainId)) {
-    case BSC_CHAIN_ID:
-      icon = BNBIcon;
-      break;
-    case ETHEREUM_CHAIN_ID:
-      icon = ETHIcon;
-      break;
-    case TRON_CHAIN_ID:
-      icon = TRONIcon;
-      break;
-    default:
-      break;
-  }
-  return { title: network.org, chainId: network.chainId, Icon: icon, networkType };
-});
+export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2');
 
 export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
-  const network = networks.find((n) => n.chainId == chainId) ?? networks.find((n) => n.title === chainId);
+  const network = networks.find((n) => n.chainId == chainId);
   if (network) {
     return <network.Icon {...props} />;
   }
 };
 
-export const filterChainBridge = (token: Tokens, item: NetworkType) => {
+export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
-  return tokenCanBridgeTo.includes(item.title);
+  return tokenCanBridgeTo.includes(item.chainName);
 };
 
 export const getTokenChain = (token: TokenItemType): NetworkChainId => {

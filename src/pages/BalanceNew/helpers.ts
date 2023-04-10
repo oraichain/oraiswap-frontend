@@ -2,16 +2,8 @@ import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-starg
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import {
-  KWT,
-  KWT_BSC_CONTRACT,
-  MILKY_BSC_CONTRACT,
-  ORAI,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_RPC,
-  ORAI_BRIDGE_UDENOM
-} from 'config/constants';
+import { CosmosChainId, embedChainInfos } from 'config/chainInfos';
+import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI, ORAICHAIN_ID, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -187,7 +179,7 @@ export const transferEvmToIBC = async (
 
 export const transferIBCMultiple = async (
   fromAddress: string,
-  chainId: string,
+  chainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
   messages: MsgTransfer[]
@@ -472,9 +464,9 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
   const result = await transferIBCMultiple(
     fromAddress,
-    ORAI_BRIDGE_CHAIN_ID,
-    ORAI_BRIDGE_RPC,
-    ORAI_BRIDGE_UDENOM,
+    'oraibridge-subnet-2',
+    embedChainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
+    'uoraib',
     transferMsgs
   );
   return result;

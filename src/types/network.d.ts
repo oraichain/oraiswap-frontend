@@ -1,3 +1,5 @@
+import { CosmosChainId } from 'config/chainInfos';
+
 export interface NetworkConfig {
   coinType?: number;
   explorer: string;

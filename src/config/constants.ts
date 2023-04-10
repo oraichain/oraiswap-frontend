@@ -13,20 +13,11 @@ export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
 export const TRON_DENOM = 'trx';
-export const UOSMOS_DENOM = 'uosmo';
-export const UATOM_DENOM = 'uatom';
 export const BEP20_ORAI = 'bep20_orai';
-export const BEP20_USDT = 'bep20_usdt';
-export const BEP20_AIRI = 'bep20_airi';
-export const BEP20_KWT = 'bep20_kwt';
-export const BEP20_MILKY = 'bep20_milky';
 export const ERC20_ORAI = 'erc20_orai';
 export const KAWAII_ORAI = 'kawaii_orai';
-
-export const NATIVE_TOKENS = [ORAI];
-export const EVM_DECIMALS = 18;
 export const COSMOS_DECIMALS = 6;
-export const DECIMAL_FRACTION = Math.pow(10, EVM_DECIMALS);
+export const DECIMAL_FRACTION = Math.pow(10, 18);
 
 // estimate fee
 export const GAS_ESTIMATION_SWAP_DEFAULT = 580000;
@@ -69,14 +60,9 @@ export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 
 export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
-export const KWT_SUBNETWORK_EVM_CHAIN_ID = Networks.kawaiiverse; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const COSMOS_PREFIX = 'cosmos';
-export const OSMOSIS_CHAIN_ID = 'osmosis-1';
-
-export const COSMOS_TYPE = 'cosmos';
-export const EVM_TYPE = 'evm';
 
 export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
@@ -85,18 +71,6 @@ export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
 export const ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX = 'trontrx-mainnet';
 export const ORAI_BRIDGE_EVM_FEE = '1';
 export const ORAI_BRIDGE_CHAIN_FEE = '1';
-export const ORAI_SCAN = 'https://scan.orai.io';
-export const ORAI_BRIDGE_RPC = 'https://bridge-v2.rpc.orai.io';
-export const ORAI_BRIDGE_LCD = 'https://bridge-v2.lcd.orai.io';
-export const ORAI_LCD = 'https://lcd.orai.io';
-export const ORAI_RPC = 'https://rpc.orai.io';
-export const ORAI_NETWORK_LCD = 'https://lcd.orai.network';
-export const OSMOSIS_NETWORK_LCD = 'https://lcd-osmosis.blockapsis.com';
-export const COSMOS_NETWORK_LCD = 'https://lcd-cosmos.oraidex.io';
-export const OSMOSIS_NETWORK_RPC = 'https://rpc-osmosis.blockapsis.com';
-export const OSMOSIS_PREFIX = 'osmo';
-export const COSMOS_NETWORK_RPC = 'https://rpc-cosmos.oraidex.io';
-export const ORAI_BRIDGE_PREFIX = 'oraib';
 
 export const ORAI_BSC_CONTRACT = '0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
 export const AIRI_BSC_CONTRACT = '0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
@@ -115,13 +89,6 @@ export const scORAI_DENOM = 'scorai';
 export const AIRI_DENOM = 'airi';
 export const KWT_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT;
 export const MILKY_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + MILKY_BSC_CONTRACT;
-
-// Kawaiiverse subnetwork
-export const KAWAII_RPC = 'https://tendermint1.kawaii.global';
-export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
-export const KAWAII_API_DEV = 'https://developers.kawaii.global';
-export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
-export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
 
 // websocket consts
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;

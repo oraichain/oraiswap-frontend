@@ -1,20 +1,22 @@
 import { AppCurrency, Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
-import { ReactComponent as AIRI } from 'assets/icons/airi.svg';
-import { ReactComponent as ATOMCOSMOS } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as KWT } from 'assets/icons/kwt.svg';
-import { ReactComponent as MILKY } from 'assets/icons/milky-token.svg';
+import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
+import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
+import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
-import { ReactComponent as scORAI } from 'assets/icons/orchai.svg';
-import { ReactComponent as OSMO } from 'assets/icons/osmosis.svg';
-import { ReactComponent as USDT } from 'assets/icons/tether.svg';
-import { ReactComponent as TRON } from 'assets/icons/tron.svg';
-import { ReactComponent as USDC } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
+import { ReactComponent as ScOraiIcon } from 'assets/icons/orchai.svg';
+import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
+import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
+import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
+import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
+
 import {
   AIRI_BSC_CONTRACT,
   BEP20_ORAI,
   ERC20_ORAI,
-  KAWAII_CONTRACT,
   KWT_BSC_CONTRACT,
   KWT_DENOM,
   MILKY_BSC_CONTRACT,
@@ -83,15 +85,21 @@ export type BridgeAppCurrency = AppCurrency & {
   readonly coinDecimals: 6 | 18;
 };
 
+export type CoinType = 118 | 60 | 195;
+
 /**
  * A list of Cosmos chain infos. If we need to add / remove any chains, just directly update this variable.
  * some chain is already in wallet so we override some attributes as optional
  */
-export interface ChainInfoCustom
+export interface CustomChainInfo
   extends Omit<ChainInfo, 'feeCurrencies' | 'stakeCurrency' | 'currencies' | 'rest' | 'bech32Config'> {
   readonly chainId: NetworkChainId;
   readonly chainName: NetworkName;
+  readonly Icon?: CoinIcon;
   readonly networkType: NetworkType;
+  readonly bip44: {
+    coinType: CoinType;
+  };
   readonly bech32Config?: Bech32Config;
   readonly rest?: string; // optional, rest api tron and lcd for cosmos
   readonly txExplorer?: {
@@ -135,7 +143,7 @@ export const OraiToken: BridgeAppCurrency = {
   bridgeTo: ['0x38', '0x01']
 };
 
-export const oraichainNetwork: ChainInfoCustom = {
+export const oraichainNetwork: CustomChainInfo = {
   rpc: 'https://rpc.orai.io',
   rest: 'https://lcd.orai.io',
   chainId: 'Oraichain',
@@ -152,6 +160,7 @@ export const oraichainNetwork: ChainInfoCustom = {
     average: 0.005,
     high: 0.007
   },
+  Icon: OraiIcon,
   features: ['stargate', 'ibc-transfer', 'cosmwasm', 'wasmd_0.24+'],
   currencies: [
     OraiToken,
@@ -161,14 +170,14 @@ export const oraichainNetwork: ChainInfoCustom = {
       coinMinimalDenom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
       bridgeTo: ['cosmoshub-4'],
       coinDecimals: 6,
-      Icon: ATOMCOSMOS
+      Icon: AtomIcon
     },
     {
       coinDenom: 'BEP20 AIRI',
       coinGeckoId: 'airight',
       coinMinimalDenom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
-      Icon: AIRI
+      Icon: AiriIcon
     },
     {
       coinDenom: 'AIRI',
@@ -177,7 +186,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
       bridgeTo: ['0x38'],
       coinDecimals: 6,
-      Icon: AIRI
+      Icon: AiriIcon
     },
     {
       coinDenom: 'USDT',
@@ -186,7 +195,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_USDT_CONTRACT,
       bridgeTo: ['0x38', '0x2b6653dc'],
       coinDecimals: 6,
-      Icon: USDT
+      Icon: UsdtIcon
     },
     {
       coinDenom: 'USDC',
@@ -195,7 +204,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_USDC_CONTRACT,
       bridgeTo: ['0x01'],
       coinDecimals: 6,
-      Icon: USDC
+      Icon: UsdcIcon
     },
     {
       coinDenom: 'OSMO',
@@ -203,14 +212,14 @@ export const oraichainNetwork: ChainInfoCustom = {
       coinDecimals: 6,
       coinGeckoId: 'osmosis',
       bridgeTo: ['osmosis-1'],
-      Icon: OSMO
+      Icon: OsmoIcon
     },
     {
       coinDenom: 'BEP20 KWT',
       coinGeckoId: 'kawaii-islands',
       coinMinimalDenom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
-      Icon: KWT
+      Icon: KwtIcon
     },
     {
       coinDenom: 'KWT',
@@ -219,14 +228,14 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_KWT_CONTRACT,
       bridgeTo: ['0x1ae6', '0x38'],
       coinDecimals: 6,
-      Icon: KWT
+      Icon: KwtIcon
     },
     {
       coinDenom: 'BEP20 MILKY',
       coinGeckoId: 'milky-token',
       coinMinimalDenom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
-      Icon: MILKY
+      Icon: MilkyIcon
     },
     {
       coinDenom: 'MILKY',
@@ -235,7 +244,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
       bridgeTo: ['0x1ae6', '0x38'],
       coinDecimals: 6,
-      Icon: MILKY
+      Icon: MilkyIcon
     },
     {
       coinDenom: 'ORAIX',
@@ -243,7 +252,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
       coinGeckoId: 'oraidex',
       coinDecimals: 6,
-      Icon: ORAIX
+      Icon: OraixIcon
     },
     {
       coinDenom: 'scORAI',
@@ -251,7 +260,7 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_SCORAI_CONTRACT,
       coinGeckoId: 'scorai',
       coinDecimals: 6,
-      Icon: scORAI
+      Icon: ScOraiIcon
     },
     {
       coinDenom: 'wTRX',
@@ -260,12 +269,12 @@ export const oraichainNetwork: ChainInfoCustom = {
       contractAddress: process.env.REACT_APP_TRX_CONTRACT,
       bridgeTo: ['0x2b6653dc'],
       coinDecimals: 6,
-      Icon: TRON
+      Icon: TronIcon
     }
   ]
 };
 
-export const embedChainInfos: ChainInfoCustom[] = [
+export const embedChainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   {
@@ -316,7 +325,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 6,
         coinGeckoId: 'usd-coin',
-        Icon: USDC
+        Icon: UsdcIcon
       },
       {
         coinDenom: 'AIRI',
@@ -324,7 +333,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeNetworkIdentifier: '0x38',
         coinDecimals: 18,
         coinGeckoId: 'airight',
-        Icon: AIRI
+        Icon: AiriIcon
       },
       {
         coinDenom: 'USDT',
@@ -332,7 +341,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeNetworkIdentifier: '0x38',
         coinDecimals: 18,
         coinGeckoId: 'tether',
-        Icon: USDT
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'USDT',
@@ -340,7 +349,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeNetworkIdentifier: '0x2b6653dc',
         coinDecimals: 6,
         coinGeckoId: 'tether',
-        Icon: USDT
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'wTRX',
@@ -348,7 +357,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeNetworkIdentifier: '0x2b6653dc',
         coinDecimals: 6,
         coinGeckoId: 'tron',
-        Icon: TRON
+        Icon: TronIcon
       },
       {
         coinDenom: 'KWT',
@@ -356,7 +365,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinMinimalDenom: KWT_DENOM,
         coinDecimals: 18,
         coinGeckoId: 'kawaii-islands',
-        Icon: KWT
+        Icon: KwtIcon
       },
       {
         coinDenom: 'MILKY',
@@ -364,7 +373,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinMinimalDenom: MILKY_DENOM,
         coinDecimals: 18,
         coinGeckoId: 'milky-token',
-        Icon: MILKY
+        Icon: MilkyIcon
       }
     ]
   },
@@ -392,6 +401,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
       average: 0.000025,
       high: 0.00004
     },
+    Icon: KwtIcon,
     features: ['stargate', 'ibc-transfer', 'no-legacy-stdTx'],
     currencies: [
       {
@@ -400,7 +410,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinMinimalDenom: process.env.REACT_APP_MILKY_SUB_NETWORK_DENOM,
         coinDecimals: 18,
         bridgeTo: ['Oraichain', 'kawaii_6886-1'],
-        Icon: MILKY
+        Icon: MilkyIcon
       },
       {
         coinDenom: 'ERC20 MILKY',
@@ -409,7 +419,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         contractAddress: MILKY_ERC_CONTRACT,
         coinDecimals: 18,
         coinGeckoId: 'milky-token',
-        Icon: MILKY
+        Icon: MilkyIcon
       },
       {
         coinDenom: 'KWT',
@@ -417,16 +427,16 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain', 'kawaii_6886-1'],
         coinGeckoId: 'kawaii-islands',
-        Icon: KWT
+        Icon: KwtIcon
       },
       {
         coinDenom: 'ERC20 KWT',
         bridgeTo: ['Oraichain', 'kawaii_6886-1'],
         coinMinimalDenom: 'erc20_kwt',
-        contractAddress: KAWAII_CONTRACT,
+        contractAddress: '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd',
         coinDecimals: 18,
         coinGeckoId: 'kawaii-islands',
-        Icon: KWT
+        Icon: KwtIcon
       }
     ]
   },
@@ -441,6 +451,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 118
     },
+    Icon: OsmoIcon,
     bech32Config: defaultBech32Config('osmo'),
     currencies: [
       {
@@ -449,7 +460,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
         bridgeTo: ['Oraichain'],
-        Icon: OSMO
+        Icon: OsmoIcon
       }
     ]
   },
@@ -462,6 +473,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 118
     },
+    Icon: AtomIcon,
     bech32Config: defaultBech32Config('cosmos'),
     currencies: [
       {
@@ -470,7 +482,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinMinimalDenom: 'uatom',
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
-        Icon: ATOMCOSMOS
+        Icon: AtomIcon
       }
     ]
   },
@@ -483,6 +495,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
     bip44: {
       coinType: 60
     },
+    Icon: EthIcon,
     networkType: 'evm',
     currencies: [
       {
@@ -501,7 +514,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'usd-coin',
-        Icon: USDC
+        Icon: UsdcIcon
       }
     ]
   },
@@ -511,6 +524,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
     chainId: '0x2b6653dc',
     networkType: 'evm',
     chainName: 'Tron Network',
+    Icon: TronIcon,
     currencies: [
       {
         coinDenom: 'USDT',
@@ -519,7 +533,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 6,
         coinGeckoId: 'tether',
-        Icon: USDT
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'wTRX',
@@ -528,7 +542,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 6,
         coinGeckoId: 'tron',
-        Icon: TRON
+        Icon: TronIcon
       }
     ],
     bip44: {
@@ -538,6 +552,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
   {
     rpc: 'https://1rpc.io/bnb',
     networkType: 'evm',
+    Icon: BnbIcon,
     chainId: '0x38',
     chainName: 'BNB Chain',
     bip44: {
@@ -560,7 +575,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'airight',
-        Icon: AIRI
+        Icon: AiriIcon
       },
       {
         coinDenom: 'USDT',
@@ -569,7 +584,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'tether',
-        Icon: USDT
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'KWT',
@@ -578,7 +593,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'kawaii-islands',
-        Icon: KWT
+        Icon: KwtIcon
       },
       {
         coinDenom: 'MILKY',
@@ -587,7 +602,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
         coinDecimals: 18,
         coinGeckoId: 'milky-token',
         bridgeTo: ['Oraichain'],
-        Icon: MILKY
+        Icon: MilkyIcon
       }
     ]
   },
@@ -596,6 +611,7 @@ export const embedChainInfos: ChainInfoCustom[] = [
     chainId: '0x1ae6',
     networkType: 'evm',
     chainName: 'Kawaiiverse EVM',
+    Icon: KwtIcon,
     bip44: {
       coinType: 60
     },
