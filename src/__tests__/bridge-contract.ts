@@ -10,6 +10,12 @@ import { Coin, coins } from '@cosmjs/proto-signing';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
 import { AssetInfo } from 'libs/contracts';
+import { OraiswapRouterClient } from 'libs/contracts/OraiswapRouter.client';
+import { InstantiateMsg as OraiswapRouterInstantiateMsg } from 'libs/contracts/OraiswapRouter.types';
+import { InstantiateMsg as OraiswapOracleIsntantiateMsg } from 'libs/contracts/OraiswapOracle.types';
+import { InstantiateMsg as OraiswapFactoryInstantiateMsg } from 'libs/contracts/OraiswapFactory.types';
+import { readFileSync } from 'fs';
+import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
 
 var cosmosChain: CWSimulateApp = new CWSimulateApp({
   chainId: 'cosmoshub-4',
@@ -20,7 +26,7 @@ var oraiClient: SimulateCosmWasmClient;
 
 const oraiSenderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
 const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
-const routerContractAddress = 'orai1x7s4a42y8scugcac5vj2zre96z86lhntq7qg23';
+const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
 const cosmosSenderAddress = bech32.encode(cosmosChain.bech32Prefix, bech32.decode(oraiSenderAddress).words);
 const ibcTransferAmount = '100000000';
 const initialBalanceAmount = '10000000000000';
@@ -71,7 +77,7 @@ describe.only('IBCModule', () => {
           minter: oraiSenderAddress
         }
       },
-      'cw-ics20'
+      'cw20-airi'
     );
     airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
 
@@ -358,55 +364,111 @@ describe.only('IBCModule', () => {
   });
 
   it.each([
-    ['', ibcTransferAmount, "empty-memo-should-fallback-to-transfer-to-receiver"],
-    [bobAddress, ibcTransferAmount, "only-receiver-memo-should-fallback-to-transfer-to-receiver"],
-    [`${bobAddress}:`, ibcTransferAmount, "receiver-with-a-dot-memo-should-fallback-to-transfer-to-receiver"],
-    [`channel-1/${bobAddress}:`, ibcTransferAmount, "receiver-with-a-dot-and-channel-memo-should-fallback-to-transfer-to-receiver"],
-    [`channel-1/${bobAddress}`, ibcTransferAmount, "receiver-and-channel-memo-should-fallback-to-transfer-to-receiver"],
-  ])("cw-ics20-test-single-step-invalid-dest-denom-memo-remote-to-local-given %s should-get-expected-amount %s", async (memo: string, expectedAmount: string, _name: string) => {
-    // create mapping
-    await ics20Contract.updateMappingPair({
-      assetInfo: {
-        token: {
-          contract_addr: airiToken.contractAddress
-        }
-      },
-      assetInfoDecimals: 6,
-      denom: airiIbcDenom,
-      remoteDecimals: 6,
-      localChannelId: 'channel-0'
-    });
-    // now send ibc package
-    const icsPackage: FungibleTokenPacketData = {
-      amount: ibcTransferAmount,
-      denom: airiIbcDenom,
-      receiver: bobAddress,
-      sender: cosmosSenderAddress,
-      memo
-    };
-    // transfer from cosmos to oraichain, should pass
-    await cosmosChain.ibc.sendPacketReceive({
-      packet: {
-        data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: 'channel-0'
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: 'channel-0'
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
+    ['', ibcTransferAmount, 'empty-memo-should-fallback-to-transfer-to-receiver'],
+    [bobAddress, ibcTransferAmount, 'only-receiver-memo-should-fallback-to-transfer-to-receiver'],
+    [`${bobAddress}:`, ibcTransferAmount, 'receiver-with-a-dot-memo-should-fallback-to-transfer-to-receiver'],
+    [
+      `channel-1/${bobAddress}:`,
+      ibcTransferAmount,
+      'receiver-with-a-dot-and-channel-memo-should-fallback-to-transfer-to-receiver'
+    ],
+    [`channel-1/${bobAddress}`, ibcTransferAmount, 'receiver-and-channel-memo-should-fallback-to-transfer-to-receiver']
+  ])(
+    'cw-ics20-test-single-step-invalid-dest-denom-memo-remote-to-local-given %s should-get-expected-amount %s',
+    async (memo: string, expectedAmount: string, _name: string) => {
+      // create mapping
+      await ics20Contract.updateMappingPair({
+        assetInfo: {
+          token: {
+            contract_addr: airiToken.contractAddress
           }
-        }
-      },
-      relayer: cosmosSenderAddress
+        },
+        assetInfoDecimals: 6,
+        denom: airiIbcDenom,
+        remoteDecimals: 6,
+        localChannelId: 'channel-0'
+      });
+      // now send ibc package
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: cosmosSenderAddress,
+        memo
+      };
+      // transfer from cosmos to oraichain, should pass
+      await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          src: {
+            port_id: cosmosPort,
+            channel_id: 'channel-0'
+          },
+          dest: {
+            port_id: oraiPort,
+            channel_id: 'channel-0'
+          },
+          sequence: 27,
+          timeout: {
+            block: {
+              revision: 1,
+              height: 12345678
+            }
+          }
+        },
+        relayer: cosmosSenderAddress
+      });
+      const ibcWasmAiriBalance = await airiToken.balance({ address: bobAddress });
+      expect(ibcWasmAiriBalance.balance).toEqual(expectedAmount);
+    }
+  );
+
+  describe('cw-ics20-test-single-step-swap-to-tokens', () => {
+    let factoryContract: OraiswapFactoryClient;
+    let routerContract: OraiswapRouterClient;
+    beforeEach(async () => {
+      // upload pair & lp token code id
+      const { codeId: pairCodeId } = await oraiClient.upload(
+        oraiSenderAddress,
+        readFileSync(path.join(__dirname, 'wasm/oraiswap_pair.wasm')),
+        'auto'
+      );
+      const { codeId: lpCodeId } = await oraiClient.upload(
+        oraiSenderAddress,
+        readFileSync(path.join(__dirname, 'wasm/oraiswap_token.wasm')),
+        'auto'
+      );
+      // deploy oracle addr
+      const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleIsntantiateMsg>(
+        oraiSenderAddress,
+        path.join(__dirname, 'wasm/oraiswap_oracle.wasm'),
+        {},
+        'oraiswap-oracle'
+      );
+      // deploy factory contract
+      const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
+        oraiSenderAddress,
+        path.join(__dirname, 'wasm/oraiswap_factory.wasm'),
+        {
+          commission_rate: null,
+          oracle_addr: oracleAddress,
+          pair_code_id: pairCodeId,
+          token_code_id: lpCodeId
+        },
+        'oraiswap-factory'
+      );
+
+      const { contractAddress: routerAddress } = await oraiClient.deploy<OraiswapRouterInstantiateMsg>(
+        oraiSenderAddress,
+        path.join(__dirname, 'testdata', 'oraiswap_router.wasm'),
+        {
+          factory_addr: factoryAddress,
+          factory_addr_v2: ''
+        },
+        'oraiswap-router'
+      );
+      factoryContract = new OraiswapFactoryClient(oraiClient, oraiSenderAddress, factoryAddress);
+      routerContract = new OraiswapRouterClient(oraiClient, oraiSenderAddress, routerAddress);
     });
-    const ibcWasmAiriBalance = await airiToken.balance({ address: bobAddress });
-    expect(ibcWasmAiriBalance.balance).toEqual(expectedAmount);
-  })
+  });
 });

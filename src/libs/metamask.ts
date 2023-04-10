@@ -10,7 +10,7 @@ import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() {}
+  constructor() { }
 
   public isWindowEthereum() {
     return !!window.ethereum;
