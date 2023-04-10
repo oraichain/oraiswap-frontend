@@ -125,7 +125,6 @@ export const kawaiiTokens = uniqBy(
   (c) => c.denom
 );
 
-console.log(cosmosTokens);
 export const gravityContracts: Omit<Record<EvmChainId, string>, '0x1ae6'> = {
   ['0x38']: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
   ['0x01']: process.env.REACT_APP_GRAVITY_ETH_CONTRACT,

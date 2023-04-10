@@ -19,7 +19,6 @@ import {
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_RPC,
   OSMOSIS_CHAIN_ID
 } from 'config/constants';
 import { Contract } from 'config/contracts';
@@ -42,6 +41,7 @@ import {
   OSMOSIS_NETWORK_RPC,
   OSMOSIS_PREFIX
 } from 'config/constants';
+import { embedChainInfos } from 'config/chainInfos';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -49,13 +49,6 @@ export type LoadTokenParams = {
   oraiAddress?: string;
   tronAddress?: string;
 };
-
-export const cosmosNetworks: { chainId: string; prefix: string; rpc: string }[] = [
-  { chainId: ORAI_BRIDGE_CHAIN_ID, prefix: ORAI_BRIDGE_PREFIX, rpc: ORAI_BRIDGE_RPC },
-  { chainId: OSMOSIS_CHAIN_ID, prefix: OSMOSIS_PREFIX, rpc: OSMOSIS_NETWORK_RPC },
-  { chainId: COSMOS_CHAIN_ID, prefix: COSMOS_PREFIX, rpc: COSMOS_NETWORK_RPC },
-  { chainId: ORAICHAIN_ID, prefix: ORAI, rpc: ORAI_RPC }
-];
 
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
   if (!address) return;
@@ -94,9 +87,11 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
 async function loadTokensCosmos(dispatch: Dispatch, address: string) {
   await handleCheckWallet();
   const { words, prefix } = bech32.decode(address);
-  for (const network of cosmosNetworks) {
-    const cosmosAddress = network.prefix === prefix ? address : bech32.encode(network.prefix, words);
-    loadNativeBalance(dispatch, cosmosAddress, network);
+  const cosmosInfos = embedChainInfos.filter((chainInfo) => chainInfo.bip44.coinType === 118);
+  for (const chainInfo of cosmosInfos) {
+    const networkPrefix = chainInfo.bech32Config.bech32PrefixAccAddr;
+    const cosmosAddress = networkPrefix === prefix ? address : bech32.encode(networkPrefix, words);
+    loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
 
