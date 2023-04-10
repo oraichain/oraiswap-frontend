@@ -5,6 +5,7 @@ import {
   CoinGeckoId,
   CoinIcon,
   embedChainInfos,
+  EvmChainId,
   NetworkChainId,
   NetworkName,
   oraichainNetwork
@@ -77,7 +78,7 @@ export const flattenTokens = flatten(tokens);
 
 export const tokenMap = Object.fromEntries(flattenTokens.map((c) => [c.denom, c]));
 
-export const filteredTokens = uniqBy(
+export const cosmosTokens = uniqBy(
   flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
@@ -87,7 +88,7 @@ export const filteredTokens = uniqBy(
 );
 
 export const cw20Tokens = uniqBy(
-  filteredTokens.filter(
+  cosmosTokens.filter(
     // filter cosmos based tokens to collect tokens that have contract addresses
     (token) =>
       // !token.contractAddress &&
@@ -120,11 +121,12 @@ export const evmChainsWithoutTron = evmChains.filter((chain) => chain.chainId !=
 export const tronChain = evmChains.filter((chain) => chain.chainId === '0x2b6653dc');
 
 export const kawaiiTokens = uniqBy(
-  filteredTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
+  cosmosTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
   (c) => c.denom
 );
 
-export const gravityContracts: { [key: string]: string } = {
+console.log(cosmosTokens);
+export const gravityContracts: Omit<Record<EvmChainId, string>, '0x1ae6'> = {
   ['0x38']: process.env.REACT_APP_GRAVITY_BSC_CONTRACT,
   ['0x01']: process.env.REACT_APP_GRAVITY_ETH_CONTRACT,
   ['0x2b6653dc']: process.env.REACT_APP_GRAVITY_TRON_CONTRACT

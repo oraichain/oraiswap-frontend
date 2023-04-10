@@ -1,6 +1,6 @@
 import { network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
-import { TokenItemType, filteredTokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens } from 'config/bridgeTokens';
 import { Key, Keplr as keplr, FeeCurrency, ChainInfo } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -89,7 +89,7 @@ export default class Keplr {
   async getKeplrAddr(chainId?: string): Promise<string | undefined> {
     // not support network.chainId (Oraichain)
     chainId = chainId ?? network.chainId;
-    const token = filteredTokens.find((token) => token.chainId === chainId);
+    const token = cosmosTokens.find((token) => token.chainId === chainId);
     if (!token) return;
     try {
       const key = await this.getKeplrKey(chainId);

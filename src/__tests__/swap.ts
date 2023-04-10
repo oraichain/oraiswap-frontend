@@ -1,4 +1,4 @@
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
+import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI, COSMOS_DECIMALS } from 'config/constants';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
@@ -53,9 +53,9 @@ describe('swap', () => {
     const senderAddress = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
     const fromAmountToken = 10;
     const fromTokenDecimals = 6;
-    const fromTokenHaveContract = filteredTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
-    const fromTokenNoContract = filteredTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
-    const toTokenInfoData = filteredTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
+    const fromTokenHaveContract = cosmosTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
+    const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
+    const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
     const simulateData = { amount: '1000000' };
     const amounts = {

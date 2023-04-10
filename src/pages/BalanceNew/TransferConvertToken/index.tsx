@@ -5,7 +5,7 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { evmChains, filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { evmChains, cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { NetworkChainId } from 'config/chainInfos';
 import { COSMOS_TYPE, EVM_TYPE, GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
 import { feeEstimate, filterChainBridge, getTokenChain, networks, NetworkType, renderLogoNetwork } from 'helper';
@@ -59,7 +59,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }, [token?.chainId]);
 
   // list of tokens where it exists in at least two different chains
-  const listedTokens = filteredTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
+  const listedTokens = cosmosTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
   const maxAmount = toDisplay(
     amountDetail.amount, // amount detail here can be undefined
     token?.decimals
@@ -114,7 +114,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of BalanceNew based on the user's token destination choice
       // TODO: to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
-      const to = filteredTokens.find((t) =>
+      const to = cosmosTokens.find((t) =>
         t.chainId === ORAI_BRIDGE_CHAIN_ID && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
           ? t.bridgeNetworkIdentifier === filterNetwork
           : t.org === filterNetwork

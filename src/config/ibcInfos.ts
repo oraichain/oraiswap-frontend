@@ -1,4 +1,5 @@
 import { IBCInfo } from 'types/ibc';
+import { CosmosChainId } from './chainInfos';
 import {
   COSMOS_CHAIN_ID,
   IBC_TRANSFER_TIMEOUT,
@@ -13,9 +14,8 @@ export const [oraib2oraichain, oraichain2oraib] = process.env.REACT_APP_ORAIB_OR
 const [oraib2oraichain_old, oraichain2oraib_old] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD.split(/\s+/);
 const [kwt2oraichain, oraichain2kwt] = process.env.REACT_APP_KWT_ORAICHAIN_CHANNELS.split(/\s+/);
 
-export interface IBCInfoMap {
-  [key: string]: { [key: string]: IBCInfo };
-}
+// exclude evm chain
+export type IBCInfoMap = Record<CosmosChainId, { [key: string]: IBCInfo }>;
 
 export const ibcInfos: IBCInfoMap = {
   [COSMOS_CHAIN_ID]: {
@@ -70,7 +70,7 @@ export const ibcInfos: IBCInfoMap = {
   }
 };
 
-export const ibcInfosOld: IBCInfoMap = {
+export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4'> = {
   Oraichain: {
     [ORAI_BRIDGE_CHAIN_ID]: {
       source: 'transfer',

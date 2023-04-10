@@ -2,7 +2,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import {
   COSMOS_DECIMALS,
   ORAI,
@@ -159,7 +159,7 @@ const ListPools = memo<{
       const searchReg = new RegExp(text, 'i');
       const ret = listPairs.filter((pairInfo) =>
         pairInfo.pair.asset_denoms.some((denom) =>
-          filteredTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
+          cosmosTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
         )
       );
       setFilteredPairInfos(ret);

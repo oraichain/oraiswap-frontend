@@ -42,16 +42,20 @@ export type NetworkName =
   | 'Kawaiiverse EVM'
   | 'Tron Network';
 
-export type NetworkChainId =
+export type CosmosChainId =
   | 'Oraichain' // oraichain
   | 'oraibridge-subnet-2' // oraibridge
-  | '0x38' // bsc
-  | '0x01' // ethereum
-  | '0x1ae6' // kawaii
-  | '0x2b6653dc' // tron
   | 'osmosis-1' // osmosis
   | 'cosmoshub-4' // cosmos hub
   | 'kawaii_6886-1'; // kawaii subnetwork
+
+export type EvmChainId =
+  | '0x38' // bsc
+  | '0x01' // ethereum
+  | '0x1ae6' // kawaii
+  | '0x2b6653dc'; // tron
+
+export type NetworkChainId = CosmosChainId | EvmChainId;
 
 export type CoinGeckoId =
   | 'oraichain-token'
@@ -280,6 +284,14 @@ export const embedChainInfos: ChainInfoCustom[] = [
       high: 0
     },
     features: ['stargate', 'ibc-transfer'],
+    stakeCurrency: {
+      coinDenom: 'ORAIB',
+      coinMinimalDenom: 'uoraib',
+      coinDecimals: 6
+    },
+    get feeCurrencies() {
+      return [this.stakeCurrency];
+    },
     // not use oraib as currency
     currencies: [
       {

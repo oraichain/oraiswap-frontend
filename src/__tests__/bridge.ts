@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/stargate';
-import { TokenItemType, filteredTokens, flattenTokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
   BSC_CHAIN_ID,
@@ -48,7 +48,7 @@ describe('bridge', () => {
 
   it('bridge-convert-kwt-should-return-only-evm-amount', async () => {
     const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name === 'KWT' && item.chainId === KWT_SUBNETWORK_CHAIN_ID);
+    const fromToken = cosmosTokens.find((item) => item.name === 'KWT' && item.chainId === KWT_SUBNETWORK_CHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
     expect(evmAmount).toMatchObject({
       amount: '10000000000000000000', // 10 * 10**18
@@ -60,7 +60,7 @@ describe('bridge', () => {
     const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
     const decimal = 18;
     const transferAmount = 10;
-    const fromToken = filteredTokens.find((item) => item.name === 'KWT' && item.chainId === ORAICHAIN_ID);
+    const fromToken = cosmosTokens.find((item) => item.name === 'KWT' && item.chainId === ORAICHAIN_ID);
     const evmAmount = coin(toAmount(transferAmount, decimal).toString(), denom);
     const amounts: AmountDetails = {
       kwt: '1000000000',
@@ -95,15 +95,15 @@ describe('bridge', () => {
   });
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-ibc-wasm-contract-address', async () => {
-    const fromToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
-    const toToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAI_BRIDGE_CHAIN_ID);
+    const fromToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
+    const toToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAI_BRIDGE_CHAIN_ID);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
     expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
   });
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-asset-info-token', async () => {
-    const fromToken = filteredTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
+    const fromToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === ORAICHAIN_ID);
     const { info: assetInfo } = parseTokenInfo(fromToken);
     expect(assetInfo).toMatchObject(ORAI_INFO);
   });
@@ -178,7 +178,7 @@ describe('bridge', () => {
   it('bridge-move-oraibridge-to-oraichain-should-return-only-transfer-IBC-msgs', async () => {
     const bridgeTokenNames = ['AIRI', 'USDT'];
     const amount = '100000000000000000';
-    const oraibTokens = filteredTokens
+    const oraibTokens = cosmosTokens
       .filter((t) => bridgeTokenNames.includes(t.name) && t.chainId === ORAI_BRIDGE_CHAIN_ID)
       .map((t) => {
         return {
@@ -188,7 +188,7 @@ describe('bridge', () => {
       });
 
     const toTokens = oraibTokens.map((oraibToken) => {
-      return filteredTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === oraibToken.name);
+      return cosmosTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === oraibToken.name);
     });
 
     const fromAddress = 'oraib14n3tx8s5ftzhlxvq0w5962v60vd82h305kec0j';

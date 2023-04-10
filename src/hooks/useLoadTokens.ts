@@ -5,7 +5,7 @@ import tokenABI from 'config/abi/erc20.json';
 import {
   evmChainsWithoutTron,
   evmTokens,
-  filteredTokens,
+  cosmosTokens,
   kawaiiTokens,
   TokenItemType,
   tokenMap,
@@ -64,7 +64,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   let amountDetails: AmountDetails = {};
 
   // reset native balances
-  filteredTokens
+  cosmosTokens
     .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
     .forEach((t) => {
       amountDetails[t.denom] = '0';
@@ -103,7 +103,7 @@ async function loadTokensCosmos(dispatch: Dispatch, address: string) {
 async function loadCw20Balance(dispatch: Dispatch, address: string) {
   if (!address) return;
   // get all cw20 token contract
-  const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
+  const cw20Tokens = cosmosTokens.filter((t) => t.contractAddress);
   const data = toBinary({
     balance: { address }
   });
