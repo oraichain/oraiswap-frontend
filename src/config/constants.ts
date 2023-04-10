@@ -27,10 +27,6 @@ export const HIGH_GAS_PRICE = 0.007;
 
 export const SEC_PER_YEAR = 60 * 60 * 24 * 365;
 
-/* oraiswap:configs */
-export const DEFAULT_MAX_SPREAD = 0.5;
-export const MAX_MSG_LENGTH = 1024;
-
 // commission_rate pool
 export const COMMISSION_RATE = '0.003';
 
@@ -39,16 +35,8 @@ export const IBC_TRANSFER_TIMEOUT = 3600;
 export const AXIOS_THROTTLE_THRESHOLD = 2000;
 export const AXIOS_TIMEOUT = 10000;
 
-/* project */
-export const MEDIUM = '';
-export const DISCORD = '';
-export const TELEGRAM = '';
-export const WECHAT = '';
-export const GITHUB = 'https://github.com/oraichain/oraiswap-frontend.git';
-
 // bsc and eth information
 export const ETHEREUM_CHAIN_ID = Networks.mainnet;
-export const ETHEREUM_RPC = 'https://1rpc.io/eth';
 export const ETHEREUM_SCAN = 'https://etherscan.io';
 export const BSC_CHAIN_ID = Networks.bsc;
 export const BSC_RPC = 'https://1rpc.io/bnb';
@@ -61,10 +49,7 @@ export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
 export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const ORAICHAIN_ID = 'Oraichain';
-export const COSMOS_CHAIN_ID = 'cosmoshub-4';
-export const COSMOS_PREFIX = 'cosmos';
 
-export const ORAI_BRIDGE_DENOM = 'ORAIB';
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';
 export const ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX = 'eth-mainnet';
@@ -84,19 +69,12 @@ export const MILKY_BSC_CONTRACT = '0x6fE3d0F096FC932A905accd1EB1783F6e4cEc717';
 export const ORAI_ETH_CONTRACT = '0x4c11249814f11b9346808179Cf06e71ac328c1b5';
 export const USDC_ETH_CONTRACT = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 export const MILKY_ERC_CONTRACT = '0xd567B3d7B8FE3C79a1AD8dA978812cfC4Fa05e75';
-export const ORAIX_DENOM = 'ORAIX';
-export const scORAI_DENOM = 'scorai';
-export const AIRI_DENOM = 'airi';
 export const KWT_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + KWT_BSC_CONTRACT;
 export const MILKY_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + MILKY_BSC_CONTRACT;
 
 // websocket consts
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;
 export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
-
-// coingeckoid token
-export const ORAI_COINGECKO_ID = 'oraichain-token';
-export const ORAIX_COINGECKO_ID = 'oraidex';
 
 // asset info token
 export const ORAI_INFO = {

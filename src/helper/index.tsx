@@ -54,17 +54,20 @@ export const getDenomEvm = () => {
   }
 };
 
-export const getTransactionUrl = (chainId: string | number, transactionHash: any) => {
-  switch (chainId) {
+export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
+  switch (Number(chainId)) {
     case BSC_CHAIN_ID:
       return `${BSC_SCAN}/tx/${transactionHash}`;
     case ETHEREUM_CHAIN_ID:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
-    case KWT_SUBNETWORK_CHAIN_ID:
-      return `${KWT_SCAN}/tx/${transactionHash}`;
     case TRON_CHAIN_ID:
-      return `${TRON_SCAN}/#/transaction/${transactionHash.txid.replace(/^0x/, '')}`;
+      return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
     default:
+      // raw string
+      switch (chainId) {
+        case KWT_SUBNETWORK_CHAIN_ID:
+          return `${KWT_SCAN}/tx/${transactionHash}`;
+      }
       return null;
   }
 };

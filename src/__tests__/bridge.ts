@@ -4,7 +4,6 @@ import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
   BSC_CHAIN_ID,
   BSC_SCAN,
-  COSMOS_CHAIN_ID,
   ETHEREUM_CHAIN_ID,
   ETHEREUM_SCAN,
   KWT_BSC_CONTRACT,
@@ -110,31 +109,31 @@ describe('bridge', () => {
 
   it.each<[TokenItemType, NetworkChainId, string, CoinGeckoId]>([
     [
-      flattenTokens.find((item) => item.name === 'ERC20 MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID),
+      flattenTokens.find((item) => item.name === 'ERC20 MILKY' && item.chainId === 'kawaii_6886-1'),
       'Oraichain',
       'MILKY',
       'milky-token'
     ],
     [
-      flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID),
+      flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === 'kawaii_6886-1'),
       'Oraichain',
       'MILKY',
       'milky-token'
     ],
     [
-      flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === ORAICHAIN_ID),
+      flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === 'Oraichain'),
       '0x38',
       'MILKY',
       'milky-token'
     ],
     [
-      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === COSMOS_CHAIN_ID),
+      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'cosmoshub-4'),
       'Oraichain',
       'ATOM',
       'cosmos'
     ],
     [
-      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === ORAICHAIN_ID),
+      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'),
       'cosmoshub-4',
       'ATOM',
       'cosmos'
@@ -164,13 +163,13 @@ describe('bridge', () => {
     expect(toToken.coinGeckoId).toBe(expectedCoingeckoId);
   });
 
-  it.each([
-    [BSC_CHAIN_ID, '0x', `${BSC_SCAN}/tx/0x`],
-    [ETHEREUM_CHAIN_ID, '0x', `${ETHEREUM_SCAN}/tx/0x`],
-    [KWT_SUBNETWORK_CHAIN_ID, '0x', `${KWT_SCAN}/tx/0x`],
-    [TRON_CHAIN_ID, { txid: '0x1234' }, `${TRON_SCAN}/#/transaction/1234`],
-    [ORAICHAIN_ID, '0x', null]
-  ])('bridge-test-get-transaciton-url', (chainId: string | number, transactionHash: any, expectedUrl: string) => {
+  it.each<[NetworkChainId, string, string]>([
+    ['0x38', '0x', `${BSC_SCAN}/tx/0x`],
+    ['0x01', '0x', `${ETHEREUM_SCAN}/tx/0x`],
+    ['kawaii_6886-1', '0x', `${KWT_SCAN}/tx/0x`],
+    ['0x2b6653dc', '0x1234', `${TRON_SCAN}/#/transaction/1234`],
+    ['Oraichain', '0x', null]
+  ])('bridge-test-get-transaciton-url', (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {
     const url = getTransactionUrl(chainId, transactionHash);
     expect(url).toBe(expectedUrl);
   });
