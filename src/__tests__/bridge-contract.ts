@@ -43,7 +43,7 @@ describe.only('IBCModule', () => {
       chainId: 'Oraichain',
       bech32Prefix: 'orai'
     });
-    const { contractAddress } = await oraiClient.deploy(
+    const { contractAddress } = await oraiClient.deploy<CwIcs20LatestTypes.InstantiateMsg>(
       oraiSenderAddress,
       path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm'),
       {
@@ -51,7 +51,7 @@ describe.only('IBCModule', () => {
         default_timeout: 3600,
         gov_contract: oraiSenderAddress, // mulitsig contract
         swap_router_contract: routerContractAddress
-      } as CwIcs20LatestTypes.InstantiateMsg,
+      },
       'cw-ics20'
     );
 
@@ -59,7 +59,7 @@ describe.only('IBCModule', () => {
     ics20Contract = new CwIcs20LatestClient(oraiClient, oraiSenderAddress, contractAddress);
 
     // init cw20 AIRI token
-    const { contractAddress: airiAddress } = await oraiClient.deploy(
+    const { contractAddress: airiAddress } = await oraiClient.deploy<OraiswapInstantiateMsg>(
       oraiSenderAddress,
       path.join(__dirname, 'testdata', 'oraiswap_token.wasm'),
       {
@@ -70,13 +70,13 @@ describe.only('IBCModule', () => {
         mint: {
           minter: oraiSenderAddress
         }
-      } as OraiswapInstantiateMsg,
+      },
       'cw-ics20'
     );
     airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
 
     // init ibc channel between two chains
-    cosmosChain.ibc.relay('channel-0', oraiPort, oraiClient.app);
+    oraiClient.app.ibc.relay('channel-0', oraiPort, 'channel-0', cosmosPort, cosmosChain);
     await cosmosChain.ibc.sendChannelOpen({
       open_init: {
         channel: {
@@ -338,6 +338,10 @@ describe.only('IBCModule', () => {
     });
 
     // try to send back to cosmos from oraichain, which will pass
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
+      console.log('handle midle ware for ibc', msg, app);
+    });
+
     const transferBackMsg: TransferBackMsg = {
       local_channel_id: channel,
       remote_address: cosmosSenderAddress,

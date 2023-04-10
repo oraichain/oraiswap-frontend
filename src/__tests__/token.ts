@@ -15,7 +15,7 @@ describe('token', () => {
 
   beforeAll(async () => {
     // init airi token
-    const initAiriRes = await client.deploy(
+    const initAiriRes = await client.deploy<OraiswapInstantiateMsg>(
       senderAddress,
       path.resolve(__dirname, 'testdata', 'oraiswap_token.wasm'),
       {
@@ -23,7 +23,7 @@ describe('token', () => {
         symbol: 'AIRI',
         name: 'Airight token',
         initial_balances: [{ address: senderAddress, amount: '1000000000' }]
-      } as OraiswapInstantiateMsg,
+      },
       'token',
       'auto'
     );

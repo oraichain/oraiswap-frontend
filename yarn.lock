@@ -2909,7 +2909,7 @@
 
 "@terran-one/cw-simulate@https://github.com/oraichain/cw-simulate.git":
   version "2.8.4"
-  resolved "https://github.com/oraichain/cw-simulate.git#cde4c73178724f59d5cd1fba4cdd075c9ab4293f"
+  resolved "https://github.com/oraichain/cw-simulate.git#fb35f812152c78340a0e74981903db7f44330681"
   dependencies:
     "@cosmjs/amino" "^0.29.5"
     "@cosmjs/cosmwasm-stargate" "^0.29.5"
