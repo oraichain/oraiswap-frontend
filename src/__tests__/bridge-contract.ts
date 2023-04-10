@@ -5,7 +5,7 @@ import path from 'path';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
-import { TransferBackMsg } from 'libs/contracts/types';
+import { Asset, TransferBackMsg } from 'libs/contracts/types';
 import { Coin, coins } from '@cosmjs/proto-signing';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
@@ -170,7 +170,7 @@ describe.only('IBCModule', () => {
       'cw-ics20-fail-transfer-cw20-fail-insufficient-funds-should-not-send-balance-remote-to-local'
     ]
   ])(
-    'bridge-test-cw-ics20-transfer-remote-to-local',
+    'bridge-test-cw-ics20-transfer-remote-to-local-given %j %s %s should return expected amount %j', //reference: https://jestjs.io/docs/api#1-testeachtablename-fn-timeout
     async (
       assetInfo: AssetInfo,
       transferAmount: string,
@@ -356,4 +356,57 @@ describe.only('IBCModule', () => {
     const ibcWasmAiriBalance = await airiToken.balance({ address: ics20Contract.contractAddress });
     expect(ibcWasmAiriBalance.balance).toEqual(initialBalanceAmount);
   });
+
+  it.each([
+    ['', ibcTransferAmount, "empty-memo-should-fallback-to-transfer-to-receiver"],
+    [bobAddress, ibcTransferAmount, "only-receiver-memo-should-fallback-to-transfer-to-receiver"],
+    [`${bobAddress}:`, ibcTransferAmount, "receiver-with-a-dot-memo-should-fallback-to-transfer-to-receiver"],
+    [`channel-1/${bobAddress}:`, ibcTransferAmount, "receiver-with-a-dot-and-channel-memo-should-fallback-to-transfer-to-receiver"],
+    [`channel-1/${bobAddress}`, ibcTransferAmount, "receiver-and-channel-memo-should-fallback-to-transfer-to-receiver"],
+  ])("cw-ics20-test-single-step-invalid-dest-denom-memo-remote-to-local-given %s should-get-expected-amount %s", async (memo: string, expectedAmount: string, _name: string) => {
+    // create mapping
+    await ics20Contract.updateMappingPair({
+      assetInfo: {
+        token: {
+          contract_addr: airiToken.contractAddress
+        }
+      },
+      assetInfoDecimals: 6,
+      denom: airiIbcDenom,
+      remoteDecimals: 6,
+      localChannelId: 'channel-0'
+    });
+    // now send ibc package
+    const icsPackage: FungibleTokenPacketData = {
+      amount: ibcTransferAmount,
+      denom: airiIbcDenom,
+      receiver: bobAddress,
+      sender: cosmosSenderAddress,
+      memo
+    };
+    // transfer from cosmos to oraichain, should pass
+    await cosmosChain.ibc.sendPacketReceive({
+      packet: {
+        data: toBinary(icsPackage),
+        src: {
+          port_id: cosmosPort,
+          channel_id: 'channel-0'
+        },
+        dest: {
+          port_id: oraiPort,
+          channel_id: 'channel-0'
+        },
+        sequence: 27,
+        timeout: {
+          block: {
+            revision: 1,
+            height: 12345678
+          }
+        }
+      },
+      relayer: cosmosSenderAddress
+    });
+    const ibcWasmAiriBalance = await airiToken.balance({ address: bobAddress });
+    expect(ibcWasmAiriBalance.balance).toEqual(expectedAmount);
+  })
 });

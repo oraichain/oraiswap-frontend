@@ -156,7 +156,7 @@ describe('bridge', () => {
       'USDT',
       'tether'
     ]
-  ])('bridge-test-find-default-to-token', (from, expectedChainId, expectedName, expectedCoingeckoId) => {
+  ])('bridge-test-find-default-to-token given from-token: %j, should give expected-name: %s, expected coingeckoid: %s', (from, expectedChainId, expectedName, expectedCoingeckoId) => {
     const toToken = findDefaultToToken(from);
     expect(from.bridgeTo.includes(toToken.chainId)).toBe(true);
     expect(toToken.name).toContain(expectedName);
@@ -169,7 +169,7 @@ describe('bridge', () => {
     ['kawaii_6886-1', '0x', `${KWT_SCAN}/tx/0x`],
     ['0x2b6653dc', '0x1234', `${TRON_SCAN}/#/transaction/1234`],
     ['Oraichain', '0x', null]
-  ])('bridge-test-get-transaciton-url', (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {
+  ])('bridge-test-get-transaciton-url given chainId %s should give expected URL %s', (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {
     const url = getTransactionUrl(chainId, transactionHash);
     expect(url).toBe(expectedUrl);
   });
