@@ -79,8 +79,8 @@ export type NetworkType = 'cosmos' | 'evm';
 export type CoinIcon = React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
 export type BridgeAppCurrency = AppCurrency & {
   readonly bridgeTo?: NetworkChainId[];
-  readonly coinGeckoId: CoinGeckoId;
-  readonly Icon: CoinIcon;
+  readonly coinGeckoId?: CoinGeckoId;
+  readonly Icon?: CoinIcon;
   readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
   readonly contractAddress?: string;
@@ -142,6 +142,20 @@ export const OraiToken: BridgeAppCurrency = {
   coinGeckoId: 'oraichain-token',
   Icon: OraiIcon,
   bridgeTo: ['0x38', '0x01']
+};
+
+const OraiBToken: BridgeAppCurrency = {
+  coinDenom: 'ORAIB',
+  coinMinimalDenom: 'uoraib',
+  coinDecimals: 6
+};
+
+const KawaiiToken: BridgeAppCurrency = {
+  coinDenom: 'ORAIE',
+  coinMinimalDenom: 'oraie',
+  coinDecimals: 18,
+  coinGeckoId: 'kawaii-islands',
+  Icon: KwtIcon
 };
 
 export const oraichainNetwork: CustomChainInfo = {
@@ -294,16 +308,11 @@ export const embedChainInfos: CustomChainInfo[] = [
       high: 0
     },
     features: ['stargate', 'ibc-transfer'],
-    stakeCurrency: {
-      coinDenom: 'ORAIB',
-      coinMinimalDenom: 'uoraib',
-      coinDecimals: 6
-    },
-    get feeCurrencies() {
-      return [this.stakeCurrency];
-    },
+    stakeCurrency: OraiBToken,
+    feeCurrencies: [OraiBToken],
     // not use oraib as currency
     currencies: [
+      OraiBToken,
       {
         coinDenom: 'ORAI',
         coinMinimalDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + ORAI_BSC_CONTRACT,
@@ -384,19 +393,12 @@ export const embedChainInfos: CustomChainInfo[] = [
     chainId: 'kawaii_6886-1',
     chainName: 'Kawaiiverse',
     networkType: 'cosmos',
-    stakeCurrency: {
-      coinDenom: 'ORAIE',
-      coinMinimalDenom: 'oraie',
-      coinDecimals: 18,
-      coinGeckoId: 'oraie'
-    },
+    stakeCurrency: KawaiiToken,
     bip44: {
       coinType: 60
     },
     bech32Config: defaultBech32Config('oraie'),
-    get feeCurrencies() {
-      return [this.stakeCurrency];
-    },
+    feeCurrencies: [KawaiiToken],
     gasPriceStep: {
       low: 0,
       average: 0.000025,
@@ -405,6 +407,7 @@ export const embedChainInfos: CustomChainInfo[] = [
     Icon: KwtIcon,
     features: ['stargate', 'ibc-transfer', 'no-legacy-stdTx'],
     currencies: [
+      KawaiiToken,
       {
         coinDenom: 'MILKY',
         coinGeckoId: 'milky-token',
