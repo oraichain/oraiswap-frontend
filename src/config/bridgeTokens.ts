@@ -11,8 +11,6 @@ import {
   oraichainNetwork
 } from './chainInfos';
 
-import { KWT_SUBNETWORK_CHAIN_ID } from './constants';
-
 export type TokenItemType = {
   name: string;
   org: NetworkName;
@@ -103,25 +101,13 @@ export const evmTokens = uniqBy(
   flattenTokens.filter(
     (token) =>
       // !token.contractAddress &&
-      token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== KWT_SUBNETWORK_CHAIN_ID
+      token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== 'kawaii_6886-1'
   ),
   (c) => c.denom
 );
 
-export const evmChains = uniqBy(
-  flattenTokens.filter(
-    (token) =>
-      // !token.contractAddress &&
-      token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== KWT_SUBNETWORK_CHAIN_ID
-  ),
-  (c) => c.chainId
-);
-
-export const evmChainsWithoutTron = evmChains.filter((chain) => chain.chainId !== '0x2b6653dc');
-export const tronChain = evmChains.filter((chain) => chain.chainId === '0x2b6653dc');
-
 export const kawaiiTokens = uniqBy(
-  cosmosTokens.filter((token) => token.chainId === KWT_SUBNETWORK_CHAIN_ID),
+  cosmosTokens.filter((token) => token.chainId === 'kawaii_6886-1'),
   (c) => c.denom
 );
 

@@ -81,7 +81,7 @@ export type BridgeAppCurrency = AppCurrency & {
   readonly bridgeTo?: NetworkChainId[];
   readonly coinGeckoId: CoinGeckoId;
   readonly Icon: CoinIcon;
-  readonly bridgeNetworkIdentifier?: NetworkChainId;
+  readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
 };
 
@@ -618,3 +618,8 @@ export const embedChainInfos: CustomChainInfo[] = [
     currencies: []
   }
 ];
+
+// exclude kawaiverse subnet and other special evm that has different cointype
+export const evmChains = embedChainInfos.filter(
+  (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
+);
