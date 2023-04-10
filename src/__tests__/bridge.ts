@@ -1,5 +1,6 @@
 import { coin } from '@cosmjs/stargate';
 import { TokenItemType, filteredTokens, flattenTokens } from 'config/bridgeTokens';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
   BSC_CHAIN_ID,
   BSC_SCAN,
@@ -77,7 +78,7 @@ describe('bridge', () => {
     it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
       // check if the sender and contract address are correct
       for (const msg of msgConvertReverses) {
-        expect(msg.contract).toBe(fromToken.contractAddress);
+        expect(msg.contract).toBe(process.env.REACT_APP_CONVERTER_CONTRACT);
         expect(msg.sender).toBe(keplrAddress);
       }
 
@@ -107,65 +108,61 @@ describe('bridge', () => {
     expect(assetInfo).toMatchObject(ORAI_INFO);
   });
 
-  it.each([
+  it.each<[TokenItemType, NetworkChainId, string, CoinGeckoId]>([
     [
       flattenTokens.find((item) => item.name === 'ERC20 MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID),
-      ORAICHAIN_ID,
+      'Oraichain',
       'MILKY',
       'milky-token'
     ],
     [
       flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === KWT_SUBNETWORK_CHAIN_ID),
-      ORAICHAIN_ID,
+      'Oraichain',
       'MILKY',
       'milky-token'
     ],
     [
       flattenTokens.find((item) => item.name === 'MILKY' && item.chainId === ORAICHAIN_ID),
-      BSC_CHAIN_ID,
+      '0x38',
       'MILKY',
       'milky-token'
     ],
     [
       flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === COSMOS_CHAIN_ID),
-      ORAICHAIN_ID,
+      'Oraichain',
       'ATOM',
       'cosmos'
     ],
     [
       flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === ORAICHAIN_ID),
-      COSMOS_CHAIN_ID,
+      'cosmoshub-4',
       'ATOM',
       'cosmos'
     ],
     [
       flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === '0x38'),
-      ORAICHAIN_ID,
+      'Oraichain',
       'ORAI',
       'oraichain-token'
     ],
     [
       flattenTokens.find((item) => item.coinGeckoId === 'tether' && item.chainId === '0x2b6653dc'),
-      ORAICHAIN_ID,
+      'Oraichain',
       'USDT',
       'tether'
     ],
     [
       flattenTokens.find((item) => item.coinGeckoId === 'tether' && item.chainId === ORAICHAIN_ID),
-      BSC_CHAIN_ID,
+      '0x38',
       'USDT',
       'tether'
     ]
-  ])(
-    'bridge-test-find-default-to-token',
-    (from: TokenItemType, expectedChainId: string, expectedName: string, expectedCoingeckoId: string) => {
-      console.log(from);
-      const toToken = findDefaultToToken(from);
-      expect(toToken.chainId).toBe(expectedChainId);
-      expect(toToken.name).toContain(expectedName);
-      expect(toToken.coinGeckoId).toBe(expectedCoingeckoId);
-    }
-  );
+  ])('bridge-test-find-default-to-token', (from, expectedChainId, expectedName, expectedCoingeckoId) => {
+    const toToken = findDefaultToToken(from);
+    expect(from.bridgeTo.includes(toToken.chainId)).toBe(true);
+    expect(toToken.name).toContain(expectedName);
+    expect(toToken.coinGeckoId).toBe(expectedCoingeckoId);
+  });
 
   it.each([
     [BSC_CHAIN_ID, '0x', `${BSC_SCAN}/tx/0x`],
