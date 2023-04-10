@@ -7,7 +7,7 @@ import {
 } from '@oraichain/kawaiiverse-txs';
 import { createTxRaw } from '@tharsis/proto';
 import { kawaiiTokens } from 'config/bridgeTokens';
-import { KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
+import { KAWAII_LCD } from 'config/constants';
 import Long from 'long';
 import { collectWallet } from './cosmjs';
 

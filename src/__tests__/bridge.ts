@@ -159,6 +159,7 @@ describe('bridge', () => {
   ])(
     'bridge-test-find-default-to-token',
     (from: TokenItemType, expectedChainId: string, expectedName: string, expectedCoingeckoId: string) => {
+      console.log(from);
       const toToken = findDefaultToToken(from);
       expect(toToken.chainId).toBe(expectedChainId);
       expect(toToken.name).toContain(expectedName);

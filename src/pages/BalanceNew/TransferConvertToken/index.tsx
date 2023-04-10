@@ -6,18 +6,9 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { evmChains, filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import {
-  COSMOS_TYPE,
-  EVM_TYPE,
-  GAS_ESTIMATION_BRIDGE_DEFAULT,
-  KAWAII_ORG,
-  KWT_SUBNETWORK_CHAIN_ID,
-  ORAI,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  TRON_CHAIN_ID
-} from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork, NetworkType } from 'helper';
+import { NetworkChainId } from 'config/chainInfos';
+import { COSMOS_TYPE, EVM_TYPE, GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { feeEstimate, filterChainBridge, getTokenChain, networks, NetworkType, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
@@ -49,7 +40,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 }) => {
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useState('');
+  const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [addressTransfer, setAddressTransfer] = useState('');
@@ -87,11 +78,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network: NetworkType) => {
     try {
       let address: string = '';
-      if (network.networkType == EVM_TYPE && network.chainId !== TRON_CHAIN_ID) {
+      if (network.networkType == EVM_TYPE && network.chainId !== '0x2b6653dc') {
         if (!window.Metamask.isWindowEthereum()) return setAddressTransfer('');
         address = await window.Metamask!.getEthAddress();
       }
-      if (network.chainId === TRON_CHAIN_ID) {
+      if (network.chainId === '0x2b6653dc') {
         address = window.tronWeb.defaultAddress.base58;
       }
       if (network.networkType == COSMOS_TYPE) {
@@ -111,12 +102,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       setTransferLoading(true);
 
       // if on the same kwt network => we convert between native & erc20 tokens
-      if (token.chainId === KWT_SUBNETWORK_CHAIN_ID && filterNetwork === KAWAII_ORG) {
+      if (token.chainId === 'kawaii_6886-1') {
         await convertKwt(convertAmount, token);
         return;
       }
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
-      if (token.chainId === KWT_SUBNETWORK_CHAIN_ID || evmChains.find((chain) => chain.chainId === token.chainId)) {
+      if (evmChains.find((chain) => chain.chainId === token.chainId)) {
         await onClickTransfer(convertAmount);
         return;
       }
@@ -206,7 +197,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             key={network.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(network?.title);
+                              setFilterNetwork(network?.chainId);
                               await getAddressTransfer(network);
                               setIsOpen(false);
                             }}

@@ -1,29 +1,27 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
-import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import {
   KWT,
   KWT_BSC_CONTRACT,
-  KWT_SUBNETWORK_CHAIN_ID,
   MILKY_BSC_CONTRACT,
   ORAI,
   ORAICHAIN_ID,
   ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_DENOM,
   ORAI_BRIDGE_RPC,
   ORAI_BRIDGE_UDENOM
 } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { ethToTronAddress, getNetworkGasPrice } from 'helper';
+import { getNetworkGasPrice } from 'helper';
 import { TransferBackMsg } from 'libs/contracts';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, parseBep20Erc20Name, toAmount } from 'libs/utils';
+import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
 import Long from 'long';
 import {
   generateConvertCw20Erc20Message,
@@ -206,7 +204,7 @@ export const transferIBCMultiple = async (
   const client = await SigningStargateClient.connectWithSigner(rpc, offlineSigner, {
     registry: customRegistry,
     aminoTypes,
-    gasPrice: GasPrice.fromString(`${(await getNetworkGasPrice()).average}${feeDenom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${feeDenom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
   return result;
@@ -265,7 +263,7 @@ export const transferTokenErc20Cw20Map = async ({
   const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner, {
     registry: customRegistry,
     aminoTypes,
-    gasPrice: GasPrice.fromString(`${(await getNetworkGasPrice()).average}${network.denom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, [...executeContractMsgs, msgTransfer], 'auto');
   return result;
@@ -391,7 +389,7 @@ export const transferIbcCustom = async (
 export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
   return flattenTokens.find(
-    (t) => from.bridgeTo.includes(t.org) && from.name.includes(t.name) && from.chainId !== t.chainId
+    (t) => from.bridgeTo.includes(t.chainId) && from.name.includes(t.name) && from.chainId !== t.chainId
   );
 };
 

@@ -71,9 +71,6 @@ export const KWT_SCAN = 'https://scan.kawaii.global';
 export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
 export const KWT_SUBNETWORK_EVM_CHAIN_ID = Networks.kawaiiverse; //'0x1ae6';
 export const ORAICHAIN_ID = 'Oraichain';
-export const BSC_ORG = 'BNB Chain';
-export const ETHEREUM_ORG = 'Ethereum';
-export const TRON_ORG = 'Tron Network';
 export const COSMOS_CHAIN_ID = 'cosmoshub-4';
 export const COSMOS_PREFIX = 'cosmos';
 export const OSMOSIS_CHAIN_ID = 'osmosis-1';
@@ -125,11 +122,6 @@ export const KAWAII_LCD = 'https://cosmos1.kawaii.global';
 export const KAWAII_API_DEV = 'https://developers.kawaii.global';
 export const KAWAII_CONTRACT = '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd';
 export const KAWAII_SUBNET_RPC = 'https://endpoint1.kawaii.global';
-
-export const KAWAII_ORG = 'Kawaiiverse';
-export const OSMOSIS_ORG = 'Osmosis';
-export const COSMOS_ORG = 'Cosmos Hub';
-export const ORAI_BRIDGE_ORG = 'OraiBridge';
 
 // websocket consts
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;

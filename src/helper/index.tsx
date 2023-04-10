@@ -21,20 +21,20 @@ import { BSC_CHAIN_ID, COSMOS_TYPE, ERC20_ORAI, ETHEREUM_CHAIN_ID, EVM_TYPE, KAW
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { embedChainInfos } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import { uniqBy } from 'lodash';
 import flatten from 'lodash/flatten';
+import { NetworkChainId } from 'config/chainInfos';
 
 interface Tokens {
   denom?: string;
-  chainId?: string | number;
+  chainId?: NetworkChainId;
   bridgeTo?: Array<string>;
 }
 
 export type NetworkType = {
   title: string;
-  chainId: string | number;
+  chainId: NetworkChainId;
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   networkType: string;
 };
@@ -73,8 +73,8 @@ export const filterChainBridge = (token: Tokens, item: NetworkType) => {
   return tokenCanBridgeTo.includes(item.title);
 };
 
-export const getTokenChain = (token: TokenItemType) => {
-  return token?.bridgeTo?.[0] ?? ORAICHAIN_ID;
+export const getTokenChain = (token: TokenItemType): NetworkChainId => {
+  return token?.bridgeTo?.[0] ?? 'Oraichain';
 };
 
 export const getDenomEvm = () => {
@@ -103,16 +103,15 @@ export const getTransactionUrl = (chainId: string | number, transactionHash: any
   }
 };
 
-export const getNetworkGasPrice = async () => {
-  let chainInfosWithoutEndpoints: any;
+export const getNetworkGasPrice = async (): Promise<number> => {
   try {
-    chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
-  } catch {
-    chainInfosWithoutEndpoints = embedChainInfos;
-  } finally {
+    const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
     const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId);
-    return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;
-  }
+    if (findToken) {
+      return findToken.feeCurrencies[0].gasPriceStep.average;
+    }
+  } catch {}
+  return 0;
 };
 
 //hardcode fee
