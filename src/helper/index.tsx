@@ -25,7 +25,7 @@ interface Tokens {
   bridgeTo?: Array<string>;
 }
 
-export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2');
+export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 
 export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
   const network = networks.find((n) => n.chainId == chainId);
