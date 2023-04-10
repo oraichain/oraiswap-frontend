@@ -182,7 +182,6 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'ATOM',
       coinGeckoId: 'cosmos',
-      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
       bridgeTo: ['cosmoshub-4'],
       coinDecimals: 6,
@@ -191,7 +190,6 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 AIRI',
       coinGeckoId: 'airight',
-      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: AiriIcon
@@ -228,7 +226,6 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'OSMO',
-      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
       coinDecimals: 6,
       coinGeckoId: 'osmosis',
@@ -238,7 +235,6 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 KWT',
       coinGeckoId: 'kawaii-islands',
-      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: KwtIcon
@@ -256,7 +252,6 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 MILKY',
       coinGeckoId: 'milky-token',
-      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: MilkyIcon
