@@ -1,5 +1,5 @@
 import bech32 from 'bech32';
-import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
 import { AssetInfo } from './contracts';
@@ -43,7 +43,7 @@ export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecima
 };
 
 export const getUsd = (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>): number => {
-  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0);
+  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coinGeckoId] ?? 0);
 };
 
 export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<string>): number => {
@@ -52,7 +52,7 @@ export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<stri
     const tokenInfo = tokenMap[denom];
     if (!tokenInfo) continue;
     const amount = toDisplay(amounts[denom], tokenInfo.decimals);
-    usd += amount * (prices[tokenInfo.coingeckoId] ?? 0);
+    usd += amount * (prices[tokenInfo.coinGeckoId] ?? 0);
   }
   return usd;
 };
@@ -216,7 +216,7 @@ export const processWsResponseMsg = (message: any): string => {
       const packet = JSON.parse(packetRaw);
       // we look for the true denom information with decimals to process
       // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
-      const receivedToken = filteredTokens.find((token) => token.denom === packet.denom);
+      const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
       const displayAmount = toDisplay(packet.amount, receivedToken.decimals);
       tokens = tokens.concat(`${displayAmount} ${receivedToken.name}, `);
     }

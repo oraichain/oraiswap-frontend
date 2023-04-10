@@ -1,5 +1,5 @@
 import { Coin } from '@cosmjs/stargate';
-import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { cosmosTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_UDENOM } from 'config/constants';
 import { toDisplay } from 'libs/utils';
 import uniqBy from 'lodash/uniqBy';
@@ -22,7 +22,7 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
       }
 
       const data: readonly Coin[] = uniqBy(
-        filteredTokens.filter((token) => !token.contractAddress && token.chainId === ORAI_BRIDGE_CHAIN_ID),
+        cosmosTokens.filter((token) => !token.contractAddress && token.chainId === ORAI_BRIDGE_CHAIN_ID),
         (c) => c.denom
       )
         .map((token) => ({ denom: token.denom, amount: amounts[token.denom] }))
