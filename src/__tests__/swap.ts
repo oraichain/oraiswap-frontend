@@ -58,6 +58,7 @@ describe('swap', () => {
     const toTokenInfoData = filteredTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
     const simulateData = { amount: '1000000' };
+    const expectedMinimumReceive = '990000';
     const amounts = {
       airi: '2000000'
     };
@@ -65,7 +66,7 @@ describe('swap', () => {
     const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
 
     it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe('999900');
+      expect(minimumReceive).toBe(expectedMinimumReceive);
     });
 
     it('return msgs generate contract', () => {
@@ -124,7 +125,7 @@ describe('swap', () => {
                 }
               }
             ],
-            minimum_receive: '999900'
+            minimum_receive: expectedMinimumReceive
           }
         });
       }
