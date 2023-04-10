@@ -135,7 +135,7 @@ const LiquidityModal: FC<ModalProps> = ({
   }, [pairAmountInfoData]);
 
   const getValueUsd = (token: TokenItemType, amount: string | bigint) => {
-    return toDisplay(amount, token!.decimals) * prices[token!.coingeckoId];
+    return toDisplay(amount, token!.decimals) * prices[token!.coinGeckoId];
   };
 
   const onChangeAmount1 = (value: bigint) => {

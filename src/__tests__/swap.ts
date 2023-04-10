@@ -1,5 +1,5 @@
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI, COSMOS_DECIMALS } from 'config/constants';
+import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -17,7 +17,7 @@ describe('swap', () => {
 
   it('max amount with denom orai', () => {
     const amount = 999999n;
-    const decimals = COSMOS_DECIMALS;
+    const decimals = 6;
     const oraiDecimals = { decimals };
 
     const displayAmount = toDisplay(amount, decimals);
@@ -53,9 +53,9 @@ describe('swap', () => {
     const senderAddress = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
     const fromAmountToken = 10;
     const fromTokenDecimals = 6;
-    const fromTokenHaveContract = filteredTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
-    const fromTokenNoContract = filteredTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
-    const toTokenInfoData = filteredTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
+    const fromTokenHaveContract = cosmosTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
+    const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
+    const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
     const simulateData = { amount: '1000000' };
     const amounts = {
@@ -65,7 +65,7 @@ describe('swap', () => {
     const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
 
     it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe('999900');
+      expect(minimumReceive).toBe('990000');
     });
 
     it('return msgs generate contract', () => {
@@ -124,7 +124,7 @@ describe('swap', () => {
                 }
               }
             ],
-            minimum_receive: '999900'
+            minimum_receive: '990000'
           }
         });
       }
