@@ -142,7 +142,7 @@ export const convertTransferIBCErc20Kwt = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coingeckoId === fromToken.coingeckoId); // collect kawaiiverse cosmos based token for conversion
+  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coinGeckoId === fromToken.coinGeckoId); // collect kawaiiverse cosmos based token for conversion
 
   const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
@@ -390,7 +390,9 @@ export const transferIbcCustom = async (
 
 export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
-  return flattenTokens.find(t => from.bridgeTo.includes(t.org) && from.name.includes(t.name) && from.chainId !== t.chainId)
+  return flattenTokens.find(
+    (t) => from.bridgeTo.includes(t.org) && from.name.includes(t.name) && from.chainId !== t.chainId
+  );
 };
 
 export const convertKwt = async (transferAmount: number, fromToken: TokenItemType): Promise<DeliverTxResponse> => {

@@ -47,7 +47,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -62,7 +62,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
   const [, setTxHash] = useState('');
 
-  const [[from, to], setTokenBridge] = useState<TokenItemType[]>([])
+  const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
 
   const { data: prices } = useCoinGeckoPrices();
 
@@ -105,11 +105,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const onClickToken = useCallback(
     (token: TokenItemType) => {
       if (isEqual(from, token)) {
-        setTokenBridge([undefined, undefined])
+        setTokenBridge([undefined, undefined]);
         return;
       }
       const toToken = findDefaultToToken(token);
-      setTokenBridge([token, toToken])
+      setTokenBridge([token, toToken]);
     },
     [otherChainTokens, oraichainTokens, from, to]
   );
@@ -160,10 +160,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
         // convert erc20 to native ==> ORAICHAIN
-        if (!!from.contractAddress)
-          result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        else
-          result = await transferIBCKwt(from, to, fromAmount, amounts);
+        if (!!from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        else result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
@@ -192,7 +190,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return token.chainId == chainId;
       })
       .sort((a, b) => {
-        return toTotalDisplay(amounts, b) * prices[b.coingeckoId] - toTotalDisplay(amounts, a) * prices[a.coingeckoId];
+        return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
       });
   };
 
@@ -288,11 +286,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                     active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
                     onClick={() => onClickToken(t)}
-                    onClickTransfer={
-                      async (fromAmount: number, transferFrom?: TokenItemType, transferTo?: TokenItemType) => {
-                        await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to)
-                      }
-                    }
+                    onClickTransfer={async (
+                      fromAmount: number,
+                      transferFrom?: TokenItemType,
+                      transferTo?: TokenItemType
+                    ) => {
+                      await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to);
+                    }}
                     convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
                       try {
                         const result = await convertKwt(transferAmount, fromToken);

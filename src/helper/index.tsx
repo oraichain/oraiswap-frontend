@@ -20,7 +20,6 @@ import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { BSC_CHAIN_ID, COSMOS_TYPE, ERC20_ORAI, ETHEREUM_CHAIN_ID, EVM_TYPE, KAWAII_ORAI } from 'config/constants';
 import { network } from 'config/networks';
 
-import { FeeCurrency } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { embedChainInfos } from 'config/chainInfos';
 import { ethers } from 'ethers';
@@ -46,7 +45,7 @@ export const networks: NetworkType[] = uniqBy(
 ).map((network) => {
   let icon = network.Icon;
   const networkType = network.cosmosBased ? COSMOS_TYPE : EVM_TYPE;
-  switch (network.chainId) {
+  switch (Number(network.chainId)) {
     case BSC_CHAIN_ID:
       icon = BNBIcon;
       break;
@@ -105,13 +104,11 @@ export const getTransactionUrl = (chainId: string | number, transactionHash: any
 };
 
 export const getNetworkGasPrice = async () => {
-  let chainInfosWithoutEndpoints: Array<{
-    chainId: string;
-    feeCurrencies: FeeCurrency[];
-    gasPriceStep?: any;
-  }> = embedChainInfos;
+  let chainInfosWithoutEndpoints: any;
   try {
     chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
+  } catch {
+    chainInfosWithoutEndpoints = embedChainInfos;
   } finally {
     const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId);
     return findToken?.feeCurrencies[0]?.gasPriceStep ?? findToken?.gasPriceStep;

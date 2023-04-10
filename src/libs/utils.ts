@@ -43,7 +43,7 @@ export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecima
 };
 
 export const getUsd = (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>): number => {
-  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coingeckoId] ?? 0);
+  return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coinGeckoId] ?? 0);
 };
 
 export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<string>): number => {
@@ -52,7 +52,7 @@ export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<stri
     const tokenInfo = tokenMap[denom];
     if (!tokenInfo) continue;
     const amount = toDisplay(amounts[denom], tokenInfo.decimals);
-    usd += amount * (prices[tokenInfo.coingeckoId] ?? 0);
+    usd += amount * (prices[tokenInfo.coinGeckoId] ?? 0);
   }
   return usd;
 };

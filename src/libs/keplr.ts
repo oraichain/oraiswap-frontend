@@ -1,7 +1,7 @@
 import { network } from 'config/networks';
 import { embedChainInfos } from 'config/chainInfos';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
+import { TokenItemType, filteredTokens } from 'config/bridgeTokens';
+import { Key, Keplr as keplr, FeeCurrency, ChainInfo } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
@@ -40,7 +40,7 @@ export default class Keplr {
 
     // if there is chainInfo try to suggest, otherwise enable it
     if (!isMobile() && chainInfo) {
-      await this.keplr.experimentalSuggestChain(chainInfo);
+      await this.keplr.experimentalSuggestChain(chainInfo as ChainInfo);
     }
     await this.keplr.enable(chainId);
   }

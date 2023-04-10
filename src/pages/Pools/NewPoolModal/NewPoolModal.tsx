@@ -60,7 +60,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const getBalanceValue = (tokenSymbol: string | undefined, amount: number | string) => {
     if (!tokenSymbol) return 0;
-    const coingeckoId = poolTokens.find((token) => token.name === tokenSymbol)?.coingeckoId;
+    const coingeckoId = poolTokens.find((token) => token.name === tokenSymbol)?.coinGeckoId;
     const pricePer = prices[coingeckoId!] ?? 0;
 
     return pricePer * +amount;

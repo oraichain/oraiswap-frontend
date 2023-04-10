@@ -169,7 +169,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: To
             evmAddress,
             evmTokens.filter((t) => t.chainId === chain.chainId),
             chain.rpc,
-            chain.chainId as number
+            Number(chain.chainId)
           )
         )
       )

@@ -1,14 +1,12 @@
 import { NetworkConfig } from 'types/network';
-import { ORAI, ORAI_LCD, ORAI_RPC, ORAI_SCAN } from './constants';
+import { ChainInfoCustom, oraichainNetwork } from './chainInfos';
+import { ORAI_SCAN } from './constants';
 
-export const network: NetworkConfig = {
-  chainId: 'Oraichain',
-  prefix: ORAI,
+export const network: ChainInfoCustom & NetworkConfig = {
+  ...oraichainNetwork,
+  prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
   denom: 'orai',
-  coinType: 118,
-  lcd: ORAI_LCD,
-  rpc: ORAI_RPC,
-
+  coinType: oraichainNetwork.bip44.coinType,
   fee: { gasPrice: '0.00506', amount: '1518', gas: '2000000' }, // 0.000500 ORAI
   factory: process.env.REACT_APP_FACTORY_CONTRACT,
   factory_v2: process.env.REACT_APP_FACTORY_V2_CONTRACT,

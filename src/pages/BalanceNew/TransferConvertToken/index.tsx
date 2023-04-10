@@ -68,7 +68,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }, [token?.chainId]);
 
   // list of tokens where it exists in at least two different chains
-  const listedTokens = filteredTokens.filter((t) => t.chainId !== token.chainId && t.coingeckoId === token.coingeckoId);
+  const listedTokens = filteredTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
   const maxAmount = toDisplay(
     amountDetail.amount, // amount detail here can be undefined
     token?.decimals
@@ -116,10 +116,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         return;
       }
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
-      if (
-        token.chainId === KWT_SUBNETWORK_CHAIN_ID ||
-        evmChains.find((chain) => chain.chainId === token.chainId)
-      ) {
+      if (token.chainId === KWT_SUBNETWORK_CHAIN_ID || evmChains.find((chain) => chain.chainId === token.chainId)) {
         await onClickTransfer(convertAmount);
         return;
       }
@@ -127,9 +124,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // TODO: to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const to = filteredTokens.find((t) =>
-        t.chainId === ORAI_BRIDGE_CHAIN_ID &&
-          t.coingeckoId === token.coingeckoId &&
-          t?.bridgeNetworkIdentifier
+        t.chainId === ORAI_BRIDGE_CHAIN_ID && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
           ? t.bridgeNetworkIdentifier === filterNetwork
           : t.org === filterNetwork
       );
@@ -140,12 +135,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     } finally {
       setTransferLoading(false);
     }
-  }
+  };
 
   const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.org ? "Convert " : "Transfer ";
+    const buttonName = filterNetwork === token.org ? 'Convert ' : 'Transfer ';
     return buttonName + filterNetwork;
-  }
+  };
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -249,7 +244,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 onValueChange={({ floatValue }) => {
                   if (!floatValue) return setConvertAmount([undefined, 0]);
-                  const usdValue = floatValue * (prices[token.coingeckoId] ?? 0);
+                  const usdValue = floatValue * (prices[token.coinGeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
                 className={styles.amount}

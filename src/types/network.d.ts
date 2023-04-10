@@ -1,12 +1,6 @@
-interface ExtNetworkConfig {
-  chainId: string;
-  rpc: string;
-  lcd: string;
-  explorer: string;
+export interface NetworkConfig {
   coinType?: number;
-}
-
-export interface NetworkConfig extends ExtNetworkConfig {
+  explorer: string;
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;
