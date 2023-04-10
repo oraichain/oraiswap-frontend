@@ -6,9 +6,10 @@ import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
 import { TransferBackMsg } from 'libs/contracts/types';
-import { coins } from '@cosmjs/proto-signing';
+import { Coin, coins } from '@cosmjs/proto-signing';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
+import { AssetInfo } from 'libs/contracts';
 
 var cosmosChain: CWSimulateApp = new CWSimulateApp({
   chainId: 'cosmoshub-4',
@@ -116,181 +117,117 @@ describe.only('IBCModule', () => {
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
 
-  it('cw-ics20-success-should-increase-native-balance-remote-to-local', async () => {
-    // create mapping
-    await ics20Contract.updateMappingPair({
-      assetInfo: {
+  it.each([
+    [
+      {
         native_token: {
           denom: 'orai'
         }
       },
-      assetInfoDecimals: 6,
-      denom: oraiIbcDenom,
-      remoteDecimals: 6,
-      localChannelId: 'channel-0'
-    });
-    // now send ibc package
-    const icsPackage: FungibleTokenPacketData = {
-      amount: ibcTransferAmount,
-      denom: oraiIbcDenom,
-      receiver: bobAddress,
-      sender: cosmosSenderAddress,
-      memo: ''
-    };
-    let packetReceiveRes = await cosmosChain.ibc.sendPacketReceive({
-      packet: {
-        data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: 'channel-0'
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: 'channel-0'
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
-          }
-        }
-      },
-      relayer: cosmosSenderAddress
-    });
-
-    const bobBalance = oraiClient.app.bank.getBalance(bobAddress);
-    expect(bobBalance).toEqual(coins(ibcTransferAmount, 'orai'));
-  });
-
-  it('cw-ics20-fail-no-pair-mapping-should-not-send-balance-remote-to-local', async () => {
-    // now send ibc package
-    const icsPackage: FungibleTokenPacketData = {
-      amount: ibcTransferAmount,
-      denom: oraiIbcDenom,
-      receiver: bobAddress,
-      sender: cosmosSenderAddress,
-      memo: ''
-    };
-    let packetReceiveRes = await cosmosChain.ibc.sendPacketReceive({
-      packet: {
-        data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: 'channel-0'
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: 'channel-0'
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
-          }
-        }
-      },
-      relayer: cosmosSenderAddress
-    });
-
-    const bobBalance = oraiClient.app.bank.getBalance(bobAddress);
-    expect(bobBalance).toEqual([]);
-  });
-
-  it('cw-ics20-fail-transfer-native-fail-insufficient-funds-should-not-send-balance-remote-to-local', async () => {
-    // create mapping
-    await ics20Contract.updateMappingPair({
-      assetInfo: {
+      ibcTransferAmount,
+      oraiIbcDenom,
+      coins(ibcTransferAmount, 'orai'),
+      'cw-ics20-success-should-increase-native-balance-remote-to-local'
+    ],
+    [
+      null,
+      ibcTransferAmount,
+      oraiIbcDenom,
+      [],
+      'cw-ics20-fail-no-pair-mapping-should-not-send-balance-remote-to-local'
+    ],
+    [
+      {
         native_token: {
           denom: 'orai'
         }
       },
-      assetInfoDecimals: 6,
-      denom: oraiIbcDenom,
-      remoteDecimals: 6,
-      localChannelId: 'channel-0'
-    });
-    // now send ibc package
-    const icsPackage: FungibleTokenPacketData = {
-      amount: '10000000000001',
-      denom: oraiIbcDenom,
-      receiver: bobAddress,
-      sender: cosmosSenderAddress,
-      memo: ''
-    };
-    let packetReceiveRes = await cosmosChain.ibc.sendPacketReceive({
-      packet: {
-        data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: 'channel-0'
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: 'channel-0'
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
-          }
-        }
-      },
-      relayer: cosmosSenderAddress
-    });
-
-    const bobBalance = oraiClient.app.bank.getBalance(bobAddress);
-    expect(bobBalance).toEqual([]);
-  });
-
-  it('cw-ics20-success-transfer-cw20-should-increase-cw20-balance-remote-to-local', async () => {
-    // create mapping
-    await ics20Contract.updateMappingPair({
-      assetInfo: {
+      '10000000000001',
+      oraiIbcDenom,
+      [],
+      'cw-ics20-fail-transfer-native-fail-insufficient-funds-should-not-send-balance-remote-to-local'
+    ],
+    [
+      {
         token: {
-          contract_addr: airiToken.contractAddress
+          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address due to jest issue: https://github.com/facebook/jest/issues/6888
         }
       },
-      assetInfoDecimals: 6,
-      denom: airiIbcDenom,
-      remoteDecimals: 6,
-      localChannelId: 'channel-0'
-    });
-    // now send ibc package
-    const icsPackage: FungibleTokenPacketData = {
-      amount: ibcTransferAmount,
-      denom: airiIbcDenom,
-      receiver: bobAddress,
-      sender: cosmosSenderAddress,
-      memo: ''
-    };
-    let packetReceiveRes = await cosmosChain.ibc.sendPacketReceive({
-      packet: {
-        data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: 'channel-0'
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: 'channel-0'
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
+      ibcTransferAmount,
+      airiIbcDenom,
+      [{ amount: ibcTransferAmount, denom: '' }],
+      'cw-ics20-success-transfer-cw20-should-increase-cw20-balance-remote-to-local'
+    ],
+    [
+      {
+        token: {
+          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address due to jest issue: https://github.com/facebook/jest/issues/6888
+        }
+      },
+      '10000000000001',
+      airiIbcDenom,
+      [{ amount: '0', denom: '' }],
+      'cw-ics20-fail-transfer-cw20-fail-insufficient-funds-should-not-send-balance-remote-to-local'
+    ]
+  ])(
+    'bridge-test-cw-ics20-transfer-remote-to-local',
+    async (
+      assetInfo: AssetInfo,
+      transferAmount: string,
+      transferDenom: string,
+      expectedBalance: Coin[],
+      _name: string
+    ) => {
+      // create mapping
+      if (assetInfo) {
+        const pair = {
+          assetInfo,
+          assetInfoDecimals: 6,
+          denom: transferDenom,
+          remoteDecimals: 6,
+          localChannelId: 'channel-0'
+        };
+        await ics20Contract.updateMappingPair(pair);
+      }
+      const icsPackage: FungibleTokenPacketData = {
+        amount: transferAmount,
+        denom: transferDenom,
+        receiver: bobAddress,
+        sender: cosmosSenderAddress,
+        memo: ''
+      };
+      await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          src: {
+            port_id: cosmosPort,
+            channel_id: 'channel-0'
+          },
+          dest: {
+            port_id: oraiPort,
+            channel_id: 'channel-0'
+          },
+          sequence: 27,
+          timeout: {
+            block: {
+              revision: 1,
+              height: 12345678
+            }
           }
-        }
-      },
-      relayer: cosmosSenderAddress
-    });
+        },
+        relayer: cosmosSenderAddress
+      });
 
-    const bobBalance = await airiToken.balance({ address: bobAddress });
-    expect(bobBalance.balance).toEqual(ibcTransferAmount);
-  });
+      if (assetInfo && (assetInfo as any).token) {
+        const bobBalance = await airiToken.balance({ address: bobAddress });
+        console.log('bob balance contract address: ', bobBalance);
+        expect(bobBalance.balance).toEqual(expectedBalance[0].amount);
+        return;
+      }
+      const bobBalance = oraiClient.app.bank.getBalance(icsPackage.receiver);
+      expect(bobBalance).toEqual(expectedBalance);
+    }
+  );
 
   it('cw-ics20-fail-outcoming-channel-larger-than-incoming-should-not-transfer-balance-local-to-remote', async () => {
     // create mapping
@@ -352,7 +289,7 @@ describe.only('IBCModule', () => {
         msg: Buffer.from(JSON.stringify(transferBackMsg)).toString('base64')
       });
     } catch (error) {
-      expect(error).toEqual(new Error("Insufficient funds to redeem voucher on channel"));
+      expect(error).toEqual(new Error('Insufficient funds to redeem voucher on channel'));
     }
   });
 
