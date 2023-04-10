@@ -182,6 +182,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'ATOM',
       coinGeckoId: 'cosmos',
+      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
       bridgeTo: ['cosmoshub-4'],
       coinDecimals: 6,
@@ -190,6 +191,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 AIRI',
       coinGeckoId: 'airight',
+      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: AiriIcon
@@ -198,6 +200,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'AIRI',
       coinGeckoId: 'airight',
       coinMinimalDenom: 'airi',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_AIRI_CONTRACT,
       bridgeTo: ['0x38'],
       coinDecimals: 6,
@@ -207,6 +210,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'USDT',
       coinGeckoId: 'tether',
       coinMinimalDenom: 'usdt',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_USDT_CONTRACT,
       bridgeTo: ['0x38', '0x2b6653dc'],
       coinDecimals: 6,
@@ -216,6 +220,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'USDC',
       coinGeckoId: 'usd-coin',
       coinMinimalDenom: 'usdc',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_USDC_CONTRACT,
       bridgeTo: ['0x01'],
       coinDecimals: 6,
@@ -223,6 +228,7 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'OSMO',
+      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
       coinDecimals: 6,
       coinGeckoId: 'osmosis',
@@ -232,6 +238,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 KWT',
       coinGeckoId: 'kawaii-islands',
+      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: KwtIcon
@@ -240,6 +247,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'KWT',
       coinGeckoId: 'kawaii-islands',
       coinMinimalDenom: 'kwt',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_KWT_CONTRACT,
       bridgeTo: ['0x1ae6', '0x38'],
       coinDecimals: 6,
@@ -248,6 +256,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BEP20 MILKY',
       coinGeckoId: 'milky-token',
+      type: 'cw20',
       coinMinimalDenom: process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
       coinDecimals: 18,
       Icon: MilkyIcon
@@ -256,6 +265,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'MILKY',
       coinGeckoId: 'milky-token',
       coinMinimalDenom: 'milky',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
       bridgeTo: ['0x1ae6', '0x38'],
       coinDecimals: 6,
@@ -264,6 +274,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'ORAIX',
       coinMinimalDenom: 'oraix',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
       coinGeckoId: 'oraidex',
       coinDecimals: 6,
@@ -272,6 +283,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'scORAI',
       coinMinimalDenom: 'scorai',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_SCORAI_CONTRACT,
       coinGeckoId: 'scorai',
       coinDecimals: 6,
@@ -281,6 +293,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDenom: 'wTRX',
       coinGeckoId: 'tron',
       coinMinimalDenom: 'trx',
+      type: 'cw20',
       contractAddress: process.env.REACT_APP_TRX_CONTRACT,
       bridgeTo: ['0x2b6653dc'],
       coinDecimals: 6,
