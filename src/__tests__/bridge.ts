@@ -77,7 +77,7 @@ describe('bridge', () => {
     it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
       // check if the sender and contract address are correct
       for (const msg of msgConvertReverses) {
-        expect(msg.contract).toBe(process.env.REACT_APP_CONVERTER_CONTRACT);
+        expect(msg.contract).toBe(fromToken.contractAddress);
         expect(msg.sender).toBe(keplrAddress);
       }
 

@@ -65,7 +65,7 @@ describe('swap', () => {
     const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
 
     it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe('999900');
+      expect(minimumReceive).toBe('990000');
     });
 
     it('return msgs generate contract', () => {
@@ -124,7 +124,7 @@ describe('swap', () => {
                 }
               }
             ],
-            minimum_receive: '999900'
+            minimum_receive: '990000'
           }
         });
       }

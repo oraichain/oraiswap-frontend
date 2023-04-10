@@ -72,7 +72,6 @@ const startApp = async () => {
       // always trigger suggest chain when users enter the webpage
       for (const networkId of [network.chainId, ORAI_BRIDGE_CHAIN_ID, KWT_SUBNETWORK_CHAIN_ID]) {
         try {
-          console.log('suggestchain', networkId);
           await window.Keplr.suggestChain(networkId);
         } catch (error) {
           console.log({ error });
