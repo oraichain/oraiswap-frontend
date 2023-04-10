@@ -83,6 +83,7 @@ export type BridgeAppCurrency = AppCurrency & {
   readonly Icon: CoinIcon;
   readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
+  readonly contractAddress?: string;
 };
 
 export type CoinType = 118 | 60 | 195;

@@ -2,7 +2,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
-import { cosmosTokens, evmTokens, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cosmosTokens, evmTokens, kawaiiTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
@@ -77,7 +77,7 @@ async function loadTokensCosmos(dispatch: Dispatch, address: string) {
 async function loadCw20Balance(dispatch: Dispatch, address: string) {
   if (!address) return;
   // get all cw20 token contract
-  const cw20Tokens = cosmosTokens.filter((t) => t.contractAddress);
+  const cw20Tokens = oraichainTokens.filter((t) => t.contractAddress);
   const data = toBinary({
     balance: { address }
   });
@@ -108,7 +108,6 @@ async function loadEvmEntries(
   multicallCustomContractAddress?: string
 ): Promise<[string, string][]> {
   const tokens = evmTokens.filter((t) => t.chainId === chain.chainId);
-  console.log('loadEvmEntries', tokens, chain.chainId);
   if (!tokens.length) return [];
   const multicall = new Multicall({
     nodeUrl: chain.rpc,

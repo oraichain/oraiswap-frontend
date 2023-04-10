@@ -47,6 +47,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     name: currency.coinDenom,
     org: network.chainName,
     coinType: network.bip44.coinType,
+    contractAddress: currency.contractAddress,
     prefix: network.bech32Config?.bech32PrefixAccAddr,
     coinGeckoId: currency.coinGeckoId,
     denom: currency.coinMinimalDenom,
@@ -69,7 +70,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
 const otherChainTokens = flatten(
   embedChainInfos.filter((chainInfo) => chainInfo.chainId !== 'Oraichain').map(getTokensFromNetwork)
 );
-const oraichainTokens: TokenItemType[] = getTokensFromNetwork(oraichainNetwork);
+export const oraichainTokens: TokenItemType[] = getTokensFromNetwork(oraichainNetwork);
 
 export const tokens = [otherChainTokens, oraichainTokens];
 export const flattenTokens = flatten(tokens);
