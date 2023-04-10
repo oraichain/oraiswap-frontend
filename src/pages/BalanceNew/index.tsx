@@ -174,8 +174,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const getFilterTokens = (chainId: string | number): TokenItemType[] => {
     return [...otherChainTokens, ...oraichainTokens]
       .filter((token) => {
-        // not display because it is evm map and no bridge to option
-        if (!token.bridgeTo && !token.prefix) return false;
+        // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
+        if (!token.bridgeTo && !token.contractAddress) return false;
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
