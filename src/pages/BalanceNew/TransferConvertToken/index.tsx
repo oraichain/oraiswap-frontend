@@ -38,6 +38,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   onClickTransfer,
   subAmounts
 }) => {
+  const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
+
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
@@ -52,7 +54,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }, [chainInfo]);
 
   useEffect(() => {
-    const chainDefault = getTokenChain(token);
+    const chainDefault = bridgeNetworks?.[0].chainId;
     setFilterNetwork(chainDefault);
     const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
@@ -129,8 +131,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
     return buttonName + filterNetwork;
   };
-
-  const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
 
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
 

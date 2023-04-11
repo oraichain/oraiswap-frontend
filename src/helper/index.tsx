@@ -21,10 +21,6 @@ export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   return tokenCanBridgeTo.includes(item.chainId);
 };
 
-export const getTokenChain = (token: TokenItemType): NetworkChainId => {
-  return token?.bridgeTo?.[0] ?? 'Oraichain';
-};
-
 export const getDenomEvm = () => {
   switch (Number(window.ethereum?.chainId)) {
     case Networks.bsc:
