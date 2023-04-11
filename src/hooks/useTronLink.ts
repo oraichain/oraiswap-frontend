@@ -22,16 +22,22 @@ export function useTronEventListener() {
     }
   }, []);
 
-  function handleTronLink() {
+  async function handleTronLink() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
       console.log('tronLink & tronWeb successfully detected!');
+      let tronAddress;
       if (tronWeb?.defaultAddress?.base58) {
-        const tronAddress = tronWeb.defaultAddress.base58;
-        console.log('tronAddress', tronAddress);
-        loadTokenAmounts({ tronAddress });
-        setTronAddress(tronAddress);
+        tronAddress = tronWeb.defaultAddress.base58;
+      } else {
+        await window.tronLink.request({
+          method: 'tron_requestAccounts'
+        });
+        tronAddress = tronWeb.defaultAddress.base58;
       }
+      console.log('tronAddress', tronAddress);
+      loadTokenAmounts({ tronAddress });
+      setTronAddress(tronAddress);
 
       window.addEventListener('message', function (e) {
         if (e?.data?.message && e.data.message.action == 'setAccount') {
