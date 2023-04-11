@@ -16,6 +16,7 @@ import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -97,7 +98,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (window.keplr) {
+    if (window.keplr && !isMobile()) {
       keplrGasPriceCheck();
     }
   }, []);
