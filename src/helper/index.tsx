@@ -4,20 +4,19 @@ import {
   ETHEREUM_SCAN,
   HIGH_GAS_PRICE,
   KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID,
   MULTIPLIER,
   ORAICHAIN_ID,
-  TRON_CHAIN_ID,
   TRON_SCAN
 } from 'config/constants';
 
 import { TokenItemType } from 'config/bridgeTokens';
-import { BSC_CHAIN_ID, ERC20_ORAI, ETHEREUM_CHAIN_ID, KAWAII_ORAI } from 'config/constants';
+import { ERC20_ORAI, KAWAII_ORAI } from 'config/constants';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { CustomChainInfo, embedChainInfos, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
+import { Networks } from 'libs/ethereum-multicall/enums';
 
 interface Tokens {
   denom?: string;
@@ -45,9 +44,9 @@ export const getTokenChain = (token: TokenItemType): NetworkChainId => {
 
 export const getDenomEvm = () => {
   switch (Number(window.ethereum?.chainId)) {
-    case BSC_CHAIN_ID:
+    case Networks.bsc:
       return BEP20_ORAI;
-    case ETHEREUM_CHAIN_ID:
+    case Networks.mainnet:
       return ERC20_ORAI;
     default:
       return KAWAII_ORAI;
@@ -56,16 +55,16 @@ export const getDenomEvm = () => {
 
 export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
   switch (Number(chainId)) {
-    case BSC_CHAIN_ID:
+    case Networks.bsc:
       return `${BSC_SCAN}/tx/${transactionHash}`;
-    case ETHEREUM_CHAIN_ID:
+    case Networks.mainnet:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
-    case TRON_CHAIN_ID:
+    case Networks.tron:
       return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
     default:
       // raw string
       switch (chainId) {
-        case KWT_SUBNETWORK_CHAIN_ID:
+        case 'kawaii_6886-1':
           return `${KWT_SCAN}/tx/${transactionHash}`;
       }
       return null;

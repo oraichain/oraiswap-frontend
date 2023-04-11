@@ -1,7 +1,5 @@
 import { Networks } from 'libs/ethereum-multicall/enums';
 
-export const CHROME = 'https://google.com/chrome';
-
 /* oraiswap:unit */
 export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
@@ -16,8 +14,6 @@ export const TRON_DENOM = 'trx';
 export const BEP20_ORAI = 'bep20_orai';
 export const ERC20_ORAI = 'erc20_orai';
 export const KAWAII_ORAI = 'kawaii_orai';
-export const COSMOS_DECIMALS = 6;
-export const DECIMAL_FRACTION = Math.pow(10, 18);
 
 // estimate fee
 export const GAS_ESTIMATION_SWAP_DEFAULT = 580000;
@@ -36,10 +32,7 @@ export const AXIOS_THROTTLE_THRESHOLD = 2000;
 export const AXIOS_TIMEOUT = 10000;
 
 // bsc and eth information
-export const ETHEREUM_CHAIN_ID = Networks.mainnet;
 export const ETHEREUM_SCAN = 'https://etherscan.io';
-export const BSC_CHAIN_ID = Networks.bsc;
-export const BSC_RPC = 'https://1rpc.io/bnb';
 export const BSC_SCAN = 'https://bscscan.com';
 export const TRON_CHAIN_ID = Networks.tron;
 export const TRON_RPC = 'https://api.trongrid.io/jsonrpc';

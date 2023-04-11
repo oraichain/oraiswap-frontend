@@ -1,10 +1,8 @@
 import { coin } from '@cosmjs/stargate';
-import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens';
+import { cosmosTokens, flattenTokens, TokenItemType } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
-  BSC_CHAIN_ID,
   BSC_SCAN,
-  ETHEREUM_CHAIN_ID,
   ETHEREUM_SCAN,
   KWT_BSC_CONTRACT,
   KWT_DENOM,
@@ -16,7 +14,6 @@ import {
   ORAI_BRIDGE_CHAIN_ID,
   ORAI_BSC_CONTRACT,
   ORAI_INFO,
-  TRON_CHAIN_ID,
   TRON_SCAN
 } from 'config/constants';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';

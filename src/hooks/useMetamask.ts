@@ -1,8 +1,8 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
-import { BSC_CHAIN_ID, ETHEREUM_CHAIN_ID } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { Networks } from 'libs/ethereum-multicall/enums';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import useLoadTokens from './useLoadTokens';
@@ -25,7 +25,8 @@ export function useEagerConnect(isInactive: boolean, isInterval: boolean) {
 
   const connectEvm = () => {
     if (!window.ethereum) return;
-    if (![BSC_CHAIN_ID, ETHEREUM_CHAIN_ID].includes(Number(window.ethereum.chainId))) return;
+    // currently support bsc and eth
+    if (![Networks.bsc, Networks.mainnet].includes(Number(window.ethereum.chainId))) return;
     if (!web3React.account && !isInactive && (pathname === '/' || pathname === '/bridge')) {
       console.log('activate');
       web3React.activate(injected);
@@ -35,7 +36,7 @@ export function useEagerConnect(isInactive: boolean, isInterval: boolean) {
   useEffect(() => {
     if (!window.ethereum || isInactive) return;
     (async function () {
-      if (isMobile()) await window.Metamask.switchNetwork(BSC_CHAIN_ID);
+      if (isMobile()) await window.Metamask.switchNetwork(Networks.bsc);
       // passe cointype 60 for ethereum or let it use default param
       const accounts = await window.ethereum.request({
         method: 'eth_accounts',

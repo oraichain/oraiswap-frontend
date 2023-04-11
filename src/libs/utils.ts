@@ -6,7 +6,7 @@ import { AssetInfo } from './contracts';
 import { TokenInfoResponse } from './contracts/OraiswapToken.types';
 
 export const truncDecimals = 6;
-const atomic = 10 ** truncDecimals;
+export const atomic = 10 ** truncDecimals;
 
 export const getEvmAddress = (bech32Address: string) => {
   if (!bech32Address) return;

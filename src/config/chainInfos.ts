@@ -501,7 +501,7 @@ export const embedChainInfos: CustomChainInfo[] = [
 
   /// evm chain info
   {
-    rpc: 'https://1rpc.io/eth',
+    rpc: 'https://rpc.ankr.com/eth',
     chainId: '0x01',
     chainName: 'Ethereum',
     bip44: {
@@ -562,7 +562,7 @@ export const embedChainInfos: CustomChainInfo[] = [
     }
   },
   {
-    rpc: 'https://1rpc.io/bnb',
+    rpc: 'https://bsc-dataseed1.binance.org',
     networkType: 'evm',
     Icon: BnbIcon,
     chainId: '0x38',

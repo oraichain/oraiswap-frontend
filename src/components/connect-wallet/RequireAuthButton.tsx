@@ -1,12 +1,12 @@
 import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
+import { Networks } from 'libs/ethereum-multicall/enums';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
@@ -26,7 +26,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
 
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
-        await window.Metamask.switchNetwork(BSC_CHAIN_ID);
+        await window.Metamask.switchNetwork(Networks.bsc);
       }
       await activate(injected, (ex) => {
         console.log('error: ', ex);

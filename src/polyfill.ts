@@ -1,9 +1,8 @@
 //@ts-nocheck
-import { BSC_RPC } from 'config/constants';
-import { BSC_CHAIN_ID } from 'config/constants';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { isMobile } from '@walletconnect/browser-utils';
+import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import _BigInt from 'big-integer';
+import { embedChainInfos } from 'config/chainInfos';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
@@ -119,12 +118,12 @@ if (typeof BigInt === 'undefined') {
 export const initEthereum = async () => {
   // support only https
   if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
-    const chainId = Number(BSC_CHAIN_ID);
+    const bscChain = embedChainInfos.find((c) => c.chainId === '0x38');
     const provider = new WalletConnectProvider({
-      chainId,
+      chainId: Networks.bsc,
       storageId: 'metamask',
       qrcode: true,
-      rpc: { [chainId]: BSC_RPC },
+      rpc: { [Networks.bsc]: bscChain.rpc },
       qrcodeModalOptions: {
         mobileLinks: ['metamask']
       }
