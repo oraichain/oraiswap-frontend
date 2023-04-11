@@ -15,8 +15,6 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 
 import {
   AIRI_BSC_CONTRACT,
-  BEP20_ORAI,
-  ERC20_ORAI,
   KWT_BSC_CONTRACT,
   KWT_DENOM,
   MILKY_BSC_CONTRACT,
@@ -510,7 +508,7 @@ export const chainInfos: CustomChainInfo[] = [
     currencies: [
       {
         coinDenom: 'ORAI',
-        coinMinimalDenom: ERC20_ORAI,
+        coinMinimalDenom: 'erc20_orai',
         contractAddress: ORAI_ETH_CONTRACT,
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
@@ -571,7 +569,7 @@ export const chainInfos: CustomChainInfo[] = [
     currencies: [
       {
         coinDenom: 'ORAI',
-        coinMinimalDenom: BEP20_ORAI,
+        coinMinimalDenom: 'bep20_orai',
         contractAddress: ORAI_BSC_CONTRACT,
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,

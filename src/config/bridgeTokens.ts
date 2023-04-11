@@ -11,6 +11,8 @@ import {
   oraichainNetwork
 } from './chainInfos';
 
+export type EvmDenom = 'bep20_orai' | 'bep20_airi' | 'erc20_orai' | 'kawaii_orai';
+
 export type TokenItemType = {
   name: string;
   org: NetworkName;

@@ -1,11 +1,10 @@
-import { BEP20_ORAI, BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, TRON_SCAN } from 'config/constants';
+import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, TRON_SCAN } from 'config/constants';
 
-import { TokenItemType } from 'config/bridgeTokens';
-import { ERC20_ORAI, KAWAII_ORAI } from 'config/constants';
+import { EvmDenom, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { CustomChainInfo, chainInfos, NetworkChainId } from 'config/chainInfos';
+import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 
 interface Tokens {
@@ -21,14 +20,14 @@ export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   return tokenCanBridgeTo.includes(item.chainId);
 };
 
-export const getDenomEvm = () => {
+export const getDenomEvm = (): EvmDenom => {
   switch (Number(window.ethereum?.chainId)) {
     case Networks.bsc:
-      return BEP20_ORAI;
+      return 'bep20_orai';
     case Networks.mainnet:
-      return ERC20_ORAI;
+      return 'erc20_orai';
     default:
-      return KAWAII_ORAI;
+      return 'kawaii_orai';
   }
 };
 

@@ -9,9 +9,6 @@ export const KWT = 'oraie';
 export const MILKY = 'milky';
 export const STABLE_DENOM = 'usdt';
 export const TRON_DENOM = 'trx';
-export const BEP20_ORAI = 'bep20_orai';
-export const ERC20_ORAI = 'erc20_orai';
-export const KAWAII_ORAI = 'kawaii_orai';
 
 // estimate fee
 export const GAS_ESTIMATION_SWAP_DEFAULT = 580000;
