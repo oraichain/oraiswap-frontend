@@ -48,21 +48,19 @@ const startApp = async () => {
   Contract.client = await CosmWasmClient.connect(network.rpc);
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
-    <StrictMode>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <ToastProvider>
-            <Router>
-              <ScrollToTop />
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </Router>
-            <ToastContainer transition={Bounce} />
-          </ToastProvider>
-        </PersistGate>
-      </Provider>
-    </StrictMode>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
+      </PersistGate>
+    </Provider>
   );
   try {
     const keplr = await window.Keplr.getKeplr();

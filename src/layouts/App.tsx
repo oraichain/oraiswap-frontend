@@ -16,6 +16,7 @@ import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -84,9 +85,11 @@ const App = () => {
     };
 
     if (isClearPersistStorage) clearPersistStorage();
-  }, []);
 
-  useEffect(() => {
+    if (window.keplr && !isMobile()) {
+      keplrGasPriceCheck();
+    }
+
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
@@ -94,12 +97,6 @@ const App = () => {
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
-  }, []);
-
-  useEffect(() => {
-    if (window.keplr) {
-      keplrGasPriceCheck();
-    }
   }, []);
 
   const keplrGasPriceCheck = async () => {

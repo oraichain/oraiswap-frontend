@@ -29,7 +29,7 @@ import { updateLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
-
+import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
@@ -321,6 +321,31 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
+                        </div>
+                      </div>
+                    </div>
+                    <hr
+                      style={{
+                        borderTop: '1px  dashed #2D2938',
+                        width: '100%'
+                      }}
+                    />
+                    <div className={cx('content')}>
+                      <div className={cx('pool-catalyst_token_lp')}>
+                        <div className={cx('pool-catalyst_token_name')}>
+                          <LpTokenIcon className={cx('icon')} />
+                          <span className={cx('token-name')}>LP Token</span>
+                        </div>
+                        <div className={cx('pool-catalyst_token_value')}>
+                          <TokenBalance
+                            balance={{
+                              amount: lpTokenInfoData?.total_supply,
+                              decimals: lpTokenInfoData?.decimals
+                            }}
+                            className={cx('amount')}
+                            decimalScale={6}
+                          />
+                          <TokenBalance balance={0} className={cx('amount-usd')} decimalScale={2} />
                         </div>
                       </div>
                     </div>

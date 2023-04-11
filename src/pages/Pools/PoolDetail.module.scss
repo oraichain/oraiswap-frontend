@@ -298,6 +298,48 @@
             }
           }
         }
+
+        .pool-catalyst_token_lp {
+          display: flex;
+          .pool-catalyst_token_name {
+            display: flex;
+            gap: 5px;
+            flex-grow: 2;
+
+            .token-name {
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 100%;
+            }
+
+            .icon {
+              width: 18px;
+              height: 18px;
+            }
+          }
+
+          .pool-catalyst_token_value {
+            flex-grow: 1;
+            padding-left: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+
+            .amount {
+              font-weight: 600;
+              font-size: 18px;
+              line-height: 100%;
+            }
+
+            .amount-usd {
+              font-weight: 600;
+              font-size: 14px;
+              line-height: 100%;
+              color: #777e90;
+            }
+          }
+        }
       }
     }
 

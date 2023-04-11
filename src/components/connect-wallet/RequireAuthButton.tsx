@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Contract } from 'config/contracts';
@@ -50,6 +51,15 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
     try {
       // if not requestAccounts before
       if (Metamask.checkTron()) {
+        // TODO: Check owallet mobile
+        let tronAddress;
+        if (isMobile()) {
+          const addressTronMobile = await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          //@ts-ignore
+          tronAddress = addressTronMobile?.base58;
+        }
         if (!window.tronWeb.defaultAddress?.base58) {
           const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
             method: 'tron_requestAccounts'
@@ -59,8 +69,8 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
             displayToast(TToastType.TRONLINK_FAILED, { message });
             return;
           }
+          tronAddress = window.tronWeb.defaultAddress.base58;
         }
-        const tronAddress = window.tronWeb.defaultAddress.base58;
         console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
