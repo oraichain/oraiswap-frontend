@@ -1,6 +1,8 @@
-import { AppCurrency, Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
+import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
@@ -10,8 +12,6 @@ import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 
 import {
   AIRI_BSC_CONTRACT,
