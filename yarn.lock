@@ -2893,7 +2893,7 @@
 
 "@terran-one/cosmwasm-vm-js@https://github.com/oraichain/cosmwasm-vm-js.git":
   version "0.2.16"
-  resolved "https://github.com/oraichain/cosmwasm-vm-js.git#007895f59f7b7206ea72e71db55702aeeff92f74"
+  resolved "https://github.com/oraichain/cosmwasm-vm-js.git#11b317ecc2e9e1b31078abfb46e54f82fb091102"
   dependencies:
     "@cosmjs/amino" "^0.29.5"
     "@cosmjs/crypto" "^0.29.5"

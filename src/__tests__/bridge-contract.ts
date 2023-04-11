@@ -430,25 +430,38 @@ describe.only('IBCModule', () => {
       // upload pair & lp token code id
       const { codeId: pairCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(path.join(__dirname, 'wasm/oraiswap_pair.wasm')),
+        readFileSync(path.join(__dirname, 'testdata/oraiswap_pair.wasm')),
         'auto'
       );
       const { codeId: lpCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(path.join(__dirname, 'wasm/oraiswap_token.wasm')),
+        readFileSync(path.join(__dirname, 'testdata/oraiswap_token.wasm')),
         'auto'
       );
       // deploy oracle addr
       const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleIsntantiateMsg>(
         oraiSenderAddress,
-        path.join(__dirname, 'wasm/oraiswap_oracle.wasm'),
+        path.join(__dirname, 'testdata/oraiswap_oracle.wasm'),
         {},
         'oraiswap-oracle'
       );
       // deploy factory contract
+
+      const { contractAddress: factoryOldAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
+        oraiSenderAddress,
+        path.join(__dirname, 'testdata/oraiswap_factory_0_13_2.wasm'),
+        {
+          commission_rate: null,
+          oracle_addr: oracleAddress,
+          pair_code_id: pairCodeId,
+          token_code_id: lpCodeId
+        },
+        'oraiswap-factory-old'
+      );
+
       const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
         oraiSenderAddress,
-        path.join(__dirname, 'wasm/oraiswap_factory.wasm'),
+        path.join(__dirname, 'testdata/oraiswap_factory.wasm'),
         {
           commission_rate: null,
           oracle_addr: oracleAddress,
@@ -462,13 +475,15 @@ describe.only('IBCModule', () => {
         oraiSenderAddress,
         path.join(__dirname, 'testdata', 'oraiswap_router.wasm'),
         {
-          factory_addr: factoryAddress,
-          factory_addr_v2: ''
+          factory_addr: factoryOldAddress,
+          factory_addr_v2: factoryAddress
         },
         'oraiswap-router'
       );
       factoryContract = new OraiswapFactoryClient(oraiClient, oraiSenderAddress, factoryAddress);
       routerContract = new OraiswapRouterClient(oraiClient, oraiSenderAddress, routerAddress);
     });
+
+    it('test', async () => {});
   });
 });
