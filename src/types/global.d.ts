@@ -1,14 +1,14 @@
 import { Keplr as keplr } from '@keplr-wallet/types';
 import { Network } from 'bip32';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import { Networks } from 'libs/ethereum-multicall/enums';
 import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
+import { TronWeb as _TronWeb } from './tronweb';
+import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 
 declare global {
-  Networks = typeof Networks;
   type AmountDetails = { [denom: string]: string };
   type IBCInfoMsg = {
     sourcePort: string;
@@ -175,6 +175,10 @@ declare global {
       REACT_APP_MULTICALL_CONTRACT: string;
     }
   }
+
+  // re-declare as global
+  declare const Networks = _Networks;
+  declare const TronWeb = _TronWeb;
 }
 
 export {};

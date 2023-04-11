@@ -7,7 +7,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo, evmChains, NetworkChainId } from 'config/chainInfos';
-import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
 import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -85,7 +85,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await window.Keplr.getKeplrAddr(network.chainId.toString());
+        address = await window.Keplr.getKeplrAddr(network.chainId);
       }
     } catch (error) {}
     setAddressTransfer(address);
@@ -112,9 +112,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // TODO: to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const to = cosmosTokens.find((t) =>
-        t.chainId === ORAI_BRIDGE_CHAIN_ID && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
+        t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
           ? t.bridgeNetworkIdentifier === filterNetwork
-          : t.org === filterNetwork
+          : t.chainId === filterNetwork
       );
       await onClickTransfer(convertAmount, token, to);
       return;
@@ -126,7 +126,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.org ? 'Convert ' : 'Transfer ';
+    const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
     return buttonName + filterNetwork;
   };
 

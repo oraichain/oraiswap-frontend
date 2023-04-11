@@ -6,7 +6,6 @@ import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { injected, useEagerConnect } from 'hooks/useMetamask';
-import { Networks } from 'libs/ethereum-multicall/enums';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';

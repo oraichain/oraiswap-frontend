@@ -2,7 +2,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { Networks } from 'libs/ethereum-multicall/enums';
+
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import useLoadTokens from './useLoadTokens';

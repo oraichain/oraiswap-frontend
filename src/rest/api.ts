@@ -1,24 +1,28 @@
-import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import { ORAI, ORAICHAIN_ID, ORAI_INFO, STABLE_DENOM, MILKY_DENOM, KWT_DENOM } from 'config/constants';
+import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { getPair, Pair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
-import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import {
+  PoolInfoResponse,
+  QueryMsg as StakingQueryMsg,
+  RewardInfoResponse,
+  RewardsPerSecResponse
+} from 'libs/contracts/OraiswapStaking.types';
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
-import { QueryMsg as StakingQueryMsg } from 'libs/contracts/OraiswapStaking.types';
+import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import { TokenInfo } from 'types/token';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import Long from 'long';
+import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
+import { TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -705,7 +709,7 @@ function generateMoveOraib2OraiMessages(
   const [, toTokens] = tokens;
   let transferMsgs: MsgTransfer[] = [];
   for (const fromToken of remainingOraib) {
-    const toToken = toTokens.find((t) => t.chainId === ORAICHAIN_ID && t.name === fromToken.name);
+    const toToken = toTokens.find((t) => t.chainId === 'Oraichain' && t.name === fromToken.name);
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     // hardcode for MILKY & KWT because they use the old IBC channel
     if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)

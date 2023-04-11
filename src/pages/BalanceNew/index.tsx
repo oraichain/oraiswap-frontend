@@ -8,7 +8,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { embedChainInfos } from 'config/chainInfos';
-import { KWT_SCAN, KWT_SUBNETWORK_CHAIN_ID, ORAICHAIN_ID, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
+import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -150,7 +150,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       let result: DeliverTxResponse;
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
-      if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
+      if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
         if (!!from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
         else result = await transferIBCKwt(from, to, fromAmount, amounts);

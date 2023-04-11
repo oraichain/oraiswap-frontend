@@ -1,5 +1,3 @@
-import { Networks } from 'libs/ethereum-multicall/enums';
-
 /* oraiswap:unit */
 export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
@@ -34,14 +32,8 @@ export const AXIOS_TIMEOUT = 10000;
 // bsc and eth information
 export const ETHEREUM_SCAN = 'https://etherscan.io';
 export const BSC_SCAN = 'https://bscscan.com';
-export const TRON_CHAIN_ID = Networks.tron;
-export const TRON_RPC = 'https://api.trongrid.io/jsonrpc';
 export const TRON_SCAN = 'https://tronscan.org';
-export const ORAI_BRIDGE_CHAIN_ID = 'oraibridge-subnet-2';
-
 export const KWT_SCAN = 'https://scan.kawaii.global';
-export const KWT_SUBNETWORK_CHAIN_ID = 'kawaii_6886-1';
-export const ORAICHAIN_ID = 'Oraichain';
 
 export const ORAI_BRIDGE_UDENOM = 'uoraib';
 export const ORAI_BRIDGE_EVM_DENOM_PREFIX = 'oraib';

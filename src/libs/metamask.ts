@@ -1,7 +1,7 @@
 import erc20ABI from 'config/abi/erc20.json';
 import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { TRON_CHAIN_ID, TRON_RPC } from 'config/constants';
+import { embedChainInfos } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
 
 import Web3 from 'web3';
@@ -17,7 +17,7 @@ export default class Metamask {
   }
 
   public isTron(chainId: string | number) {
-    return Number(chainId) == TRON_CHAIN_ID;
+    return Number(chainId) == Networks.tron;
   }
 
   public static checkTron() {
@@ -36,7 +36,8 @@ export default class Metamask {
     parameters = [],
     issuerAddress: string
   ): Promise<any> {
-    const tronUrl = TRON_RPC.replace('/jsonrpc', '');
+    const tronRpc = embedChainInfos.find((c) => c.chainId == '0x2b6653dc').rpc;
+    const tronUrl = tronRpc.replace('/jsonrpc', '');
     const tronWeb = new TronWeb(tronUrl, tronUrl);
 
     try {

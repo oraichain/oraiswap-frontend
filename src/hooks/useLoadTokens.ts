@@ -3,7 +3,6 @@ import { StargateClient } from '@cosmjs/stargate';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, kawaiiTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
@@ -143,7 +142,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
 }
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
-  const kwtAddress = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
+  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
   if (!kwtAddress) return;
   const kawaiiInfo = embedChainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);

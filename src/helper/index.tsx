@@ -1,13 +1,4 @@
-import {
-  BEP20_ORAI,
-  BSC_SCAN,
-  ETHEREUM_SCAN,
-  HIGH_GAS_PRICE,
-  KWT_SCAN,
-  MULTIPLIER,
-  ORAICHAIN_ID,
-  TRON_SCAN
-} from 'config/constants';
+import { BEP20_ORAI, BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, TRON_SCAN } from 'config/constants';
 
 import { TokenItemType } from 'config/bridgeTokens';
 import { ERC20_ORAI, KAWAII_ORAI } from 'config/constants';
@@ -16,12 +7,11 @@ import { network } from 'config/networks';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { CustomChainInfo, embedChainInfos, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
-import { Networks } from 'libs/ethereum-multicall/enums';
 
 interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
-  bridgeTo?: Array<string>;
+  bridgeTo?: Array<NetworkChainId>;
 }
 
 export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
@@ -34,8 +24,8 @@ export const renderLogoNetwork = (chainId: string | number, props: any = {}) => 
 };
 
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
-  const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
-  return tokenCanBridgeTo.includes(item.chainName);
+  const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
+  return tokenCanBridgeTo.includes(item.chainId);
 };
 
 export const getTokenChain = (token: TokenItemType): NetworkChainId => {

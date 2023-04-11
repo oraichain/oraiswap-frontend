@@ -17,14 +17,3 @@ export const network: CustomChainInfo & NetworkConfig = {
   multicall: process.env.REACT_APP_MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io'
 };
-
-export interface NetworkItem {
-  cosmosBased: boolean;
-  name: string;
-  chainId: string;
-  icon: string;
-  rpc: string;
-}
-
-// sadly our Oraichain is not added into keplr yet
-export const mobileBlacklistNetworks: string[] = [network.chainId];
