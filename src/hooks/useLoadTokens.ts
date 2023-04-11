@@ -3,7 +3,6 @@ import { StargateClient } from '@cosmjs/stargate';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, kawaiiTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { KWT_SUBNETWORK_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
@@ -15,7 +14,7 @@ import { getEvmAddress } from '../libs/utils';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import { CustomChainInfo, embedChainInfos, evmChains } from 'config/chainInfos';
+import { CustomChainInfo, chainInfos, evmChains } from 'config/chainInfos';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -57,7 +56,7 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
         loadEvmAmounts(
           dispatch,
           tronToEthAddress(tronAddress),
-          embedChainInfos.filter((c) => c.chainId == '0x2b6653dc')
+          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
         )
     ].filter(Boolean)
   );
@@ -66,7 +65,7 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
 async function loadTokensCosmos(dispatch: Dispatch, address: string) {
   await handleCheckWallet();
   const { words, prefix } = bech32.decode(address);
-  const cosmosInfos = embedChainInfos.filter((chainInfo) => chainInfo.bip44.coinType === 118);
+  const cosmosInfos = chainInfos.filter((chainInfo) => chainInfo.bip44.coinType === 118);
   for (const chainInfo of cosmosInfos) {
     const networkPrefix = chainInfo.bech32Config.bech32PrefixAccAddr;
     const cosmosAddress = networkPrefix === prefix ? address : bech32.encode(networkPrefix, words);
@@ -143,13 +142,13 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
 }
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
-  const kwtAddress = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
+  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
   if (!kwtAddress) return;
-  const kawaiiInfo = embedChainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
 
   const kwtSubnetAddress = getEvmAddress(kwtAddress);
-  const kawaiiEvmInfo = embedChainInfos.find((c) => c.chainId === '0x1ae6');
+  const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
   let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
   // update amounts
   dispatch(updateAmounts(amountDetails));

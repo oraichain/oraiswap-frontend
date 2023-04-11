@@ -1,71 +1,48 @@
-import {
-  BEP20_ORAI,
-  BSC_SCAN,
-  ETHEREUM_SCAN,
-  HIGH_GAS_PRICE,
-  KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID,
-  MULTIPLIER,
-  ORAICHAIN_ID,
-  TRON_CHAIN_ID,
-  TRON_SCAN
-} from 'config/constants';
+import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, TRON_SCAN } from 'config/constants';
 
-import { TokenItemType } from 'config/bridgeTokens';
-import { BSC_CHAIN_ID, ERC20_ORAI, ETHEREUM_CHAIN_ID, KAWAII_ORAI } from 'config/constants';
+import { EvmDenom, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { CustomChainInfo, embedChainInfos, NetworkChainId } from 'config/chainInfos';
+import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 
 interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
-  bridgeTo?: Array<string>;
+  bridgeTo?: Array<NetworkChainId>;
 }
 
-export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
-
-export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
-  const network = networks.find((n) => n.chainId == chainId);
-  if (network) {
-    return <network.Icon {...props} />;
-  }
-};
+export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
-  const tokenCanBridgeTo = token.bridgeTo ?? [ORAICHAIN_ID];
-  return tokenCanBridgeTo.includes(item.chainName);
+  const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
+  return tokenCanBridgeTo.includes(item.chainId);
 };
 
-export const getTokenChain = (token: TokenItemType): NetworkChainId => {
-  return token?.bridgeTo?.[0] ?? 'Oraichain';
-};
-
-export const getDenomEvm = () => {
+export const getDenomEvm = (): EvmDenom => {
   switch (Number(window.ethereum?.chainId)) {
-    case BSC_CHAIN_ID:
-      return BEP20_ORAI;
-    case ETHEREUM_CHAIN_ID:
-      return ERC20_ORAI;
+    case Networks.bsc:
+      return 'bep20_orai';
+    case Networks.mainnet:
+      return 'erc20_orai';
     default:
-      return KAWAII_ORAI;
+      return 'kawaii_orai';
   }
 };
 
 export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
   switch (Number(chainId)) {
-    case BSC_CHAIN_ID:
+    case Networks.bsc:
       return `${BSC_SCAN}/tx/${transactionHash}`;
-    case ETHEREUM_CHAIN_ID:
+    case Networks.mainnet:
       return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
-    case TRON_CHAIN_ID:
+    case Networks.tron:
       return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
     default:
       // raw string
       switch (chainId) {
-        case KWT_SUBNETWORK_CHAIN_ID:
+        case 'kawaii_6886-1':
           return `${KWT_SCAN}/tx/${transactionHash}`;
       }
       return null;

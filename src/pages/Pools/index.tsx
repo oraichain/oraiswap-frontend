@@ -3,13 +3,13 @@ import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { COSMOS_DECIMALS, ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { Pair, pairs } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
-import { toDecimal, validateNumber } from 'libs/utils';
+import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import compact from 'lodash/compact';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
@@ -240,10 +240,9 @@ const Pools: React.FC<PoolsProps> = () => {
         let rewardsPerYearValue = 0;
         rewardsPerSec.forEach(({ amount, info }) => {
           if (isEqual(info, ORAI_INFO))
-            rewardsPerYearValue +=
-              (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / 10 ** COSMOS_DECIMALS;
+            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
           else if (isEqual(info, ORAIX_INFO))
-            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / 10 ** COSMOS_DECIMALS;
+            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
         });
         return {
           ...acc,

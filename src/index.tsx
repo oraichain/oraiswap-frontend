@@ -1,25 +1,25 @@
-import React, { StrictMode } from 'react';
-import 'polyfill';
-import { render } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import './index.scss';
-import ScrollToTop from './layouts/ScrollToTop';
-import App from './layouts/App';
-import { network } from 'config/networks';
-import { ToastProvider } from 'components/Toasts/context';
-import 'react-toastify/dist/ReactToastify.css';
-import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID, TRON_RPC } from 'config/constants';
+import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
-import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { collectWallet } from 'libs/cosmjs';
-import { GasPrice } from '@cosmjs/stargate';
-import { Provider } from 'react-redux';
-import { persistor, store } from 'store/configure';
-import { PersistGate } from 'redux-persist/integration/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from 'components/Toasts/context';
+import { NetworkChainId } from 'config/chainInfos';
 import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
+import { collectWallet } from 'libs/cosmjs';
+import 'polyfill';
+import { StrictMode } from 'react';
+import { render } from 'react-dom';
+import { Provider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Bounce, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store } from 'store/configure';
+import './index.scss';
+import App from './layouts/App';
+import ScrollToTop from './layouts/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -70,7 +70,7 @@ const startApp = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, ORAI_BRIDGE_CHAIN_ID, KWT_SUBNETWORK_CHAIN_ID]) {
+      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
         try {
           await window.Keplr.suggestChain(networkId);
         } catch (error) {

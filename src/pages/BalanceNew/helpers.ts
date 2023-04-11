@@ -2,8 +2,8 @@ import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-starg
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CosmosChainId, embedChainInfos } from 'config/chainInfos';
-import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI, ORAICHAIN_ID, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
+import { CosmosChainId, chainInfos } from 'config/chainInfos';
+import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -49,7 +49,7 @@ export const transferIBC = async (data: {
 }): Promise<DeliverTxResponse> => {
   const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
 
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId as string);
+  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
   const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner);
   const result = await client.sendIbcTokens(
     fromAddress,
@@ -76,11 +76,11 @@ export const transferIBCKwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await window.Keplr.suggestChain(toToken.chainId as string);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await window.Keplr.suggestChain(fromToken.chainId as string);
-  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
-  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
+  await window.Keplr.suggestChain(fromToken.chainId);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
   var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
@@ -126,11 +126,11 @@ export const convertTransferIBCErc20Kwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty!');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await window.Keplr.suggestChain(toToken.chainId as string);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await window.Keplr.suggestChain(fromToken.chainId as string);
-  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
-  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
+  await window.Keplr.suggestChain(fromToken.chainId);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
   const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coinGeckoId === fromToken.coinGeckoId); // collect kawaiiverse cosmos based token for conversion
 
@@ -167,7 +167,7 @@ export const transferEvmToIBC = async (
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
-  const gravityContractAddr = gravityContracts[from!.chainId!] as string;
+  const gravityContractAddr = gravityContracts[from!.chainId!];
   if (!gravityContractAddr || !from) {
     return;
   }
@@ -246,7 +246,7 @@ export const transferTokenErc20Cw20Map = async ({
     })
   };
 
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId as string);
+  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
   const aminoTypes = new AminoTypes({
     ...createWasmAminoConverters(),
     ...customAminoTypes
@@ -325,18 +325,18 @@ export const transferIbcCustom = async (
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
 
-  await window.Keplr.suggestChain(toToken.chainId as string);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await window.Keplr.suggestChain(fromToken.chainId as string);
+  await window.Keplr.suggestChain(fromToken.chainId);
   // check address
-  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
-  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId as string);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
-  if (toToken.chainId === ORAI_BRIDGE_CHAIN_ID && !toToken.prefix) throw generateError('Prefix Token not found!');
+  if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
-  const ibcMemo = toToken.chainId === ORAI_BRIDGE_CHAIN_ID ? toToken.prefix + transferAddress : '';
+  const ibcMemo = toToken.chainId === 'oraibridge-subnet-2' ? toToken.prefix + transferAddress : '';
   let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
   if (!transferAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
@@ -389,8 +389,8 @@ export const convertKwt = async (transferAmount: number, fromToken: TokenItemTyp
   if (transferAmount === 0) throw new Error('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await window.Keplr.suggestChain(fromToken.chainId as string);
-  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId as string);
+  await window.Keplr.suggestChain(fromToken.chainId);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
 
   if (!fromAddress) {
     return;
@@ -457,15 +457,15 @@ export const broadcastConvertTokenTx = async (
 
 export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[]) => {
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-  const fromAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
-  const toAddress = await window.Keplr.getKeplrAddr(ORAICHAIN_ID);
+  const fromAddress = await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
+  const toAddress = await window.Keplr.getKeplrAddr('Oraichain');
   const transferMsgs = generateMoveOraib2OraiMessages(remainingOraib, fromAddress, toAddress);
 
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
   const result = await transferIBCMultiple(
     fromAddress,
     'oraibridge-subnet-2',
-    embedChainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
+    chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
     'uoraib',
     transferMsgs
   );

@@ -7,8 +7,8 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo, evmChains, NetworkChainId } from 'config/chainInfos';
-import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI, ORAI_BRIDGE_CHAIN_ID } from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
+import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
+import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
@@ -38,6 +38,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   onClickTransfer,
   subAmounts
 }) => {
+  const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
+
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
@@ -52,7 +54,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }, [chainInfo]);
 
   useEffect(() => {
-    const chainDefault = getTokenChain(token);
+    const chainDefault = bridgeNetworks?.[0].chainId;
     setFilterNetwork(chainDefault);
     const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
@@ -85,7 +87,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await window.Keplr.getKeplrAddr(network.chainId.toString());
+        address = await window.Keplr.getKeplrAddr(network.chainId);
       }
     } catch (error) {}
     setAddressTransfer(address);
@@ -112,9 +114,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // TODO: to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const to = cosmosTokens.find((t) =>
-        t.chainId === ORAI_BRIDGE_CHAIN_ID && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
+        t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === token.coinGeckoId && t?.bridgeNetworkIdentifier
           ? t.bridgeNetworkIdentifier === filterNetwork
-          : t.org === filterNetwork
+          : t.chainId === filterNetwork
       );
       await onClickTransfer(convertAmount, token, to);
       return;
@@ -126,9 +128,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.org ? 'Convert ' : 'Transfer ';
+    const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
     return buttonName + filterNetwork;
   };
+
+  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -170,17 +174,23 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 className={styles.search_filter}
                 onClick={(event) => {
                   event.stopPropagation();
-                  setIsOpen(!isOpen);
+                  if (bridgeNetworks.length > 1) setIsOpen(!isOpen);
                 }}
               >
                 <div className={styles.search_box}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                    <span className={styles.search_text}>{filterNetwork}</span>
-                  </div>
-                  <div>
-                    <ArrowDownIcon />
-                  </div>
+                  {network && (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div className={styles.search_logo}>
+                        <network.Icon />
+                      </div>
+                      <span className={styles.search_text}>{network.chainName}</span>
+                    </div>
+                  )}
+                  {bridgeNetworks.length > 1 && (
+                    <div>
+                      <ArrowDownIcon />
+                    </div>
+                  )}
                 </div>
               </div>
               {isOpen && (
@@ -194,20 +204,24 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             key={network.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(network?.chainId);
+                              setFilterNetwork(network.chainId);
                               await getAddressTransfer(network);
                               setIsOpen(false);
                             }}
                           >
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}
-                            >
-                              <div>{renderLogoNetwork(network.chainId)}</div>
-                              <div className={styles.items_title}>{network.chainName}</div>
-                            </div>
+                            {network && (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <div>
+                                  <network.Icon />
+                                </div>
+                                <div className={styles.items_title}>{network.chainName}</div>
+                              </div>
+                            )}
                           </li>
                         );
                       })}

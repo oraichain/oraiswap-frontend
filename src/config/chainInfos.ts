@@ -1,6 +1,8 @@
-import { AppCurrency, Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
+import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
+import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
+import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
@@ -10,13 +12,9 @@ import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
-import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 
 import {
   AIRI_BSC_CONTRACT,
-  BEP20_ORAI,
-  ERC20_ORAI,
   KWT_BSC_CONTRACT,
   KWT_DENOM,
   MILKY_BSC_CONTRACT,
@@ -77,7 +75,7 @@ export type CoinGeckoId =
 
 export type NetworkType = 'cosmos' | 'evm';
 export type CoinIcon = React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
-export type BridgeAppCurrency = AppCurrency & {
+export type BridgeAppCurrency = FeeCurrency & {
   readonly bridgeTo?: NetworkChainId[];
   readonly coinGeckoId?: CoinGeckoId;
   readonly Icon?: CoinIcon;
@@ -111,11 +109,6 @@ export interface CustomChainInfo
   readonly stakeCurrency?: Currency;
   readonly feeCurrencies?: FeeCurrency[];
   readonly currencies: BridgeAppCurrency[];
-  readonly gasPriceStep?: {
-    low: number;
-    average: number;
-    high: number;
-  };
 }
 
 export const defaultBech32Config = (
@@ -141,13 +134,23 @@ export const OraiToken: BridgeAppCurrency = {
   coinDecimals: 6,
   coinGeckoId: 'oraichain-token',
   Icon: OraiIcon,
-  bridgeTo: ['0x38', '0x01']
+  bridgeTo: ['0x38', '0x01'],
+  gasPriceStep: {
+    low: 0.003,
+    average: 0.005,
+    high: 0.007
+  }
 };
 
 const OraiBToken: BridgeAppCurrency = {
   coinDenom: 'ORAIB',
   coinMinimalDenom: 'uoraib',
-  coinDecimals: 6
+  coinDecimals: 6,
+  gasPriceStep: {
+    low: 0,
+    average: 0,
+    high: 0
+  }
 };
 
 const KawaiiToken: BridgeAppCurrency = {
@@ -155,7 +158,12 @@ const KawaiiToken: BridgeAppCurrency = {
   coinMinimalDenom: 'oraie',
   coinDecimals: 18,
   coinGeckoId: 'kawaii-islands',
-  Icon: KwtIcon
+  Icon: KwtIcon,
+  gasPriceStep: {
+    low: 0,
+    average: 0.000025,
+    high: 0.00004
+  }
 };
 
 export const oraichainNetwork: CustomChainInfo = {
@@ -170,13 +178,9 @@ export const oraichainNetwork: CustomChainInfo = {
   },
   bech32Config: defaultBech32Config('orai'),
   feeCurrencies: [OraiToken],
-  gasPriceStep: {
-    low: 0.003,
-    average: 0.005,
-    high: 0.007
-  },
+
   Icon: OraiIcon,
-  features: ['stargate', 'ibc-transfer', 'cosmwasm', 'wasmd_0.24+'],
+  features: ['ibc-transfer', 'cosmwasm', 'wasmd_0.24+'],
   currencies: [
     OraiToken,
     {
@@ -297,7 +301,7 @@ export const oraichainNetwork: CustomChainInfo = {
   ]
 };
 
-export const embedChainInfos: CustomChainInfo[] = [
+export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   {
@@ -310,12 +314,8 @@ export const embedChainInfos: CustomChainInfo[] = [
       coinType: 118
     },
     bech32Config: defaultBech32Config('oraib'),
-    gasPriceStep: {
-      low: 0,
-      average: 0,
-      high: 0
-    },
-    features: ['stargate', 'ibc-transfer'],
+
+    features: ['ibc-transfer'],
     stakeCurrency: OraiBToken,
     feeCurrencies: [OraiBToken],
     // not use oraib as currency
@@ -407,13 +407,9 @@ export const embedChainInfos: CustomChainInfo[] = [
     },
     bech32Config: defaultBech32Config('oraie'),
     feeCurrencies: [KawaiiToken],
-    gasPriceStep: {
-      low: 0,
-      average: 0.000025,
-      high: 0.00004
-    },
+
     Icon: KwtIcon,
-    features: ['stargate', 'ibc-transfer', 'no-legacy-stdTx'],
+    features: ['ibc-transfer'],
     currencies: [
       KawaiiToken,
       {
@@ -501,7 +497,7 @@ export const embedChainInfos: CustomChainInfo[] = [
 
   /// evm chain info
   {
-    rpc: 'https://1rpc.io/eth',
+    rpc: 'https://rpc.ankr.com/eth',
     chainId: '0x01',
     chainName: 'Ethereum',
     bip44: {
@@ -512,7 +508,7 @@ export const embedChainInfos: CustomChainInfo[] = [
     currencies: [
       {
         coinDenom: 'ORAI',
-        coinMinimalDenom: ERC20_ORAI,
+        coinMinimalDenom: 'erc20_orai',
         contractAddress: ORAI_ETH_CONTRACT,
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
@@ -562,7 +558,7 @@ export const embedChainInfos: CustomChainInfo[] = [
     }
   },
   {
-    rpc: 'https://1rpc.io/bnb',
+    rpc: 'https://bsc-dataseed1.binance.org',
     networkType: 'evm',
     Icon: BnbIcon,
     chainId: '0x38',
@@ -573,7 +569,7 @@ export const embedChainInfos: CustomChainInfo[] = [
     currencies: [
       {
         coinDenom: 'ORAI',
-        coinMinimalDenom: BEP20_ORAI,
+        coinMinimalDenom: 'bep20_orai',
         contractAddress: ORAI_BSC_CONTRACT,
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
@@ -632,6 +628,6 @@ export const embedChainInfos: CustomChainInfo[] = [
 ];
 
 // exclude kawaiverse subnet and other special evm that has different cointype
-export const evmChains = embedChainInfos.filter(
+export const evmChains = chainInfos.filter(
   (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
 );

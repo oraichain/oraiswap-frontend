@@ -14,10 +14,10 @@ import { collectWallet } from './cosmjs';
 import { Coin, StargateClient } from '@cosmjs/stargate';
 import { OfflineDirectSigner } from '@keplr-wallet/types';
 import { getEvmAddress } from './utils';
-import { embedChainInfos } from 'config/chainInfos';
+import { chainInfos } from 'config/chainInfos';
 
 async function getAccountInfo(accAddress: string) {
-  const kawaiiInfo = embedChainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   return await fetch(`${kawaiiInfo.rest}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
     data.json()
   );
