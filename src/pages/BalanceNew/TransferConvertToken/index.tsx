@@ -8,7 +8,7 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo, evmChains, NetworkChainId } from 'config/chainInfos';
 import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks, renderLogoNetwork } from 'helper';
+import { feeEstimate, filterChainBridge, getTokenChain, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
@@ -130,6 +130,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return buttonName + filterNetwork;
   };
 
+  const network = networks.find((n) => n.chainId == filterNetwork);
+
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
@@ -174,10 +176,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
               >
                 <div className={styles.search_box}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                    <span className={styles.search_text}>{filterNetwork}</span>
-                  </div>
+                  {network && (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div className={styles.search_logo}>
+                        <network.Icon />
+                      </div>
+                      <span className={styles.search_text}>{network.chainName}</span>
+                    </div>
+                  )}
                   <div>
                     <ArrowDownIcon />
                   </div>
@@ -194,20 +200,24 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             key={network.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(network?.chainId);
+                              setFilterNetwork(network.chainId);
                               await getAddressTransfer(network);
                               setIsOpen(false);
                             }}
                           >
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}
-                            >
-                              <div>{renderLogoNetwork(network.chainId)}</div>
-                              <div className={styles.items_title}>{network.chainName}</div>
-                            </div>
+                            {network && (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <div>
+                                  <network.Icon />
+                                </div>
+                                <div className={styles.items_title}>{network.chainName}</div>
+                              </div>
+                            )}
                           </li>
                         );
                       })}

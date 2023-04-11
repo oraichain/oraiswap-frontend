@@ -9,7 +9,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
-import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -208,6 +208,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     }
   };
 
+  const network = networks.find((n) => n.chainId == filterNetwork);
+
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -224,12 +226,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           <div className={styles.search}>
             <div className={styles.search_filter} onClick={() => setIsSelectNetwork(true)}>
               <div className={styles.search_box}>
-                <div className={styles.search_flex}>
-                  <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                  <span className={styles.search_text}>
-                    {networks.find((n) => n.chainId == filterNetwork)?.chainName}
-                  </span>
-                </div>
+                {network && (
+                  <div className={styles.search_flex}>
+                    <div className={styles.search_logo}>
+                      <network.Icon />
+                    </div>
+                    <span className={styles.search_text}>{network.chainName}</span>
+                  </div>
+                )}
                 <div>
                   <ArrowDownIcon />
                 </div>

@@ -16,13 +16,6 @@ interface Tokens {
 
 export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 
-export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
-  const network = networks.find((n) => n.chainId == chainId);
-  if (network) {
-    return <network.Icon {...props} />;
-  }
-};
-
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
