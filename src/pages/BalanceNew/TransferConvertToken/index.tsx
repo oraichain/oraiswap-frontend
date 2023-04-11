@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import classNames from 'classnames';
@@ -83,6 +84,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       if (network.networkType == 'evm') {
         if (network.chainId === '0x2b6653dc') {
           address = window.tronWeb.defaultAddress.base58;
+          // TODO: Check owallet mobile
+          if (isMobile()) {
+            const addressTronMobile = await window.tronLink.request({
+              method: 'tron_requestAccounts'
+            });
+            //@ts-ignore
+            address = addressTronMobile?.base58;
+          }
         } else {
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
