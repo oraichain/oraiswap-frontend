@@ -21,6 +21,9 @@ import Long from 'long';
 import { findDefaultToToken, getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
+// @ts-ignore
+window.Networks = require('libs/ethereum-multicall/enums').Networks;
+
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
   it('bridge-evm-bsc-to-orai-normal-token-should-return-channel-1-plus-address', async () => {
