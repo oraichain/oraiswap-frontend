@@ -8,7 +8,7 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo, evmChains, NetworkChainId } from 'config/chainInfos';
 import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
-import { feeEstimate, filterChainBridge, getTokenChain, networks } from 'helper';
+import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { reduceString, toDisplay } from 'libs/utils';
