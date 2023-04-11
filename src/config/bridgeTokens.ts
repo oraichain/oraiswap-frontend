@@ -4,7 +4,7 @@ import {
   CustomChainInfo,
   CoinGeckoId,
   CoinIcon,
-  embedChainInfos,
+  chainInfos,
   EvmChainId,
   NetworkChainId,
   NetworkName,
@@ -58,7 +58,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     rpc: network.rpc,
     lcd: network.rest,
     cosmosBased: network.networkType === 'cosmos',
-    maxGas: (network.gasPriceStep?.high ?? 0) * 20000,
+    maxGas: (network.feeCurrencies[0].gasPriceStep?.high ?? 0) * 20000,
     minAmountSwap: minAmountSwapMap[currency.coinMinimalDenom],
     evmDenoms: evmDenomsMap[currency.coinMinimalDenom],
     factoryV2: factoryV2CoinDenoms.includes(currency.coinMinimalDenom),
@@ -68,7 +68,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
 
 // other chains, oraichain
 const otherChainTokens = flatten(
-  embedChainInfos.filter((chainInfo) => chainInfo.chainId !== 'Oraichain').map(getTokensFromNetwork)
+  chainInfos.filter((chainInfo) => chainInfo.chainId !== 'Oraichain').map(getTokensFromNetwork)
 );
 export const oraichainTokens: TokenItemType[] = getTokensFromNetwork(oraichainNetwork);
 

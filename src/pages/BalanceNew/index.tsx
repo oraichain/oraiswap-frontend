@@ -7,7 +7,7 @@ import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
-import { embedChainInfos } from 'config/chainInfos';
+import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -197,7 +197,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(embedChainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
+      processTxResult(chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {

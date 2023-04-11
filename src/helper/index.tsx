@@ -5,7 +5,7 @@ import { ERC20_ORAI, KAWAII_ORAI } from 'config/constants';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { CustomChainInfo, embedChainInfos, NetworkChainId } from 'config/chainInfos';
+import { CustomChainInfo, chainInfos, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 
 interface Tokens {
@@ -14,7 +14,7 @@ interface Tokens {
   bridgeTo?: Array<NetworkChainId>;
 }
 
-export const networks = embedChainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
+export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 
 export const renderLogoNetwork = (chainId: string | number, props: any = {}) => {
   const network = networks.find((n) => n.chainId == chainId);

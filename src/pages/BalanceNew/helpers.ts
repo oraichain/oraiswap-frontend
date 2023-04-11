@@ -2,7 +2,7 @@ import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-starg
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CosmosChainId, embedChainInfos } from 'config/chainInfos';
+import { CosmosChainId, chainInfos } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
@@ -465,7 +465,7 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   const result = await transferIBCMultiple(
     fromAddress,
     'oraibridge-subnet-2',
-    embedChainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
+    chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
     'uoraib',
     transferMsgs
   );

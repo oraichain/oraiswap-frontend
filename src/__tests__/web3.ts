@@ -3,11 +3,11 @@ import Web3 from 'web3';
 import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'libs/ethereum-multicall/models';
 import { ethToTronAddress } from 'helper';
-import { embedChainInfos } from 'config/chainInfos';
+import { chainInfos } from 'config/chainInfos';
 
 describe('bigint', () => {
   it('web3-tron-happy-path', async () => {
-    const tronRpc = embedChainInfos.find((c) => c.chainId === '0x2b6653dc').rpc;
+    const tronRpc = chainInfos.find((c) => c.chainId === '0x2b6653dc').rpc;
     const web3 = new Web3(tronRpc);
     const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], USDT_TRON_CONTRACT);
     const owner = '0x993d06fc97f45f16e4805883b98a6c20bab54964';
