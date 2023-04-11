@@ -1,11 +1,11 @@
-import { FC } from 'react';
-import Modal from 'components/Modal';
-import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
+import Modal from 'components/Modal';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { getSubAmountDetails, getTotalUsd, toAmount, toDisplay, toSumDisplay, truncDecimals } from 'libs/utils';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { CustomChainInfo } from 'config/chainInfos';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
+import { FC } from 'react';
+import styles from './SelectTokenModal.module.scss';
 
 const cx = cn.bind(styles);
 

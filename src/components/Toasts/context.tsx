@@ -1,9 +1,9 @@
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import { displayToast, DisplayToast } from './Toast';
 
 export const ToastContext = React.createContext<DisplayToast | null>(null);
 
-export const ToastProvider: FunctionComponent = ({ children }) => {
+export const ToastProvider: FC<{ children: ReactChildren }> = ({ children }) => {
   return (
     <ToastContext.Provider
       value={{
