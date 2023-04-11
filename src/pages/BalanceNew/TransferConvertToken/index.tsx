@@ -130,7 +130,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return buttonName + filterNetwork;
   };
 
-  const network = networks.find((n) => n.chainId == filterNetwork);
+  const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
+
+  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -172,7 +174,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 className={styles.search_filter}
                 onClick={(event) => {
                   event.stopPropagation();
-                  setIsOpen(!isOpen);
+                  if (bridgeNetworks.length > 1) setIsOpen(!isOpen);
                 }}
               >
                 <div className={styles.search_box}>
@@ -184,9 +186,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       <span className={styles.search_text}>{network.chainName}</span>
                     </div>
                   )}
-                  <div>
-                    <ArrowDownIcon />
-                  </div>
+                  {bridgeNetworks.length > 1 && (
+                    <div>
+                      <ArrowDownIcon />
+                    </div>
+                  )}
                 </div>
               </div>
               {isOpen && (
