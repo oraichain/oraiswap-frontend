@@ -10,7 +10,7 @@ import { network } from 'config/networks';
 import { collectWallet } from 'libs/cosmjs';
 import 'polyfill';
 import { StrictMode } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Bounce, ToastContainer } from 'react-toastify';
@@ -46,7 +46,8 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 
 const startApp = async () => {
   Contract.client = await CosmWasmClient.connect(network.rpc);
-  render(
+  const root = createRoot(document.getElementById('oraiswap'));
+  root.render(
     <StrictMode>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
@@ -61,8 +62,7 @@ const startApp = async () => {
           </ToastProvider>
         </PersistGate>
       </Provider>
-    </StrictMode>,
-    document.getElementById('oraiswap')
+    </StrictMode>
   );
   try {
     const keplr = await window.Keplr.getKeplr();

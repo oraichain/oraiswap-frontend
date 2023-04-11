@@ -179,6 +179,7 @@ declare global {
   // re-declare as global
   declare const Networks = _Networks;
   declare const TronWeb = _TronWeb;
+  type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
 export {};

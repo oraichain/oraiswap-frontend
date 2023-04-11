@@ -20,8 +20,8 @@ const TooltipTippyProps: TippyProps = {
   className: styles.tooltip
 };
 
-interface Props extends Omit<TippyProps, 'children'> {
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>
+interface Props extends TippyProps {
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   visible: boolean;
 }
 
@@ -29,23 +29,28 @@ const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, .
   const hide = () => setVisible(false);
 
   const button = (
-    <span className={classNames(styles.button, className)} onClick={() => setVisible(!visible)} >
+    <span className={classNames(styles.button, className)} onClick={() => setVisible(!visible)}>
       {children}
     </span>
   );
 
   return props.content ? (
-    <Tippy visible={visible} onClickOutside={hide} popperOptions={{
-      modifiers: [
-        {
-          name: 'arrow',
-          options: {
-            element: null,
-          },
-        },
-      ],
-    }}
-      {...TooltipTippyProps} {...props} >
+    <Tippy
+      visible={visible}
+      onClickOutside={hide}
+      popperOptions={{
+        modifiers: [
+          {
+            name: 'arrow',
+            options: {
+              element: null
+            }
+          }
+        ]
+      }}
+      {...TooltipTippyProps}
+      {...props}
+    >
       {button}
     </Tippy>
   ) : (
@@ -57,13 +62,13 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => {
   return (
     <div className={styles.flex}>
       {children}
-      <div className={styles.icon} >
+      <div className={styles.icon}>
         <SettingTooltip {...props} visible={props.visible} setVisible={props.setVisible}>
           <SettingImg />
         </SettingTooltip>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default SettingTooltip;
