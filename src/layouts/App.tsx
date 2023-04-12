@@ -20,6 +20,8 @@ import { isMobile } from '@walletconnect/browser-utils';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
+  const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -120,6 +122,22 @@ const App = () => {
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayInstallWallet();
+      }
+
+      // TODO: owallet get address tron
+      if (window.tronWeb && window.tronLink) {
+        await window.tronLink.request({
+          method: 'tron_requestAccounts'
+        });
+        setTronAddress(window.tronWeb?.defaultAddress?.base58);
+      }
+      // TODO: owallet get address evm
+      if (window.ethereum) {
+        const [address] = await window.ethereum!.request({
+          method: 'eth_requestAccounts',
+          params: []
+        });
+        setMetamaskAddress(address);
       }
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
