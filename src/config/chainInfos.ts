@@ -82,6 +82,7 @@ export type BridgeAppCurrency = FeeCurrency & {
   readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
   readonly contractAddress?: string;
+  readonly prefixToken?: string;
 };
 
 export type CoinType = 118 | 60 | 195;
@@ -335,6 +336,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: OraiIcon
       },
       {
@@ -343,6 +345,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 6,
         coinGeckoId: 'usd-coin',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: UsdcIcon
       },
       {
@@ -365,6 +368,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDenom: 'USDT',
         coinMinimalDenom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
         bridgeNetworkIdentifier: '0x2b6653dc',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         coinDecimals: 6,
         coinGeckoId: 'tether',
         Icon: UsdtIcon
@@ -375,6 +379,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x2b6653dc',
         coinDecimals: 6,
         coinGeckoId: 'tron',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         Icon: TronIcon
       },
       {

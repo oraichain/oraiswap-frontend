@@ -141,12 +141,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
+  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
-    return buttonName + filterNetwork;
+    return buttonName + network?.chainName;
   };
-
-  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
