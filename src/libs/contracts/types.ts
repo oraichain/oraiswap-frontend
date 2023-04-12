@@ -81,12 +81,29 @@ export interface MappingMetadata {
   remote_decimals: number;
 }
 export type ArrayOfPairQuery = PairQuery[];
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
+export interface Call {
+  address: Addr;
+  data: Binary;
+}
+export interface CallOptional {
+  address: Addr;
+  data: Binary;
+  require_success: boolean;
+}
+export interface AggregateResult {
+  return_data: CallResult[];
+}
+export interface CallResult {
+  data: Binary;
+  success: boolean;
+}
+export interface BlockAggregateResult {
+  block: number;
+  return_data: CallResult[];
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
 }
 export interface TokenInfo {
   decimals: number;
@@ -96,6 +113,13 @@ export type Decimal = string;
 export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
+}
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
 }
 export type OrderDirection = "buy" | "sell";
 export interface Asset {
