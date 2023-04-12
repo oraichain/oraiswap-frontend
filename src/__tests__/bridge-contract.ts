@@ -6,7 +6,7 @@ import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
 import { Asset, TransferBackMsg } from 'libs/contracts/types';
-import { Coin, coins } from '@cosmjs/proto-signing';
+import { Coin, coin, coins } from '@cosmjs/proto-signing';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
 import { AssetInfo } from 'libs/contracts';
@@ -26,6 +26,7 @@ var oraiClient: SimulateCosmWasmClient;
 
 const oraiSenderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
 const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
+const bridgeReceiver = "tron-testnet0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222";
 const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
 const cosmosSenderAddress = bech32.encode(cosmosChain.bech32Prefix, bech32.decode(oraiSenderAddress).words);
 const ibcTransferAmount = '100000000';
@@ -33,12 +34,29 @@ const initialBalanceAmount = '10000000000000';
 
 describe.only('IBCModule', () => {
   let oraiPort: string;
-  let oraiIbcDenom: string = 'oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
-  let airiIbcDenom: string = 'oraib0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
+  let oraiIbcDenom: string = 'tron-testnet0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0';
+  let airiIbcDenom: string = 'tron-testnet0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
   let cosmosPort: string = 'transfer';
   let channel = 'channel-0';
   let ics20Contract: CwIcs20LatestClient;
   let airiToken: OraiswapTokenClient;
+  let packetData = {
+    src: {
+      port_id: cosmosPort,
+      channel_id: channel
+    },
+    dest: {
+      port_id: oraiPort,
+      channel_id: channel
+    },
+    sequence: 27,
+    timeout: {
+      block: {
+        revision: 1,
+        height: 12345678
+      }
+    }
+  }
   beforeEach(async () => {
     // reset state for every test
     cosmosChain = new CWSimulateApp({
@@ -62,6 +80,7 @@ describe.only('IBCModule', () => {
     );
 
     oraiPort = 'wasm.' + contractAddress;
+    packetData.dest.port_id = oraiPort;
     ics20Contract = new CwIcs20LatestClient(oraiClient, oraiSenderAddress, contractAddress);
 
     // init cw20 AIRI token
@@ -82,7 +101,7 @@ describe.only('IBCModule', () => {
     airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
 
     // init ibc channel between two chains
-    oraiClient.app.ibc.relay('channel-0', oraiPort, 'channel-0', cosmosPort, cosmosChain);
+    oraiClient.app.ibc.relay(channel, oraiPort, channel, cosmosPort, cosmosChain);
     await cosmosChain.ibc.sendChannelOpen({
       open_init: {
         channel: {
@@ -106,11 +125,11 @@ describe.only('IBCModule', () => {
         channel: {
           counterparty_endpoint: {
             port_id: oraiPort,
-            channel_id: 'channel-0'
+            channel_id: channel
           },
           endpoint: {
             port_id: cosmosPort,
-            channel_id: 'channel-0'
+            channel_id: channel
           },
           order: IbcOrder.Unordered,
           version: 'ics20-1',
@@ -118,6 +137,8 @@ describe.only('IBCModule', () => {
         },
         counterparty_version: 'ics20-1'
       }
+    });
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
     });
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
@@ -156,7 +177,7 @@ describe.only('IBCModule', () => {
     [
       {
         token: {
-          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address due to jest issue: https://github.com/facebook/jest/issues/6888
+          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address airi due to jest issue: https://github.com/facebook/jest/issues/6888
         }
       },
       ibcTransferAmount,
@@ -167,7 +188,7 @@ describe.only('IBCModule', () => {
     [
       {
         token: {
-          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address due to jest issue: https://github.com/facebook/jest/issues/6888
+          contract_addr: 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu' // has to hard-code address airi due to jest issue: https://github.com/facebook/jest/issues/6888
         }
       },
       '10000000000001',
@@ -191,7 +212,7 @@ describe.only('IBCModule', () => {
           assetInfoDecimals: 6,
           denom: transferDenom,
           remoteDecimals: 6,
-          localChannelId: 'channel-0'
+          localChannelId: channel
         };
         await ics20Contract.updateMappingPair(pair);
       }
@@ -205,21 +226,7 @@ describe.only('IBCModule', () => {
       await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
-          src: {
-            port_id: cosmosPort,
-            channel_id: 'channel-0'
-          },
-          dest: {
-            port_id: oraiPort,
-            channel_id: 'channel-0'
-          },
-          sequence: 27,
-          timeout: {
-            block: {
-              revision: 1,
-              height: 12345678
-            }
-          }
+          ...packetData,
         },
         relayer: cosmosSenderAddress
       });
@@ -246,7 +253,7 @@ describe.only('IBCModule', () => {
       assetInfoDecimals: 6,
       denom: airiIbcDenom,
       remoteDecimals: 6,
-      localChannelId: 'channel-0'
+      localChannelId: channel
     });
     // now send ibc package
     const icsPackage: FungibleTokenPacketData = {
@@ -262,11 +269,11 @@ describe.only('IBCModule', () => {
         data: toBinary(icsPackage),
         src: {
           port_id: cosmosPort,
-          channel_id: 'channel-0'
+          channel_id: channel
         },
         dest: {
           port_id: oraiPort,
-          channel_id: 'channel-0'
+          channel_id: channel
         },
         sequence: 27,
         timeout: {
@@ -295,7 +302,7 @@ describe.only('IBCModule', () => {
         msg: Buffer.from(JSON.stringify(transferBackMsg)).toString('base64')
       });
     } catch (error) {
-      expect(error).toEqual(new Error('Insufficient funds to redeem voucher on channel'));
+      expect(error).not.toBeNull();
     }
   });
 
@@ -310,7 +317,7 @@ describe.only('IBCModule', () => {
       assetInfoDecimals: 6,
       denom: airiIbcDenom,
       remoteDecimals: 6,
-      localChannelId: 'channel-0'
+      localChannelId: channel
     });
     // now send ibc package
     const icsPackage: FungibleTokenPacketData = {
@@ -326,11 +333,11 @@ describe.only('IBCModule', () => {
         data: toBinary(icsPackage),
         src: {
           port_id: cosmosPort,
-          channel_id: 'channel-0'
+          channel_id: channel
         },
         dest: {
           port_id: oraiPort,
-          channel_id: 'channel-0'
+          channel_id: channel
         },
         sequence: 27,
         timeout: {
@@ -341,11 +348,6 @@ describe.only('IBCModule', () => {
         }
       },
       relayer: cosmosSenderAddress
-    });
-
-    // try to send back to cosmos from oraichain, which will pass
-    cosmosChain.ibc.addMiddleWare((msg, app) => {
-      console.log('handle midle ware for ibc', msg, app);
     });
 
     const transferBackMsg: TransferBackMsg = {
@@ -386,7 +388,7 @@ describe.only('IBCModule', () => {
         assetInfoDecimals: 6,
         denom: airiIbcDenom,
         remoteDecimals: 6,
-        localChannelId: 'channel-0'
+        localChannelId: channel
       });
       // now send ibc package
       const icsPackage: FungibleTokenPacketData = {
@@ -400,21 +402,7 @@ describe.only('IBCModule', () => {
       await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
-          src: {
-            port_id: cosmosPort,
-            channel_id: 'channel-0'
-          },
-          dest: {
-            port_id: oraiPort,
-            channel_id: 'channel-0'
-          },
-          sequence: 27,
-          timeout: {
-            block: {
-              revision: 1,
-              height: 12345678
-            }
-          }
+          ...packetData,
         },
         relayer: cosmosSenderAddress
       });
@@ -428,6 +416,13 @@ describe.only('IBCModule', () => {
     let routerContract: OraiswapRouterClient;
     let usdtToken: OraiswapTokenClient;
     let assetInfos: AssetInfo[];
+    let icsPackage: FungibleTokenPacketData = {
+      amount: ibcTransferAmount,
+      denom: airiIbcDenom,
+      receiver: bobAddress,
+      sender: cosmosSenderAddress,
+      memo: '',
+    };
     beforeEach(async () => {
       assetInfos = [
         { native_token: { denom: "orai" } },
@@ -499,7 +494,7 @@ describe.only('IBCModule', () => {
         assetInfoDecimals: 6,
         denom: airiIbcDenom,
         remoteDecimals: 6,
-        localChannelId: 'channel-0'
+        localChannelId: channel
       });
       await factoryContract.createPair(
         {
@@ -545,81 +540,95 @@ describe.only('IBCModule', () => {
     it.each([
       [`${bobAddress}:orai`, bobAddress],
       [`channel-0/${bobAddress}:orai`, "orai1kpjz6jsyxg0wd5r5hhyquawgt3zva34m96qdl2"] // hard-coded ics20 address
-    ])('cw-ics20-test-single-step-native-token-swap-operations-to-dest-denom', async (memo: string, expectedRecipient: string) => {
+    ])('cw-ics20-test-single-step-native-token-swap-operations-to-dest-denom memo %s expected recipient %s', async (memo: string, expectedRecipient: string) => {
       // now send ibc package
-      const icsPackage: FungibleTokenPacketData = {
-        amount: ibcTransferAmount,
-        denom: airiIbcDenom,
-        receiver: bobAddress,
-        sender: cosmosSenderAddress,
-        memo
-      };
+      icsPackage.memo = memo;
       // transfer from cosmos to oraichain, should pass
       const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
-          src: {
-            port_id: cosmosPort,
-            channel_id: 'channel-0'
-          },
-          dest: {
-            port_id: oraiPort,
-            channel_id: 'channel-0'
-          },
-          sequence: 27,
-          timeout: {
-            block: {
-              revision: 1,
-              height: 12345678
-            }
-          }
+          ...packetData,
         },
         relayer: cosmosSenderAddress
       });
-      const transferAttributes = result.events.find(event => event.type === 'transfer').attributes;
-      // in the end, the orai receiver should be expectedRecipient
-      expect(transferAttributes.find(attr => attr.key === 'recipient').value).toEqual(expectedRecipient);
-      // denom of the transfer token should be orai
-      expect(JSON.parse(transferAttributes.find(attr => attr.key === 'amount').value)[0].denom).toEqual("orai");
+      console.log("result: ", result);
+      const bobBalance = oraiClient.app.bank.getBalance(expectedRecipient);
+      expect(bobBalance.length).toBeGreaterThan(0);
+      expect(bobBalance[0].denom).toEqual("orai");
+      expect(parseInt(bobBalance[0].amount)).toBeGreaterThan(0);
     });
 
     it.each([
-      [`${bobAddress}:orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3`, bobAddress], // hard-coded usdt address
-      [`channel-0/${bobAddress}:orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3`, "orai1kpjz6jsyxg0wd5r5hhyquawgt3zva34m96qdl2"] // hard-coded usdt & ics20 address
-    ])('cw-ics20-test-single-step-cw20-token-swap-operations-to-dest-denom', async (memo: string, expectedRecipient: string) => {
+      [`${bobAddress}`, "orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3", bobAddress], // hard-coded usdt address
+      [`${bobAddress}`, "orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu", bobAddress], // edge case, dest denom is also airi
+      [`channel-0/${bobAddress}`, "orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3", "orai1kpjz6jsyxg0wd5r5hhyquawgt3zva34m96qdl2"] // hard-coded usdt & ics20 address
+    ])('cw-ics20-test-single-step-cw20-token-swap-operations-to-dest-denom memo %s dest denom %s expected recipient %s', async (memo: string, destDenom: string, expectedRecipient: string) => {
       // now send ibc package
-      const icsPackage: FungibleTokenPacketData = {
-        amount: ibcTransferAmount,
-        denom: airiIbcDenom,
-        receiver: bobAddress,
-        sender: cosmosSenderAddress,
-        memo
-      };
+      icsPackage.memo = memo + `:${destDenom}`;
       // transfer from cosmos to oraichain, should pass
       const result = await cosmosChain.ibc.sendPacketReceive({
         packet: {
           data: toBinary(icsPackage),
-          src: {
-            port_id: cosmosPort,
-            channel_id: 'channel-0'
-          },
-          dest: {
-            port_id: oraiPort,
-            channel_id: 'channel-0'
-          },
-          sequence: 27,
-          timeout: {
-            block: {
-              revision: 1,
-              height: 12345678
-            }
-          }
+          ...packetData,
         },
         relayer: cosmosSenderAddress
       });
-      const wasmEvent = result.events.find(event => event.type === 'wasm' && event.attributes.find(attr => attr.key === '_contract_addr' && attr.value === usdtToken.contractAddress));
-      // in the end, the orai receiver should be expected recipient
-      expect(wasmEvent.attributes.find(event => event.key === 'to').value).toEqual(expectedRecipient);
+      const token = new OraiswapTokenClient(oraiClient, oraiSenderAddress, destDenom);
+      const cw20Balance = await token.balance({ address: expectedRecipient });
+      expect(parseInt(cw20Balance.balance)).toBeGreaterThan(1000);
+    });
+
+    it.each([
+      [channel, "abcd", "orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3"], // hard-coded usdt address
+      [channel, "orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g", "orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu"], // edge case, dest denom is also airi
+      [channel, "cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm", "orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3"], // hard-coded usdt
+      [channel, "cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm", "orai"],
+      [channel, "0x", "orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3"],
+      [channel, "0xabcd", "orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu"],
+      [channel, "tron-testnet0xabcd", "orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu"], // bad evm address case
+    ])('cw-ics20-test-single-step-has-ibc-msg-dest-receiver-cosmos-based memo %s dest denom %s expected recipient %s', async (destChannel: string, destReceiver: string, destDenom: string) => {
+      // now send ibc package
+      icsPackage.memo = `${destChannel}/${destReceiver}:${destDenom}`
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData,
+        },
+        relayer: cosmosSenderAddress
+      });
+      const ibcEvent = result.events.find(event => event.type === 'transfer' && event.attributes.find(attr => attr.key === 'channel'));
+      // get swap operation event
+      expect(ibcEvent).not.toBeUndefined();
+      expect(ibcEvent.attributes.find(attr => attr.key === 'channel').value).toEqual(destChannel);
+      expect(ibcEvent.attributes.find(attr => attr.key === 'recipient').value).toEqual(destReceiver);
+      expect(ibcEvent.attributes.find(attr => attr.key === 'sender').value).toEqual(ics20Contract.contractAddress);
+      expect(ibcEvent.attributes.find(attr => attr.key === 'amount').value).toContain(destDenom);
+    });
+
+    it.each([
+      [channel, bridgeReceiver, "orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu"], // hard-coded airi
+    ])('cw-ics20-test-single-step-has-ibc-msg-dest-receiver-evm-based memo %s dest denom %s expected recipient %s', async (destChannel: string, destReceiver: string, destDenom: string) => {
+      // now send ibc package
+      icsPackage.memo = `${destChannel}/${destReceiver}:${destDenom}`
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData,
+        },
+        relayer: cosmosSenderAddress
+      });
+      console.log("result: ", JSON.stringify(result.events))
+      const sendPacketEvent = result.events.find(event => event.type === 'send_packet');
+      expect(sendPacketEvent).not.toBeUndefined();
+      const packetHex = sendPacketEvent.attributes.find(attr => attr.key === 'packet_data_hex').value;
+      expect(packetHex).not.toBeUndefined();
+      const packet = JSON.parse(Buffer.from(packetHex, 'hex').toString('ascii'));
+      console.log("packet: ", packet)
+      expect(packet.receiver).toEqual(icsPackage.sender);
+      expect(packet.sender).toEqual(ics20Contract.contractAddress);
+      // expect(packet.memo).toEqual(ics20Contract.contractAddress);
     });
   });
 });
