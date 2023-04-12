@@ -1,7 +1,6 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from 'components/Toasts/context';
 import { NetworkChainId } from 'config/chainInfos';
@@ -27,7 +26,6 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
   Sentry.init({
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
-    integrations: [new BrowserTracing()],
     denyUrls: [
       /extensions\//i,
       /extension/i,
