@@ -239,10 +239,18 @@ export interface CwIcs20LatestInterface extends CwIcs20LatestReadOnlyInterface {
     contract: string;
     gasLimit?: number;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  updateAdmin: ({
-    admin
+  updateConfig: ({
+    admin,
+    defaultGasLimit,
+    defaultTimeout,
+    feeDenom,
+    swapRouterContract
   }: {
-    admin: string;
+    admin?: string;
+    defaultGasLimit?: number;
+    defaultTimeout?: number;
+    feeDenom?: string;
+    swapRouterContract?: string;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class CwIcs20LatestClient extends CwIcs20LatestQueryClient implements CwIcs20LatestInterface {
@@ -261,7 +269,7 @@ export class CwIcs20LatestClient extends CwIcs20LatestQueryClient implements CwI
     this.updateMappingPair = this.updateMappingPair.bind(this);
     this.deleteMappingPair = this.deleteMappingPair.bind(this);
     this.allow = this.allow.bind(this);
-    this.updateAdmin = this.updateAdmin.bind(this);
+    this.updateConfig = this.updateConfig.bind(this);
   }
 
   receive = async ({
@@ -375,14 +383,26 @@ export class CwIcs20LatestClient extends CwIcs20LatestQueryClient implements CwI
       }
     }, $fee, $memo, $funds);
   };
-  updateAdmin = async ({
-    admin
+  updateConfig = async ({
+    admin,
+    defaultGasLimit,
+    defaultTimeout,
+    feeDenom,
+    swapRouterContract
   }: {
-    admin: string;
+    admin?: string;
+    defaultGasLimit?: number;
+    defaultTimeout?: number;
+    feeDenom?: string;
+    swapRouterContract?: string;
   }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
-      update_admin: {
-        admin
+      update_config: {
+        admin,
+        default_gas_limit: defaultGasLimit,
+        default_timeout: defaultTimeout,
+        fee_denom: feeDenom,
+        swap_router_contract: swapRouterContract
       }
     }, $fee, $memo, $funds);
   };

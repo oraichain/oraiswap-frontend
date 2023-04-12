@@ -51,7 +51,7 @@ describe.only('IBCModule', () => {
     });
     const { contractAddress } = await oraiClient.deploy<CwIcs20LatestTypes.InstantiateMsg>(
       oraiSenderAddress,
-      path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm'),
+      path.join(__dirname, 'testdata', 'cw_ics20.wasm'),
       {
         allowlist: [],
         default_timeout: 3600,
@@ -426,7 +426,13 @@ describe.only('IBCModule', () => {
   describe('cw-ics20-test-single-step-swap-to-tokens', () => {
     let factoryContract: OraiswapFactoryClient;
     let routerContract: OraiswapRouterClient;
+    let usdtToken: OraiswapTokenClient;
+    let assetInfos: AssetInfo[];
     beforeEach(async () => {
+      assetInfos = [
+        { native_token: { denom: "orai" } },
+        { token: { contract_addr: airiToken.contractAddress } }
+      ];
       // upload pair & lp token code id
       const { codeId: pairCodeId } = await oraiClient.upload(
         oraiSenderAddress,
@@ -438,6 +444,17 @@ describe.only('IBCModule', () => {
         readFileSync(path.join(__dirname, 'testdata/oraiswap_token.wasm')),
         'auto'
       );
+      // deploy another cw20 for oraiswap testing
+      const { contractAddress: usdtAddress } = await oraiClient.instantiate(oraiSenderAddress, lpCodeId, {
+        decimals: 6,
+        symbol: 'USDT',
+        name: 'USDT token',
+        initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }],
+        mint: {
+          minter: oraiSenderAddress
+        }
+      }, "cw20-usdt")
+      usdtToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, usdtAddress);
       // deploy oracle addr
       const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleIsntantiateMsg>(
         oraiSenderAddress,
@@ -446,24 +463,11 @@ describe.only('IBCModule', () => {
         'oraiswap-oracle'
       );
       // deploy factory contract
-
-      const { contractAddress: factoryOldAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
-        oraiSenderAddress,
-        path.join(__dirname, 'testdata/oraiswap_factory_0_13_2.wasm'),
-        {
-          commission_rate: null,
-          oracle_addr: oracleAddress,
-          pair_code_id: pairCodeId,
-          token_code_id: lpCodeId
-        },
-        'oraiswap-factory-old'
-      );
-
       const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
         oraiSenderAddress,
         path.join(__dirname, 'testdata/oraiswap_factory.wasm'),
         {
-          commission_rate: null,
+          commission_rate: "0",
           oracle_addr: oracleAddress,
           pair_code_id: pairCodeId,
           token_code_id: lpCodeId
@@ -475,15 +479,147 @@ describe.only('IBCModule', () => {
         oraiSenderAddress,
         path.join(__dirname, 'testdata', 'oraiswap_router.wasm'),
         {
-          factory_addr: factoryOldAddress,
+          factory_addr: factoryAddress,
           factory_addr_v2: factoryAddress
         },
         'oraiswap-router'
       );
       factoryContract = new OraiswapFactoryClient(oraiClient, oraiSenderAddress, factoryAddress);
       routerContract = new OraiswapRouterClient(oraiClient, oraiSenderAddress, routerAddress);
+
+      // set correct router contract to prepare for the tests
+      await ics20Contract.updateConfig({ swapRouterContract: routerAddress });
+      // create mapping
+      await ics20Contract.updateMappingPair({
+        assetInfo: {
+          token: {
+            contract_addr: airiToken.contractAddress
+          }
+        },
+        assetInfoDecimals: 6,
+        denom: airiIbcDenom,
+        remoteDecimals: 6,
+        localChannelId: 'channel-0'
+      });
+      await factoryContract.createPair(
+        {
+          assetInfos
+        },
+      );
+      await factoryContract.createPair(
+        {
+          assetInfos: [assetInfos[0], { token: { contract_addr: usdtToken.contractAddress } }]
+        },
+      );
+      const firstPairInfo = await factoryContract.pair({
+        assetInfos
+      });
+      const secondPairInfo = await factoryContract.pair({
+        assetInfos: [assetInfos[0], { token: { contract_addr: usdtToken.contractAddress } }]
+      });
+      // mint lots of orai, airi for the pair contracts to mock provide lp
+      oraiClient.app.bank.setBalance(firstPairInfo.contract_addr, coins(initialBalanceAmount, "orai"));
+      airiToken.mint({ amount: initialBalanceAmount, recipient: firstPairInfo.contract_addr });
+      oraiClient.app.bank.setBalance(secondPairInfo.contract_addr, coins(initialBalanceAmount, "orai"));
+      usdtToken.mint({ amount: initialBalanceAmount, recipient: secondPairInfo.contract_addr });
     });
 
-    it('test', async () => {});
+    it('cw-ics20-test-simulate-swap-ops-mock-pair-contract', async () => {
+      const simulateResult = await routerContract.simulateSwapOperations({
+        offerAmount: "1",
+        operations: [{
+          orai_swap: {
+            offer_asset_info: assetInfos[1],
+            ask_asset_info: assetInfos[0],
+          }
+        }, {
+          orai_swap: {
+            offer_asset_info: assetInfos[0],
+            ask_asset_info: { token: { contract_addr: usdtToken.contractAddress } },
+          }
+        }]
+      })
+      expect(simulateResult.amount).toEqual("1")
+    });
+
+    it.each([
+      [`${bobAddress}:orai`, bobAddress],
+      [`channel-0/${bobAddress}:orai`, "orai1kpjz6jsyxg0wd5r5hhyquawgt3zva34m96qdl2"] // hard-coded ics20 address
+    ])('cw-ics20-test-single-step-native-token-swap-operations-to-dest-denom', async (memo: string, expectedRecipient: string) => {
+      // now send ibc package
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: cosmosSenderAddress,
+        memo
+      };
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          src: {
+            port_id: cosmosPort,
+            channel_id: 'channel-0'
+          },
+          dest: {
+            port_id: oraiPort,
+            channel_id: 'channel-0'
+          },
+          sequence: 27,
+          timeout: {
+            block: {
+              revision: 1,
+              height: 12345678
+            }
+          }
+        },
+        relayer: cosmosSenderAddress
+      });
+      const transferAttributes = result.events.find(event => event.type === 'transfer').attributes;
+      // in the end, the orai receiver should be expectedRecipient
+      expect(transferAttributes.find(attr => attr.key === 'recipient').value).toEqual(expectedRecipient);
+      // denom of the transfer token should be orai
+      expect(JSON.parse(transferAttributes.find(attr => attr.key === 'amount').value)[0].denom).toEqual("orai");
+    });
+
+    it.each([
+      [`${bobAddress}:orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3`, bobAddress], // hard-coded usdt address
+      [`channel-0/${bobAddress}:orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3`, "orai1kpjz6jsyxg0wd5r5hhyquawgt3zva34m96qdl2"] // hard-coded usdt & ics20 address
+    ])('cw-ics20-test-single-step-cw20-token-swap-operations-to-dest-denom', async (memo: string, expectedRecipient: string) => {
+      // now send ibc package
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: cosmosSenderAddress,
+        memo
+      };
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          src: {
+            port_id: cosmosPort,
+            channel_id: 'channel-0'
+          },
+          dest: {
+            port_id: oraiPort,
+            channel_id: 'channel-0'
+          },
+          sequence: 27,
+          timeout: {
+            block: {
+              revision: 1,
+              height: 12345678
+            }
+          }
+        },
+        relayer: cosmosSenderAddress
+      });
+      const wasmEvent = result.events.find(event => event.type === 'wasm' && event.attributes.find(attr => attr.key === '_contract_addr' && attr.value === usdtToken.contractAddress));
+      // in the end, the orai receiver should be expected recipient
+      expect(wasmEvent.attributes.find(event => event.key === 'to').value).toEqual(expectedRecipient);
+    });
   });
 });
