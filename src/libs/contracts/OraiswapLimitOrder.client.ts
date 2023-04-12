@@ -225,15 +225,15 @@ export interface OraiswapLimitOrderInterface extends OraiswapLimitOrderReadOnlyI
     admin: Addr;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   createOrderBookPair: ({
-    baseCoinInfo,
-    minQuoteCoinAmount,
-    quoteCoinInfo,
-    spread
+    askInfo,
+    minOfferAmount,
+    offerInfo,
+    precision
   }: {
-    baseCoinInfo: AssetInfo;
-    minQuoteCoinAmount: Uint128;
-    quoteCoinInfo: AssetInfo;
-    spread?: Decimal;
+    askInfo: AssetInfo;
+    minOfferAmount: Uint128;
+    offerInfo: AssetInfo;
+    precision?: Decimal;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   submitOrder: ({
     assets,
@@ -249,12 +249,21 @@ export interface OraiswapLimitOrderInterface extends OraiswapLimitOrderReadOnlyI
     assetInfos: AssetInfo[];
     orderId: number;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
+  executeOrder: ({
+    askAsset,
+    offerInfo,
+    orderId
+  }: {
+    askAsset: Asset;
+    offerInfo: AssetInfo;
+    orderId: number;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   executeOrderBookPair: ({
     assetInfos
   }: {
     assetInfos: AssetInfo[];
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
-  removeOrderBookPair: ({
+  removeOrderBook: ({
     assetInfos
   }: {
     assetInfos: AssetInfo[];
@@ -275,8 +284,9 @@ export class OraiswapLimitOrderClient extends OraiswapLimitOrderQueryClient impl
     this.createOrderBookPair = this.createOrderBookPair.bind(this);
     this.submitOrder = this.submitOrder.bind(this);
     this.cancelOrder = this.cancelOrder.bind(this);
+    this.executeOrder = this.executeOrder.bind(this);
     this.executeOrderBookPair = this.executeOrderBookPair.bind(this);
-    this.removeOrderBookPair = this.removeOrderBookPair.bind(this);
+    this.removeOrderBook = this.removeOrderBook.bind(this);
   }
 
   receive = async ({
@@ -308,22 +318,22 @@ export class OraiswapLimitOrderClient extends OraiswapLimitOrderQueryClient impl
     }, $fee, $memo, $funds);
   };
   createOrderBookPair = async ({
-    baseCoinInfo,
-    minQuoteCoinAmount,
-    quoteCoinInfo,
-    spread
+    askInfo,
+    minOfferAmount,
+    offerInfo,
+    precision
   }: {
-    baseCoinInfo: AssetInfo;
-    minQuoteCoinAmount: Uint128;
-    quoteCoinInfo: AssetInfo;
-    spread?: Decimal;
+    askInfo: AssetInfo;
+    minOfferAmount: Uint128;
+    offerInfo: AssetInfo;
+    precision?: Decimal;
   }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       create_order_book_pair: {
-        base_coin_info: baseCoinInfo,
-        min_quote_coin_amount: minQuoteCoinAmount,
-        quote_coin_info: quoteCoinInfo,
-        spread
+        ask_info: askInfo,
+        min_offer_amount: minOfferAmount,
+        offer_info: offerInfo,
+        precision
       }
     }, $fee, $memo, $funds);
   };
@@ -355,6 +365,23 @@ export class OraiswapLimitOrderClient extends OraiswapLimitOrderQueryClient impl
       }
     }, $fee, $memo, $funds);
   };
+  executeOrder = async ({
+    askAsset,
+    offerInfo,
+    orderId
+  }: {
+    askAsset: Asset;
+    offerInfo: AssetInfo;
+    orderId: number;
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
+    return await this.client.execute(this.sender, this.contractAddress, {
+      execute_order: {
+        ask_asset: askAsset,
+        offer_info: offerInfo,
+        order_id: orderId
+      }
+    }, $fee, $memo, $funds);
+  };
   executeOrderBookPair = async ({
     assetInfos
   }: {
@@ -366,13 +393,13 @@ export class OraiswapLimitOrderClient extends OraiswapLimitOrderQueryClient impl
       }
     }, $fee, $memo, $funds);
   };
-  removeOrderBookPair = async ({
+  removeOrderBook = async ({
     assetInfos
   }: {
     assetInfos: AssetInfo[];
   }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
-      remove_order_book_pair: {
+      remove_order_book: {
         asset_infos: assetInfos
       }
     }, $fee, $memo, $funds);

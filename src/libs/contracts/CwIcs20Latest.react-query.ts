@@ -158,10 +158,14 @@ export function useCwIcs20LatestPortQuery<TData = PortResponse>({
     enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
   });
 }
-export interface CwIcs20LatestUpdateAdminMutation {
+export interface CwIcs20LatestUpdateConfigMutation {
   client: CwIcs20LatestClient;
   msg: {
-    admin: string;
+    admin?: string;
+    defaultGasLimit?: number;
+    defaultTimeout?: number;
+    feeDenom?: string;
+    swapRouterContract?: string;
   };
   args?: {
     $fee?: number | StdFee | "auto";
@@ -169,8 +173,8 @@ export interface CwIcs20LatestUpdateAdminMutation {
     $funds?: Coin[];
   };
 }
-export function useCwIcs20LatestUpdateAdminMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, CwIcs20LatestUpdateAdminMutation>, "mutationFn">) {
-  return useMutation<ExecuteResult, Error, CwIcs20LatestUpdateAdminMutation>(({
+export function useCwIcs20LatestUpdateConfigMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, CwIcs20LatestUpdateConfigMutation>, "mutationFn">) {
+  return useMutation<ExecuteResult, Error, CwIcs20LatestUpdateConfigMutation>(({
     client,
     msg,
     args: {
@@ -178,7 +182,7 @@ export function useCwIcs20LatestUpdateAdminMutation(options?: Omit<UseMutationOp
       $memo,
       $funds
     } = {}
-  }) => client.updateAdmin(msg, $fee, $memo, $funds), options);
+  }) => client.updateConfig(msg, $fee, $memo, $funds), options);
 }
 export interface CwIcs20LatestAllowMutation {
   client: CwIcs20LatestClient;

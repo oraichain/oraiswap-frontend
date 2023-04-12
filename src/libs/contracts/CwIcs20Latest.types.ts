@@ -19,8 +19,12 @@ export type ExecuteMsg = {
 } | {
   allow: AllowMsg;
 } | {
-  update_admin: {
-    admin: string;
+  update_config: {
+    admin?: string | null;
+    default_gas_limit?: number | null;
+    default_timeout?: number | null;
+    fee_denom?: string | null;
+    swap_router_contract?: string | null;
   };
 };
 export type QueryMsg = {
@@ -76,7 +80,9 @@ export interface ChannelResponse {
 export interface ConfigResponse {
   default_gas_limit?: number | null;
   default_timeout: number;
+  fee_denom: string;
   gov_contract: string;
+  swap_router_contract: string;
 }
 export interface ListAllowedResponse {
   allow: AllowedInfo[];
