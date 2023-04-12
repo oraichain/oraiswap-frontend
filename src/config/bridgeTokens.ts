@@ -50,7 +50,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     org: network.chainName,
     coinType: network.bip44.coinType,
     contractAddress: currency.contractAddress,
-    prefix: network.bech32Config?.bech32PrefixAccAddr,
+    prefix: currency?.prefixToken ?? network.bech32Config?.bech32PrefixAccAddr,
     coinGeckoId: currency.coinGeckoId,
     denom: currency.coinMinimalDenom,
     bridgeNetworkIdentifier: currency.bridgeNetworkIdentifier,
