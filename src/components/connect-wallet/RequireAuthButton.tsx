@@ -11,8 +11,9 @@ import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
 
-const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
+const RequireAuthButton: React.FC<any> = () => {
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const [address, setAddress] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const { activate, deactivate } = useWeb3React();
@@ -59,8 +60,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
           });
           //@ts-ignore
           tronAddress = addressTronMobile?.base58;
-        }
-        if (!window.tronWeb.defaultAddress?.base58) {
+        } else if (!window.tronWeb.defaultAddress?.base58) {
           const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
             method: 'tron_requestAccounts'
           });

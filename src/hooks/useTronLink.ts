@@ -35,6 +35,7 @@ export function useTronEventListener() {
         const tronAddress = addressTronMobile?.base58;
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
+        return;
       }
 
       console.log('tronLink & tronWeb successfully detected!');

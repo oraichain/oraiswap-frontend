@@ -24,8 +24,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
-  const [address, setAddress] = useConfigReducer('address');
-  const [infoCosmos] = useConfigReducer('infoCosmos');
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {
@@ -89,7 +87,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             </Link>
           )}
           <div className={styles.menu_items}>
-            <RequireAuthButton address={address} setAddress={setAddress} />
+            <RequireAuthButton />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}

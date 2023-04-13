@@ -125,19 +125,21 @@ const App = () => {
       }
 
       // TODO: owallet get address tron
-      if (window.tronWeb && window.tronLink) {
-        await window.tronLink.request({
-          method: 'tron_requestAccounts'
-        });
-        setTronAddress(window.tronWeb?.defaultAddress?.base58);
-      }
-      // TODO: owallet get address evm
-      if (window.ethereum) {
-        const [address] = await window.ethereum!.request({
-          method: 'eth_requestAccounts',
-          params: []
-        });
-        setMetamaskAddress(address);
+      if (!isMobile()) {
+        if (window.tronWeb && window.tronLink) {
+          await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          setTronAddress(window.tronWeb?.defaultAddress?.base58);
+        }
+        // TODO: owallet get address evm
+        if (window.ethereum) {
+          const [address] = await window.ethereum!.request({
+            method: 'eth_requestAccounts',
+            params: []
+          });
+          setMetamaskAddress(address);
+        }
       }
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
