@@ -266,21 +266,7 @@ describe.only('IBCModule', () => {
     await cosmosChain.ibc.sendPacketReceive({
       packet: {
         data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: channel
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: channel
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
-          }
-        }
+        ...packetData,
       },
       relayer: cosmosSenderAddress
     });
@@ -330,21 +316,7 @@ describe.only('IBCModule', () => {
     await cosmosChain.ibc.sendPacketReceive({
       packet: {
         data: toBinary(icsPackage),
-        src: {
-          port_id: cosmosPort,
-          channel_id: channel
-        },
-        dest: {
-          port_id: oraiPort,
-          channel_id: channel
-        },
-        sequence: 27,
-        timeout: {
-          block: {
-            revision: 1,
-            height: 12345678
-          }
-        }
+        ...packetData,
       },
       relayer: cosmosSenderAddress
     });
