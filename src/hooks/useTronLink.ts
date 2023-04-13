@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
@@ -22,9 +23,20 @@ export function useTronEventListener() {
     }
   }, []);
 
-  function handleTronLink() {
+  async function handleTronLink() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
+      const addressTronMobile = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
+      // TODO: Check owallet mobile
+      if (!tronWeb?.defaultAddress?.base58 || isMobile()) {
+        //@ts-ignore
+        const tronAddress = addressTronMobile?.base58;
+        loadTokenAmounts({ tronAddress });
+        setTronAddress(tronAddress);
+      }
+
       console.log('tronLink & tronWeb successfully detected!');
       if (tronWeb?.defaultAddress?.base58) {
         const tronAddress = tronWeb.defaultAddress.base58;

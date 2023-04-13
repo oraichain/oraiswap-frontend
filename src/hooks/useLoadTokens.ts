@@ -2,26 +2,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
-import {
-  evmChainsWithoutTron,
-  evmTokens,
-  filteredTokens,
-  kawaiiTokens,
-  TokenItemType,
-  tokenMap,
-  tronChain
-} from 'config/bridgeTokens';
-import {
-  COSMOS_CHAIN_ID,
-  KAWAII_SUBNET_RPC,
-  KWT_SUBNETWORK_CHAIN_ID,
-  KWT_SUBNETWORK_EVM_CHAIN_ID,
-  ORAI,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_RPC,
-  OSMOSIS_CHAIN_ID
-} from 'config/constants';
+import { cosmosTokens, evmTokens, kawaiiTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { Contract } from 'config/contracts';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
@@ -33,15 +14,7 @@ import { getEvmAddress } from '../libs/utils';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import {
-  COSMOS_NETWORK_RPC,
-  COSMOS_PREFIX,
-  KAWAII_RPC,
-  ORAI_BRIDGE_PREFIX,
-  ORAI_BRIDGE_RPC,
-  OSMOSIS_NETWORK_RPC,
-  OSMOSIS_PREFIX
-} from 'config/constants';
+import { CustomChainInfo, chainInfos, evmChains } from 'config/chainInfos';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -50,13 +23,6 @@ export type LoadTokenParams = {
   tronAddress?: string;
 };
 
-export const cosmosNetworks: { chainId: string; prefix: string; rpc: string }[] = [
-  { chainId: ORAI_BRIDGE_CHAIN_ID, prefix: ORAI_BRIDGE_PREFIX, rpc: ORAI_BRIDGE_RPC },
-  { chainId: OSMOSIS_CHAIN_ID, prefix: OSMOSIS_PREFIX, rpc: OSMOSIS_NETWORK_RPC },
-  { chainId: COSMOS_CHAIN_ID, prefix: COSMOS_PREFIX, rpc: COSMOS_NETWORK_RPC },
-  { chainId: ORAICHAIN_ID, prefix: ORAI, rpc: ORAI_RPC }
-];
-
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
   if (!address) return;
   const client = await StargateClient.connect(tokenInfo.rpc);
@@ -64,7 +30,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   let amountDetails: AmountDetails = {};
 
   // reset native balances
-  filteredTokens
+  cosmosTokens
     .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
     .forEach((t) => {
       amountDetails[t.denom] = '0';
@@ -85,8 +51,13 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
       oraiAddress && loadCw20Balance(dispatch, oraiAddress),
       // different cointype but also require keplr connected by checking oraiAddress
       oraiAddress && loadKawaiiSubnetAmount(dispatch),
-      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChainsWithoutTron),
-      tronAddress && loadEvmAmounts(dispatch, tronToEthAddress(tronAddress), tronChain)
+      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChains),
+      tronAddress &&
+        loadEvmAmounts(
+          dispatch,
+          tronToEthAddress(tronAddress),
+          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+        )
     ].filter(Boolean)
   );
 }
@@ -94,16 +65,18 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
 async function loadTokensCosmos(dispatch: Dispatch, address: string) {
   await handleCheckWallet();
   const { words, prefix } = bech32.decode(address);
-  for (const network of cosmosNetworks) {
-    const cosmosAddress = network.prefix === prefix ? address : bech32.encode(network.prefix, words);
-    loadNativeBalance(dispatch, cosmosAddress, network);
+  const cosmosInfos = chainInfos.filter((chainInfo) => chainInfo.bip44.coinType === 118);
+  for (const chainInfo of cosmosInfos) {
+    const networkPrefix = chainInfo.bech32Config.bech32PrefixAccAddr;
+    const cosmosAddress = networkPrefix === prefix ? address : bech32.encode(networkPrefix, words);
+    loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
 
 async function loadCw20Balance(dispatch: Dispatch, address: string) {
   if (!address) return;
   // get all cw20 token contract
-  const cw20Tokens = filteredTokens.filter((t) => t.contractAddress);
+  const cw20Tokens = oraichainTokens.filter((t) => t.contractAddress);
   const data = toBinary({
     balance: { address }
   });
@@ -130,15 +103,15 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
 
 async function loadEvmEntries(
   address: string,
-  tokens: TokenItemType[],
-  rpc: string,
-  chainId: number,
+  chain: CustomChainInfo,
   multicallCustomContractAddress?: string
 ): Promise<[string, string][]> {
+  const tokens = evmTokens.filter((t) => t.chainId === chain.chainId);
+  if (!tokens.length) return [];
   const multicall = new Multicall({
-    nodeUrl: rpc,
+    nodeUrl: chain.rpc,
     multicallCustomContractAddress,
-    chainId
+    chainId: Number(chain.chainId)
   });
   const input = tokens.map((token) => ({
     reference: token.denom,
@@ -160,41 +133,23 @@ async function loadEvmEntries(
   });
 }
 
-async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: TokenItemType[]) {
+async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: CustomChainInfo[]) {
   const amountDetails = Object.fromEntries(
-    flatten(
-      await Promise.all(
-        chains.map((chain) =>
-          loadEvmEntries(
-            evmAddress,
-            evmTokens.filter((t) => t.chainId === chain.chainId),
-            chain.rpc,
-            chain.chainId as number
-          )
-        )
-      )
-    )
+    flatten(await Promise.all(chains.map((chain) => loadEvmEntries(evmAddress, chain))))
   );
 
   dispatch(updateAmounts(amountDetails));
 }
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
-  const kwtAddress = await window.Keplr.getKeplrAddr(KWT_SUBNETWORK_CHAIN_ID);
+  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
   if (!kwtAddress) return;
-
-  loadNativeBalance(dispatch, kwtAddress, { chainId: KWT_SUBNETWORK_CHAIN_ID, rpc: KAWAII_RPC });
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
 
   const kwtSubnetAddress = getEvmAddress(kwtAddress);
-
-  let amountDetails = Object.fromEntries(
-    await loadEvmEntries(
-      kwtSubnetAddress,
-      kawaiiTokens.filter((t) => !!t.contractAddress),
-      KAWAII_SUBNET_RPC,
-      KWT_SUBNETWORK_EVM_CHAIN_ID
-    )
-  );
+  const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
+  let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
   // update amounts
   dispatch(updateAmounts(amountDetails));
 }

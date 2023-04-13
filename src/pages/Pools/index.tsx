@@ -2,37 +2,28 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import { filteredTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import {
-  COSMOS_DECIMALS,
-  ORAI,
-  ORAIX_COINGECKO_ID,
-  ORAIX_INFO,
-  ORAI_COINGECKO_ID,
-  ORAI_INFO,
-  SEC_PER_YEAR,
-  STABLE_DENOM
-} from 'config/constants';
+import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { Pair, pairs } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
-import { toDecimal, validateNumber } from 'libs/utils';
-import isEqual from 'lodash/isEqual';
+import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import compact from 'lodash/compact';
+import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { updatePairs } from 'reducer/token';
 import {
-  fetchPoolInfoAmount,
-  getPairAmountInfo,
-  parseTokenInfo,
-  fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
-  fetchTokenInfos
+  fetchAllTokenAssetPools,
+  fetchPoolInfoAmount,
+  fetchTokenInfos,
+  getPairAmountInfo,
+  parseTokenInfo
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
@@ -159,7 +150,7 @@ const ListPools = memo<{
       const searchReg = new RegExp(text, 'i');
       const ret = listPairs.filter((pairInfo) =>
         pairInfo.pair.asset_denoms.some((denom) =>
-          filteredTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
+          cosmosTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
         )
       );
       setFilteredPairInfos(ret);
@@ -249,11 +240,9 @@ const Pools: React.FC<PoolsProps> = () => {
         let rewardsPerYearValue = 0;
         rewardsPerSec.forEach(({ amount, info }) => {
           if (isEqual(info, ORAI_INFO))
-            rewardsPerYearValue +=
-              (SEC_PER_YEAR * validateNumber(amount) * prices[ORAI_COINGECKO_ID]) / 10 ** COSMOS_DECIMALS;
+            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
           else if (isEqual(info, ORAIX_INFO))
-            rewardsPerYearValue +=
-              (SEC_PER_YEAR * validateNumber(amount) * prices[ORAIX_COINGECKO_ID]) / 10 ** COSMOS_DECIMALS;
+            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
         });
         return {
           ...acc,

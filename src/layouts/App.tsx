@@ -16,9 +16,12 @@ import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
+  const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -84,9 +87,11 @@ const App = () => {
     };
 
     if (isClearPersistStorage) clearPersistStorage();
-  }, []);
 
-  useEffect(() => {
+    if (window.keplr && !isMobile()) {
+      keplrGasPriceCheck();
+    }
+
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
@@ -96,16 +101,10 @@ const App = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (window.keplr) {
-      keplrGasPriceCheck();
-    }
-  }, []);
-
   const keplrGasPriceCheck = async () => {
     try {
-      const gasPriceStep = await getNetworkGasPrice();
-      if (gasPriceStep && !gasPriceStep.low) {
+      const gasPrice = await getNetworkGasPrice();
+      if (!gasPrice) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
           customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
@@ -123,6 +122,22 @@ const App = () => {
       const keplr = await window.Keplr.getKeplr();
       if (!keplr) {
         return displayInstallWallet();
+      }
+
+      // TODO: owallet get address tron
+      if (window.tronWeb && window.tronLink) {
+        await window.tronLink.request({
+          method: 'tron_requestAccounts'
+        });
+        setTronAddress(window.tronWeb?.defaultAddress?.base58);
+      }
+      // TODO: owallet get address evm
+      if (window.ethereum) {
+        const [address] = await window.ethereum!.request({
+          method: 'eth_requestAccounts',
+          params: []
+        });
+        setMetamaskAddress(address);
       }
 
       const oraiAddress = await window.Keplr.getKeplrAddr();

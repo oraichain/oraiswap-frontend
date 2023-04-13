@@ -69,7 +69,6 @@ const Menu: React.FC<{}> = React.memo((props) => {
   };
 
   const mobileMode = isMobile();
-  console.log(infoCosmos);
   const ToggleIcon = open ? CloseIcon : MenuIcon;
 
   return (
@@ -77,7 +76,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
       {mobileMode && (
         <div className={styles.logo}>
           <Link to={'/'} onClick={() => setLink('/')}>
-            <img src={LogoFullImg} alt='logo' />
+            <img src={LogoFullImg} alt="logo" />
           </Link>
           <ToggleIcon onClick={handleToggle} />
         </div>
@@ -86,7 +85,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <img src={LogoFullImg} alt='logo' />
+              <img src={LogoFullImg} alt="logo" />
             </Link>
           )}
           <div className={styles.menu_items}>
@@ -94,43 +93,26 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
-            {renderLink(
-              'https://info.oraidex.io/',
-              'Info',
-              () => { },
-              <InfoIcon />,
-              true
-            )}
-            {renderLink(
-              'https://payment.orai.io/',
-              'Buy ORAI (Fiat)',
-              () => { },
-              <BuyFiat />,
-              true
-            )}
-            {renderLink(
-              'https://faucet.mainnet.orai.io/',
-              'Faucet',
-              () => { },
-              <Faucet />,
-              true
-            )}
+            {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
+            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
+            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)}
           </div>
         </div>
 
         <div className={styles.menu_footer}>
-          {theme === 'dark'
-            ? <button
+          {theme === 'dark' ? (
+            <button
               className={classNames(styles.menu_theme, {
                 [styles.active]: theme === 'dark'
               })}
               onClick={() => {
-                setTheme("light");
+                setTheme('light');
               }}
             >
               <Dark style={{ width: 14, height: 14 }} />
             </button>
-            : <button
+          ) : (
+            <button
               className={classNames(styles.menu_theme, {
                 [styles.active]: theme === 'light'
               })}
@@ -140,11 +122,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
             >
               <Light style={{ width: 14, height: 14 }} />
             </button>
-          }
-          <span>
-            {/* © 2020 - 2023 Oraichain Foundation */}
-            © 2022 Powered by Oraichain
-          </span>
+          )}
+          <span>{/* © 2020 - 2023 Oraichain Foundation */}© 2022 Powered by Oraichain</span>
         </div>
       </div>
     </>

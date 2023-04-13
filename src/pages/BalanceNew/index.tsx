@@ -7,22 +7,15 @@ import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
-import {
-  KWT_SCAN,
-  KWT_SUBNETWORK_CHAIN_ID,
-  ORAICHAIN_ID,
-  ORAI_BRIDGE_CHAIN_ID,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
-  ORAI_BRIDGE_RPC
-} from 'config/constants';
-import { network } from 'config/networks';
-import { getTransactionUrl, handleCheckWallet, networks, renderLogoNetwork, tronToEthAddress } from 'helper';
+import { chainInfos } from 'config/chainInfos';
+import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
+import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
-import { getTotalUsd, getUsd, parseBep20Erc20Name, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, getUsd, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { initEthereum } from 'polyfill';
@@ -33,7 +26,6 @@ import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
-  broadcastConvertTokenTx,
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
@@ -47,7 +39,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -62,7 +54,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
   const [, setTxHash] = useState('');
 
-  const [[from, to], setTokenBridge] = useState<TokenItemType[]>([])
+  const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
 
   const { data: prices } = useCoinGeckoPrices();
 
@@ -105,11 +97,11 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const onClickToken = useCallback(
     (token: TokenItemType) => {
       if (isEqual(from, token)) {
-        setTokenBridge([undefined, undefined])
+        setTokenBridge([undefined, undefined]);
         return;
       }
       const toToken = findDefaultToToken(token);
-      setTokenBridge([token, toToken])
+      setTokenBridge([token, toToken]);
     },
     [otherChainTokens, oraichainTokens, from, to]
   );
@@ -158,12 +150,10 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       let result: DeliverTxResponse;
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
-      if (from.chainId === KWT_SUBNETWORK_CHAIN_ID && to.chainId === ORAICHAIN_ID) {
+      if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
-        if (!!from.contractAddress)
-          result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        else
-          result = await transferIBCKwt(from, to, fromAmount, amounts);
+        if (!!from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        else result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
@@ -184,15 +174,15 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const getFilterTokens = (chainId: string | number): TokenItemType[] => {
     return [...otherChainTokens, ...oraichainTokens]
       .filter((token) => {
-        // not display because it is evm map and no bridge to option
-        if (!token.bridgeTo && !token.prefix) return false;
+        // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
+        if (!token.bridgeTo && !token.contractAddress) return false;
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
         return token.chainId == chainId;
       })
       .sort((a, b) => {
-        return toTotalDisplay(amounts, b) * prices[b.coingeckoId] - toTotalDisplay(amounts, a) * prices[a.coingeckoId];
+        return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
       });
   };
 
@@ -207,7 +197,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     try {
       setMoveOraib2OraiLoading(true);
       const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(ORAI_BRIDGE_RPC, result);
+      processTxResult(chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error);
       displayToast(TToastType.TX_FAILED, {
@@ -217,6 +207,8 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       setMoveOraib2OraiLoading(false);
     }
   };
+
+  const network = networks.find((n) => n.chainId == filterNetwork);
 
   return (
     <Content nonBackground>
@@ -234,10 +226,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           <div className={styles.search}>
             <div className={styles.search_filter} onClick={() => setIsSelectNetwork(true)}>
               <div className={styles.search_box}>
-                <div className={styles.search_flex}>
-                  <div className={styles.search_logo}>{renderLogoNetwork(filterNetwork)}</div>
-                  <span className={styles.search_text}>{networks.find((n) => n.chainId == filterNetwork)?.title}</span>
-                </div>
+                {network && (
+                  <div className={styles.search_flex}>
+                    <div className={styles.search_logo}>
+                      <network.Icon />
+                    </div>
+                    <span className={styles.search_text}>{network.chainName}</span>
+                  </div>
+                )}
                 <div>
                   <ArrowDownIcon />
                 </div>
@@ -288,11 +284,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                     active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
                     onClick={() => onClickToken(t)}
-                    onClickTransfer={
-                      async (fromAmount: number, transferFrom?: TokenItemType, transferTo?: TokenItemType) => {
-                        await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to)
-                      }
-                    }
+                    onClickTransfer={async (
+                      fromAmount: number,
+                      transferFrom?: TokenItemType,
+                      transferTo?: TokenItemType
+                    ) => {
+                      await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to);
+                    }}
                     convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
                       try {
                         const result = await convertKwt(transferAmount, fromToken);
@@ -317,7 +315,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           prices={prices}
           amounts={amounts}
           type="network"
-          listToken={networks}
+          items={networks}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}

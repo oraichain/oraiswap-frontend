@@ -7,16 +7,18 @@ import {
 } from '@oraichain/kawaiiverse-txs';
 import { createTxRaw } from '@tharsis/proto';
 import { kawaiiTokens } from 'config/bridgeTokens';
-import { KAWAII_CONTRACT, KAWAII_LCD } from 'config/constants';
+
 import Long from 'long';
 import { collectWallet } from './cosmjs';
 
 import { Coin, StargateClient } from '@cosmjs/stargate';
 import { OfflineDirectSigner } from '@keplr-wallet/types';
 import { getEvmAddress } from './utils';
+import { chainInfos } from 'config/chainInfos';
 
 async function getAccountInfo(accAddress: string) {
-  return await fetch(`${KAWAII_LCD}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+  return await fetch(`${kawaiiInfo.rest}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
     data.json()
   );
 }

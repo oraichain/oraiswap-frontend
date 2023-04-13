@@ -10,6 +10,7 @@ process.on('unhandledRejection', (err) => {
 
 // Ensure environment variables are read.
 require('react-scripts/config/env');
+const fs = require('fs');
 const paths = require('react-scripts/config/paths');
 const webpack = require('webpack');
 const path = require('path');
@@ -18,6 +19,13 @@ const { fallback } = require('../config-overrides');
 const ignores = [];
 const isDevelopment = process.env.NODE_ENV === 'development';
 const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
+const chalk = require('react-dev-utils/chalk');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+
+const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
+
+// clear old files
+fs.rmSync(vendorPath, { recursive: true, force: true });
 
 const config = {
   mode: process.env.NODE_ENV,
@@ -30,13 +38,12 @@ const config = {
     fallback
   },
   output: {
-    filename: 'vendor.bundle.js',
+    filename: `vendor.${vendorHash}.js`,
     path: vendorPath,
     library: 'vendor_lib'
   },
   plugins: [
     new webpack.ProgressPlugin(),
-
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, 'manifest.json')
@@ -47,9 +54,6 @@ const config = {
 if (isDevelopment) {
   config.devtool = 'cheap-module-source-map';
 }
-
-const chalk = require('react-dev-utils/chalk');
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
 // We used to support resolving modules according to `NODE_PATH`.
 // This now has been deprecated in favor of jsconfig/tsconfig.json

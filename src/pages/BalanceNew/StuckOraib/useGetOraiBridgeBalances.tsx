@@ -1,6 +1,6 @@
 import { Coin } from '@cosmjs/stargate';
-import { filteredTokens, TokenItemType, tokens } from 'config/bridgeTokens';
-import { ORAI_BRIDGE_CHAIN_ID, ORAI_BRIDGE_UDENOM } from 'config/constants';
+import { cosmosTokens, TokenItemType, tokens } from 'config/bridgeTokens';
+import { ORAI_BRIDGE_UDENOM } from 'config/constants';
 import { toDisplay } from 'libs/utils';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useState } from 'react';
@@ -15,14 +15,14 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
 
   const getBalanceOraibridge = async () => {
     try {
-      const oraiBridgeAddress = await window.Keplr.getKeplrAddr(ORAI_BRIDGE_CHAIN_ID);
+      const oraiBridgeAddress = await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
       if (!oraiBridgeAddress) {
         setRemainingOraib([]);
         return;
       }
 
       const data: readonly Coin[] = uniqBy(
-        filteredTokens.filter((token) => !token.contractAddress && token.chainId === ORAI_BRIDGE_CHAIN_ID),
+        cosmosTokens.filter((token) => !token.contractAddress && token.chainId === 'oraibridge-subnet-2'),
         (c) => c.denom
       )
         .map((token) => ({ denom: token.denom, amount: amounts[token.denom] }))

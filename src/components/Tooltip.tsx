@@ -20,7 +20,7 @@ const TooltipTippyProps: TippyProps = {
   className: styles.tooltip
 };
 
-interface Props extends Omit<TippyProps, 'children'> {
+interface Props extends TippyProps {
   onClick?: () => void;
 }
 

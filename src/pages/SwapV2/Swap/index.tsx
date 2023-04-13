@@ -17,9 +17,7 @@ import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import {
-  fetchTokenInfos, simulateSwap
-} from 'rest/api';
+import { fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
@@ -304,7 +302,7 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          listToken={poolTokens.filter((token) =>
+          items={poolTokens.filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           amounts={amounts}
@@ -319,7 +317,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          listToken={poolTokens.filter((token) =>
+          items={poolTokens.filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {

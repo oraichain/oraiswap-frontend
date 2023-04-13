@@ -90,10 +90,17 @@ module.exports = {
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
-    // add dll
-    const vendorManifest = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor', 'manifest.json');
+    // update vendor hash
+    const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
+    const interpolateHtmlPlugin = config.plugins.find((c) => c.constructor.name === 'InterpolateHtmlPlugin');
+    interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
-    if (!fs.existsSync(vendorManifest)) {
+    // add dll
+    const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
+
+    if (fs.existsSync(path.join(vendorPath, `vendor.${vendorHash}.js`))) {
+      console.log(`Already build vendor.${vendorHash}.js`);
+    } else {
       execSync('yarn vendor', {
         stdio: 'inherit',
         env: process.env,
@@ -124,7 +131,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: vendorManifest
+        manifest: path.join(vendorPath, 'manifest.json')
       })
     );
 
