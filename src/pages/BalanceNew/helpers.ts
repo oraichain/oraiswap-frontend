@@ -357,6 +357,7 @@ export const transferIbcCustom = async (
       ibcInfo,
       ibcMemo
     });
+    return result;
   }
   // if it includes wasm in source => ibc wasm case
   if (ibcInfo.channel === oraichain2oraib) {

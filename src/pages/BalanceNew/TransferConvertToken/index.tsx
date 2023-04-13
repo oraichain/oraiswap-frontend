@@ -120,7 +120,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         return;
       }
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
-      if (evmChains.find((chain) => chain.chainId === token.chainId)) {
+      if (
+        evmChains.find((chain) => chain.chainId === token.chainId) ||
+        (token.chainId === 'Oraichain' && filterNetwork === 'kawaii_6886-1')
+      ) {
         await onClickTransfer(convertAmount);
         return;
       }
