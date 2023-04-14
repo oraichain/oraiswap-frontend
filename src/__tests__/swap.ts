@@ -1,5 +1,5 @@
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAICHAIN_ID, ORAI } from 'config/constants';
+import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -15,14 +15,14 @@ describe('swap', () => {
     expect(displayAmount).toBe(123.456789);
   });
 
-  it('max amount with denom orai', async () => {
+  it('max amount with denom orai', () => {
     const amount = 999999n;
     const decimals = 6;
-    const oraiDecimals = { decimals: 6 };
+    const oraiDecimals = { decimals };
 
     const displayAmount = toDisplay(amount, decimals);
     //@ts-ignore: need only orai decimals to test
-    const useFeeEstimate = await feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
+    const useFeeEstimate = feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
 
     let finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
     expect(finalAmount).toBe(0.993503);
@@ -35,14 +35,14 @@ describe('swap', () => {
     expect(displayAmount).toBe(61.728394);
   });
 
-  it('half amount with denom orai', async () => {
+  it('half amount with denom orai', () => {
     const amount = 999999n;
     const decimals = 6;
     const oraiDecimals = { decimals: 6 };
 
     const displayAmount = toDisplay(amount / BigInt(2), decimals);
     //@ts-ignore: need only orai decimals to test
-    const useFeeEstimate = await feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
+    const useFeeEstimate = feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
     const fromTokenBalanceDisplay = toDisplay(amount, oraiDecimals.decimals);
 
     let finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
@@ -50,22 +50,23 @@ describe('swap', () => {
   });
 
   describe('generate msgs contract for swap action', () => {
-    const address = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
+    const senderAddress = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
     const fromAmountToken = 10;
     const fromTokenDecimals = 6;
-    const fromTokenHaveContract = filteredTokens.find((item) => item.name === 'AIRI' && item.chainId === ORAICHAIN_ID);
-    const fromTokenNoContract = filteredTokens.find((item) => item.name === 'ATOM' && item.chainId === ORAICHAIN_ID);
-    const toTokenInfoData = filteredTokens.find((item) => item.name === 'ORAIX' && item.chainId === ORAICHAIN_ID);
+    const fromTokenHaveContract = cosmosTokens.find((item) => item.name === 'AIRI' && item.chainId === 'Oraichain');
+    const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === 'Oraichain');
+    const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === 'Oraichain');
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
     const simulateData = { amount: '1000000' };
+    const expectedMinimumReceive = '990000';
     const amounts = {
       airi: '2000000'
     };
-    const userSlippage = 0.01;
+    const userSlippage = 1;
     const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
 
     it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe('999900');
+      expect(minimumReceive).toBe(expectedMinimumReceive);
     });
 
     it('return msgs generate contract', () => {
@@ -76,7 +77,7 @@ describe('swap', () => {
     function testMsgs(fromTokenInfoData: TokenItemType, toTokenInfoData: TokenItemType) {
       const msgs = generateContractMessages({
         type: Type.SWAP,
-        sender: address,
+        sender: senderAddress,
         amount: _fromAmount,
         fromInfo: fromTokenInfoData,
         toInfo: toTokenInfoData,
@@ -124,11 +125,11 @@ describe('swap', () => {
                 }
               }
             ],
-            minimum_receive: '999900'
+            minimum_receive: expectedMinimumReceive
           }
         });
       }
-      expect(msg.sender).toEqual(address);
+      expect(msg.sender).toEqual(senderAddress);
       expect(msg.sent_funds).toBeDefined();
 
       const multipleMsgs = generateMsgsSwap(
@@ -138,7 +139,7 @@ describe('swap', () => {
         amounts,
         simulateData,
         userSlippage,
-        address
+        senderAddress
       );
       expect(Array.isArray(multipleMsgs)).toBe(true);
     }

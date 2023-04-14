@@ -27,7 +27,6 @@ export function generateMsgsSwap(
     const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
 
     const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, fromTokenInfoData.decimals);
-    console.log({ minimumReceive });
     const msgs = generateContractMessages({
       type: Type.SWAP,
       sender: oraiAddress,

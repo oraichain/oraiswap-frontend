@@ -1,6 +1,6 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { BSC_CHAIN_ID } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { displayInstallWallet } from 'helper';
@@ -11,8 +11,9 @@ import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
 
-const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
+const RequireAuthButton: React.FC<any> = () => {
   const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const [address, setAddress] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const { activate, deactivate } = useWeb3React();
@@ -26,7 +27,7 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
 
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
-        await window.Metamask.switchNetwork(BSC_CHAIN_ID);
+        await window.Metamask.switchNetwork(Networks.bsc);
       }
       await activate(injected, (ex) => {
         console.log('error: ', ex);
@@ -51,7 +52,15 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
     try {
       // if not requestAccounts before
       if (Metamask.checkTron()) {
-        if (!window.tronWeb.defaultAddress?.base58) {
+        // TODO: Check owallet mobile
+        let tronAddress;
+        if (isMobile()) {
+          const addressTronMobile = await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          //@ts-ignore
+          tronAddress = addressTronMobile?.base58;
+        } else if (!window.tronWeb.defaultAddress?.base58) {
           const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
@@ -60,8 +69,8 @@ const RequireAuthButton: React.FC<any> = ({ address, setAddress }) => {
             displayToast(TToastType.TRONLINK_FAILED, { message });
             return;
           }
+          tronAddress = window.tronWeb.defaultAddress.base58;
         }
-        const tronAddress = window.tronWeb.defaultAddress.base58;
         console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);

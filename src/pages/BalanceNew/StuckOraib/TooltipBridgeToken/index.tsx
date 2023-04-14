@@ -20,7 +20,7 @@ const TooltipTippyProps: TippyProps = {
   className: styles.tooltip
 };
 
-interface Props extends Omit<TippyProps, 'children'> {
+interface Props extends TippyProps {
   onClick?: () => void;
 }
 
@@ -32,17 +32,21 @@ const Tooltip: FC<Props> = ({ className, onClick, children, ...props }) => {
   );
 
   return props.content ? (
-    <Tippy popperOptions={{
-      modifiers: [
-        {
-          name: 'arrow',
-          options: {
-            element: null,
-          },
-        },
-      ],
-    }}
-      {...TooltipTippyProps} {...props} hideOnClick={props.visible}>
+    <Tippy
+      popperOptions={{
+        modifiers: [
+          {
+            name: 'arrow',
+            options: {
+              element: null
+            }
+          }
+        ]
+      }}
+      {...TooltipTippyProps}
+      {...props}
+      hideOnClick={props.visible}
+    >
       {button}
     </Tippy>
   ) : (

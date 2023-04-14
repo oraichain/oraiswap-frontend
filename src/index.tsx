@@ -1,25 +1,24 @@
-import React, { StrictMode } from 'react';
-import 'polyfill';
-import { render } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import './index.scss';
-import ScrollToTop from './layouts/ScrollToTop';
-import App from './layouts/App';
-import { network } from 'config/networks';
-import { ToastProvider } from 'components/Toasts/context';
-import 'react-toastify/dist/ReactToastify.css';
-import { Bounce, ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { KWT_SUBNETWORK_CHAIN_ID, ORAI_BRIDGE_CHAIN_ID, TRON_RPC } from 'config/constants';
-import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { collectWallet } from 'libs/cosmjs';
 import { GasPrice } from '@cosmjs/stargate';
-import { Provider } from 'react-redux';
-import { persistor, store } from 'store/configure';
-import { PersistGate } from 'redux-persist/integration/react';
+import * as Sentry from '@sentry/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider } from 'components/Toasts/context';
+import { NetworkChainId } from 'config/chainInfos';
 import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
+import { collectWallet } from 'libs/cosmjs';
+import 'polyfill';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Bounce, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store } from 'store/configure';
+import './index.scss';
+import App from './layouts/App';
+import ScrollToTop from './layouts/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -27,7 +26,6 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
   Sentry.init({
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
-    integrations: [new BrowserTracing()],
     denyUrls: [
       /extensions\//i,
       /extension/i,
@@ -46,23 +44,21 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 
 const startApp = async () => {
   Contract.client = await CosmWasmClient.connect(network.rpc);
-  render(
-    <StrictMode>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <ToastProvider>
-            <Router>
-              <ScrollToTop />
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </Router>
-            <ToastContainer transition={Bounce} />
-          </ToastProvider>
-        </PersistGate>
-      </Provider>
-    </StrictMode>,
-    document.getElementById('oraiswap')
+  const root = createRoot(document.getElementById('oraiswap'));
+  root.render(
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </Router>
+          <ToastContainer transition={Bounce} />
+        </ToastProvider>
+      </PersistGate>
+    </Provider>
   );
   try {
     const keplr = await window.Keplr.getKeplr();
@@ -70,7 +66,7 @@ const startApp = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, ORAI_BRIDGE_CHAIN_ID, KWT_SUBNETWORK_CHAIN_ID]) {
+      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
         try {
           await window.Keplr.suggestChain(networkId);
         } catch (error) {
@@ -83,12 +79,8 @@ const startApp = async () => {
         prefix: network.prefix,
         gasPrice: GasPrice.fromString(`0${network.denom}`)
       });
-    } else {
-      // go to catch
-      throw new Error('Keplr not connected!');
     }
   } catch (ex) {
-    Contract.client = await CosmWasmClient.connect(network.rpc);
     console.log(ex);
   }
 };

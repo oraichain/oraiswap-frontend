@@ -1,7 +1,7 @@
 import { network } from 'config/networks';
-import { embedChainInfos } from 'config/chainInfos';
-import { filteredTokens, TokenItemType } from 'config/bridgeTokens';
-import { Key, Keplr as keplr, FeeCurrency } from '@keplr-wallet/types';
+import { chainInfos, NetworkChainId } from 'config/chainInfos';
+import { TokenItemType, cosmosTokens } from 'config/bridgeTokens';
+import { Key, Keplr as keplr, FeeCurrency, ChainInfo } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
@@ -33,14 +33,14 @@ export default class Keplr {
 
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
-    const chainInfo = embedChainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+    const chainInfo = chainInfos.find((chainInfo) => chainInfo.chainId === chainId);
 
     // do nothing without chainInfo
     if (!chainInfo) return;
 
     // if there is chainInfo try to suggest, otherwise enable it
     if (!isMobile() && chainInfo) {
-      await this.keplr.experimentalSuggestChain(chainInfo);
+      await this.keplr.experimentalSuggestChain(chainInfo as ChainInfo);
     }
     await this.keplr.enable(chainId);
   }
@@ -86,10 +86,10 @@ export default class Keplr {
     }
   }
 
-  async getKeplrAddr(chainId?: string): Promise<string | undefined> {
+  async getKeplrAddr(chainId?: NetworkChainId): Promise<string | undefined> {
     // not support network.chainId (Oraichain)
     chainId = chainId ?? network.chainId;
-    const token = filteredTokens.find((token) => token.chainId === chainId);
+    const token = cosmosTokens.find((token) => token.chainId === chainId);
     if (!token) return;
     try {
       const key = await this.getKeplrKey(chainId);

@@ -62,8 +62,7 @@ interface TabViewProps {
 }
 
 /* Modal */
-interface Modal {
-  className?: string;
+interface Modal extends ReactModal.Props {
   isOpen: boolean;
   open: () => void;
   close: () => void;

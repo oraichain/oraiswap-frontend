@@ -1,12 +1,14 @@
-import React, { FC, useState } from 'react';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ComponentType, FC, useState } from 'react';
 import ReactModal from 'react-modal';
 import styles from './Modal.module.scss';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+
+const ModalSafeForReact18 = ReactModal as ComponentType<ReactModal['props']>;
 
 ReactModal.setAppElement('#oraiswap');
 
 const Modal: FC<Modal> = ({ className, isOpen, close, children, isCloseBtn = false }) => (
-  <ReactModal
+  <ModalSafeForReact18
     className={`${styles.modal} ${className || ''}`}
     overlayClassName={`${styles.overlay} ${className || ''}`}
     preventScroll
@@ -22,7 +24,7 @@ const Modal: FC<Modal> = ({ className, isOpen, close, children, isCloseBtn = fal
       </div>
     )}
     {children}
-  </ReactModal>
+  </ModalSafeForReact18>
 );
 
 export default Modal;

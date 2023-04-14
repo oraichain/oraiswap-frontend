@@ -5,6 +5,8 @@ import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
+import { TronWeb as _TronWeb } from './tronweb';
+import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -130,7 +132,6 @@ declare global {
 
       // config for relayer
       REACT_APP_ATOM_ORAICHAIN_CHANNELS: string;
-      REACT_APP_TERRA_ORAICHAIN_CHANNELS: string;
       REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
       REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
       REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD: string;
@@ -174,6 +175,11 @@ declare global {
       REACT_APP_MULTICALL_CONTRACT: string;
     }
   }
+
+  // re-declare as global
+  declare const Networks = _Networks;
+  declare const TronWeb = _TronWeb;
+  type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
 export {};

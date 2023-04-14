@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
@@ -22,9 +23,21 @@ export function useTronEventListener() {
     }
   }, []);
 
-  function handleTronLink() {
+  async function handleTronLink() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
+      const addressTronMobile = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
+      // TODO: Check owallet mobile
+      if (!tronWeb?.defaultAddress?.base58 || isMobile()) {
+        //@ts-ignore
+        const tronAddress = addressTronMobile?.base58;
+        loadTokenAmounts({ tronAddress });
+        setTronAddress(tronAddress);
+        return;
+      }
+
       console.log('tronLink & tronWeb successfully detected!');
       if (tronWeb?.defaultAddress?.base58) {
         const tronAddress = tronWeb.defaultAddress.base58;
@@ -34,15 +47,15 @@ export function useTronEventListener() {
       }
 
       window.addEventListener('message', function (e) {
-        if (e.data.message && e.data.message.action == 'setAccount') {
-          const tronAddress = e.data.message.data.address;
+        if (e?.data?.message && e.data.message.action == 'setAccount') {
+          const tronAddress = e.data.message?.data?.address;
           console.log('tronAddress', tronAddress);
           loadTokenAmounts({ tronAddress });
           setTronAddress(tronAddress);
         }
 
         // Tronlink chrome v3.22.1 & Tronlink APP v4.3.4 started to support
-        if (e.data.message && e.data.message.action == 'disconnect') {
+        if (e?.data?.message && e.data.message.action == 'disconnect') {
           console.log('disconnect event', e.data.message.isTronLink);
           setTronAddress(undefined);
         }

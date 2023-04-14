@@ -1,14 +1,14 @@
 //@ts-nocheck
-import { BSC_RPC } from 'config/constants';
-import { BSC_CHAIN_ID } from 'config/constants';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { isMobile } from '@walletconnect/browser-utils';
+import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import _BigInt from 'big-integer';
+import { chainInfos } from 'config/chainInfos';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
-// inject TronWeb class
-(window as any).TronWeb = require('tronweb');
+// inject global
+window.TronWeb = require('tronweb');
+window.Networks = require('libs/ethereum-multicall/enums').Networks;
 
 // enable Keplr
 window.Keplr = new Keplr();
@@ -119,12 +119,12 @@ if (typeof BigInt === 'undefined') {
 export const initEthereum = async () => {
   // support only https
   if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
-    const chainId = Number(BSC_CHAIN_ID);
+    const bscChain = chainInfos.find((c) => c.chainId === '0x38');
     const provider = new WalletConnectProvider({
-      chainId,
+      chainId: Networks.bsc,
       storageId: 'metamask',
       qrcode: true,
-      rpc: { [chainId]: BSC_RPC },
+      rpc: { [Networks.bsc]: bscChain.rpc },
       qrcodeModalOptions: {
         mobileLinks: ['metamask']
       }

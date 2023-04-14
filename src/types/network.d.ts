@@ -1,12 +1,8 @@
-interface ExtNetworkConfig {
-  chainId: string;
-  rpc: string;
-  lcd: string;
-  explorer: string;
-  coinType?: number;
-}
+import { CosmosChainId } from 'config/chainInfos';
 
-export interface NetworkConfig extends ExtNetworkConfig {
+export interface NetworkConfig {
+  coinType?: number;
+  explorer: string;
   /** Fixed fee */
   fee: { gasPrice: string; amount: string; gas: string };
   factory: string;

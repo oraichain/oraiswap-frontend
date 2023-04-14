@@ -1,11 +1,11 @@
-import { FC } from 'react';
-import Modal from 'components/Modal';
-import styles from './SelectTokenModal.module.scss';
 import cn from 'classnames/bind';
+import Modal from 'components/Modal';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { getSubAmountDetails, getTotalUsd, toAmount, toDisplay, toSumDisplay, truncDecimals } from 'libs/utils';
-import { NetworkType } from 'helper';
+import { CustomChainInfo } from 'config/chainInfos';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
+import { FC } from 'react';
+import styles from './SelectTokenModal.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -17,7 +17,7 @@ interface ModalProps {
   isCloseBtn?: boolean;
   amounts: AmountDetails;
   prices: CoinGeckoPrices<string>;
-  listToken: TokenItemType[] | NetworkType[];
+  items?: TokenItemType[] | CustomChainInfo[];
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
 }
@@ -27,7 +27,7 @@ const SelectTokenModal: FC<ModalProps> = ({
   isOpen,
   close,
   open,
-  listToken,
+  items,
   setToken,
   prices,
   amounts
@@ -39,7 +39,7 @@ const SelectTokenModal: FC<ModalProps> = ({
           <div>{type === 'token' ? 'Select a token' : 'Select a network'}</div>
         </div>
         <div className={cx('options')}>
-          {listToken.map((item: TokenItemType | NetworkType) => {
+          {items?.map((item: TokenItemType | CustomChainInfo) => {
             let key: string, title: string, balance: string;
 
             if (type === 'token') {
@@ -58,9 +58,9 @@ const SelectTokenModal: FC<ModalProps> = ({
               }
               balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
             } else {
-              const network = item as NetworkType;
+              const network = item as CustomChainInfo;
               key = network.chainId.toString();
-              title = network.title;
+              title = network.chainName;
               const subAmounts = Object.fromEntries(
                 Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
               );
