@@ -1,34 +1,29 @@
-import { AppResponse, CWSimulateApp, IbcOrder, SimulateCosmWasmClient } from '@terran-one/cw-simulate';
-import * as CwIcs20LatestTypes from 'libs/contracts/CwIcs20Latest.types';
-import bech32 from 'bech32';
-import path from 'path';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
-import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
-import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
-import { Asset, TransferBackMsg } from 'libs/contracts/types';
-import { Coin, coin, coins } from '@cosmjs/proto-signing';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
-import { InstantiateMsg as OraiswapInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
+import { Coin, coins } from '@cosmjs/proto-signing';
+import { CWSimulateApp, IbcOrder, SimulateCosmWasmClient } from '@terran-one/cw-simulate';
+import bech32 from 'bech32';
+import { readFileSync } from 'fs';
 import { AssetInfo } from 'libs/contracts';
+import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
+import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
+import { InstantiateMsg as OraiswapFactoryInstantiateMsg } from 'libs/contracts/OraiswapFactory.types';
+import { InstantiateMsg as OraiswapOracleIsntantiateMsg } from 'libs/contracts/OraiswapOracle.types';
 import { OraiswapRouterClient } from 'libs/contracts/OraiswapRouter.client';
 import { InstantiateMsg as OraiswapRouterInstantiateMsg } from 'libs/contracts/OraiswapRouter.types';
-import { InstantiateMsg as OraiswapOracleIsntantiateMsg } from 'libs/contracts/OraiswapOracle.types';
-import { InstantiateMsg as OraiswapFactoryInstantiateMsg } from 'libs/contracts/OraiswapFactory.types';
-import { readFileSync } from 'fs';
-import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
+import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
+import { TransferBackMsg } from 'libs/contracts/types';
+import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
+import path from 'path';
+import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
 
-var cosmosChain: CWSimulateApp = new CWSimulateApp({
-  chainId: 'cosmoshub-4',
-  bech32Prefix: 'cosmos'
-});
+let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
-var oraiClient: SimulateCosmWasmClient;
+let oraiClient: SimulateCosmWasmClient;
 
-const oraiSenderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
 const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
 const bridgeReceiver = 'tron-testnet0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222';
 const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
-const cosmosSenderAddress = bech32.encode(cosmosChain.bech32Prefix, bech32.decode(oraiSenderAddress).words);
+const cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiSenderAddress).words);
 const ibcTransferAmount = '100000000';
 const initialBalanceAmount = '10000000000000';
 
@@ -63,42 +58,23 @@ describe.only('IBCModule', () => {
       chainId: 'cosmoshub-4',
       bech32Prefix: 'cosmos'
     });
+
     oraiClient = new SimulateCosmWasmClient({
       chainId: 'Oraichain',
       bech32Prefix: 'orai'
     });
-    const { contractAddress } = await oraiClient.deploy<CwIcs20LatestTypes.InstantiateMsg>(
-      oraiSenderAddress,
-      path.join(__dirname, 'testdata', 'cw_ics20.wasm'),
-      {
-        allowlist: [],
-        default_timeout: 3600,
-        gov_contract: oraiSenderAddress, // mulitsig contract
-        swap_router_contract: routerContractAddress
-      },
-      'cw-ics20'
-    );
 
-    oraiPort = 'wasm.' + contractAddress;
+    ics20Contract = await deployIcs20Token(oraiClient, { swap_router_contract: routerContractAddress });
+    oraiPort = 'wasm.' + ics20Contract.contractAddress;
     packetData.dest.port_id = oraiPort;
-    ics20Contract = new CwIcs20LatestClient(oraiClient, oraiSenderAddress, contractAddress);
 
     // init cw20 AIRI token
-    const { contractAddress: airiAddress } = await oraiClient.deploy<OraiswapInstantiateMsg>(
-      oraiSenderAddress,
-      path.join(__dirname, 'testdata', 'oraiswap_token.wasm'),
-      {
-        decimals: 6,
-        symbol: 'AIRI',
-        name: 'Airight token',
-        initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }],
-        mint: {
-          minter: oraiSenderAddress
-        }
-      },
-      'cw20-airi'
-    );
-    airiToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, airiAddress);
+    airiToken = await deployToken(oraiClient, {
+      decimals: 6,
+      symbol: 'AIRI',
+      name: 'Airight token',
+      initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }]
+    });
 
     // init ibc channel between two chains
     oraiClient.app.ibc.relay(channel, oraiPort, channel, cosmosPort, cosmosChain);
@@ -138,7 +114,7 @@ describe.only('IBCModule', () => {
         counterparty_version: 'ics20-1'
       }
     });
-    cosmosChain.ibc.addMiddleWare((msg, app) => { });
+    cosmosChain.ibc.addMiddleWare((msg, app) => {});
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
@@ -266,7 +242,7 @@ describe.only('IBCModule', () => {
     await cosmosChain.ibc.sendPacketReceive({
       packet: {
         data: toBinary(icsPackage),
-        ...packetData,
+        ...packetData
       },
       relayer: cosmosSenderAddress
     });
@@ -316,7 +292,7 @@ describe.only('IBCModule', () => {
     await cosmosChain.ibc.sendPacketReceive({
       packet: {
         data: toBinary(icsPackage),
-        ...packetData,
+        ...packetData
       },
       relayer: cosmosSenderAddress
     });
