@@ -116,6 +116,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
       // if on the same kwt network => we convert between native & erc20 tokens
       if (token.chainId === 'kawaii_6886-1') {
+        // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
+        if (filterNetwork === 'Oraichain') {
+          return await onClickTransfer(convertAmount);
+        }
         await convertKwt(convertAmount, token);
         return;
       }

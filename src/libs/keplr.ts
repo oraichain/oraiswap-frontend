@@ -34,6 +34,7 @@ export default class Keplr {
   async suggestChain(chainId: string) {
     if (!window.keplr) return;
     const chainInfo = chainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+
     // do nothing without chainInfo
     if (!chainInfo) return;
 
