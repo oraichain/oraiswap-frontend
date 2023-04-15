@@ -219,5 +219,5 @@ export async function getPairs(factory: string) {
 }
 
 describe('test', () => {
-  it('', () => {});
+  it('', () => { });
 });
