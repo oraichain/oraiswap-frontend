@@ -14,7 +14,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { PairInfo } from 'libs/contracts';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { buildMultipleMessages, getSubAmountDetails, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
+import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -28,6 +28,7 @@ import {
 import { RootState } from 'store/configure';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityModal.module.scss';
+import { handleCheckAddress, handleErrorTransaction } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -134,10 +135,6 @@ const LiquidityModal: FC<ModalProps> = ({
       setAmountToken1((amountToken2 * token1Amount) / token2Amount);
   }, [pairAmountInfoData]);
 
-  const getValueUsd = (token: TokenItemType, amount: string | bigint) => {
-    return toDisplay(amount, token!.decimals) * prices[token!.coinGeckoId];
-  };
-
   const onChangeAmount1 = (value: bigint) => {
     setRecentInput(1);
     setAmountToken1(value);
@@ -153,6 +150,7 @@ const LiquidityModal: FC<ModalProps> = ({
     if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
 
     const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
+
     setEstimatedLP(estimatedLP);
   };
 
@@ -172,11 +170,6 @@ const LiquidityModal: FC<ModalProps> = ({
     });
 
     const msg = msgs[0];
-
-    // console.log(
-    //   'msgs: ',
-    //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-    // );
 
     const result = await CosmJs.execute({
       address: msg.contract,
@@ -201,13 +194,7 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      if (!oraiAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
+      const oraiAddress = await handleCheckAddress()
 
       if (token1AllowanceToPair < amount1) {
         await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, oraiAddress);
@@ -252,13 +239,7 @@ const LiquidityModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in providing liquidity: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      handleErrorTransaction(error)
     } finally {
       setActionLoading(false);
     }
@@ -269,15 +250,9 @@ const LiquidityModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      if (!oraiAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
+      const oraiAddress = await handleCheckAddress();
 
-      const msgs = await generateContractMessages({
+      const msgs = generateContractMessages({
         type: Type.WITHDRAW,
         sender: oraiAddress,
         lpAddr: lpTokenInfoData!.contractAddress!,
@@ -286,11 +261,6 @@ const LiquidityModal: FC<ModalProps> = ({
       });
 
       const msg = msgs[0];
-
-      // console.log(
-      //   'msgs: ',
-      //   msgs.map((msg) => ({ ...msg, msg: Buffer.from(msg.msg).toString() }))
-      // );
 
       const result = await CosmJs.execute({
         address: msg.contract,
@@ -304,21 +274,14 @@ const LiquidityModal: FC<ModalProps> = ({
       console.log('result provide tx hash: ', result);
 
       if (result) {
-        console.log('in correct result');
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         onLiquidityChange();
       }
     } catch (error) {
-      console.log('error in swap form: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      console.log('error in Withdraw Liquidity: ', error);
+      handleErrorTransaction(error)
     } finally {
       setActionLoading(false);
     }
@@ -357,7 +320,7 @@ const LiquidityModal: FC<ModalProps> = ({
             HALF
           </div>
           <TokenBalance
-            balance={getValueUsd(token1, token1Balance)}
+            balance={getUsd(token1Balance, token1, prices)}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -386,7 +349,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -409,7 +372,7 @@ const LiquidityModal: FC<ModalProps> = ({
             HALF
           </div>
           <TokenBalance
-            balance={getValueUsd(token2, token2Balance)}
+            balance={getUsd(token2Balance, token2, prices)}
             style={{ flexGrow: 1, textAlign: 'right' }}
             decimalScale={2}
           />
@@ -605,8 +568,9 @@ const LiquidityModal: FC<ModalProps> = ({
                   decimalScale={6}
                   prefix={''}
                 />
-
-                <TokenBalance balance={getValueUsd(token1, lp1BurnAmount)} className={cx('des')} decimalScale={2} />
+                <TokenBalance
+                  balance={getUsd(lp1BurnAmount, token1, prices)}
+                  className={cx('des')} decimalScale={2} />
               </div>
             </div>{' '}
             <div className={cx('seperator')} />
@@ -626,7 +590,7 @@ const LiquidityModal: FC<ModalProps> = ({
                   prefix={''}
                 />
 
-                <TokenBalance balance={getValueUsd(token2, lp2BurnAmount)} className={cx('des')} decimalScale={2} />
+                <TokenBalance balance={getUsd(lp2BurnAmount, token2, prices)} className={cx('des')} decimalScale={2} />
               </div>
             </div>
           </>

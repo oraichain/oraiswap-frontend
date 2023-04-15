@@ -76,7 +76,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
     queries
   });
 
-  // aggregate no try
+  // aggregate no trybbb
   return res.return_data.map((data) => fromBinary(data.data));
 }
 
@@ -108,13 +108,14 @@ async function getPairAmountInfo(
   toToken: TokenItemType,
   cachedPairs?: PairDetails
 ): Promise<PairAmountInfo> {
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
-
+  const pair = getPair(fromToken.denom, toToken.denom);
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken, pair, cachedPairs);
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const pair = getPair(ORAI, STABLE_DENOM);
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], pair, cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -132,15 +133,13 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
+  pair: Pair,
   cachedPairs?: PairDetails
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-
-  const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
-
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
@@ -156,7 +155,6 @@ async function fetchPoolInfoAmount(
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
-
   return { offerPoolAmount, askPoolAmount };
 }
 
