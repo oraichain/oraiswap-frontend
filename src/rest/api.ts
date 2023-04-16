@@ -299,27 +299,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -672,34 +672,6 @@ export type Claim = {
   proofs: string[];
 };
 
-function generateClaimMsg(msg: Claim) {
-  const { type, sender, stage, amount, proofs } = msg;
-  let sent_funds;
-  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
-  let contractAddr = process.env.REACT_APP_ORAIX_CLAIM_CONTRACT;
-  let input;
-  switch (type) {
-    case Type.CLAIM_ORAIX:
-      input = {
-        claim: {
-          stage,
-          amount: amount.toString(),
-          proof: proofs
-        }
-      };
-      break;
-    default:
-      break;
-  }
-
-  return {
-    contract: contractAddr,
-    msg: Buffer.from(JSON.stringify(input)),
-    sender,
-    sent_funds
-  };
-}
-
 // Generate multiple IBC messages in a single transaction to transfer from Oraibridge to Oraichain.
 function generateMoveOraib2OraiMessages(
   remainingOraib: RemainingOraibTokenItem[],
@@ -737,7 +709,6 @@ export {
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,
-  generateClaimMsg,
   simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,

@@ -153,7 +153,6 @@ declare global {
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
       REACT_APP_FACTORY_V2_CONTRACT: string;
-      REACT_APP_ROUTER_CONTRACT: string;
       REACT_APP_ROUTER_V2_CONTRACT: string;
       REACT_APP_ORACLE_CONTRACT: string;
       REACT_APP_GRAVITY_BSC_CONTRACT: string;
@@ -162,8 +161,6 @@ declare global {
       REACT_APP_STAKING_CONTRACT: string;
       REACT_APP_REWARDER_CONTRACT: string;
       REACT_APP_CONVERTER_CONTRACT: string;
-      REACT_APP_ORAIX_CLAIM_URL: string;
-      REACT_APP_ORAIX_CLAIM_CONTRACT: string;
       REACT_APP_SENTRY_ENVIRONMENT: string;
       REACT_APP_KWT_CONTRACT: string;
       REACT_APP_MILKY_CONTRACT: string;
@@ -182,4 +179,4 @@ declare global {
   type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
-export {};
+export { };
