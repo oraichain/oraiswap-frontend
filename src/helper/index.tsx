@@ -7,7 +7,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 
-interface Tokens {
+export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
@@ -56,7 +56,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -104,3 +104,13 @@ export const handleCheckAddress = async (): Promise<string> => {
   }
   return oraiAddress;
 };
+
+export const handleErrorTransaction = (error) => {
+  let finalError = '';
+  if (typeof error === 'string' || error instanceof String) {
+    finalError = error as string;
+  } else finalError = String(error);
+  displayToast(TToastType.TX_FAILED, {
+    message: finalError
+  });
+}

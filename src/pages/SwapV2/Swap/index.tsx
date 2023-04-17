@@ -9,7 +9,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { poolTokens } from 'config/pools';
-import { feeEstimate, handleCheckAddress } from 'helper';
+import { feeEstimate, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
@@ -145,13 +145,7 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      handleErrorTransaction(error)
     } finally {
       setSwapLoading(false);
     }

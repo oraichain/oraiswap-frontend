@@ -13,6 +13,7 @@ import { network } from 'config/networks';
 import Loader from 'components/Loader';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
+import { handleCheckAddress, handleErrorTransaction } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -49,13 +50,7 @@ const UnbondModal: FC<ModalProps> = ({
         message: 'Amount is invalid!'
       });
 
-    const oraiAddress = await window.Keplr.getKeplrAddr();
-    if (!oraiAddress) {
-      displayToast(TToastType.TX_FAILED, {
-        message: 'Please login both metamask and keplr!'
-      });
-      return;
-    }
+    const oraiAddress = await handleCheckAddress()
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -87,13 +82,7 @@ const UnbondModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in unbond form: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      handleErrorTransaction(error)
     } finally {
       setActionLoading(false);
     }
