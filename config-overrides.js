@@ -83,14 +83,14 @@ module.exports = {
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
     // update vendor hash
+    const vendorPath = path.resolve('node_modules', 'vendor');
     const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
     const interpolateHtmlPlugin = config.plugins.find((c) => c.constructor.name === 'InterpolateHtmlPlugin');
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
     // add dll
-    const vendorPath = path.resolve(isDevelopment ? paths.appPublic : 'node_modules', 'vendor');
-
-    if (fs.existsSync(path.join(vendorPath, `vendor.${vendorHash}.js`))) {
+    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
+    if (fs.existsSync(vendorFileSrc)) {
       console.log(`Already build vendor.${vendorHash}.js`);
     } else {
       execFileSync('node', ['scripts/vendor.js', vendorPath, vendorHash], {
@@ -98,6 +98,12 @@ module.exports = {
         env: process.env,
         cwd: process.cwd()
       });
+    }
+
+    // try copy from cache to public for later copy
+    const vendorFileDest = path.join(paths.appPublic, `vendor.${vendorHash}.js`);
+    if (!fs.existsSync(vendorFileDest)) {
+      fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
 
     if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
