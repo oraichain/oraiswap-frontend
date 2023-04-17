@@ -23,6 +23,7 @@ import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
+import { Pairs } from 'config/poolV2';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -64,7 +65,7 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
 async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<RewardsPerSecResponse[]> {
   const queries = tokens.map((token) => {
     return {
-      address: process.env.REACT_APP_STAKING_CONTRACT,
+      address: network.staking,
       data: toBinary({
         rewards_per_sec: {
           asset_info: toAssetInfo(token)
@@ -83,7 +84,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
   const queries = tokens.map((token) => {
     return {
-      address: process.env.REACT_APP_STAKING_CONTRACT,
+      address: network.staking,
       data: toBinary({
         pool_info: {
           asset_info: toAssetInfo(token)
@@ -108,14 +109,12 @@ async function getPairAmountInfo(
   toToken: TokenItemType,
   cachedPairs?: PairDetails
 ): Promise<PairAmountInfo> {
-  const pair = getPair(fromToken.denom, toToken.denom);
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, pair, cachedPairs);
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const pair = getPair(ORAI, STABLE_DENOM);
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], pair, cachedPairs);
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -133,21 +132,22 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
-  pair: Pair,
   cachedPairs?: PairDetails
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
+
+  const pair = Pairs.getPair(fromTokenInfo.denom, toTokenInfo.denom);
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
-    const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
+    const fromPairInfo = Pairs.getPair(fromTokenInfo.denom, ORAI);
+    const toPairInfo = Pairs.getPair(ORAI, toTokenInfo.denom);
     const fromPoolInfo =
       cachedPairs?.[fromPairInfo.contract_addr] || (await Contract.pair(fromPairInfo.contract_addr).pool());
     const toPoolInfo =

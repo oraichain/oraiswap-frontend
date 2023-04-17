@@ -234,9 +234,8 @@ describe('bridge', () => {
   describe('helper function', () => {
     it.each([
       [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']],
-      [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['0x38']],
-      [flattenTokens.find((i) => i.name === 'BEP20 AIRI' && i.chainId === 'Oraichain'), ['Oraichain']],
-      [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']]
+      [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['kawaii_6886-1', '0x38']],
+      [flattenTokens.find((i) => i.name === 'BEP20 AIRI' && i.chainId === 'Oraichain'), ['Oraichain']]
     ])('should filter chain bridge run exactly', async (token: Tokens, expectedBridgeNetwork: NetworkChainId[]) => {
       const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
       expect(bridgeNetworks.map((network) => network.chainId)).toEqual(expectedBridgeNetwork);
