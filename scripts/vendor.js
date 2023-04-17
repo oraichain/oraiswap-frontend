@@ -11,18 +11,16 @@ process.on('unhandledRejection', (err) => {
 // Ensure environment variables are read.
 require('react-scripts/config/env');
 const fs = require('fs');
-const paths = require('react-scripts/config/paths');
 const webpack = require('webpack');
 const path = require('path');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
 const isDevelopment = process.env.NODE_ENV === 'development';
-const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
 const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
-const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
+const [vendorPath, vendorHash] = process.argv.slice(2, 4);
 
 // clear old files
 fs.rmSync(vendorPath, { recursive: true, force: true });
@@ -110,5 +108,3 @@ compiler.run((err, stats) => {
     );
   }
 });
-
-module.exports = { config };
