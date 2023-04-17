@@ -89,8 +89,9 @@ module.exports = {
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
     // add dll
-    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
-    if (fs.existsSync(vendorFileSrc)) {
+
+    const manifest = path.join(vendorPath, `manifest.${vendorHash}.json`);
+    if (fs.existsSync(manifest)) {
       console.log(`Already build vendor.${vendorHash}.js`);
     } else {
       execFileSync('node', ['scripts/vendor.js', vendorPath, vendorHash], {
@@ -101,6 +102,7 @@ module.exports = {
     }
 
     // try copy from cache to public for later copy
+    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
     const vendorFileDest = path.join(paths.appPublic, `vendor.${vendorHash}.js`);
     if (!fs.existsSync(vendorFileDest)) {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
@@ -129,7 +131,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: path.join(vendorPath, 'manifest.json')
+        manifest
       })
     );
 

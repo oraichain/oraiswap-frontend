@@ -10,7 +10,7 @@ process.on('unhandledRejection', (err) => {
 
 // Ensure environment variables are read.
 require('react-scripts/config/env');
-const fs = require('fs');
+
 const webpack = require('webpack');
 const path = require('path');
 const package = require('../package.json');
@@ -20,9 +20,6 @@ const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
 const [vendorPath, vendorHash] = process.argv.slice(2, 4);
-
-// clear old files
-fs.rmSync(vendorPath, { recursive: true, force: true });
 
 const config = {
   mode: 'production',
@@ -43,7 +40,7 @@ const config = {
     new webpack.ProgressPlugin(),
     new webpack.DllPlugin({
       name: 'vendor_lib',
-      path: path.join(vendorPath, 'manifest.json')
+      path: path.join(vendorPath, `manifest.${vendorHash}.json`)
     })
   ]
 };
