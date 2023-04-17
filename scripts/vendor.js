@@ -13,6 +13,7 @@ require('react-scripts/config/env');
 
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
@@ -20,6 +21,11 @@ const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
 const [vendorPath, vendorHash] = process.argv.slice(2, 4);
+
+// make sure vendorPath exist
+if (!fs.existsSync(vendorPath)) {
+  fs.mkdirSync(vendorPath, { recursive: true });
+}
 
 const config = {
   mode: 'production',
