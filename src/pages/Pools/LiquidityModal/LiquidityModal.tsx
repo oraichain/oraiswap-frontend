@@ -18,6 +18,7 @@ import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDecimal
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
+import { isMobile } from '@walletconnect/browser-utils';
 import {
   fetchTokenAllowance,
   generateContractMessages,
@@ -619,7 +620,12 @@ const LiquidityModal: FC<ModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
-      <div className={cx('container')}>
+      <div
+        className={cx('container')}
+        style={{
+          marginBottom: isMobile() ? 200 : 0
+        }}
+      >
         <div className={cx('title')}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
         <div className={cx('switch')}>
           <div className={cx({ 'active-tab': activeTab === 0 })} onClick={() => setActiveTab(0)}>
