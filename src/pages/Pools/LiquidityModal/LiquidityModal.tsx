@@ -659,7 +659,7 @@ const LiquidityModal: FC<ModalProps> = ({
       <div
         className={cx('container')}
         style={{
-          marginBottom: isMobile() ? 200 : 0
+          paddingBottom: isMobile() ? 200 : 0
         }}
       >
         <div className={cx('title')}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
