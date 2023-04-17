@@ -82,6 +82,7 @@ export type BridgeAppCurrency = FeeCurrency & {
   readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
   readonly contractAddress?: string;
+  readonly prefixToken?: string;
 };
 
 export type CoinType = 118 | 60 | 195;
@@ -249,7 +250,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'kwt',
       type: 'cw20',
       contractAddress: process.env.REACT_APP_KWT_CONTRACT,
-      bridgeTo: ['0x1ae6', '0x38'],
+      bridgeTo: ['kawaii_6886-1', '0x38'],
       coinDecimals: 6,
       Icon: KwtIcon
     },
@@ -266,7 +267,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'milky',
       type: 'cw20',
       contractAddress: process.env.REACT_APP_MILKY_CONTRACT,
-      bridgeTo: ['0x1ae6', '0x38'],
+      bridgeTo: ['kawaii_6886-1', '0x38'],
       coinDecimals: 6,
       Icon: MilkyIcon
     },
@@ -335,6 +336,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: OraiIcon
       },
       {
@@ -343,6 +345,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 6,
         coinGeckoId: 'usd-coin',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: UsdcIcon
       },
       {
@@ -365,6 +368,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDenom: 'USDT',
         coinMinimalDenom: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX + USDT_TRON_CONTRACT,
         bridgeNetworkIdentifier: '0x2b6653dc',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         coinDecimals: 6,
         coinGeckoId: 'tether',
         Icon: UsdtIcon
@@ -375,6 +379,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x2b6653dc',
         coinDecimals: 6,
         coinGeckoId: 'tron',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         Icon: TronIcon
       },
       {
@@ -623,7 +628,26 @@ export const chainInfos: CustomChainInfo[] = [
     bip44: {
       coinType: 60
     },
-    currencies: []
+    currencies: [
+      {
+        coinDenom: 'ERC20 MILKY',
+        coinMinimalDenom: 'erc20_milky',
+        bridgeTo: ['Oraichain', 'kawaii_6886-1'],
+        contractAddress: MILKY_ERC_CONTRACT,
+        coinDecimals: 18,
+        coinGeckoId: 'milky-token',
+        Icon: MilkyIcon
+      },
+      {
+        coinDenom: 'ERC20 KWT',
+        bridgeTo: ['Oraichain', 'kawaii_6886-1'],
+        coinMinimalDenom: 'erc20_kwt',
+        contractAddress: '0x80b5a32E4F032B2a058b4F29EC95EEfEEB87aDcd',
+        coinDecimals: 18,
+        coinGeckoId: 'kawaii-islands',
+        Icon: KwtIcon
+      }
+    ]
   }
 ];
 

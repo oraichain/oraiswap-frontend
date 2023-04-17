@@ -13,7 +13,6 @@ import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveListener } from 'hooks/useMetamask';
 import Content from 'layouts/Content';
 import { getTotalUsd, getUsd, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
@@ -60,8 +59,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-
-  useInactiveListener();
 
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);

@@ -83,7 +83,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     try {
       if (network.networkType == 'evm') {
         if (network.chainId === '0x2b6653dc') {
-          address = window.tronWeb.defaultAddress.base58;
           // TODO: Check owallet mobile
           if (isMobile()) {
             const addressTronMobile = await window.tronLink.request({
@@ -91,6 +90,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             });
             //@ts-ignore
             address = addressTronMobile?.base58;
+          } else {
+            address = window?.tronWeb?.defaultAddress?.base58;
           }
         } else {
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
@@ -98,7 +99,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       } else {
         address = await window.Keplr.getKeplrAddr(network.chainId);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log({
+        error
+      });
+    }
     setAddressTransfer(address);
   };
 
@@ -111,11 +116,18 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
       // if on the same kwt network => we convert between native & erc20 tokens
       if (token.chainId === 'kawaii_6886-1') {
+        // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
+        if (filterNetwork === 'Oraichain') {
+          return await onClickTransfer(convertAmount);
+        }
         await convertKwt(convertAmount, token);
         return;
       }
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
-      if (evmChains.find((chain) => chain.chainId === token.chainId)) {
+      if (
+        evmChains.find((chain) => chain.chainId === token.chainId) ||
+        (token.chainId === 'Oraichain' && filterNetwork === 'kawaii_6886-1')
+      ) {
         await onClickTransfer(convertAmount);
         return;
       }
@@ -136,12 +148,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
+  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
-    return buttonName + filterNetwork;
+    return buttonName + network?.chainName;
   };
-
-  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>

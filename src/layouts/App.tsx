@@ -1,4 +1,3 @@
-import { Web3ReactProvider } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { Contract } from 'config/contracts';
@@ -17,9 +16,12 @@ import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ethers } from 'ethers';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
+  const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -122,6 +124,24 @@ const App = () => {
         return displayInstallWallet();
       }
 
+      // TODO: owallet get address tron
+      if (!isMobile()) {
+        if (window.tronWeb && window.tronLink) {
+          await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          setTronAddress(window.tronWeb?.defaultAddress?.base58);
+        }
+        // TODO: owallet get address evm
+        if (window.ethereum) {
+          const [address] = await window.ethereum!.request({
+            method: 'eth_requestAccounts',
+            params: []
+          });
+          setMetamaskAddress(ethers.utils.getAddress(address));
+        }
+      }
+
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       Contract.sender = oraiAddress;
@@ -140,10 +160,8 @@ const App = () => {
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
-      <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <Menu />
-        {routes()}
-      </Web3ReactProvider>
+      <Menu />
+      {routes()}
     </ThemeProvider>
   );
 };

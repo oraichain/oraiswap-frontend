@@ -26,15 +26,16 @@ export function useTronEventListener() {
   async function handleTronLink() {
     const { tronLink, tronWeb } = window;
     if (tronLink && tronWeb) {
+      const addressTronMobile = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
       // TODO: Check owallet mobile
       if (!tronWeb?.defaultAddress?.base58 || isMobile()) {
-        const addressTronMobile = await window.tronLink.request({
-          method: 'tron_requestAccounts'
-        });
         //@ts-ignore
         const tronAddress = addressTronMobile?.base58;
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
+        return;
       }
 
       console.log('tronLink & tronWeb successfully detected!');
