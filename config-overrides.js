@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
@@ -74,14 +74,6 @@ const rewiredEsbuild = (config, env) => {
 
 module.exports = {
   fallback,
-  devServer: function (configFunction) {
-    return function (proxy, allowedHost) {
-      // Create the default config by calling configFunction with the proxy/allowedHost parameters
-      const config = configFunction(proxy, allowedHost);
-      config.static = [path.resolve('vendor'), paths.appPublic];
-      return config;
-    };
-  },
   webpack: function (config, env) {
     config.resolve.fallback = fallback;
 
@@ -96,12 +88,12 @@ module.exports = {
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
     // add dll
-    const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
+    const vendorPath = path.resolve(isDevelopment ? paths.appPublic : 'node_modules', 'vendor');
 
     if (fs.existsSync(path.join(vendorPath, `vendor.${vendorHash}.js`))) {
       console.log(`Already build vendor.${vendorHash}.js`);
     } else {
-      execSync('yarn vendor', {
+      execFileSync('node', ['scripts/vendor.js', vendorPath, vendorHash], {
         stdio: 'inherit',
         env: process.env,
         cwd: process.cwd()

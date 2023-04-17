@@ -46,21 +46,23 @@ const RequireAuthButton: React.FC<any> = () => {
       // if not requestAccounts before
       if (Metamask.checkTron()) {
         // TODO: Check owallet mobile
-        let tronAddress;
+        let tronAddress: string;
         if (isMobile()) {
           const addressTronMobile = await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
           //@ts-ignore
           tronAddress = addressTronMobile?.base58;
-        } else if (!window.tronWeb.defaultAddress?.base58) {
-          const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-            method: 'tron_requestAccounts'
-          });
-          // throw error when not connected
-          if (code !== 200) {
-            displayToast(TToastType.TRONLINK_FAILED, { message });
-            return;
+        } else {
+          if (!window.tronWeb.defaultAddress?.base58) {
+            const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+              method: 'tron_requestAccounts'
+            });
+            // throw error when not connected
+            if (code !== 200) {
+              displayToast(TToastType.TRONLINK_FAILED, { message });
+              return;
+            }
           }
           tronAddress = window.tronWeb.defaultAddress.base58;
         }
