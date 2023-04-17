@@ -83,14 +83,15 @@ module.exports = {
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
     // update vendor hash
-    const vendorPath = path.resolve('node_modules', 'vendor');
+    const vendorPath = path.resolve('node_modules', '.cache', 'vendor');
     const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
     const interpolateHtmlPlugin = config.plugins.find((c) => c.constructor.name === 'InterpolateHtmlPlugin');
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
     // add dll
-    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
-    if (fs.existsSync(vendorFileSrc)) {
+
+    const manifest = path.join(vendorPath, `manifest.${vendorHash}.json`);
+    if (fs.existsSync(manifest)) {
       console.log(`Already build vendor.${vendorHash}.js`);
     } else {
       execFileSync('node', ['scripts/vendor.js', vendorPath, vendorHash], {
@@ -101,6 +102,7 @@ module.exports = {
     }
 
     // try copy from cache to public for later copy
+    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
     const vendorFileDest = path.join(paths.appPublic, `vendor.${vendorHash}.js`);
     if (!fs.existsSync(vendorFileDest)) {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
@@ -129,7 +131,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: path.join(vendorPath, 'manifest.json')
+        manifest
       })
     );
 

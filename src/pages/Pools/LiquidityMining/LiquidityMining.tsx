@@ -17,6 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityMining.module.scss';
+import { handleErrorTransaction } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -135,13 +136,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       }
     } catch (error) {
       console.log('error in bond form: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      handleErrorTransaction(error)
     }
     setActionLoading(false);
   };

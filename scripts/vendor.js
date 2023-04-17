@@ -10,9 +10,10 @@ process.on('unhandledRejection', (err) => {
 
 // Ensure environment variables are read.
 require('react-scripts/config/env');
-const fs = require('fs');
+
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
@@ -21,8 +22,10 @@ const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
 const [vendorPath, vendorHash] = process.argv.slice(2, 4);
 
-// clear old files
-fs.rmSync(vendorPath, { recursive: true, force: true });
+// make sure vendorPath exist
+if (!fs.existsSync(vendorPath)) {
+  fs.mkdirSync(vendorPath, { recursive: true });
+}
 
 const config = {
   mode: 'production',
@@ -43,7 +46,7 @@ const config = {
     new webpack.ProgressPlugin(),
     new webpack.DllPlugin({
       name: 'vendor_lib',
-      path: path.join(vendorPath, 'manifest.json')
+      path: path.join(vendorPath, `manifest.${vendorHash}.json`)
     })
   ]
 };

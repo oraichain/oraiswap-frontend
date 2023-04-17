@@ -6,6 +6,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
+import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -56,13 +57,7 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      if (!oraiAddress) {
-        displayToast(TToastType.TX_FAILED, {
-          message: 'Please login both metamask and keplr!'
-        });
-        return;
-      }
+      const oraiAddress = await handleCheckAddress()
 
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
@@ -91,13 +86,7 @@ const BondingModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in bond form: ', error);
-      let finalError = '';
-      if (typeof error === 'string' || error instanceof String) {
-        finalError = error as string;
-      } else finalError = String(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: finalError
-      });
+      handleErrorTransaction(error)
     } finally {
       setActionLoading(false);
     }

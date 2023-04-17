@@ -14,7 +14,7 @@ import {
   TRON_SCAN
 } from 'config/constants';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { getTransactionUrl } from 'helper';
+import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
@@ -229,5 +229,17 @@ describe('bridge', () => {
       .multiply(1000000000)
       .toString();
     expect(transferMsgs[0].timeoutTimestamp).toEqual(expectedTimeoutTimestamp);
+  });
+
+  describe('helper function', () => {
+    it.each([
+      [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']],
+      [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['0x38']],
+      [flattenTokens.find((i) => i.name === 'BEP20 AIRI' && i.chainId === 'Oraichain'), ['Oraichain']],
+      [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']]
+    ])('should filter chain bridge run exactly', async (token: Tokens, expectedBridgeNetwork: NetworkChainId[]) => {
+      const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
+      expect(bridgeNetworks.map((network) => network.chainId)).toEqual(expectedBridgeNetwork);
+    });
   });
 });

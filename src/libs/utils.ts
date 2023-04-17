@@ -27,11 +27,26 @@ export const toAmount = (amount: number, decimals = 6): bigint => {
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
 };
 
+/**
+ * Converts a fraction to its equivalent decimal value as a number.
+ *
+ * @param {bigint} numerator - The numerator of the fraction
+ * @param {bigint} denominator - The denominator of the fraction
+ * @return {number} - The decimal value equivalent to the input fraction, returned as a number.
+ */
 export const toDecimal = (numerator: bigint, denominator: bigint): number => {
   if (denominator === BigInt(0)) return 0;
-  return toDisplay((numerator * BigInt(atomic)) / denominator, truncDecimals);
+  return toDisplay((numerator * BigInt(10 ** 6)) / denominator, 6);
 };
 
+/**
+ * Convert the amount to be displayed on the user interface.
+ *
+ * @param {string|bigint} amount - The amount to be converted.
+ * @param {number} sourceDecimals - The number of decimal places in the original `amount`.
+ * @param {number} desDecimals - The number of decimal places in the `amount` after conversion.
+ * @return {number} The value of `amount` after conversion.
+ */
 export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecimals = 6): number => {
   if (!amount) return 0;
   // guarding conditions to prevent crashing
@@ -93,6 +108,13 @@ export const toSumDisplay = (amounts: AmountDetails): number => {
   return amount;
 };
 
+/**
+ * Returns a shortened string by replacing characters in between with '...'.
+ * @param str The input string.
+ * @param from The position of the character to be kept as-is in the resulting string.
+ * @param end The number of characters to be kept as-is at the end of the resulting string.
+ * @returns The shortened string, or '-' if the input string is null or undefined.
+ */
 export const reduceString = (str: string, from: number, end: number) => {
   return str ? str.substring(0, from) + '...' + str.substring(str.length - end) : '-';
 };

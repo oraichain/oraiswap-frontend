@@ -32,7 +32,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -106,7 +106,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
-    // enabled: !!token1! && !!token2!,
     refetchOnWindowFocus: false
   });
 
