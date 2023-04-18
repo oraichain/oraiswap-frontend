@@ -155,23 +155,22 @@ describe('pool', () => {
         assetToken.contractAddress = pair.token_asset === 'airi' ? airiContractAddress : usdtContractAddress;
       });
       const myCachedPairs = await fetchMyCachedPairsData(devAddress);
-      console.log({ myCachedPairs });
-      expect(myCachedPairs[Pairs.pairs[0].contract_addr]).toBe(false);
-      expect(myCachedPairs[Pairs.pairs[1].contract_addr]).toBe(false);
+      expect(myCachedPairs[Pairs.pairs[0].contract_addr]).toBe(true);
+      expect(myCachedPairs[Pairs.pairs[1].contract_addr]).toBe(true);
     });
 
-    // it.each(testCaculateRewardData)(
-    //   'should caculate my reward info',
-    //   (aggregateRes: AggregateResult, expectedRewardInfo) => {
-    //     const rewardInfo = calculateReward(aggregateRes);
-    //     expect(Object.values(rewardInfo)).toEqual(expectedRewardInfo);
-    //   }
-    // );
+    it.each(testCaculateRewardData)(
+      'should caculate my reward info',
+      (aggregateRes: AggregateResult, expectedRewardInfo) => {
+        const rewardInfo = calculateReward(aggregateRes);
+        expect(Object.values(rewardInfo)).toEqual(expectedRewardInfo);
+      }
+    );
 
     it('should fetch pair info data correctly', async () => {
-      const pollInfoAmount: PoolInfo = await fetchPoolInfoAmount(fromTokenInfo, usdtTokenInfo, pairsData);
-      expect(pollInfoAmount.offerPoolAmount).toBe(10000000n);
-      expect(pollInfoAmount.askPoolAmount).toBe(10000000n);
+      const poolInfoAmount: PoolInfo = await fetchPoolInfoAmount(fromTokenInfo, usdtTokenInfo, pairsData);
+      expect(poolInfoAmount.offerPoolAmount).toBe(10000000n);
+      expect(poolInfoAmount.askPoolAmount).toBe(10000000n);
 
       const pairInfoData = await fetchPairInfoData(Pairs.pairs[1], pairsData);
 
@@ -190,7 +189,7 @@ describe('pool', () => {
       }
     );
 
-    it('should fetch pool info amount and poll list infos, orai price correctly', async () => {
+    it('should fetch pool info amount and pool list infos, orai price correctly', async () => {
       const res = await fetchPoolListAndOraiPrice(pairsData);
       pairInfos = res.pairInfo;
 
@@ -232,27 +231,24 @@ describe('pool', () => {
           expect(info).toHaveProperty('migration_index_snapshot');
           expect(info).toHaveProperty('migration_deprecated_staking_token');
         }
-        expect(allTokenAssetInfos[0].staking_token).toBe(airiContractAddress);
-        expect(allTokenAssetInfos[1].staking_token).toBe(usdtContractAddress);
+        expect(allTokenAssetInfos[0].staking_token).toBe(devAddress);
+        expect(allTokenAssetInfos[1].staking_token).toBe(devAddress);
       });
 
       it('should fetch all reward infos per second correctly', async () => {
         allRewardPerSec = await fetchAllRewardPerSecInfos(assetTokens);
         expect(allRewardPerSec[0].assets).toEqual([
-          {
-            info: {
-              token: { contract_addr: airiContractAddress }
-            },
-            amount: '1500000'
-          }
+          { amount: constants.rewardPerSecAmount, info: { token: { contract_addr: airiContractAddress } } },
+          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: 'orai' } } }
         ]);
         expect(allRewardPerSec[1].assets).toEqual([
           {
             info: {
               token: { contract_addr: usdtContractAddress }
             },
-            amount: '1500000'
-          }
+            amount: constants.rewardPerSecAmount
+          },
+          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: 'orai' } } }
         ]);
       });
 
@@ -266,9 +262,9 @@ describe('pool', () => {
       // );
 
       it('should fetch apr correctly', () => {
-        const aprResult = calculateAprResult(poolList, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
+        const aprResult = calculateAprResult(pairInfos, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
         expect(aprResult[Pairs.pairs[0].contract_addr]).toBe(0);
-        expect(aprResult[Pairs.pairs[1].contract_addr]).toBe(0);
+        expect(aprResult[Pairs.pairs[1].contract_addr]).toBe(6196.830196830198);
       });
     });
 

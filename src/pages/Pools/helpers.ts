@@ -54,9 +54,9 @@ export const calculateAprResult = (
     const rewardsPerSec = allRewardPerSec[ind].assets;
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
-      if (isEqual(info, ORAI_INFO))
+      if (isEqual(info, ORAI_INFO)) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
-      else if (isEqual(info, ORAIX_INFO))
+      } else if (isEqual(info, ORAIX_INFO))
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
     });
     return {
@@ -71,7 +71,6 @@ export const calculateAprResult = (
 const fetchAprResult = async (pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const lpTokens = Pairs.pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
   const assetTokens = Pairs.pairs.map((p) => tokenMap[p.token_asset]);
-
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
@@ -171,7 +170,6 @@ export const calculateReward = (res: AggregateResult) => {
       }
       const value = fromBinary(data.data);
       const bondPools = sumBy(Object.values(value.reward_infos));
-      console.log({ reward_infos: value.reward_infos, ind });
       return [pair.contract_addr, !!bondPools];
     })
   );

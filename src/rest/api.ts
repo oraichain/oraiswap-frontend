@@ -57,7 +57,6 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
   const res = await Contract.multicall.aggregate({
     queries
   });
-
   let ind = 0;
   return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
 }
@@ -76,7 +75,6 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
   const res = await Contract.multicall.aggregate({
     queries
   });
-
   // aggregate no trybbb
   return res.return_data.map((data) => fromBinary(data.data));
 }
@@ -96,6 +94,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
   const res = await Contract.multicall.aggregate({
     queries
   });
+
   // aggregate no try
   return res.return_data.map((data) => fromBinary(data.data));
 }
@@ -297,27 +296,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: ORAI_INFO
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: ORAI_INFO,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
