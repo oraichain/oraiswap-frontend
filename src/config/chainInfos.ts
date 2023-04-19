@@ -192,13 +192,13 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 6,
       Icon: AtomIcon
     },
-    {
-      coinDenom: 'BEP20 AIRI',
-      coinGeckoId: 'airight',
-      coinMinimalDenom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
-      coinDecimals: 18,
-      Icon: AiriIcon
-    },
+    // {
+    //   coinDenom: 'BEP20 AIRI',
+    //   coinGeckoId: 'airight',
+    //   coinMinimalDenom: process.env.REACT_APP_AIRIBSC_ORAICHAIN_DENOM,
+    //   coinDecimals: 18,
+    //   Icon: AiriIcon
+    // },
     {
       coinDenom: 'AIRI',
       coinGeckoId: 'airight',

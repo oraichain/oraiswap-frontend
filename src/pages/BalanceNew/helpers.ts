@@ -20,6 +20,7 @@ import {
   generateConvertMsgs,
   generateMoveOraib2OraiMessages,
   parseTokenInfo,
+  parseTokenInfoRawDenom,
   Type
 } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -38,6 +39,30 @@ export const getOneStepReceiverAddr = (keplrAddress: string, contractAddress: st
     oneStepKeplrAddr = keplrAddress;
   }
   return oneStepKeplrAddr;
+};
+
+
+// TODO: unfinished testing & writing code
+/**
+ * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address 
+ * @param from - from token
+ * @param to - to token
+ * @returns destination in the format <dest-channel>/<dest-receiver>:<dest-denom>
+ */
+export const getDestination = (fromToken: TokenItemType, toToken: TokenItemType, receiver: string): string => {
+  // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
+  if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
+    return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
+  }
+  // if to token chain id is Oraichain, then we dont need to care about ibc msg case
+  if (toToken.chainId === 'Oraichain') {
+    // first case, two tokens are the same, only different in network => simple swap
+    if (fromToken.coinGeckoId === toToken.coinGeckoId)
+      return receiver;
+    // if they are not the same then we set dest denom 
+    return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
+  }
+  return '';
 };
 
 export const transferIBC = async (data: {

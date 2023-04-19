@@ -1,7 +1,8 @@
-import { flattenTokens } from 'config/bridgeTokens';
+import { TokenItemType, flattenTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
+import { parseTokenInfoRawDenom } from 'rest/api';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -82,4 +83,11 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(reduceString(null, 5, 6)).toEqual('-');
     });
   });
+
+  it.each<[TokenItemType, string]>([
+    [flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain').contractAddress],
+    [flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain').denom],
+  ])("test-parse-token-info-raw-denom-given-%j-should-receive-%s", (token, expectedDenom) => {
+    expect(parseTokenInfoRawDenom(token)).toEqual(expectedDenom);
+  })
 });

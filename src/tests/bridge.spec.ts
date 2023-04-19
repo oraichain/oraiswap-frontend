@@ -241,7 +241,7 @@ describe('bridge', () => {
     it.each<[Tokens, NetworkChainId[]]>([
       [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']],
       [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['kawaii_6886-1', '0x38']],
-      [flattenTokens.find((i) => i.name === 'BEP20 AIRI' && i.chainId === 'Oraichain'), ['Oraichain']],
+      [flattenTokens.find((i) => i.name === 'ATOM' && i.chainId === 'Oraichain'), ['cosmoshub-4']],
       [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']]
     ])('should filter chain bridge run exactly', async (token, expectedBridgeNetwork) => {
       const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));

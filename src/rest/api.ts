@@ -282,6 +282,12 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
+const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
+  if (tokenInfo.contractAddress)
+    return tokenInfo.contractAddress;
+  return tokenInfo.denom;
+};
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -723,5 +729,6 @@ export {
   parseTokenInfo,
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
-  generateMoveOraib2OraiMessages
+  generateMoveOraib2OraiMessages,
+  parseTokenInfoRawDenom
 };
