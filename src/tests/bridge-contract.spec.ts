@@ -263,7 +263,7 @@ describe.only('IBCModule', () => {
         msg: Buffer.from(JSON.stringify(transferBackMsg)).toString('base64')
       });
     } catch (error) {
-      expect(error).not.toBeNull();
+      expect(error.message).toContain('Insufficient funds to redeem voucher on channel');
     }
   });
 
