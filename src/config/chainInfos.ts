@@ -414,7 +414,8 @@ export const chainInfos: CustomChainInfo[] = [
     feeCurrencies: [KawaiiToken],
 
     Icon: KwtIcon,
-    features: ['ibc-transfer'],
+    // features: ['ibc-transfer'],
+    features: ['ibc-transfer', 'ibc-go', 'stargate', 'eth-address-gen', 'eth-key-sign'],
     currencies: [
       KawaiiToken,
       {

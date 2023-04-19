@@ -41,21 +41,21 @@ export async function deployOraiDexContracts(): Promise<{
   // upload pair & lp token code id
   const { codeId: pairCodeId } = await client.upload(
     devAddress,
-    readFileSync(path.join(__dirname, 'test-data/oraiswap_pair.wasm')),
+    readFileSync(path.join(__dirname, 'testdata/oraiswap_pair.wasm')),
     'auto'
   );
   const { codeId: lpCodeId } = await client.upload(
     devAddress,
-    readFileSync(path.join(__dirname, 'test-data/oraiswap_token.wasm')),
+    readFileSync(path.join(__dirname, 'testdata/oraiswap_token.wasm')),
     'auto'
   );
 
   // deploy oracle addr
-  const oracle = await client.deploy(devAddress, path.join(__dirname, 'test-data/oraiswap_oracle.wasm'), {}, 'oracle');
+  const oracle = await client.deploy(devAddress, path.join(__dirname, 'testdata/oraiswap_oracle.wasm'), {}, 'oracle');
   // deploy factory contract
   const factory = await client.deploy(
     devAddress,
-    path.join(__dirname, 'test-data/oraiswap_factory.wasm'),
+    path.join(__dirname, 'testdata/oraiswap_factory.wasm'),
     {
       commission_rate: null,
       oracle_addr: oracle.contractAddress,
@@ -67,7 +67,7 @@ export async function deployOraiDexContracts(): Promise<{
   // deploy staking contract address
   const staking = await client.deploy(
     devAddress,
-    path.join(__dirname, 'test-data/oraiswap_staking.wasm'),
+    path.join(__dirname, 'testdata/oraiswap_staking.wasm'),
     {
       base_denom: constants.oraiDenom,
       factory_addr: factory.contractAddress,
@@ -82,7 +82,7 @@ export async function deployOraiDexContracts(): Promise<{
   // deploy multicall contract address
   const multicall = await client.deploy(
     devAddress,
-    path.join(__dirname, 'test-data/multicall.wasm'),
+    path.join(__dirname, 'testdata/multicall.wasm'),
     {} as MulticallInstantiateMsg,
     'multicall'
   );
@@ -219,5 +219,5 @@ export async function getPairs(factory: string) {
 }
 
 describe('test', () => {
-  it('', () => { });
+  it('', () => {});
 });
