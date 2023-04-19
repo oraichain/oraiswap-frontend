@@ -5,7 +5,7 @@ import { Key, Keplr as keplr, FeeCurrency, ChainInfo } from '@keplr-wallet/types
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
-
+import isEqual from 'lodash/isEqual';
 export default class Keplr {
   constructor() {}
 
@@ -43,6 +43,22 @@ export default class Keplr {
       await this.keplr.experimentalSuggestChain(chainInfo as ChainInfo);
     }
     await this.keplr.enable(chainId);
+
+    // check to update newest Kawaiiverse chain info
+    if (chainInfo.chainId === 'kawaii_6886-1') {
+      const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
+      const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
+      if (
+        keplrChain &&
+        (keplrChain.bip44.coinType !== chainInfo.bip44.coinType ||
+          !isEqual(keplrChain.feeCurrencies[0].gasPriceStep, chainInfo.feeCurrencies[0].gasPriceStep))
+      ) {
+        displayToast(TToastType.TX_INFO, {
+          message:
+            'Keplr recently sent out an update that affected the current flow of Kawaiiverse, please delete Kawaiiverse in Keplr and add it again'
+        });
+      }
+    }
   }
 
   async suggestToken(token: TokenItemType) {
