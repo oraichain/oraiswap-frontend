@@ -172,8 +172,8 @@ export const transferEvmToIBC = async (
     return;
   }
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  let oneStepKeplrAddr = getOneStepReceiverAddr(oraiAddress, from.contractAddress);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, oneStepKeplrAddr);
+  const receiverAddr = getOneStepReceiverAddr(oraiAddress, from.contractAddress);
+  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, receiverAddr);
   return result;
 };
 
