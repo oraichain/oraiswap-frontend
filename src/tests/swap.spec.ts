@@ -1,6 +1,7 @@
 import { cosmosTokens, evmTokens, flattenTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { CoinGeckoId, CosmosChainId, EvmChainId } from 'config/chainInfos';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
+import { oraichain2atom } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -150,8 +151,10 @@ describe('swap', () => {
   it.each<[CoinGeckoId, EvmChainId | CosmosChainId, CoinGeckoId, EvmChainId | CosmosChainId, string, string]>([
     ['airight', '0x38', 'airight', 'Oraichain', 'orai1234', `orai1234`],
     ['airight', 'Oraichain', 'tether', 'Oraichain', 'orai1234', `orai1234:${[process.env.REACT_APP_USDT_CONTRACT]}`],
-    ['airight', '0x38', 'cosmos', 'Oraichain', 'orai1234', `orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`]
-  ])("test-get-one-step-receiver-addr-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
+    ['airight', '0x38', 'cosmos', 'Oraichain', 'orai1234', `orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`],
+    ['airight', 'Oraichain', 'cosmos', 'cosmoshub-4', 'orai1234', ''],
+    // ['airight', '0x38', 'cosmos', 'cosmoshub-4', 'orai1234', `${oraichain2atom}/orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`],
+  ])("test-getDestination-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
     const fromToken = flattenTokens.find((item) => item.coinGeckoId === fromCoingeckoId && item.chainId === fromChainId);
     const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);
     const receiverAddress = getDestination(fromToken, toToken, receiver);

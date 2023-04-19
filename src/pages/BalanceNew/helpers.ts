@@ -62,7 +62,12 @@ export const getDestination = (fromToken: TokenItemType, toToken: TokenItemType,
     // if they are not the same then we set dest denom 
     return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
   }
-  return '';
+  // we dont need to have any destination for this case
+  if (fromToken.chainId === 'Oraichain') {
+    return '';
+  }
+  const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId];
+  return `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(toToken)}`;
 };
 
 export const transferIBC = async (data: {

@@ -2,7 +2,7 @@ import { IBCInfo } from 'types/ibc';
 import { CosmosChainId } from './chainInfos';
 import { IBC_TRANSFER_TIMEOUT } from './constants';
 
-export const [atom2oraichain, oraicbain2atom] = process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
+export const [atom2oraichain, oraichain2atom] = process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
 const [osmosis2oraichain, oraicbain2osmosis] = process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
 export const [oraib2oraichain, oraichain2oraib] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
 const [oraib2oraichain_old, oraichain2oraib_old] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD.split(/\s+/);
@@ -36,7 +36,7 @@ export const ibcInfos: IBCInfoMap = {
   Oraichain: {
     'cosmoshub-4': {
       source: 'transfer',
-      channel: oraicbain2atom,
+      channel: oraichain2atom,
       timeout: IBC_TRANSFER_TIMEOUT
     },
     'osmosis-1': {
