@@ -7,7 +7,8 @@ import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import BalanceNew from 'pages/BalanceNew';
-import Pools from 'pages/Pools';
+// import Pools from 'pages/Pools/index';
+import Pools from 'pages/Pools/indexV2';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import SwapV2 from 'pages/SwapV2/index';
 

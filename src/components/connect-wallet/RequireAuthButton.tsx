@@ -1,25 +1,22 @@
 import { isMobile } from '@walletconnect/browser-utils';
-import { useWeb3React } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { injected, useEagerConnect } from 'hooks/useMetamask';
+import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
 
 const RequireAuthButton: React.FC<any> = () => {
-  const [isInactiveMetamask, setIsInactiveMetamask] = useState(false);
+  const [, setIsInactiveMetamask] = useState(false);
   const [address, setAddress] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const { activate, deactivate } = useWeb3React();
   const loadTokenAmounts = useLoadTokens();
-
-  useEagerConnect(isInactiveMetamask, false);
+  const connect = useInactiveConnect();
 
   const connectMetamask = async () => {
     try {
@@ -29,10 +26,7 @@ const RequireAuthButton: React.FC<any> = () => {
       if (!window.ethereum.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
       }
-      await activate(injected, (ex) => {
-        console.log('error: ', ex);
-        displayToast(TToastType.METAMASK_FAILED, { message: ex.message });
-      });
+      await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
     }
@@ -40,7 +34,6 @@ const RequireAuthButton: React.FC<any> = () => {
 
   const disconnectMetamask = async () => {
     try {
-      deactivate();
       setIsInactiveMetamask(true);
       setMetamaskAddress(undefined);
     } catch (ex) {
@@ -53,21 +46,23 @@ const RequireAuthButton: React.FC<any> = () => {
       // if not requestAccounts before
       if (Metamask.checkTron()) {
         // TODO: Check owallet mobile
-        let tronAddress;
+        let tronAddress: string;
         if (isMobile()) {
           const addressTronMobile = await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
           //@ts-ignore
           tronAddress = addressTronMobile?.base58;
-        } else if (!window.tronWeb.defaultAddress?.base58) {
-          const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-            method: 'tron_requestAccounts'
-          });
-          // throw error when not connected
-          if (code !== 200) {
-            displayToast(TToastType.TRONLINK_FAILED, { message });
-            return;
+        } else {
+          if (!window.tronWeb.defaultAddress?.base58) {
+            const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+              method: 'tron_requestAccounts'
+            });
+            // throw error when not connected
+            if (code !== 200) {
+              displayToast(TToastType.TRONLINK_FAILED, { message });
+              return;
+            }
           }
           tronAddress = window.tronWeb.defaultAddress.base58;
         }

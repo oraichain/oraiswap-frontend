@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
@@ -74,14 +74,6 @@ const rewiredEsbuild = (config, env) => {
 
 module.exports = {
   fallback,
-  devServer: function (configFunction) {
-    return function (proxy, allowedHost) {
-      // Create the default config by calling configFunction with the proxy/allowedHost parameters
-      const config = configFunction(proxy, allowedHost);
-      config.static = [path.resolve('vendor'), paths.appPublic];
-      return config;
-    };
-  },
   webpack: function (config, env) {
     config.resolve.fallback = fallback;
 
@@ -91,21 +83,29 @@ module.exports = {
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
     // update vendor hash
+    const vendorPath = path.resolve('node_modules', '.cache', 'vendor');
     const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
     const interpolateHtmlPlugin = config.plugins.find((c) => c.constructor.name === 'InterpolateHtmlPlugin');
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
 
     // add dll
-    const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
 
-    if (fs.existsSync(path.join(vendorPath, `vendor.${vendorHash}.js`))) {
+    const manifest = path.join(vendorPath, `manifest.${vendorHash}.json`);
+    if (fs.existsSync(manifest)) {
       console.log(`Already build vendor.${vendorHash}.js`);
     } else {
-      execSync('yarn vendor', {
+      execFileSync('node', ['scripts/vendor.js', vendorPath, vendorHash], {
         stdio: 'inherit',
         env: process.env,
         cwd: process.cwd()
       });
+    }
+
+    // try copy from cache to public for later copy
+    const vendorFileSrc = path.join(vendorPath, `vendor.${vendorHash}.js`);
+    const vendorFileDest = path.join(paths.appPublic, `vendor.${vendorHash}.js`);
+    if (!fs.existsSync(vendorFileDest)) {
+      fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
 
     if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
@@ -131,7 +131,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest: path.join(vendorPath, 'manifest.json')
+        manifest
       })
     );
 

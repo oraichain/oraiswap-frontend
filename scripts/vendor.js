@@ -10,25 +10,25 @@ process.on('unhandledRejection', (err) => {
 
 // Ensure environment variables are read.
 require('react-scripts/config/env');
-const fs = require('fs');
-const paths = require('react-scripts/config/paths');
+
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const package = require('../package.json');
 const { fallback } = require('../config-overrides');
 const ignores = [];
-const isDevelopment = process.env.NODE_ENV === 'development';
-const vendorPath = path.resolve(isDevelopment ? 'vendor' : paths.appPublic, 'vendor');
 const chalk = require('react-dev-utils/chalk');
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 
-const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
+const [vendorPath, vendorHash] = process.argv.slice(2, 4);
 
-// clear old files
-fs.rmSync(vendorPath, { recursive: true, force: true });
+// make sure vendorPath exist
+if (!fs.existsSync(vendorPath)) {
+  fs.mkdirSync(vendorPath, { recursive: true });
+}
 
 const config = {
-  mode: process.env.NODE_ENV,
+  mode: 'production',
   target: 'web',
   entry: {
     vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
@@ -46,14 +46,10 @@ const config = {
     new webpack.ProgressPlugin(),
     new webpack.DllPlugin({
       name: 'vendor_lib',
-      path: path.join(vendorPath, 'manifest.json')
+      path: path.join(vendorPath, `manifest.${vendorHash}.json`)
     })
   ]
 };
-
-if (isDevelopment) {
-  config.devtool = 'cheap-module-source-map';
-}
 
 // We used to support resolving modules according to `NODE_PATH`.
 // This now has been deprecated in favor of jsconfig/tsconfig.json
@@ -110,5 +106,3 @@ compiler.run((err, stats) => {
     );
   }
 });
-
-module.exports = { config };

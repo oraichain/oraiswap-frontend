@@ -23,7 +23,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { Contract } from 'config/contracts';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDecimal } from 'libs/utils';
+import { getUsd, toDecimal } from 'libs/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
@@ -43,12 +43,12 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
   const [address] = useConfigReducer('address');
   const [cachedApr] = useConfigReducer('apr');
+  const [cachePrices] = useConfigReducer('coingecko');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const loadTokenAmounts = useLoadTokens();
-
   const getPairInfo = async () => {
     if (!poolUrl) return;
 
@@ -106,7 +106,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
-    // enabled: !!token1! && !!token2!,
     refetchOnWindowFocus: false
   });
 
@@ -247,7 +246,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount')}
                             decimalScale={6}
                           />
-                          <TokenBalance balance={liquidityUsd / 2} className={cx('amount-usd')} decimalScale={2} />
+                          <TokenBalance
+                            balance={getUsd(liquidity1, pairInfoData.token1, cachePrices)}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
                         </div>
                       </div>
                       <div className={cx('liquidity_token')}>
@@ -265,7 +268,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             className={cx('amount')}
                             decimalScale={6}
                           />
-                          <TokenBalance balance={liquidityUsd / 2} className={cx('amount-usd')} decimalScale={2} />
+                          <TokenBalance
+                            balance={getUsd(liquidity2, pairInfoData.token2, cachePrices)}
+                            className={cx('amount-usd')}
+                            decimalScale={2}
+                          />
                         </div>
                       </div>
                       <button

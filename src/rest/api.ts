@@ -76,7 +76,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
     queries
   });
 
-  // aggregate no try
+  // aggregate no trybbb
   return res.return_data.map((data) => fromBinary(data.data));
 }
 
@@ -108,13 +108,14 @@ async function getPairAmountInfo(
   toToken: TokenItemType,
   cachedPairs?: PairDetails
 ): Promise<PairAmountInfo> {
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
-
+  const pair = getPair(fromToken.denom, toToken.denom);
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken, pair, cachedPairs);
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const pair = getPair(ORAI, STABLE_DENOM);
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], pair, cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -132,15 +133,13 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
+  pair: Pair,
   cachedPairs?: PairDetails
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-
-  const pair = getPair(fromTokenInfo.denom, toTokenInfo.denom);
-
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
@@ -156,7 +155,6 @@ async function fetchPoolInfoAmount(
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
-
   return { offerPoolAmount, askPoolAmount };
 }
 
@@ -299,27 +297,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -672,34 +670,6 @@ export type Claim = {
   proofs: string[];
 };
 
-function generateClaimMsg(msg: Claim) {
-  const { type, sender, stage, amount, proofs } = msg;
-  let sent_funds;
-  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
-  let contractAddr = process.env.REACT_APP_ORAIX_CLAIM_CONTRACT;
-  let input;
-  switch (type) {
-    case Type.CLAIM_ORAIX:
-      input = {
-        claim: {
-          stage,
-          amount: amount.toString(),
-          proof: proofs
-        }
-      };
-      break;
-    default:
-      break;
-  }
-
-  return {
-    contract: contractAddr,
-    msg: Buffer.from(JSON.stringify(input)),
-    sender,
-    sent_funds
-  };
-}
-
 // Generate multiple IBC messages in a single transaction to transfer from Oraibridge to Oraichain.
 function generateMoveOraib2OraiMessages(
   remainingOraib: RemainingOraibTokenItem[],
@@ -737,7 +707,6 @@ export {
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,
-  generateClaimMsg,
   simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,

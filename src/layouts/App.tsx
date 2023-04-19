@@ -1,4 +1,3 @@
-import { Web3ReactProvider } from '@web3-react/core';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { Contract } from 'config/contracts';
@@ -17,6 +16,7 @@ import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ethers } from 'ethers';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -138,7 +138,7 @@ const App = () => {
             method: 'eth_requestAccounts',
             params: []
           });
-          setMetamaskAddress(address);
+          setMetamaskAddress(ethers.utils.getAddress(address));
         }
       }
 
@@ -160,10 +160,8 @@ const App = () => {
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
-      <Web3ReactProvider getLibrary={(provider) => new Web3(provider)}>
-        <Menu />
-        {routes()}
-      </Web3ReactProvider>
+      <Menu />
+      {routes()}
     </ThemeProvider>
   );
 };

@@ -16,7 +16,7 @@ describe('token', () => {
 
   beforeAll(async () => {
     // init airi token
-    const wasmBytecode = readFileSync(path.resolve(__dirname, 'oraiswap_token.wasm'));
+    const wasmBytecode = readFileSync(path.resolve(__dirname, 'testdata/oraiswap_token.wasm'));
 
     const { codeId } = await client.upload(senderAddress, wasmBytecode);
     const initAiriRes = await client.instantiate(
