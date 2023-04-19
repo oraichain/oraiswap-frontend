@@ -1,10 +1,10 @@
-import { network } from 'config/networks';
-import { chainInfos, NetworkChainId } from 'config/chainInfos';
-import { TokenItemType, cosmosTokens } from 'config/bridgeTokens';
-import { Key, Keplr as keplr, FeeCurrency, ChainInfo, ChainInfoWithoutEndpoints } from '@keplr-wallet/types';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
+import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types';
+import { isMobile } from '@walletconnect/browser-utils';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
+import { chainInfos, NetworkChainId } from 'config/chainInfos';
+import { network } from 'config/networks';
 import isEqual from 'lodash/isEqual';
 export default class Keplr {
   constructor() {}
