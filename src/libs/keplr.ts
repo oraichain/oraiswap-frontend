@@ -1,7 +1,7 @@
 import { network } from 'config/networks';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { TokenItemType, cosmosTokens } from 'config/bridgeTokens';
-import { Key, Keplr as keplr, FeeCurrency, ChainInfo } from '@keplr-wallet/types';
+import { Key, Keplr as keplr, FeeCurrency, ChainInfo, ChainInfoWithoutEndpoints } from '@keplr-wallet/types';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { isMobile } from '@walletconnect/browser-utils';
 import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
@@ -45,9 +45,7 @@ export default class Keplr {
     await this.keplr.enable(chainId);
 
     const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
-    const keplrChain: ChainInfo = keplrChainInfos.find(
-      (keplrChain: ChainInfo) => keplrChain.chainId === chainInfo.chainId
-    );
+    const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
     if (!keplrChain) return;
 
     // check to update newest chain info
