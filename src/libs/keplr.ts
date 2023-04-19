@@ -5,7 +5,6 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { network } from 'config/networks';
-import isEqual from 'lodash/isEqual';
 export default class Keplr {
   constructor() {}
 
@@ -49,10 +48,7 @@ export default class Keplr {
     if (!keplrChain) return;
 
     // check to update newest chain info
-    if (
-      keplrChain.bip44.coinType !== chainInfo.bip44.coinType ||
-      !isEqual(keplrChain.feeCurrencies[0].gasPriceStep, chainInfo.feeCurrencies[0].gasPriceStep)
-    ) {
+    if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !keplrChain.feeCurrencies?.[0]?.gasPriceStep) {
       displayToast(TToastType.TX_INFO, {
         message: `Keplr recently sent out an update that affected the current flow of ${keplrChain.chainName}, please delete ${keplrChain.chainName} in Keplr and add it again`
       });
