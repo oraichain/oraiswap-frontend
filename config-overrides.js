@@ -83,7 +83,7 @@ module.exports = {
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
     // update vendor hash
-    const vendorPath = path.resolve('node_modules', '.vendor');
+    const vendorPath = path.resolve('node_modules', 'vendor');
     const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
     const interpolateHtmlPlugin = config.plugins.find((c) => c.constructor.name === 'InterpolateHtmlPlugin');
     interpolateHtmlPlugin.replacements.VENDOR_VERSION = vendorHash;
