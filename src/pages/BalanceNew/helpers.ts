@@ -31,7 +31,7 @@ import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
  * @param contractAddress - BSC / ETH token contract address
  * @returns converted receiver address
  */
-export const getOneStepKeplrAddr = (keplrAddress: string, contractAddress: string): string => {
+export const getOneStepReceiverAddr = (keplrAddress: string, contractAddress: string): string => {
   let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
   // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
   if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
@@ -172,7 +172,7 @@ export const transferEvmToIBC = async (
     return;
   }
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
+  let oneStepKeplrAddr = getOneStepReceiverAddr(oraiAddress, from.contractAddress);
   const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, oneStepKeplrAddr);
   return result;
 };

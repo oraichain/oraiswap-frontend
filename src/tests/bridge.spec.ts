@@ -18,7 +18,7 @@ import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
-import { findDefaultToToken, getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
+import { findDefaultToToken, getOneStepReceiverAddr } from 'pages/BalanceNew/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
 // @ts-ignore
@@ -28,17 +28,17 @@ const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
   it('bridge-evm-bsc-to-orai-normal-token-should-return-channel-1-plus-address', async () => {
     const tokenAddress = ORAI_BSC_CONTRACT;
-    const res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
+    const res = getOneStepReceiverAddr(keplrAddress, tokenAddress);
     expect(res).toBe(`channel-1/${keplrAddress}`);
   });
 
   it('bridge-evm-bsc-to-orai-special-tokens-should-return-only-address', async () => {
     let tokenAddress = KWT_BSC_CONTRACT;
-    let res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
+    let res = getOneStepReceiverAddr(keplrAddress, tokenAddress);
     expect(res).toBe(keplrAddress);
 
     tokenAddress = MILKY_BSC_CONTRACT;
-    res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
+    res = getOneStepReceiverAddr(keplrAddress, tokenAddress);
     expect(res).toBe(keplrAddress);
   });
 
