@@ -42,7 +42,7 @@ export default class Keplr {
       await this.keplr.experimentalSuggestChain(chainInfo as ChainInfo);
     }
     await this.keplr.enable(chainId);
-
+    if (isMobile()) return;
     const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
     const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
     if (!keplrChain) return;
