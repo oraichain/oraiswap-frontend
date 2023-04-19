@@ -107,10 +107,14 @@ describe('pool', () => {
       }));
       const res = await multicallClient.aggregate({ queries });
       pairsData = toPairDetails(res, pairs);
-      expect(pairsData[pairs[0].contract_addr].assets[0].info.native_token.denom).toBe('orai');
-      expect(pairsData[pairs[0].contract_addr].assets[1].info.token.contract_addr).toBe(airiContractAddress);
+      expect(pairsData[pairs[0].contract_addr].assets[0].info).toEqual({ native_token: { denom: 'orai' } });
+      expect(pairsData[pairs[0].contract_addr].assets[1].info).toEqual({
+        token: { contract_addr: airiContractAddress }
+      });
       expect(pairsData[pairs[0].contract_addr].total_share).toBe('0');
-      expect(pairsData[pairs[1].contract_addr].assets[1].info.token.contract_addr).toBe(usdtContractAddress);
+      expect(pairsData[pairs[1].contract_addr].assets[1].info).toEqual({
+        token: { contract_addr: usdtContractAddress }
+      });
       expect(pairsData[pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
