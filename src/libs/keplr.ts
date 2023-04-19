@@ -44,20 +44,20 @@ export default class Keplr {
     }
     await this.keplr.enable(chainId);
 
-    // check to update newest Kawaiiverse chain info
-    if (chainInfo.chainId === 'kawaii_6886-1') {
-      const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
-      const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
-      if (
-        keplrChain &&
-        (keplrChain.bip44.coinType !== chainInfo.bip44.coinType ||
-          !isEqual(keplrChain.feeCurrencies[0].gasPriceStep, chainInfo.feeCurrencies[0].gasPriceStep))
-      ) {
-        displayToast(TToastType.TX_INFO, {
-          message:
-            'Keplr recently sent out an update that affected the current flow of Kawaiiverse, please delete Kawaiiverse in Keplr and add it again'
-        });
-      }
+    const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
+    const keplrChain: ChainInfo = keplrChainInfos.find(
+      (keplrChain: ChainInfo) => keplrChain.chainId === chainInfo.chainId
+    );
+    if (!keplrChain) return;
+
+    // check to update newest chain info
+    if (
+      keplrChain.bip44.coinType !== chainInfo.bip44.coinType ||
+      !isEqual(keplrChain.feeCurrencies[0].gasPriceStep, chainInfo.feeCurrencies[0].gasPriceStep)
+    ) {
+      displayToast(TToastType.TX_INFO, {
+        message: `Keplr recently sent out an update that affected the current flow of ${keplrChain.chainName}, please delete ${keplrChain.chainName} in Keplr and add it again`
+      });
     }
   }
 
