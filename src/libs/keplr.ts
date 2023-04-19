@@ -5,7 +5,6 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { network } from 'config/networks';
-import isEqual from 'lodash/isEqual';
 export default class Keplr {
   constructor() {}
 
