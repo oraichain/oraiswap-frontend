@@ -4,7 +4,6 @@ import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair, Pair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
@@ -292,7 +291,7 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
 };
 
 const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
-  const pair = getPair(denoms);
+  const pair = Pairs.getPair(denoms);
 
   return pair
     ? [

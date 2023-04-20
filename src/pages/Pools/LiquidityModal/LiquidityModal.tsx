@@ -30,6 +30,7 @@ import { RootState } from 'store/configure';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityModal.module.scss';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
+import { fetchBalanceLpTokens } from '../helpers';
 
 const cx = cn.bind(styles);
 
@@ -45,7 +46,6 @@ interface ModalProps {
   lpTokenBalance: string;
   pairAmountInfoData: PairAmountInfo;
   refetchPairAmountInfo: Function;
-  fetchCachedLpTokenAll: () => void;
   pairInfoData: PairInfo;
 }
 
@@ -59,7 +59,6 @@ const LiquidityModal: FC<ModalProps> = ({
   lpTokenBalance: lpTokenBalanceValue,
   pairAmountInfoData,
   refetchPairAmountInfo,
-  fetchCachedLpTokenAll,
   pairInfoData
 }) => {
   const token1 = token1InfoData;
@@ -157,7 +156,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll();
+    fetchBalanceLpTokens(address);
     loadTokenAmounts({ oraiAddress: address });
   };
 

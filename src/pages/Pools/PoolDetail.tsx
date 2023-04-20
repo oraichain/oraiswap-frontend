@@ -1,11 +1,9 @@
 import cn from 'classnames/bind';
 import Pie from 'components/Pie';
-import { getPair, Pair, pairs, poolTokens } from 'config/pools';
 import Content from 'layouts/Content';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  fetchPairInfo,
   fetchRewardInfo,
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
@@ -16,27 +14,25 @@ import BondingModal from './BondingModal/BondingModal';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
 import styles from './PoolDetail.module.scss';
 
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { useQuery } from '@tanstack/react-query';
+import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
-import { Contract } from 'config/contracts';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateLpPools } from 'reducer/token';
+import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
-import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
+import { fetchBalanceLpTokens, getPairInfo } from './helpers';
+import { useFetchBalanceLpToken } from './hooks';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
-  let pair: Pair | undefined;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
@@ -46,66 +42,18 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [cachePrices] = useConfigReducer('coingecko');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const dispatch = useDispatch();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const loadTokenAmounts = useLoadTokens();
-  const getPairInfo = async () => {
-    if (!poolUrl) return;
 
-    pair = getPair(poolUrl.split('_'));
-    if (!pair) return;
-    const token1 = poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
-
-    const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
-
-    const info = await fetchPairInfo([token1!, token2!]);
-
-    return {
-      info,
-      token1,
-      token2,
-      apr: cachedApr?.[pair.contract_addr] || 0
-    };
-  };
-
-  useEffect(() => {
-    fetchCachedLpTokenAll();
-  }, []);
-
-  const fetchCachedLpTokenAll = async () => {
-    const queries = pairs.map((pair) => ({
-      address: pair.liquidity_token,
-      data: toBinary({
-        balance: {
-          address
-        }
-      })
-    }));
-
-    const res = await Contract.multicall.aggregate({
-      queries
-    });
-
-    const lpTokenData = Object.fromEntries(
-      pairs.map((pair, ind) => {
-        const data = res.return_data[ind];
-        if (!data.success) {
-          return [pair.liquidity_token, {}];
-        }
-        return [pair.liquidity_token, fromBinary(data.data)];
-      })
-    );
-    setCachedLpPools(lpTokenData);
-  };
+  useFetchBalanceLpToken()
 
   const onBondingAction = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll();
+    fetchBalanceLpTokens(address);
     loadTokenAmounts({ oraiAddress: address });
   };
 
-  const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
+  const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(poolUrl, cachedApr), {
     refetchOnWindowFocus: false
   });
 
@@ -394,7 +342,6 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData.info}
-                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
               />
             )}
           {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (

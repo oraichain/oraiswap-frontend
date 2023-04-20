@@ -1,18 +1,19 @@
 import { network } from 'config/networks';
-import { AggregateResult } from 'libs/contracts/types';
+import { AggregateResult, Asset } from 'libs/contracts/types';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType, cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import {
   fetchAllRewardPerSecInfos,
   fetchAllTokenAssetPools,
+  fetchPairInfo,
   fetchPoolInfoAmount,
   fetchTokenInfos,
   getPairAmountInfo,
@@ -201,4 +202,97 @@ const fetchMyCachedPairsData = async (stakerAddress: string) => {
   return calculateReward(res);
 };
 
-export { fetchAprResult, fetchPoolListAndOraiPrice, fetchCachedPairsData, fetchMyCachedPairsData };
+/**
+ * Get detail info about pair in detail
+ * @param poolUrl
+ * @returns
+ */
+const getPairInfo = async (poolUrl: string, cachedApr: { [denom: string]: number }) => {
+  if (!poolUrl) return;
+
+  const pair = Pairs.getPair(poolUrl.split('_'));
+  if (!pair) return;
+  const token1 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
+
+  const token2 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
+
+  const info = await fetchPairInfo([token1!, token2!]);
+
+  return {
+    info,
+    token1,
+    token2,
+    apr: cachedApr?.[pair.contract_addr] || 0
+  };
+};
+
+/**
+ * fetch balance LP tokens of user
+ * @param address
+ * @returns
+ */
+const fetchBalanceLpTokens = async (address: string) => {
+  const queries = Pairs.pairs.map((pair) => ({
+    address: pair.liquidity_token,
+    data: toBinary({
+      balance: {
+        address
+      }
+    })
+  }));
+
+  const res = await Contract.multicall.aggregate({
+    queries
+  });
+
+  const lpTokenData = Object.fromEntries(
+    Pairs.pairs.map((pair, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [pair.liquidity_token, {}];
+      }
+      return [pair.liquidity_token, fromBinary(data.data)];
+    })
+  );
+  return lpTokenData;
+};
+
+/**
+ *
+ * @param totalRewardInfoData
+ * @param rewardPerSecInfoData
+ * @returns
+ */
+const calculateRewardEachPool = (totalRewardInfoData: RewardInfoResponse, rewardPerSecInfoData: Asset[]) => {
+  const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
+  const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
+
+  let res = rewardPerSecInfoData
+    .filter((p) => parseInt(p.amount))
+    .map((r) => {
+      const pendingWithdraw = BigInt(
+        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
+      );
+
+      const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
+
+      const token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
+
+      return {
+        ...token,
+        amount,
+        pendingWithdraw
+      };
+    });
+  return res;
+};
+
+export {
+  fetchAprResult,
+  fetchPoolListAndOraiPrice,
+  fetchCachedPairsData,
+  fetchMyCachedPairsData,
+  getPairInfo,
+  fetchBalanceLpTokens,
+  calculateRewardEachPool
+};

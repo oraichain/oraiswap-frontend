@@ -5,7 +5,6 @@ import Modal from 'components/Modal';
 import Pie from 'components/Pie';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
-import { poolTokens } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { toDisplay } from 'libs/utils';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
@@ -15,6 +14,7 @@ import { useSelector } from 'react-redux';
 import { fetchTokenInfo } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './NewPoolModal.module.scss';
+import { Pairs } from 'config/poolV2';
 
 const cx = cn.bind(styles);
 
@@ -34,15 +34,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [isSelectingToken, setIsSelectingToken] = useState<'token1' | 'token2' | null>(null);
   const [token1, setToken1] = useState<string | null>(null);
   const [token2, setToken2] = useState<string | null>(null);
-  const [listToken1Option, setListToken1Option] = useState<TokenItemType[]>(poolTokens);
-  const [listToken2Option, setListToken2Option] = useState<TokenItemType[]>(poolTokens);
+  const [listToken1Option, setListToken1Option] = useState<TokenItemType[]>(Pairs.poolTokens);
+  const [listToken2Option, setListToken2Option] = useState<TokenItemType[]>(Pairs.poolTokens);
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const tokenObj1 = poolTokens.find((token) => token.denom === token1);
-  const tokenObj2 = poolTokens.find((token) => token.denom === token2);
+  const tokenObj1 = Pairs.poolTokens.find((token) => token.denom === token1);
+  const tokenObj2 = Pairs.poolTokens.find((token) => token.denom === token2);
 
   const { data: token1InfoData } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
     enabled: !!tokenObj1
@@ -60,7 +60,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const getBalanceValue = (tokenSymbol: string | undefined, amount: number | string) => {
     if (!tokenSymbol) return 0;
-    const coingeckoId = poolTokens.find((token) => token.name === tokenSymbol)?.coinGeckoId;
+    const coingeckoId = Pairs.poolTokens.find((token) => token.name === tokenSymbol)?.coinGeckoId;
     const pricePer = prices[coingeckoId!] ?? 0;
 
     return pricePer * +amount;
@@ -331,10 +331,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="text"
-              // value={supplyToken2 ? supplyToken2 : ''}
-              // onValueChange={({ floatValue }) => {
-              //   setSupplyToken2(floatValue);
-              // }}
+            // value={supplyToken2 ? supplyToken2 : ''}
+            // onValueChange={({ floatValue }) => {
+            //   setSupplyToken2(floatValue);
+            // }}
             />
             <span>%</span>
           </div>
@@ -353,7 +353,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => {}}>
+        <div className={cx('swap-btn')} onClick={() => { }}>
           Create
         </div>
       </div>
@@ -405,7 +405,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         prices={prices}
         setToken={(token1: string) => {
           setToken1(token1);
-          setListToken2Option(poolTokens.filter((t) => t.denom !== token1));
+          setListToken2Option(Pairs.poolTokens.filter((t) => t.denom !== token1));
         }}
         amounts={amounts}
         items={listToken1Option}
@@ -418,7 +418,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         amounts={amounts}
         setToken={(token2: string) => {
           setToken2(token2);
-          setListToken1Option(poolTokens.filter((t) => t.denom !== token2));
+          setListToken1Option(Pairs.poolTokens.filter((t) => t.denom !== token2));
         }}
         items={listToken2Option}
       />

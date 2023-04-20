@@ -2,10 +2,11 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updatePairs } from 'reducer/token';
+import { updateLpPools, updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
 import {
   fetchAprResult,
+  fetchBalanceLpTokens,
   fetchCachedPairsData,
   fetchMyCachedPairsData,
   fetchPoolListAndOraiPrice,
@@ -77,4 +78,17 @@ export const useFetchPairInfoDataList = () => {
   }, [cachedPairs]);
 
   return { pairInfos, oraiPrice };
+};
+
+export const useFetchBalanceLpToken = () => {
+  const dispatch = useDispatch();
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const [address] = useConfigReducer('address');
+
+  useEffect(() => {
+    (async () => {
+      const lpTokenData = await fetchBalanceLpTokens(address);
+      setCachedLpPools(lpTokenData);
+    })();
+  }, []);
 };

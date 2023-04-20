@@ -1,11 +1,12 @@
 import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, TRON_SCAN } from 'config/constants';
 
-import { EvmDenom, TokenItemType } from 'config/bridgeTokens';
+import { cosmosTokens, EvmDenom, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 
 export interface Tokens {
   denom?: string;
@@ -114,3 +115,38 @@ export const handleErrorTransaction = (error) => {
     message: finalError
   });
 }
+
+/**
+ * Constructs the URL to retrieve prices from CoinGecko.
+ * @param tokens
+ * @returns
+ */
+export const buildCoinGeckoPricesURL = (tokens: readonly string[]): string =>
+  `https://price.market.orai.io/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
+
+export const fetchPriceMarket = async (cachePrices: CoinGeckoPrices<string>, signal: AbortSignal) => {
+  const tokens = [...new Set(cosmosTokens.map((t) => t.coinGeckoId))];
+  tokens.sort();
+  const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
+  const prices = { ...cachePrices };
+
+  // by default not return data then use cached version
+  try {
+    const resp = await fetch(coingeckoPricesURL, { signal });
+    const rawData = await resp.text();
+    // Check for valid JSON response
+    const data = JSON.parse(rawData);
+    if (data.error) {
+      throw new Error(data.error)
+    }
+    // update cached
+    for (const key in data) {
+      prices[key] = data[key].usd;
+    }
+    return prices;
+  } catch (error) {
+    console.log({ error });
+    const fallbackPrices = Object.keys(cachePrices).length !== 0 ? cachePrices : Object.fromEntries(tokens.map((token) => [token, 0])) as CoinGeckoPrices<string>
+    return fallbackPrices;
+  }
+};

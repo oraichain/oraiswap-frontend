@@ -11,7 +11,6 @@ import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import Loader from 'components/Loader';
-import useConfigReducer from 'hooks/useConfigReducer';
 import { TokenInfo } from 'types/token';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 

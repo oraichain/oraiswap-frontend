@@ -8,7 +8,6 @@ import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
-import { poolTokens } from 'config/pools';
 import { feeEstimate, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -24,6 +23,7 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
+import { Pairs } from 'config/poolV2';
 
 const cx = cn.bind(styles);
 
@@ -296,7 +296,7 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          items={poolTokens.filter((token) =>
+          items={Pairs.poolTokens.filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           amounts={amounts}
@@ -311,7 +311,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          items={poolTokens.filter((token) =>
+          items={Pairs.poolTokens.filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {

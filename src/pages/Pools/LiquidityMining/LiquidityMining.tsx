@@ -3,21 +3,21 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { Asset, RewardInfoResponseItem } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
 import CosmJs from 'libs/cosmjs';
-import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
-import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
 import { TokenInfo } from 'types/token';
+import { calculateRewardEachPool } from '../helpers';
 import styles from './LiquidityMining.module.scss';
-import { handleErrorTransaction } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -63,51 +63,15 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
 
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
-      // let interval = setInterval(() => setNewReward(), 1000);
-      // return () => clearInterval(interval);
-      setNewReward();
+      const newReward = calculateRewardEachPool(totalRewardInfoData, rewardPerSecInfoData);
+      setPendingRewards(newReward);
     }
   }, [totalRewardInfoData, rewardPerSecInfoData, stakingPoolInfoData]);
-
-  const setNewReward = () => {
-    const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
-
-    const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
-
-    let res = rewardPerSecInfoData
-      .filter((p) => parseInt(p.amount))
-      .map((r) => {
-        const pendingWithdraw = BigInt(
-          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
-        );
-
-        const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
-
-        const token =
-          'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
-
-        return {
-          ...token,
-          amount,
-          pendingWithdraw
-        };
-      });
-
-    setPendingRewards(res);
-  };
 
   const handleBond = async () => {
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.BOND_LIQUIDITY,
-      //   sender: `${walletAddr}`,
-      //   amount: `${parsedAmount}`,
-      //   lpToken: lpTokenInfoData.contract_addr,
-      //   assetToken
-      // });
-
       const msgs = await generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
@@ -138,8 +102,9 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     } catch (error) {
       console.log('error in bond form: ', error);
       handleErrorTransaction(error);
+    } finally {
+      setActionLoading(false);
     }
-    setActionLoading(false);
   };
 
   return (
@@ -165,7 +130,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         <>
           <div className={cx('mining')}>
             <div className={cx('container', 'container_mining')}>
-              <img className={cx('icon')} src={miningImage} />
+              <img alt='mining' className={cx('icon')} src={miningImage} />
               <div className={cx('bonded')}>
                 <div className={cx('label')}>Bonded</div>
                 <div>
@@ -195,7 +160,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                   style={{
                     borderTop: '1px  dashed #2D2938',
                     width: '100%'
-                    // margin: '16px 0'
                   }}
                 />
                 {apr && (
@@ -204,12 +168,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                     <div className={cx('bonded-value')}>{apr.toFixed(2)}%</div>
                   </div>
                 )}
-                {/* <div className={cx('bonded-unbouding')}>
-                          <div className={cx('bonded-name')}>
-                            Unbonding Duration
-                          </div>
-                          <div className={cx('bonded-value')}>7 days</div>
-                        </div> */}
               </div>
             </div>
           </div>

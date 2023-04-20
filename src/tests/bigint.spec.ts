@@ -1,4 +1,6 @@
-import { toAmount, toDecimal, toDisplay } from 'libs/utils';
+import { TokenItemType, flattenTokens } from 'config/bridgeTokens';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { getUsd, toAmount, toDecimal, toDisplay } from 'libs/utils';
 
 describe('bigint', () => {
   describe('toAmount', () => {
@@ -9,30 +11,33 @@ describe('bigint', () => {
     });
 
     it.each([
-      [6000, 18, "6000000000000000000000"],
-      [2000000, 18, "2000000000000000000000000"],
-      [6000.5043177, 6, "6000504317"],
-      [6000.504317725654, 6, "6000504317"],
-      [0.0006863532, 6, "686"],
-
-    ])("toAmount number %.7f with decimal %d should return %s", (amount: number, decimal: number, expectedAmount: string) => {
-      const res = toAmount(amount, decimal).toString();
-      expect(res).toBe(expectedAmount);
-    });
+      [6000, 18, '6000000000000000000000'],
+      [2000000, 18, '2000000000000000000000000'],
+      [6000.5043177, 6, '6000504317'],
+      [6000.504317725654, 6, '6000504317'],
+      [0.0006863532, 6, '686']
+    ])(
+      'toAmount number %.7f with decimal %d should return %s',
+      (amount: number, decimal: number, expectedAmount: string) => {
+        const res = toAmount(amount, decimal).toString();
+        expect(res).toBe(expectedAmount);
+      }
+    );
   });
 
   describe('toDisplay', () => {
-
     it.each([
-      ['1000', 6, "0.001", 6],
-      ['454136345353413531', 15, "454.136345", 6],
-      ['454136345353413531', 15, "454.13", 2],
-      ['100000000000000', 18, "0.0001", 6],
-
-    ])("toDisplay number %d with decimal %d should return %s", (amount: string, decimal: number, expectedAmount: string, desDecimal: number) => {
-      const res = toDisplay(amount, decimal, desDecimal).toString();
-      expect(res).toBe(expectedAmount);
-    });
+      ['1000', 6, '0.001', 6],
+      ['454136345353413531', 15, '454.136345', 6],
+      ['454136345353413531', 15, '454.13', 2],
+      ['100000000000000', 18, '0.0001', 6]
+    ])(
+      'toDisplay number %d with decimal %d should return %s',
+      (amount: string, decimal: number, expectedAmount: string, desDecimal: number) => {
+        const res = toDisplay(amount, decimal, desDecimal).toString();
+        expect(res).toBe(expectedAmount);
+      }
+    );
   });
 
   describe('toDecimal', () => {
@@ -70,6 +75,18 @@ describe('bigint', () => {
         const decimalValue = toDecimal(numerator, denominator);
         // Expect the decimal value to be equal to the expected value.
         expect(decimalValue).toBeCloseTo(expectedDecValue, desDecimal);
+      }
+    );
+
+    it.each([
+      [BigInt(1000000), flattenTokens.find((t) => t.denom === 'orai'), {}, 0],
+      [BigInt(1000000), flattenTokens.find((t) => t.denom === 'orai'), { 'oraichain-token': 2 }, 2],
+      [BigInt(1000000), flattenTokens.find((t) => t.denom === 'orai'), { airight: 2 }, 0]
+    ])(
+      'should correctly get amount USD of token base on price in market',
+      (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>, expectedUsd: number) => {
+        const usd = getUsd(amount, tokenInfo, prices);
+        expect(usd).toEqual(expectedUsd);
       }
     );
   });

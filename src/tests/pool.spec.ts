@@ -1,12 +1,11 @@
 import { coin } from '@cosmjs/proto-signing';
-import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cw20TokenMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { COMMISSION_RATE } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pair } from 'config/pools';
-import { Pairs } from 'config/poolV2';
-import { AggregateResult } from 'libs/contracts';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { Pairs, Pair } from 'config/poolV2';
+import { AggregateResult, Asset } from 'libs/contracts';
+import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { buildMultipleMessages } from 'libs/utils';
 import compact from 'lodash/compact';
@@ -14,10 +13,12 @@ import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  fetchBalanceLpTokens,
   fetchCachedPairsData,
   fetchMyCachedPairsData,
   fetchPairInfoData,
   fetchPoolListAndOraiPrice,
+  calculateRewardEachPool,
   PairInfoData,
   toPairDetails
 } from 'pages/Pools/helpers';
@@ -46,7 +47,6 @@ describe('pool', () => {
   let usdtContractAddress = '',
     airiContractAddress = '';
   let pairsData: PairDetails;
-  let poolList: PairInfoData[] = [];
   let pairInfos: PairInfoData[] = [];
   let assetTokens = [];
   const prices = {
@@ -127,7 +127,6 @@ describe('pool', () => {
 
     it('should fetch pairs data correctly', async () => {
       pairsData = await fetchCachedPairsData();
-      poolList = compact(await Promise.all(Pairs.pairs.map((p) => fetchPairInfoData(p, pairsData))));
 
       expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({
@@ -272,6 +271,71 @@ describe('pool', () => {
       const totalAmount = sumBy(pairInfos, (c) => c.amount);
       expect(totalAmount).toBe(20); // 10 + 10 when provide liquidity orai - usdt
     });
+
+    it('should fetch LP token balance of user correctly', async () => {
+      const lpTokenBalances = await fetchBalanceLpTokens(devAddress);
+
+      // expect lp balance in orai-airi = 0, lp balance in orai-usdt = 10000000
+      expect(lpTokenBalances[Pairs.pairs[0].liquidity_token].balance).toEqual('0');
+      expect(lpTokenBalances[Pairs.pairs[1].liquidity_token].balance).toEqual('10000000');
+    });
+
+    it.each([
+      [
+        {
+          staker_addr: devAddress,
+          reward_infos: [
+            {
+              asset_info: {
+                native_token: {
+                  denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM
+                }
+              },
+              bond_amount: '10',
+              pending_reward: '1000',
+              pending_withdraw: [],
+              should_migrate: null
+            }
+          ]
+        },
+        [
+          {
+            info: {
+              token: {
+                contract_addr: process.env.REACT_APP_ORAIX_CONTRACT
+              }
+            },
+            amount: '10000'
+          },
+          {
+            info: {
+              native_token: {
+                denom: 'orai'
+              }
+            },
+            amount: '10000'
+          }
+        ],
+        [
+          {
+            ...cw20TokenMap[process.env.REACT_APP_ORAIX_CONTRACT],
+            amount: 500n,
+            pendingWithdraw: 0n
+          },
+          {
+            ...tokenMap['orai'],
+            amount: 500n,
+            pendingWithdraw: 0n
+          }
+        ]
+      ]
+    ])(
+      'should fetch Reward Each Pool correctly',
+      (totalRewardInfoData: RewardInfoResponse, rewardPerSecInfoData: Asset[], expectedReward) => {
+        const res = calculateRewardEachPool(totalRewardInfoData, rewardPerSecInfoData);
+        expect(res).toEqual(expectedReward);
+      }
+    );
   });
 
   describe('add & withdraw liquidity', () => {

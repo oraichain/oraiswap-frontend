@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { KeyFilterPool } from 'pages/Pools';
+import { KeyFilterPool } from 'pages/Pools/indexV2';
 import { PERSIST_VER } from 'store/constants';
 // import { PERSIST_VERSION } from 'store/configure';
 
@@ -50,7 +50,7 @@ const initialState: ConfigState = {
   coingecko: {},
   apr: {},
   filterDefaultPool: KeyFilterPool.all_pool,
-  persistVersion: PERSIST_VER,
+  persistVersion: PERSIST_VER
 };
 
 export const configSlice = createSlice({
@@ -58,10 +58,7 @@ export const configSlice = createSlice({
   initialState,
   reducers: {
     updateConfig: {
-      reducer(
-        state,
-        action: PayloadAction<string, string, ConfigState[keyof ConfigState]>
-      ) {
+      reducer(state, action: PayloadAction<string, string, ConfigState[keyof ConfigState]>) {
         state[action.payload] = action.meta;
       },
       prepare(key: string, value: ConfigState[keyof ConfigState]) {
