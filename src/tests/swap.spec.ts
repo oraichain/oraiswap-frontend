@@ -1,7 +1,7 @@
 import { cosmosTokens, evmTokens, flattenTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { CoinGeckoId, CosmosChainId, EvmChainId } from 'config/chainInfos';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
-import { oraichain2atom } from 'config/ibcInfos';
+import { oraichain2atom, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -149,11 +149,17 @@ describe('swap', () => {
   });
 
   it.each<[CoinGeckoId, EvmChainId | CosmosChainId, CoinGeckoId, EvmChainId | CosmosChainId, string, string]>([
+    ['airight', '0x01', 'airight', 'Oraichain', 'orai1234', ``],
+    ['airight', '0x38', 'airight', '0x01', 'orai1234', ``],
+    ['airight', '0x38', 'airight', 'Oraichain', '', ``],
     ['airight', '0x38', 'airight', 'Oraichain', 'orai1234', `orai1234`],
     ['airight', 'Oraichain', 'tether', 'Oraichain', 'orai1234', `orai1234:${[process.env.REACT_APP_USDT_CONTRACT]}`],
     ['airight', '0x38', 'cosmos', 'Oraichain', 'orai1234', `orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`],
     ['airight', 'Oraichain', 'cosmos', 'cosmoshub-4', 'orai1234', ''],
-    // ['airight', '0x38', 'cosmos', 'cosmoshub-4', 'orai1234', `${oraichain2atom}/orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`],
+    ['airight', '0x38', 'cosmos', 'cosmoshub-4', 'orai1234', `${oraichain2atom}/orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`],
+    ['tether', '0x38', 'oraichain-token', '0x01', 'orai1234', `${oraichain2oraib}/orai1234:orai`],
+    ['usd-coin', '0x01', 'tether', '0x38', 'orai1234', `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`],
+    ['usd-coin', '0x01', 'tether', '0x2b6653dc', 'orai1234', `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`],
   ])("test-getDestination-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
     const fromToken = flattenTokens.find((item) => item.coinGeckoId === fromCoingeckoId && item.chainId === fromChainId);
     const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);

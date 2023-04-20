@@ -1,8 +1,9 @@
-import { TokenItemType, flattenTokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
-import { parseTokenInfoRawDenom } from 'rest/api';
+import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
+import { CoinGeckoId } from 'config/chainInfos';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -87,7 +88,19 @@ describe('should utils functions in libs/utils run exactly', () => {
   it.each<[TokenItemType, string]>([
     [flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain').contractAddress],
     [flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain').denom],
-  ])("test-parse-token-info-raw-denom-given-%j-should-receive-%s", (token, expectedDenom) => {
+  ])("test-parseTokenInfoRawDenom-given-%j-should-receive-%s", (token, expectedDenom) => {
     expect(parseTokenInfoRawDenom(token)).toEqual(expectedDenom);
+  })
+
+  it.each<[CoinGeckoId, TokenItemType, string]>([
+    ['airight', cosmosTokens.find(token => token.coinGeckoId === 'airight' && token.chainId === 'Oraichain'), ""],
+    ['tether', cosmosTokens.find(token => token.coinGeckoId === 'tether' && token.chainId === 'Oraichain'), ""],
+    ['kawaii-islands', cosmosTokens.find(token => token.coinGeckoId === 'kawaii-islands' && token.chainId === 'Oraichain'), "KWT and MILKY not supported in this function"],
+  ])("test-getTokenOnOraichain-given-%s-should-receive-%j", (coingeckoId, expectedToken, err) => {
+    try {
+      expect(getTokenOnOraichain(coingeckoId)).toEqual(expectedToken);
+    } catch (error) {
+      expect(error).toEqual(new Error(err));
+    }
   })
 });

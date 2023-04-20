@@ -19,6 +19,7 @@ import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   generateMoveOraib2OraiMessages,
+  getTokenOnOraichain,
   parseTokenInfo,
   parseTokenInfoRawDenom,
   Type
@@ -32,7 +33,7 @@ import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
  * @param contractAddress - BSC / ETH token contract address
  * @returns converted receiver address
  */
-export const getOneStepReceiverAddr = (keplrAddress: string, contractAddress: string): string => {
+export const getSourceReceiver = (keplrAddress: string, contractAddress: string): string => {
   let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
   // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
   if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
@@ -47,9 +48,12 @@ export const getOneStepReceiverAddr = (keplrAddress: string, contractAddress: st
  * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address 
  * @param from - from token
  * @param to - to token
+ * @param receiver - destination receiver
  * @returns destination in the format <dest-channel>/<dest-receiver>:<dest-denom>
  */
-export const getDestination = (fromToken: TokenItemType, toToken: TokenItemType, receiver: string): string => {
+export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemType, receiver?: string): string => {
+  if (!fromToken || !toToken || !receiver)
+    return '';
   // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
   if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
     return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
@@ -66,9 +70,19 @@ export const getDestination = (fromToken: TokenItemType, toToken: TokenItemType,
   if (fromToken.chainId === 'Oraichain') {
     return '';
   }
-  const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId];
-  return `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(toToken)}`;
+  // the remaining cases where we have to process ibc msg
+  const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
+  // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
+  return `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(getTokenOnOraichain(toToken.coinGeckoId))}`;
 };
+
+export const combineReceiver = (sourceReceiver: string, contractAddress: string, fromToken?: TokenItemType, toToken?: TokenItemType, destReceiver?: string): string => {
+  const source = getSourceReceiver(sourceReceiver, contractAddress);
+  const destination = getDestination(fromToken, toToken, destReceiver);
+  if (destination.length > 0)
+    return `${source}:${destination}`;
+  return source;
+}
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -202,7 +216,7 @@ export const transferEvmToIBC = async (
     return;
   }
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  const receiverAddr = getOneStepReceiverAddr(oraiAddress, from.contractAddress);
+  const receiverAddr = combineReceiver(oraiAddress, from.contractAddress);
   const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, receiverAddr);
   return result;
 };

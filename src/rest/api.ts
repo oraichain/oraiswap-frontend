@@ -1,6 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -23,6 +23,7 @@ import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
+import { CoinGeckoId } from 'config/chainInfos';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -287,6 +288,13 @@ const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
     return tokenInfo.contractAddress;
   return tokenInfo.denom;
 };
+
+const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
+  if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
+    throw new Error("KWT and MILKY not supported in this function");
+  }
+  return cosmosTokens.find(token => token.coinGeckoId === coingeckoId && token.chainId === 'Oraichain');
+}
 
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
@@ -730,5 +738,6 @@ export {
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
-  parseTokenInfoRawDenom
+  parseTokenInfoRawDenom,
+  getTokenOnOraichain
 };
