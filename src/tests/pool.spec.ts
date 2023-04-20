@@ -40,7 +40,7 @@ import {
   getPairs,
   instantiateCw20Token
 } from './listing-simulate';
-import { testCaculateAprDatas, testCaculateRewardData, testConverToPairsDetailData } from './test-data/test-data-pool';
+import { testCaculateAprDatas, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 
 describe('pool', () => {
   let usdtContractAddress = '',
