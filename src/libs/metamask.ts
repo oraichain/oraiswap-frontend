@@ -3,14 +3,12 @@ import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
-
 import Web3 from 'web3';
-
 import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
 
   public isWindowEthereum() {
     return !!window.ethereum;
