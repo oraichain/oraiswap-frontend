@@ -115,7 +115,7 @@ describe('pool', () => {
       expect(pairsData[pairs[1].contract_addr].assets[1].info).toEqual({
         token: { contract_addr: usdtContractAddress }
       });
-      expect(pairsData[pairs[1].contract_addr].total_share).toEqual(constants.amountProvideLiquidity);
+      expect(pairsData[pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
     it('should fetch my pairs data correctly', async () => {

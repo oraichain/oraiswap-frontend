@@ -176,7 +176,13 @@ export const convertTransferIBCErc20Kwt = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coinGeckoId === fromToken.coinGeckoId); // collect kawaiiverse cosmos based token for conversion
+  const nativeToken = kawaiiTokens.find(
+    (token) =>
+      token.bridgeTo &&
+      token.cosmosBased &&
+      token.coinGeckoId === fromToken.coinGeckoId &&
+      token.denom !== fromToken.denom
+  ); // collect kawaiiverse cosmos based token for conversion
 
   const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
