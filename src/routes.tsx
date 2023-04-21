@@ -31,8 +31,8 @@ export default () => (
   >
     <Routes>
       <Route path="/" element={<BalanceNew />} />
-      <Route path="/swapv2" element={<SwapV2 />} />
-      <Route path="/swapv3" element={<UniversalSwap />} />
+      <Route path="/swap" element={<SwapV2 />} />
+      <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/airdrop/:chain" element={<AirDrop />} />
       <Route path="/ethereum" element={<EthereumTest />} />

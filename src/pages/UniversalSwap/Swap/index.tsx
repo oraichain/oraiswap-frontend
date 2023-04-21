@@ -71,6 +71,8 @@ const SwapComponent: React.FC<{
 
   const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
   const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
+  const fromTokenDisplay = tokenMap[fromTokenDenom];
+  const toTokenDisplay = tokenMap[toTokenDenom];
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -172,7 +174,10 @@ const SwapComponent: React.FC<{
         <div className={cx('input')}>
           <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
             {FromIcon && <FromIcon className={cx('logo')} />}
-            <span>{fromTokenInfoData?.symbol}</span>
+            <div className={cx('token-info')}>
+              <span className={cx('token-symbol')}>{fromTokenDisplay?.name}</span>
+              <span className={cx('token-org')}>{fromTokenDisplay?.org}</span>
+            </div>
             <div className={cx('arrow-down')} />
           </div>
 
@@ -215,13 +220,16 @@ const SwapComponent: React.FC<{
           />
 
           <span style={{ flexGrow: 1, textAlign: 'right' }}>
-            {`1 ${fromTokenInfoData?.symbol} ≈ ${averageRatio} ${toTokenInfoData?.symbol}`}
+            {`1 ${fromTokenDisplay?.name} ≈ ${averageRatio} ${toTokenDisplay?.name}`}
           </span>
         </div>
         <div className={cx('input')}>
           <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
             {ToIcon && <ToIcon className={cx('logo')} />}
-            <span>{toTokenInfoData?.symbol}</span>
+            <div className={cx('token-info')}>
+              <span className={cx('token-symbol')}>{toTokenDisplay?.name}</span>
+              <span className={cx('token-org')}>{toTokenDisplay?.org}</span>
+            </div>
             <div className={cx('arrow-down')} />
           </div>
 

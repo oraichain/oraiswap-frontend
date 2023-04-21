@@ -89,8 +89,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={styles.menu_items}>
             <RequireAuthButton />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
-            {renderLink('/swapv2', 'Swap', setLink, <Swap />)}
-            {renderLink('/swapv3', 'Universal Swap', setLink, <Swap />)}
+            {renderLink('/swap', 'Swap', setLink, <Swap />)}
+            {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
             {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}
             {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => { }, <BuyFiat />, true)}
