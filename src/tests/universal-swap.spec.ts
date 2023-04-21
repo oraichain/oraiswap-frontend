@@ -7,7 +7,7 @@ import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
 import { combineReceiver, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
-import { getUniversalSwapToAddress } from 'pages/SwapV3/helpers';
+import { getUniversalSwapToAddress } from 'pages/UniversalSwap/helpers';
 import { generateContractMessages, Type } from 'rest/api';
 
 jest.mock('libs/metamask.ts');

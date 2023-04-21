@@ -11,7 +11,7 @@ import BalanceNew from 'pages/BalanceNew';
 import Pools from 'pages/Pools/indexV2';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import SwapV2 from 'pages/SwapV2/index';
-import SwapV3 from 'pages/SwapV3/index';
+import UniversalSwap from 'pages/UniversalSwap/index';
 
 export default () => (
   <Suspense
@@ -32,7 +32,7 @@ export default () => (
     <Routes>
       <Route path="/" element={<BalanceNew />} />
       <Route path="/swapv2" element={<SwapV2 />} />
-      <Route path="/swapv3" element={<SwapV3 />} />
+      <Route path="/swapv3" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/airdrop/:chain" element={<AirDrop />} />
       <Route path="/ethereum" element={<EthereumTest />} />
