@@ -1,6 +1,6 @@
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
-import { cosmosTokens, TokenItemType } from './bridgeTokens';
+import { cosmosTokens, flattenTokens, TokenItemType } from './bridgeTokens';
 import { COMMISSION_RATE, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from './constants';
 
 export type Pair = {
@@ -89,6 +89,8 @@ export const pairs: Pair[] = [
 export const pairDenoms = uniq(flatten(pairs.map((pair) => pair.asset_denoms)));
 
 export const poolTokens = cosmosTokens.filter((token) => pairDenoms.includes(token.denom));
+export const swapFromTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2' && token.chainId !== 'cosmoshub-4' && token.chainId !== 'osmosis-1' && token.chainId !== 'kawaii_6886-1');
+export const swapToTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2');
 
 export const getPair = (denom1: string | string[], denom2?: string): Pair | undefined => {
   const asset_denoms = typeof denom1 === 'string' ? [denom1, denom2] : denom1;
