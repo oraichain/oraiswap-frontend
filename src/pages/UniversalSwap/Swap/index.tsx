@@ -44,8 +44,6 @@ const SwapComponent: React.FC<{
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
-  const loadTokenAmounts = useLoadTokens();
-
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
     setSwapAmount([amount, toAmountToken]);
@@ -71,8 +69,8 @@ const SwapComponent: React.FC<{
 
   const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
   const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
-  const fromTokenDisplay = tokenMap[fromTokenDenom];
-  const toTokenDisplay = tokenMap[toTokenDenom];
+  const originalFromToken = tokenMap[fromTokenDenom];
+  const originalToToken = tokenMap[toTokenDenom];
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -122,8 +120,10 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const toAddress = await getUniversalSwapToAddress(toToken.chainId);
-      const receiver = combineReceiver(oraiAddress, fromToken, toToken, toAddress);
+      const toAddress = await getUniversalSwapToAddress(originalToToken.chainId);
+      const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
+      console.log("receiver: ", combinedReceiver);
+      console.log("universal swap type: ", universalSwapType);
       // TODO: process the remaining logic of universal swap
     } catch (error) {
       handleErrorTransaction(error)
@@ -175,8 +175,8 @@ const SwapComponent: React.FC<{
           <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
             {FromIcon && <FromIcon className={cx('logo')} />}
             <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{fromTokenDisplay?.name}</span>
-              <span className={cx('token-org')}>{fromTokenDisplay?.org}</span>
+              <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
+              <span className={cx('token-org')}>{originalFromToken?.org}</span>
             </div>
             <div className={cx('arrow-down')} />
           </div>
@@ -220,15 +220,15 @@ const SwapComponent: React.FC<{
           />
 
           <span style={{ flexGrow: 1, textAlign: 'right' }}>
-            {`1 ${fromTokenDisplay?.name} ≈ ${averageRatio} ${toTokenDisplay?.name}`}
+            {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
           </span>
         </div>
         <div className={cx('input')}>
           <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
             {ToIcon && <ToIcon className={cx('logo')} />}
             <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{toTokenDisplay?.name}</span>
-              <span className={cx('token-org')}>{toTokenDisplay?.org}</span>
+              <span className={cx('token-symbol')}>{originalToToken?.name}</span>
+              <span className={cx('token-org')}>{originalToToken?.org}</span>
             </div>
             <div className={cx('arrow-down')} />
           </div>

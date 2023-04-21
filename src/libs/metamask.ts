@@ -27,6 +27,10 @@ export default class Metamask {
     return false;
   }
 
+  public isEthAddress(address: string) {
+    return Web3.utils.checkAddressChecksum(Web3.utils.toChecksumAddress(address));
+  }
+
   private async submitTronSmartContract(
     address: string,
     functionSelector: string,

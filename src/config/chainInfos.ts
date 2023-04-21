@@ -519,6 +519,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'oraichain-token',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: OraiIcon
       },
       {
@@ -528,6 +529,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'usd-coin',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: UsdcIcon
       }
     ]
@@ -547,6 +549,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 6,
         coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         Icon: UsdtIcon
       },
       {
@@ -556,6 +559,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 6,
         coinGeckoId: 'tron',
+        prefixToken: ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
         Icon: TronIcon
       }
     ],
@@ -580,6 +584,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: OraiIcon
       },
       {
@@ -589,6 +594,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'airight',
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: AiriIcon
       },
       {
@@ -598,6 +604,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinDecimals: 18,
         coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: UsdtIcon
       },
       {

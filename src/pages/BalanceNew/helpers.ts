@@ -48,11 +48,11 @@ export const getSourceReceiver = (keplrAddress: string, contractAddress?: string
  * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address 
  * @param from - from token
  * @param to - to token
- * @param receiver - destination receiver
- * @returns destination in the format <dest-channel>/<dest-receiver>:<dest-denom>
+ * @param destReceiver - destination destReceiver
+ * @returns destination in the format <dest-channel>/<dest-destReceiver>:<dest-denom>
  */
-export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemType, receiver?: string): { destination: string, universalSwapType: UniversalSwapType } => {
-  if (!fromToken || !toToken || !receiver)
+export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemType, destReceiver?: string): { destination: string, universalSwapType: UniversalSwapType } => {
+  if (!fromToken || !toToken || !destReceiver)
     return { destination: '', universalSwapType: 'other-networks-to-oraichain' };
   // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
   if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
@@ -69,14 +69,17 @@ export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemTyp
   if (toToken.chainId === 'Oraichain') {
     // first case, two tokens are the same, only different in network => simple swap
     if (fromToken.coinGeckoId === toToken.coinGeckoId)
-      return { destination: receiver, universalSwapType: 'other-networks-to-oraichain' };
+      return { destination: destReceiver, universalSwapType: 'other-networks-to-oraichain' };
     // if they are not the same then we set dest denom 
-    return { destination: `${receiver}:${parseTokenInfoRawDenom(toToken)}`, universalSwapType: 'other-networks-to-oraichain' };
+    return { destination: `${destReceiver}:${parseTokenInfoRawDenom(toToken)}`, universalSwapType: 'other-networks-to-oraichain' };
   }
   // the remaining cases where we have to process ibc msg
   const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
   // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
-  return { destination: `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(getTokenOnOraichain(toToken.coinGeckoId))}`, universalSwapType: 'other-networks-to-oraichain' };
+  let receiverPrefix = '';
+  if (window.Metamask.isEthAddress(destReceiver))
+    receiverPrefix = toToken.prefix;
+  return { destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(getTokenOnOraichain(toToken.coinGeckoId))}`, universalSwapType: 'other-networks-to-oraichain' };
 };
 
 export const combineReceiver = (sourceReceiver: string, fromToken?: TokenItemType, toToken?: TokenItemType, destReceiver?: string): { combinedReceiver: string, universalSwapType: UniversalSwapType } => {
@@ -377,6 +380,7 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
+  console.log("to token: ", toToken);
 
   await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction

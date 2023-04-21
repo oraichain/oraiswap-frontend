@@ -1,6 +1,6 @@
 import { cosmosTokens, evmTokens, flattenTokens, TokenItemType, tokens, UniversalSwapType } from 'config/bridgeTokens';
 import { CoinGeckoId, CosmosChainId, EvmChainId } from 'config/chainInfos';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { oraichain2atom, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
@@ -13,6 +13,10 @@ import { generateContractMessages, Type } from 'rest/api';
 jest.mock('libs/metamask.ts');
 
 describe('universal-swap', () => {
+  let windowSpy: jest.SpyInstance;
+  beforeAll(() => {
+    windowSpy = jest.spyOn(window, "window", "get");
+  });
   it('max amount', () => {
     const amount = 123456789n;
     const decimals = 6;
@@ -167,7 +171,15 @@ describe('universal-swap', () => {
     ['tether', '0x38', 'oraichain-token', '0x01', 'orai1234', { destination: `${oraichain2oraib}/orai1234:orai`, universalSwapType: 'other-networks-to-oraichain' }],
     ['usd-coin', '0x01', 'tether', '0x38', 'orai1234', { destination: `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`, universalSwapType: 'other-networks-to-oraichain' }],
     ['usd-coin', '0x01', 'tether', '0x2b6653dc', 'orai1234', { destination: `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`, universalSwapType: 'other-networks-to-oraichain' }],
+    ['usd-coin', '0x01', 'tether', '0x2b6653dc', '0x1234', { destination: `${oraichain2oraib}/${ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX}0x1234:${process.env.REACT_APP_USDT_CONTRACT}`, universalSwapType: 'other-networks-to-oraichain' }],
   ])("test-getDestination-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
+    windowSpy.mockImplementation(() => ({
+      Metamask: {
+        isEthAddress: (address: string) => {
+          return address.includes('0x') ? true : false;
+        }
+      },
+    }));
     const fromToken = flattenTokens.find((item) => item.coinGeckoId === fromCoingeckoId && item.chainId === fromChainId);
     const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);
     try {
@@ -187,28 +199,22 @@ describe('universal-swap', () => {
     expect(result.combinedReceiver).toEqual("channel-1/receiver:foobar:orai");
   })
 
-  describe("test-universal-swap-with-spy", () => {
-    let windowSpy: jest.SpyInstance;
-    beforeEach(() => {
-      windowSpy = jest.spyOn(window, "window", "get");
-    });
-    it("test-getUniversalSwapToAddress", async () => {
-      windowSpy.mockImplementation(() => ({
-        Metamask: {
-          getEthAddress: () => {
-            return '0x1234';
-          }
-        },
-        Keplr: {
-          getKeplrAddr: async (_chainId: string) => {
-            return 'orai1234';
-          }
+  it("test-getUniversalSwapToAddress", async () => {
+    windowSpy.mockImplementation(() => ({
+      Metamask: {
+        getEthAddress: () => {
+          return '0x1234';
         }
-      }));
-      let result = await getUniversalSwapToAddress('0x01');
-      expect(result).toEqual('0x1234');
-      result = await getUniversalSwapToAddress('cosmoshub-4');
-      expect(result).toEqual('orai1234');
-    })
-  });
+      },
+      Keplr: {
+        getKeplrAddr: async (_chainId: string) => {
+          return 'orai1234';
+        }
+      }
+    }));
+    let result = await getUniversalSwapToAddress('0x01');
+    expect(result).toEqual('0x1234');
+    result = await getUniversalSwapToAddress('cosmoshub-4');
+    expect(result).toEqual('orai1234');
+  })
 });
