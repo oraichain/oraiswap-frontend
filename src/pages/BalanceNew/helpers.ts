@@ -1,7 +1,7 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
-import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap, UniversalSwapType } from 'config/bridgeTokens';
 import { CosmosChainId, chainInfos } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
@@ -33,7 +33,7 @@ import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
  * @param contractAddress - BSC / ETH token contract address
  * @returns converted receiver address
  */
-export const getSourceReceiver = (keplrAddress: string, contractAddress: string): string => {
+export const getSourceReceiver = (keplrAddress: string, contractAddress?: string): string => {
   let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
   // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
   if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
@@ -51,37 +51,37 @@ export const getSourceReceiver = (keplrAddress: string, contractAddress: string)
  * @param receiver - destination receiver
  * @returns destination in the format <dest-channel>/<dest-receiver>:<dest-denom>
  */
-export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemType, receiver?: string): string => {
+export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemType, receiver?: string): { destination: string, universalSwapType: UniversalSwapType } => {
   if (!fromToken || !toToken || !receiver)
-    return '';
+    return { destination: '', universalSwapType: 'other-networks-to-oraichain' };
   // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
   if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
-    return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
+    return { destination: '', universalSwapType: 'oraichain-to-oraichain' };
+  }
+  // we dont need to have any destination for this case
+  if (fromToken.chainId === 'Oraichain') {
+    return { destination: '', universalSwapType: 'oraichain-to-other-networks' };
   }
   // if to token chain id is Oraichain, then we dont need to care about ibc msg case
   if (toToken.chainId === 'Oraichain') {
     // first case, two tokens are the same, only different in network => simple swap
     if (fromToken.coinGeckoId === toToken.coinGeckoId)
-      return receiver;
+      return { destination: receiver, universalSwapType: 'other-networks-to-oraichain' };
     // if they are not the same then we set dest denom 
-    return `${receiver}:${parseTokenInfoRawDenom(toToken)}`;
-  }
-  // we dont need to have any destination for this case
-  if (fromToken.chainId === 'Oraichain') {
-    return '';
+    return { destination: `${receiver}:${parseTokenInfoRawDenom(toToken)}`, universalSwapType: 'other-networks-to-oraichain' };
   }
   // the remaining cases where we have to process ibc msg
   const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
   // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
-  return `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(getTokenOnOraichain(toToken.coinGeckoId))}`;
+  return { destination: `${ibcInfo.channel}/${receiver}:${parseTokenInfoRawDenom(getTokenOnOraichain(toToken.coinGeckoId))}`, universalSwapType: 'other-networks-to-oraichain' };
 };
 
-export const combineReceiver = (sourceReceiver: string, contractAddress: string, fromToken?: TokenItemType, toToken?: TokenItemType, destReceiver?: string): string => {
-  const source = getSourceReceiver(sourceReceiver, contractAddress);
-  const destination = getDestination(fromToken, toToken, destReceiver);
+export const combineReceiver = (sourceReceiver: string, fromToken?: TokenItemType, toToken?: TokenItemType, destReceiver?: string): { combinedReceiver: string, universalSwapType: UniversalSwapType } => {
+  const source = getSourceReceiver(sourceReceiver, fromToken?.contractAddress);
+  const { destination, universalSwapType } = getDestination(fromToken, toToken, destReceiver);
   if (destination.length > 0)
-    return `${source}:${destination}`;
-  return source;
+    return { combinedReceiver: `${source}:${destination}`, universalSwapType };
+  return { combinedReceiver: source, universalSwapType };
 }
 
 export const transferIBC = async (data: {
@@ -222,8 +222,8 @@ export const transferEvmToIBC = async (
     return;
   }
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  const receiverAddr = combineReceiver(oraiAddress, from.contractAddress);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, receiverAddr);
+  const { combinedReceiver } = combineReceiver(oraiAddress, from);
+  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, combinedReceiver);
   return result;
 };
 

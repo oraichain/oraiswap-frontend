@@ -19,11 +19,12 @@ import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
-import { generateMsgsSwap } from '../helpers';
+import { generateMsgsSwap, getUniversalSwapToAddress } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
+import { combineReceiver } from 'pages/BalanceNew/helpers';
 
 const cx = cn.bind(styles);
 
@@ -119,31 +120,9 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-
-      const messages = generateMsgsSwap(
-        fromTokenInfoData,
-        fromAmountToken,
-        toTokenInfoData,
-        amounts,
-        simulateData,
-        userSlippage,
-        oraiAddress
-      );
-
-      const result = await CosmJs.executeMultiple({
-        prefix: ORAI,
-        walletAddr: oraiAddress,
-        msgs: messages,
-        gasAmount: { denom: ORAI, amount: '0' }
-      });
-      if (result) {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
-        loadTokenAmounts({ oraiAddress });
-
-        setSwapLoading(false);
-      }
+      const toAddress = await getUniversalSwapToAddress(toToken.chainId);
+      const receiver = combineReceiver(oraiAddress, fromToken, toToken, toAddress);
+      // TODO: process the remaining logic of universal swap
     } catch (error) {
       handleErrorTransaction(error)
     } finally {

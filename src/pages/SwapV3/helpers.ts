@@ -1,3 +1,4 @@
+import { CosmosChainId, NetworkChainId } from 'config/chainInfos';
 import { toDisplay } from '../../libs/utils';
 import { TokenItemType } from 'config/bridgeTokens';
 import { Uint128 } from 'libs/contracts';
@@ -8,6 +9,13 @@ export function calculateMinReceive(simulateAmount: string, userSlippage: number
   const amount = toDisplay(simulateAmount, decimals);
   const result = amount * (1 - userSlippage / 100);
   return toAmount(result, decimals).toString();
+}
+
+export const getUniversalSwapToAddress = async (toChainId: NetworkChainId): Promise<string> => {
+  if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x2b6653dc' || toChainId === '0x38') {
+    return await window.Metamask.getEthAddress();
+  }
+  return await window.Keplr.getKeplrAddr(toChainId);
 }
 
 export function generateMsgsSwap(

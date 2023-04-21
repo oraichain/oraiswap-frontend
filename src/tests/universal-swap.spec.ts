@@ -1,12 +1,18 @@
-import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
+import { cosmosTokens, evmTokens, flattenTokens, TokenItemType, tokens, UniversalSwapType } from 'config/bridgeTokens';
+import { CoinGeckoId, CosmosChainId, EvmChainId } from 'config/chainInfos';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
+import { oraichain2atom, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
+import { combineReceiver, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
+import { getUniversalSwapToAddress } from 'pages/SwapV3/helpers';
 import { generateContractMessages, Type } from 'rest/api';
 
-describe('swap', () => {
+jest.mock('libs/metamask.ts');
+
+describe('universal-swap', () => {
   it('max amount', () => {
     const amount = 123456789n;
     const decimals = 6;
@@ -143,5 +149,58 @@ describe('swap', () => {
       );
       expect(Array.isArray(multipleMsgs)).toBe(true);
     }
+  });
+
+  it.each<[CoinGeckoId, EvmChainId | CosmosChainId, CoinGeckoId, EvmChainId | CosmosChainId, string, { destination: string, universalSwapType: UniversalSwapType }]>([
+    ['airight', '0x01', 'airight', 'Oraichain', 'orai1234', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['airight', '0x38', 'airight', '0x01', 'orai1234', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['airight', '0x38', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['airight', '0x38', 'airight', 'Oraichain', 'orai1234', { destination: 'orai1234', universalSwapType: 'other-networks-to-oraichain' }],
+    ['airight', 'Oraichain', 'tether', 'Oraichain', 'orai1234', { destination: '', universalSwapType: 'oraichain-to-oraichain' }],
+    ['airight', '0x38', 'cosmos', 'Oraichain', 'orai1234', { destination: `orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`, universalSwapType: 'other-networks-to-oraichain' }],
+    ['airight', 'Oraichain', 'cosmos', 'cosmoshub-4', 'orai1234', { destination: '', universalSwapType: 'oraichain-to-other-networks' }],
+    ['airight', '0x38', 'cosmos', 'cosmoshub-4', 'orai1234', { destination: `${oraichain2atom}/orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`, universalSwapType: 'other-networks-to-oraichain' }],
+    ['tether', '0x38', 'oraichain-token', '0x01', 'orai1234', { destination: `${oraichain2oraib}/orai1234:orai`, universalSwapType: 'other-networks-to-oraichain' }],
+    ['usd-coin', '0x01', 'tether', '0x38', 'orai1234', { destination: `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`, universalSwapType: 'other-networks-to-oraichain' }],
+    ['usd-coin', '0x01', 'tether', '0x2b6653dc', 'orai1234', { destination: `${oraichain2oraib}/orai1234:${process.env.REACT_APP_USDT_CONTRACT}`, universalSwapType: 'other-networks-to-oraichain' }],
+  ])("test-getDestination-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
+    const fromToken = flattenTokens.find((item) => item.coinGeckoId === fromCoingeckoId && item.chainId === fromChainId);
+    const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);
+    const receiverAddress = getDestination(fromToken, toToken, receiver);
+    expect(receiverAddress).toEqual(destination);
+  })
+
+  it("test-combineReceiver-empty-destination", () => {
+    const result = combineReceiver('receiver');
+    expect(result.combinedReceiver).toEqual("channel-1/receiver");
+  })
+  it("test-combineReceiver-non-empty-destination", () => {
+    const result = combineReceiver('receiver', flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'), flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === 'Oraichain'), 'foobar');
+    expect(result.combinedReceiver).toEqual("channel-1/receiver:foobar:orai");
+  })
+
+  describe("test-universal-swap-with-spy", () => {
+    let windowSpy: jest.SpyInstance;
+    beforeEach(() => {
+      windowSpy = jest.spyOn(window, "window", "get");
+    });
+    it("test-getUniversalSwapToAddress", async () => {
+      windowSpy.mockImplementation(() => ({
+        Metamask: {
+          getEthAddress: () => {
+            return '0x1234';
+          }
+        },
+        Keplr: {
+          getKeplrAddr: async (_chainId: string) => {
+            return 'orai1234';
+          }
+        }
+      }));
+      let result = await getUniversalSwapToAddress('0x01');
+      expect(result).toEqual('0x1234');
+      result = await getUniversalSwapToAddress('cosmoshub-4');
+      expect(result).toEqual('orai1234');
+    })
   });
 });
