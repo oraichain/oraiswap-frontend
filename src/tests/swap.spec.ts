@@ -5,7 +5,7 @@ import { oraichain2atom, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
-import { getDestination } from 'pages/BalanceNew/helpers';
+import { combineReceiver, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
 import { generateContractMessages, Type } from 'rest/api';
 
@@ -165,5 +165,14 @@ describe('swap', () => {
     const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);
     const receiverAddress = getDestination(fromToken, toToken, receiver);
     expect(receiverAddress).toEqual(destination);
+  })
+
+  it("test-combineReceiver-empty-destination", () => {
+    const result = combineReceiver('receiver', 'contract');
+    expect(result).toEqual("channel-1/receiver");
+  })
+  it("test-combineReceiver-non-empty-destination", () => {
+    const result = combineReceiver('receiver', 'contract', flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'), flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === 'Oraichain'), 'foobar');
+    expect(result).toEqual("channel-1/receiver:foobar:orai");
   })
 });
