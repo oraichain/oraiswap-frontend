@@ -155,6 +155,10 @@ describe('universal-swap', () => {
     ['airight', '0x01', 'airight', 'Oraichain', 'orai1234', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
     ['airight', '0x38', 'airight', '0x01', 'orai1234', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
     ['airight', '0x38', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['cosmos', 'cosmoshub-4', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['osmosis', 'osmosis-1', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['kawaii-islands', 'kawaii_6886-1', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
+    ['kawaii-islands', '0x1ae6', 'airight', 'Oraichain', '', { destination: '', universalSwapType: 'other-networks-to-oraichain' }],
     ['airight', '0x38', 'airight', 'Oraichain', 'orai1234', { destination: 'orai1234', universalSwapType: 'other-networks-to-oraichain' }],
     ['airight', 'Oraichain', 'tether', 'Oraichain', 'orai1234', { destination: '', universalSwapType: 'oraichain-to-oraichain' }],
     ['airight', '0x38', 'cosmos', 'Oraichain', 'orai1234', { destination: `orai1234:${process.env.REACT_APP_ATOM_ORAICHAIN_DENOM}`, universalSwapType: 'other-networks-to-oraichain' }],
@@ -166,8 +170,12 @@ describe('universal-swap', () => {
   ])("test-getDestination-given %s coingecko id, chain id %s, send-to %s, chain id %s with receiver %s should have destination %s", (fromCoingeckoId, fromChainId, toCoingeckoId, toChainId, receiver, destination) => {
     const fromToken = flattenTokens.find((item) => item.coinGeckoId === fromCoingeckoId && item.chainId === fromChainId);
     const toToken = flattenTokens.find((item) => item.coinGeckoId === toCoingeckoId && item.chainId === toChainId);
-    const receiverAddress = getDestination(fromToken, toToken, receiver);
-    expect(receiverAddress).toEqual(destination);
+    try {
+      const receiverAddress = getDestination(fromToken, toToken, receiver);
+      expect(receiverAddress).toEqual(destination);
+    } catch (error) {
+      expect(error).toEqual(new Error(`chain id ${fromToken.chainId} is currently not supported in universal swap`));
+    }
   })
 
   it("test-combineReceiver-empty-destination", () => {

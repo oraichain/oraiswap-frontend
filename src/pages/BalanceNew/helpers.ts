@@ -62,6 +62,9 @@ export const getDestination = (fromToken?: TokenItemType, toToken?: TokenItemTyp
   if (fromToken.chainId === 'Oraichain') {
     return { destination: '', universalSwapType: 'oraichain-to-other-networks' };
   }
+  if (fromToken.chainId === 'cosmoshub-4' || fromToken.chainId === 'osmosis-1' || fromToken.chainId === 'kawaii_6886-1' || fromToken.chainId === '0x1ae6') {
+    throw new Error(`chain id ${fromToken.chainId} is currently not supported in universal swap`);
+  }
   // if to token chain id is Oraichain, then we dont need to care about ibc msg case
   if (toToken.chainId === 'Oraichain') {
     // first case, two tokens are the same, only different in network => simple swap
