@@ -7,10 +7,8 @@ import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
 import { combineReceiver, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
-import { getUniversalSwapToAddress } from 'pages/UniversalSwap/helpers';
+import { UniversalSwapHandler } from 'pages/UniversalSwap/helpers';
 import { generateContractMessages, Type } from 'rest/api';
-
-jest.mock('libs/metamask.ts');
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -198,8 +196,8 @@ describe('universal-swap', () => {
     const result = combineReceiver('receiver', flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'), flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === 'Oraichain'), 'foobar');
     expect(result.combinedReceiver).toEqual("channel-1/receiver:foobar:orai");
   })
-
   it("test-getUniversalSwapToAddress", async () => {
+    const universalSwap = new UniversalSwapHandler();
     windowSpy.mockImplementation(() => ({
       Metamask: {
         getEthAddress: () => {
@@ -212,9 +210,42 @@ describe('universal-swap', () => {
         }
       }
     }));
-    let result = await getUniversalSwapToAddress('0x01');
+    let result = await universalSwap.getUniversalSwapToAddress('0x01');
     expect(result).toEqual('0x1234');
-    result = await getUniversalSwapToAddress('cosmoshub-4');
+    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
     expect(result).toEqual('orai1234');
+  })
+
+  describe("test-processUniversalSwap-with-mock", () => {
+    const universalSwap = new UniversalSwapHandler();
+    let swapSpy: jest.SpyInstance;
+    let swapAndTransferSpy: jest.SpyInstance;
+    let transferAndSwapSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      swapSpy = jest.spyOn(universalSwap, 'swap');
+      swapAndTransferSpy = jest.spyOn(universalSwap, 'swapAndTransfer');
+      transferAndSwapSpy = jest.spyOn(universalSwap, 'transferAndSwap');
+    })
+
+    it.each<[UniversalSwapType, string]>([
+      ['oraichain-to-oraichain', 'swap'],
+      ['oraichain-to-other-networks', 'swapAndTransfer'],
+      ['other-networks-to-oraichain', 'transferAndSwap'],
+    ])("test-processUniversalSwap", async (universalSwapType, expectedFunction) => {
+      swapSpy.mockResolvedValue("swap");
+      swapAndTransferSpy.mockResolvedValue("swapAndTransfer");
+      transferAndSwapSpy.mockResolvedValue("transferAndSwap");
+      const sourceReceiver = "orai1234";
+      const fromToken = flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38');
+      const toToken = flattenTokens.find((item) => item.coinGeckoId === 'tether' && item.chainId === '0x2b6653dc');
+      universalSwap.fromToken = fromToken;
+      universalSwap.toToken = toToken;
+      const result = await universalSwap.processUniversalSwap(sourceReceiver, '', universalSwapType);
+      // expect(swapSpy).toHaveBeenCalledTimes(1);
+      // expect(swapAndTransferSpy).toHaveBeenCalledTimes(1);
+      // expect(transferAndSwapSpy).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expectedFunction);
+    });
   })
 });
