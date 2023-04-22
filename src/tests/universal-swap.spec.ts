@@ -236,12 +236,11 @@ describe('universal-swap', () => {
       swapSpy.mockResolvedValue("swap");
       swapAndTransferSpy.mockResolvedValue("swapAndTransfer");
       transferAndSwapSpy.mockResolvedValue("transferAndSwap");
-      const sourceReceiver = "orai1234";
       const fromToken = flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38');
       const toToken = flattenTokens.find((item) => item.coinGeckoId === 'tether' && item.chainId === '0x2b6653dc');
       universalSwap.fromToken = fromToken;
       universalSwap.toToken = toToken;
-      const result = await universalSwap.processUniversalSwap(sourceReceiver, '', universalSwapType);
+      const result = await universalSwap.processUniversalSwap('', universalSwapType, { fromAmountToken: 1, simulateAmount: "1" });
       // expect(swapSpy).toHaveBeenCalledTimes(1);
       // expect(swapAndTransferSpy).toHaveBeenCalledTimes(1);
       // expect(transferAndSwapSpy).toHaveBeenCalledTimes(1);

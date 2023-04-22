@@ -14,6 +14,7 @@ import {
   TRON_SCAN
 } from 'config/constants';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
@@ -168,7 +169,7 @@ describe('bridge', () => {
     ['0x01', '0x', `${ETHEREUM_SCAN}/tx/0x`],
     ['kawaii_6886-1', '0x', `${KWT_SCAN}/tx/0x`],
     ['0x2b6653dc', '0x1234', `${TRON_SCAN}/#/transaction/1234`],
-    ['Oraichain', '0x', null]
+    ['Oraichain', '0x', `${network.explorer}/txs/0x`]
   ])(
     'bridge-test-get-transaciton-url given chainId %s should give expected URL %s',
     (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {

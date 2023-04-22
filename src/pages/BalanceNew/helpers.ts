@@ -43,7 +43,6 @@ export const getSourceReceiver = (keplrAddress: string, contractAddress?: string
 };
 
 
-// TODO: unfinished testing & writing code
 /**
  * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address 
  * @param from - from token
@@ -217,7 +216,8 @@ export const transferEvmToIBC = async (
   address: {
     metamaskAddress?: string;
     tronAddress?: string;
-  }
+  },
+  combinedReceiver?: string,
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
@@ -225,11 +225,10 @@ export const transferEvmToIBC = async (
   if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!];
   if (!gravityContractAddr || !from) {
-    return;
+    throw generateError("No gravity contract addr or no from token");
   }
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  const { combinedReceiver } = combineReceiver(oraiAddress, from);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, combinedReceiver);
+  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver);
   return result;
 };
 

@@ -4,17 +4,20 @@ import { TokenItemType, UniversalSwapType } from 'config/bridgeTokens';
 import { Uint128 } from 'libs/contracts';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import { generateContractMessages, generateConvertErc20Cw20Message, SwapQuery, Type } from 'rest/api';
+import CosmJs from 'libs/cosmjs';
+import { ORAI } from 'config/constants';
+import { combineReceiver, transferEvmToIBC } from 'pages/BalanceNew/helpers';
 
 export class UniversalSwapHandler {
 
-  private sender: string;
+  private _sender: string;
   private _fromToken: TokenItemType;
   private _toToken: TokenItemType;
 
   constructor(sender?: string, fromToken?: TokenItemType, toToken?: TokenItemType) {
-    this.sender = sender;
-    this.fromToken = fromToken;
-    this.toToken = toToken;
+    this._sender = sender;
+    this._fromToken = fromToken;
+    this._toToken = toToken;
   }
 
   get fromToken() {
@@ -25,12 +28,20 @@ export class UniversalSwapHandler {
     return this._toToken;
   }
 
+  get sender() {
+    return this._sender;
+  }
+
   set fromToken(from: TokenItemType) {
     this._fromToken = from;
   }
 
   set toToken(to: TokenItemType) {
     this._toToken = to;
+  }
+
+  set sender(sender: string) {
+    this._sender = sender;
   }
 
   calculateMinReceive(simulateAmount: string, userSlippage: number, decimals: number): Uint128 {
@@ -46,41 +57,48 @@ export class UniversalSwapHandler {
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
-  async swap(): Promise<any> {
-    return;
+  async swap(fromAmountToken: number, simulateAmount: string, oraiAddress: string, userSlippage?: number): Promise<any> {
+    const messages = this.generateMsgsSwap(
+      fromAmountToken,
+      simulateAmount,
+      userSlippage,
+      oraiAddress
+    );
+    const result = await CosmJs.executeMultiple({
+      prefix: ORAI,
+      walletAddr: oraiAddress,
+      msgs: messages,
+      gasAmount: { denom: ORAI, amount: '0' }
+    });
+    return result;
   }
 
   async swapAndTransfer(): Promise<any> {
     return;
   }
 
-  async transferAndSwap(): Promise<any> {
-    return;
+  async transferAndSwap(fromAmount: number, combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
+    return transferEvmToIBC(this.fromToken, fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 
-  async processUniversalSwap(sourceReceiver: string, combinedReceiver: string, universalSwapType: UniversalSwapType) {
+  async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: { fromAmountToken: number, simulateAmount: string, userSlippage?: number, metamaskAddress?: string, tronAddress?: string }) {
     if (universalSwapType === 'oraichain-to-oraichain')
-      return this.swap();
+      return this.swap(swapData.fromAmountToken, swapData.simulateAmount, this.sender, swapData.userSlippage);
     if (universalSwapType === 'oraichain-to-other-networks')
       return this.swapAndTransfer();
-    return this.transferAndSwap();
+    return this.transferAndSwap(swapData.fromAmountToken, combinedReceiver, swapData.metamaskAddress, swapData.tronAddress);
   }
 
   generateMsgsSwap(
     fromAmountToken: number,
-    amounts: AmountDetails,
-    simulateData: any,
+    simulateAmount: string,
     userSlippage: number,
     oraiAddress: string
   ) {
     try {
       const _fromAmount = toAmount(fromAmountToken, this.fromToken.decimals).toString();
 
-      // hard copy of from & to token info data to prevent data from changing when calling the function
-      const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, this.fromToken, oraiAddress);
-      const msgConvertTo = generateConvertErc20Cw20Message(amounts, this.toToken, oraiAddress);
-
-      const minimumReceive = this.calculateMinReceive(simulateData.amount, userSlippage, this.fromToken.decimals);
+      const minimumReceive = this.calculateMinReceive(simulateAmount, userSlippage, this.fromToken.decimals);
       const msgs = generateContractMessages({
         type: Type.SWAP,
         sender: oraiAddress,
@@ -92,10 +110,10 @@ export class UniversalSwapHandler {
 
       const msg = msgs[0];
 
-      const messages = buildMultipleMessages(msg, msgConvertsFrom, msgConvertTo);
+      const messages = buildMultipleMessages(msg);
       return messages;
     } catch (error) {
-      console.log('error generateMsgsSwap: ', error);
+      throw new Error(`Error generateMsgsSwap: ${error}`);
     }
   }
 }

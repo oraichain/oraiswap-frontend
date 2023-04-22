@@ -114,7 +114,7 @@ describe.only('IBCModule', () => {
         counterparty_version: 'ics20-1'
       }
     });
-    cosmosChain.ibc.addMiddleWare((msg, app) => {});
+    cosmosChain.ibc.addMiddleWare((msg, app) => { });
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
@@ -363,6 +363,7 @@ describe.only('IBCModule', () => {
     let routerContract: OraiswapRouterClient;
     let usdtToken: OraiswapTokenClient;
     let assetInfos: AssetInfo[];
+    // TODO: add a case where denom is ORAI, not CW20 token
     let icsPackage: FungibleTokenPacketData = {
       amount: ibcTransferAmount,
       denom: airiIbcDenom,

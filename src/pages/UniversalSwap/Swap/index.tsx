@@ -8,7 +8,7 @@ import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/pools';
-import { feeEstimate, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
@@ -22,6 +22,9 @@ import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
 import { combineReceiver } from 'pages/BalanceNew/helpers';
+import { network } from 'config/networks';
+import useLoadTokens from 'hooks/useLoadTokens';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -40,6 +43,10 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
+
+  const loadTokenAmounts = useLoadTokens();
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
@@ -116,13 +123,20 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const univeralSwapHandler = new UniversalSwapHandler();
       const oraiAddress = await handleCheckAddress();
+      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
-      console.log("receiver: ", combinedReceiver);
-      console.log("universal swap type: ", universalSwapType);
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
       // TODO: process the remaining logic of universal swap
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
+        });
+        loadTokenAmounts({ oraiAddress });
+
+        setSwapLoading(false);
+      }
     } catch (error) {
       handleErrorTransaction(error)
     } finally {

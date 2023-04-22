@@ -22,7 +22,6 @@ type ContractName =
   | 'converter'
   | 'pair'
   | 'token'
-  | 'cw20Ics20'
   | 'multicall';
 
 export class Contract {
@@ -78,7 +77,7 @@ export class Contract {
   }
 
   static ibcwasm(contractAddress: string): CwIcs20LatestClient {
-    return this.getContract('cw20Ics20', contractAddress, true, 'Cw20Ics20');
+    return new CwIcs20LatestClient(this.client as SigningCosmWasmClient, this.sender, contractAddress);
   }
 
   static get multicall(): MulticallQueryClient {
