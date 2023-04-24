@@ -1,6 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -23,6 +23,8 @@ import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
+import { Pairs } from 'config/poolV2';
+import { CoinGeckoId } from 'config/chainInfos';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -56,7 +58,6 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
   const res = await Contract.multicall.aggregate({
     queries
   });
-
   let ind = 0;
   return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
 }
@@ -64,7 +65,7 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
 async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<RewardsPerSecResponse[]> {
   const queries = tokens.map((token) => {
     return {
-      address: process.env.REACT_APP_STAKING_CONTRACT,
+      address: network.staking,
       data: toBinary({
         rewards_per_sec: {
           asset_info: toAssetInfo(token)
@@ -75,7 +76,6 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
   const res = await Contract.multicall.aggregate({
     queries
   });
-
   // aggregate no trybbb
   return res.return_data.map((data) => fromBinary(data.data));
 }
@@ -83,7 +83,7 @@ async function fetchAllRewardPerSecInfos(tokens: TokenItemType[]): Promise<Rewar
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInfoResponse[]> {
   const queries = tokens.map((token) => {
     return {
-      address: process.env.REACT_APP_STAKING_CONTRACT,
+      address: network.staking,
       data: toBinary({
         pool_info: {
           asset_info: toAssetInfo(token)
@@ -95,6 +95,7 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<PoolInf
   const res = await Contract.multicall.aggregate({
     queries
   });
+
   // aggregate no try
   return res.return_data.map((data) => fromBinary(data.data));
 }
@@ -108,14 +109,12 @@ async function getPairAmountInfo(
   toToken: TokenItemType,
   cachedPairs?: PairDetails
 ): Promise<PairAmountInfo> {
-  const pair = getPair(fromToken.denom, toToken.denom);
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, pair, cachedPairs);
+  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const pair = getPair(ORAI, STABLE_DENOM);
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], pair, cachedPairs);
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -133,21 +132,22 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
-  pair: Pair,
   cachedPairs?: PairDetails
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
+
+  const pair = Pairs.getPair(fromTokenInfo.denom, toTokenInfo.denom);
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = getPair(fromTokenInfo.denom, ORAI) as Pair;
-    const toPairInfo = getPair(ORAI, toTokenInfo.denom) as Pair;
+    const fromPairInfo = Pairs.getPair(fromTokenInfo.denom, ORAI);
+    const toPairInfo = Pairs.getPair(ORAI, toTokenInfo.denom);
     const fromPoolInfo =
       cachedPairs?.[fromPairInfo.contract_addr] || (await Contract.pair(fromPairInfo.contract_addr).pool());
     const toPoolInfo =
@@ -282,6 +282,18 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
+const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
+  if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
+  return tokenInfo.denom;
+};
+
+const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
+  if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
+    throw new Error('KWT and MILKY not supported in this function');
+  }
+  return cosmosTokens.find((token) => token.coinGeckoId === coingeckoId && token.chainId === 'Oraichain');
+};
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -297,27 +309,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: ORAI_INFO
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: ORAI_INFO,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -328,8 +340,6 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
-  console.log('operations: ', operations);
-
   try {
     const data = await Contract.router.simulateSwapOperations({
       offerAmount: amount.toString(),
@@ -723,5 +733,7 @@ export {
   parseTokenInfo,
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
-  generateMoveOraib2OraiMessages
+  generateMoveOraib2OraiMessages,
+  parseTokenInfoRawDenom,
+  getTokenOnOraichain
 };

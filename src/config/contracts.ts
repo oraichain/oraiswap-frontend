@@ -1,6 +1,6 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { contracts } from 'libs/contracts';
-import { Cw20Ics20Client } from 'libs/contracts/Cw20Ics20.client';
+import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
 import { MulticallQueryClient } from 'libs/contracts/Multicall.client';
 import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
 import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
@@ -22,7 +22,6 @@ type ContractName =
   | 'converter'
   | 'pair'
   | 'token'
-  | 'cw20Ics20'
   | 'multicall';
 
 export class Contract {
@@ -77,8 +76,8 @@ export class Contract {
     return this.getContract('token', contractAddress);
   }
 
-  static ibcwasm(contractAddress: string): Cw20Ics20Client {
-    return this.getContract('cw20Ics20', contractAddress, true, 'Cw20Ics20');
+  static ibcwasm(contractAddress: string): CwIcs20LatestClient {
+    return new CwIcs20LatestClient(this.client as SigningCosmWasmClient, this.sender, contractAddress);
   }
 
   static get multicall(): MulticallQueryClient {

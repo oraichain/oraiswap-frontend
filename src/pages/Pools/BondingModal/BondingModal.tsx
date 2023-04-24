@@ -7,7 +7,6 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay } from 'libs/utils';
 import { FC, useState } from 'react';
@@ -91,7 +90,6 @@ const BondingModal: FC<ModalProps> = ({
       setActionLoading(false);
     }
   };
-
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
@@ -136,7 +134,6 @@ const BondingModal: FC<ModalProps> = ({
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
-              // type="input"
               value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
               onChange={(e: { target: { value: string } }) => {
                 setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.decimals));

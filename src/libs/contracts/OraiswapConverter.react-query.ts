@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import { Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo} from "./types";
-import { ConfigResponse, ConvertInfoResponse} from "./OraiswapConverter.types";
+import {Uint128, Binary, Addr, AssetInfo, Cw20ReceiveMsg, TokenInfo, Decimal, TokenRatio} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, ConvertInfoResponse} from "./OraiswapConverter.types";
 import { OraiswapConverterQueryClient, OraiswapConverterClient } from "./OraiswapConverter.client";
 export interface OraiswapConverterReactQuery<TResponse, TData = TResponse> {
   client: OraiswapConverterQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
+    initialData?: undefined;
   };
 }
 export interface OraiswapConverterConvertInfoQuery<TData> extends OraiswapConverterReactQuery<ConvertInfoResponse, TData> {
@@ -47,9 +47,9 @@ export interface OraiswapConverterWithdrawTokensMutation {
     assetInfos: AssetInfo[];
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterWithdrawTokensMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterWithdrawTokensMutation>, "mutationFn">) {
@@ -57,11 +57,11 @@ export function useOraiswapConverterWithdrawTokensMutation(options?: Omit<UseMut
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.withdrawTokens(msg, fee, memo, funds), options);
+  }) => client.withdrawTokens(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapConverterConvertReverseMutation {
   client: OraiswapConverterClient;
@@ -69,9 +69,9 @@ export interface OraiswapConverterConvertReverseMutation {
     fromAsset: AssetInfo;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterConvertReverseMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterConvertReverseMutation>, "mutationFn">) {
@@ -79,11 +79,11 @@ export function useOraiswapConverterConvertReverseMutation(options?: Omit<UseMut
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.convertReverse(msg, fee, memo, funds), options);
+  }) => client.convertReverse(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapConverterUnregisterPairMutation {
   client: OraiswapConverterClient;
@@ -91,9 +91,9 @@ export interface OraiswapConverterUnregisterPairMutation {
     from: TokenInfo;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterUnregisterPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterUnregisterPairMutation>, "mutationFn">) {
@@ -101,11 +101,11 @@ export function useOraiswapConverterUnregisterPairMutation(options?: Omit<UseMut
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.unregisterPair(msg, fee, memo, funds), options);
+  }) => client.unregisterPair(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapConverterUpdatePairMutation {
   client: OraiswapConverterClient;
@@ -114,9 +114,9 @@ export interface OraiswapConverterUpdatePairMutation {
     to: TokenInfo;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterUpdatePairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterUpdatePairMutation>, "mutationFn">) {
@@ -124,29 +124,29 @@ export function useOraiswapConverterUpdatePairMutation(options?: Omit<UseMutatio
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updatePair(msg, fee, memo, funds), options);
+  }) => client.updatePair(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapConverterConvertMutation {
   client: OraiswapConverterClient;
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterConvertMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterConvertMutation>, "mutationFn">) {
   return useMutation<ExecuteResult, Error, OraiswapConverterConvertMutation>(({
     client,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.convert(fee, memo, funds), options);
+  }) => client.convert($fee, $memo, $funds), options);
 }
 export interface OraiswapConverterUpdateConfigMutation {
   client: OraiswapConverterClient;
@@ -154,9 +154,9 @@ export interface OraiswapConverterUpdateConfigMutation {
     owner: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterUpdateConfigMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterUpdateConfigMutation>, "mutationFn">) {
@@ -164,19 +164,23 @@ export function useOraiswapConverterUpdateConfigMutation(options?: Omit<UseMutat
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updateConfig(msg, fee, memo, funds), options);
+  }) => client.updateConfig(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapConverterReceiveMutation {
   client: OraiswapConverterClient;
-  msg: Cw20ReceiveMsg;
+  msg: {
+    amount: Uint128;
+    msg: Binary;
+    sender: string;
+  };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapConverterReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapConverterReceiveMutation>, "mutationFn">) {
@@ -184,9 +188,9 @@ export function useOraiswapConverterReceiveMutation(options?: Omit<UseMutationOp
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.receive(msg, fee, memo, funds), options);
+  }) => client.receive(msg, $fee, $memo, $funds), options);
 }

@@ -124,7 +124,7 @@ export const parseBep20Erc20Name = (name: string) => {
 };
 
 export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): TokenInfo => {
-  const data = info?.token_info_response ?? info;
+  const data = (info as any)?.token_info_response ?? info;
   return {
     ...token,
     symbol: token.name,

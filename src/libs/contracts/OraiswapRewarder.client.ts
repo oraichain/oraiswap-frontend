@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import {Addr, AssetInfo} from "./types";
-import { ConfigResponse, DistributionInfoResponse, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
+import {Addr, AssetInfo, Uint128} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, DistributionInfoResponse, RewardAmountPerSecondResponse} from "./OraiswapRewarder.types";
 export interface OraiswapRewarderReadOnlyInterface {
   contractAddress: string;
   config: () => Promise<ConfigResponse>;
@@ -73,12 +73,12 @@ export interface OraiswapRewarderInterface extends OraiswapRewarderReadOnlyInter
     distributionInterval?: number;
     owner?: Addr;
     stakingContract?: Addr;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   distribute: ({
     assetInfos
   }: {
     assetInfos: AssetInfo[];
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class OraiswapRewarderClient extends OraiswapRewarderQueryClient implements OraiswapRewarderInterface {
   client: SigningCosmWasmClient;
@@ -102,24 +102,24 @@ export class OraiswapRewarderClient extends OraiswapRewarderQueryClient implemen
     distributionInterval?: number;
     owner?: Addr;
     stakingContract?: Addr;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       update_config: {
         distribution_interval: distributionInterval,
         owner,
         staking_contract: stakingContract
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   distribute = async ({
     assetInfos
   }: {
     assetInfos: AssetInfo[];
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       distribute: {
         asset_infos: assetInfos
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
 }

@@ -38,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -120,6 +120,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     if (toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
       transferAddress = tronToEthAddress(tronAddress);
     }
+    console.log({ transferAmount })
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
     processTxResult(fromToken.rpc, result);
   };
@@ -155,6 +156,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       if (from.cosmosBased) {
+        console.log('ok')
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
@@ -163,7 +165,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message
+        message: ex.ex.message
       });
     }
   };

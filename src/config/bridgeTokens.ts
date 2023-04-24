@@ -13,6 +13,8 @@ import {
 
 export type EvmDenom = 'bep20_orai' | 'bep20_airi' | 'erc20_orai' | 'kawaii_orai';
 
+export type UniversalSwapType = 'other-networks-to-oraichain' | 'oraichain-to-oraichain' | 'oraichain-to-other-networks';
+
 export type TokenItemType = {
   name: string;
   org: NetworkName;
