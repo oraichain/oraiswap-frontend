@@ -1,4 +1,3 @@
-import { NetworkType } from './../../config/chainInfos';
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
@@ -125,7 +124,6 @@ export const transferIBC = async (data: {
   ibcInfo: IBCInfo;
 }): Promise<DeliverTxResponse> => {
   const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
-  console.log({ data });
   const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
   const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner);
   const result = await client.sendIbcTokens(
@@ -255,13 +253,7 @@ export const transferEvmToIBC = async (
   if (!gravityContractAddr || !from) {
     throw generateError('No gravity contract addr or no from token');
   }
-  console.log({
-    from,
-    fromAmount,
-    finalTransferAddress,
-    combinedReceiver: combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver
-  });
-  return;
+
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
   const result = await window.Metamask.transferToGravity(
     from,
@@ -419,7 +411,6 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
-  console.log(fromToken, toToken);
 
   await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
@@ -428,7 +419,6 @@ export const transferIbcCustom = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  console.log(fromAddress, toAddress);
   if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
@@ -459,7 +449,6 @@ export const transferIbcCustom = async (
   if (ibcInfo.channel === oraichain2oraib) {
     try {
       console.log({ ibcInfo, fromToken, toToken, toAddress, amount: amount.amount, ibcMemo });
-      // return
       // special case. We try-catch because cosmwasm stargate already check tx code for us & throw an error if code != 0 => we can safely cast to DeliverTxResponse if there's no error
       const result = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, toAddress, amount.amount, ibcMemo);
       return { ...result, code: 0 };
@@ -571,7 +560,7 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   return result;
 };
 
-export const getToToken = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
+export const findToToken = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
   const toToken = cosmosTokens.find((t) =>
     t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === fromToken.coinGeckoId && t?.bridgeNetworkIdentifier
       ? t.bridgeNetworkIdentifier === toNetwork

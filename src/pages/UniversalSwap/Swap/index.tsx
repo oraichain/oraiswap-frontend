@@ -25,6 +25,7 @@ import { combineReceiver, getToToken } from 'pages/BalanceNew/helpers';
 import { network } from 'config/networks';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 
 const cx = cn.bind(styles);
 
@@ -114,6 +115,18 @@ const SwapComponent: React.FC<{
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
+  const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
+    if (isDeliverTxFailure(result)) {
+      displayToast(TToastType.TX_FAILED, {
+        message: result.rawLog
+      });
+    } else {
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: customLink || `${rpc}/tx?hash=0x${result.transactionHash}`
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -124,21 +137,12 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const toTokenSwap = oraichainTokens.find(t => t.name === originalToToken.name);
-      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, toTokenSwap);
+      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
       const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, amounts, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
-      // TODO: process the remaining logic of universal swap
-      if (result) {
-        // todo: need to process if universal swap from orai to evm chain => 2 buoc, can genrate url cua bridge rpc.
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
-        });
-        loadTokenAmounts({ oraiAddress });
-
-        setSwapLoading(false);
-      }
+      processTxResult(originalFromToken.rpc, result);
+      loadTokenAmounts({ oraiAddress });
     } catch (error) {
       console.log({ error })
       handleErrorTransaction(error)

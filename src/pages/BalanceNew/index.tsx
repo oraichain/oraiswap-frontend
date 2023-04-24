@@ -120,7 +120,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     if (toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
       transferAddress = tronToEthAddress(tronAddress);
     }
-    console.log({ transferAmount })
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
     processTxResult(fromToken.rpc, result);
   };
@@ -156,7 +155,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         return;
       }
       if (from.cosmosBased) {
-        console.log('ok')
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
