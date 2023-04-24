@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {  AssetInfo, PairInfo} from "./types";
-import { ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
+import {Addr, AssetInfo, PairInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, PairsResponse} from "./OraiswapFactory.types";
 import { OraiswapFactoryQueryClient, OraiswapFactoryClient } from "./OraiswapFactory.client";
 export interface OraiswapFactoryReactQuery<TResponse, TData = TResponse> {
   client: OraiswapFactoryQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
+    initialData?: undefined;
   };
 }
 export interface OraiswapFactoryPairsQuery<TData> extends OraiswapFactoryReactQuery<PairsResponse, TData> {
@@ -59,15 +59,38 @@ export function useOraiswapFactoryConfigQuery<TData = ConfigResponse>({
     enabled: !!client && (options?.enabled != undefined ? options.enabled : true)
   });
 }
+export interface OraiswapFactoryAddPairMutation {
+  client: OraiswapFactoryClient;
+  msg: {
+    pairInfo: PairInfo;
+  };
+  args?: {
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
+  };
+}
+export function useOraiswapFactoryAddPairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapFactoryAddPairMutation>, "mutationFn">) {
+  return useMutation<ExecuteResult, Error, OraiswapFactoryAddPairMutation>(({
+    client,
+    msg,
+    args: {
+      $fee,
+      $memo,
+      $funds
+    } = {}
+  }) => client.addPair(msg, $fee, $memo, $funds), options);
+}
 export interface OraiswapFactoryCreatePairMutation {
   client: OraiswapFactoryClient;
   msg: {
     assetInfos: AssetInfo[];
+    pairAdmin?: string;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapFactoryCreatePairMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapFactoryCreatePairMutation>, "mutationFn">) {
@@ -75,11 +98,11 @@ export function useOraiswapFactoryCreatePairMutation(options?: Omit<UseMutationO
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.createPair(msg, fee, memo, funds), options);
+  }) => client.createPair(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapFactoryUpdateConfigMutation {
   client: OraiswapFactoryClient;
@@ -89,9 +112,9 @@ export interface OraiswapFactoryUpdateConfigMutation {
     tokenCodeId?: number;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapFactoryUpdateConfigMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapFactoryUpdateConfigMutation>, "mutationFn">) {
@@ -99,9 +122,9 @@ export function useOraiswapFactoryUpdateConfigMutation(options?: Omit<UseMutatio
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.updateConfig(msg, fee, memo, funds), options);
+  }) => client.updateConfig(msg, $fee, $memo, $funds), options);
 }

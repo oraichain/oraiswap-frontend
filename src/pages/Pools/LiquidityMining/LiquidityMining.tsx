@@ -11,7 +11,7 @@ import { Asset, RewardInfoResponseItem } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse } from 'libs/contracts/OraiswapStaking.types';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDecimal } from 'libs/utils';
+import { getUsd, toDecimal } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
@@ -58,6 +58,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
+  const [cachePrices] = useConfigReducer('coingecko');
   const loadTokenAmounts = useLoadTokens();
 
   useEffect(() => {
@@ -136,7 +137,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       }
     } catch (error) {
       console.log('error in bond form: ', error);
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     }
     setActionLoading(false);
   };
@@ -228,11 +229,11 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                         decimalScale={6}
                       />
                     </div>
-                    {/* <TokenBalance
-                              balance={r.usdValue}
-                              className={cx('amount-usd')}
-                              decimalScale={2}
-                            /> */}
+                    <TokenBalance
+                      balance={getUsd(r.amount, r, cachePrices)}
+                      className={cx('amount-usd')}
+                      decimalScale={2}
+                    />
                   </div>
                 ))}
               <button

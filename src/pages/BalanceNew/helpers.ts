@@ -1,8 +1,17 @@
+import { NetworkType } from './../../config/chainInfos';
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
-import { flattenTokens, gravityContracts, kawaiiTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CosmosChainId, chainInfos } from 'config/chainInfos';
+import {
+  cosmosTokens,
+  flattenTokens,
+  gravityContracts,
+  kawaiiTokens,
+  TokenItemType,
+  tokenMap,
+  UniversalSwapType
+} from 'config/bridgeTokens';
+import { CosmosChainId, chainInfos, NetworkChainId } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
@@ -19,7 +28,9 @@ import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
   generateMoveOraib2OraiMessages,
+  getTokenOnOraichain,
   parseTokenInfo,
+  parseTokenInfoRawDenom,
   Type
 } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -31,13 +42,79 @@ import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
  * @param contractAddress - BSC / ETH token contract address
  * @returns converted receiver address
  */
-export const getOneStepKeplrAddr = (keplrAddress: string, contractAddress: string): string => {
+export const getSourceReceiver = (keplrAddress: string, contractAddress?: string): string => {
   let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
   // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
   if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
     oneStepKeplrAddr = keplrAddress;
   }
   return oneStepKeplrAddr;
+};
+
+/**
+ * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address
+ * @param from - from token
+ * @param to - to token
+ * @param destReceiver - destination destReceiver
+ * @returns destination in the format <dest-channel>/<dest-destReceiver>:<dest-denom>
+ */
+export const getDestination = (
+  fromToken?: TokenItemType,
+  toToken?: TokenItemType,
+  destReceiver?: string
+): { destination: string; universalSwapType: UniversalSwapType } => {
+  if (!fromToken || !toToken || !destReceiver)
+    return { destination: '', universalSwapType: 'other-networks-to-oraichain' };
+  // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
+  if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
+    return { destination: '', universalSwapType: 'oraichain-to-oraichain' };
+  }
+  // we dont need to have any destination for this case
+  if (fromToken.chainId === 'Oraichain') {
+    return { destination: '', universalSwapType: 'oraichain-to-other-networks' };
+  }
+  if (
+    fromToken.chainId === 'cosmoshub-4' ||
+    fromToken.chainId === 'osmosis-1' ||
+    fromToken.chainId === 'kawaii_6886-1' ||
+    fromToken.chainId === '0x1ae6'
+  ) {
+    throw new Error(`chain id ${fromToken.chainId} is currently not supported in universal swap`);
+  }
+  // if to token chain id is Oraichain, then we dont need to care about ibc msg case
+  if (toToken.chainId === 'Oraichain') {
+    // first case, two tokens are the same, only different in network => simple swap
+    if (fromToken.coinGeckoId === toToken.coinGeckoId)
+      return { destination: destReceiver, universalSwapType: 'other-networks-to-oraichain' };
+    // if they are not the same then we set dest denom
+    return {
+      destination: `${destReceiver}:${parseTokenInfoRawDenom(toToken)}`,
+      universalSwapType: 'other-networks-to-oraichain'
+    };
+  }
+  // the remaining cases where we have to process ibc msg
+  const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
+  // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
+  let receiverPrefix = '';
+  if (window.Metamask.isEthAddress(destReceiver)) receiverPrefix = toToken.prefix;
+  return {
+    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(
+      getTokenOnOraichain(toToken.coinGeckoId)
+    )}`,
+    universalSwapType: 'other-networks-to-oraichain'
+  };
+};
+
+export const combineReceiver = (
+  sourceReceiver: string,
+  fromToken?: TokenItemType,
+  toToken?: TokenItemType,
+  destReceiver?: string
+): { combinedReceiver: string; universalSwapType: UniversalSwapType } => {
+  const source = getSourceReceiver(sourceReceiver, fromToken?.contractAddress);
+  const { destination, universalSwapType } = getDestination(fromToken, toToken, destReceiver);
+  if (destination.length > 0) return { combinedReceiver: `${source}:${destination}`, universalSwapType };
+  return { combinedReceiver: source, universalSwapType };
 };
 
 export const transferIBC = async (data: {
@@ -48,7 +125,7 @@ export const transferIBC = async (data: {
   ibcInfo: IBCInfo;
 }): Promise<DeliverTxResponse> => {
   const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
-
+  console.log({ data });
   const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
   const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner);
   const result = await client.sendIbcTokens(
@@ -132,7 +209,13 @@ export const convertTransferIBCErc20Kwt = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  const nativeToken = kawaiiTokens.find((token) => token.cosmosBased && token.coinGeckoId === fromToken.coinGeckoId); // collect kawaiiverse cosmos based token for conversion
+  const nativeToken = kawaiiTokens.find(
+    (token) =>
+      token.bridgeTo &&
+      token.cosmosBased &&
+      token.coinGeckoId === fromToken.coinGeckoId &&
+      token.denom !== fromToken.denom
+  ); // collect kawaiiverse cosmos based token for conversion
 
   const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
@@ -161,7 +244,8 @@ export const transferEvmToIBC = async (
   address: {
     metamaskAddress?: string;
     tronAddress?: string;
-  }
+  },
+  combinedReceiver?: string
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
@@ -169,11 +253,22 @@ export const transferEvmToIBC = async (
   if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!];
   if (!gravityContractAddr || !from) {
-    return;
+    throw generateError('No gravity contract addr or no from token');
   }
+  console.log({
+    from,
+    fromAmount,
+    finalTransferAddress,
+    combinedReceiver: combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver
+  });
+  return;
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  let oneStepKeplrAddr = getOneStepKeplrAddr(oraiAddress, from.contractAddress);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, oneStepKeplrAddr);
+  const result = await window.Metamask.transferToGravity(
+    from,
+    fromAmount,
+    finalTransferAddress,
+    combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver
+  );
   return result;
 };
 
@@ -324,6 +419,7 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
+  console.log(fromToken, toToken);
 
   await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
@@ -332,7 +428,7 @@ export const transferIbcCustom = async (
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-
+  console.log(fromAddress, toAddress);
   if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
@@ -362,6 +458,8 @@ export const transferIbcCustom = async (
   // if it includes wasm in source => ibc wasm case
   if (ibcInfo.channel === oraichain2oraib) {
     try {
+      console.log({ ibcInfo, fromToken, toToken, toAddress, amount: amount.amount, ibcMemo });
+      // return
       // special case. We try-catch because cosmwasm stargate already check tx code for us & throw an error if code != 0 => we can safely cast to DeliverTxResponse if there's no error
       const result = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, toAddress, amount.amount, ibcMemo);
       return { ...result, code: 0 };
@@ -471,4 +569,13 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
     transferMsgs
   );
   return result;
+};
+
+export const getToToken = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
+  const toToken = cosmosTokens.find((t) =>
+    t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === fromToken.coinGeckoId && t?.bridgeNetworkIdentifier
+      ? t.bridgeNetworkIdentifier === toNetwork
+      : t.chainId === toNetwork
+  );
+  return toToken;
 };

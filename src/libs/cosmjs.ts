@@ -81,7 +81,7 @@ const executeMultipleDirectClient = async (
   client: cosmwasm.SigningCosmWasmClient
 ) => {
   const executeContractMsgs = getExecuteContractMsgs(senderAddress, msgs);
-
+  console.log({ senderAddress, executeContractMsgs });
   const result = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', memo);
   if (isDeliverTxFailure(result)) {
     throw new Error(

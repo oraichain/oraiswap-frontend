@@ -1,6 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -24,6 +24,7 @@ import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
 import { Pairs } from 'config/poolV2';
+import { CoinGeckoId } from 'config/chainInfos';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -281,6 +282,18 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
+const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
+  if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
+  return tokenInfo.denom;
+};
+
+const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
+  if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
+    throw new Error('KWT and MILKY not supported in this function');
+  }
+  return cosmosTokens.find((token) => token.coinGeckoId === coingeckoId && token.chainId === 'Oraichain');
+};
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -327,8 +340,6 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
-  console.log('operations: ', operations);
-
   try {
     const data = await Contract.router.simulateSwapOperations({
       offerAmount: amount.toString(),
@@ -722,5 +733,7 @@ export {
   parseTokenInfo,
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
-  generateMoveOraib2OraiMessages
+  generateMoveOraib2OraiMessages,
+  parseTokenInfoRawDenom,
+  getTokenOnOraichain
 };

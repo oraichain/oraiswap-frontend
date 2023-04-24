@@ -1,6 +1,7 @@
-import {Addr, Uint128, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
+import {Addr, Uint128, Binary, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
 export interface InstantiateMsg {
   factory_addr: Addr;
+  factory_addr_v2: Addr;
 }
 export type ExecuteMsg = {
   receive: Cw20ReceiveMsg;
@@ -34,6 +35,7 @@ export type QueryMsg = {
 export interface MigrateMsg {}
 export interface ConfigResponse {
   factory_addr: Addr;
+  factory_addr_v2: Addr;
 }
 export interface SimulateSwapOperationsResponse {
   amount: Uint128;
