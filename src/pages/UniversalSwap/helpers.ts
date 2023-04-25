@@ -138,8 +138,14 @@ export class UniversalSwapHandler {
       const amount = coin(toAmount(transferAmount, this._toTokenInOrai.decimals).toString(), this._toTokenInOrai.denom);
 
       const msgSwap = this.generateMsgsSwap(fromAmountToken, simulateAmount, userSlippage);
-      const msgExecuteSwap = getExecuteContractMsgs(this._sender, msgSwap);
-
+      const input = msgSwap.map(({ handleMsg, handleOptions, contractAddress }) => {
+        return {
+          handleMsg: JSON.parse(handleMsg),
+          transferAmount: handleOptions?.funds,
+          contractAddress
+        };
+      });
+      const msgExecuteSwap = getExecuteContractMsgs(this._sender, input);
       const msgTransfer = {
         typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
         value: MsgTransfer.fromPartial({
@@ -148,7 +154,6 @@ export class UniversalSwapHandler {
           token: amount,
           sender: this._sender,
           receiver: transferAddress,
-          // receiver: 'oraib14n3tx8s5ftzhlxvq0w5962v60vd82h305kec0j',
           memo: ibcMemo,
           timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
             .multiply(1000000000)
@@ -156,22 +161,41 @@ export class UniversalSwapHandler {
         })
       };
 
-      console.log([...msgExecuteSwap, msgTransfer]);
+      console.log('msgExecuteSwap: ', msgExecuteSwap);
+
+      // const result = await CosmJs.executeMultiple({
+      //   prefix: ORAI,
+      //   walletAddr: this.sender,
+      //   msgs: msgSwap,
+      //   gasAmount: { denom: ORAI, amount: '0' }
+      // });
 
       const offlineSigner = await window.Keplr.getOfflineSigner(oraichainNetwork.chainId);
       const aminoTypes = new AminoTypes({
         ...customAminoTypes
       });
 
-      // Initialize the gaia api with the offline signer that is injected by Keplr extension.
       const client = await SigningStargateClient.connectWithSigner(oraichainNetwork.rpc, offlineSigner, {
         registry: customRegistry,
         aminoTypes,
         gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
       });
-      // const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
-      const result = await client.signAndBroadcast(this._sender, [msgTransfer], 'auto');
+      const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
       return result;
+
+      // const offlineSigner = await window.Keplr.getOfflineSigner(oraichainNetwork.chainId);
+      // const aminoTypes = new AminoTypes({
+      //   ...customAminoTypes
+      // });
+
+      // // Initialize the gaia api with the offline signer that is injected by Keplr extension.
+      // const client = await SigningStargateClient.connectWithSigner(oraichainNetwork.rpc, offlineSigner, {
+      //   registry: customRegistry,
+      //   aminoTypes,
+      //   gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+      // });
+      // // const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
+      // const result = await client.signAndBroadcast(this._sender, [msgTransfer], 'auto');
     } catch (error) {
       console.log('error in executeMultipleMsgs:', error);
     }
@@ -205,6 +229,8 @@ export class UniversalSwapHandler {
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {
+    console.log('universalSwapType processUniversalSwap', universalSwapType);
+
     if (universalSwapType === 'oraichain-to-oraichain')
       return this.swap(swapData.fromAmountToken, swapData.simulateAmount, swapData.userSlippage);
     if (universalSwapType === 'oraichain-to-other-networks') return this.swapAndTransfer(swapData);
@@ -229,7 +255,6 @@ export class UniversalSwapHandler {
         toInfo: this._toTokenInOrai ?? this._toToken,
         minimumReceive
       } as SwapQuery);
-
       const msg = msgs[0];
 
       const messages = buildMultipleMessages(msg);
