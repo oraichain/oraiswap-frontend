@@ -151,11 +151,10 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
       console.log({ msg });
       return {
         contractAddress: msg.contract,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         handleOptions: { funds: msg.sent_funds }
       };
     });
-    console.log({ messages });
     return messages;
   } catch (error) {
     console.log('error in buildMultipleMessages', error);

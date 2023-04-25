@@ -332,6 +332,7 @@ export const transferTokenErc20Cw20Map = async ({
         .toString()
     })
   };
+  console.log({ msgTransfer });
 
   const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
   const aminoTypes = new AminoTypes({

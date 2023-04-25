@@ -141,8 +141,13 @@ const SwapComponent: React.FC<{
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
       const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, amounts, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
-      processTxResult(originalFromToken.rpc, result);
-      loadTokenAmounts({ oraiAddress });
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
+        });
+        loadTokenAmounts({ oraiAddress });
+        setSwapLoading(false);
+      }
     } catch (error) {
       console.log({ error })
       handleErrorTransaction(error)
