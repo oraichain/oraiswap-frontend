@@ -14,6 +14,7 @@ import { useFetchApr, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataL
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
+import NewTokenModal from './NewTokenModal/NewTokenModal';
 
 interface PoolsProps {}
 
@@ -106,7 +107,8 @@ const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: { [key: string]: number };
   myPairsData?: Object;
-}>(({ pairInfos, allPoolApr, myPairsData }) => {
+  setIsOpenNewTokenModal?: (isOpenNewToken: boolean) => void;
+}>(({ pairInfos, allPoolApr, myPairsData, setIsOpenNewTokenModal }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -150,24 +152,38 @@ const ListPools = memo<{
 
   return (
     <div className={styles.listpools}>
-      <div className={styles.listpools_header}>
-        <div className={styles.listpools_filter}>
-          {LIST_FILTER_POOL.map((item) => (
-            <div
-              key={item.key}
-              style={{
-                color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
-                background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
-              }}
-              className={styles.filter_item}
-              onClick={() => setTypeFilter(item.key)}
-            >
-              {item.text}
-            </div>
-          ))}
+      <div className={styles.listpools_all}>
+        <div className={styles.listpools_header}>
+          <div className={styles.listpools_filter}>
+            {LIST_FILTER_POOL.map((item) => (
+              <div
+                key={item.key}
+                style={{
+                  color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
+                  background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
+                }}
+                className={styles.filter_item}
+                onClick={() => setTypeFilter(item.key)}
+              >
+                {item.text}
+              </div>
+            ))}
+          </div>
+          <div className={styles.listpools_search}>
+            <SearchInput placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+          </div>
         </div>
-        <div className={styles.listpools_search}>
-          <SearchInput placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+        <div className={styles.listpoolsToken_create}>
+          <div
+            style={{
+              color: '#fff',
+              background: '#612fca'
+            }}
+            className={styles.create_item}
+            onClick={() => setIsOpenNewTokenModal(true)}
+          >
+            Create new Token
+          </div>
         </div>
       </div>
       <div className={styles.listpools_list}>
@@ -192,6 +208,7 @@ const ListPools = memo<{
 
 const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
+  const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
 
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList();
@@ -204,11 +221,21 @@ const Pools: React.FC<PoolsProps> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice} />
-        <ListPools pairInfos={pairInfos} allPoolApr={cachedApr} myPairsData={myPairsData} />
+        <ListPools
+          setIsOpenNewTokenModal={setIsOpenNewTokenModal}
+          pairInfos={pairInfos}
+          allPoolApr={cachedApr}
+          myPairsData={myPairsData}
+        />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
+        />
+        <NewTokenModal
+          isOpen={isOpenNewTokenModal}
+          open={() => setIsOpenNewTokenModal(true)}
+          close={() => setIsOpenNewTokenModal(false)}
         />
       </div>
     </Content>
