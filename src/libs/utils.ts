@@ -144,14 +144,22 @@ export const toAssetInfo = (token: TokenInfo): AssetInfo => {
 };
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
-  var messages: any[] = mainMsg ? [mainMsg] : [];
-  messages.unshift(...preMessages.flat(1));
-  messages = messages.map((msg) => ({
-    contractAddress: msg.contract,
-    handleMsg: msg.msg.toString(),
-    handleOptions: { funds: msg.sent_funds }
-  }));
-  return messages;
+  try {
+    var messages: any[] = mainMsg ? [mainMsg] : [];
+    messages.unshift(...preMessages.flat(1));
+    messages = messages.map((msg) => {
+      console.log({ msg });
+      return {
+        contractAddress: msg.contract,
+        handleMsg: msg.msg.toString(),
+        handleOptions: { funds: msg.sent_funds }
+      };
+    });
+    console.log({ messages });
+    return messages;
+  } catch (error) {
+    console.log('error in buildMultipleMessages', error);
+  }
 };
 
 export const formateNumberDecimals = (price, decimals = 2) => {

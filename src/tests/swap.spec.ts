@@ -9,7 +9,7 @@ import { generateContractMessages, Type } from 'rest/api';
 describe('swap', () => {
   it('max amount', () => {
     const amount = 123456789n;
-    const decimals = 18;
+    const decimals = 6;
 
     const displayAmount = toDisplay(amount, decimals);
     console.log({ displayAmount });

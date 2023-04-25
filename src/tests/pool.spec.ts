@@ -126,7 +126,6 @@ describe('pool', () => {
 
     it('should fetch pairs data correctly', async () => {
       pairsData = await fetchCachedPairsData();
-      poolList = compact(await Promise.all(Pairs.pairs.map((p) => fetchPairInfoData(p, pairsData))));
 
       expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({

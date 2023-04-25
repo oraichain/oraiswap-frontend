@@ -315,7 +315,7 @@ export const transferTokenErc20Cw20Map = async ({
     fromAddress,
     parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
   );
-
+  console.log({ executeContractMsgs });
   // note need refactor
   // get raw ibc tx
   const msgTransfer = {
@@ -389,6 +389,7 @@ export const transferToRemoteChainIbcWasm = async (
       timeout: msg.timeout,
       memo: msg.memo
     };
+    console.log({ transferBackMsgCw20Msg });
     const cw20Token = Contract.token(fromToken.contractAddress);
     result = await cw20Token.send(
       {
@@ -411,7 +412,6 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
-
   await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
   await window.Keplr.suggestChain(fromToken.chainId);
@@ -431,7 +431,6 @@ export const transferIbcCustom = async (
   // for KWT & MILKY tokens, we use the old ibc info channel
   if (fromToken.evmDenoms || kawaiiTokens.find((i) => i.name === fromToken.name))
     ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
-
   let result: DeliverTxResponse;
   if (fromToken.evmDenoms) {
     result = await transferTokenErc20Cw20Map({
