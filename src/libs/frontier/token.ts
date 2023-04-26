@@ -20,7 +20,7 @@ const getSigningCosmWasmClient = async () => {
   const { accounts, wallet } = await getWallet();
   const address = accounts[0].address;
   const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
-    gasPrice: GasPrice.fromString('0.001orai' as string)
+    gasPrice: GasPrice.fromString(network.fee.gasPrice)
   });
   return { client, address, wallet };
 };
@@ -52,6 +52,7 @@ const addPairAndLpToken = async (cw20ContractAddress: string) => {
     process.env.REACT_APP_FACTORY_V2_CONTRACT as string
   );
 
+  // force the token to be paired with native orai by default. It will then be able to be swapped with other tokens that pairs with ORAI
   const result = await factoryContract.createPair({
     assetInfos: [{ native_token: { denom: 'orai' } }, { token: { contract_addr: cw20ContractAddress } }]
   });
@@ -85,8 +86,8 @@ const createTextProposal = async (
       initialDeposit: initial_deposit
     }
   };
-  // return client.signAndBroadcast(address, [message], 'auto');
-  return client.simulate(address, [message], 'auto');
+  return client.signAndBroadcast(address, [message], 'auto');
+  // return client.simulate(address, [message], 'auto');
 };
 
 export { deployCw20Token, addPairAndLpToken, createTextProposal };

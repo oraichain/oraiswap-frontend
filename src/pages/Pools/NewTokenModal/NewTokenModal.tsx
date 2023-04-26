@@ -70,7 +70,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div className={cx('container')}>
         <RewardIcon className={cx('reward-icon')} />
-        <div className={cx('title')}>Create new Token</div>
+        <div className={cx('title')}>List a new token</div>
         <div className={cx('content')}>
           <div className={cx('token')}>
             <div className={cx('label')}>Token name</div>
