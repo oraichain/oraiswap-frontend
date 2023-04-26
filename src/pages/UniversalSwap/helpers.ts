@@ -9,7 +9,7 @@ import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { getNetworkGasPrice, tronToEthAddress } from 'helper';
 import { TransferBackMsg, Uint128 } from 'libs/contracts';
-import CosmJs, { getExecuteContractMsgs } from 'libs/cosmjs';
+import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
@@ -76,9 +76,47 @@ export class UniversalSwapHandler {
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
+  async handleTransferIBC(simulateAmount: string, fromAmountToken: number, userSlippage: number) {
+    const transferAmount = toDisplay(simulateAmount); // amount to transfer
+    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
+    const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
+    if (!toAddress) throw generateError('Please login keplr!');
+
+    const amount = coin(toAmount(transferAmount, this._fromToken.decimals).toString(), this._toTokenInOrai.denom);
+    const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
+    const aminoTypes = new AminoTypes({
+      ...createWasmAminoConverters(),
+      ...customAminoTypes
+    });
+
+    const client = await SigningStargateClient.connectWithSigner(this._fromToken.rpc, offlineSigner, {
+      registry: customRegistry,
+      aminoTypes,
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+    });
+    const msgSwap = this.generateMsgsSwap(fromAmountToken, simulateAmount, userSlippage);
+    const msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
+
+    const msgTransfer = {
+      typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+      value: MsgTransfer.fromPartial({
+        sourcePort: ibcInfo.source,
+        sourceChannel: ibcInfo.channel,
+        token: amount,
+        sender: this._sender,
+        receiver: toAddress,
+        memo: '',
+        timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
+          .multiply(1000000000)
+          .toString()
+      })
+    };
+    const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
+    return result;
+  }
+
   async handleTransferOraiToEvm(
     fromAmountToken: number,
-    transferAmount: number,
     metamaskAddress: string,
     tronAddress: string,
     simulateAmount: string,
@@ -134,13 +172,11 @@ export class UniversalSwapHandler {
           timeout: msg.timeout,
           memo: msg.memo
         };
-        console.log({ transferBackMsgCw20Msg });
         const cw20Token = Contract.token(this._fromToken.contractAddress);
         const _fromAmount = toAmount(fromAmountToken, this._fromToken.decimals).toString();
 
         res = await cw20Token.send(
           {
-            // amount: simulateAmount,
             amount: _fromAmount,
             contract: ibcWasmContractAddress,
             msg: Buffer.from(JSON.stringify(transferBackMsgCw20Msg)).toString('base64')
@@ -176,59 +212,17 @@ export class UniversalSwapHandler {
     tronAddress,
     userSlippage
   }: SwapData): Promise<any> {
-    const transferAmount = toDisplay(simulateAmount); // amount to transfer
-    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     this._toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this._toToken.coinGeckoId); // find to token in Oraichain to swap
 
     // if swap from Oraichain to cosmoshub | osmosis, we can transfer via IBC.
     if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1') {
-      const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
-      if (!toAddress) throw generateError('Please login keplr!');
-
-      const ibcMemo = '';
-      const amount = coin(toAmount(transferAmount, this._fromToken.decimals).toString(), this._toTokenInOrai.denom);
-      const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
-      const aminoTypes = new AminoTypes({
-        ...createWasmAminoConverters(),
-        ...customAminoTypes
-      });
-
-      const client = await SigningStargateClient.connectWithSigner(this._fromToken.rpc, offlineSigner, {
-        registry: customRegistry,
-        aminoTypes,
-        gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
-      });
-      const msgSwap = this.generateMsgsSwap(fromAmountToken, simulateAmount, userSlippage);
-      const input = msgSwap.map(({ handleMsg, handleOptions, contractAddress }) => {
-        return {
-          handleMsg: JSON.parse(handleMsg),
-          transferAmount: handleOptions?.funds,
-          contractAddress
-        };
-      });
-      const msgExecuteSwap = getExecuteContractMsgs(this._sender, input);
-      const msgTransfer = {
-        typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-        value: MsgTransfer.fromPartial({
-          sourcePort: ibcInfo.source,
-          sourceChannel: ibcInfo.channel,
-          token: amount,
-          sender: this._sender,
-          receiver: toAddress,
-          memo: ibcMemo,
-          timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
-            .multiply(1000000000)
-            .toString()
-        })
-      };
-      const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
+      const result = await this.handleTransferIBC(simulateAmount, fromAmountToken, userSlippage);
       return result;
     }
 
     // from Oraichain to EVM networks
     const result = await this.handleTransferOraiToEvm(
       fromAmountToken,
-      transferAmount,
       metamaskAddress,
       tronAddress,
       simulateAmount,
