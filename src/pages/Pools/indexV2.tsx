@@ -16,7 +16,7 @@ import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -182,7 +182,7 @@ const ListPools = memo<{
             className={styles.create_item}
             onClick={() => setIsOpenNewTokenModal(true)}
           >
-            Create new Token
+            List a new token
           </div>
         </div>
       </div>
