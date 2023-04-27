@@ -61,6 +61,10 @@ export class UniversalSwapHandler {
     return this._toToken;
   }
 
+  get toTokenInOrai() {
+    return this._toTokenInOrai;
+  }
+
   get sender() {
     return this._sender;
   }
@@ -83,6 +87,10 @@ export class UniversalSwapHandler {
 
   set toToken(to: TokenItemType) {
     this._toToken = to;
+  }
+
+  set toTokenInOrai(toTokenInOrai: TokenItemType) {
+    this._toTokenInOrai = toTokenInOrai;
   }
 
   set sender(sender: string) {
@@ -202,10 +210,11 @@ export class UniversalSwapHandler {
         timeout: ibcInfo.timeout,
         memo: ibcMemo
       };
+      console.log({ msg });
       let res: cosmwasm.ExecuteResult;
       if (assetInfo.native_token) {
         res = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [
-          { amount: simulateAmount, denom: this._toToken.denom }
+          { amount: toAmount(this.fromAmount).toString(), denom: this._fromToken.denom }
         ]);
       } else {
         const transferBackMsgCw20Msg: TransferBackMsg = {
@@ -215,9 +224,10 @@ export class UniversalSwapHandler {
           timeout: msg.timeout,
           memo: msg.memo
         };
+        console.log({ transferBackMsgCw20Msg });
         const cw20Token = Contract.token(this._fromToken.contractAddress);
         const _fromAmount = toAmount(fromAmountToken, this._fromToken.decimals).toString();
-
+        console.log({ _fromAmount });
         res = await cw20Token.send(
           {
             amount: _fromAmount,

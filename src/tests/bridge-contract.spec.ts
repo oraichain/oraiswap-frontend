@@ -24,6 +24,7 @@ const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
 const bridgeReceiver = 'tron-testnet0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222';
 const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
 const cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiSenderAddress).words);
+console.log({ cosmosSenderAddress });
 const ibcTransferAmount = '100000000';
 const initialBalanceAmount = '10000000000000';
 
@@ -114,7 +115,7 @@ describe.only('IBCModule', () => {
         counterparty_version: 'ics20-1'
       }
     });
-    cosmosChain.ibc.addMiddleWare((msg, app) => { });
+    cosmosChain.ibc.addMiddleWare((msg, app) => {});
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
@@ -302,6 +303,7 @@ describe.only('IBCModule', () => {
       remote_address: cosmosSenderAddress,
       remote_denom: airiIbcDenom
     };
+    console.log({ transferBackMsg, ibcTransferAmount });
     airiToken.sender = bobAddress;
     await airiToken.send({
       amount: ibcTransferAmount,
@@ -483,6 +485,7 @@ describe.only('IBCModule', () => {
           }
         ]
       });
+      console.log({ simulateResult });
       expect(simulateResult.amount).toEqual('1');
     });
 

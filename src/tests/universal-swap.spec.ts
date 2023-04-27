@@ -17,6 +17,7 @@ import { combineReceiver, findToToken, getDestination } from 'pages/BalanceNew/h
 import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
 import { UniversalSwapHandler } from 'pages/UniversalSwap/helpers';
 import { generateContractMessages, Type } from 'rest/api';
+import { senderAddress } from './common';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -375,6 +376,8 @@ describe('universal-swap', () => {
     universalSwap.fromAmount = 0.1;
     universalSwap.simulateAmount = '10000';
     universalSwap.userSlippage = 0.01;
+
+    universalSwap.sender = senderAddress;
     let swapSpy: jest.SpyInstance;
     let swapAndTransferSpy: jest.SpyInstance;
     let transferAndSwapSpy: jest.SpyInstance;
@@ -444,9 +447,55 @@ describe('universal-swap', () => {
       expect(result).toEqual(expectedFunction);
     });
 
-    it.each([[]])('test generate msg swap', () => {
-      const messages = universalSwap.generateMsgsSwap();
-      console.log(messages);
+    it.each([
+      [
+        oraichainTokens.find((t) => t.coinGeckoId === 'oraichain-token'),
+        cosmosTokens.find((t) => t.coinGeckoId === 'cosmos' && t.chainId === 'cosmoshub-4'),
+        [
+          {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: {
+              sender: senderAddress,
+              contract: process.env.REACT_APP_ROUTER_V2_CONTRACT
+            }
+          },
+          {
+            typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+            value: {
+              sourcePort: 'transfer',
+              sourceChannel: 'channel-15', // atom oraichain channel
+              token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM, amount: '10000' },
+              sender: senderAddress,
+              receiver: 'orai1234'
+            }
+          }
+        ],
+        'universal-swap-oraichain-to-cosmos-or-osmosis'
+      ]
+    ])('test generate msg swap', async (fromToken, toToken, expectedMsgs, _name) => {
+      windowSpy.mockImplementation(() => ({
+        Keplr: {
+          getKeplrAddr: async (_chainId: string) => {
+            return 'orai1234';
+          }
+        }
+      }));
+      universalSwap.fromToken = fromToken;
+      universalSwap.toToken = toToken;
+      universalSwap.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === toToken.coinGeckoId);
+
+      const messages = await universalSwap.combineMsgIbc();
+      console.log(JSON.stringify(messages));
+      expect(messages.length).toEqual(2);
+      expect(messages[0].typeUrl).toEqual(expectedMsgs[0].typeUrl);
+      expect(messages[0].value.sender).toEqual(senderAddress);
+      expect(messages[0].value.contract).toEqual(process.env.REACT_APP_ROUTER_V2_CONTRACT);
+
+      expect(messages[1].typeUrl).toEqual(expectedMsgs[1].typeUrl);
+      expect(messages[1].value.sourcePort).toEqual('transfer');
+      expect(messages[1].value.sourceChannel).toEqual(expectedMsgs[1].value.sourceChannel);
+      expect(messages[1].value.sender).toEqual(expectedMsgs[1].value.sender);
+      expect(messages[1].value.receiver).toEqual(expectedMsgs[1].value.receiver);
     });
   });
 });

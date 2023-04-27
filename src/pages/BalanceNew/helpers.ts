@@ -380,7 +380,9 @@ export const transferToRemoteChainIbcWasm = async (
     memo: ibcMemo
   };
   let result: ExecuteResult;
+  console.log({ amount });
   if (assetInfo.native_token) {
+    console.log({ msg, amount: { amount, denom: fromToken.denom } });
     result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
   } else {
     const transferBackMsgCw20Msg: TransferBackMsg = {
