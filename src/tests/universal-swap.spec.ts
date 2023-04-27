@@ -472,7 +472,7 @@ describe('universal-swap', () => {
         ],
         'universal-swap-oraichain-to-cosmos-or-osmosis'
       ]
-    ])('test generate msg swap', async (fromToken, toToken, expectedMsgs, _name) => {
+    ])('test-generate-msg-swap-for-%s', async (_name, fromToken, toToken, expectedMsgs) => {
       windowSpy.mockImplementation(() => ({
         Keplr: {
           getKeplrAddr: async (_chainId: string) => {

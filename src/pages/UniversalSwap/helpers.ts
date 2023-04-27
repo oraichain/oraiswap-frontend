@@ -218,11 +218,16 @@ export class UniversalSwapHandler {
         ]);
       } else {
         const transferBackMsgCw20Msg: TransferBackMsg = {
-          local_channel_id: msg.localChannelId,
-          remote_address: msg.remoteAddress,
-          remote_denom: msg.remoteDenom,
-          timeout: msg.timeout,
-          memo: msg.memo
+          // local_channel_id: msg.localChannelId,
+          // remote_address: msg.remoteAddress,
+          // remote_denom: msg.remoteDenom,
+          // timeout: msg.timeout,
+          // memo: msg.memo
+          local_channel_id: 'channel-29',
+          remote_address: 'oraib14n3tx8s5ftzhlxvq0w5962v60vd82h305kec0j',
+          remote_denom: 'oraib0x55d398326f99059fF775485246999027B3197955',
+          timeout: 3600,
+          memo: 'oraib0x8754032Ac7966A909e2E753308dF56bb08DabD69'
         };
         console.log({ transferBackMsgCw20Msg });
         const cw20Token = Contract.token(this._fromToken.contractAddress);
