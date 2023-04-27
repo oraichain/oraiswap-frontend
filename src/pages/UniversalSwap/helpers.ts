@@ -1,5 +1,6 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
+import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
 import { NetworkChainId } from 'config/chainInfos';
@@ -32,11 +33,24 @@ export class UniversalSwapHandler {
   private _fromToken: TokenItemType;
   private _toToken: TokenItemType;
   private _toTokenInOrai: TokenItemType;
+  private _fromAmount: number;
+  private _simulateAmount: string;
+  private _userSlippage?: number;
 
-  constructor(sender?: string, fromToken?: TokenItemType, toToken?: TokenItemType) {
+  constructor(
+    sender?: string,
+    fromToken?: TokenItemType,
+    toToken?: TokenItemType,
+    fromAmount?: number,
+    simulateAmount?: string,
+    userSlippage?: number
+  ) {
     this._sender = sender;
     this._fromToken = fromToken;
     this._toToken = toToken;
+    this._fromAmount = fromAmount;
+    this._simulateAmount = simulateAmount;
+    this._userSlippage = userSlippage;
   }
 
   get fromToken() {
@@ -51,6 +65,18 @@ export class UniversalSwapHandler {
     return this._sender;
   }
 
+  get fromAmount() {
+    return this._fromAmount;
+  }
+
+  get simulateAmount() {
+    return this._simulateAmount;
+  }
+
+  get userSlippage() {
+    return this._userSlippage;
+  }
+
   set fromToken(from: TokenItemType) {
     this._fromToken = from;
   }
@@ -61,6 +87,17 @@ export class UniversalSwapHandler {
 
   set sender(sender: string) {
     this._sender = sender;
+  }
+  set fromAmount(fromAmount: number) {
+    this._fromAmount = fromAmount;
+  }
+
+  set simulateAmount(simulateAmount: string) {
+    this._simulateAmount = simulateAmount;
+  }
+
+  set userSlippage(userSlippage: number) {
+    this._userSlippage = userSlippage;
   }
 
   calculateMinReceive(simulateAmount: string, userSlippage: number, decimals: number): Uint128 {
@@ -76,25 +113,15 @@ export class UniversalSwapHandler {
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
-  async handleTransferIBC(simulateAmount: string, fromAmountToken: number, userSlippage: number) {
-    const transferAmount = toDisplay(simulateAmount); // amount to transfer
+  async combineMsgIbc(): Promise<EncodeObject[]> {
+    const transferAmount = toDisplay(this._simulateAmount); // amount to transfer
     const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
     const amount = coin(toAmount(transferAmount, this._fromToken.decimals).toString(), this._toTokenInOrai.denom);
-    const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
-    const aminoTypes = new AminoTypes({
-      ...createWasmAminoConverters(),
-      ...customAminoTypes
-    });
 
-    const client = await SigningStargateClient.connectWithSigner(this._fromToken.rpc, offlineSigner, {
-      registry: customRegistry,
-      aminoTypes,
-      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
-    });
-    const msgSwap = this.generateMsgsSwap(fromAmountToken, simulateAmount, userSlippage);
+    const msgSwap = this.generateMsgsSwap();
     const msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
 
     const msgTransfer = {
@@ -111,7 +138,23 @@ export class UniversalSwapHandler {
           .toString()
       })
     };
-    const result = await client.signAndBroadcast(this._sender, [...msgExecuteSwap, msgTransfer], 'auto');
+    return [...msgExecuteSwap, msgTransfer];
+  }
+
+  async handleTransferIBC() {
+    const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
+    const aminoTypes = new AminoTypes({
+      ...createWasmAminoConverters(),
+      ...customAminoTypes
+    });
+
+    const client = await SigningStargateClient.connectWithSigner(this._fromToken.rpc, offlineSigner, {
+      registry: customRegistry,
+      aminoTypes,
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+    });
+    const combinedMsg = await this.combineMsgIbc();
+    const result = await client.signAndBroadcast(this._sender, combinedMsg, 'auto');
     return result;
   }
 
@@ -190,8 +233,8 @@ export class UniversalSwapHandler {
     }
   }
 
-  async swap(fromAmountToken: number, simulateAmount: string, userSlippage?: number): Promise<any> {
-    const messages = this.generateMsgsSwap(fromAmountToken, simulateAmount, userSlippage);
+  async swap(): Promise<any> {
+    const messages = this.generateMsgsSwap();
     const result = await CosmJs.executeMultiple({
       prefix: ORAI,
       walletAddr: this.sender,
@@ -201,10 +244,7 @@ export class UniversalSwapHandler {
     return result;
   }
 
-  /** Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.
-   * B1: find toToken in Oraichain (this._toTokenInOrai) to swap first
-   * B2: find toToken in in Osmosis | CosmosHub | Oraibridge for EVM network to bridge from Oraichain
-   */
+  // Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.
   async swapAndTransfer({
     fromAmountToken,
     simulateAmount,
@@ -215,20 +255,17 @@ export class UniversalSwapHandler {
     this._toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this._toToken.coinGeckoId); // find to token in Oraichain to swap
 
     // if swap from Oraichain to cosmoshub | osmosis, we can transfer via IBC.
-    if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1') {
-      const result = await this.handleTransferIBC(simulateAmount, fromAmountToken, userSlippage);
-      return result;
-    }
+    if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1')
+      return await this.handleTransferIBC();
 
     // from Oraichain to EVM networks
-    const result = await this.handleTransferOraiToEvm(
+    return await this.handleTransferOraiToEvm(
       fromAmountToken,
       metamaskAddress,
       tronAddress,
       simulateAmount,
       userSlippage
     );
-    return result;
   }
 
   async transferAndSwap(
@@ -237,12 +274,11 @@ export class UniversalSwapHandler {
     metamaskAddress?: string,
     tronAddress?: string
   ): Promise<any> {
-    return transferEvmToIBC(this.fromToken, fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
+    return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {
-    if (universalSwapType === 'oraichain-to-oraichain')
-      return this.swap(swapData.fromAmountToken, swapData.simulateAmount, swapData.userSlippage);
+    if (universalSwapType === 'oraichain-to-oraichain') return this.swap();
     if (universalSwapType === 'oraichain-to-other-networks') return this.swapAndTransfer(swapData);
     return this.transferAndSwap(
       swapData.fromAmountToken,
@@ -252,11 +288,15 @@ export class UniversalSwapHandler {
     );
   }
 
-  generateMsgsSwap(fromAmountToken: number, simulateAmount: string, userSlippage: number) {
+  generateMsgsSwap() {
     try {
-      const _fromAmount = toAmount(fromAmountToken, this._fromToken.decimals).toString();
+      const _fromAmount = toAmount(this._fromAmount, this._fromToken.decimals).toString();
 
-      const minimumReceive = this.calculateMinReceive(simulateAmount, userSlippage, this._fromToken.decimals);
+      const minimumReceive = this.calculateMinReceive(
+        this._simulateAmount,
+        this._userSlippage,
+        this._fromToken.decimals
+      );
       const msgs = generateContractMessages({
         type: Type.SWAP,
         sender: this._sender,

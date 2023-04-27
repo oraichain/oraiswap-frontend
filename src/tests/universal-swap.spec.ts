@@ -372,6 +372,9 @@ describe('universal-swap', () => {
 
   describe('test-processUniversalSwap-with-mock', () => {
     const universalSwap = new UniversalSwapHandler();
+    universalSwap.fromAmount = 0.1;
+    universalSwap.simulateAmount = '10000';
+    universalSwap.userSlippage = 0.01;
     let swapSpy: jest.SpyInstance;
     let swapAndTransferSpy: jest.SpyInstance;
     let transferAndSwapSpy: jest.SpyInstance;
@@ -439,6 +442,11 @@ describe('universal-swap', () => {
       // expect(swapAndTransferSpy).toHaveBeenCalledTimes(1);
       // expect(transferAndSwapSpy).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expectedFunction);
+    });
+
+    it.each([[]])('test generate msg swap', () => {
+      const messages = universalSwap.generateMsgsSwap();
+      console.log(messages);
     });
   });
 });

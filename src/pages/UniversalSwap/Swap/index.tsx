@@ -137,7 +137,7 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken);
+      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
       const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, amounts, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });

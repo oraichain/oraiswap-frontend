@@ -112,7 +112,7 @@ export const handleErrorTransaction = (error: any) => {
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
   } else {
-    if (error.ex.message)
+    if (error?.ex?.message)
       finalError = String(error.ex.message);
     else
       finalError = String(error);
