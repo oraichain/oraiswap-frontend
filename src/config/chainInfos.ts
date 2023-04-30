@@ -663,4 +663,3 @@ export const chainInfos: CustomChainInfo[] = [
 export const evmChains = chainInfos.filter(
   (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
 );
-console.log({ evmChains });

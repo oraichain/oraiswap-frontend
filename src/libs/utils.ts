@@ -148,7 +148,6 @@ export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
     var messages: any[] = mainMsg ? [mainMsg] : [];
     messages.unshift(...preMessages.flat(1));
     messages = messages.map((msg) => {
-      console.log({ msg });
       return {
         contractAddress: msg.contract,
         handleMsg: msg.msg,

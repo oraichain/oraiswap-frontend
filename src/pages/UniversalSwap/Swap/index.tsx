@@ -1,3 +1,4 @@
+import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
@@ -5,12 +6,15 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/pools';
 import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { combineReceiver } from 'pages/BalanceNew/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -21,11 +25,6 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
-import { combineReceiver, getToToken } from 'pages/BalanceNew/helpers';
-import { network } from 'config/networks';
-import useLoadTokens from 'hooks/useLoadTokens';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 
 const cx = cn.bind(styles);
 
@@ -46,7 +45,6 @@ const SwapComponent: React.FC<{
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-
   const loadTokenAmounts = useLoadTokens();
 
   const onChangeFromAmount = (amount: number | undefined) => {
@@ -115,18 +113,6 @@ const SwapComponent: React.FC<{
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
-  const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
-    if (isDeliverTxFailure(result)) {
-      displayToast(TToastType.TX_FAILED, {
-        message: result.rawLog
-      });
-    } else {
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink || `${rpc}/tx?hash=0x${result.transactionHash}`
-      });
-    }
-  };
-
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -137,10 +123,10 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount);
+      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount, userSlippage);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, amounts, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
