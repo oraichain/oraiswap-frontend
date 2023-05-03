@@ -28,7 +28,12 @@ export default class Metamask {
   }
 
   public isEthAddress(address: string): boolean {
-    return Web3.utils.checkAddressChecksum(Web3.utils.toChecksumAddress(address));
+    try {
+      const checkSumAddress = Web3.utils.toChecksumAddress(address);
+      return Web3.utils.checkAddressChecksum(checkSumAddress);
+    } catch (error) {
+      return false;
+    }
   }
 
   public toCheckSumEthAddress(address: string): string {

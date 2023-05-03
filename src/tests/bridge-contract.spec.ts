@@ -1,6 +1,7 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coins } from '@cosmjs/proto-signing';
-import { CWSimulateApp, IbcOrder, SimulateCosmWasmClient } from '@terran-one/cw-simulate';
+import { CWSimulateApp, GenericError, IbcOrder, IbcPacket, SimulateCosmWasmClient } from '@terran-one/cw-simulate';
+import { Ok } from 'ts-results';
 import bech32 from 'bech32';
 import { readFileSync } from 'fs';
 import { AssetInfo } from 'libs/contracts';
@@ -16,6 +17,7 @@ import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2
 import path from 'path';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
+import { flatten } from 'lodash';
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -116,7 +118,13 @@ describe.only('IBCModule', () => {
         counterparty_version: 'ics20-1'
       }
     });
-    cosmosChain.ibc.addMiddleWare((msg, app) => { });
+
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
+      const data = msg.data.packet as IbcPacket;
+      if (Number(data.timeout.timestamp) < cosmosChain.time) {
+        throw new GenericError('timeout at ' + data.timeout.timestamp);
+      }
+    });
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
@@ -582,14 +590,16 @@ describe.only('IBCModule', () => {
       async (destChannel: string, destReceiver: string, destDenom: string) => {
         // now send ibc package
         icsPackage.memo = `${destChannel}/${destReceiver}:${destDenom}`;
+
         // transfer from cosmos to oraichain, should pass
-        const result = await cosmosChain.ibc.sendPacketReceive({
+        let result = await cosmosChain.ibc.sendPacketReceive({
           packet: {
             data: toBinary(icsPackage),
             ...packetData
           },
           relayer: cosmosSenderAddress
         });
+
         console.log('result: ', JSON.stringify(result.events));
         const sendPacketEvent = result.events.find((event) => event.type === 'send_packet');
         expect(sendPacketEvent).not.toBeUndefined();
@@ -600,6 +610,22 @@ describe.only('IBCModule', () => {
         expect(packet.receiver).toEqual(icsPackage.sender);
         expect(packet.sender).toEqual(ics20Contract.contractAddress);
         // expect(packet.memo).toEqual(ics20Contract.contractAddress);
+
+        // pass 1 day with 86_400 seconds
+        cosmosChain.store.tx((setter) => Ok(setter('time')(cosmosChain.time + 86_400 * 1e9)));
+
+        // transfer from cosmos to oraichain, should pass
+        result = await cosmosChain.ibc.sendPacketReceive({
+          packet: {
+            data: toBinary(icsPackage),
+            ...packetData
+          },
+          relayer: cosmosSenderAddress
+        });
+
+        expect(
+          flatten(result.events.map((e) => e.attributes)).find((a) => a.key === 'error_follow_up_msgs').value
+        ).toContain('Generic error: timeout at');
       }
     );
   });
