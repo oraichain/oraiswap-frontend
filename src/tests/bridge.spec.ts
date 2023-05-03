@@ -13,7 +13,7 @@ import {
   ORAI_INFO,
   TRON_SCAN
 } from 'config/constants';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
@@ -30,7 +30,7 @@ describe('bridge', () => {
   it('bridge-evm-bsc-to-orai-normal-token-should-return-channel-1-plus-address', async () => {
     const tokenAddress = ORAI_BSC_CONTRACT;
     const res = getSourceReceiver(keplrAddress, tokenAddress);
-    expect(res).toBe(`channel-1/${keplrAddress}`);
+    expect(res).toBe(`${oraib2oraichain}/${keplrAddress}`);
   });
 
   it('bridge-evm-bsc-to-orai-special-tokens-should-return-only-address', async () => {

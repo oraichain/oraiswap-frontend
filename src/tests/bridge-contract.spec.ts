@@ -15,6 +15,7 @@ import { TransferBackMsg } from 'libs/contracts/types';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import path from 'path';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
+import { oraib2oraichain } from 'config/ibcInfos';
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -115,7 +116,7 @@ describe.only('IBCModule', () => {
         counterparty_version: 'ics20-1'
       }
     });
-    cosmosChain.ibc.addMiddleWare((msg, app) => {});
+    cosmosChain.ibc.addMiddleWare((msg, app) => { });
     // topup
     oraiClient.app.bank.setBalance(ics20Contract.contractAddress, coins(initialBalanceAmount, 'orai'));
   });
@@ -319,11 +320,11 @@ describe.only('IBCModule', () => {
     [bobAddress, ibcTransferAmount, 'only-receiver-memo-should-fallback-to-transfer-to-receiver'],
     [`${bobAddress}:`, ibcTransferAmount, 'receiver-with-a-dot-memo-should-fallback-to-transfer-to-receiver'],
     [
-      `channel-1/${bobAddress}:`,
+      `${oraib2oraichain}/${bobAddress}:`,
       ibcTransferAmount,
       'receiver-with-a-dot-and-channel-memo-should-fallback-to-transfer-to-receiver'
     ],
-    [`channel-1/${bobAddress}`, ibcTransferAmount, 'receiver-and-channel-memo-should-fallback-to-transfer-to-receiver']
+    [`${oraib2oraichain}/${bobAddress}`, ibcTransferAmount, 'receiver-and-channel-memo-should-fallback-to-transfer-to-receiver']
   ])(
     'cw-ics20-test-single-step-invalid-dest-denom-memo-remote-to-local-given %s should-get-expected-amount %s',
     async (memo: string, expectedAmount: string, _name: string) => {

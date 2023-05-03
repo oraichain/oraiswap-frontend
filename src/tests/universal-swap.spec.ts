@@ -9,7 +9,7 @@ import {
   ORAI,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX
 } from 'config/constants';
-import { ibcInfos, oraichain2atom, oraichain2oraib } from 'config/ibcInfos';
+import { ibcInfos, oraib2oraichain, oraichain2atom, oraichain2oraib, oraichain2osmosis } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay } from 'libs/utils';
@@ -329,7 +329,7 @@ describe('universal-swap', () => {
 
   it('test-combineReceiver-empty-destination', () => {
     const result = combineReceiver('receiver');
-    expect(result.combinedReceiver).toEqual('channel-1/receiver');
+    expect(result.combinedReceiver).toEqual(`${oraib2oraichain}/receiver`);
   });
   it('test-combineReceiver-non-empty-destination', () => {
     const result = combineReceiver(
@@ -338,7 +338,7 @@ describe('universal-swap', () => {
       flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === 'Oraichain'),
       'foobar'
     );
-    expect(result.combinedReceiver).toEqual('channel-1/receiver:foobar:orai');
+    expect(result.combinedReceiver).toEqual(`${oraib2oraichain}/receiver:foobar:orai`);
   });
   it('test-getUniversalSwapToAddress', async () => {
     const universalSwap = new UniversalSwapHandler();
@@ -607,7 +607,7 @@ describe('universal-swap', () => {
         toChainId: NetworkChainId,
         expectedSwapMsg: any,
         expectedSwapContractAddr: string,
-        expectedFunds?: any
+        expectedFunds: any
       ) => {
         universalSwap.fromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoinGeckoId);
         universalSwap.toToken = flattenTokens.find((t) => t.coinGeckoId === toCoinGeckoId && t.chainId === toChainId);
@@ -636,7 +636,7 @@ describe('universal-swap', () => {
             contract: process.env.REACT_APP_IBC_WASM_CONTRACT,
             amount: simulateAmount,
             msg: toBinary({
-              local_channel_id: 'channel-29',
+              local_channel_id: oraichain2oraib,
               remote_address: 'foobar',
               remote_denom: 'bep20_airi',
               timeout: 3600,
@@ -654,7 +654,7 @@ describe('universal-swap', () => {
         '0x38',
         {
           transfer_to_remote: {
-            local_channel_id: 'channel-29',
+            local_channel_id: oraichain2oraib,
             remote_address: 'foobar',
             remote_denom: 'bep20_orai',
             timeout: 3600,
@@ -674,7 +674,7 @@ describe('universal-swap', () => {
             contract: process.env.REACT_APP_IBC_WASM_CONTRACT,
             amount: simulateAmount,
             msg: toBinary({
-              local_channel_id: 'channel-29',
+              local_channel_id: oraichain2oraib,
               remote_address: 'foobar',
               remote_denom: 'bep20_usdt',
               timeout: 3600,
@@ -783,7 +783,7 @@ describe('universal-swap', () => {
             typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
             value: {
               sourcePort: 'transfer',
-              sourceChannel: 'channel-13',
+              sourceChannel: oraichain2osmosis,
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount },
               sender: senderAddress,
               receiver: 'orai1234',
