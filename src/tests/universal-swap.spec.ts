@@ -543,6 +543,38 @@ describe('universal-swap', () => {
       }
     );
 
+    it.each<[NetworkChainId, string]>([
+      [
+        'cosmoshub-4',
+        'cosmos',
+      ],
+      [
+        'osmosis-1',
+        'cosmos',
+      ],
+      [
+        'Oraichain',
+        'evm',
+      ],
+      [
+        '0x01',
+        'evm',
+      ]
+    ])("test-combine-msgs-logic", async (chainId, expectedMsgType) => {
+      const universalSwap = new UniversalSwapHandler();
+      const toToken = flattenTokens.find((item) => item.coinGeckoId === 'tether');
+      universalSwap.toToken = toToken;
+      universalSwap.toToken.chainId = chainId;
+      universalSwap.combineMsgCosmos = async () => {
+        return new Promise((resolve) => resolve([{ value: "any", typeUrl: "cosmos" }]));
+      };
+      universalSwap.combineMsgEvm = async () => {
+        return new Promise((resolve) => resolve([{ value: "any", typeUrl: "evm" }]));
+      };
+      const messages = await universalSwap.combineMsgs('Ox1234', 'T1234');
+      expect(messages[0].typeUrl).toEqual(expectedMsgType)
+    })
+
     it.each([
       [
         'swap-tokens-that-both-belong-to-Oraichain-from-is-native-token',
