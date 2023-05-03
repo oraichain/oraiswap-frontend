@@ -199,13 +199,10 @@ export class UniversalSwapHandler {
   }
 
   async combineMsgs(metamaskAddress: string, tronAddress: string): Promise<EncodeObject[]> {
-    let combinedMsgs: EncodeObject[];
     if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1')
-      combinedMsgs = await this.combineMsgCosmos();
-    else {
-      combinedMsgs = await this.combineMsgEvm(metamaskAddress, tronAddress);
-    }
-    return combinedMsgs;
+      return this.combineMsgCosmos();
+    return this.combineMsgEvm(metamaskAddress, tronAddress);
+
   }
 
   // Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.
