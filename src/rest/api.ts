@@ -25,6 +25,8 @@ import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiB
 import { TokenInfo } from 'types/token';
 import { Pairs } from 'config/poolV2';
 import { CoinGeckoId } from 'config/chainInfos';
+import { calculateTimeoutTimestamp } from 'helper';
+import { IBCInfo } from 'types/ibc';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -309,27 +311,27 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
@@ -690,7 +692,7 @@ function generateMoveOraib2OraiMessages(
   let transferMsgs: MsgTransfer[] = [];
   for (const fromToken of remainingOraib) {
     const toToken = toTokens.find((t) => t.chainId === 'Oraichain' && t.name === fromToken.name);
-    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     // hardcode for MILKY & KWT because they use the old IBC channel
     if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
       ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
@@ -703,9 +705,7 @@ function generateMoveOraib2OraiMessages(
       sender: fromAddress,
       receiver: toAddress,
       memo: '',
-      timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
-        .multiply(1000000000)
-        .toString(),
+      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
       timeoutHeight: { revisionNumber: '0', revisionHeight: '0' } // we dont need timeout height. We only use timeout timestamp
     });
   }

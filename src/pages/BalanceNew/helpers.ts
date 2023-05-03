@@ -15,7 +15,7 @@ import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constant
 import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { getNetworkGasPrice } from 'helper';
+import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 import { TransferBackMsg } from 'libs/contracts';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
@@ -133,7 +133,7 @@ export const transferIBC = async (data: {
     ibcInfo.source,
     ibcInfo.channel,
     undefined,
-    Math.floor(Date.now() / 1000) + ibcInfo.timeout,
+    parseInt(calculateTimeoutTimestamp(ibcInfo.timeout)),
     {
       gas: '200000',
       amount: []
@@ -186,7 +186,7 @@ export const transferIBCKwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
+      timeoutTimestamp: parseInt(calculateTimeoutTimestamp(ibcInfo.timeout))
     },
     customMessages
   });
@@ -228,7 +228,7 @@ export const convertTransferIBCErc20Kwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: Math.floor(Date.now() / 1000) + ibcInfo.timeout
+      timeoutTimestamp: parseInt(calculateTimeoutTimestamp(ibcInfo.timeout))
     },
     amount: amount.amount,
     contractAddr: fromToken?.contractAddress
@@ -327,9 +327,7 @@ export const transferTokenErc20Cw20Map = async ({
       sender: fromAddress,
       receiver: toAddress,
       memo: ibcMemo,
-      timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
-        .multiply(1000000000)
-        .toString()
+      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout)
     })
   };
   console.log({ msgTransfer });

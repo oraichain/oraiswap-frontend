@@ -6,6 +6,7 @@ import { network } from 'config/networks';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
+import Long from 'long';
 
 export interface Tokens {
   denom?: string;
@@ -120,4 +121,10 @@ export const handleErrorTransaction = (error: any) => {
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
+}
+
+export const calculateTimeoutTimestamp = (timeout: number): string => {
+  return Long.fromNumber(Math.floor(Date.now() / 1000) + timeout)
+    .multiply(1000000000)
+    .toString();
 }
