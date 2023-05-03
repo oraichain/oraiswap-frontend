@@ -52,7 +52,7 @@ export const deployIcs20Token = async (
     (
       await client.deploy<CwIcs20LatestTypes.InstantiateMsg>(
         senderAddress,
-        path.join(__dirname, 'testdata', 'cw_ics20.wasm'),
+        path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm'),
         {
           allowlist: [],
           default_timeout: 3600,
