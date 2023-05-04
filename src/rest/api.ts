@@ -334,7 +334,7 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
       ];
 };
 
-async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
+async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
   const { amount, fromInfo, toInfo } = query;
 
   // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.

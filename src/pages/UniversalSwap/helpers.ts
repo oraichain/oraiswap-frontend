@@ -147,6 +147,23 @@ export class UniversalSwapHandler {
     return [msgTransfer];
   }
 
+  getTranferAddress(metamaskAddress: string, tronAddress: string, ibcInfo: IBCInfo) {
+    let transferAddress = metamaskAddress;
+    // check tron network and convert address
+    if (this._toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
+      transferAddress = tronToEthAddress(tronAddress);
+    }
+    // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
+    if (!transferAddress && (this._toTokenInOrai.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
+      throw generateError('Please login metamask / tronlink!');
+    }
+    return transferAddress;
+  }
+
+  getIbcMemo(transferAddress: string) {
+    return this._toToken.chainId === 'oraibridge-subnet-2' ? this._toToken.prefix + transferAddress : '';
+  }
+
   /**
    * Combine messages for universal swap token from Oraichain to EVM networks(BSC | Ethereum | Tron).
    * @returns combined messages
@@ -165,16 +182,9 @@ export class UniversalSwapHandler {
     const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
-    let transferAddress = metamaskAddress;
-    // check tron network and convert address
-    if (this._toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
-      transferAddress = tronToEthAddress(tronAddress);
-    }
-    // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
-    if (!transferAddress && (this._toTokenInOrai.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
-      throw generateError('Please login metamask!');
-    }
-    const ibcMemo = this._toToken.chainId === 'oraibridge-subnet-2' ? this._toToken.prefix + transferAddress : '';
+
+    const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
+    const ibcMemo = this.getIbcMemo(transferAddress);
 
     // create bridge msg
     const msgTransfer = this.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);

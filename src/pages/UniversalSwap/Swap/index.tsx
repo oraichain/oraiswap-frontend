@@ -1,10 +1,9 @@
-import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
@@ -20,10 +19,10 @@ import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
-import { UniversalSwapHandler } from '../helpers';
-import SelectTokenModal from '../Modals/SelectTokenModal';
+import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
+import { UniversalSwapHandler } from '../helpers';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
@@ -46,6 +45,8 @@ const SwapComponent: React.FC<{
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
+
+  const [searchTokenName, setSearchTokenName] = useState('');
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
@@ -81,8 +82,8 @@ const SwapComponent: React.FC<{
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
-  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
-  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
+  const fromTokenBalance = originalFromToken ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
+  const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -164,7 +165,7 @@ const SwapComponent: React.FC<{
           <TokenBalance
             balance={{
               amount: fromTokenBalance,
-              decimals: fromTokenInfoData?.decimals,
+              decimals: originalFromToken?.decimals,
               denom: fromTokenInfoData?.symbol ?? ''
             }}
             prefix="Balance: "
@@ -181,28 +182,43 @@ const SwapComponent: React.FC<{
             HALF
           </div>
         </div>
-        <div className={cx('input')}>
-          <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
-            {FromIcon && <FromIcon className={cx('logo')} />}
-            <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
-              <span className={cx('token-org')}>{originalFromToken?.org}</span>
+        <div className={cx('input-wrapper')}>
+          <div className={cx('input')}>
+            <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
+              {FromIcon && <FromIcon className={cx('logo')} />}
+              <div className={cx('token-info')}>
+                <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
+                <span className={cx('token-org')}>{originalFromToken?.org}</span>
+              </div>
+              <div className={cx('arrow-down')} />
             </div>
-            <div className={cx('arrow-down')} />
-          </div>
 
-          <NumberFormat
-            placeholder="0"
-            className={cx('amount')}
-            thousandSeparator
-            decimalScale={6}
-            type="text"
-            value={fromAmountToken}
-            onValueChange={({ floatValue }) => {
-              onChangeFromAmount(floatValue);
+            <NumberFormat
+              placeholder="0"
+              className={cx('amount')}
+              thousandSeparator
+              decimalScale={6}
+              type="text"
+              value={fromAmountToken}
+              onValueChange={({ floatValue }) => {
+                onChangeFromAmount(floatValue);
+              }}
+            />
+          </div>
+          {isSelectFrom && <SelectTokenModalV2
+            close={() => setIsSelectFrom(false)}
+            prices={prices}
+            items={swapFromTokens.filter((token) =>
+              toTokenDenom === MILKY ? token.denom === STABLE_DENOM : (token.denom !== toTokenDenom && token.name.includes(searchTokenName))
+            )}
+            amounts={amounts}
+            setToken={(denom) => {
+              setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
             }}
-          />
+            setSearchTokenName={setSearchTokenName}
+          />}
         </div>
+
       </div>
       <div className={cx('swap-icon')}>
         <img
@@ -223,7 +239,7 @@ const SwapComponent: React.FC<{
             balance={{
               amount: toTokenBalance,
               denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals
+              decimals: originalToToken?.decimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -233,18 +249,33 @@ const SwapComponent: React.FC<{
             {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
           </span>
         </div>
-        <div className={cx('input')}>
-          <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
-            {ToIcon && <ToIcon className={cx('logo')} />}
-            <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{originalToToken?.name}</span>
-              <span className={cx('token-org')}>{originalToToken?.org}</span>
+        <div className={cx('input-wrapper')}>
+          <div className={cx('input')}>
+            <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
+              {ToIcon && <ToIcon className={cx('logo')} />}
+              <div className={cx('token-info')}>
+                <span className={cx('token-symbol')}>{originalToToken?.name}</span>
+                <span className={cx('token-org')}>{originalToToken?.org}</span>
+              </div>
+              <div className={cx('arrow-down')} />
             </div>
-            <div className={cx('arrow-down')} />
-          </div>
 
-          <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+            <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+          </div>
+          {isSelectTo && <SelectTokenModalV2
+            close={() => setIsSelectTo(false)}
+            prices={prices}
+            items={swapToTokens.filter((token) =>
+              toTokenDenom === MILKY ? token.denom === STABLE_DENOM : (token.denom !== fromTokenDenom && token.name.includes(searchTokenName))
+            )}
+            amounts={amounts}
+            setToken={(denom) => {
+              setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
+            }}
+            setSearchTokenName={setSearchTokenName}
+          />}
         </div>
+
       </div>
       <button
         className={cx('swap-btn')}
@@ -287,7 +318,7 @@ const SwapComponent: React.FC<{
           </div>
         )}
       </div>
-      {isSelectFrom ? (
+      {/* {isSelectFrom ? (
         <SelectTokenModal
           isOpen={isSelectFrom}
           open={() => setIsSelectFrom(true)}
@@ -315,7 +346,7 @@ const SwapComponent: React.FC<{
             setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 };

@@ -833,6 +833,21 @@ describe('universal-swap', () => {
         expect(msg).toEqual(expectedTransferMsg);
       }
     );
+
+    it('test-combineMsgEvm-should-throw-error', async () => {
+      windowSpy.mockImplementation(() => ({
+        Keplr: {
+          getKeplrAddr: async (_chainId: string) => {
+            return undefined;
+          }
+        }
+      }));
+      try {
+        await universalSwap.combineMsgEvm('0x1234', 'T1234');
+      } catch (error) {
+        expect(error?.ex?.message).toEqual('Please login keplr!');
+      }
+    });
   });
 
   it.each([
@@ -843,7 +858,7 @@ describe('universal-swap', () => {
     ['oraichain-token', 'airight', '1000000', '200000']
   ])(
     'test simulate swap data for universal-swap',
-    async (fromCoingeckoId: CoinGeckoId, toCoingeckoId: CoinGeckoId, amount: number | string, expectedSimulateData) => {
+    async (fromCoingeckoId: CoinGeckoId, toCoingeckoId: CoinGeckoId, amount: string, expectedSimulateData) => {
       const fromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoingeckoId);
       const toToken = oraichainTokens.find((t) => t.coinGeckoId === toCoingeckoId);
       const [fromInfo, toInfo] = [toTokenInfo(fromToken), toTokenInfo(toToken)];
@@ -854,6 +869,39 @@ describe('universal-swap', () => {
       }
       const simulateData = await simulateSwap(query);
       expect(simulateData.amount).toEqual(expectedSimulateData);
+    }
+  );
+
+  it.each([
+    ['0x1234', 'T123456789', flattenTokens.find((t) => t.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX), '0xae1ae6'],
+    ['0x1234', 'T123456789', flattenTokens.find((t) => t.prefix !== ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX), '0x1234'],
+    ['', '', flattenTokens.find((t) => t.prefix !== ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX), 'this-case-throw-error']
+  ])(
+    'test get transfer address should return transferAddress correctly & throw error correctly',
+    (metamaskAddress: string, tronAddress: string, toToken: TokenItemType, expectedTransferAddr: string) => {
+      const universalSwap = new UniversalSwapHandler();
+      const ibcInfo = ibcInfos['Oraichain']['oraibridge-subnet-2'];
+      universalSwap.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === 'airight');
+      universalSwap.toToken = toToken;
+      try {
+        const transferAddress = universalSwap.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
+        expect(transferAddress).toEqual(expectedTransferAddr);
+      } catch (error) {
+        expect(error?.ex?.message).toEqual('Please login metamask / tronlink!');
+      }
+    }
+  );
+
+  it.each([
+    ['0x1234', flattenTokens.find((t) => t.chainId === 'oraibridge-subnet-2'), 'oraib0x1234'],
+    ['0x1234', flattenTokens.find((t) => t.chainId !== 'oraibridge-subnet-2'), '']
+  ])(
+    'test getIbcMemo should return ibc memo correctly',
+    (transferAddress: string, toToken: TokenItemType, expectedIbcMemo: string) => {
+      const universalSwap = new UniversalSwapHandler();
+      universalSwap.toToken = toToken;
+      const ibcMemo = universalSwap.getIbcMemo(transferAddress);
+      expect(ibcMemo).toEqual(expectedIbcMemo);
     }
   );
 });

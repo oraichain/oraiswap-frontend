@@ -5,6 +5,7 @@ import debounce from 'lodash/debounce';
 
 export type InputProps = Input & {
   onSearch?: (text: string) => void;
+  isBorder?: boolean;
 };
 
 const Input: React.FC<InputProps> = ({ className, onSearch, ...props }) => (
