@@ -54,23 +54,24 @@ const SwapComponent: React.FC<{
   };
 
   const onMaxFromAmount = (amount: bigint, type: 'max' | 'half') => {
-    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    const displayAmount = toDisplay(amount, originalFromToken?.decimals);
     let finalAmount = displayAmount;
 
     // hardcode fee when swap token orai
     if (fromTokenDenom === ORAI) {
-      const useFeeEstimate = feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
       if (type === 'max') {
-        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
+        finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
       }
       if (type === 'half') {
-        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+        finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
       }
     }
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
+  // get token on oraichain to simulate swap amount.
   const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
   const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
   const originalFromToken = tokenMap[fromTokenDenom];
@@ -80,10 +81,11 @@ const SwapComponent: React.FC<{
     data: [fromTokenInfoData, toTokenInfoData]
   } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
-  const subAmountFrom = toSubAmount(amounts, fromToken);
-  const subAmountTo = toSubAmount(amounts, toToken);
+  const subAmountFrom = toSubAmount(amounts, originalFromToken);
+  const subAmountTo = toSubAmount(amounts, originalToToken);
   const fromTokenBalance = originalFromToken ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
+
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -143,8 +145,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = fromToken?.Icon;
-  const ToIcon = toToken?.Icon;
+  const FromIcon = originalFromToken?.Icon;
+  const ToIcon = originalToToken?.Icon;
 
   return (
     <div className={cx('swap-box')}>
@@ -174,7 +176,7 @@ const SwapComponent: React.FC<{
 
           <div
             className={cx('btn')}
-            onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0), 'max')}
+            onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), 'max')}
           >
             MAX
           </div>
@@ -318,35 +320,6 @@ const SwapComponent: React.FC<{
           </div>
         )}
       </div>
-      {/* {isSelectFrom ? (
-        <SelectTokenModal
-          isOpen={isSelectFrom}
-          open={() => setIsSelectFrom(true)}
-          close={() => setIsSelectFrom(false)}
-          prices={prices}
-          items={swapFromTokens.filter((token) =>
-            toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
-          )}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
-          }}
-        />
-      ) : (
-        <SelectTokenModal
-          isOpen={isSelectTo}
-          open={() => setIsSelectTo(true)}
-          close={() => setIsSelectTo(false)}
-          prices={prices}
-          amounts={amounts}
-          items={swapToTokens.filter((token) =>
-            fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
-          )}
-          setToken={(denom) => {
-            setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
-          }}
-        />
-      )} */}
     </div>
   );
 };
