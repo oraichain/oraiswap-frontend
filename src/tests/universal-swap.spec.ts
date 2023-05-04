@@ -850,7 +850,7 @@ describe('universal-swap', () => {
       const query = { fromInfo, toInfo, amount };
       if (fromInfo.coinGeckoId !== toInfo.coinGeckoId) {
         const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
-        simulateSwapSpy.mockResolvedValue({ amount: '200000' });
+        simulateSwapSpy.mockResolvedValue({ amount: expectedSimulateData });
       }
       const simulateData = await simulateSwap(query);
       expect(simulateData.amount).toEqual(expectedSimulateData);
