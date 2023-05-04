@@ -1,10 +1,10 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { TokenItemType, cosmosTokens, tokenMap, tokens } from 'config/bridgeTokens';
+import { TokenItemType, oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair, Pair } from 'config/pools';
+import { getPair } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
@@ -293,7 +293,7 @@ const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
     throw new Error('KWT and MILKY not supported in this function');
   }
-  return cosmosTokens.find((token) => token.coinGeckoId === coingeckoId && token.chainId === 'Oraichain');
+  return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
 };
 
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
