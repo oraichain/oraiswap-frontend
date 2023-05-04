@@ -6,23 +6,23 @@ import cn from 'classnames/bind';
 import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
-const Swap: React.FC = () => {
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
-    [string, string]
-  >(['orai', 'usdt']);
+function replaceTokens(inputString) {
+  return inputString
+    .replace(/bep20_/g, '')
+    .replace(/erc20_/g, '')
+    .replace(/trc20_/g, '');
+}
 
+const Swap: React.FC = () => {
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
   return (
     <Content>
       <div className={cx('swap-container')}>
         <div className={cx('swap-col', 'w60')}>
-          <SwapChart fromTokenDenom={fromTokenDenom} />
+          <SwapChart fromTokenDenom={replaceTokens(fromTokenDenom)} />
         </div>
         <div className={cx('swap-col', 'w40')}>
-          <SwapComponent
-            fromTokenDenom={fromTokenDenom}
-            toTokenDenom={toTokenDenom}
-            setSwapTokens={setSwapTokens}
-          />
+          <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
         </div>
       </div>
     </Content>
