@@ -211,11 +211,11 @@ const SwapComponent: React.FC<{
             close={() => setIsSelectFrom(false)}
             prices={prices}
             items={swapFromTokens.filter((token) =>
-              toTokenDenom === MILKY ? token.denom === STABLE_DENOM : (token.denom !== toTokenDenom && token.name.includes(searchTokenName))
+              token.denom !== toTokenDenom && token.name.includes(searchTokenName)
             )}
             amounts={amounts}
             setToken={(denom) => {
-              setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
+              setSwapTokens([denom, toTokenDenom]);
             }}
             setSearchTokenName={setSearchTokenName}
           />}
@@ -268,11 +268,11 @@ const SwapComponent: React.FC<{
             close={() => setIsSelectTo(false)}
             prices={prices}
             items={swapToTokens.filter((token) =>
-              toTokenDenom === MILKY ? token.denom === STABLE_DENOM : (token.denom !== fromTokenDenom && token.name.includes(searchTokenName))
+              token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
             )}
             amounts={amounts}
             setToken={(denom) => {
-              setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
+              setSwapTokens([fromTokenDenom, denom]);
             }}
             setSearchTokenName={setSearchTokenName}
           />}
@@ -312,13 +312,6 @@ const SwapComponent: React.FC<{
           </div>
           <span>0.3 %</span>
         </div>
-        {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
-          <div className={cx('row')}>
-            <div className={cx('title')}>
-              <span>*Additional: 5% entry tax rate for MILKY transactions</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
