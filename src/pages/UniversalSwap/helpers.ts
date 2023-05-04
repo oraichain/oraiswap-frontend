@@ -13,7 +13,6 @@ import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'li
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import Long from 'long';
 import { findToToken, transferEvmToIBC } from 'pages/BalanceNew/helpers';
 import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -121,13 +120,11 @@ export class UniversalSwapHandler {
    * @returns combined messages
    */
   async combineMsgCosmos(): Promise<EncodeObject[]> {
-    const transferAmount = toDisplay(this._simulateAmount); // amount to transfer
     const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
-    const amount = coin(toAmount(transferAmount, this._fromToken.decimals).toString(), this._toTokenInOrai.denom);
-
+    const amount = coin(this._simulateAmount, this._toTokenInOrai.denom);
     const msgTransfer = {
       typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
       value: MsgTransfer.fromPartial({
@@ -200,7 +197,6 @@ export class UniversalSwapHandler {
     if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1')
       return this.combineMsgCosmos();
     return this.combineMsgEvm(metamaskAddress, tronAddress);
-
   }
 
   // Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.

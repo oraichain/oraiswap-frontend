@@ -18,7 +18,7 @@ import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
@@ -311,33 +311,40 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
 
   return pair
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: ORAI_INFO
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: ORAI_INFO,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
   const { amount, fromInfo, toInfo } = query;
-  // check if they have pairs. If not then we go through ORAI
 
+  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
+  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
+    return {
+      amount
+    };
+  }
+
+  // check if they have pairs. If not then we go through ORAI
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo);
 

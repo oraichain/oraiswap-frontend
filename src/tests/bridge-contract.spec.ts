@@ -332,7 +332,11 @@ describe.only('IBCModule', () => {
       ibcTransferAmount,
       'receiver-with-a-dot-and-channel-memo-should-fallback-to-transfer-to-receiver'
     ],
-    [`${oraib2oraichain}/${bobAddress}`, ibcTransferAmount, 'receiver-and-channel-memo-should-fallback-to-transfer-to-receiver']
+    [
+      `${oraib2oraichain}/${bobAddress}`,
+      ibcTransferAmount,
+      'receiver-and-channel-memo-should-fallback-to-transfer-to-receiver'
+    ]
   ])(
     'cw-ics20-test-single-step-invalid-dest-denom-memo-remote-to-local-given %s should-get-expected-amount %s',
     async (memo: string, expectedAmount: string, _name: string) => {
@@ -622,7 +626,6 @@ describe.only('IBCModule', () => {
           },
           relayer: cosmosSenderAddress
         });
-
         expect(
           flatten(result.events.map((e) => e.attributes)).find((a) => a.key === 'error_follow_up_msgs').value
         ).toContain('Generic error: timeout at');
