@@ -29,13 +29,7 @@ export type ExecuteMsg = {
     rate: Decimal;
   };
 };
-export type QueryMsg = {
-  treasury: OracleTreasuryQuery;
-} | {
-  exchange: OracleExchangeQuery;
-} | {
-  contract: OracleContractQuery;
-};
+export type QueryMsg = OracleTreasuryQuery | OracleExchangeQuery | OracleContractQuery;
 export interface MigrateMsg {}
 export interface ContractInfoResponse {
   admin: Addr;
@@ -59,6 +53,3 @@ export interface TaxCapResponse {
 export interface TaxRateResponse {
   rate: Decimal;
 }
-export type TreasuryResponse = TaxRateResponse | TaxCapResponse;
-export type ExchangeResponse = ExchangeRateResponse | ExchangeRatesResponse;
-export type ContractResponse = ContractInfoResponse | Coin;
