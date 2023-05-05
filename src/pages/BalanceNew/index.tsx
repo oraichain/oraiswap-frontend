@@ -38,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -163,7 +163,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       displayToast(TToastType.TX_FAILED, {
-        message: ex.message
+        message: ex.ex.message
       });
     }
   };

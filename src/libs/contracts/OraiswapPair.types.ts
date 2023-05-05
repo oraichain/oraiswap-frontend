@@ -1,4 +1,4 @@
-import {AssetInfo, Addr, Uint128, Decimal, Cw20ReceiveMsg, Asset, PairInfo} from "./types";
+import {AssetInfo, Addr, Uint128, Binary, Decimal, Cw20ReceiveMsg, Asset, PairInfo} from "./types";
 export interface InstantiateMsg {
   asset_infos: [AssetInfo, AssetInfo];
   commission_rate?: string | null;

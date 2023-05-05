@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import { Addr, Uint128, Binary, Decimal, Asset} from "./types";
-import { PairResponse, PoolResponse, ReverseSimulationResponse, SimulationResponse} from "./OraiswapPair.types";
+import {AssetInfo, Addr, Uint128, Binary, Decimal, Cw20ReceiveMsg, Asset, PairInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, PairResponse, PoolResponse, ReverseSimulationResponse, SimulationResponse} from "./OraiswapPair.types";
 export interface OraiswapPairReadOnlyInterface {
   contractAddress: string;
   pair: () => Promise<PairResponse>;
@@ -80,7 +80,7 @@ export interface OraiswapPairInterface extends OraiswapPairReadOnlyInterface {
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   provideLiquidity: ({
     assets,
     receiver,
@@ -89,7 +89,7 @@ export interface OraiswapPairInterface extends OraiswapPairReadOnlyInterface {
     assets: Asset[];
     receiver?: Addr;
     slippageTolerance?: Decimal;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   swap: ({
     beliefPrice,
     maxSpread,
@@ -100,7 +100,7 @@ export interface OraiswapPairInterface extends OraiswapPairReadOnlyInterface {
     maxSpread?: Decimal;
     offerAsset: Asset;
     to?: Addr;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class OraiswapPairClient extends OraiswapPairQueryClient implements OraiswapPairInterface {
   client: SigningCosmWasmClient;
@@ -125,14 +125,14 @@ export class OraiswapPairClient extends OraiswapPairQueryClient implements Orais
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       receive: {
         amount,
         msg,
         sender
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   provideLiquidity = async ({
     assets,
@@ -142,14 +142,14 @@ export class OraiswapPairClient extends OraiswapPairQueryClient implements Orais
     assets: Asset[];
     receiver?: Addr;
     slippageTolerance?: Decimal;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       provide_liquidity: {
         assets,
         receiver,
         slippage_tolerance: slippageTolerance
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   swap = async ({
     beliefPrice,
@@ -161,7 +161,7 @@ export class OraiswapPairClient extends OraiswapPairQueryClient implements Orais
     maxSpread?: Decimal;
     offerAsset: Asset;
     to?: Addr;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       swap: {
         belief_price: beliefPrice,
@@ -169,6 +169,6 @@ export class OraiswapPairClient extends OraiswapPairQueryClient implements Orais
         offer_asset: offerAsset,
         to
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
 }

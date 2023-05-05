@@ -140,13 +140,9 @@ export interface MarketingInfoResponse {
   project?: string | null;
   [k: string]: unknown;
 }
-
-export interface TokenInfoRes {
+export interface TokenInfoResponse {
   decimals: number;
   name: string;
   symbol: string;
   total_supply: Uint128;
-}
-export interface TokenInfoResponse extends TokenInfoRes {
-  token_info_response: TokenInfoRes;
 }

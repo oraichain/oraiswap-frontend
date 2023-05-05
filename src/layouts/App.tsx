@@ -12,7 +12,6 @@ import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import Web3 from 'web3';
 import './index.scss';
 import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';

@@ -6,8 +6,8 @@
 
 import { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { Coin, StdFee } from "@cosmjs/amino";
-import {Addr, Uint128, Binary, SwapOperation, AssetInfo} from "./types";
-import { ConfigResponse, SimulateSwapOperationsResponse} from "./OraiswapRouter.types";
+import {Addr, Uint128, Binary, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, SimulateSwapOperationsResponse} from "./OraiswapRouter.types";
 export interface OraiswapRouterReadOnlyInterface {
   contractAddress: string;
   config: () => Promise<ConfigResponse>;
@@ -61,7 +61,7 @@ export interface OraiswapRouterInterface extends OraiswapRouterReadOnlyInterface
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   executeSwapOperations: ({
     minimumReceive,
     operations,
@@ -70,14 +70,14 @@ export interface OraiswapRouterInterface extends OraiswapRouterReadOnlyInterface
     minimumReceive?: Uint128;
     operations: SwapOperation[];
     to?: Addr;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   executeSwapOperation: ({
     operation,
     to
   }: {
     operation: SwapOperation;
     to?: Addr;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
   assertMinimumReceive: ({
     assetInfo,
     minimumReceive,
@@ -88,7 +88,7 @@ export interface OraiswapRouterInterface extends OraiswapRouterReadOnlyInterface
     minimumReceive: Uint128;
     prevBalance: Uint128;
     receiver: Addr;
-  }, fee?: number | StdFee | "auto", memo?: string, funds?: Coin[]) => Promise<ExecuteResult>;
+  }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
 export class OraiswapRouterClient extends OraiswapRouterQueryClient implements OraiswapRouterInterface {
   client: SigningCosmWasmClient;
@@ -114,14 +114,14 @@ export class OraiswapRouterClient extends OraiswapRouterQueryClient implements O
     amount: Uint128;
     msg: Binary;
     sender: string;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       receive: {
         amount,
         msg,
         sender
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   executeSwapOperations = async ({
     minimumReceive,
@@ -131,14 +131,14 @@ export class OraiswapRouterClient extends OraiswapRouterQueryClient implements O
     minimumReceive?: Uint128;
     operations: SwapOperation[];
     to?: Addr;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       execute_swap_operations: {
         minimum_receive: minimumReceive,
         operations,
         to
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   executeSwapOperation = async ({
     operation,
@@ -146,13 +146,13 @@ export class OraiswapRouterClient extends OraiswapRouterQueryClient implements O
   }: {
     operation: SwapOperation;
     to?: Addr;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       execute_swap_operation: {
         operation,
         to
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
   assertMinimumReceive = async ({
     assetInfo,
@@ -164,7 +164,7 @@ export class OraiswapRouterClient extends OraiswapRouterQueryClient implements O
     minimumReceive: Uint128;
     prevBalance: Uint128;
     receiver: Addr;
-  }, fee: number | StdFee | "auto" = "auto", memo?: string, funds?: Coin[]): Promise<ExecuteResult> => {
+  }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
       assert_minimum_receive: {
         asset_info: assetInfo,
@@ -172,6 +172,6 @@ export class OraiswapRouterClient extends OraiswapRouterQueryClient implements O
         prev_balance: prevBalance,
         receiver
       }
-    }, fee, memo, funds);
+    }, $fee, $memo, $funds);
   };
 }

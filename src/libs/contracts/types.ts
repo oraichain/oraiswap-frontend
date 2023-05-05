@@ -81,12 +81,29 @@ export interface MappingMetadata {
   remote_decimals: number;
 }
 export type ArrayOfPairQuery = PairQuery[];
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
+export interface Call {
+  address: Addr;
+  data: Binary;
+}
+export interface CallOptional {
+  address: Addr;
+  data: Binary;
+  require_success: boolean;
+}
+export interface AggregateResult {
+  return_data: CallResult[];
+}
+export interface CallResult {
+  data: Binary;
+  success: boolean;
+}
+export interface BlockAggregateResult {
+  block: number;
+  return_data: CallResult[];
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
 }
 export interface TokenInfo {
   decimals: number;
@@ -96,6 +113,13 @@ export type Decimal = string;
 export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
+}
+export interface PairInfo {
+  asset_infos: [AssetInfo, AssetInfo];
+  commission_rate: string;
+  contract_addr: Addr;
+  liquidity_token: Addr;
+  oracle_addr: Addr;
 }
 export type OrderDirection = "buy" | "sell";
 export interface Asset {
@@ -136,53 +160,6 @@ export interface ExchangeRateItem {
   exchange_rate: Decimal;
   quote_denom: string;
 }
-export type Uint64 = string;
-export interface SwapMsg {
-  channel: string;
-  min_amount_out: Uint128;
-  pool: Uint64;
-  timeout?: number | null;
-  token_out: string;
-}
-export interface JoinPoolMsg {
-  channel: string;
-  pool: Uint64;
-  share_min_out: Uint128;
-  timeout?: number | null;
-}
-export interface ExitPoolMsg {
-  channel: string;
-  min_amount_out: Uint128;
-  timeout?: number | null;
-  token_out: string;
-}
-export interface CreateLockupMsg {
-  channel: string;
-  timeout?: number | null;
-}
-export interface LockTokensMsg {
-  channel: string;
-  duration: Uint64;
-  timeout?: number | null;
-}
-export interface ClaimTokensMsg {
-  channel: string;
-  denom: string;
-  timeout?: number | null;
-}
-export interface UnlockTokensMsg {
-  channel: string;
-  lock_id: Uint64;
-  timeout?: number | null;
-}
-export interface ExternalTokenMsg {
-  contract: string;
-  denom: string;
-}
-export interface AllowedTokenInfo {
-  contract: string;
-  denom: string;
-}
 export type SwapOperation = {
   orai_swap: {
     ask_asset_info: AssetInfo;
@@ -220,6 +197,7 @@ export type Expiration = {
   never: {};
 };
 export type Timestamp = Uint64;
+export type Uint64 = string;
 export interface AllowanceInfo {
   allowance: Uint128;
   expires: Expiration;
@@ -233,35 +211,3 @@ export interface SpenderAllowanceInfo {
 export type LogoInfo = {
   url: string;
 } | "embedded";
-
-export interface Call {
-  address: Addr;
-  data: Binary;
-}
-export interface CallOptional {
-  address: Addr;
-  data: Binary;
-  require_success: boolean;
-}
-export interface AggregateResult {
-  return_data: CallResult[];
-}
-export interface CallResult {
-  data: Binary;
-  success: boolean;
-}
-export interface BlockAggregateResult {
-  block: number;
-  return_data: CallResult[];
-}
-export interface ContractVersion {
-  contract: string;
-  version: string;
-}
-export interface PairInfo {
-  asset_infos: [AssetInfo, AssetInfo];
-  commission_rate: string;
-  contract_addr: Addr;
-  liquidity_token: Addr;
-  oracle_addr: Addr;
-}

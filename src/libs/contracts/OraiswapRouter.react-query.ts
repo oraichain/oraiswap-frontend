@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {Addr, Uint128, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
-import { ConfigResponse, SimulateSwapOperationsResponse} from "./OraiswapRouter.types";
+import {Addr, Uint128, Binary, SwapOperation, AssetInfo, Cw20ReceiveMsg} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, ConfigResponse, SimulateSwapOperationsResponse} from "./OraiswapRouter.types";
 import { OraiswapRouterQueryClient, OraiswapRouterClient } from "./OraiswapRouter.client";
 export interface OraiswapRouterReactQuery<TResponse, TData = TResponse> {
   client: OraiswapRouterQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
+    initialData?: undefined;
   };
 }
 export interface OraiswapRouterSimulateSwapOperationsQuery<TData> extends OraiswapRouterReactQuery<SimulateSwapOperationsResponse, TData> {
@@ -52,9 +52,9 @@ export interface OraiswapRouterAssertMinimumReceiveMutation {
     receiver: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapRouterAssertMinimumReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapRouterAssertMinimumReceiveMutation>, "mutationFn">) {
@@ -62,11 +62,11 @@ export function useOraiswapRouterAssertMinimumReceiveMutation(options?: Omit<Use
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.assertMinimumReceive(msg, fee, memo, funds), options);
+  }) => client.assertMinimumReceive(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapRouterExecuteSwapOperationMutation {
   client: OraiswapRouterClient;
@@ -75,9 +75,9 @@ export interface OraiswapRouterExecuteSwapOperationMutation {
     to?: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapRouterExecuteSwapOperationMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapRouterExecuteSwapOperationMutation>, "mutationFn">) {
@@ -85,11 +85,11 @@ export function useOraiswapRouterExecuteSwapOperationMutation(options?: Omit<Use
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.executeSwapOperation(msg, fee, memo, funds), options);
+  }) => client.executeSwapOperation(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapRouterExecuteSwapOperationsMutation {
   client: OraiswapRouterClient;
@@ -99,9 +99,9 @@ export interface OraiswapRouterExecuteSwapOperationsMutation {
     to?: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapRouterExecuteSwapOperationsMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapRouterExecuteSwapOperationsMutation>, "mutationFn">) {
@@ -109,19 +109,23 @@ export function useOraiswapRouterExecuteSwapOperationsMutation(options?: Omit<Us
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.executeSwapOperations(msg, fee, memo, funds), options);
+  }) => client.executeSwapOperations(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapRouterReceiveMutation {
   client: OraiswapRouterClient;
-  msg: Cw20ReceiveMsg;
+  msg: {
+    amount: Uint128;
+    msg: Binary;
+    sender: string;
+  };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapRouterReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapRouterReceiveMutation>, "mutationFn">) {
@@ -129,9 +133,9 @@ export function useOraiswapRouterReceiveMutation(options?: Omit<UseMutationOptio
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.receive(msg, fee, memo, funds), options);
+  }) => client.receive(msg, $fee, $memo, $funds), options);
 }

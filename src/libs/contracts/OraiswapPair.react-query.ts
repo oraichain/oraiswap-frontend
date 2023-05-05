@@ -7,13 +7,13 @@
 import { UseQueryOptions, useQuery, useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ExecuteResult } from "@cosmjs/cosmwasm-stargate";
 import { StdFee, Coin } from "@cosmjs/amino";
-import {  Addr, Decimal, Cw20ReceiveMsg, Asset } from "./types";
-import { PairResponse, PoolResponse, ReverseSimulationResponse, SimulationResponse} from "./OraiswapPair.types";
+import {AssetInfo, Addr, Uint128, Binary, Decimal, Cw20ReceiveMsg, Asset, PairInfo} from "./types";
+import {InstantiateMsg, ExecuteMsg, QueryMsg, MigrateMsg, PairResponse, PoolResponse, ReverseSimulationResponse, SimulationResponse} from "./OraiswapPair.types";
 import { OraiswapPairQueryClient, OraiswapPairClient } from "./OraiswapPair.client";
 export interface OraiswapPairReactQuery<TResponse, TData = TResponse> {
   client: OraiswapPairQueryClient | undefined;
   options?: Omit<UseQueryOptions<TResponse, Error, TData>, "'queryKey' | 'queryFn' | 'initialData'"> & {
-    initialData: undefined;
+    initialData?: undefined;
   };
 }
 export interface OraiswapPairReverseSimulationQuery<TData> extends OraiswapPairReactQuery<ReverseSimulationResponse, TData> {
@@ -75,9 +75,9 @@ export interface OraiswapPairSwapMutation {
     to?: Addr;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapPairSwapMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapPairSwapMutation>, "mutationFn">) {
@@ -85,11 +85,11 @@ export function useOraiswapPairSwapMutation(options?: Omit<UseMutationOptions<Ex
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.swap(msg, fee, memo, funds), options);
+  }) => client.swap(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapPairProvideLiquidityMutation {
   client: OraiswapPairClient;
@@ -99,9 +99,9 @@ export interface OraiswapPairProvideLiquidityMutation {
     slippageTolerance?: Decimal;
   };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapPairProvideLiquidityMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapPairProvideLiquidityMutation>, "mutationFn">) {
@@ -109,19 +109,23 @@ export function useOraiswapPairProvideLiquidityMutation(options?: Omit<UseMutati
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.provideLiquidity(msg, fee, memo, funds), options);
+  }) => client.provideLiquidity(msg, $fee, $memo, $funds), options);
 }
 export interface OraiswapPairReceiveMutation {
   client: OraiswapPairClient;
-  msg: Cw20ReceiveMsg;
+  msg: {
+    amount: Uint128;
+    msg: Binary;
+    sender: string;
+  };
   args?: {
-    fee?: number | StdFee | "auto";
-    memo?: string;
-    funds?: Coin[];
+    $fee?: number | StdFee | "auto";
+    $memo?: string;
+    $funds?: Coin[];
   };
 }
 export function useOraiswapPairReceiveMutation(options?: Omit<UseMutationOptions<ExecuteResult, Error, OraiswapPairReceiveMutation>, "mutationFn">) {
@@ -129,9 +133,9 @@ export function useOraiswapPairReceiveMutation(options?: Omit<UseMutationOptions
     client,
     msg,
     args: {
-      fee,
-      memo,
-      funds
+      $fee,
+      $memo,
+      $funds
     } = {}
-  }) => client.receive(msg, fee, memo, funds), options);
+  }) => client.receive(msg, $fee, $memo, $funds), options);
 }

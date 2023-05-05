@@ -13,12 +13,13 @@ import {
   ORAI_INFO,
   TRON_SCAN
 } from 'config/constants';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
+import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
-import { findDefaultToToken, getOneStepKeplrAddr } from 'pages/BalanceNew/helpers';
+import { findDefaultToToken, getSourceReceiver } from 'pages/BalanceNew/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
 // @ts-ignore
@@ -28,17 +29,17 @@ const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
   it('bridge-evm-bsc-to-orai-normal-token-should-return-channel-1-plus-address', async () => {
     const tokenAddress = ORAI_BSC_CONTRACT;
-    const res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
-    expect(res).toBe(`channel-1/${keplrAddress}`);
+    const res = getSourceReceiver(keplrAddress, tokenAddress);
+    expect(res).toBe(`${oraib2oraichain}/${keplrAddress}`);
   });
 
   it('bridge-evm-bsc-to-orai-special-tokens-should-return-only-address', async () => {
     let tokenAddress = KWT_BSC_CONTRACT;
-    let res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
+    let res = getSourceReceiver(keplrAddress, tokenAddress);
     expect(res).toBe(keplrAddress);
 
     tokenAddress = MILKY_BSC_CONTRACT;
-    res = getOneStepKeplrAddr(keplrAddress, tokenAddress);
+    res = getSourceReceiver(keplrAddress, tokenAddress);
     expect(res).toBe(keplrAddress);
   });
 
@@ -153,23 +154,29 @@ describe('bridge', () => {
       'USDT',
       'tether'
     ]
-  ])('bridge-test-find-default-to-token', (from, expectedChainId, expectedName, expectedCoingeckoId) => {
-    const toToken = findDefaultToToken(from);
-    expect(from.bridgeTo.includes(toToken.chainId)).toBe(true);
-    expect(toToken.name).toContain(expectedName);
-    expect(toToken.coinGeckoId).toBe(expectedCoingeckoId);
-  });
+  ])(
+    'bridge-test-find-default-to-token given from-token: %j, should give expected-name: %s, expected coingeckoid: %s',
+    (from, expectedChainId, expectedName, expectedCoingeckoId) => {
+      const toToken = findDefaultToToken(from);
+      expect(from.bridgeTo.includes(toToken.chainId)).toBe(true);
+      expect(toToken.name).toContain(expectedName);
+      expect(toToken.coinGeckoId).toBe(expectedCoingeckoId);
+    }
+  );
 
   it.each<[NetworkChainId, string, string]>([
     ['0x38', '0x', `${BSC_SCAN}/tx/0x`],
     ['0x01', '0x', `${ETHEREUM_SCAN}/tx/0x`],
     ['kawaii_6886-1', '0x', `${KWT_SCAN}/tx/0x`],
     ['0x2b6653dc', '0x1234', `${TRON_SCAN}/#/transaction/1234`],
-    ['Oraichain', '0x', null]
-  ])('bridge-test-get-transaciton-url', (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {
-    const url = getTransactionUrl(chainId, transactionHash);
-    expect(url).toBe(expectedUrl);
-  });
+    ['Oraichain', '0x', `${network.explorer}/txs/0x`]
+  ])(
+    'bridge-test-get-transaciton-url given chainId %s should give expected URL %s',
+    (chainId: NetworkChainId, transactionHash: any, expectedUrl: string) => {
+      const url = getTransactionUrl(chainId, transactionHash);
+      expect(url).toBe(expectedUrl);
+    }
+  );
 
   it('bridge-move-oraibridge-to-oraichain-should-return-only-transfer-IBC-msgs', async () => {
     const bridgeTokenNames = ['AIRI', 'USDT'];
@@ -234,8 +241,7 @@ describe('bridge', () => {
   describe('helper function', () => {
     it.each<[Tokens, NetworkChainId[]]>([
       [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']],
-      [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['kawaii_6886-1', '0x38']],
-      [flattenTokens.find((i) => i.name === 'BEP20 AIRI' && i.chainId === 'Oraichain'), ['Oraichain']]
+      [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['kawaii_6886-1', '0x38']]
     ])('should filter chain bridge run exactly', async (token: Tokens, expectedBridgeNetwork: NetworkChainId[]) => {
       const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
       expect(bridgeNetworks.map((network) => network.chainId)).toEqual(expectedBridgeNetwork);

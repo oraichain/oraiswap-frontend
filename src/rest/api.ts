@@ -1,6 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { TokenItemType, oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -19,10 +19,12 @@ import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
 import { Pairs } from 'config/poolV2';
+import { CoinGeckoId } from 'config/chainInfos';
+import { calculateTimeoutTimestamp } from 'helper';
+import { IBCInfo } from 'types/ibc';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -280,6 +282,18 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
 };
 
+const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
+  if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
+  return tokenInfo.denom;
+};
+
+const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
+  if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
+    throw new Error('KWT and MILKY not supported in this function');
+  }
+  return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
+};
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -318,16 +332,21 @@ const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, ask
       ];
 };
 
-async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: number | string }) {
+async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
   const { amount, fromInfo, toInfo } = query;
-  // check if they have pairs. If not then we go through ORAI
 
+  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
+  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
+    return {
+      amount
+    };
+  }
+
+  // check if they have pairs. If not then we go through ORAI
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo);
 
   const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
-  console.log('operations: ', operations);
-
   try {
     const data = await Contract.router.simulateSwapOperations({
       offerAmount: amount.toString(),
@@ -678,7 +697,7 @@ function generateMoveOraib2OraiMessages(
   let transferMsgs: MsgTransfer[] = [];
   for (const fromToken of remainingOraib) {
     const toToken = toTokens.find((t) => t.chainId === 'Oraichain' && t.name === fromToken.name);
-    let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
+    let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     // hardcode for MILKY & KWT because they use the old IBC channel
     if (fromToken.denom === MILKY_DENOM || fromToken.denom === KWT_DENOM)
       ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
@@ -691,9 +710,7 @@ function generateMoveOraib2OraiMessages(
       sender: fromAddress,
       receiver: toAddress,
       memo: '',
-      timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + ibcInfo.timeout)
-        .multiply(1000000000)
-        .toString(),
+      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
       timeoutHeight: { revisionNumber: '0', revisionHeight: '0' } // we dont need timeout height. We only use timeout timestamp
     });
   }
@@ -721,5 +738,7 @@ export {
   parseTokenInfo,
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
-  generateMoveOraib2OraiMessages
+  generateMoveOraib2OraiMessages,
+  parseTokenInfoRawDenom,
+  getTokenOnOraichain
 };

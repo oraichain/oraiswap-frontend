@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { KeyFilterPool } from 'pages/Pools/indexV2';
+import { KeyFilterPool } from 'pages/Pools/index';
 import { PERSIST_VER } from 'store/constants';
 // import { PERSIST_VERSION } from 'store/configure';
 
