@@ -294,7 +294,7 @@ const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
 };
 
-const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
+export const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
     if (fund) sent_funds.push(fund);
@@ -304,7 +304,7 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   return sent_funds;
 };
 
-const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
+export const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
   const pair = Pairs.getPair(denoms);
 
   return pair
@@ -527,12 +527,12 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
+function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
   const { type, sender, ...params } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input;
+  let input = {};
   switch (type) {
     case Type.BOND_LIQUIDITY: {
       const bondMsg = params as BondMining;

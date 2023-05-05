@@ -54,7 +54,7 @@ const UnbondModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = await generateMiningMsgs({
+      const msgs = generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),

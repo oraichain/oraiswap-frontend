@@ -49,19 +49,15 @@ describe('fetch price market', () => {
     } as any);
 
     const result = await fetchPriceMarket(cachedPrices, mockSignal);
-    console.log({ result });
     expect(result).toEqual(expectedPrices);
   });
 
-  it('should return zero price if api fails and dont have cache price yet', async () => {
-    mockFetch.mockRejectedValue(new Error('Error fetch market price'));
-
-    const result = await fetchPriceMarket({}, mockSignal);
-    expect(result).toEqual(FALLBACK_PRICES);
-  });
-
   it.each([
+    [{}, FALLBACK_PRICES],
     [
+      {
+        'oraichain-token': 1
+      },
       {
         'oraichain-token': 1
       }
@@ -73,12 +69,19 @@ describe('fetch price market', () => {
         'kawaii-islands': 21,
         'milky-token': 21,
         'oraichain-token': 21
+      },
+      {
+        airight: 21,
+        cosmos: 21,
+        'kawaii-islands': 21,
+        'milky-token': 21,
+        'oraichain-token': 21
       }
     ]
-  ])('should return cache prices if api fails', async (cachedPrice) => {
+  ])('should return cache prices if api fails', async (cachedPrice, expectedReturnPrices) => {
     mockFetch.mockRejectedValue(new Error('Error fetch market price'));
 
     const result = await fetchPriceMarket(cachedPrice, mockSignal);
-    expect(result).toEqual(cachedPrice);
+    expect(result).toEqual(expectedReturnPrices);
   });
 });

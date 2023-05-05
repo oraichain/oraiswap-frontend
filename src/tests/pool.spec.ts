@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/proto-signing';
-import { cw20TokenMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { cw20TokenMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { COMMISSION_RATE } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -21,13 +21,18 @@ import {
   toPairDetails
 } from 'pages/Pools/helpers';
 import {
+  BondMining,
   fetchAllRewardPerSecInfos,
   fetchAllTokenAssetPools,
   fetchPoolInfoAmount,
   fetchTokenInfos,
   generateContractMessages,
+  generateMiningMsgs,
+  parseTokenInfo,
   ProvideQuery,
-  Type
+  Type,
+  UnbondLiquidity,
+  WithdrawMining
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
 import {
@@ -40,6 +45,7 @@ import {
   instantiateCw20Token
 } from './listing-simulate';
 import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
 
 describe('pool', () => {
   let usdtContractAddress = '',
@@ -365,6 +371,108 @@ describe('pool', () => {
           ]
         }
       });
+    });
+
+    it('test generateMiningMsgs should return an array with one message containing correct contract address, input, sender and sent_funds when given a BondMining message', () => {
+      const msg: BondMining = {
+        type: Type.BOND_LIQUIDITY,
+        sender: 'sender_address',
+        assetToken: oraichainTokens.find((t) => t.coinGeckoId === 'airight'),
+        amount: 100,
+        lpToken: 'lp_token_address'
+      };
+      const expectedContractAddr = 'lp_token_address';
+      const expectedInput = {
+        send: {
+          contract: network.staking,
+          amount: '100',
+          msg: toBinary({
+            bond: {
+              asset_info: parseTokenInfo(msg.assetToken).info
+            }
+          })
+        }
+      };
+      const expectedSender = 'sender_address';
+      const expectedSentFunds = undefined;
+
+      const result = generateMiningMsgs(msg);
+
+      expect(Array.isArray(result)).toBeTruthy();
+      expect(result.length).toEqual(1);
+      expect(result[0].contract).toEqual(expectedContractAddr);
+      expect(JSON.parse(Buffer.from(result[0].msg).toString())).toEqual(expectedInput);
+      expect(result[0].sender).toEqual(expectedSender);
+      expect(result[0].sent_funds).toEqual(expectedSentFunds);
+    });
+
+    it('test generateMiningMsgs should return an array with one message containing correct contract address, input, sender and sent_funds when given a WithdrawMining message', () => {
+      const msg: WithdrawMining = {
+        type: Type.WITHDRAW_LIQUIDITY_MINING,
+        sender: 'sender_address',
+        assetToken: oraichainTokens.find((t) => t.coinGeckoId === 'airight')
+      };
+      const expectedContractAddr = network.staking;
+      const expectedInput = {
+        withdraw: {
+          asset_info: parseTokenInfo(msg.assetToken).info
+        }
+      };
+      const expectedSender = 'sender_address';
+      const expectedSentFunds = undefined;
+
+      const result = generateMiningMsgs(msg);
+
+      expect(Array.isArray(result)).toBeTruthy();
+      expect(result.length).toEqual(1);
+      expect(result[0].contract).toEqual(expectedContractAddr);
+      expect(JSON.parse(Buffer.from(result[0].msg).toString())).toEqual(expectedInput);
+      expect(result[0].sender).toEqual(expectedSender);
+      expect(result[0].sent_funds).toEqual(expectedSentFunds);
+    });
+
+    it('test generateMiningMsgs should return an array with one message containing correct contract address, input, sender and sent_funds when given an UnbondLiquidity message', () => {
+      const msg: UnbondLiquidity = {
+        type: Type.UNBOND_LIQUIDITY,
+        sender: 'sender_address',
+        assetToken: oraichainTokens.find((t) => t.coinGeckoId === 'airight'),
+        amount: 100
+      };
+      const expectedContractAddr = network.staking;
+      const expectedInput = {
+        unbond: {
+          asset_info: parseTokenInfo(msg.assetToken).info,
+          amount: '100'
+        }
+      };
+      const expectedSender = 'sender_address';
+      const expectedSentFunds = undefined;
+
+      const result = generateMiningMsgs(msg);
+
+      expect(Array.isArray(result)).toBeTruthy();
+      expect(result.length).toEqual(1);
+      expect(result[0].contract).toEqual(expectedContractAddr);
+      expect(JSON.parse(Buffer.from(result[0].msg).toString())).toEqual(expectedInput);
+      expect(result[0].sender).toEqual(expectedSender);
+      expect(result[0].sent_funds).toEqual(expectedSentFunds);
+    });
+
+    it('should return an empty msg when given an unsupported message type', () => {
+      const msg = {
+        type: 'unsupported_type',
+        sender: 'sender_address'
+      };
+
+      const result = generateMiningMsgs(msg);
+      expect(result).toEqual([
+        {
+          contract: network.router,
+          msg: Buffer.from(JSON.stringify({})),
+          sender: 'sender_address',
+          sent_funds: undefined
+        }
+      ]);
     });
   });
 });

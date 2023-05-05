@@ -68,11 +68,11 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     }
   }, [totalRewardInfoData, rewardPerSecInfoData, stakingPoolInfoData]);
 
-  const handleBond = async () => {
+  const handleClaimReward = async () => {
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = await generateMiningMsgs({
+      const msgs = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
         assetToken: assetToken
@@ -196,7 +196,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 ))}
               <button
                 className={cx('btn')}
-                onClick={() => handleBond()}
+                onClick={() => handleClaimReward()}
                 disabled={actionLoading || !+totalRewardInfoData?.reward_infos[0]?.pending_reward}
               >
                 {actionLoading && <Loader width={20} height={20} />}
