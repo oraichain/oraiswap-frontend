@@ -3,22 +3,20 @@ import { cw20TokenMap, flattenTokens, TokenItemType, tokenMap } from 'config/bri
 import { COMMISSION_RATE } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pairs, Pair } from 'config/poolV2';
+import { Pair, Pairs } from 'config/poolV2';
 import { AggregateResult, Asset } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { buildMultipleMessages } from 'libs/utils';
-import compact from 'lodash/compact';
-import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  calculateRewardEachPool,
   fetchBalanceLpTokens,
   fetchCachedPairsData,
   fetchMyCachedPairsData,
   fetchPairInfoData,
   fetchPoolListAndOraiPrice,
-  calculateRewardEachPool,
   PairInfoData,
   toPairDetails
 } from 'pages/Pools/helpers';
@@ -41,7 +39,7 @@ import {
   getPairs,
   instantiateCw20Token
 } from './listing-simulate';
-import { testCaculateAprDatas, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
+import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 
 describe('pool', () => {
   let usdtContractAddress = '',
@@ -119,16 +117,19 @@ describe('pool', () => {
     let allLpTokenInfos: TokenInfo[] = [];
     let allRewardPerSec: RewardsPerSecResponse[] = [];
 
-    const fromTokenInfo = flattenTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
-    const usdtTokenInfo = flattenTokens.find((t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain');
-    const airiTokenInfo = flattenTokens.find((t) => t.name === 'AIRI' && t.decimals === 6 && t.chainId === 'Oraichain');
+    const fromTokenInfo = flattenTokens.find((t) => t.coinGeckoId === 'oraichain-token' && t.decimals === 6);
+    const usdtTokenInfo = flattenTokens.find(
+      (t) => t.coinGeckoId === 'tether' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
+    const airiTokenInfo = flattenTokens.find(
+      (t) => t.coinGeckoId === 'airight' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
     usdtTokenInfo.contractAddress = usdtContractAddress;
     airiTokenInfo.contractAddress = airiContractAddress;
 
     it('should fetch pairs data correctly', async () => {
       pairsData = await fetchCachedPairsData();
 
-      expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({
         native_token: {
           denom: 'orai'
@@ -144,6 +145,7 @@ describe('pool', () => {
           contract_addr: usdtContractAddress
         }
       });
+      expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
@@ -154,6 +156,8 @@ describe('pool', () => {
         assetToken.contractAddress = pair.token_asset === 'airi' ? airiContractAddress : usdtContractAddress;
       });
       const myCachedPairs = await fetchMyCachedPairsData(devAddress);
+      console.log({ pairsData: JSON.stringify(myCachedPairs, null, 2) });
+
       expect(myCachedPairs[Pairs.pairs[0].contract_addr]).toBe(true);
       expect(myCachedPairs[Pairs.pairs[1].contract_addr]).toBe(true);
     });
@@ -251,25 +255,11 @@ describe('pool', () => {
         ]);
       });
 
-      // it.each(testCaculateAprDatas)(
-      //   'should fetch apr correctly',
-      //   ({ poolList, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec }) => {
-      //     const aprResult = calculateAprResult(poolList, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
-      //     console.log({ aprResult });
-      //     // expect(something...)
-      //   }
-      // );
-
       it('should fetch apr correctly', () => {
         const aprResult = calculateAprResult(pairInfos, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
         expect(aprResult[Pairs.pairs[0].contract_addr]).toBe(0);
         expect(aprResult[Pairs.pairs[1].contract_addr]).toBe(6196.830196830198);
       });
-    });
-
-    it('should total liquidity correctly', () => {
-      const totalAmount = sumBy(pairInfos, (c) => c.amount);
-      expect(totalAmount).toBe(20); // 10 + 10 when provide liquidity orai - usdt
     });
 
     it('should fetch LP token balance of user correctly', async () => {

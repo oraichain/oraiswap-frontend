@@ -182,20 +182,6 @@ export async function addPairAndLpToken(factory: string, cw20ContractAddress: st
   });
 }
 
-export async function addPairNative(factory: string) {
-  const factoryContract = new OraiswapFactoryClient(client, constants.devAddress, factory);
-  const assetInfos = [
-    { native_token: { denom: constants.oraiDenom } },
-    { native_token: { denom: constants.atomDenom } }
-  ];
-  await factoryContract.createPair(
-    {
-      assetInfos
-    },
-    'auto'
-  );
-}
-
 export async function addLiquidity(pair: PairInfo) {
   const pairContract = new OraiswapPairClient(client, constants.devAddress, pair.contract_addr);
   await pairContract.provideLiquidity(
