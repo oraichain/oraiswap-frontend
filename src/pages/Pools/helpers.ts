@@ -1,13 +1,16 @@
-import { network } from 'config/networks';
-import { AggregateResult, Asset } from 'libs/contracts/types';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemType, cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
+import { network } from 'config/networks';
+import type { Pair } from 'config/pools';
+import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { AggregateResult, Asset } from 'libs/contracts/types';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
+import compact from 'lodash/compact';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import {
@@ -20,8 +23,6 @@ import {
   parseTokenInfo
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
-import { Pairs, Pair } from 'config/poolV2';
-import { compact } from 'lodash';
 
 interface PoolInfo {
   offerPoolAmount: bigint;

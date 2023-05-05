@@ -3,7 +3,7 @@ import { cw20TokenMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap }
 import { COMMISSION_RATE } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pair, Pairs } from 'config/poolV2';
+import { Pair, Pairs } from 'config/pools';
 import { AggregateResult, Asset } from 'libs/contracts';
 import { PoolInfoResponse, RewardInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';

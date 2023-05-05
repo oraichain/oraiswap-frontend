@@ -8,7 +8,7 @@ import { DataChart, InfoMove, InfoToken } from './type';
 import { getInfoTokenSv, getPriceTokenWithTF } from './services';
 import SymbolSwapImg from 'assets/images/symbols_swap.svg';
 import { formateNumberDecimalsAuto } from 'libs/utils';
-import { Pairs } from 'config/poolV2';
+import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 

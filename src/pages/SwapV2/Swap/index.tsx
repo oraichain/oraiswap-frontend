@@ -23,7 +23,7 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
-import { Pairs } from 'config/poolV2';
+import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 

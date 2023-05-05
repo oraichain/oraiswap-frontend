@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { fetchTokenInfo } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './NewPoolModal.module.scss';
-import { Pairs } from 'config/poolV2';
+import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 

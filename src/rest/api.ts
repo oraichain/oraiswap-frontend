@@ -21,7 +21,7 @@ import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } f
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
-import { Pairs } from 'config/poolV2';
+import { Pairs } from 'config/pools';
 import { CoinGeckoId } from 'config/chainInfos';
 import { calculateTimeoutTimestamp } from 'helper';
 import { IBCInfo } from 'types/ibc';
