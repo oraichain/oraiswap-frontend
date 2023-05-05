@@ -1,9 +1,34 @@
+export type Addr = string;
+export type Binary = string;
+export interface Call {
+  address: Addr;
+  data: Binary;
+}
+export interface CallOptional {
+  address: Addr;
+  data: Binary;
+  require_success: boolean;
+}
+export interface AggregateResult {
+  return_data: CallResult[];
+}
+export interface CallResult {
+  data: Binary;
+  success: boolean;
+}
+export interface BlockAggregateResult {
+  block: number;
+  return_data: CallResult[];
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
+}
 export interface AllowMsg {
   contract: string;
   gas_limit?: number | null;
 }
 export type Uint128 = string;
-export type Binary = string;
 export type AssetInfo = {
   token: {
     contract_addr: Addr;
@@ -13,7 +38,6 @@ export type AssetInfo = {
     denom: string;
   };
 };
-export type Addr = string;
 export interface Cw20ReceiveMsg {
   amount: Uint128;
   msg: Binary;
@@ -81,30 +105,6 @@ export interface MappingMetadata {
   remote_decimals: number;
 }
 export type ArrayOfPairQuery = PairQuery[];
-export interface Call {
-  address: Addr;
-  data: Binary;
-}
-export interface CallOptional {
-  address: Addr;
-  data: Binary;
-  require_success: boolean;
-}
-export interface AggregateResult {
-  return_data: CallResult[];
-}
-export interface CallResult {
-  data: Binary;
-  success: boolean;
-}
-export interface BlockAggregateResult {
-  block: number;
-  return_data: CallResult[];
-}
-export interface ContractVersion {
-  contract: string;
-  version: string;
-}
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
@@ -160,12 +160,6 @@ export interface ExchangeRateItem {
   exchange_rate: Decimal;
   quote_denom: string;
 }
-export type SwapOperation = {
-  orai_swap: {
-    ask_asset_info: AssetInfo;
-    offer_asset_info: AssetInfo;
-  };
-};
 export interface RewardInfoResponseItem {
   asset_info: AssetInfo;
   bond_amount: Uint128;
@@ -173,6 +167,12 @@ export interface RewardInfoResponseItem {
   pending_withdraw: Asset[];
   should_migrate?: boolean | null;
 }
+export type SwapOperation = {
+  orai_swap: {
+    ask_asset_info: AssetInfo;
+    offer_asset_info: AssetInfo;
+  };
+};
 export type Logo = {
   url: string;
 } | {
