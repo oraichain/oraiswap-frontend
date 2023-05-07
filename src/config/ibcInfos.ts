@@ -3,8 +3,9 @@ import { CosmosChainId, NetworkChainId } from './chainInfos';
 import { IBC_TRANSFER_TIMEOUT } from './constants';
 
 export const [atom2oraichain, oraichain2atom] = process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
-const [osmosis2oraichain, oraicbain2osmosis] = process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
+export const [osmosis2oraichain, oraichain2osmosis] = process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
 export const [oraib2oraichain, oraichain2oraib] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
+// export const [oraib2oraichain, oraichain2oraib] = ["channel-5", "channel-64"];
 const [oraib2oraichain_old, oraichain2oraib_old] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD.split(/\s+/);
 const [kwt2oraichain, oraichain2kwt] = process.env.REACT_APP_KWT_ORAICHAIN_CHANNELS.split(/\s+/);
 
@@ -41,7 +42,7 @@ export const ibcInfos: IBCInfoMap = {
     },
     'osmosis-1': {
       source: 'transfer',
-      channel: oraicbain2osmosis,
+      channel: oraichain2osmosis,
       timeout: IBC_TRANSFER_TIMEOUT
     },
     'oraibridge-subnet-2': {
@@ -68,7 +69,7 @@ export const ibcInfos: IBCInfoMap = {
       source: 'transfer',
       channel: oraichain2kwt,
       timeout: IBC_TRANSFER_TIMEOUT
-    },
+    }
   },
   'oraibridge-subnet-2': {
     Oraichain: {

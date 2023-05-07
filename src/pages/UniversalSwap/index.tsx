@@ -7,10 +7,7 @@ import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<
-    [string, string]
-  >(['orai', 'usdt']);
-
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
   return (
     <Content>
       <div className={cx('swap-container')}>
@@ -18,11 +15,7 @@ const Swap: React.FC = () => {
           <SwapChart fromTokenDenom={fromTokenDenom} />
         </div>
         <div className={cx('swap-col', 'w40')}>
-          <SwapComponent
-            fromTokenDenom={fromTokenDenom}
-            toTokenDenom={toTokenDenom}
-            setSwapTokens={setSwapTokens}
-          />
+          <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
         </div>
       </div>
     </Content>

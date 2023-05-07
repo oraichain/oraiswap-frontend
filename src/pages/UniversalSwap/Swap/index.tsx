@@ -3,28 +3,27 @@ import AntSwapImg from 'assets/images/ant_swap.svg';
 import RefreshImg from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/pools';
 import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { combineReceiver } from 'pages/BalanceNew/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
-import { UniversalSwapHandler } from '../helpers';
-import SelectTokenModal from '../Modals/SelectTokenModal';
+import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
+import { UniversalSwapHandler } from '../helpers';
 import styles from './index.module.scss';
-import { combineReceiver } from 'pages/BalanceNew/helpers';
-import { network } from 'config/networks';
-import useLoadTokens from 'hooks/useLoadTokens';
-import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -45,8 +44,9 @@ const SwapComponent: React.FC<{
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-
   const loadTokenAmounts = useLoadTokens();
+
+  const [searchTokenName, setSearchTokenName] = useState('');
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) return setSwapAmount([undefined, toAmountToken]);
@@ -54,23 +54,24 @@ const SwapComponent: React.FC<{
   };
 
   const onMaxFromAmount = (amount: bigint, type: 'max' | 'half') => {
-    const displayAmount = toDisplay(amount, fromTokenInfoData?.decimals);
+    const displayAmount = toDisplay(amount, originalFromToken?.decimals);
     let finalAmount = displayAmount;
 
     // hardcode fee when swap token orai
     if (fromTokenDenom === ORAI) {
-      const useFeeEstimate = feeEstimate(fromTokenInfoData, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, fromTokenInfoData?.decimals);
+      const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
+      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
       if (type === 'max') {
-        finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
+        finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
       }
       if (type === 'half') {
-        finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+        finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
       }
     }
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
+  // get token on oraichain to simulate swap amount.
   const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
   const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
   const originalFromToken = tokenMap[fromTokenDenom];
@@ -80,10 +81,11 @@ const SwapComponent: React.FC<{
     data: [fromTokenInfoData, toTokenInfoData]
   } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
 
-  const subAmountFrom = toSubAmount(amounts, fromToken);
-  const subAmountTo = toSubAmount(amounts, toToken);
-  const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
-  const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
+  const subAmountFrom = toSubAmount(amounts, originalFromToken);
+  const subAmountTo = toSubAmount(amounts, originalToToken);
+  const fromTokenBalance = originalFromToken ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
+  const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
+
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -124,28 +126,27 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken);
+      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount, userSlippage);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { fromAmountToken, simulateAmount: simulateData.amount, userSlippage, metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
-      // TODO: process the remaining logic of universal swap
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
         });
         loadTokenAmounts({ oraiAddress });
-
         setSwapLoading(false);
       }
     } catch (error) {
+      console.log({ error })
       handleErrorTransaction(error)
     } finally {
       setSwapLoading(false);
     }
   };
 
-  const FromIcon = fromToken?.Icon;
-  const ToIcon = toToken?.Icon;
+  const FromIcon = originalFromToken?.Icon;
+  const ToIcon = originalToToken?.Icon;
 
   return (
     <div className={cx('swap-box')}>
@@ -166,7 +167,7 @@ const SwapComponent: React.FC<{
           <TokenBalance
             balance={{
               amount: fromTokenBalance,
-              decimals: fromTokenInfoData?.decimals,
+              decimals: originalFromToken?.decimals,
               denom: fromTokenInfoData?.symbol ?? ''
             }}
             prefix="Balance: "
@@ -175,7 +176,7 @@ const SwapComponent: React.FC<{
 
           <div
             className={cx('btn')}
-            onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(fromToken?.maxGas ?? 0), 'max')}
+            onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), 'max')}
           >
             MAX
           </div>
@@ -183,28 +184,43 @@ const SwapComponent: React.FC<{
             HALF
           </div>
         </div>
-        <div className={cx('input')}>
-          <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
-            {FromIcon && <FromIcon className={cx('logo')} />}
-            <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
-              <span className={cx('token-org')}>{originalFromToken?.org}</span>
+        <div className={cx('input-wrapper')}>
+          <div className={cx('input')}>
+            <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
+              {FromIcon && <FromIcon className={cx('logo')} />}
+              <div className={cx('token-info')}>
+                <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
+                <span className={cx('token-org')}>{originalFromToken?.org}</span>
+              </div>
+              <div className={cx('arrow-down')} />
             </div>
-            <div className={cx('arrow-down')} />
-          </div>
 
-          <NumberFormat
-            placeholder="0"
-            className={cx('amount')}
-            thousandSeparator
-            decimalScale={6}
-            type="text"
-            value={fromAmountToken}
-            onValueChange={({ floatValue }) => {
-              onChangeFromAmount(floatValue);
+            <NumberFormat
+              placeholder="0"
+              className={cx('amount')}
+              thousandSeparator
+              decimalScale={6}
+              type="text"
+              value={fromAmountToken}
+              onValueChange={({ floatValue }) => {
+                onChangeFromAmount(floatValue);
+              }}
+            />
+          </div>
+          {isSelectFrom && <SelectTokenModalV2
+            close={() => setIsSelectFrom(false)}
+            prices={prices}
+            items={swapFromTokens.filter((token) =>
+              token.denom !== toTokenDenom && token.name.includes(searchTokenName)
+            )}
+            amounts={amounts}
+            setToken={(denom) => {
+              setSwapTokens([denom, toTokenDenom]);
             }}
-          />
+            setSearchTokenName={setSearchTokenName}
+          />}
         </div>
+
       </div>
       <div className={cx('swap-icon')}>
         <img
@@ -225,7 +241,7 @@ const SwapComponent: React.FC<{
             balance={{
               amount: toTokenBalance,
               denom: toTokenInfoData?.symbol ?? '',
-              decimals: toTokenInfoData?.decimals
+              decimals: originalToToken?.decimals
             }}
             prefix="Balance: "
             decimalScale={6}
@@ -235,18 +251,33 @@ const SwapComponent: React.FC<{
             {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
           </span>
         </div>
-        <div className={cx('input')}>
-          <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
-            {ToIcon && <ToIcon className={cx('logo')} />}
-            <div className={cx('token-info')}>
-              <span className={cx('token-symbol')}>{originalToToken?.name}</span>
-              <span className={cx('token-org')}>{originalToToken?.org}</span>
+        <div className={cx('input-wrapper')}>
+          <div className={cx('input')}>
+            <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
+              {ToIcon && <ToIcon className={cx('logo')} />}
+              <div className={cx('token-info')}>
+                <span className={cx('token-symbol')}>{originalToToken?.name}</span>
+                <span className={cx('token-org')}>{originalToToken?.org}</span>
+              </div>
+              <div className={cx('arrow-down')} />
             </div>
-            <div className={cx('arrow-down')} />
-          </div>
 
-          <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+            <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+          </div>
+          {isSelectTo && <SelectTokenModalV2
+            close={() => setIsSelectTo(false)}
+            prices={prices}
+            items={swapToTokens.filter((token) =>
+              token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
+            )}
+            amounts={amounts}
+            setToken={(denom) => {
+              setSwapTokens([fromTokenDenom, denom]);
+            }}
+            setSearchTokenName={setSearchTokenName}
+          />}
         </div>
+
       </div>
       <button
         className={cx('swap-btn')}
@@ -281,43 +312,7 @@ const SwapComponent: React.FC<{
           </div>
           <span>0.3 %</span>
         </div>
-        {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
-          <div className={cx('row')}>
-            <div className={cx('title')}>
-              <span>*Additional: 5% entry tax rate for MILKY transactions</span>
-            </div>
-          </div>
-        )}
       </div>
-      {isSelectFrom ? (
-        <SelectTokenModal
-          isOpen={isSelectFrom}
-          open={() => setIsSelectFrom(true)}
-          close={() => setIsSelectFrom(false)}
-          prices={prices}
-          items={swapFromTokens.filter((token) =>
-            toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
-          )}
-          amounts={amounts}
-          setToken={(denom) => {
-            setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
-          }}
-        />
-      ) : (
-        <SelectTokenModal
-          isOpen={isSelectTo}
-          open={() => setIsSelectTo(true)}
-          close={() => setIsSelectTo(false)}
-          prices={prices}
-          amounts={amounts}
-          items={swapToTokens.filter((token) =>
-            fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
-          )}
-          setToken={(denom) => {
-            setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
-          }}
-        />
-      )}
     </div>
   );
 };

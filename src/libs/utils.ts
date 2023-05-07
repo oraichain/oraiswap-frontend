@@ -22,7 +22,7 @@ export const validateNumber = (amount: number | string): number => {
 };
 
 // decimals always >= 6
-export const toAmount = (amount: number, decimals = 6): bigint => {
+export const toAmount = (amount: number | string, decimals = 6): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
 };
@@ -136,22 +136,28 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-        token: {
-          contract_addr: token.contractAddress
-        }
+      token: {
+        contract_addr: token.contractAddress
       }
+    }
     : { native_token: { denom: token.denom } };
 };
 
 export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
-  var messages: any[] = mainMsg ? [mainMsg] : [];
-  messages.unshift(...preMessages.flat(1));
-  messages = messages.map((msg) => ({
-    contractAddress: msg.contract,
-    handleMsg: msg.msg.toString(),
-    handleOptions: { funds: msg.sent_funds }
-  }));
-  return messages;
+  try {
+    var messages: any[] = mainMsg ? [mainMsg] : [];
+    messages.unshift(...preMessages.flat(1));
+    messages = messages.map((msg) => {
+      return {
+        contractAddress: msg.contract,
+        handleMsg: msg.msg,
+        handleOptions: { funds: msg.sent_funds }
+      };
+    });
+    return messages;
+  } catch (error) {
+    console.log('error in buildMultipleMessages', error);
+  }
 };
 
 export const formateNumberDecimals = (price, decimals = 2) => {

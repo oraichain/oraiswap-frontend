@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
-import { poolTokens } from 'config/pools';
+import { swapFromTokens } from 'config/pools';
 import LoadingBox from 'components/LoadingBox';
 import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';
@@ -22,7 +22,7 @@ const SwapChart: React.FC<{
   const [price24hChange, setPrice24hChange] = useState<number | null>(null);
   const [infoToken, setInfoToken] = useState<InfoToken | null>(null);
 
-  const tokenName = poolTokens.find((el) => el.denom === fromTokenDenom)?.name;
+  const tokenName = swapFromTokens.find((el) => el.denom === fromTokenDenom)?.name;
 
   useEffect(() => {
     if (infoToken?.price24hChange) {
@@ -41,7 +41,7 @@ const SwapChart: React.FC<{
   }, [typeData, tokenName]);
 
   const IconFromToken = useMemo(() => {
-    return poolTokens.find((el) => el.denom === fromTokenDenom)?.Icon;
+    return swapFromTokens.find((el) => el.denom === fromTokenDenom)?.Icon;
   }, [fromTokenDenom]);
 
   const getInfoToken = useCallback(async () => {
@@ -80,7 +80,7 @@ const SwapChart: React.FC<{
                     <IconFromToken />
                   </div>
                   <span className={cx('item-text')}>
-                    {poolTokens.find((el) => el.denom === fromTokenDenom)?.name?.toUpperCase()}
+                    {swapFromTokens.find((el) => el.denom === fromTokenDenom)?.name?.toUpperCase()}
                   </span>
                 </div>
                 <span className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}>
