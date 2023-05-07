@@ -6,6 +6,7 @@ import { network } from 'config/networks';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
+import Long from 'long';
 
 export interface Tokens {
   denom?: string;
@@ -44,6 +45,8 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
       switch (chainId) {
         case 'kawaii_6886-1':
           return `${KWT_SCAN}/tx/${transactionHash}`;
+        case 'Oraichain':
+          return `${network.explorer}/txs/${transactionHash}`
       }
       return null;
   }
@@ -105,12 +108,23 @@ export const handleCheckAddress = async (): Promise<string> => {
   return oraiAddress;
 };
 
-export const handleErrorTransaction = (error) => {
+export const handleErrorTransaction = (error: any) => {
   let finalError = '';
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
-  } else finalError = String(error);
+  } else {
+    if (error?.ex?.message)
+      finalError = String(error.ex.message);
+    else
+      finalError = String(error);
+  }
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
+}
+
+export const calculateTimeoutTimestamp = (timeout: number): string => {
+  return Long.fromNumber(Math.floor(Date.now() / 1000) + timeout)
+    .multiply(1000000000)
+    .toString();
 }

@@ -1,4 +1,4 @@
-.search {   
+.search {
     width: 420px;
     height: 48px;
     background-color: #1e1e21;
@@ -7,12 +7,33 @@
     font-weight: 500;
     font-size: 16px;
     color: white;
+
     @media (max-width: 575px) {
         font-size: 15px;
         width: 100%;
     }
+
     &::placeholder {
         color: #505665;
     }
-    
+}
+
+.universalSearch {
+    width: 100%;
+    background-color: #1e1e21;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-weight: 500;
+    font-size: 16px;
+    color: white;
+    border: 1px solid #484454;
+
+    @media (max-width: 575px) {
+        font-size: 15px;
+        width: 100%;
+    }
+
+    &::placeholder {
+        color: #505665;
+    }
 }

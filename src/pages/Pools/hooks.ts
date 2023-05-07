@@ -1,7 +1,5 @@
-import { pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import compact from 'lodash/compact';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updatePairs } from 'reducer/token';
@@ -10,7 +8,6 @@ import {
   fetchAprResult,
   fetchCachedPairsData,
   fetchMyCachedPairsData,
-  fetchPairInfoData,
   fetchPoolListAndOraiPrice,
   PairInfoData
 } from './helpers';
@@ -70,8 +67,7 @@ export const useFetchPairInfoDataList = () => {
   const [oraiPrice, setOraiPrice] = useState(0);
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const fetchPairInfoDataList = async () => {
-    let poolList: PairInfoData[] = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
-    const res = await fetchPoolListAndOraiPrice(cachedPairs, poolList);
+    const res = await fetchPoolListAndOraiPrice(cachedPairs);
     res.pairInfo && setPairInfos(res.pairInfo);
     res.oraiPrice && setOraiPrice(res.oraiPrice);
   };
