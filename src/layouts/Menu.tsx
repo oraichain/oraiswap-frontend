@@ -8,7 +8,8 @@ import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
-import LogoFullImg from 'assets/images/OraiDEX_full_light.svg';
+import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
+import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import { ThemeContext } from 'context/theme-context';
 
 import { isMobile } from '@walletconnect/browser-utils';
@@ -16,9 +17,7 @@ import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
 import React, { memo, ReactElement, useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
-
 import classNames from 'classnames';
-import useConfigReducer from 'hooks/useConfigReducer';
 
 const Menu: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
@@ -40,7 +39,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <a
           target="_blank"
           href={to}
-          className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
+          className={classNames(styles.menu_item + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`)}
           onClick={() => {
             setOpen(!open);
             onClick(to);
@@ -48,7 +47,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
           rel="noreferrer"
         >
           {icon}
-          <span className={styles.menu_item_text}>{title}</span>
+          <span className={classNames(styles.menu_item_text + ` ${styles[theme]}`, styles.menu_item_text)}>
+            {title}
+          </span>
         </a>
       );
     return (
@@ -58,38 +59,46 @@ const Menu: React.FC<{}> = React.memo((props) => {
           setOpen(!open);
           onClick(to);
         }}
-        className={styles.menu_item + (link === to ? ` ${styles.active}` : '')}
+        className={classNames(styles.menu_item + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`)}
       >
         {icon}
-        <span className={styles.menu_item_text}>{title}</span>
+        <span
+          className={classNames(
+            styles.menu_item_text + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`,
+            styles.menu_item_text
+          )}
+        >
+          {title}
+        </span>
       </Link>
     );
   };
 
   const mobileMode = isMobile();
   const ToggleIcon = open ? CloseIcon : MenuIcon;
-
+  const darkTheme = theme === 'dark';
   return (
     <>
       {mobileMode && (
         <div className={styles.logo}>
           <Link to={'/'} onClick={() => setLink('/')}>
-            <img src={LogoFullImg} alt="logo" />
+            <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
           </Link>
           <ToggleIcon onClick={handleToggle} />
         </div>
       )}
-      <div className={classNames(styles.menu, { [styles.open]: open })}>
+      <div className={classNames(styles.menu, styles[theme], { [styles.open]: open })}>
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <img src={LogoFullImg} alt="logo" />
+              <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
             </Link>
           )}
-          <div className={styles.menu_items}>
+          <div className={classNames(styles.menu_items)}>
             <RequireAuthButton />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
+            {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
             {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
             {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
@@ -107,18 +116,22 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 setTheme('light');
               }}
             >
-              <Dark style={{ width: 14, height: 14 }} />
+              <Light style={{ width: 14, height: 14 }} />
             </button>
           ) : (
             <button
-              className={classNames(styles.menu_theme, {
-                [styles.active]: theme === 'light'
-              })}
+              className={classNames(
+                styles.menu_theme,
+                {
+                  [styles.active]: theme === 'light'
+                },
+                styles[theme]
+              )}
               onClick={() => {
                 setTheme('dark');
               }}
             >
-              <Light style={{ width: 14, height: 14 }} />
+              <Dark style={{ width: 14, height: 14 }} />
             </button>
           )}
           <span>{/* © 2020 - 2023 Oraichain Foundation */}© 2022 Powered by Oraichain</span>

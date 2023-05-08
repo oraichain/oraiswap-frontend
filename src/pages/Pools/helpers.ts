@@ -1,8 +1,9 @@
+import { network } from 'config/networks';
+import { AggregateResult } from 'libs/contracts/types';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
-import { Pair, pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
@@ -18,6 +19,8 @@ import {
   parseTokenInfo
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
+import { Pairs, Pair } from 'config/poolV2';
+import { compact } from 'lodash';
 
 interface PoolInfo {
   offerPoolAmount: bigint;
@@ -40,10 +43,9 @@ export const calculateAprResult = (
   prices: CoinGeckoPrices<string>,
   allTokenInfo: TokenInfo[],
   allLpTokenAsset: PoolInfoResponse[],
-  allRewardPerSec: RewardsPerSecResponse[],
-  pairs: Pair[]
+  allRewardPerSec: RewardsPerSecResponse[]
 ) => {
-  const aprResult = pairs.reduce((acc, pair, ind) => {
+  const aprResult = Pairs.pairs.reduce((acc, pair, ind) => {
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
     const lpToken = allLpTokenAsset[ind];
     const tokenSupply = allTokenInfo[ind];
@@ -52,9 +54,9 @@ export const calculateAprResult = (
     const rewardsPerSec = allRewardPerSec[ind].assets;
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
-      if (isEqual(info, ORAI_INFO))
+      if (isEqual(info, ORAI_INFO)) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
-      else if (isEqual(info, ORAIX_INFO))
+      } else if (isEqual(info, ORAIX_INFO))
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
     });
     return {
@@ -67,27 +69,27 @@ export const calculateAprResult = (
 
 // Fetch APR
 const fetchAprResult = async (pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  const assetTokens = pairs.map((p) => tokenMap[p.token_asset]);
-
+  const lpTokens = Pairs.pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
+  const assetTokens = Pairs.pairs.map((p) => tokenMap[p.token_asset]);
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
-    return calculateAprResult(pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec, pairs);
+    return calculateAprResult(pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
   }
 };
 
 // Fetch Pair Info Data List
-const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails, poolList: PairInfoData[]) => {
+const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails) => {
   if (!cachedPairs) {
     // wait for cached pair updated
     return;
   }
+  let poolList: PairInfoData[] = compact(await Promise.all(Pairs.pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
   const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
   if (!oraiUsdtPool) {
     // retry after 3 seconds
@@ -117,7 +119,7 @@ export const fetchPairInfoData = async (pair: Pair, cached: PairDetails): Promis
   if (!fromToken || !toToken) return;
 
   try {
-    const poolData = await fetchPoolInfoAmount(fromToken, toToken, pair, cached);
+    const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached);
     return {
       ...poolData,
       amount: 0,
@@ -131,9 +133,9 @@ export const fetchPairInfoData = async (pair: Pair, cached: PairDetails): Promis
   }
 };
 
-export const toPairDetails = (res, pairs: Pair[]): PairDetails => {
+export const toPairDetails = (res: AggregateResult): PairDetails => {
   const pairsData = Object.fromEntries(
-    pairs.map((pair, ind) => {
+    Pairs.pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
         return [pair.contract_addr, {}];
@@ -146,7 +148,7 @@ export const toPairDetails = (res, pairs: Pair[]): PairDetails => {
 
 // Fetch all pair data
 const fetchCachedPairsData = async () => {
-  const queries = pairs.map((pair) => ({
+  const queries = Pairs.pairs.map((pair) => ({
     address: pair.contract_addr,
     data: toBinary({
       pool: {}
@@ -156,12 +158,12 @@ const fetchCachedPairsData = async () => {
   const res = await Contract.multicall.aggregate({
     queries
   });
-  return toPairDetails(res, pairs);
+  return toPairDetails(res);
 };
 
-export const calculateReward = (res, pairs: Pair[]) => {
+export const calculateReward = (res: AggregateResult) => {
   const myPairData = Object.fromEntries(
-    pairs.map((pair, ind) => {
+    Pairs.pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
         return [pair.contract_addr, {}];
@@ -174,26 +176,29 @@ export const calculateReward = (res, pairs: Pair[]) => {
   return myPairData;
 };
 
-// Fetch my pair data
-const fetchMyCachedPairsData = async (address: string) => {
-  const queries = pairs.map((pair) => {
+const generateRewardInfoQueries = (stakerAddress: string) => {
+  const queries = Pairs.pairs.map((pair) => {
     const assetToken = tokenMap[pair.token_asset];
     const { info: assetInfo } = parseTokenInfo(assetToken);
     return {
-      address: process.env.REACT_APP_STAKING_CONTRACT,
+      address: network.staking,
       data: toBinary({
         reward_info: {
           asset_info: assetInfo,
-          staker_addr: address
+          staker_addr: stakerAddress
         }
       })
     };
   });
+  return queries;
+};
+
+const fetchMyCachedPairsData = async (stakerAddress: string) => {
+  const queries = generateRewardInfoQueries(stakerAddress);
   const res = await Contract.multicall.aggregate({
     queries
   });
-
-  return calculateReward(res, pairs);
+  return calculateReward(res);
 };
 
 export { fetchAprResult, fetchPoolListAndOraiPrice, fetchCachedPairsData, fetchMyCachedPairsData };

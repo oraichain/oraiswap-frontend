@@ -39,8 +39,21 @@ button.connect {
   align-items: center;
   padding: 8px;
 
+  //light mode
+  &.light {
+    background-color: #efefef;
+  }
+
   &:last-child {
     margin-bottom: 28px;
+  }
+
+  &.light:hover {
+    background: #612fca !important;
+  }
+
+  &.light:hover .des {
+    color: #efefef !important;
   }
 
   &:hover {
@@ -71,6 +84,11 @@ button.connect {
       font-feature-settings: 'ss03' on;
       user-select: none;
       color: #bfa7f2;
+
+      //light mode
+      &.light {
+        color: #6f767e;
+      }
     }
   }
 

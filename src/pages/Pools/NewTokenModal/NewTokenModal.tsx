@@ -11,6 +11,7 @@ import NumberFormat from 'react-number-format';
 import Loader from 'components/Loader';
 import { handleErrorTransaction } from 'helper';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { toDisplay } from 'libs/utils';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -82,7 +83,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   thousandSeparator
                   decimalScale={6}
                   customInput={Input}
-                  value={oraiPer}
+                  value={toDisplay(oraiPer.toString())}
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
@@ -105,7 +106,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   thousandSeparator
                   decimalScale={6}
                   customInput={Input}
-                  value={oraixPer}
+                  value={toDisplay(oraixPer.toString())}
                   onClick={(event) => {
                     event.stopPropagation();
                   }}

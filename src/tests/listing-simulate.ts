@@ -1,3 +1,4 @@
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin } from '@cosmjs/proto-signing';
 import { SimulateCosmWasmClient } from '@terran-one/cw-simulate/src';
 import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
@@ -23,7 +24,8 @@ export const constants = {
   devAddress: 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g',
   oraiDenom: 'orai',
   atomDenom: 'ibc/a2e2eec9057a4a1c2c0a6a4c78b0239118df5f278830f50b4a6bdd7a66506b78',
-  osmoDenom: 'ibc/9c4dcd21b48231d0bc2ac3d1b74a864746b37e4292694c93c617324250d002fc'
+  osmoDenom: 'ibc/9c4dcd21b48231d0bc2ac3d1b74a864746b37e4292694c93c617324250d002fc',
+  rewardPerSecAmount: '1'
 };
 export const client = new SimulateCosmWasmClient({
   chainId: 'Oraichain',
@@ -134,7 +136,7 @@ export async function addPairAndLpToken(factory: string, cw20ContractAddress: st
         contract_addr: cw20ContractAddress
       }
     },
-    stakingToken: cw20ContractAddress
+    stakingToken: constants.devAddress
   });
 
   // add reward per sec to fetch
@@ -146,31 +148,37 @@ export async function addPairAndLpToken(factory: string, cw20ContractAddress: st
     },
     assets: [
       {
-        amount: '1500000',
+        amount: constants.rewardPerSecAmount,
         info: {
           token: {
             contract_addr: cw20ContractAddress
           }
         }
-      }
-    ]
-  });
-  await staking.updateRewardsPerSec({
-    assetInfo: {
-      native_token: {
-        denom: constants.oraiDenom
-      }
-    },
-    assets: [
+      },
       {
-        amount: '1500000',
+        amount: constants.rewardPerSecAmount,
         info: {
           native_token: {
-            denom: constants.oraiDenom
+            denom: 'orai'
           }
         }
       }
     ]
+  });
+
+  // bond to pool
+  await staking.receive({
+    amount: '999999',
+    msg: toBinary({
+      bond: {
+        asset_info: {
+          token: {
+            contract_addr: cw20ContractAddress
+          }
+        }
+      }
+    }),
+    sender: constants.devAddress
   });
 }
 
@@ -205,10 +213,7 @@ export async function addLiquidity(pair: PairInfo) {
     },
     'auto',
     null,
-    [
-      coin(constants.amountProvideLiquidity, constants.oraiDenom),
-      coin(constants.amountProvideLiquidity, constants.atomDenom)
-    ]
+    [coin(constants.amountProvideLiquidity, constants.oraiDenom)]
   );
 }
 

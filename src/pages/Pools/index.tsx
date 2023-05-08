@@ -1,35 +1,22 @@
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
-import { Contract } from 'config/contracts';
-import { Pair, pairs } from 'config/pools';
+import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
-import { atomic, toDecimal, validateNumber } from 'libs/utils';
-import compact from 'lodash/compact';
-import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
+import { useSelector } from 'react-redux';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { updatePairs } from 'reducer/token';
-import {
-  fetchAllRewardPerSecInfos,
-  fetchAllTokenAssetPools,
-  fetchPoolInfoAmount,
-  fetchTokenInfos,
-  getPairAmountInfo,
-  parseTokenInfo
-} from 'rest/api';
-import { RootState } from 'store/configure';
+import { PairInfoData } from './helpers';
+import { useFetchApr, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
+import { RootState } from 'store/configure';
+import NewTokenModal from './NewTokenModal/NewTokenModal';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -120,9 +107,11 @@ const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: { [key: string]: number };
   myPairsData?: Object;
-}>(({ pairInfos, allPoolApr, myPairsData }) => {
+  setIsOpenNewTokenModal?: (isOpenNewToken: boolean) => void;
+}>(({ pairInfos, allPoolApr, myPairsData, setIsOpenNewTokenModal }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   useEffect(() => {
     if (!!!typeFilter) {
       setTypeFilter(KeyFilterPool.all_pool);
@@ -130,7 +119,10 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => myPairsData[pairInfo?.pair?.contract_addr]);
+    return pairInfos.filter(
+      (pairInfo) =>
+        myPairsData[pairInfo?.pair?.contract_addr] || parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
+    );
   }, [myPairsData, pairInfos]);
 
   useEffect(() => {
@@ -160,24 +152,38 @@ const ListPools = memo<{
 
   return (
     <div className={styles.listpools}>
-      <div className={styles.listpools_header}>
-        <div className={styles.listpools_filter}>
-          {LIST_FILTER_POOL.map((item) => (
-            <div
-              key={item.key}
-              style={{
-                color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
-                background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
-              }}
-              className={styles.filter_item}
-              onClick={() => setTypeFilter(item.key)}
-            >
-              {item.text}
-            </div>
-          ))}
+      <div className={styles.listpools_all}>
+        <div className={styles.listpools_header}>
+          <div className={styles.listpools_filter}>
+            {LIST_FILTER_POOL.map((item) => (
+              <div
+                key={item.key}
+                style={{
+                  color: item.key === typeFilter ? '#b177eb' : '#ebebeb',
+                  background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
+                }}
+                className={styles.filter_item}
+                onClick={() => setTypeFilter(item.key)}
+              >
+                {item.text}
+              </div>
+            ))}
+          </div>
+          <div className={styles.listpools_search}>
+            <SearchInput placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+          </div>
         </div>
-        <div className={styles.listpools_search}>
-          <SearchInput placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+        <div className={styles.listpoolsToken_create}>
+          <div
+            style={{
+              color: '#fff',
+              background: '#612fca'
+            }}
+            className={styles.create_item}
+            onClick={() => setIsOpenNewTokenModal(true)}
+          >
+            List a new token
+          </div>
         </div>
       </div>
       <div className={styles.listpools_list}>
@@ -200,191 +206,36 @@ const ListPools = memo<{
   );
 });
 
-type PairInfoData = {
-  pair: Pair;
-  amount: number;
-  commissionRate: string;
-  fromToken: TokenItemType;
-  toToken: TokenItemType;
-} & PoolInfo;
-
 const Pools: React.FC<PoolsProps> = () => {
-  const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
-  const [myPairsData, setMyPairsData] = useState({});
-  const [address] = useConfigReducer('address');
-  const cachedPairs = useSelector((state: RootState) => state.token.pairs);
-  const [cachedApr, setCachedApr] = useConfigReducer('apr');
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
-  const [oraiPrice, setOraiPrice] = useState(0);
-  const dispatch = useDispatch();
-  const setCachedPairs = (payload: PairDetails) => dispatch(updatePairs(payload));
+  const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
+
   const { data: prices } = useCoinGeckoPrices();
-
-  const fetchApr = async () => {
-    const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-    const assetTokens = pairs.map((p) => tokenMap[p.token_asset]);
-    try {
-      const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-        fetchTokenInfos(lpTokens),
-        fetchAllTokenAssetPools(assetTokens),
-        fetchAllRewardPerSecInfos(assetTokens)
-      ]);
-      const aprResult = pairs.reduce((acc, pair, ind) => {
-        const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
-        const lpToken = allLpTokenAsset[ind];
-        const tokenSupply = allTokenInfo[ind];
-        const bondValue =
-          (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) /
-          validateNumber(tokenSupply.total_supply);
-        const rewardsPerSec = allRewardPerSec[ind].assets;
-        let rewardsPerYearValue = 0;
-        rewardsPerSec.forEach(({ amount, info }) => {
-          if (isEqual(info, ORAI_INFO))
-            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
-          else if (isEqual(info, ORAIX_INFO))
-            rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
-        });
-        return {
-          ...acc,
-          [pair.contract_addr]: (100 * rewardsPerYearValue) / bondValue || 0
-        };
-      }, {});
-      setCachedApr(aprResult);
-    } catch (error) {
-      console.log({ error });
-    }
-  };
-
-  const fetchCachedPairs = async () => {
-    const queries = pairs.map((pair) => ({
-      address: pair.contract_addr,
-      data: toBinary({
-        pool: {}
-      })
-    }));
-
-    const res = await Contract.multicall.aggregate({
-      queries
-    });
-
-    const pairsData = Object.fromEntries(
-      pairs.map((pair, ind) => {
-        const data = res.return_data[ind];
-        if (!data.success) {
-          return [pair.contract_addr, {}];
-        }
-        return [pair.contract_addr, fromBinary(data.data)];
-      })
-    );
-    setCachedPairs(pairsData);
-  };
-
-  const fetchMyCachedPairs = async () => {
-    const queries = pairs.map((pair) => {
-      const assetToken = tokenMap[pair.token_asset];
-      const { info: assetInfo } = parseTokenInfo(assetToken);
-      return {
-        address: process.env.REACT_APP_STAKING_CONTRACT,
-        data: toBinary({
-          reward_info: {
-            asset_info: assetInfo,
-            staker_addr: address
-          }
-        })
-      };
-    });
-
-    const res = await Contract.multicall.aggregate({
-      queries
-    });
-
-    const myPairData = Object.fromEntries(
-      pairs.map((pair, ind) => {
-        const data = res.return_data[ind];
-        if (!data.success) {
-          return [pair.contract_addr, {}];
-        }
-        const value = fromBinary(data.data);
-        const bondPools = sumBy(Object.values(value.reward_infos));
-        return [pair.contract_addr, !!bondPools];
-      })
-    );
-    setMyPairsData(myPairData);
-  };
-
-  const fetchPairInfoData = async (pair: Pair, cached: PairDetails): Promise<PairInfoData> => {
-    const [fromToken, toToken] = pair.asset_denoms.map((denom) => tokenMap[denom]);
-    if (!fromToken || !toToken) return;
-
-    try {
-      const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached);
-
-      return {
-        ...poolData,
-        amount: 0,
-        pair,
-        commissionRate: pair.commission_rate,
-        fromToken,
-        toToken
-      };
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  const fetchPairInfoDataList = async () => {
-    if (!cachedPairs) {
-      // wait for cached pair updated
-      return;
-    }
-
-    const poolList: PairInfoData[] = compact(await Promise.all(pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
-    const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
-
-    if (!oraiUsdtPool) {
-      // retry after 3 seconds
-      return setTimeout(fetchPairInfoDataList, 3000);
-    }
-
-    const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
-
-    const pairAmounts = await Promise.all(
-      poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs))
-    );
-    poolList.forEach((pool, ind) => {
-      pool.amount = pairAmounts[ind].tokenUsd;
-    });
-    poolList.sort((a, b) => b.amount - a.amount);
-
-    setPairInfos(poolList);
-    setOraiPrice(oraiPrice);
-  };
-
-  useEffect(() => {
-    fetchPairInfoDataList();
-  }, [cachedPairs]);
-
-  useEffect(() => {
-    fetchCachedPairs();
-    fetchMyCachedPairs();
-  }, []);
-
-  useEffect(() => {
-    if (!pairInfos.length) return;
-    fetchApr();
-  }, [pairInfos]);
+  const { pairInfos, oraiPrice } = useFetchPairInfoDataList();
+  const [cachedApr] = useFetchApr(pairInfos, prices);
+  const [myPairsData] = useFetchMyPairs();
+  useFetchCachePairs();
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
-
   return (
     <Content nonBackground>
       <div className={styles.pools}>
         <Header amount={totalAmount} oraiPrice={oraiPrice} />
-        <ListPools pairInfos={pairInfos} allPoolApr={cachedApr} myPairsData={myPairsData} />
+        <ListPools
+          setIsOpenNewTokenModal={setIsOpenNewTokenModal}
+          pairInfos={pairInfos}
+          allPoolApr={cachedApr}
+          myPairsData={myPairsData}
+        />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
+        />
+        <NewTokenModal
+          isOpen={isOpenNewTokenModal}
+          open={() => setIsOpenNewTokenModal(true)}
+          close={() => setIsOpenNewTokenModal(false)}
         />
       </div>
     </Content>

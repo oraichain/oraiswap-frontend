@@ -4,6 +4,7 @@ import { Decimal } from '@cosmjs/math';
 import { isDeliverTxFailure, logs, GasPrice, Coin } from '@cosmjs/stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
+import { EncodeObject } from '@cosmjs/proto-signing';
 
 /**
  * The options of an .instantiate() call.
@@ -46,7 +47,7 @@ const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
   });
 };
 
-const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]) => {
+const getExecuteContractMsgs = (senderAddress: string, msgs: Msg[]): EncodeObject[] => {
   return msgs.map(({ handleMsg, transferAmount, contractAddress }) => {
     return {
       typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
@@ -81,7 +82,7 @@ const executeMultipleDirectClient = async (
   client: cosmwasm.SigningCosmWasmClient
 ) => {
   const executeContractMsgs = getExecuteContractMsgs(senderAddress, msgs);
-
+  console.log({ senderAddress, executeContractMsgs });
   const result = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', memo);
   if (isDeliverTxFailure(result)) {
     throw new Error(

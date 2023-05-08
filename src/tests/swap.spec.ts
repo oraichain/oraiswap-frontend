@@ -12,6 +12,7 @@ describe('swap', () => {
     const decimals = 6;
 
     const displayAmount = toDisplay(amount, decimals);
+    console.log({ displayAmount });
     expect(displayAmount).toBe(123.456789);
   });
 
