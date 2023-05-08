@@ -3,9 +3,14 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
-import { CoinGeckoId } from 'config/chainInfos';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import { getNetworkGasPrice } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
+  let windowSpy: jest.SpyInstance;
+  beforeAll(() => {
+    windowSpy = jest.spyOn(window, 'window', 'get');
+  });
   const amounts: AmountDetails = {
     usdt: '1000000', // 1
     orai: '1000000', // 1
@@ -114,4 +119,21 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(error).toEqual(new Error(err));
     }
   });
+
+  it.each([
+    ['Oraichain', 1],
+    ['0x38', 0]
+  ])(
+    'test-getNetworkGasPrice-should-return-gasPrice-correctly',
+    async (mockChainId: NetworkChainId, expectedGasEstimate) => {
+      windowSpy.mockImplementation(() => ({
+        Keplr: {
+          getChainInfosWithoutEndpoints: async () => {
+            return [{ chainId: mockChainId, feeCurrencies: [{ gasPriceStep: { average: 1 } }] }];
+          }
+        }
+      }));
+      expect(await getNetworkGasPrice()).toEqual(expectedGasEstimate);
+    }
+  );
 });

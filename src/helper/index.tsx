@@ -60,7 +60,9 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch (error) {
+    console.log({ error })
+  }
   return 0;
 };
 
