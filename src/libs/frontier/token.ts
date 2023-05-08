@@ -65,8 +65,8 @@ const addPairAndLpToken = async (cw20ContractAddress: string) => {
 const createTextProposal = async (
   cw20ContractAddress: string,
   lpAddress: string,
-  rewardPerSecOrai: number,
-  rewardPerSecOraiX: number
+  rewardPerSecOrai: bigint,
+  rewardPerSecOraiX: bigint
 ) => {
   const title = `OraiDEX frontier - Listing new LP mining pool of token ${cw20ContractAddress}`;
   const description = `Create a new liquidity mining pool for CW20 token ${cw20ContractAddress} with LP Address: ${lpAddress}. Total rewards per second for the liquidity mining pool: ${rewardPerSecOrai} orai & ${rewardPerSecOraiX} uORAIX`;

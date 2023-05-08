@@ -11,7 +11,8 @@ import NumberFormat from 'react-number-format';
 import Loader from 'components/Loader';
 import { handleErrorTransaction } from 'helper';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { toDisplay } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
+import { oraichainTokens } from 'config/bridgeTokens';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -22,13 +23,25 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
+const checkRegex = (str: string) => {
+  const regex = /^[a-zA-Z\-]{3,12}$/;
+  return regex.test(str);
+};
+
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [tokenName, setTokenName] = useState('');
-  const [oraiPer, setOraiPer] = useState(1e6);
-  const [oraixPer, setOraixPer] = useState(1e6);
+  const [oraiPer, setOraiPer] = useState(BigInt(1e6));
+  const [oraixPer, setOraixPer] = useState(BigInt(1e6));
   const [isLoading, setIsLoading] = useState(false);
-  const handleCreateToken = async (tokenSymbol, rewardPerSecondOrai, rewardPerSecondOraiX) => {
+  const oraiReward = oraichainTokens.find(token => token.coinGeckoId === 'oraichain-token');
+  const oraixReward = oraichainTokens.find(token => token.contractAddress === 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge');
+  const handleCreateToken = async (tokenSymbol: string, rewardPerSecondOrai: bigint, rewardPerSecondOraiX: bigint) => {
     try {
+      if (!checkRegex(tokenSymbol))
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'Token name is required and must be letter (3 to 12 characters)'
+        });
+
       setIsLoading(true);
       let cw20ContractAddress = process.env.CW20_CONTRACT_ADDRESS;
       let lpAddress: string;
@@ -38,14 +51,14 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         const result = await addPairAndLpToken(cw20ContractAddress);
         lpAddress = result.lpAddress;
       }
-      const simulateResult = await createTextProposal(
+      const result = await createTextProposal(
         cw20ContractAddress,
         lpAddress,
-        parseInt(rewardPerSecondOrai),
-        parseInt(rewardPerSecondOraiX)
+        rewardPerSecondOrai,
+        rewardPerSecondOraiX
       ); // in minimal denom aka in 10^6 denom
 
-      if (simulateResult) {
+      if (result) {
         displayToast(TToastType.TX_SUCCESSFUL);
         setIsLoading(false);
       }
@@ -68,7 +81,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               className={cx('input')}
               value={tokenName}
               onChange={(e) => setTokenName(e?.target?.value)}
-              placeholder="ORAIX"
+              placeholder="ORAICHAIN"
             />
           </div>
           <div className={cx('rewards')}>
@@ -83,12 +96,12 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   thousandSeparator
                   decimalScale={6}
                   customInput={Input}
-                  value={toDisplay(oraiPer.toString())}
+                  value={toDisplay(oraiPer.toString(), oraiReward.decimals)}
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
                   onValueChange={(e) => {
-                    setOraiPer(e.floatValue);
+                    setOraiPer(toAmount(Number(e.value), 6));
                   }}
                   className={cx('value')}
                 />
@@ -106,12 +119,12 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   thousandSeparator
                   decimalScale={6}
                   customInput={Input}
-                  value={toDisplay(oraixPer.toString())}
+                  value={toDisplay(oraixPer.toString(), oraixReward.decimals)}
                   onClick={(event) => {
                     event.stopPropagation();
                   }}
                   onValueChange={(e) => {
-                    setOraixPer(e.floatValue);
+                    setOraixPer(toAmount(Number(e.value), 6));
                   }}
                   className={cx('value')}
                 />
@@ -119,10 +132,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             </div>
           </div>
         </div>
-
         <div
-          className={cx('create-btn', isLoading && 'disable-btn')}
-          onClick={() => handleCreateToken(tokenName, oraiPer, oraixPer)}
+          className={cx('create-btn', (isLoading || !checkRegex(tokenName)) && 'disable-btn')}
+          onClick={() => !isLoading && checkRegex(tokenName) && handleCreateToken(tokenName, oraiPer, oraixPer)}
         >
           {isLoading && <Loader width={20} height={20} />}
           {isLoading && <div style={{ width: 8 }}></div>}
