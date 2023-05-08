@@ -3,8 +3,7 @@ import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { COMMISSION_RATE } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pair } from 'config/pools';
-import { Pairs } from 'config/poolV2';
+import { Pairs, Pair } from 'config/pools';
 import { AggregateResult } from 'libs/contracts';
 import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
@@ -126,6 +125,7 @@ describe('pool', () => {
 
     it('should fetch pairs data correctly', async () => {
       pairsData = await fetchCachedPairsData();
+      console.log("pair data: ", pairsData)
 
       expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({

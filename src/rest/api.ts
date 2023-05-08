@@ -4,7 +4,7 @@ import { TokenItemType, oraichainTokens, tokenMap, tokens } from 'config/bridgeT
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { getPair } from 'config/pools';
+import { Pairs } from 'config/pools';
 import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
@@ -23,7 +23,6 @@ import isEqual from 'lodash/isEqual';
 import Long from 'long';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { TokenInfo } from 'types/token';
-import { Pairs } from 'config/poolV2';
 import { CoinGeckoId } from 'config/chainInfos';
 import { calculateTimeoutTimestamp } from 'helper';
 import { IBCInfo } from 'types/ibc';
@@ -307,31 +306,31 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
 };
 
 const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
-  const pair = getPair(denoms);
+  const pair = Pairs.getPair(denoms);
 
   return pair
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {

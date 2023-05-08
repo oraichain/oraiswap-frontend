@@ -121,3 +121,8 @@ export const gravityContracts: Omit<Record<EvmChainId, string>, '0x1ae6'> = {
   '0x01': process.env.REACT_APP_GRAVITY_ETH_CONTRACT,
   '0x2b6653dc': process.env.REACT_APP_GRAVITY_TRON_CONTRACT
 };
+
+// universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
+export const swapFromTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2' && token.chainId !== 'cosmoshub-4' && token.chainId !== 'osmosis-1' && token.chainId !== 'kawaii_6886-1');
+// universal swap. We dont support kwt & milky for simplicity. We also skip OraiBridge tokens because users dont care about them
+export const swapToTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2');
