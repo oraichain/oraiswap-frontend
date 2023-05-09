@@ -1,12 +1,12 @@
-name: Sonar
+name: Reuseable Sonaqube
 
 on:
-  push:
-    branches: [develop-v2]
+  workflow_call:
+  pull_request:
 
 jobs:
-  build:
-    name: Build
+  scan-repository:
+    name: scan repository with Sonaqube
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
