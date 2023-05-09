@@ -9,6 +9,7 @@ import { DataChart, InfoMove, InfoToken } from './type';
 import { getInfoTokenSv, getPriceTokenWithTF } from './services';
 import SymbolSwapImg from 'assets/images/symbols_swap.svg';
 import { formateNumberDecimalsAuto } from 'libs/utils';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -21,7 +22,7 @@ const SwapChart: React.FC<{
   const [loading, setLoading] = useState<boolean>(false);
   const [price24hChange, setPrice24hChange] = useState<number | null>(null);
   const [infoToken, setInfoToken] = useState<InfoToken | null>(null);
-
+  const [theme] = useConfigReducer('theme');
   const tokenName = swapFromTokens.find((el) => el.denom === fromTokenDenom)?.name;
 
   useEffect(() => {
@@ -69,8 +70,8 @@ const SwapChart: React.FC<{
   }, [tokenName, typeData]);
 
   return (
-    <div className={cx('chart-container')}>
-      <LoadingBox loading={loading}>
+    <div className={cx('chart-container', `chart-container ${styles[theme]}`)}>
+      <LoadingBox loading={loading} theme={theme}>
         <div className={cx('head-info')}>
           {price24hChange && (
             <div>
@@ -94,7 +95,7 @@ const SwapChart: React.FC<{
               <div>
                 <div className={cx('content-price')}>
                   <img src={SymbolSwapImg} />
-                  <span>
+                  <span className={cx('content-price-value', `content-price-value ${styles[theme]}`)}>
                     {formateNumberDecimalsAuto({
                       price: infoMove?.value,
                       maxDecimal: 6,
@@ -114,12 +115,16 @@ const SwapChart: React.FC<{
                 </p>
               </div>
               <div>
-                <div className={cx('date-select')}>
+                <div className={cx('date-select', `date-select ${styles[theme]}`)}>
                   {INTERVALS.map((item) => (
                     <button
                       key={item.key}
                       onClick={() => setTypeData(item.tf)}
-                      className={cx(item.tf === typeData ? 'active' : '')}
+                      className={cx(
+                        item.tf === typeData ? 'active' : '',
+                        'date-select-btn',
+                        `date-select-btn ${styles[theme]}`
+                      )}
                     >
                       {item.text}
                     </button>

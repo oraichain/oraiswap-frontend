@@ -1,8 +1,12 @@
+@import 'src/styles/themes';
 .modal {
   max-width: 568px;
 
   .container {
     background: #17181c;
+    &.light {
+      background-color: $light-bg-primary-box;
+    }
     margin: auto;
     border-radius: 24px;
     padding: 24px;
@@ -26,6 +30,9 @@
       /* aiRight/White */
 
       color: #ffffff;
+      &.light {
+        color: $light-text-color;
+      }
     }
 
     .supply {
@@ -40,6 +47,9 @@
       /* aiRight/Dark BG */
 
       background: #141416;
+      &.light {
+        background: #fff;
+      }
       /* Bridge shadow/Level 2 */
 
       box-shadow: 0px 0px 30px rgba(23, 11, 70, 0.5);
@@ -76,7 +86,9 @@
           /* aiRight/White */
 
           color: #ffffff;
-
+          &.light {
+            color: $light-text-color;
+          }
           /* Inside auto layout */
 
           flex-grow: 1;
@@ -87,6 +99,7 @@
           /* Color/Button */
 
           background: #191b21;
+
           border-radius: 8px;
 
           /* Inside auto layout */
@@ -127,7 +140,9 @@
           padding: 4px 6px;
 
           background: #191b21;
-
+          &.light {
+            background: rgba(239, 239, 239, 1);
+          }
           border-radius: 4px;
 
           font-style: normal;
@@ -141,7 +156,11 @@
           color: #a871df;
 
           &:hover {
-            background: #333642 !important;
+            background: #333642;
+          }
+
+          &.light:hover {
+            background: rgba(239, 239, 239, 1);
           }
         }
 
@@ -243,6 +262,10 @@
           flex-grow: 1;
           text-align: right;
           background: #1e1e21;
+          &.light {
+            background: #efefef;
+            color: $light-text-color;
+          }
           border-radius: 8px;
           height: 100%;
         }
@@ -300,6 +323,9 @@
       /* aiRight/Dark BG */
 
       background: #141416;
+      &.light {
+        background: #fff;
+      }
       /* Bridge shadow/Level 2 */
 
       box-shadow: 0px 0px 30px rgba(23, 11, 70, 0.5);

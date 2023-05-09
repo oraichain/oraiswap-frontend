@@ -1,8 +1,11 @@
+@import 'src/styles/themes';
 .select {
   background: #141416;
   border-radius: 24px;
   padding: 30px 24px;
-
+  &.light {
+    background-color: #ffffff;
+  }
   .title {
     display: flex;
     align-items: flex-end;
@@ -21,6 +24,9 @@
     /* aiRight/White */
 
     color: #ffffff;
+    &.light {
+      color: $light-text-color;
+    }
   }
 
   .options {
@@ -33,6 +39,10 @@
       background: #1e1e21;
       border-radius: 8px;
       display: flex;
+      &.light {
+        background-color: #ededed;
+        color: $light-text-color;
+      }
       gap: 10px;
       align-items: center;
       padding: 16px;
@@ -51,7 +61,12 @@
 
       &:hover {
         cursor: pointer;
-        background: #333642 !important;
+        background: #333642;
+      }
+
+      &.light:hover {
+        background-color: #612fca;
+        color: #fff;
       }
 
       .logo {

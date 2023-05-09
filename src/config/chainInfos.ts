@@ -6,7 +6,9 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
+import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as ScOraiIcon } from 'assets/icons/orchai.svg';
 import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
@@ -79,6 +81,7 @@ export type BridgeAppCurrency = FeeCurrency & {
   readonly bridgeTo?: NetworkChainId[];
   readonly coinGeckoId?: CoinGeckoId;
   readonly Icon?: CoinIcon;
+  readonly IconLight?: CoinIcon;
   readonly bridgeNetworkIdentifier?: EvmChainId;
   readonly coinDecimals: 6 | 18;
   readonly contractAddress?: string;
@@ -135,6 +138,7 @@ export const OraiToken: BridgeAppCurrency = {
   coinDecimals: 6,
   coinGeckoId: 'oraichain-token',
   Icon: OraiIcon,
+  IconLight: OraiLightIcon,
   bridgeTo: ['0x38', '0x01'],
   gasPriceStep: {
     low: 0.003,
@@ -278,7 +282,8 @@ export const oraichainNetwork: CustomChainInfo = {
       contractAddress: process.env.REACT_APP_ORAIX_CONTRACT,
       coinGeckoId: 'oraidex',
       coinDecimals: 6,
-      Icon: OraixIcon
+      Icon: OraixIcon,
+      IconLight: OraixLightIcon
     },
     {
       coinDenom: 'scORAI',

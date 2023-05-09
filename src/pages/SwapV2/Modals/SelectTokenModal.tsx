@@ -20,6 +20,7 @@ interface ModalProps {
   items?: TokenItemType[] | CustomChainInfo[];
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
+  theme?: string;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -30,12 +31,13 @@ const SelectTokenModal: FC<ModalProps> = ({
   items,
   setToken,
   prices,
-  amounts
+  amounts,
+  theme
 }) => {
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
-      <div className={cx('select')}>
-        <div className={cx('title')}>
+    <Modal theme={theme} isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
+      <div className={cx('select', `select ${styles[theme]}`)}>
+        <div className={cx('title', `title ${styles[theme]}`)}>
           <div>{type === 'token' ? 'Select a token' : 'Select a network'}</div>
         </div>
         <div className={cx('options')}>
@@ -69,7 +71,7 @@ const SelectTokenModal: FC<ModalProps> = ({
             }
             return (
               <div
-                className={cx('item')}
+                className={cx('item', `item ${styles[theme]}`)}
                 key={key}
                 onClick={() => {
                   setToken(key);

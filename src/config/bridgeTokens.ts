@@ -13,7 +13,10 @@ import {
 
 export type EvmDenom = 'bep20_orai' | 'bep20_airi' | 'erc20_orai' | 'kawaii_orai';
 
-export type UniversalSwapType = 'other-networks-to-oraichain' | 'oraichain-to-oraichain' | 'oraichain-to-other-networks';
+export type UniversalSwapType =
+  | 'other-networks-to-oraichain'
+  | 'oraichain-to-oraichain'
+  | 'oraichain-to-other-networks';
 
 export type TokenItemType = {
   name: string;
@@ -25,6 +28,7 @@ export type TokenItemType = {
   bridgeNetworkIdentifier?: NetworkChainId;
   bridgeTo?: NetworkChainId[];
   Icon: CoinIcon;
+  IconLight?: CoinIcon;
   chainId: NetworkChainId;
   coinType?: number;
   rpc: string;
@@ -66,7 +70,8 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     minAmountSwap: minAmountSwapMap[currency.coinMinimalDenom],
     evmDenoms: evmDenomsMap[currency.coinMinimalDenom],
     factoryV2: factoryV2CoinDenoms.includes(currency.coinMinimalDenom),
-    Icon: currency.Icon
+    Icon: currency.Icon,
+    IconLight: currency?.IconLight
   }));
 };
 

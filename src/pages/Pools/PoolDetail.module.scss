@@ -1,3 +1,5 @@
+@import 'src/styles/themes';
+
 .pool-detail {
   padding: 40px;
 
@@ -55,6 +57,9 @@
           /* aiRight/White */
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
         }
 
         .value {
@@ -67,6 +72,9 @@
           font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
         }
       }
     }
@@ -158,6 +166,9 @@
       background: #17181c;
       border-radius: 16px;
 
+      &.light {
+        background-color: $light-bg-primary-box;
+      }
       font-style: normal;
       font-weight: 600;
       font-size: 22px;
@@ -193,13 +204,17 @@
             font-weight: 600;
             font-size: 18px;
             line-height: 100%;
+            &.light {
+              background-color: $light-bg-primary-box;
+              color: $light-text-color;
+            }
           }
 
           .amount-usd {
             font-weight: 600;
             font-size: 14px;
             line-height: 100%;
-            color: #777e90;
+            color: $light-text-color-gray;
           }
         }
 
@@ -225,6 +240,9 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+                &.light {
+                  color: $light-text-color;
+                }
               }
             }
 
@@ -239,6 +257,9 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+                &.light {
+                  color: $light-text-color;
+                }
               }
 
               .amount-usd {
@@ -268,6 +289,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -288,6 +312,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {
@@ -310,6 +337,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -330,6 +360,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {

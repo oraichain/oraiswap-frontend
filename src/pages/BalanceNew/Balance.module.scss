@@ -1,4 +1,5 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .wrapper {
   padding: 32px;
@@ -28,6 +29,9 @@
       font-weight: 600;
       font-size: 40px;
       color: #ffffff;
+      &.light {
+        color: $light-text-color;
+      }
     }
   }
 
@@ -39,7 +43,6 @@
       margin-bottom: 15px;
     }
   }
-
 }
 
 .action {
@@ -84,6 +87,9 @@
     }
 
     background: #2b2d3b;
+    &.light {
+      background-color: $light-bg-primary-box;
+    }
     text-align: center;
     margin-right: 20px;
     border-radius: 8px;
@@ -106,6 +112,9 @@
     font-size: 16px;
     font-weight: 600;
     padding-left: 10px;
+    &.light {
+      color: $light-text-color-gray;
+    }
   }
 
   &_form {
@@ -181,6 +190,9 @@
   width: 100%;
   height: 1px;
   background-color: #2d2938;
+  &.light {
+    background-color: #cccdd0;
+  }
   margin-top: 16px;
   margin-bottom: 16px;
 }
@@ -211,6 +223,9 @@
     margin-bottom: 20px;
     background-color: #191b21;
     border-radius: 16px;
+    &.light {
+      background-color: $light-bg-primary-box;
+    }
   }
 }
 

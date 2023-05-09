@@ -1,4 +1,5 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .wrapper {
   padding: 32px;
@@ -124,6 +125,11 @@
   box-sizing: border-box;
 }
 
+.tokenWrapper.light:hover {
+  background-color: #fcfcfc;
+  border: 1px solid #612fca;
+}
+
 .tokenWrapper {
   padding: 24px;
   cursor: pointer;
@@ -148,11 +154,17 @@
     .tokenAmount {
       font-weight: 600;
       font-size: 22px;
+      &.light {
+        color: $light-text-color;
+      }
     }
   }
 
   &.active {
     background: #191b21;
+    &.light {
+      background-color: #fcfcfc;
+    }
     border: 1px solid #a871df;
     box-sizing: border-box;
     border-radius: 12px;
@@ -189,6 +201,9 @@
     .tokenName {
       font-weight: 600;
       font-size: 22px;
+      &.light {
+        color: $light-text-color;
+      }
     }
 
     .tokenOrg {

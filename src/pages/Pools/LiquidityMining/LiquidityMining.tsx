@@ -1,4 +1,5 @@
 import miningImage from 'assets/images/Liquidity_mining_illus.png';
+import miningLightImage from 'assets/images/Liquidity_mining_illus_light.png';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -59,6 +60,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
   const [cachePrices] = useConfigReducer('coingecko');
+  const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
 
   useEffect(() => {
@@ -147,7 +149,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       <div className={cx('row')} style={{ marginBottom: '30px', marginTop: '40px' }}>
         <>
           <div className={cx('mining')}>
-            <div className={cx('label--bold')}>Liquidity Mining</div>
+            <div className={cx('label--bold', `label--bold ${styles[theme]}`)}>Liquidity Mining</div>
             <div className={cx('label--sub')}>Bond liquidity to earn ORAI liquidity reward and swap fees</div>
           </div>
           <div className={cx('earning')}>
@@ -164,8 +166,8 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       <div className={cx('row')} style={{ flexWrap: 'wrap' }}>
         <>
           <div className={cx('mining')}>
-            <div className={cx('container', 'container_mining')}>
-              <img className={cx('icon')} src={miningImage} />
+            <div className={cx('container', 'container_mining', `container ${styles[theme]}`)}>
+              <img className={cx('icon')} src={theme === 'light' ? miningLightImage : miningImage} />
               <div className={cx('bonded')}>
                 <div className={cx('label')}>Bonded</div>
                 <div>
@@ -175,7 +177,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       decimals: lpTokenInfoData.decimals,
                       denom: lpTokenInfoData?.symbol
                     }}
-                    className={cx('amount')}
+                    className={cx('amount', `amount ${styles[theme]}`)}
                     decimalScale={6}
                   />
                   <div>
@@ -214,12 +216,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             </div>
           </div>
           <div className={cx('earning')}>
-            <div className={cx('container', 'container_earning')}>
+            <div className={cx('container', 'container_earning', `container ${styles[theme]}`)}>
               <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
                 pendingRewards.map((r, idx) => (
                   <div key={idx}>
-                    <div className={cx('amount')}>
+                    <div className={cx('amount', `amount ${styles[theme]}`)}>
                       <TokenBalance
                         balance={{
                           amount: r.amount,

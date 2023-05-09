@@ -1,10 +1,14 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .chart-container {
   position: relative;
   height: 381px;
   padding: 20px 24px;
   background: #111111;
+  &.light {
+    background: $light-bg-primary-box;
+  }
   border: 0.76361px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   .chart-box {
@@ -71,9 +75,12 @@
         display: flex;
         align-items: center;
         @include mobile {
-          img, svg {max-width: 20px}
+          img,
+          svg {
+            max-width: 20px;
+          }
         }
-        span {
+        &-value {
           color: #fff;
           font-weight: 500;
           font-size: 30px;
@@ -82,6 +89,10 @@
           @include mobile {
             font-size: 16px;
             margin-left: 4px;
+          }
+          &.light {
+            color: $light-text-color;
+            font-weight: 400;
           }
         }
       }
@@ -93,17 +104,35 @@
       }
       .date-select {
         background: #1e1e21;
+        &.light {
+          background: #efefef;
+        }
         padding: 3px;
         font-size: 13px;
         @include mobile {
           font-size: 11px;
         }
-        button {
+
+        // button {
+        //   cursor: pointer;
+        //   padding: 2px 6px;
+        //   &.active {
+        //     background: #2c2f34;
+        //     font-weight: 500;
+        //   }
+        // }
+        &-btn {
           cursor: pointer;
           padding: 2px 6px;
           &.active {
             background: #2c2f34;
             font-weight: 500;
+            &.light {
+              background-color: $light-text-color-gray;
+            }
+          }
+          &.light {
+            background-color: #efefef;
           }
         }
       }
