@@ -14,6 +14,11 @@ export type ExecuteMsg = {
 } | {
   create_pair: {
     asset_infos: [AssetInfo, AssetInfo];
+    pair_admin?: string | null;
+  };
+} | {
+  add_pair: {
+    pair_info: PairInfo;
   };
 };
 export type QueryMsg = {

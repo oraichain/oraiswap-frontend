@@ -6,6 +6,12 @@
   }
 }
 
+@mixin medium-desktop {
+  @media (min-width: ($breakpoint)) and (max-width: ($breakpoint-lg)) {
+    @content;
+  }
+}
+
 @mixin mobile {
   @media (max-width: ($breakpoint - 0.02)) {
     @content;

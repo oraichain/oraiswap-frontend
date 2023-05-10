@@ -4,6 +4,7 @@ import erc20ABI from 'config/abi/erc20.json';
 import { AbiItem } from 'libs/ethereum-multicall/models';
 import { ethToTronAddress } from 'helper';
 import { chainInfos } from 'config/chainInfos';
+import Metamask from 'libs/metamask';
 
 describe('bigint', () => {
   it('web3-tron-happy-path', async () => {
@@ -16,4 +17,14 @@ describe('bigint', () => {
     const currentAllowance = BigInt(await tokenContract.methods.allowance(owner, spender).call());
     console.log('current allowance: ', currentAllowance);
   });
+
+  it.each<[string, boolean]>([
+    ["0x", false],
+    ["orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g", false],
+    ["0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222", true],
+  ])("test-is-eth-address-metamask", (address, expectedIsEthAddress) => {
+    const metamask = new Metamask();
+    const isEthAddress = metamask.isEthAddress(address);
+    expect(isEthAddress).toEqual(expectedIsEthAddress);
+  })
 });

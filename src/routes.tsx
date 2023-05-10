@@ -7,10 +7,10 @@ import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import BalanceNew from 'pages/BalanceNew';
-// import Pools from 'pages/Pools/index';
-import Pools from 'pages/Pools/indexV2';
+import Pools from 'pages/Pools/index';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import SwapV2 from 'pages/SwapV2/index';
+import UniversalSwap from 'pages/UniversalSwap/index';
 
 export default () => (
   <Suspense
@@ -31,6 +31,7 @@ export default () => (
     <Routes>
       <Route path="/" element={<BalanceNew />} />
       <Route path="/swap" element={<SwapV2 />} />
+      <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/airdrop/:chain" element={<AirDrop />} />
       <Route path="/ethereum" element={<EthereumTest />} />

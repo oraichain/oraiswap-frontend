@@ -9,7 +9,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
-import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -38,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -162,9 +162,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      displayToast(TToastType.TX_FAILED, {
-        message: ex.message
-      });
+      handleErrorTransaction(ex)
     }
   };
 
