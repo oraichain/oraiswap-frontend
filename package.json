@@ -91,5 +91,8 @@
     "@cosmjs/math": "0.29.5",
     "@cosmjs/crypto": "0.29.5",
     "@types/react": "17.0.43"
+  },
+  "engines": {
+    "node": "^18"
   }
 }
