@@ -20,7 +20,7 @@ const getSigningCosmWasmClient = async () => {
   const { accounts, wallet } = await getWallet();
   const address = accounts[0].address;
   const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
-    gasPrice: GasPrice.fromString(network.fee.gasPrice)
+    gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
   });
   return { client, address, wallet };
 };

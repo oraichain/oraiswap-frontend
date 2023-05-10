@@ -13,6 +13,7 @@ import { handleErrorTransaction } from 'helper';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { toAmount, toDisplay } from 'libs/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
+import { network } from 'config/networks';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -33,8 +34,10 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [oraiPer, setOraiPer] = useState(BigInt(1e6));
   const [oraixPer, setOraixPer] = useState(BigInt(1e6));
   const [isLoading, setIsLoading] = useState(false);
-  const oraiReward = oraichainTokens.find(token => token.coinGeckoId === 'oraichain-token');
-  const oraixReward = oraichainTokens.find(token => token.contractAddress === 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge');
+  const oraiReward = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
+  const oraixReward = oraichainTokens.find(
+    (token) => token.contractAddress === 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge'
+  );
   const handleCreateToken = async (tokenSymbol: string, rewardPerSecondOrai: bigint, rewardPerSecondOraiX: bigint) => {
     try {
       if (!checkRegex(tokenSymbol))
@@ -47,9 +50,16 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       let lpAddress: string;
       if (tokenSymbol) {
         cw20ContractAddress = await deployCw20Token(tokenSymbol);
+        displayToast(TToastType.TX_INFO, {
+          message: cw20ContractAddress,
+          customLink: `${network.explorer}/smart-contract/${cw20ContractAddress}`
+        });
         console.log('deployed cw20 token address: ', cw20ContractAddress);
-        const result = await addPairAndLpToken(cw20ContractAddress);
-        lpAddress = result.lpAddress;
+        const res = await addPairAndLpToken(cw20ContractAddress);
+        lpAddress = res.lpAddress;
+        displayToast(TToastType.TX_INFO, {
+          message: res.lpAddress
+        });
       }
       const result = await createTextProposal(
         cw20ContractAddress,
@@ -59,7 +69,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       ); // in minimal denom aka in 10^6 denom
 
       if (result) {
-        displayToast(TToastType.TX_SUCCESSFUL);
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
         setIsLoading(false);
       }
     } catch (error) {
