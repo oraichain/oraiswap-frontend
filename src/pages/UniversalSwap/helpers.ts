@@ -27,13 +27,6 @@ const evmChainIds = chainInfos
   .filter((chain) => chain.networkType === 'evm' && chain.chainId !== '0x1ae6')
   .map((t) => t.chainId);
 
-export const checkSupportNetwork = (from: TokenItemType, to: TokenItemType) => {
-  if (evmChainIds.includes(from.chainId) && to.chainId !== 'Oraichain') {
-    return false;
-  }
-  return true;
-};
-
 export class UniversalSwapHandler {
   private _sender: string;
   private _fromToken: TokenItemType;
