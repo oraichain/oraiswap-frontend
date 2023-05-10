@@ -143,6 +143,7 @@ const SwapComponent: React.FC<{
       const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount, userSlippage);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
+      console.log({ toAddress, combinedReceiver, universalSwapType })
       const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
@@ -326,12 +327,12 @@ const SwapComponent: React.FC<{
               decimalScale={6}
             />
           </div>
-          <div className={cx('row')}>
+          {/* <div className={cx('row')}>
             <div className={cx('title')}>
               <span>Tax rate</span>
             </div>
             <span>0.3 %</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </LoadingBox>
