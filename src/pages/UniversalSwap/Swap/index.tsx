@@ -23,7 +23,7 @@ import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
-import { UniversalSwapHandler, checkSupportNetwork } from '../helpers';
+import { UniversalSwapHandler } from '../helpers';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
@@ -164,11 +164,11 @@ const SwapComponent: React.FC<{
   const ToIcon = originalToToken?.Icon;
 
   const filteredFromTokens = swapFromTokens.filter((token) =>
-    token.denom !== toTokenDenom && token.name.includes(searchTokenName) && checkSupportNetwork(token, originalToToken)
+    token.denom !== toTokenDenom && token.name.includes(searchTokenName)
   )
 
   const filteredToTokens = swapToTokens.filter((token) =>
-    token.denom !== fromTokenDenom && token.name.includes(searchTokenName) && checkSupportNetwork(originalFromToken, token)
+    token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
   )
 
   return (

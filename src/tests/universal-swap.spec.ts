@@ -17,7 +17,7 @@ import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
 import { combineReceiver, findToToken, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { UniversalSwapHandler, checkSupportFrom, checkSupportNetwork } from 'pages/UniversalSwap/helpers';
+import { UniversalSwapHandler } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -902,47 +902,6 @@ describe('universal-swap', () => {
       universalSwap.toToken = toToken;
       const ibcMemo = universalSwap.getIbcMemo(transferAddress);
       expect(ibcMemo).toEqual(expectedIbcMemo);
-    }
-  );
-
-  it.each([
-    [
-      'should return true if from is Oraichain and to is other network',
-      'oraichain-token',
-      'Oraichain',
-      'tether',
-      '0x38',
-      true
-    ],
-    [
-      'should return false if from is EVM network and to is not Oraichain',
-      'oraichain-token',
-      '0x38',
-      'tether',
-      '0x38',
-      false
-    ],
-    [
-      'should return true if from is EVM network and to is Oraichain',
-      'oraichain-token',
-      '0x38',
-      'tether',
-      'Oraichain',
-      true
-    ]
-  ])(
-    'test checkSupportNetwork %s',
-    (
-      _name: string,
-      fromCoingeckoId: CoinGeckoId,
-      fromChainId: NetworkChainId,
-      toCoingeckoId: CoinGeckoId,
-      toChainId: NetworkChainId,
-      expectedResult: boolean
-    ) => {
-      const fromToken = flattenTokens.find((t) => t.coinGeckoId === fromCoingeckoId && t.chainId === fromChainId);
-      const toToken = flattenTokens.find((t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId);
-      expect(checkSupportNetwork(fromToken, toToken)).toBe(expectedResult);
     }
   );
 });
