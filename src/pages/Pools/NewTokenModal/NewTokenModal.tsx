@@ -6,7 +6,14 @@ import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
 import Input from 'components/Input';
-import { addPairAndLpToken, createTextProposal, deployCw20Token } from 'libs/frontier/token';
+import {
+  addPairAndLpToken,
+  msgsTextProposal,
+  deployCw20Token,
+  getPairAndLpAddress,
+  getSigningCosmWasmClient,
+  signBroadCast
+} from 'libs/frontier/token';
 import NumberFormat from 'react-number-format';
 import Loader from 'components/Loader';
 import { handleErrorTransaction } from 'helper';
@@ -48,26 +55,44 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       setIsLoading(true);
       let cw20ContractAddress = process.env.CW20_CONTRACT_ADDRESS;
       let lpAddress: string;
+      const { client, address } = await getSigningCosmWasmClient();
+      console.log({
+        address,
+        client
+      });
+
+      if (!address)
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'Wallet address does not exist!'
+        });
+
       if (tokenSymbol) {
-        cw20ContractAddress = await deployCw20Token(tokenSymbol);
+        cw20ContractAddress = await deployCw20Token({ tokenSymbol, client, address });
         displayToast(TToastType.TX_INFO, {
           message: cw20ContractAddress,
           customLink: `${network.explorer}/smart-contract/${cw20ContractAddress}`
         });
         console.log('deployed cw20 token address: ', cw20ContractAddress);
-        const res = await addPairAndLpToken(cw20ContractAddress);
-        lpAddress = res.lpAddress;
+        const res = await addPairAndLpToken({
+          cw20ContractAddress,
+          client,
+          address
+        });
+        const findPairAndLpAddress = await getPairAndLpAddress(res);
+        lpAddress = findPairAndLpAddress.lpAddress;
         displayToast(TToastType.TX_INFO, {
-          message: res.lpAddress
+          message: findPairAndLpAddress.lpAddress
         });
       }
-      const result = await createTextProposal(
+      const msgsProposal = await msgsTextProposal({
         cw20ContractAddress,
         lpAddress,
         rewardPerSecondOrai,
-        rewardPerSecondOraiX
-      ); // in minimal denom aka in 10^6 denom
+        rewardPerSecondOraiX,
+        address
+      }); // in minimal denom aka in 10^6 denom
 
+      const result = await signBroadCast(client, address, msgsProposal);
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`

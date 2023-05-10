@@ -25,11 +25,22 @@ const getSigningCosmWasmClient = async () => {
   return { client, address, wallet };
 };
 
-const deployCw20Token = async (tokenSymbol: string, cap?: number | string) => {
-  const { client, address } = await getSigningCosmWasmClient();
+const deployCw20Token = async ({
+  tokenSymbol,
+  cap,
+  client,
+  address,
+  codeId
+}: {
+  client: cosmwasm.SigningCosmWasmClient;
+  tokenSymbol: string;
+  cap?: number | string;
+  address: string;
+  codeId?: number;
+}) => {
   const instantiateResult = await client.instantiate(
     address,
-    CODE_ID_CW20,
+    codeId ?? CODE_ID_CW20,
     {
       mint: { minter: address, cap },
       name: `${tokenSymbol} token`,
@@ -44,33 +55,51 @@ const deployCw20Token = async (tokenSymbol: string, cap?: number | string) => {
   return instantiateResult.contractAddress;
 };
 
-const addPairAndLpToken = async (cw20ContractAddress: string) => {
-  const { client, address } = await getSigningCosmWasmClient();
+const addPairAndLpToken = async ({
+  cw20ContractAddress,
+  client,
+  address,
+  factory
+}: {
+  cw20ContractAddress: string;
+  client: cosmwasm.SigningCosmWasmClient;
+  address: string;
+  factory?: string;
+}) => {
   const factoryContract = new OraiswapFactoryClient(
     client,
     address,
-    process.env.REACT_APP_FACTORY_V2_CONTRACT as string
+    factory ?? (process.env.REACT_APP_FACTORY_V2_CONTRACT as string)
   );
-
   // force the token to be paired with native orai by default. It will then be able to be swapped with other tokens that pairs with ORAI
   const result = await factoryContract.createPair({
     assetInfos: [{ native_token: { denom: 'orai' } }, { token: { contract_addr: cw20ContractAddress } }]
   });
-  const wasmAttributes = result.logs[0].events.find((event) => event.type === 'wasm')?.attributes;
+  return result;
+};
+
+const getPairAndLpAddress = (result) => {
+  const wasmAttributes = result?.logs?.[0]?.events.find((event) => event.type === 'wasm')?.attributes;
   const pairAddress = wasmAttributes?.find((attr) => attr.key === 'pair_contract_address')?.value;
   const lpAddress = wasmAttributes?.find((attr) => attr.key === 'liquidity_token_address')?.value;
   return { pairAddress, lpAddress };
 };
 
-const createTextProposal = async (
-  cw20ContractAddress: string,
-  lpAddress: string,
-  rewardPerSecOrai: bigint,
-  rewardPerSecOraiX: bigint
-) => {
+const msgsTextProposal = async ({
+  cw20ContractAddress,
+  lpAddress,
+  rewardPerSecondOrai,
+  rewardPerSecondOraiX,
+  address
+}: {
+  cw20ContractAddress: string;
+  lpAddress: string;
+  rewardPerSecondOrai: bigint;
+  rewardPerSecondOraiX: bigint;
+  address: string;
+}) => {
   const title = `OraiDEX frontier - Listing new LP mining pool of token ${cw20ContractAddress}`;
-  const description = `Create a new liquidity mining pool for CW20 token ${cw20ContractAddress} with LP Address: ${lpAddress}. Total rewards per second for the liquidity mining pool: ${rewardPerSecOrai} orai & ${rewardPerSecOraiX} uORAIX`;
-  const { client, address } = await getSigningCosmWasmClient();
+  const description = `Create a new liquidity mining pool for CW20 token ${cw20ContractAddress} with LP Address: ${lpAddress}. Total rewards per second for the liquidity mining pool: ${rewardPerSecondOrai} orai & ${rewardPerSecondOraiX} uORAIX`;
   const initial_deposit = [];
   const message = {
     typeUrl: '/cosmos.gov.v1beta1.MsgSubmitProposal',
@@ -86,8 +115,19 @@ const createTextProposal = async (
       initialDeposit: initial_deposit
     }
   };
+  return message;
+};
+
+const signBroadCast = async (client, address, message) => {
   return client.signAndBroadcast(address, [message], 'auto');
   // return client.simulate(address, [message], 'auto');
 };
 
-export { deployCw20Token, addPairAndLpToken, createTextProposal };
+export {
+  deployCw20Token,
+  addPairAndLpToken,
+  msgsTextProposal,
+  getSigningCosmWasmClient,
+  getPairAndLpAddress,
+  signBroadCast
+};
