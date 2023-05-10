@@ -22,7 +22,7 @@ describe('frontier-cw20-token', () => {
     codeId = tokenCodeId;
   });
 
-  it('deployCw20Token', async () => {
+  it('deploy-cw20-token', async () => {
     cw20ContractAddress = await deployCw20Token({
       tokenSymbol,
       client,
@@ -32,7 +32,7 @@ describe('frontier-cw20-token', () => {
     expect(typeof cw20ContractAddress).toBe('string');
   });
 
-  it('addPairAndLpToken', async () => {
+  it('add-pair-and-lp-token', async () => {
     const res = await addPairAndLpToken({
       cw20ContractAddress,
       factory: factoryContract,
@@ -55,7 +55,7 @@ describe('frontier-cw20-token', () => {
     expect(typeof lpAddressSimulate).toBe('string');
   });
 
-  it('addPairAndLpToken', async () => {
+  it('msgs-create-text-proposal', async () => {
     const msgs = await msgsTextProposal({
       cw20ContractAddress,
       lpAddress: lpAddressSimulate,
