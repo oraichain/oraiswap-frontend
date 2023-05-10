@@ -86,6 +86,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
+                setSearchTokenName('')
                 close();
               }}
             >

@@ -171,6 +171,16 @@
     .input-wrapper {
       width: 100%;
       position: relative;
+
+      @include medium-desktop {
+        .input {
+          font-size: 20px;
+
+          .amount {
+            font-size: 18px;
+          }
+        }
+      }
     }
 
     .input {
@@ -228,6 +238,7 @@
         flex-grow: 1;
         text-align: right;
         max-width: 50%;
+        width: inherit;
 
         @include mobile {
           width: 100%;
