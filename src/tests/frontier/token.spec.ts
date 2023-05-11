@@ -48,7 +48,7 @@ describe('frontier-cw20-token', () => {
       const wasmAttributes = res?.events.find((event) => {
         return event.type === 'wasm' && event.attributes.find((attr) => attr.key === 'liquidity_token_address');
       })?.attributes;
-      pairAddressSimulate = wasmAttributes?.find((attr) => attr.key === '_contract_addr')?.value;
+      pairAddressSimulate = wasmAttributes?.find((attr) => attr.key === 'pair_contract_address')?.value;
       lpAddressSimulate = wasmAttributes?.find((attr) => attr.key === 'liquidity_token_address')?.value;
     }
     expect(typeof pairAddressSimulate).toBe('string');
