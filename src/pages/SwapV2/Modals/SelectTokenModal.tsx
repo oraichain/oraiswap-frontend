@@ -78,7 +78,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                   close();
                 }}
               >
-                <item.Icon className={cx('logo')} />
+                {theme === 'light' ? (item.IconLight ? <item.IconLight className={cx('logo')} /> : <item.Icon className={cx('logo')} />) : item.Icon && <item.Icon className={cx('logo')} />}
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

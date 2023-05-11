@@ -199,7 +199,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   {network && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div className={styles.search_logo}>
-                        <network.Icon />
+                        {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
                       </div>
                       <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
                         {network.chainName}
@@ -314,7 +314,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             return (
               <button
                 disabled={transferLoading || !addressTransfer}
-                className={styles.tfBtn}
+                className={classNames(styles.tfBtn, styles.tfBtn + `${styles[theme]}`)}
                 onClick={onTransferConvert}
               >
                 {transferLoading && <Loader width={20} height={20} />}

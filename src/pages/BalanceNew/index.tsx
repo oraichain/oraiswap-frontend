@@ -10,7 +10,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
-import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -39,7 +39,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -164,9 +164,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      displayToast(TToastType.TX_FAILED, {
-        message: ex.ex.message
-      });
+      handleErrorTransaction(ex)
     }
   };
 
@@ -235,7 +233,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                 {network && (
                   <div className={styles.search_flex}>
                     <div className={styles.search_logo}>
-                      <network.Icon />
+                      {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
                     </div>
                     <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
                       {network.chainName}
@@ -259,7 +257,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           </div>
         </div>
         <div className={styles.balances}>
-          <div className={styles.box}>
+          <div className={classNames(styles.box, styles.box + ` ${styles[theme]}`)}>
             <div>
               <CheckBox label="Hide small balances" checked={hideOtherSmallAmount} onCheck={setHideOtherSmallAmount} />
             </div>

@@ -1,6 +1,6 @@
 import cn from 'classnames/bind';
 import Pie from 'components/Pie';
-import { getPair, Pair, pairs, poolTokens } from 'config/pools';
+import { Pairs, Pair } from 'config/pools';
 import Content from 'layouts/Content';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -32,7 +32,7 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -53,11 +53,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const getPairInfo = async () => {
     if (!poolUrl) return;
 
-    pair = getPair(poolUrl.split('_'));
+    pair = Pairs.getPair(poolUrl.split('_'));
     if (!pair) return;
-    const token1 = poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
+    const token1 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
 
-    const token2 = poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
+    const token2 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
 
     const info = await fetchPairInfo([token1!, token2!]);
 
@@ -74,7 +74,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   }, []);
 
   const fetchCachedLpTokenAll = async () => {
-    const queries = pairs.map((pair) => ({
+    const queries = Pairs.pairs.map((pair) => ({
       address: pair.liquidity_token,
       data: toBinary({
         balance: {
@@ -88,7 +88,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     });
 
     const lpTokenData = Object.fromEntries(
-      pairs.map((pair, ind) => {
+      Pairs.pairs.map((pair, ind) => {
         const data = res.return_data[ind];
         if (!data.success) {
           return [pair.liquidity_token, {}];

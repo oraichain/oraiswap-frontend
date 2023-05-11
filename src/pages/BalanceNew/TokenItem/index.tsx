@@ -3,6 +3,7 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
+import useConfigReducer from 'hooks/useConfigReducer';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };
@@ -44,7 +45,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
-          {token.Icon && <token.Icon className={styles.tokenIcon} />}
+          {token.Icon && token.IconLight && theme === 'light' ? <token.IconLight className={styles.tokenIcon} /> : <token.Icon className={styles.tokenIcon} />}
           <div className={styles.tokenInfo}>
             <div className={classNames(styles.tokenName, styles.tokenName + ` ${styles[theme]}`)}>{token.name}</div>
           </div>

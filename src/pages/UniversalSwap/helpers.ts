@@ -3,7 +3,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
-import { NetworkChainId } from 'config/chainInfos';
+import { NetworkChainId, chainInfos } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -21,6 +21,11 @@ export interface SwapData {
   metamaskAddress?: string;
   tronAddress?: string;
 }
+
+// exclude Kawaii 0x1ae6
+const evmChainIds = chainInfos
+  .filter((chain) => chain.networkType === 'evm' && chain.chainId !== '0x1ae6')
+  .map((t) => t.chainId);
 
 export class UniversalSwapHandler {
   private _sender: string;

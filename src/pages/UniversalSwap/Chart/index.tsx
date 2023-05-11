@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
 import ChartComponent from './Chart';
-import { swapFromTokens } from 'config/pools';
+import { swapFromTokens } from 'config/bridgeTokens';
 import LoadingBox from 'components/LoadingBox';
 import { INTERVALS } from './constants';
 import { DataChart, InfoMove, InfoToken } from './type';

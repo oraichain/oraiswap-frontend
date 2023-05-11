@@ -19,7 +19,7 @@ import {
   parseTokenInfo
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
-import { Pairs, Pair } from 'config/poolV2';
+import { Pairs, Pair } from 'config/pools';
 import { compact } from 'lodash';
 
 interface PoolInfo {
