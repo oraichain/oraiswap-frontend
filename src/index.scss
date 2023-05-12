@@ -32,9 +32,11 @@ button[disabled] {
   position: fixed;
   z-index: 10000000;
   padding: 16px 8px 16px 16px;
+
   .Toastify__toast-theme--dark {
     background: #2d2938;
   }
+
   .Toastify__toast-container--top-right {
     top: 35px;
     right: 35px;
@@ -81,12 +83,12 @@ button[disabled] {
   padding: 0 !important;
 }
 
-#oraiswap {
-  font-size: $font-size;
-  min-height: 100%;
-  display: flex;
-  width: 100%;
-}
+// #oraiswap {
+//   font-size: $font-size;
+//   min-height: 100%;
+//   display: flex;
+//   width: 100%;
+// }
 
 #basement {
   min-height: 100vh;
@@ -124,11 +126,13 @@ button[disabled] {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: #666;
   border-radius: 8px;
 }
+
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #888;

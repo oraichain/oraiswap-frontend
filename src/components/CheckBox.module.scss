@@ -1,3 +1,6 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 /* Customize the label (the container) */
 .container {
   display: block;
@@ -27,21 +30,21 @@
   left: 0;
   height: 16px;
   width: 16px;
-  border: 1px solid #A871DF;
+  border: 1px solid $purple-magenta;
 }
 
 /* On mouse-over, add a grey background color */
 .container:hover input~.checkmark {
-  border-color: #A871DF;
+  border-color: $purple-magenta;
 }
 
 /* When the checkbox is checked, add a blue background */
 .container input:checked~.checkmark {
-  border-color: #A871DF;
-  background-color: black;
+  border-color: $purple-magenta;
+  background-color: $black-color;
 
-  .light {
-    background-color: white;
+  @include theme() {
+    background-color: theme-get('bg-color');
   }
 }
 
@@ -63,7 +66,7 @@
   top: 1px;
   width: 5px;
   height: 10px;
-  border: solid #A871DF;
+  border: solid $purple-magenta;
   border-width: 0 2px 2px 0;
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);

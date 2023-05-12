@@ -1,16 +1,17 @@
+@import "src/styles/mixins";
+
 .search {
   width: 420px;
   height: 48px;
-  background-color: #1e1e21;
   border-radius: 8px;
   padding: 12px 16px;
   font-weight: 500;
   font-size: 16px;
-  color: white;
 
-  &.light {
-    background-color: #fcfcfc;
-    color: #505665 !important;
+  @include theme() {
+    background-color: theme-get('bg-color');
+    color: theme-get('text-color');
+    border-color: theme-get('border-color');
   }
 
   @media (max-width: 575px) {
@@ -25,20 +26,20 @@
 
 .universalSearch {
   width: 100%;
-  background-color: #1e1e21;
   border-radius: 8px;
   padding: 12px 16px;
   font-weight: 500;
   font-size: 16px;
-  color: white;
-  border: 1px solid #484454;
+  border: 1px solid;
+
+  @include theme() {
+    background-color: theme-get('bg-color');
+    color: theme-get('text-color');
+    border-color: theme-get('border-color');
+  }
 
   @media (max-width: 575px) {
     font-size: 15px;
     width: 100%;
-  }
-
-  &::placeholder {
-    color: #505665;
   }
 }

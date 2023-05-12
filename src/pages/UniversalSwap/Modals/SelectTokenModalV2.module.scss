@@ -1,5 +1,10 @@
+@import "src/styles/mixins";
+
 .select {
-  background: #1E1E21;
+  @include theme() {
+    background-color: theme-get('bg-color');
+  }
+
   border-radius: 8px;
   padding: 24px;
   max-height: 500px;
@@ -36,7 +41,12 @@
     gap: 10px;
 
     .item {
-      background: #1e1e21;
+      @include theme() {
+        background-color: theme-get('bg-color');
+        color: theme-get('text-color');
+
+      }
+
       border-radius: 8px;
       display: flex;
       gap: 10px;
@@ -53,11 +63,14 @@
 
       /* aiRight/White */
 
-      color: #ffffff;
 
       &:hover {
         cursor: pointer;
-        background: #333642 !important;
+
+        @include theme() {
+          background-color: theme-get('bg-hover-color');
+          color: theme-get('text-color-hover');
+        }
       }
 
       .logo {

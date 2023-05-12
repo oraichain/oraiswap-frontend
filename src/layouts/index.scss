@@ -1,4 +1,8 @@
 @import 'src/styles/themes';
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/reboot';
+@import 'src/styles/utils';
 
 .primary-btn {
   border-radius: 8px;
@@ -14,4 +18,12 @@
   .primary-btn {
     background-color: $dark-bg-primary-btn;
   }
+}
+
+.light,
+.dark {
+  font-size: $font-size;
+  min-height: 100%;
+  display: flex;
+  width: 100%;
 }

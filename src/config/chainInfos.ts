@@ -339,6 +339,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x38',
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
+        IconLight: OraiLightIcon,
         Icon: OraiIcon
       },
       {
@@ -347,6 +348,7 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeNetworkIdentifier: '0x01',
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
+        IconLight: OraiLightIcon,
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: OraiIcon
       },
@@ -477,6 +479,7 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 118
     },
     Icon: OsmoIcon,
+    IconLight: OsmoLightIcon,
     bech32Config: defaultBech32Config('osmo'),
     currencies: [
       {
@@ -485,7 +488,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 6,
         coinGeckoId: 'osmosis',
         bridgeTo: ['Oraichain'],
-        Icon: OsmoIcon
+        Icon: OsmoIcon,
+        IconLight: OsmoLightIcon
       }
     ]
   },
@@ -530,6 +534,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'oraichain-token',
+        IconLight: OraiLightIcon,
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: OraiIcon
       },
@@ -596,7 +601,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'oraichain-token',
         prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
-        Icon: OraiIcon
+        Icon: OraiIcon,
+        IconLight: OraiLightIcon
       },
       {
         coinDenom: 'AIRI',

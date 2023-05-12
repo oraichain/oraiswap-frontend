@@ -1,7 +1,6 @@
 @import 'src/styles/mixins';
 
 .menu {
-  background: #191b21;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -25,9 +24,8 @@
     }
   }
 
-  // light mode
-  &.light {
-    background-color: #fcfcfc;
+  @include theme() {
+    background-color: theme-get('bg-color');
   }
 }
 

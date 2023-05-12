@@ -1,0 +1,40 @@
+$colors: (
+    'forest': #239F28,
+    'aqua': #186EEF,
+    'ruby': #C93939,
+    'zing': #20CAC3,
+    'carrot': #E9853E,
+    'grape': #7542F2,
+    'midnight': #433F5C,
+    'slate': #657786,
+);
+$shades: (
+    'shade-0': #ffffff,
+    'shade-1': #f5f5f5,
+    'shade-2': #d8d8d8,
+    'shade-3': #bbbbbb,
+    'shade-4': #979797,
+    'shade-5': #535353,
+    'shade-6': #0c0c0c,
+);
+$shade-0: map-get($shades, 'shade-0');
+$shade-1: map-get($shades, 'shade-1');
+$shade-2: map-get($shades, 'shade-2');
+$shade-3: map-get($shades, 'shade-3');
+$shade-4: map-get($shades, 'shade-4');
+$shade-5: map-get($shades, 'shade-5');
+$shade-6: map-get($shades, 'shade-6');
+$forest: map-get($colors, 'forest');
+$aqua: map-get($colors, 'aqua');
+$ruby: map-get($colors, 'ruby');
+$zing: map-get($colors, 'zing');
+$carrot: map-get($colors, 'carrot');
+$grape: map-get($colors, 'grape');
+$midnight: map-get($colors, 'midnight');
+$slate: map-get($colors, 'slate');
+$bg-color: map-get($shades, 'shade-1');
+$border-color: map-get($shades, 'shade-2');
+$border-dark-color: map-get($shades, 'shade-3');
+$text-color: map-get($shades, 'shade-6');
+$muted: map-get($colors, 'slate');
+$subtle: map-get($shades, 'shade-4');

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
-import RefreshImg from 'assets/images/refresh.svg';
+import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -170,8 +171,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = originalFromToken?.Icon;
-  const ToIcon = originalToToken?.Icon;
+  const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
+  const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   const filteredFromTokens = swapFromTokens.filter((token) =>
     token.denom !== toTokenDenom && token.name.includes(searchTokenName)
@@ -193,8 +194,8 @@ const SwapComponent: React.FC<{
               setVisible={setVisible}
               content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
             />
-            <button onClick={refreshBalances}>
-              <img className={cx('btn')} src={RefreshImg} alt="btn" />
+            <button className={cx('btn')} onClick={refreshBalances}>
+              <RefreshImg />
             </button>
           </div>
           <div className={cx('balance')}>
@@ -256,13 +257,12 @@ const SwapComponent: React.FC<{
         </div>
         <div className={cx('swap-icon')}>
           <img
-            src={AntSwapImg}
+            src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
             }}
             alt="ant"
-            style={{ pointerEvents: swapFromTokens.some((t) => t.denom === toTokenDenom) ? 'auto' : 'none', cursor: swapFromTokens.some((t) => t.denom === toTokenDenom) ? 'pointer' : 'not-allowed' }}
           />
         </div>
         <div className={cx('to')}>

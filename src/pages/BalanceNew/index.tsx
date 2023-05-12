@@ -1,5 +1,6 @@
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
 import classNames from 'classnames';
 import CheckBox from 'components/CheckBox';
@@ -241,7 +242,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                   </div>
                 )}
                 <div>
-                  <ArrowDownIcon />
+                  {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
                 </div>
               </div>
             </div>

@@ -1,4 +1,6 @@
 @import 'src/styles/variables';
+// @import 'src/styles/dark_theme';
+// @import 'src/styles/light_theme';
 
 @mixin desktop {
   @media (min-width: ($breakpoint)) {
@@ -41,4 +43,65 @@
 
 @mixin transition($property: all) {
   transition: $property $transition-duration;
+}
+
+
+// for dark-light mode
+$themes: (
+  dark: ('text-color': white,
+    text-color-hover: black,
+    'text-active': #FFFFFF,
+    'bg-color': #191b21,
+    'bg-hover-color': #2b2d3b,
+    'bg-color-secondary': #1e1e21,
+    'bg-color-active': #1e1e21,
+    'bg-chart': #111111,
+    'bg-btn-switch': #ffffff,
+    'bg-btn-time': #777E90,
+    'bg-btn-active': #2c2f34,
+    'bg-swap-box': linear-gradient(144.98deg, rgba(51, 51, 51, 0.8) 5.29%, rgba(7, 7, 7, 0.8) 95.51%),
+    'bg-color-arrow': 6px solid #ffffff,
+    'shadow-swap-box': -6px 6px 9px -10px rgba(0, 0, 0, 0.12),
+    'shadow-swap-from-to': 0px 0px 30px rgba(23, 11, 70, 0.5),
+    'shadow-input': 'none',
+    'border-color': #484454,
+    'placeholder-color': #46484E,
+    'svg-fill-color': #BDC3D3),
+  light: ('text-color': black,
+    text-color-hover: white,
+    'text-active': #323537,
+    'bg-color': #fcfcfc,
+    'bg-hover-color': #7e5cc5,
+    'bg-color-secondary': #EFEFEF,
+    'bg-color-active': #efe7f8,
+    'bg-chart': #ffffff,
+    'bg-btn-switch': #47494B,
+    'bg-btn-time': #777E90,
+    'bg-btn-active': #dadbdd,
+    'bg-swap-box': #ECECEC,
+    'bg-color-arrow': 6px solid #272B30,
+    'shadow-swap-box': 'none',
+    'shadow-swap-from-to': 'none',
+    'shadow-input': 0px 4px 4px rgba(0, 0, 0, 0.25),
+    'border-color': #D9DBDD,
+    'placeholder-color': #B9B9B9,
+    'svg-fill-color': #777E90)
+);
+
+@mixin theme() {
+
+  @each $theme,
+  $map in $themes {
+    $theme-map: $map !global;
+
+    :global(.#{$theme}) & {
+      @content; // the content inside @include theme() {...}
+    }
+  }
+
+  $theme-map: null !global;
+}
+
+@function theme-get($key) {
+  @return map-get($theme-map, $key);
 }

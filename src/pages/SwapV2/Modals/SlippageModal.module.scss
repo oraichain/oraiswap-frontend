@@ -1,7 +1,12 @@
+@import 'src/styles/mixins';
+
 .setting {
   border-radius: 8px;
   padding: 20px 24px 24px;
-  background: #2B2D3B;
+
+  @include theme() {
+    background-color: theme-get('bg-color');
+  }
 
   .header {
     display: flex;
@@ -37,7 +42,6 @@
       }
     }
   }
-
 
   .subtitle {
     color: #A871DF;
