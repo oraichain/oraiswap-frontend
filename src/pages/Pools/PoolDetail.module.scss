@@ -1,4 +1,5 @@
 @import 'src/styles/themes';
+@import 'src/styles/mixins';
 
 .pool-detail {
   padding: 40px;
@@ -377,8 +378,10 @@
     }
 
     .btn {
-      background: #612fca;
-      box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+      @include theme() {
+        background-color: theme-get('bg-btn-primary');
+        box-shadow:  theme-get('shadow-btn');
+      }
       padding: 16px;
       width: 100%;
       text-align: center;
@@ -389,7 +392,7 @@
       font-size: 16px;
       line-height: 100%;
       text-align: center;
-      color: #ffffff;
+      color: $white-color;
       cursor: pointer;
       display: flex;
       justify-content: center;

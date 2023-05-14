@@ -1,4 +1,6 @@
 @import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .header {
   display: flex;
   gap: 20px;
@@ -317,7 +319,10 @@
   gap: 10px;
   justify-content: center;
   align-items: center;
-
+  @include theme() {
+    background-color: theme-get('bg-btn-primary');
+    box-shadow:  theme-get('shadow-btn');
+  }
   @media (max-width: 575px) {
     font-size: 14px;
     &.btn-unbond {
@@ -326,9 +331,12 @@
   }
 
   &--dark {
-    background: #2d2938;
+    @include theme() {
+      background-color: theme-get('bg-color-secondary');
+      color:  theme-get('text-color-secondary');
+    }
     border: none;
-    box-shadow: none;
+    box-shadow: none !important;
   }
 
   opacity: 1;
@@ -367,9 +375,11 @@
         gap: 10px;
 
         .bonded-value {
-          background: #612fca;
+          @include theme() {
+            background-color: theme-get('bg-btn-primary');
+          }
           border-radius: 8px;
-          padding: 5px;
+          padding: 13px 8px;
         }
       }
 
