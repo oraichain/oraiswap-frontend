@@ -122,7 +122,9 @@ export const handleErrorTransaction = (error: any) => {
     message: finalError
   });
 }
-
+displayToast(TToastType.TX_FAILED, {
+  message: 'test'
+});
 export const calculateTimeoutTimestamp = (timeout: number): string => {
   return Long.fromNumber(Math.floor(Date.now() / 1000) + timeout)
     .multiply(1000000000)

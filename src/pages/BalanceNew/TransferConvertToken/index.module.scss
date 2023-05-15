@@ -7,8 +7,12 @@
 
   // @include flex(space-between);
   .tfBtn {
-    background: #612fca;
-    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    @include theme() {
+      background-color: theme-get('bg-btn-primary');
+      box-shadow: theme-get('shadow-btn');
+    }
+
+    color: $white-color;
     border-radius: 8px;
     padding: 16px;
     @include flex();
@@ -349,6 +353,8 @@
   &.light {
     background: #efefef;
     border-color: none;
+
+
   }
 
   border-radius: 8px;
@@ -356,10 +362,15 @@
 
   li {
     padding: 12px 24px 12px 24px;
+
   }
 
   li:hover {
     background-color: #703cde;
+
+    div {
+      color: $white-color;
+    }
   }
 
   &_title {

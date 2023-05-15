@@ -1,6 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import classNames from 'classnames';
 import Input from 'components/Input';
 import Loader from 'components/Loader';
@@ -208,7 +209,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   )}
                   {bridgeNetworks.length > 1 && (
                     <div>
-                      <ArrowDownIcon />
+                      {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
                     </div>
                   )}
                 </div>

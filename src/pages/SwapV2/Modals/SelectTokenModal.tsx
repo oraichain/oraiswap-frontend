@@ -6,6 +6,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
 import { FC } from 'react';
 import styles from './SelectTokenModal.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -20,7 +21,6 @@ interface ModalProps {
   items?: TokenItemType[] | CustomChainInfo[];
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
-  theme?: string;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -32,8 +32,10 @@ const SelectTokenModal: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  theme
 }) => {
+
+  const [theme] = useConfigReducer('theme')
+
   return (
     <Modal theme={theme} isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
       <div className={cx('select', `select ${styles[theme]}`)}>

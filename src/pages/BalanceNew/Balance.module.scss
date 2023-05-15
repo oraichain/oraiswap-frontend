@@ -163,8 +163,11 @@
   flex-direction: row;
 
   .tfBtn {
-    background: #612fca;
-    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    @include theme() {
+      background-color: theme-get('bg-btn-primary');
+      box-shadow: theme-get('shadow-btn');
+    }
+
     border-radius: 8px;
     padding: 16px;
     justify-content: center;
