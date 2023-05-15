@@ -220,7 +220,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
             <div className={cx('info')}>
               {!!pairAmountInfoData && lpTokenInfoData && (
                 <div className={cx('row')}>
-                  <div className={cx('container', 'tokens', `container ${styles[theme]}`)}>
+                  <div className={cx('container', 'tokens')}>
                     <div className={cx('available-tokens')}>
                       <div className={cx('label')}>Available LP tokens</div>
                       <Pie percent={50}>
@@ -298,7 +298,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                   </div>
 
-                  <div className={cx('container', 'pool-catalyst', `container ${styles[theme]}`)}>
+                  <div className={cx('container', 'pool-catalyst')}>
                     <div className={cx('label')}>Total liquidity</div>
                     <div className={cx('content')}>
                       <div className={cx('pool-catalyst_token')}>

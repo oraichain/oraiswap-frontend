@@ -27,40 +27,6 @@
   }
 }
 
-.transferTab {
-  width: 100%;
-  display: flex;
-  margin-top: 40px;
-  flex-direction: row;
-
-  .tfBtn {
-    background: #612fca;
-    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
-    border-radius: 8px;
-    padding: 16px;
-    justify-content: center;
-    align-content: center;
-    display: flex;
-    align-items: center;
-    margin-top: 24px;
-    cursor: pointer;
-
-    svg {
-      margin-right: 5px !important;
-    }
-  }
-
-  .tfTxt {
-    font-weight: 600;
-    font-size: 16px;
-  }
-
-  @include mobile {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
 .divider {
   width: 100%;
   height: 1px;
@@ -127,7 +93,7 @@
 
 .tokenWrapper.light:hover {
   background-color: #fcfcfc;
-  border: 1px solid #612fca;
+  border: 1px solid $blue-color;
 }
 
 .tokenWrapper {
@@ -204,23 +170,6 @@
       &.light {
         color: $light-text-color;
       }
-    }
-
-    .tokenOrg {
-      padding-left: 4px;
-      padding-right: 4px;
-      border-radius: 4px;
-      background: #612fca;
-      float: left;
-    }
-
-    .tokenOrgTxt {
-      font-weight: 600;
-      font-size: 14px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      float: left;
-      white-space: nowrap;
     }
   }
 }

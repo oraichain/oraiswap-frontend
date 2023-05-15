@@ -1,4 +1,6 @@
 @import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .modal {
   max-width: 568px;
 
@@ -298,7 +300,7 @@
       }
 
       .isChosen {
-        background: #612fca;
+        background: $blue-color;
       }
 
       .input {
@@ -323,7 +325,7 @@
     .swap-btn {
       margin-top: 30px;
       width: 100%;
-      background: #612fca;
+      background: $blue-color;
       /* Inner/Button */
 
       box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;

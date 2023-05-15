@@ -20,7 +20,9 @@
   }
 
   &::placeholder {
-    color: #cccdd0;
+    @include theme() {
+      color: theme-get('text-color-placeholder');
+    }
   }
 }
 

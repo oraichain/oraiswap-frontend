@@ -38,11 +38,11 @@ const LIST_FILTER_POOL = [
 const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amount, oraiPrice, theme }) => {
   return (
     <div className={styles.header}>
-      <div className={classNames(styles.header_title, styles.header_title + ` ${styles[theme]}`)}>Pools</div>
+      <div className={styles.header_title}>Pools</div>
       <div className={styles.header_data}>
         <div className={styles.header_data_item}>
           <span className={styles.header_data_name}>ORAI Price</span>
-          <span className={classNames(styles.header_data_value, styles.header_data_value + ` ${styles[theme]}`)}>
+          <span className={styles.header_data_value}>
             <TokenBalance balance={oraiPrice} className={styles.header_data_value} decimalScale={2} />
           </span>
         </div>
@@ -50,7 +50,7 @@ const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amou
           <span className={styles.header_data_name}>Total Liquidity</span>
           <TokenBalance
             balance={amount}
-            className={classNames(styles.header_data_value, styles.header_data_value + ` ${styles[theme]}`)}
+            className={styles.header_data_value}
             decimalScale={2}
           />
         </div>
@@ -67,11 +67,10 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
 
   return (
     <div
-      className={classNames(styles.pairbox, styles.pairbox + ` ${styles[theme]}`)}
+      className={classNames(styles.pairbox)}
       onClick={() =>
         navigate(
           `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(token2.denom)}`
-          // { replace: true }
         )
       }
     >
@@ -90,7 +89,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
           )}
         </div>
         <div className={styles.pairbox_pair}>
-          <div className={classNames(styles.pairbox_pair_name, styles.pairbox_pair_name + ` ${styles[theme]}`)}>
+          <div className={styles.pairbox_pair_name}>
             {token1.name}/{token2.name}
           </div>
           <div className={styles.pairbox_pair_rate}>{/* {token1.name} (50%)/{token2.name} (50%) */}</div>
@@ -101,14 +100,14 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
         {!!apr && (
           <div className={styles.pairbox_data}>
             <span className={styles.pairbox_data_name}>APR</span>
-            <span className={classNames(styles.pairbox_data_value, styles.pairbox_data_value + ` ${styles[theme]}`)}>
+            <span className={styles.pairbox_data_value}>
               {apr.toFixed(2)}%
             </span>
           </div>
         )}
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
-          <span className={classNames(styles.pairbox_data_value, styles.pairbox_data_value + ` ${styles[theme]}`)}>
+          <span className={styles.pairbox_data_value}>
             {100 * parseFloat(commissionRate)}%
           </span>
         </div>
@@ -116,7 +115,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
           <span className={styles.pairbox_data_name}>Liquidity</span>
           <TokenBalance
             balance={amount}
-            className={classNames(styles.pairbox_data_value, styles.pairbox_data_value + ` ${styles[theme]}`)}
+            className={styles.pairbox_data_value}
             decimalScale={2}
           />
         </div>
@@ -179,18 +178,14 @@ const ListPools = memo<{
           {LIST_FILTER_POOL.map((item) => (
             <div
               key={item.key}
-              style={{
-                color: item.key === typeFilter ? '#b177eb' : '#cccdd0'
-                // background: item.key === typeFilter ? '#2a2a2e' : '#1e1e21'
-              }}
-              className={classNames(styles.filter_item + ` ${styles[theme]}`, styles.filter_item)}
+              className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
               onClick={() => setTypeFilter(item.key)}
             >
               {item.text}
             </div>
           ))}
         </div>
-        <div className={classNames(styles.listpools_search)}>
+        <div className={styles.listpools_search}>
           <SearchInput theme={theme} placeholder="Search by pools or tokens name" onSearch={filterPairs} />
         </div>
       </div>
@@ -205,7 +200,7 @@ const ListPools = memo<{
             />
           ))
         ) : (
-          <div className={classNames(styles.no_data + ` ${styles[theme]}`, styles.no_data)}>
+          <div className={styles.no_data}>
             <img src={theme === 'light' ? NoDataLightSvg : NoDataSvg} alt="nodata" />
             <span>No data</span>
           </div>

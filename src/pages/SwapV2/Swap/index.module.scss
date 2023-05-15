@@ -50,8 +50,6 @@
       rgba(232, 241, 255, 0) 98.89%) 1;
 
     @include mobile {
-      padding-left: 0;
-      padding-right: 0;
       border: none;
       border-radius: 0;
       background: none;
@@ -248,7 +246,7 @@
 
   .swap-btn {
     width: 100%;
-    background: #612fca;
+    background: $blue-color;
     box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
     border-radius: 8px;
 

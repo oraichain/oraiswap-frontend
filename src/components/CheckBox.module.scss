@@ -30,19 +30,17 @@
   left: 0;
   height: 16px;
   width: 16px;
-  border: 1px solid $purple-magenta;
+  border: 1px solid $blue-color;
 }
 
 /* On mouse-over, add a grey background color */
 .container:hover input~.checkmark {
-  border-color: $purple-magenta;
+  border-color: $blue-color;
 }
 
 /* When the checkbox is checked, add a blue background */
 .container input:checked~.checkmark {
-  border-color: $purple-magenta;
-  background-color: $black-color;
-
+  border-color: $blue-color;
   @include theme() {
     background-color: theme-get('bg-color');
   }
@@ -66,7 +64,7 @@
   top: 1px;
   width: 5px;
   height: 10px;
-  border: solid $purple-magenta;
+  border: solid $blue-color;
   border-width: 0 2px 2px 0;
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);

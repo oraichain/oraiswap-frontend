@@ -3,6 +3,12 @@
   align-self: flex-start;
 }
 
+.btn_close_light {
+  path {
+    fill: #777E90;
+  }
+}
+
 .btn_close_img:hover {
   path {
     fill: #a871df;
@@ -26,7 +32,6 @@
 
 .toast_section {
   h6 {
-    color: #ffffff;
     font-weight: 600;
     font-size: 18px;
     line-height: 100%;
@@ -39,7 +44,6 @@
     font-size: 14px;
     line-height: 120%;
     font-feature-settings: 'zero' on;
-    color: #bdc3d3;
     text-align: left;
     max-width: 230px;
     overflow-wrap: break-word;

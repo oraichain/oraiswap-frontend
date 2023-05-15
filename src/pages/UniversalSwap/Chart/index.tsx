@@ -95,7 +95,7 @@ const SwapChart: React.FC<{
               <div>
                 <div className={cx('content-price')}>
                   <img src={SymbolSwapImg} />
-                  <span className={cx('content-price-value', `content-price-value ${styles[theme]}`)}>
+                  <span className={cx('content-price-value')}>
                     {formateNumberDecimalsAuto({
                       price: infoMove?.value,
                       maxDecimal: 6,

@@ -8,18 +8,23 @@ import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import Loader from 'components/Loader';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { store } from 'store/configure';
 
-const CloseButton = ({ closeToast }: { closeToast: () => void }) => (
-  <button onClick={closeToast} className={styles.btn_close}>
-    <CloseIcon className={styles.btn_close_img} />
+const CloseButton = ({ closeToast }: { closeToast: () => void }) => {
+const [theme] = useConfigReducer('theme')
+  return (
+
+    <button onClick={closeToast} className={styles.btn_close}>
+    <CloseIcon className={theme === 'light' ? styles.btn_close_light : styles.btn_close} />
   </button>
-);
+  )
+}
 
 const defaultOptions: ToastOptions = {
   position: 'top-right',
   theme: 'dark',
-  // autoClose: 7000,
-  autoClose: false,
+  autoClose: 7000,
   icon: false,
   hideProgressBar: true,
   closeOnClick: false,
@@ -110,6 +115,9 @@ export const displayToast: DisplayToastFn = (
     ...defaultOptions,
     ...refinedOptions,
   } as ToastOptions;
+
+  const state = store.getState()
+  inputOptions.theme = state.config.theme;
 
   switch (type) {
     case TToastType.TX_INFO:

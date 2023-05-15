@@ -1,4 +1,5 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .menu {
   display: flex;
@@ -156,7 +157,7 @@
 
 .connect {
   color: #fff;
-  background: #612fca;
+  background: $blue-color;
   border-radius: 8px;
   font-weight: 400;
   font-size: 14px;

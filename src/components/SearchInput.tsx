@@ -9,7 +9,6 @@ const Search: React.FC<InputProps> = ({ className, isBorder, theme, ...props }) 
     className={classNames(
       className,
       isBorder ? styles.universalSearch : styles.search,
-      styles.search + ` ${styles[theme]}`
     )}
     placeholder="Search by pools or tokens name"
     style={{

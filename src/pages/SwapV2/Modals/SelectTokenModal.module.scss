@@ -28,9 +28,7 @@
     /* aiRight/White */
 
     &.light {
-      @include theme() {
-        color: theme-get('text-color');
-      }
+     color: #6F767E;
     }
   }
 
@@ -42,16 +40,12 @@
     overflow: auto;
 
     .item {
-      // @include theme() {
-      //   background-color: theme-get('bg-color');
-      //   color: theme-get('text-color');
-
-      // }
       &.light {
-        @include theme() {
-          color: theme-get('text-color');
-        }
+        &.light {
+          color: #6F767E;
+         }
       }
+
 
       border-radius: 8px;
       display: flex;
@@ -80,7 +74,7 @@
       }
 
       &.light:hover {
-        background-color: #612fca;
+        background-color: $blue-color;
         color: #fff;
       }
 
@@ -91,7 +85,6 @@
 
       .grow {
         flex-grow: 1;
-
         display: flex;
         flex-direction: column;
         gap: 10px;
