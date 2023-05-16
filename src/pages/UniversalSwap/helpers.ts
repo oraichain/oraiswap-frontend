@@ -8,7 +8,7 @@ import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
-import { TransferBackMsg, Uint128 } from 'libs/contracts';
+import { TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';

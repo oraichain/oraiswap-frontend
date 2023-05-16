@@ -4,11 +4,9 @@ import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from 'components/Toasts/context';
 import { NetworkChainId } from 'config/chainInfos';
-import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { collectWallet } from 'libs/cosmjs';
 import 'polyfill';
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -43,7 +41,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 }
 
 const startApp = async () => {
-  Contract.client = await CosmWasmClient.connect(network.rpc);
+  window.client = await CosmWasmClient.connect(network.rpc);
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -73,12 +71,6 @@ const startApp = async () => {
           console.log({ error });
         }
       }
-
-      const wallet = await collectWallet(network.chainId);
-      Contract.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-        prefix: network.prefix,
-        gasPrice: GasPrice.fromString(`0${network.denom}`)
-      });
     }
   } catch (ex) {
     console.log(ex);

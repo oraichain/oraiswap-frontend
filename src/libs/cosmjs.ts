@@ -175,13 +175,7 @@ class CosmJs {
     chainId?: string;
   }) {
     await window.Keplr.suggestChain(chainId);
-    const wallet = await collectWallet(chainId);
-
-    const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(lcd, wallet, {
-      gasPrice: GasPrice.fromString(gasAmount.amount + gasAmount.denom),
-      prefix: 'orai'
-    });
-
+    const client = window.client as cosmwasm.SigningCosmWasmClient;
     const result = await client.signAndBroadcast(walletAddr, msgs, 'auto');
     if (isDeliverTxFailure(result)) {
       throw new Error(

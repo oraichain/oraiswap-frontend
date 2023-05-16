@@ -16,11 +16,11 @@ import BondingModal from './BondingModal/BondingModal';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
 import styles from './PoolDetail.module.scss';
 
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
-import { Contract } from 'config/contracts';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
@@ -30,9 +30,10 @@ import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
+import { network } from 'config/networks';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -82,7 +83,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       })
     }));
 
-    const res = await Contract.multicall.aggregate({
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+    const res = await multicall.aggregate({
       queries
     });
 

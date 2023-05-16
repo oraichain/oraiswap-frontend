@@ -1,12 +1,10 @@
 import { network } from 'config/networks';
-import { AggregateResult } from 'libs/contracts/types';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { AggregateResult, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { OraiswapStakingTypes, OraiswapPairTypes } from '@oraichain/orderbook-contracts-sdk';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
@@ -35,15 +33,15 @@ export type PairInfoData = {
 } & PoolInfo;
 
 type PairDetails = {
-  [key: string]: PoolResponse;
+  [key: string]: OraiswapPairTypes.PoolResponse;
 };
 
 export const calculateAprResult = (
   pairInfos: PairInfoData[],
   prices: CoinGeckoPrices<string>,
   allTokenInfo: TokenInfo[],
-  allLpTokenAsset: PoolInfoResponse[],
-  allRewardPerSec: RewardsPerSecResponse[]
+  allLpTokenAsset: OraiswapStakingTypes.PoolInfoResponse[],
+  allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[]
 ) => {
   const aprResult = Pairs.pairs.reduce((acc, pair, ind) => {
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
@@ -148,6 +146,7 @@ export const toPairDetails = (res: AggregateResult): PairDetails => {
 
 // Fetch all pair data
 const fetchCachedPairsData = async () => {
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
   const queries = Pairs.pairs.map((pair) => ({
     address: pair.contract_addr,
     data: toBinary({
@@ -155,9 +154,10 @@ const fetchCachedPairsData = async () => {
     })
   }));
 
-  const res = await Contract.multicall.aggregate({
+  const res = await multicall.aggregate({
     queries
   });
+
   return toPairDetails(res);
 };
 
@@ -194,8 +194,9 @@ const generateRewardInfoQueries = (stakerAddress: string) => {
 };
 
 const fetchMyCachedPairsData = async (stakerAddress: string) => {
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
   const queries = generateRewardInfoQueries(stakerAddress);
-  const res = await Contract.multicall.aggregate({
+  const res = await multicall.aggregate({
     queries
   });
   return calculateReward(res);

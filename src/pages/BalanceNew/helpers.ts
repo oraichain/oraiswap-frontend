@@ -1,4 +1,9 @@
-import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import {
+  CosmWasmClient,
+  createWasmAminoConverters,
+  ExecuteResult,
+  SigningCosmWasmClient
+} from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import {
@@ -12,17 +17,22 @@ import {
 } from 'config/bridgeTokens';
 import { CosmosChainId, chainInfos, NetworkChainId } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
-import { TransferBackMsg } from 'libs/contracts';
-import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
+
+import CosmJs, {
+  collectWallet,
+  getExecuteContractMsgs,
+  HandleOptions,
+  parseExecuteContractMultiple
+} from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
-import Long from 'long';
+import { OraiswapTokenClient } from '@oraichain/orderbook-contracts-sdk';
+import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -358,9 +368,16 @@ export const transferToRemoteChainIbcWasm = async (
   const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
   if (!ibcWasmContractAddress)
     throw generateError('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
+  const wallet = await collectWallet(network.chainId);
+  const accounts = await wallet.getAccounts();
+  const sender = accounts[0].address;
+  const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    prefix: network.prefix,
+    gasPrice: GasPrice.fromString(`0${network.denom}`)
+  });
 
   const { info: assetInfo } = parseTokenInfo(fromToken);
-  const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
+  const ibcWasmContract = new CwIcs20LatestClient(client, sender, ibcWasmContractAddress);
   try {
     // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
     await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
@@ -391,7 +408,7 @@ export const transferToRemoteChainIbcWasm = async (
       memo: msg.memo
     };
     console.log({ transferBackMsgCw20Msg });
-    const cw20Token = Contract.token(fromToken.contractAddress);
+    const cw20Token = new OraiswapTokenClient(client, sender, fromToken.contractAddress);
     result = await cw20Token.send(
       {
         amount,

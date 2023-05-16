@@ -2457,6 +2457,16 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.12.0.tgz#19c959bdb900986e74939d4227e757aa16936b91"
   integrity sha512-hO+bdeGOlJwqowUBoZF5LyP3ORUFOP1G0GRv8N45W/cztXbT2ZEXaAzfokRS9Xc9FWmYrDj32mF6SzH6wuoIyA==
 
+"@oraichain/common-contracts-build@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.7.tgz#17989bdec0b7d5fd88b93db7db89bd88d90c2878"
+  integrity sha512-gbjCDpkqIF2x7iZfaVdrHizo8/D3Bfo0uWuBE0NAfnksgs21dC1ErgwKYthX1djahBsTYr5qb7STaLn18eFFHg==
+
+"@oraichain/common-contracts-sdk@^1.0.5":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.6.tgz#b7666195a1d7d355def04c5a701fe73f57ab954b"
+  integrity sha512-ASrFTCMkFr48+XMtBokB22lnSYFO987/9lk54in2D8SNWeM48/GP98ZcWQMyXLsvBHJXfh5nTS1QltGOjmQvJQ==
+
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
   resolved "https://registry.yarnpkg.com/@oraichain/cosmosjs/-/cosmosjs-0.0.94.tgz#35f1a045737b86015f728aa22b1a974058eb4104"
@@ -2488,6 +2498,16 @@
     bech32 "1.1.3"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
+
+"@oraichain/orderbook-contracts-build@^1.0.7":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@oraichain/orderbook-contracts-build/-/orderbook-contracts-build-1.0.8.tgz#f6cd8fed92467406ffa6ac7f6dd1b99087840122"
+  integrity sha512-pDFU7ZUBBwPzQ9zmFKVxZpqGt5AY9VhCM6eXRvIKf4na3vM6SDauKU4QYB8nyQEfbVxCQVpr+08RLD2CDNqYbw==
+
+"@oraichain/orderbook-contracts-sdk@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@oraichain/orderbook-contracts-sdk/-/orderbook-contracts-sdk-1.0.5.tgz#45ab5181a13b90b576fdcbab9f5cca2a6dfa95d9"
+  integrity sha512-udYVBQpSWVzrBr4Y6ozfVofMpkM76BLq5wlP7UkNk9EWE0Lcb8y+RNN6EKCblHAhnitHiTyKp37/zOvWyU4gnw==
 
 "@pedrouid/environment@^1.0.1":
   version "1.0.1"

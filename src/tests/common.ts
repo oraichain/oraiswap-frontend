@@ -1,16 +1,21 @@
-import path from 'path';
 import { SimulateCosmWasmClient } from '@terran-one/cw-simulate/src';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
-import * as TokenTypes from 'libs/contracts/OraiswapToken.types';
-import * as CwIcs20LatestTypes from 'libs/contracts/CwIcs20Latest.types';
-import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
-import { Cw20Coin } from 'libs/contracts';
+import { OraiswapTokenClient, Cw20Coin, OraiswapTokenTypes } from '@oraichain/orderbook-contracts-sdk';
+import { CwIcs20LatestTypes, CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
+import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as commonArtifacts from '@oraichain/common-contracts-build';
+
 export const TOKEN1 = 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg';
 export const TOKEN2 = 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge';
 export const TOKEN3 = 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh';
 export const TOKEN4 = 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd';
 export const senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
 export const bobAddress = 'orai18cgmaec32hgmd8ls8w44hjn25qzjwhannd9kpj';
+
+export const client = new SimulateCosmWasmClient({
+  chainId: 'Oraichain',
+  bech32Prefix: 'orai'
+});
+window.client = client;
 
 export const deployToken = async (
   client: SimulateCosmWasmClient,
@@ -25,9 +30,10 @@ export const deployToken = async (
     client,
     senderAddress,
     (
-      await client.deploy<TokenTypes.InstantiateMsg>(
+      await oraiswapArtifacts.deployContract<OraiswapTokenTypes.InstantiateMsg>(
+        client,
         senderAddress,
-        path.resolve(__dirname, 'testdata', 'oraiswap_token.wasm'),
+
         {
           decimals,
           symbol,
@@ -36,7 +42,7 @@ export const deployToken = async (
           initial_balances
         },
         'token',
-        'auto'
+        'oraiswap_token'
       )
     ).contractAddress
   );
@@ -50,16 +56,18 @@ export const deployIcs20Token = async (
     client,
     senderAddress,
     (
-      await client.deploy<CwIcs20LatestTypes.InstantiateMsg>(
+      await commonArtifacts.deployContract<CwIcs20LatestTypes.InstantiateMsg>(
+        client,
         senderAddress,
-        path.join(__dirname, 'testdata', 'cw-ics20-latest.wasm'),
+
         {
           allowlist: [],
           default_timeout: 3600,
           gov_contract,
           swap_router_contract
         },
-        'cw-ics20'
+        'cw-ics20',
+        'cw-ics20-latest'
       )
     ).contractAddress
   );

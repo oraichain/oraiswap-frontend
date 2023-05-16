@@ -1,6 +1,5 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
 import { displayInstallWallet, getNetworkGasPrice } from 'helper';
@@ -144,7 +143,6 @@ const App = () => {
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
-      Contract.sender = oraiAddress;
       setAddress(oraiAddress);
 
       // window.location.reload();

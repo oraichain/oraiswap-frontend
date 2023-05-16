@@ -1,6 +1,6 @@
 import { toDisplay } from './../../libs/utils';
 import { TokenItemType } from 'config/bridgeTokens';
-import { Uint128 } from 'libs/contracts';
+import { Uint128 } from '@oraichain/orderbook-contracts-sdk';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import { generateContractMessages, generateConvertErc20Cw20Message, SwapQuery, Type } from 'rest/api';
 

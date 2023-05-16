@@ -1,20 +1,21 @@
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenTypes } from '@oraichain/orderbook-contracts-sdk';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
-import { cosmosTokens, evmTokens, kawaiiTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { Contract } from 'config/contracts';
+import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
-import { BalanceResponse } from '../libs/contracts/OraiswapToken.types';
 import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
 import { getEvmAddress } from '../libs/utils';
 
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import { CustomChainInfo, chainInfos, evmChains } from 'config/chainInfos';
+import { chainInfos, CustomChainInfo, evmChains } from 'config/chainInfos';
+import { network } from 'config/networks';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -81,7 +82,9 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
     balance: { address }
   });
 
-  const res = await Contract.multicall.aggregate({
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+  const res = await multicall.aggregate({
     queries: cw20Tokens.map((t) => ({
       address: t.contractAddress,
       data
@@ -93,7 +96,7 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
       if (!res.return_data[ind].success) {
         return [t.denom, 0];
       }
-      const balanceRes = fromBinary(res.return_data[ind].data) as BalanceResponse;
+      const balanceRes = fromBinary(res.return_data[ind].data) as OraiswapTokenTypes.BalanceResponse;
       const amount = balanceRes.balance;
       return [t.denom, amount];
     })

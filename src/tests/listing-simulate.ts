@@ -1,17 +1,21 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin } from '@cosmjs/proto-signing';
-import { SimulateCosmWasmClient } from '@terran-one/cw-simulate/src';
+import { client } from './common';
 import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 import { readFileSync } from 'fs';
-import { PairInfo } from 'libs/contracts';
-import { InstantiateMsg as MulticallInstantiateMsg } from 'libs/contracts/Multicall.types';
-import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
-import { InstantiateMsg as FactoryInstantiateMsg } from 'libs/contracts/OraiswapFactory.types';
-import { OraiswapStakingClient } from 'libs/contracts/OraiswapStaking.client';
-import { InstantiateMsg as StakingInstantiateMsg } from 'libs/contracts/OraiswapStaking.types';
-import { InstantiateMsg as OraiswapTokenInstantiateMsg } from 'libs/contracts/OraiswapToken.types';
-import path from 'path';
-import { OraiswapPairClient } from './../libs/contracts/OraiswapPair.client';
+import {
+  PairInfo,
+  OraiswapFactoryClient,
+  OraiswapStakingClient,
+  OraiswapPairClient,
+  OraiswapFactoryTypes,
+  OraiswapStakingTypes,
+  OraiswapTokenTypes
+} from '@oraichain/orderbook-contracts-sdk';
+import { MulticallTypes } from '@oraichain/common-contracts-sdk';
+import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as commonArtifacts from '@oraichain/common-contracts-build';
+
 dotenv.config();
 
 export const constants = {
@@ -27,10 +31,6 @@ export const constants = {
   osmoDenom: 'ibc/9c4dcd21b48231d0bc2ac3d1b74a864746b37e4292694c93c617324250d002fc',
   rewardPerSecAmount: '1'
 };
-export const client = new SimulateCosmWasmClient({
-  chainId: 'Oraichain',
-  bech32Prefix: 'orai'
-});
 
 export async function deployOraiDexContracts(): Promise<{
   factory: string;
@@ -41,59 +41,70 @@ export async function deployOraiDexContracts(): Promise<{
   const { devAddress } = constants;
   // deploy fixed multisig
   // upload pair & lp token code id
-  const { codeId: pairCodeId } = await client.upload(
+  const { codeId: tokenCodeId } = await client.upload(
     devAddress,
-    readFileSync(path.join(__dirname, 'testdata/oraiswap_pair.wasm')),
+    readFileSync(oraiswapArtifacts.getContractDir('oraiswap_token')),
     'auto'
   );
-  const { codeId: lpCodeId } = await client.upload(
+  const { codeId: pairCodeId } = await client.upload(
     devAddress,
-    readFileSync(path.join(__dirname, 'testdata/oraiswap_token.wasm')),
+    readFileSync(oraiswapArtifacts.getContractDir('oraiswap_pair')),
     'auto'
   );
 
   // deploy oracle addr
-  const oracle = await client.deploy(devAddress, path.join(__dirname, 'testdata/oraiswap_oracle.wasm'), {}, 'oracle');
-  // deploy factory contract
-  const factory = await client.deploy(
+  const { contractAddress: oracleAddr } = await oraiswapArtifacts.deployContract(
+    client,
     devAddress,
-    path.join(__dirname, 'testdata/oraiswap_factory.wasm'),
+    {},
+    'oracle',
+    'oraiswap_oracle'
+  );
+  // deploy factory contract
+  const { contractAddress: factoryAddr } = await oraiswapArtifacts.deployContract<OraiswapFactoryTypes.InstantiateMsg>(
+    client,
+    devAddress,
+
     {
       commission_rate: null,
-      oracle_addr: oracle.contractAddress,
+      oracle_addr: oracleAddr,
       pair_code_id: pairCodeId,
-      token_code_id: lpCodeId
-    } as FactoryInstantiateMsg,
-    'factory'
+      token_code_id: tokenCodeId
+    },
+    'factory',
+    'oraiswap_factory'
   );
   // deploy staking contract address
-  const staking = await client.deploy(
+  const { contractAddress: stakingAddr } = await oraiswapArtifacts.deployContract<OraiswapStakingTypes.InstantiateMsg>(
+    client,
     devAddress,
-    path.join(__dirname, 'testdata/oraiswap_staking.wasm'),
+
     {
       base_denom: constants.oraiDenom,
-      factory_addr: factory.contractAddress,
+      factory_addr: factoryAddr,
       minter: null,
-      oracle_addr: oracle.contractAddress,
+      oracle_addr: oracleAddr,
       owner: devAddress,
       rewarder: devAddress
-    } as StakingInstantiateMsg,
-    'staking'
+    },
+    'staking',
+    'oraiswap_staking'
   );
 
   // deploy multicall contract address
-  const multicall = await client.deploy(
+  const { contractAddress: multicallAddr } = await commonArtifacts.deployContract<MulticallTypes.InstantiateMsg>(
+    client,
     devAddress,
-    path.join(__dirname, 'testdata/multicall.wasm'),
-    {} as MulticallInstantiateMsg,
+    {},
+    'multicall',
     'multicall'
   );
 
   return {
-    factory: factory.contractAddress,
-    staking: staking.contractAddress,
-    multicall: multicall.contractAddress,
-    tokenCodeId: lpCodeId
+    factory: factoryAddr,
+    staking: stakingAddr,
+    multicall: multicallAddr,
+    tokenCodeId
   };
 }
 
@@ -107,7 +118,7 @@ export async function instantiateCw20Token(tokenSymbol: string, codeId: number):
       decimals: constants.cw20Decimals,
       initial_balances: [{ amount: constants.devInitialBalances, address: constants.devAddress }],
       marketing: null
-    } as OraiswapTokenInstantiateMsg,
+    } as OraiswapTokenTypes.InstantiateMsg,
     'cw20',
     'auto'
   );

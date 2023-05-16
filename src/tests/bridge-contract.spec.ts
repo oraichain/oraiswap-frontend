@@ -4,22 +4,23 @@ import { CWSimulateApp, GenericError, IbcOrder, IbcPacket, SimulateCosmWasmClien
 import { Ok } from 'ts-results';
 import bech32 from 'bech32';
 import { readFileSync } from 'fs';
-import { AssetInfo } from 'libs/contracts';
-import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
-import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
-import { InstantiateMsg as OraiswapFactoryInstantiateMsg } from 'libs/contracts/OraiswapFactory.types';
-import { InstantiateMsg as OraiswapOracleIsntantiateMsg } from 'libs/contracts/OraiswapOracle.types';
-import { OraiswapRouterClient } from 'libs/contracts/OraiswapRouter.client';
-import { InstantiateMsg as OraiswapRouterInstantiateMsg } from 'libs/contracts/OraiswapRouter.types';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
-import { TransferBackMsg } from 'libs/contracts/types';
+import {
+  AssetInfo,
+  OraiswapFactoryClient,
+  OraiswapRouterClient,
+  OraiswapTokenClient,
+  OraiswapFactoryTypes,
+  OraiswapOracleTypes,
+  OraiswapRouterTypes
+} from '@oraichain/orderbook-contracts-sdk';
+import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
+import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as commonArtifacts from '@oraichain/common-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import path from 'path';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
-import { flatten } from 'lodash';
 import { ORAI } from 'config/constants';
-
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -368,12 +369,12 @@ describe.only('IBCModule', () => {
       // upload pair & lp token code id
       const { codeId: pairCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(path.join(__dirname, 'testdata/oraiswap_pair.wasm')),
+        readFileSync(oraiswapArtifacts.getContractDir('oraiswap_pair')),
         'auto'
       );
       const { codeId: lpCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(path.join(__dirname, 'testdata/oraiswap_token.wasm')),
+        readFileSync(oraiswapArtifacts.getContractDir('oraiswap_token')),
         'auto'
       );
       // deploy another cw20 for oraiswap testing
@@ -393,16 +394,16 @@ describe.only('IBCModule', () => {
       );
       usdtToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, usdtAddress);
       // deploy oracle addr
-      const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleIsntantiateMsg>(
+      const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleTypes.InstantiateMsg>(
         oraiSenderAddress,
-        path.join(__dirname, 'testdata/oraiswap_oracle.wasm'),
+        oraiswapArtifacts.getContractDir('oraiswap_oracle'),
         {},
         'oraiswap-oracle'
       );
       // deploy factory contract
-      const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryInstantiateMsg>(
+      const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryTypes.InstantiateMsg>(
         oraiSenderAddress,
-        path.join(__dirname, 'testdata/oraiswap_factory.wasm'),
+        oraiswapArtifacts.getContractDir('oraiswap_factory'),
         {
           commission_rate: '0',
           oracle_addr: oracleAddress,
@@ -412,9 +413,9 @@ describe.only('IBCModule', () => {
         'oraiswap-factory'
       );
 
-      const { contractAddress: routerAddress } = await oraiClient.deploy<OraiswapRouterInstantiateMsg>(
+      const { contractAddress: routerAddress } = await oraiClient.deploy<OraiswapRouterTypes.InstantiateMsg>(
         oraiSenderAddress,
-        path.join(__dirname, 'testdata', 'oraiswap_router.wasm'),
+        oraiswapArtifacts.getContractDir('oraiswap_router'),
         {
           factory_addr: factoryAddress,
           factory_addr_v2: factoryAddress
@@ -609,7 +610,7 @@ describe.only('IBCModule', () => {
       }
     );
 
-    it("cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-airi-destination-denom-should-swap-normally", async () => {
+    it('cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-airi-destination-denom-should-swap-normally', async () => {
       await ics20Contract.updateMappingPair({
         assetInfo: {
           native_token: {
@@ -655,12 +656,19 @@ describe.only('IBCModule', () => {
         relayer: cosmosSenderAddress
       });
 
-      const swapEvent = result.events.find((event) => event.type === 'wasm' && event.attributes.find(attr => attr.value === 'swap'));
-      expect(swapEvent.attributes.filter(attr => attr.key === 'offer_asset' && attr.value === ORAI).length).toBeGreaterThan(0);
-      expect(swapEvent.attributes.filter(attr => attr.key === 'ask_asset' && attr.value === airiToken.contractAddress).length).toBeGreaterThan(0);
-    })
+      const swapEvent = result.events.find(
+        (event) => event.type === 'wasm' && event.attributes.find((attr) => attr.value === 'swap')
+      );
+      expect(
+        swapEvent.attributes.filter((attr) => attr.key === 'offer_asset' && attr.value === ORAI).length
+      ).toBeGreaterThan(0);
+      expect(
+        swapEvent.attributes.filter((attr) => attr.key === 'ask_asset' && attr.value === airiToken.contractAddress)
+          .length
+      ).toBeGreaterThan(0);
+    });
 
-    it("cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-orai-destination-denom-should-transfer-normally", async () => {
+    it('cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-orai-destination-denom-should-transfer-normally', async () => {
       await ics20Contract.updateMappingPair({
         assetInfo: {
           native_token: {
@@ -705,12 +713,18 @@ describe.only('IBCModule', () => {
         },
         relayer: cosmosSenderAddress
       });
-      const transferEvent = result.events.find(event => event.type === 'transfer');
-      expect(transferEvent.attributes.filter(attr => attr.key === 'recipient' && attr.value === bobAddress).length).toBeGreaterThan(0);
-      expect(transferEvent.attributes.filter(attr => attr.key === 'amount' && attr.value === JSON.stringify([{ denom: ORAI, amount: ibcTransferAmount }])).length).toBeGreaterThan(0);
-    })
+      const transferEvent = result.events.find((event) => event.type === 'transfer');
+      expect(
+        transferEvent.attributes.filter((attr) => attr.key === 'recipient' && attr.value === bobAddress).length
+      ).toBeGreaterThan(0);
+      expect(
+        transferEvent.attributes.filter(
+          (attr) => attr.key === 'amount' && attr.value === JSON.stringify([{ denom: ORAI, amount: ibcTransferAmount }])
+        ).length
+      ).toBeGreaterThan(0);
+    });
 
-    it("cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-orai-destination-denom-with-dest-channel-should-do-ibctransfer", async () => {
+    it('cw-ics20-test-single-step-ibc-msg-map-with-fee-denom-orai-and-orai-destination-denom-with-dest-channel-should-do-ibctransfer', async () => {
       await ics20Contract.updateMappingPair({
         assetInfo: {
           native_token: {
@@ -755,11 +769,18 @@ describe.only('IBCModule', () => {
         },
         relayer: cosmosSenderAddress
       });
-      const transferEvent = result.events.find(event => event.type === 'transfer');
-      console.log(JSON.stringify(transferEvent))
-      expect(transferEvent.attributes.filter(attr => attr.key === 'recipient' && attr.value === bobAddress).length).toBeGreaterThan(0);
-      expect(transferEvent.attributes.filter(attr => attr.key === 'amount' && attr.value === `${ibcTransferAmount}orai`).length).toBeGreaterThan(0);
-      expect(transferEvent.attributes.filter(attr => attr.key === 'channel' && attr.value === channel).length).toBeGreaterThan(0);
-    })
+      const transferEvent = result.events.find((event) => event.type === 'transfer');
+      console.log(JSON.stringify(transferEvent));
+      expect(
+        transferEvent.attributes.filter((attr) => attr.key === 'recipient' && attr.value === bobAddress).length
+      ).toBeGreaterThan(0);
+      expect(
+        transferEvent.attributes.filter((attr) => attr.key === 'amount' && attr.value === `${ibcTransferAmount}orai`)
+          .length
+      ).toBeGreaterThan(0);
+      expect(
+        transferEvent.attributes.filter((attr) => attr.key === 'channel' && attr.value === channel).length
+      ).toBeGreaterThan(0);
+    });
   });
 });
