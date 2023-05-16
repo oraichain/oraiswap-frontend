@@ -8,6 +8,7 @@ import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
 import { ReactComponent as Swap } from 'assets/icons/swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
+import { ReactComponent as OrderBook } from 'assets/icons/orderbook.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import { ThemeContext } from 'context/theme-context';
@@ -100,6 +101,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
             {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
+            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => {}, <OrderBook />, true)}
             {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
             {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
             {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)}
