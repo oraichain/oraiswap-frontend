@@ -1,5 +1,5 @@
 import { CODE_ID_CW20, CW20_DECIMALS } from 'config/constants';
-import { AccountData } from '@cosmjs/proto-signing';
+import { AccountData, OfflineDirectSigner } from '@cosmjs/proto-signing';
 import { Any } from 'cosmjs-types/google/protobuf/any';
 import { TextProposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov';
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
@@ -8,9 +8,10 @@ import { network } from 'config/networks';
 import { OraiswapFactoryClient } from 'libs/contracts/OraiswapFactory.client';
 import { InstantiateMsg as Cw20InstantiateMsg } from '../contracts/OraiswapToken.types';
 import { collectWallet } from 'libs/cosmjs';
+import { OfflineAminoSigner } from '@keplr-wallet/types';
 
 // deploy cw20 token
-const getWallet = async (): Promise<{ accounts: readonly AccountData[]; wallet }> => {
+const getWallet = async (): Promise<{ accounts: readonly AccountData[]; wallet: OfflineDirectSigner | OfflineAminoSigner }> => {
   const wallet = await collectWallet();
   const accounts = await wallet.getAccounts();
   return { accounts, wallet };
