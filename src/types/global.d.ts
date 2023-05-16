@@ -1,5 +1,5 @@
 import { Keplr as keplr } from '@keplr-wallet/types';
-import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Network } from 'bip32';
 import { OraiswapPairTypes } from '@oraichain/orderbook-contracts-sdk';
 import Web3 from 'web3';
@@ -119,7 +119,7 @@ declare global {
     ReactNativeWebView?: {
       postMessage(msg: string): void;
     };
-    client: CosmWasmClient;
+    client: SigningCosmWasmClient;
     keplr: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;

@@ -196,9 +196,11 @@ const generateRewardInfoQueries = (stakerAddress: string) => {
 const fetchMyCachedPairsData = async (stakerAddress: string) => {
   const multicall = new MulticallQueryClient(window.client, network.multicall);
   const queries = generateRewardInfoQueries(stakerAddress);
+
   const res = await multicall.aggregate({
     queries
   });
+
   return calculateReward(res);
 };
 

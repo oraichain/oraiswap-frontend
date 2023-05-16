@@ -1,12 +1,8 @@
-import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
+import 'polyfill';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from 'components/Toasts/context';
-import { NetworkChainId } from 'config/chainInfos';
-import { network } from 'config/networks';
-import { collectWallet } from 'libs/cosmjs';
-import 'polyfill';
+import { initClient } from 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -40,8 +36,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
   });
 }
 
-const startApp = async () => {
-  window.client = await CosmWasmClient.connect(network.rpc);
+initClient().then(() => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -58,23 +53,4 @@ const startApp = async () => {
       </PersistGate>
     </Provider>
   );
-  try {
-    const keplr = await window.Keplr.getKeplr();
-
-    // suggest our chain
-    if (keplr) {
-      // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
-        try {
-          await window.Keplr.suggestChain(networkId);
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
-};
-
-startApp();
+});

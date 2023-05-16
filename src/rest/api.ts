@@ -61,7 +61,6 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
       token_info: {}
     } as OraiswapTokenTypes.QueryMsg)
   }));
-
   const multicall = new MulticallQueryClient(window.client, network.multicall);
   const res = await multicall.aggregate({
     queries
