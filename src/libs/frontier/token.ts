@@ -78,7 +78,7 @@ const addPairAndLpToken = async ({
   return result;
 };
 
-const getPairAndLpAddress = (result) => {
+const getPairAndLpAddress = (result: cosmwasm.ExecuteResult) => {
   const wasmAttributes = result?.logs?.[0]?.events.find((event) => event.type === 'wasm')?.attributes;
   const pairAddress = wasmAttributes?.find((attr) => attr.key === 'pair_contract_address')?.value;
   const lpAddress = wasmAttributes?.find((attr) => attr.key === 'liquidity_token_address')?.value;

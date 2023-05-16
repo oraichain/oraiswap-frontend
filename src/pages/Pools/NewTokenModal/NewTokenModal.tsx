@@ -78,7 +78,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           client,
           address
         });
-        const findPairAndLpAddress = await getPairAndLpAddress(res);
+        const findPairAndLpAddress = getPairAndLpAddress(res);
         lpAddress = findPairAndLpAddress.lpAddress;
         displayToast(TToastType.TX_INFO, {
           message: findPairAndLpAddress.lpAddress
