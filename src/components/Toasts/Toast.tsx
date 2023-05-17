@@ -1,22 +1,16 @@
-import React, { FunctionComponent } from 'react';
-import styles from './Toast.module.scss';
-import classNames from 'classnames';
-import { toast, ToastOptions } from 'react-toastify';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
-import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import classNames from 'classnames';
 import Loader from 'components/Loader';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { store } from 'store/configure';
+import { FunctionComponent } from 'react';
+import { toast, ToastOptions } from 'react-toastify';
+import styles from './Toast.module.scss';
 
 const CloseButton = ({ closeToast }: { closeToast: () => void }) => {
-const [theme] = useConfigReducer('theme')
   return (
-
     <button onClick={closeToast} className={styles.btn_close}>
-    <CloseIcon className={theme === 'light' ? styles.btn_close_light : styles.btn_close} />
   </button>
   )
 }
@@ -115,9 +109,6 @@ export const displayToast: DisplayToastFn = (
     ...defaultOptions,
     ...refinedOptions,
   } as ToastOptions;
-
-  const state = store.getState()
-  inputOptions.theme = state.config.theme;
 
   switch (type) {
     case TToastType.TX_INFO:
