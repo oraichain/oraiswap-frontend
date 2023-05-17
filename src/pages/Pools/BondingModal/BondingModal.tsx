@@ -7,6 +7,7 @@ import { TokenItemType } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
+import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay } from 'libs/utils';
 import { FC, useState } from 'react';
@@ -44,7 +45,7 @@ const BondingModal: FC<ModalProps> = ({
 }) => {
   const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
-
+  const [theme] = useConfigReducer('theme');
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
 
   const handleBond = async (parsedAmount: bigint) => {
@@ -56,7 +57,7 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress()
+      const oraiAddress = await handleCheckAddress();
 
       const msgs = await generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
@@ -85,17 +86,17 @@ const BondingModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in bond form: ', error);
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setActionLoading(false);
     }
   };
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
-      <div className={cx('container')}>
-        <div className={cx('title')}>Bond LP tokens</div>
+      <div className={cx('container', `container ${styles[theme]}`)}>
+        <div className={cx('title', `title ${styles[theme]}`)}>Bond LP tokens</div>
 
-        <div className={cx('detail')}>
+        <div className={cx('detail', `detail ${styles[theme]}`)}>
           {apr && (
             <div className={cx('row')}>
               <div className={cx('row-title')}>
@@ -105,9 +106,9 @@ const BondingModal: FC<ModalProps> = ({
             </div>
           )}
         </div>
-        <div className={cx('supply')}>
+        <div className={cx('supply', `supply ${styles[theme]}`)}>
           <div className={cx('header')}>
-            <div className={cx('title')}>AMOUNT TO BOND</div>
+            <div className={cx('title', `title ${styles[theme]}`)}>AMOUNT TO BOND</div>
           </div>
           <div className={cx('balance')}>
             <TokenBalance
@@ -120,17 +121,20 @@ const BondingModal: FC<ModalProps> = ({
               prefix="Balance: "
             />
 
-            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance)}>
+            <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => setBondAmount(lpTokenBalance)}>
               MAX
             </div>
-            <div className={cx('btn')} onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
+            <div
+              className={cx('btn', `btn ${styles[theme]}`)}
+              onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}
+            >
               HALF
             </div>
             <TokenBalance style={{ flexGrow: 1, textAlign: 'right' }} balance={liquidityValue} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
-              className={cx('amount')}
+              className={cx('amount', `amount ${styles[theme]}`)}
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}

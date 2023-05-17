@@ -43,7 +43,19 @@
 .icon {
     color: fade-out($slate, 0.25);
     cursor: pointer;
-    background: #191b21;
+
+    @include theme() {
+        background-color: theme-get('bg-color-secondary');
+    }
+
+    svg {
+        path {
+            @include theme() {
+                fill: theme-get('svg-fill-color');
+            }
+        }
+    }
+
     border-radius: 8px;
     padding: 12px;
 }

@@ -1,10 +1,15 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
+
 .modal {
   max-width: 568px;
 
   .container {
     background: #17181c;
     margin: auto;
+    &.light {
+      background: $light-bg-primary-box;
+    }
     border-radius: 24px;
     padding: 24px;
     max-height: 100vh;
@@ -24,6 +29,9 @@
       /* aiRight/White */
 
       color: #ffffff;
+      &.light {
+        color: $light-text-color;
+      }
     }
     .switch {
       margin: 38px 0;
@@ -35,6 +43,10 @@
       /* aiRight/Dark BG */
 
       background: #141416;
+      &.light {
+        background: $light-bg-btn-active-gray;
+        color: $light-text-color-gray;
+      }
       border-radius: 16px;
 
       font-style: normal;
@@ -76,6 +88,9 @@
       /* aiRight/Dark BG */
 
       background: #141416;
+      &.light {
+        background: #fff;
+      }
       /* Bridge shadow/Level 2 */
 
       box-shadow: 0px 0px 30px rgba(23, 11, 70, 0.5);
@@ -112,7 +127,9 @@
           /* aiRight/White */
 
           color: #ffffff;
-
+          &.light {
+            color: $light-text-color;
+          }
           /* Inside auto layout */
 
           flex-grow: 1;
@@ -166,7 +183,9 @@
           padding: 4px 6px;
 
           background: #191b21;
-
+          &.light {
+            background: #efe6f8;
+          }
           border-radius: 4px;
 
           font-style: normal;
@@ -183,7 +202,10 @@
           color: #a871df;
 
           &:hover {
-            background: #333642 !important;
+            background: #333642;
+          }
+          &.light:hover {
+            background: #efe6f8;
           }
         }
 
@@ -243,6 +265,9 @@
             /* aiRight/White */
 
             color: #ffffff;
+            &.light {
+              color: $light-text-color;
+            }
             text-align: left;
             display: flex;
             flex-direction: column;
@@ -289,6 +314,10 @@
           background: #1e1e21;
           border-radius: 8px;
           height: 100%;
+          &.light {
+            background: #efefef;
+            color: $light-text-color;
+          }
         }
       }
     }
@@ -311,7 +340,7 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      background: #612fca;
+      background: $blue-color;
       /* Inner/Button */
 
       box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
@@ -332,7 +361,7 @@
       color: #ffffff;
       // cursor: pointer;
 
-      margin: 32px 0 0 0;
+      margin: 32px 0 20px 0;
     }
 
     .disabled {
@@ -386,6 +415,9 @@
       /* aiRight/Dark BG */
 
       background: #141416;
+      &.light {
+        background: #fff;
+      }
       /* Bridge shadow/Level 2 */
 
       box-shadow: 0px 0px 30px rgba(23, 11, 70, 0.5);
@@ -422,7 +454,9 @@
           /* aiRight/White */
 
           color: #ffffff;
-
+          &.light {
+            color: $light-text-color;
+          }
           /* Inside auto layout */
 
           flex-grow: 1;
@@ -492,6 +526,9 @@
           /* aiRight/White */
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
           text-align: left;
           display: flex;
           flex-direction: column;
@@ -544,6 +581,9 @@
           /* aiRight/White */
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
           text-align: right;
           display: flex;
           flex-direction: column;
@@ -594,6 +634,11 @@
         width: 80px;
         height: 48px;
         background: #1e1e21;
+        &.light {
+          background-color: #efe6f8;
+          color: #a871df;
+          border-style: none;
+        }
         border-radius: 8px;
         padding: 16px 8px;
         color: #ffffff;
@@ -604,7 +649,7 @@
       }
 
       .isChosen {
-        background: #612fca;
+        background: $blue-color;
       }
 
       .input {
@@ -620,6 +665,9 @@
         font-feature-settings: 'zero' on;
 
         color: #ffffff;
+        &.light {
+          color: #a871df;
+        }
       }
 
       .border {

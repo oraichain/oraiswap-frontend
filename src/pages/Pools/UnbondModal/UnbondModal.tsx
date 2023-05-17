@@ -41,7 +41,7 @@ const UnbondModal: FC<ModalProps> = ({
   const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
-
+  const [theme] = useConfigReducer('theme');
   const bondAmount = BigInt(bondAmountValue);
 
   const handleUnbond = async (parsedAmount: bigint) => {
@@ -50,7 +50,7 @@ const UnbondModal: FC<ModalProps> = ({
         message: 'Amount is invalid!'
       });
 
-    const oraiAddress = await handleCheckAddress()
+    const oraiAddress = await handleCheckAddress();
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
@@ -82,7 +82,7 @@ const UnbondModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in unbond form: ', error);
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setActionLoading(false);
     }
@@ -90,8 +90,8 @@ const UnbondModal: FC<ModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
-      <div className={cx('setting')}>
-        <div className={cx('title')}>
+      <div className={cx('setting', `setting ${styles[theme]}`)}>
+        <div className={cx('title', `title ${styles[theme]}`)}>
           <div>Unbond LP tokens</div>
           {/* <TooltipIcon
             content="The transfer won’t go through if the bridge rate moves
@@ -115,7 +115,7 @@ const UnbondModal: FC<ModalProps> = ({
           </div>
           <div className={cx('input')}>
             <NumberFormat
-              className={cx('amount')}
+              className={cx('amount', `amount ${styles[theme]}`)}
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}
@@ -126,7 +126,7 @@ const UnbondModal: FC<ModalProps> = ({
           <div className={cx('options')}>
             {[25, 50, 75, 100].map((option, idx) => (
               <div
-                className={cx('item', {
+                className={cx('item', `item ${styles[theme]}`, {
                   isChosen: chosenOption === idx
                 })}
                 key={idx}
@@ -139,7 +139,7 @@ const UnbondModal: FC<ModalProps> = ({
               </div>
             ))}
             <div
-              className={cx('item', 'border', {
+              className={cx('item', `item ${styles[theme]}`, 'border', {
                 isChosen: chosenOption === 4
               })}
               onClick={() => setChosenOption(4)}
@@ -147,7 +147,7 @@ const UnbondModal: FC<ModalProps> = ({
               <input
                 placeholder="0.00"
                 type={'number'}
-                className={cx('input')}
+                className={cx('input', `input ${styles[theme]}`)}
                 onChange={(event) => {
                   // multiply 10^6 then divide 10^8
                   setUnbondAmount((toAmount(Number(event.target.value), 6) * bondAmount) / BigInt(100000000));

@@ -1,5 +1,12 @@
+@import "src/styles/mixins";
+
 .select {
-  background: #1E1E21;
+  @include theme() {
+    background-color: theme-get('bg-color');
+    box-shadow: theme-get('shadow-modal-token');
+    border-color: theme-get('border-color-secondary')
+  }
+  border: 1px solid;
   border-radius: 8px;
   padding: 24px;
   max-height: 500px;
@@ -13,21 +20,13 @@
   .title {
     display: flex;
     align-items: flex-end;
-
     gap: 5px;
     margin-bottom: 25px;
-
     font-style: normal;
     font-weight: 600;
     font-size: 18px;
     line-height: 100%;
-    /* identical to box height, or 18px */
-
     text-align: center;
-
-    /* aiRight/White */
-
-    color: #ffffff;
   }
 
   .options {
@@ -36,28 +35,29 @@
     gap: 10px;
 
     .item {
-      background: #1e1e21;
+      @include theme() {
+        background-color: theme-get('bg-color');
+        color: theme-get('text-color');
+
+      }
+
       border-radius: 8px;
       display: flex;
       gap: 10px;
       align-items: center;
       padding: 8px;
-
       font-style: normal;
       font-weight: 500;
       font-size: 16px;
       line-height: 100%;
-      /* identical to box height, or 16px */
-
       font-feature-settings: 'zero' on;
-
-      /* aiRight/White */
-
-      color: #ffffff;
-
       &:hover {
         cursor: pointer;
-        background: #333642 !important;
+
+        @include theme() {
+          background-color: theme-get('bg-hover-color');
+          color: theme-get('text-color-hover');
+        }
       }
 
       .logo {
@@ -76,15 +76,6 @@
       .org {
         opacity: 0.5;
         font-size: 14px;
-      }
-
-      .arrow-right {
-        width: 0;
-        height: 0;
-        border-top: 8px solid transparent;
-        border-bottom: 8px solid transparent;
-
-        border-left: 8px solid #ffffff;
       }
     }
   }

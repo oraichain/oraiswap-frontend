@@ -1,3 +1,6 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .header {
   display: flex;
   gap: 20px;
@@ -97,7 +100,7 @@
   }
 
   .liquidity {
-    background: #612fca;
+    background: $blue-color;
     /* Inner/Button */
 
     box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
@@ -131,6 +134,9 @@
     font-size: 18px;
     line-height: 100%;
     color: #fff;
+    &.light {
+      color: $light-text-color;
+    }
   }
 
   &--sub {
@@ -147,6 +153,9 @@
   background: #17181c;
   border-radius: 16px;
 
+  &.light {
+    background-color: $light-bg-primary-box;
+  }
   font-style: normal;
   font-weight: 600;
   font-size: 22px;
@@ -289,7 +298,7 @@
 }
 
 .btn {
-  background: #612fca;
+  background: $blue-color;
   box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
   padding: 16px;
   width: 100%;
@@ -310,7 +319,10 @@
   gap: 10px;
   justify-content: center;
   align-items: center;
-
+  @include theme() {
+    background-color: theme-get('bg-btn-primary');
+    box-shadow:  theme-get('shadow-btn');
+  }
   @media (max-width: 575px) {
     font-size: 14px;
     &.btn-unbond {
@@ -319,9 +331,12 @@
   }
 
   &--dark {
-    background: #2d2938;
+    @include theme() {
+      background-color: theme-get('bg-color-secondary');
+      color:  theme-get('text-color-secondary');
+    }
     border: none;
-    box-shadow: none;
+    box-shadow: none !important;
   }
 
   opacity: 1;
@@ -360,9 +375,11 @@
         gap: 10px;
 
         .bonded-value {
-          background: #612fca;
+          @include theme() {
+            background-color: theme-get('bg-btn-primary');
+          }
           border-radius: 8px;
-          padding: 5px;
+          padding: 13px 8px;
         }
       }
 
@@ -385,6 +402,9 @@
       font-size: 18px;
       line-height: 100%;
       // margin-top: 20px;
+      &.light {
+        color: $light-text-color;
+      }
     }
 
     .amount-usd {
@@ -414,6 +434,9 @@
       font-size: 18px;
       line-height: 100%;
       margin-top: 20px;
+      &.light {
+        color: $light-text-color;
+      }
     }
 
     .amount-usd {

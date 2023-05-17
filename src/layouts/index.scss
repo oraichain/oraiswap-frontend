@@ -1,17 +1,13 @@
 @import 'src/styles/themes';
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/reboot';
+@import 'src/styles/utils';
 
-.primary-btn {
-  border-radius: 8px;
-  padding: 16px 24px;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 100%;
-}
-
-// Dark Theme
+.light,
 .dark {
-  .primary-btn {
-    background-color: $dark-bg-primary-btn;
-  }
+  font-size: $font-size;
+  min-height: 100%;
+  display: flex;
+  width: 100%;
 }

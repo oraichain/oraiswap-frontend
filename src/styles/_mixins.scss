@@ -1,4 +1,5 @@
 @import 'src/styles/variables';
+@import 'src/styles/themes';
 
 @mixin desktop {
   @media (min-width: ($breakpoint)) {
@@ -41,4 +42,26 @@
 
 @mixin transition($property: all) {
   transition: $property $transition-duration;
+}
+
+@mixin theme() {
+
+  @each $theme,
+  $map in $themes {
+    $theme-map: $map !global;
+
+    :global(.#{$theme}) & {
+      @content; // the content inside @include theme() {...}
+    }
+
+    :global(.#{$theme}-modal) & {
+      @content; // the content inside @include theme() {...}
+    }
+  }
+
+  $theme-map: null !global;
+}
+
+@function theme-get($key) {
+  @return map-get($theme-map, $key);
 }
