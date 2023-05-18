@@ -6,6 +6,10 @@
   background-size: cover;
   background-position: center center;
   background-color: #111111;
+
+  &.light {
+    background-color: #f4f4f4;
+  }
   flex: 1;
   min-height: 100vh;
   height: auto;
@@ -16,10 +20,10 @@
   }
 }
 
-.light {
-  filter: invert(100%);  
-}
+// .light {
+//   filter: invert(100%);
+// }
 
-.dark {
-  filter: invert(0%);  
-}
+// .dark {
+//   filter: invert(0%);
+// }

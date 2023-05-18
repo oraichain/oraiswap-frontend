@@ -88,7 +88,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <ToggleIcon onClick={handleToggle} />
         </div>
       )}
-      <div className={classNames(styles.menu, styles[theme], { [styles.open]: open })}>
+      <div className={classNames(styles.menu, { [styles.open]: open })}>
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>

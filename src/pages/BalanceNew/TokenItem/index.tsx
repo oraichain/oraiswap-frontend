@@ -3,9 +3,10 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
+import useConfigReducer from 'hooks/useConfigReducer';
 interface TokenItemProps {
   token: TokenItemType;
-  amountDetail?: { amount: string, usd: number };
+  amountDetail?: { amount: string; usd: number };
   name?: string;
   onClickTransfer: any;
   active: Boolean;
@@ -14,6 +15,7 @@ interface TokenItemProps {
   onBlur?: Function;
   convertKwt?: any;
   subAmounts?: AmountDetails;
+  theme?: string;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -24,11 +26,18 @@ const TokenItem: React.FC<TokenItemProps> = ({
   onClick,
   onClickTransfer,
   convertKwt,
-  subAmounts
+  subAmounts,
+  theme
 }) => {
   return (
     <div
-      className={classNames(styles.tokenWrapper, { [styles.active]: active }, className)}
+      className={classNames(
+        styles.tokenWrapper,
+        styles.tokenWrapper + ` ${styles[theme]}`,
+        { [styles.active]: active },
+        { [styles.active + ` ${styles[theme]}`]: active },
+        className
+      )}
       onClick={(event) => {
         event.stopPropagation();
         onClick();
@@ -36,9 +45,9 @@ const TokenItem: React.FC<TokenItemProps> = ({
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
-          {token.Icon && <token.Icon className={styles.tokenIcon} />}
+          {token.Icon && token.IconLight && theme === 'light' ? <token.IconLight className={styles.tokenIcon} /> : <token.Icon className={styles.tokenIcon} />}
           <div className={styles.tokenInfo}>
-            <div className={styles.tokenName}>{token.name}</div>
+            <div className={classNames(styles.tokenName, styles.tokenName + ` ${styles[theme]}`)}>{token.name}</div>
           </div>
         </div>
         <div className={styles.tokenBalance}>
@@ -49,7 +58,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                 denom: '',
                 decimals: token.decimals
               }}
-              className={styles.tokenAmount}
+              className={classNames(styles.tokenAmount, styles.tokenAmount + ` ${styles[theme]}`)}
               decimalScale={Math.min(6, token.decimals)}
             />
           </div>

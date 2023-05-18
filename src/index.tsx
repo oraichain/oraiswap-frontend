@@ -32,7 +32,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 0.7
+    tracesSampleRate: 1
   });
 }
 

@@ -1,3 +1,6 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .pool-detail {
   padding: 40px;
 
@@ -55,6 +58,9 @@
           /* aiRight/White */
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
         }
 
         .value {
@@ -67,6 +73,9 @@
           font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
 
           color: #ffffff;
+          &.light {
+            color: $light-text-color;
+          }
         }
       }
     }
@@ -84,36 +93,6 @@
       /* aiRight/Gray 3 */
 
       color: #777e90;
-    }
-
-    .btn {
-      padding: 16px 24px;
-      text-align: center;
-      border-radius: 8px;
-
-      font-style: normal;
-      font-weight: 600;
-      font-size: 16px;
-      line-height: 100%;
-      /* identical to box height, or 16px */
-
-      text-align: center;
-
-      /* aiRight/White */
-
-      color: #ffffff;
-      // cursor: pointer;
-    }
-
-    .swap {
-      background: #191b21;
-    }
-
-    .liquidity {
-      background: #612fca;
-      /* Inner/Button */
-
-      box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
     }
   }
 
@@ -155,9 +134,11 @@
 
     .container {
       padding: 25px;
-      background: #17181c;
       border-radius: 16px;
-
+      @include theme() {
+        background-color: theme-get('bg-container');
+        box-shadow:  theme-get('shadow-pair');
+      }
       font-style: normal;
       font-weight: 600;
       font-size: 22px;
@@ -193,13 +174,17 @@
             font-weight: 600;
             font-size: 18px;
             line-height: 100%;
+            &.light {
+              background-color: $light-bg-primary-box;
+              color: $light-text-color;
+            }
           }
 
           .amount-usd {
             font-weight: 600;
             font-size: 14px;
             line-height: 100%;
-            color: #777e90;
+            color: $light-text-color-gray;
           }
         }
 
@@ -225,6 +210,9 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+                &.light {
+                  color: $light-text-color;
+                }
               }
             }
 
@@ -239,6 +227,9 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+                &.light {
+                  color: $light-text-color;
+                }
               }
 
               .amount-usd {
@@ -268,6 +259,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -288,6 +282,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {
@@ -310,6 +307,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -330,6 +330,9 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {
@@ -344,8 +347,10 @@
     }
 
     .btn {
-      background: #612fca;
-      box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+      @include theme() {
+        background-color: theme-get('bg-btn-primary');
+        box-shadow:  theme-get('shadow-btn');
+      }
       padding: 16px;
       width: 100%;
       text-align: center;
@@ -356,7 +361,7 @@
       font-size: 16px;
       line-height: 100%;
       text-align: center;
-      color: #ffffff;
+      color: $white-color;
       cursor: pointer;
       display: flex;
       justify-content: center;
@@ -402,7 +407,7 @@
 
           &-apr {
             .bonded-value {
-              background: #612fca;
+              background: $blue-color;
               border-radius: 8px;
               padding: 5px;
             }

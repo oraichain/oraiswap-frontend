@@ -1,6 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import classNames from 'classnames';
 import Input from 'components/Input';
 import Loader from 'components/Loader';
@@ -47,6 +48,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
+  const [theme] = useConfigReducer('theme');
   const [addressTransfer, setAddressTransfer] = useState('');
   const { data: prices } = useCoinGeckoPrices();
   useEffect(() => {
@@ -135,7 +137,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of BalanceNew based on the user's token destination choice
       // TODO: to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
-      const to = findToToken(token, filterNetwork)
+      const to = findToToken(token, filterNetwork);
       await onClickTransfer(convertAmount, token, to);
       return;
     } catch (error) {
@@ -182,13 +184,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           <div className={styles.box}>
             <div className={styles.transfer}>
               <div className={styles.content}>
-                <div className={styles.title}>Transfer to</div>
+                <div className={classNames(styles.title, styles.title + ` ${styles[theme]}`)}>Transfer to</div>
                 <div className={styles.address}>{reduceString(addressTransfer, 10, 7)}</div>
               </div>
             </div>
             <div className={styles.search}>
               <div
-                className={styles.search_filter}
+                className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
                 onClick={(event) => {
                   event.stopPropagation();
                   if (bridgeNetworks.length > 1) setIsOpen(!isOpen);
@@ -198,21 +200,23 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   {network && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div className={styles.search_logo}>
-                        <network.Icon />
+                        {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
                       </div>
-                      <span className={styles.search_text}>{network.chainName}</span>
+                      <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
+                        {network.chainName}
+                      </span>
                     </div>
                   )}
                   {bridgeNetworks.length > 1 && (
                     <div>
-                      <ArrowDownIcon />
+                      {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
                     </div>
                   )}
                 </div>
               </div>
               {isOpen && (
                 <div>
-                  <ul className={styles.items}>
+                  <ul className={classNames(styles.items, styles.items + ` ${styles[theme]}`)}>
                     {networks
                       .filter((item) => filterChainBridge(token, item))
                       .map((network) => {
@@ -236,7 +240,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                 <div>
                                   <network.Icon />
                                 </div>
-                                <div className={styles.items_title}>{network.chainName}</div>
+                                <div
+                                  className={classNames(styles.items_title, styles.items_title + ` ${styles[theme]}`)}
+                                >
+                                  {network.chainName}
+                                </div>
                               </div>
                             )}
                           </li>
@@ -266,7 +274,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   const usdValue = floatValue * (prices[token.coinGeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
-                className={styles.amount}
+                className={classNames(styles.amount, styles.amount + ` ${styles[theme]}`)}
               />
               <div style={{ paddingTop: 8 }}>
                 <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} />
@@ -277,7 +285,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
                 <button
                   key={coeff}
-                  className={styles.balanceBtn}
+                  className={classNames(styles.balanceBtn, styles.balanceBtn + ` ${styles[theme]}`)}
                   onClick={(event) => {
                     event.stopPropagation();
                     // hardcode estimate fee oraichain
@@ -307,7 +315,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             return (
               <button
                 disabled={transferLoading || !addressTransfer}
-                className={styles.tfBtn}
+                className={classNames(styles.tfBtn, styles.tfBtn + `${styles[theme]}`)}
                 onClick={onTransferConvert}
               >
                 {transferLoading && <Loader width={20} height={20} />}

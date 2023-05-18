@@ -9,21 +9,14 @@ const BlocLoaderDex: React.FC<{
   borderRadius?: boolean;
   classNameLoading?: string;
   classNameLogoLoading?: string;
-}> = ({
-  open,
-  borderRadius = false,
-  classNameLoading,
-  classNameLogoLoading
-}) => {
-  let className = borderRadius
-    ? ['loaderRoot', 'loaderRootBorderRadius']
-    : ['loaderRoot'];
+  theme?: string;
+}> = ({ open, borderRadius = false, classNameLoading, classNameLogoLoading, theme }) => {
+  let className = borderRadius ? ['loaderRoot', 'loaderRootBorderRadius'] : ['loaderRoot'];
   return (
     <div
       className={cx(
-        open
-          ? className.concat(['loaderRootDisplayed', classNameLoading])
-          : className
+        open ? className.concat(['loaderRootDisplayed', classNameLoading]) : className,
+        `loaderRoot ${styles[theme]}`
       )}
     >
       <div className={cx('osmosisContainer')}>

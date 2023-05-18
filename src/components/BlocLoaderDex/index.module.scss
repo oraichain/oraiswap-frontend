@@ -1,3 +1,4 @@
+@import 'src/styles/themes';
 .loaderRoot {
   display: flex;
   align-items: center;
@@ -7,6 +8,9 @@
   transition: all 0.3s;
   position: absolute;
   background: rgba(0, 0, 0, 0.5);
+  &.light {
+    background-color: $light-bg-btn-active-gray;
+  }
   top: 0;
   left: 0;
   bottom: 0;

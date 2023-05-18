@@ -16,7 +16,7 @@ import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
-
+import './index.scss'
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
@@ -25,6 +25,7 @@ const App = () => {
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
+  const [theme] = useConfigReducer('theme');
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -159,8 +160,10 @@ const App = () => {
   return (
     <ThemeProvider>
       <GlobalStyles />
-      <Menu />
-      {routes()}
+      <div className={`${theme}`}>
+        <Menu />
+        {routes()}
+      </div>
     </ThemeProvider>
   );
 };

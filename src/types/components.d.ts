@@ -67,6 +67,7 @@ interface Modal extends ReactModal.Props {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
+  theme?: string;
 }
 
 /* Modules */

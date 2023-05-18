@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
-import RefreshImg from 'assets/images/refresh.svg';
+import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
@@ -47,6 +48,7 @@ const SwapComponent: React.FC<{
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
 
   const [searchTokenName, setSearchTokenName] = useState('');
@@ -97,7 +99,9 @@ const SwapComponent: React.FC<{
 
   const subAmountFrom = toSubAmount(amounts, originalFromToken);
   const subAmountTo = toSubAmount(amounts, originalToToken);
-  const fromTokenBalance = originalFromToken ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
+  const fromTokenBalance = originalFromToken
+    ? BigInt(amounts[originalFromToken.denom] ?? '0') + subAmountFrom
+    : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
   const { data: simulateData } = useQuery(
@@ -140,7 +144,14 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-      const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount, userSlippage);
+      const univeralSwapHandler = new UniversalSwapHandler(
+        oraiAddress,
+        originalFromToken,
+        originalToToken,
+        fromAmountToken,
+        simulateData.amount,
+        userSlippage
+      );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
       console.log({ toAddress, combinedReceiver, universalSwapType })
@@ -153,15 +164,15 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      console.log({ error })
-      handleErrorTransaction(error)
+      console.log({ error });
+      handleErrorTransaction(error);
     } finally {
       setSwapLoading(false);
     }
   };
 
-  const FromIcon = originalFromToken?.Icon;
-  const ToIcon = originalToToken?.Icon;
+  const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
+  const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   const filteredFromTokens = swapFromTokens.filter((token) =>
     token.denom !== toTokenDenom && token.name.includes(searchTokenName)
@@ -183,8 +194,8 @@ const SwapComponent: React.FC<{
               setVisible={setVisible}
               content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
             />
-            <button onClick={refreshBalances}>
-              <img className={cx('btn')} src={RefreshImg} alt="btn" />
+            <button className={cx('btn')} onClick={refreshBalances}>
+              <RefreshImg />
             </button>
           </div>
           <div className={cx('balance')}>
@@ -246,13 +257,12 @@ const SwapComponent: React.FC<{
         </div>
         <div className={cx('swap-icon')}>
           <img
-            src={AntSwapImg}
+            src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
             }}
             alt="ant"
-            style={{ pointerEvents: swapFromTokens.some((t) => t.denom === toTokenDenom) ? 'auto' : 'none', cursor: swapFromTokens.some((t) => t.denom === toTokenDenom) ? 'pointer' : 'not-allowed' }}
           />
         </div>
         <div className={cx('to')}>
