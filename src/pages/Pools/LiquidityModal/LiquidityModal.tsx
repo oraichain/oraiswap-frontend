@@ -11,7 +11,7 @@ import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PairInfo } from '@oraichain/orderbook-contracts-sdk';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import {

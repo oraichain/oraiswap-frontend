@@ -1,6 +1,6 @@
 import { client } from './common';
-import { OraiswapTokenQueryClient, OraiswapTokenTypes } from '@oraichain/orderbook-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import { OraiswapTokenQueryClient, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
+import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
 
 describe('token', () => {
   let senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';

@@ -4,7 +4,7 @@ import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { AggregateResult, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { OraiswapStakingTypes, OraiswapPairTypes } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapStakingTypes, OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';

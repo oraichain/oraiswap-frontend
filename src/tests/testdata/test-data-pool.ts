@@ -1,5 +1,5 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { OraiswapStakingTypes } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { TokenInfo } from 'types/token';
 import { PairInfoData } from 'pages/Pools/helpers';
 import { constants } from '../listing-simulate';

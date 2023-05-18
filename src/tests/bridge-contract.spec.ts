@@ -12,9 +12,9 @@ import {
   OraiswapFactoryTypes,
   OraiswapOracleTypes,
   OraiswapRouterTypes
-} from '@oraichain/orderbook-contracts-sdk';
+} from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import path from 'path';

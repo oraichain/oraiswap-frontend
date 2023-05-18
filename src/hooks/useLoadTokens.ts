@@ -1,7 +1,7 @@
 import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenTypes } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';

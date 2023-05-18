@@ -2499,15 +2499,15 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/orderbook-contracts-build@^1.0.7":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/@oraichain/orderbook-contracts-build/-/orderbook-contracts-build-1.0.8.tgz#f6cd8fed92467406ffa6ac7f6dd1b99087840122"
-  integrity sha512-pDFU7ZUBBwPzQ9zmFKVxZpqGt5AY9VhCM6eXRvIKf4na3vM6SDauKU4QYB8nyQEfbVxCQVpr+08RLD2CDNqYbw==
+"@oraichain/oraidex-contracts-build@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.7.tgz#a7585add66c53db5fd8cbbd452268e20e34760f1"
+  integrity sha512-8VuwoMvqk16sh91IfUhZaaiWT0Kwpgt7X4lGtp0t6s2jrobU52FPTQi6pbYdqY4Z5P8UxT64HQHGET3Z9AA/rg==
 
-"@oraichain/orderbook-contracts-sdk@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@oraichain/orderbook-contracts-sdk/-/orderbook-contracts-sdk-1.0.5.tgz#45ab5181a13b90b576fdcbab9f5cca2a6dfa95d9"
-  integrity sha512-udYVBQpSWVzrBr4Y6ozfVofMpkM76BLq5wlP7UkNk9EWE0Lcb8y+RNN6EKCblHAhnitHiTyKp37/zOvWyU4gnw==
+"@oraichain/oraidex-contracts-sdk@^1.0.5":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.7.tgz#95608af1d2ef547033bede2c1e461f987e9e5665"
+  integrity sha512-EaHQUDuoFVdvyKwXZMlbKn1EsKuE+dH1SO6gTABrymWhod2N2OyLztzi6VINfU54nMInFCIlP1rfj75r6VypUw==
 
 "@pedrouid/environment@^1.0.1":
   version "1.0.1"

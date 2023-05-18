@@ -11,9 +11,9 @@ import {
   OraiswapFactoryTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes
-} from '@oraichain/orderbook-contracts-sdk';
+} from '@oraichain/oraidex-contracts-sdk';
 import { MulticallTypes } from '@oraichain/common-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 
 dotenv.config();

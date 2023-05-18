@@ -1,7 +1,7 @@
 import { SimulateCosmWasmClient } from '@terran-one/cw-simulate/src';
-import { OraiswapTokenClient, Cw20Coin, OraiswapTokenTypes } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapTokenClient, Cw20Coin, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestTypes, CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/orderbook-contracts-build';
+import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 
 export const TOKEN1 = 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg';

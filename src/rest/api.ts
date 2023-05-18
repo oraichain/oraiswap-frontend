@@ -14,7 +14,7 @@ import {
   OraiswapTokenTypes,
   PairInfo,
   SwapOperation
-} from '@oraichain/orderbook-contracts-sdk';
+} from '@oraichain/oraidex-contracts-sdk';
 import { oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';

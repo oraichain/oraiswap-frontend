@@ -7,7 +7,7 @@ import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { Asset, RewardInfoResponseItem, OraiswapStakingTypes } from '@oraichain/orderbook-contracts-sdk';
+import { Asset, RewardInfoResponseItem, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';

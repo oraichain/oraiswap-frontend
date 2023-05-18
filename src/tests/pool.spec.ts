@@ -5,7 +5,7 @@ import { network } from 'config/networks';
 import { client } from './common';
 import { Pairs, Pair } from 'config/pools';
 import { AggregateResult } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { buildMultipleMessages } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import {

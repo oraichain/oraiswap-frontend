@@ -17,7 +17,7 @@ import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient } from '@oraichain/orderbook-contracts-sdk';
+import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
