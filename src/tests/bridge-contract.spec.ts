@@ -14,10 +14,8 @@ import {
   OraiswapRouterTypes
 } from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
-import * as commonArtifacts from '@oraichain/common-contracts-build';
+import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
-import path from 'path';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
 import { ORAI } from 'config/constants';
@@ -369,12 +367,12 @@ describe.only('IBCModule', () => {
       // upload pair & lp token code id
       const { codeId: pairCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(oraiswapArtifacts.getContractDir('oraiswap_pair')),
+        readFileSync(oraidexArtifacts.getContractDir('oraiswap_pair')),
         'auto'
       );
       const { codeId: lpCodeId } = await oraiClient.upload(
         oraiSenderAddress,
-        readFileSync(oraiswapArtifacts.getContractDir('oraiswap_token')),
+        readFileSync(oraidexArtifacts.getContractDir('oraiswap_token')),
         'auto'
       );
       // deploy another cw20 for oraiswap testing
@@ -396,14 +394,14 @@ describe.only('IBCModule', () => {
       // deploy oracle addr
       const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleTypes.InstantiateMsg>(
         oraiSenderAddress,
-        oraiswapArtifacts.getContractDir('oraiswap_oracle'),
+        oraidexArtifacts.getContractDir('oraiswap_oracle'),
         {},
         'oraiswap-oracle'
       );
       // deploy factory contract
       const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryTypes.InstantiateMsg>(
         oraiSenderAddress,
-        oraiswapArtifacts.getContractDir('oraiswap_factory'),
+        oraidexArtifacts.getContractDir('oraiswap_factory'),
         {
           commission_rate: '0',
           oracle_addr: oracleAddress,
@@ -415,7 +413,7 @@ describe.only('IBCModule', () => {
 
       const { contractAddress: routerAddress } = await oraiClient.deploy<OraiswapRouterTypes.InstantiateMsg>(
         oraiSenderAddress,
-        oraiswapArtifacts.getContractDir('oraiswap_router'),
+        oraidexArtifacts.getContractDir('oraiswap_router'),
         {
           factory_addr: factoryAddress,
           factory_addr_v2: factoryAddress

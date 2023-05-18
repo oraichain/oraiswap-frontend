@@ -13,7 +13,7 @@ import {
   OraiswapTokenTypes
 } from '@oraichain/oraidex-contracts-sdk';
 import { MulticallTypes } from '@oraichain/common-contracts-sdk';
-import * as oraiswapArtifacts from '@oraichain/oraidex-contracts-build';
+import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 
 dotenv.config();
@@ -43,17 +43,17 @@ export async function deployOraiDexContracts(): Promise<{
   // upload pair & lp token code id
   const { codeId: tokenCodeId } = await client.upload(
     devAddress,
-    readFileSync(oraiswapArtifacts.getContractDir('oraiswap_token')),
+    readFileSync(oraidexArtifacts.getContractDir('oraiswap_token')),
     'auto'
   );
   const { codeId: pairCodeId } = await client.upload(
     devAddress,
-    readFileSync(oraiswapArtifacts.getContractDir('oraiswap_pair')),
+    readFileSync(oraidexArtifacts.getContractDir('oraiswap_pair')),
     'auto'
   );
 
   // deploy oracle addr
-  const { contractAddress: oracleAddr } = await oraiswapArtifacts.deployContract(
+  const { contractAddress: oracleAddr } = await oraidexArtifacts.deployContract(
     client,
     devAddress,
     {},
@@ -61,7 +61,7 @@ export async function deployOraiDexContracts(): Promise<{
     'oraiswap_oracle'
   );
   // deploy factory contract
-  const { contractAddress: factoryAddr } = await oraiswapArtifacts.deployContract<OraiswapFactoryTypes.InstantiateMsg>(
+  const { contractAddress: factoryAddr } = await oraidexArtifacts.deployContract<OraiswapFactoryTypes.InstantiateMsg>(
     client,
     devAddress,
 
@@ -75,7 +75,7 @@ export async function deployOraiDexContracts(): Promise<{
     'oraiswap_factory'
   );
   // deploy staking contract address
-  const { contractAddress: stakingAddr } = await oraiswapArtifacts.deployContract<OraiswapStakingTypes.InstantiateMsg>(
+  const { contractAddress: stakingAddr } = await oraidexArtifacts.deployContract<OraiswapStakingTypes.InstantiateMsg>(
     client,
     devAddress,
 
