@@ -23,7 +23,7 @@ import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
-import { UniversalSwapHandler } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress } from '../helpers';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
@@ -143,8 +143,10 @@ const SwapComponent: React.FC<{
       const univeralSwapHandler = new UniversalSwapHandler(oraiAddress, originalFromToken, originalToToken, fromAmountToken, simulateData.amount, userSlippage);
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
-      console.log({ toAddress, combinedReceiver, universalSwapType })
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: window.Metamask.toCheckSumEthAddress(metamaskAddress), tronAddress });
+      checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
+      checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
+      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress)
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: checksumMetamaskAddress, tronAddress });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
