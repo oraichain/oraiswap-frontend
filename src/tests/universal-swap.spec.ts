@@ -17,7 +17,7 @@ import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
 import { combineReceiver, findToToken, getDestination } from 'pages/BalanceNew/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { UniversalSwapHandler } from 'pages/UniversalSwap/helpers';
+import { UniversalSwapHandler, checkEvmAddress } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -904,4 +904,39 @@ describe('universal-swap', () => {
       expect(ibcMemo).toEqual(expectedIbcMemo);
     }
   );
+
+  describe('checkEvmAddress', () => {
+    const testCases = [
+      ['0x01', '', undefined],
+      ['0x38', '', undefined],
+      ['0x2b6653dc', undefined, ''],
+    ];
+    it.each(testCases)(
+      'throws an error when not logged in to wallet (%s)',
+      (chainId: NetworkChainId, metamaskAddress?: string, tronAddress?: string | boolean) => {
+        expect(() => {
+          checkEvmAddress(chainId, metamaskAddress, tronAddress);
+        }).toThrow();
+      }
+    );
+  
+    it('does not throw an error when logged in to Metamask on Ethereum', () => {
+      expect(() => {
+        checkEvmAddress('0x01', '0x1234abcd');
+      }).not.toThrow();
+    });
+  
+    it('does not throw an error when logged in to Metamask on BSC', () => {
+      expect(() => {
+        checkEvmAddress('0x38', '0x5678efgh');
+      }).not.toThrow();
+    });
+  
+    it('does not throw an error when logged in to Tron wallet', () => {
+      expect(() => {
+        checkEvmAddress('0x2b6653dc', '', 'TRON_ADDRESS');
+      }).not.toThrow();
+    });
+  })
+ 
 });

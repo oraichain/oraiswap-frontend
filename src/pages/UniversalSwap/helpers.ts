@@ -27,6 +27,23 @@ const evmChainIds = chainInfos
   .filter((chain) => chain.networkType === 'evm' && chain.chainId !== '0x1ae6')
   .map((t) => t.chainId);
 
+
+export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?:string, tronAddress?: string | boolean) => {
+  switch(chainId) {
+    case '0x01':
+    case '0x38': 
+      if(!metamaskAddress) {
+        throw generateError('Please login Metamask wallet!');
+      }
+      break;
+    case '0x2b6653dc': 
+    if(!tronAddress) {
+      throw generateError('Please login Tron wallet!');
+    }
+  }
+}
+
+
 export class UniversalSwapHandler {
   private _sender: string;
   private _fromToken: TokenItemType;
