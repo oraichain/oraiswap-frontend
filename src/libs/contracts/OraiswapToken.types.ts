@@ -111,20 +111,16 @@ export type QueryMsg = {
 };
 export interface AllAccountsResponse {
   accounts: string[];
-  [k: string]: unknown;
 }
 export interface AllAllowancesResponse {
   allowances: AllowanceInfo[];
-  [k: string]: unknown;
 }
 export interface AllSpenderAllowancesResponse {
   allowances: SpenderAllowanceInfo[];
-  [k: string]: unknown;
 }
 export interface AllowanceResponse {
   allowance: Uint128;
   expires: Expiration;
-  [k: string]: unknown;
 }
 export interface BalanceResponse {
   balance: Uint128;
@@ -138,7 +134,6 @@ export interface MarketingInfoResponse {
   logo?: LogoInfo | null;
   marketing?: Addr | null;
   project?: string | null;
-  [k: string]: unknown;
 }
 export interface TokenInfoResponse {
   decimals: number;

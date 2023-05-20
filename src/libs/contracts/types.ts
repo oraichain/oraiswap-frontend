@@ -1,34 +1,9 @@
-export type Addr = string;
-export type Binary = string;
-export interface Call {
-  address: Addr;
-  data: Binary;
-}
-export interface CallOptional {
-  address: Addr;
-  data: Binary;
-  require_success: boolean;
-}
-export interface AggregateResult {
-  return_data: CallResult[];
-}
-export interface CallResult {
-  data: Binary;
-  success: boolean;
-}
-export interface BlockAggregateResult {
-  block: number;
-  return_data: CallResult[];
-}
-export interface ContractVersion {
-  contract: string;
-  version: string;
-}
 export interface AllowMsg {
   contract: string;
   gas_limit?: number | null;
 }
 export type Uint128 = string;
+export type Binary = string;
 export type AssetInfo = {
   token: {
     contract_addr: Addr;
@@ -38,6 +13,7 @@ export type AssetInfo = {
     denom: string;
   };
 };
+export type Addr = string;
 export interface Cw20ReceiveMsg {
   amount: Uint128;
   msg: Binary;
@@ -75,7 +51,6 @@ export type Amount = {
 export interface Coin {
   amount: Uint128;
   denom: string;
-  [k: string]: unknown;
 }
 export interface Cw20Coin {
   address: string;
@@ -89,7 +64,6 @@ export interface ChannelInfo {
 export interface IbcEndpoint {
   channel_id: string;
   port_id: string;
-  [k: string]: unknown;
 }
 export interface AllowedInfo {
   contract: string;
@@ -105,6 +79,30 @@ export interface MappingMetadata {
   remote_decimals: number;
 }
 export type ArrayOfPairQuery = PairQuery[];
+export interface Call {
+  address: Addr;
+  data: Binary;
+}
+export interface CallOptional {
+  address: Addr;
+  data: Binary;
+  require_success: boolean;
+}
+export interface AggregateResult {
+  return_data: CallResult[];
+}
+export interface CallResult {
+  data: Binary;
+  success: boolean;
+}
+export interface BlockAggregateResult {
+  block: number;
+  return_data: CallResult[];
+}
+export interface ContractVersion {
+  contract: string;
+  version: string;
+}
 export interface TokenInfo {
   decimals: number;
   info: AssetInfo;
@@ -114,6 +112,40 @@ export interface TokenRatio {
   info: AssetInfo;
   ratio: Decimal;
 }
+export type Logo = {
+  url: string;
+} | {
+  embedded: EmbeddedLogo;
+};
+export type EmbeddedLogo = {
+  svg: Binary;
+} | {
+  png: Binary;
+};
+export interface ListTokenMsg {
+  initial_balances?: Cw20Coin[] | null;
+  label?: string | null;
+  liquidity_pool_reward_assets: Asset[];
+  marketing?: InstantiateMarketingInfo | null;
+  mint?: MinterResponse | null;
+  name?: string | null;
+  symbol: string;
+}
+export interface Asset {
+  amount: Uint128;
+  info: AssetInfo;
+}
+export interface InstantiateMarketingInfo {
+  description?: string | null;
+  logo?: Logo | null;
+  marketing?: string | null;
+  project?: string | null;
+}
+export interface Config {
+  cw20_code_id: number;
+  factory_addr: Addr;
+  owner: Addr;
+}
 export interface PairInfo {
   asset_infos: [AssetInfo, AssetInfo];
   commission_rate: string;
@@ -122,10 +154,6 @@ export interface PairInfo {
   oracle_addr: Addr;
 }
 export type OrderDirection = "buy" | "sell";
-export interface Asset {
-  amount: Uint128;
-  info: AssetInfo;
-}
 export type OrderFilter = ("tick" | "none") | {
   bidder: string;
 } | {
@@ -160,35 +188,12 @@ export interface ExchangeRateItem {
   exchange_rate: Decimal;
   quote_denom: string;
 }
-export interface RewardInfoResponseItem {
-  asset_info: AssetInfo;
-  bond_amount: Uint128;
-  pending_reward: Uint128;
-  pending_withdraw: Asset[];
-  should_migrate?: boolean | null;
-}
 export type SwapOperation = {
   orai_swap: {
     ask_asset_info: AssetInfo;
     offer_asset_info: AssetInfo;
   };
 };
-export type Logo = {
-  url: string;
-} | {
-  embedded: EmbeddedLogo;
-};
-export type EmbeddedLogo = {
-  svg: Binary;
-} | {
-  png: Binary;
-};
-export interface InstantiateMarketingInfo {
-  description?: string | null;
-  logo?: Logo | null;
-  marketing?: string | null;
-  project?: string | null;
-}
 export type Expiration = {
   at_height: number;
 } | {

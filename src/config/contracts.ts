@@ -1,5 +1,5 @@
 import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { contracts } from 'libs/contracts';
+import * as contracts from 'libs/contracts';
 import { CwIcs20LatestClient } from 'libs/contracts/CwIcs20Latest.client';
 import { MulticallQueryClient } from 'libs/contracts/Multicall.client';
 import { OraiswapConverterClient } from 'libs/contracts/OraiswapConverter.client';
@@ -32,7 +32,7 @@ export class Contract {
     const name = className || `Oraiswap${type.charAt(0).toUpperCase() + type.slice(1)}`;
     if (!this[key]) {
       const args = signing ? [this.sender, address] : [address];
-      this[key] = new contracts[name][`${name}${signing ? '' : 'Query'}Client`](this.client, ...args);
+      this[key] = new contracts[`${name}${signing ? '' : 'Query'}Client`](this.client, ...args);
     } else {
       this[key].sender = this.sender;
       this[key].contractAddress = address;

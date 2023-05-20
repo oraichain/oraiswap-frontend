@@ -36,6 +36,15 @@ const collectWallet = async (chainId?: string) => {
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
 };
 
+const getCosmWasmClient = async () => {
+  const wallet = await collectWallet();
+  const defaultAddress = (await wallet.getAccounts())[0];
+  const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
+    gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
+  });
+  return { wallet, client, defaultAddress: defaultAddress };
+}
+
 const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
   console.log('messages in parse execute contract: ', msgs);
   return msgs.map(({ handleMsg, handleOptions, contractAddress }) => {
@@ -335,6 +344,6 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple, getAminoExecuteContractMsgs };
+export { getCosmWasmClient, collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple, getAminoExecuteContractMsgs };
 
 export default CosmJs;

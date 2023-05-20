@@ -29,7 +29,13 @@ export type ExecuteMsg = {
     rate: Decimal;
   };
 };
-export type QueryMsg = OracleTreasuryQuery | OracleExchangeQuery | OracleContractQuery;
+export type QueryMsg = {
+  treasury: OracleTreasuryQuery;
+} | {
+  exchange: OracleExchangeQuery;
+} | {
+  contract: OracleContractQuery;
+};
 export interface MigrateMsg {}
 export interface ContractInfoResponse {
   admin: Addr;

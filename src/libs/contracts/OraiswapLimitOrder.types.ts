@@ -12,10 +12,10 @@ export type ExecuteMsg = {
   };
 } | {
   create_order_book_pair: {
-    base_coin_info: AssetInfo;
-    min_quote_coin_amount: Uint128;
-    quote_coin_info: AssetInfo;
-    spread?: Decimal | null;
+    ask_info: AssetInfo;
+    min_offer_amount: Uint128;
+    offer_info: AssetInfo;
+    precision?: Decimal | null;
   };
 } | {
   submit_order: {
@@ -28,12 +28,17 @@ export type ExecuteMsg = {
     order_id: number;
   };
 } | {
-  execute_order_book_pair: {
-    asset_infos: [AssetInfo, AssetInfo];
-    limit?: number | null;
+  execute_order: {
+    ask_asset: Asset;
+    offer_info: AssetInfo;
+    order_id: number;
   };
 } | {
-  remove_order_book_pair: {
+  execute_order_book_pair: {
+    asset_infos: [AssetInfo, AssetInfo];
+  };
+} | {
+  remove_order_book: {
     asset_infos: [AssetInfo, AssetInfo];
   };
 };
@@ -79,10 +84,6 @@ export type QueryMsg = {
   };
 } | {
   last_order_id: {};
-} | {
-  order_book_matchable: {
-    asset_infos: [AssetInfo, AssetInfo];
-  };
 };
 export interface MigrateMsg {}
 export interface ContractInfoResponse {
@@ -103,13 +104,10 @@ export interface OrderResponse {
   order_id: number;
 }
 export interface OrderBookResponse {
-  base_coin_info: AssetInfo;
-  min_quote_coin_amount: Uint128;
-  quote_coin_info: AssetInfo;
-  spread?: Decimal | null;
-}
-export interface OrderBookMatchableResponse {
-  is_matchable: boolean;
+  ask_info: AssetInfo;
+  min_offer_amount: Uint128;
+  offer_info: AssetInfo;
+  precision?: Decimal | null;
 }
 export interface OrderBooksResponse {
   order_books: OrderBookResponse[];
