@@ -111,6 +111,7 @@
   display: flex;
   justify-content: space-between;
   gap: 30px;
+
   @media (max-width: 575px) {
     flex-wrap: wrap;
     gap: 15px;
@@ -118,7 +119,10 @@
 
   &:first-child {
     padding-bottom: 40px;
-    border-bottom: 1px solid #2d2938;
+
+    @include theme() {
+      border-bottom: theme-get('hr-color');
+    }
   }
 }
 
@@ -134,6 +138,7 @@
     font-size: 18px;
     line-height: 100%;
     color: #fff;
+
     &.light {
       color: $light-text-color;
     }
@@ -156,13 +161,16 @@
   &.light {
     background-color: $light-bg-primary-box;
   }
+
   font-style: normal;
   font-weight: 600;
   font-size: 22px;
   line-height: 100%;
   /* identical to box height, or 22px */
 
-  font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+  font-feature-settings: 'tnum' on,
+  'lnum' on,
+  'zero' on;
 
   /* aiRight/White */
 
@@ -319,12 +327,15 @@
   gap: 10px;
   justify-content: center;
   align-items: center;
+
   @include theme() {
     background-color: theme-get('bg-btn-primary');
-    box-shadow:  theme-get('shadow-btn');
+    box-shadow: theme-get('shadow-btn');
   }
+
   @media (max-width: 575px) {
     font-size: 14px;
+
     &.btn-unbond {
       margin-top: 0;
     }
@@ -333,8 +344,9 @@
   &--dark {
     @include theme() {
       background-color: theme-get('bg-color-secondary');
-      color:  theme-get('text-color-secondary');
+      color: theme-get('text-color-secondary');
     }
+
     border: none;
     box-shadow: none !important;
   }
@@ -378,6 +390,7 @@
           @include theme() {
             background-color: theme-get('bg-btn-primary');
           }
+
           border-radius: 8px;
           padding: 13px 8px;
         }
@@ -401,6 +414,7 @@
       font-weight: 600;
       font-size: 18px;
       line-height: 100%;
+
       // margin-top: 20px;
       &.light {
         color: $light-text-color;
@@ -434,6 +448,7 @@
       font-size: 18px;
       line-height: 100%;
       margin-top: 20px;
+
       &.light {
         color: $light-text-color;
       }
@@ -453,8 +468,10 @@
   .mining {
     width: 100%;
   }
+
   .earning {
     width: 100%;
+
     .container_earning {
       .amount {
         font-size: 16px;

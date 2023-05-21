@@ -1,4 +1,5 @@
 @import "src/styles/mixins";
+@import "src/styles/themes";
 
 .select {
   @include theme() {
@@ -6,6 +7,7 @@
     box-shadow: theme-get('shadow-modal-token');
     border-color: theme-get('border-color-secondary')
   }
+
   border: 1px solid;
   border-radius: 8px;
   padding: 24px;
@@ -51,12 +53,13 @@
       font-size: 16px;
       line-height: 100%;
       font-feature-settings: 'zero' on;
+
       &:hover {
         cursor: pointer;
+        color: $white-color;
 
         @include theme() {
           background-color: theme-get('bg-hover-color');
-          color: theme-get('text-color-hover');
         }
       }
 

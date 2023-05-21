@@ -33,7 +33,7 @@ import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -201,9 +201,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 </div>
 
                 <div className={cx('title')}>
-                  <div className={cx('name', `name ${styles[theme]}`)}>{`${pairInfoData.token1!.name}/${
-                    pairInfoData.token2!.name
-                  }`}</div>
+                  <div className={cx('name', `name ${styles[theme]}`)}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name
+                    }`}</div>
                   <TokenBalance
                     balance={pairAmountInfoData?.tokenUsd}
                     className={cx('value', `value ${styles[theme]}`)}
@@ -353,7 +352,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                     </div>
                     <hr
                       style={{
-                        borderTop: '1px  dashed #2D2938',
+                        borderTop: theme === 'light' ? '1px  solid #CCCDD0' : '1px  solid #2D2938',
                         width: '100%'
                       }}
                     />

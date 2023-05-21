@@ -101,10 +101,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
             {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
-            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => {}, <OrderBook />, true)}
-            {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
-            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
-            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)}
+            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => { }, <OrderBook />, true)}
+            {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}
+            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => { }, <BuyFiat />, true)}
+            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => { }, <Faucet />, true)}
           </div>
         </div>
 

@@ -194,7 +194,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                 </div>
                 <hr
                   style={{
-                    borderTop: '1px  dashed #2D2938',
+                    borderTop: theme === 'light' ? '1px  solid #CCCDD0' : '1px  solid #2D2938',
                     width: '100%'
                     // margin: '16px 0'
                   }}
