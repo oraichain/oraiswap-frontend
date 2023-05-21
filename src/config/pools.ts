@@ -1,9 +1,10 @@
-import { TokenItemType } from './bridgeTokens';
+import { TokenItemType, cosmosTokens } from './bridgeTokens';
 import { ORAI } from './constants';
 import { AssetInfo, OraiswapFactoryQueryClient, OraiswapFactoryReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { parseAssetInfo } from 'helper';
 import { Contract } from './contracts';
-import { flatten } from 'lodash';
+import { flatten, uniq } from 'lodash';
+import { parseTokenInfo } from 'rest/api';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -44,6 +45,8 @@ export class Pairs {
       asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }],
     }
   ];
+
+  static poolTokens = cosmosTokens.filter(token => uniq(flatten(this.pairs.map(pair => pair.asset_infos))).includes(parseTokenInfo(token).info))
 
   static getAllPairs = async (factoryClient: OraiswapFactoryReadOnlyInterface): Promise<PairInfo[]> => {
     return (await factoryClient.pairs({})).pairs;

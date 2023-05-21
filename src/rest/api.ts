@@ -272,7 +272,7 @@ function generateConvertCw20Erc20Message(
   return msgConverts;
 }
 
-const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
+function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
