@@ -10,13 +10,14 @@ import { useSelector } from 'react-redux';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PairInfoData } from './helpers';
-import { useFetchApr, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
+import { useFetchAllPairs, useFetchApr, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
+import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -54,9 +55,9 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({ amount, oraiPrice }
   );
 };
 
-const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commissionRate, apr }) => {
+const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, apr }) => {
   const navigate = useNavigate();
-  const [token1, token2] = pair.asset_denoms.map((denom) => tokenMap[denom]);
+  const [token1, token2] = pair.asset_infos.map((info) => getOraichainTokenItemTypeFromAssetInfo(info));
 
   if (!token1 || !token2) return null;
 
@@ -65,7 +66,9 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
       className={styles.pairbox}
       onClick={() =>
         navigate(
-          `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(token2.denom)}`
+          `/pool/${encodeURIComponent(parseTokenInfoRawDenom(token1))}_${encodeURIComponent(
+            parseTokenInfoRawDenom(token2)
+          )}`
           // { replace: true }
         )
       }
@@ -92,7 +95,7 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
         )}
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Swap Fee</span>
-          <span className={styles.pairbox_data_value}>{100 * parseFloat(commissionRate)}%</span>
+          <span className={styles.pairbox_data_value}>{100 * parseFloat(pair.commission_rate)}%</span>
         </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Liquidity</span>
@@ -139,11 +142,8 @@ const ListPools = memo<{
       if (!text) {
         return setFilteredPairInfos(listPairs);
       }
-      const searchReg = new RegExp(text, 'i');
       const ret = listPairs.filter((pairInfo) =>
-        pairInfo.pair.asset_denoms.some((denom) =>
-          cosmosTokens.find((token) => token.denom === denom && token.name.search(searchReg) !== -1)
-        )
+        pairInfo.pair.asset_infos.some((info) => cosmosTokens.find((token) => parseTokenInfo(token).info === info))
       );
       setFilteredPairInfos(ret);
     },
@@ -210,11 +210,12 @@ const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
 
+  const pairs = useFetchAllPairs();
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList();
-  const [cachedApr] = useFetchApr(pairInfos, prices);
-  const [myPairsData] = useFetchMyPairs();
-  useFetchCachePairs();
+  const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
+  const [myPairsData] = useFetchMyPairs(pairs);
+  useFetchCachePairs(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
   return (

@@ -5,7 +5,7 @@ import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/co
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
+import { AssetInfo, OraiswapFactoryQueryClient, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import {
@@ -26,6 +26,7 @@ import { TokenInfo } from 'types/token';
 import { CoinGeckoId } from 'config/chainInfos';
 import { calculateTimeoutTimestamp } from 'helper';
 import { IBCInfo } from 'types/ibc';
+import { getCosmWasmClient } from 'libs/cosmjs';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -139,16 +140,16 @@ async function fetchPoolInfoAmount(
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-
-  const pair = Pairs.getPair(fromTokenInfo.denom, toTokenInfo.denom);
+  const pair = await fetchPairInfo([fromTokenInfo, toTokenInfo]);
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = Pairs.getPair(fromTokenInfo.denom, ORAI);
-    const toPairInfo = Pairs.getPair(ORAI, toTokenInfo.denom);
+    const oraiTokenType = oraichainTokens.find(token => token.denom === ORAI);
+    const fromPairInfo = await fetchPairInfo([fromTokenInfo, oraiTokenType]);
+    const toPairInfo = await fetchPairInfo([oraiTokenType, toTokenInfo]);
     const fromPoolInfo =
       cachedPairs?.[fromPairInfo.contract_addr] || (await Contract.pair(fromPairInfo.contract_addr).pool());
     const toPoolInfo =
@@ -159,11 +160,11 @@ async function fetchPoolInfoAmount(
   return { offerPoolAmount, askPoolAmount };
 }
 
-async function fetchPairInfo(assetInfos: [TokenItemType, TokenItemType]): Promise<PairInfo> {
+async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factory = assetInfos.some((a) => a.factoryV2) ? Contract.factory_v2 : Contract.factory;
-  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
-  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+  const factory = tokenTypes.some((a) => a.factoryV2) ? Contract.factory_v2 : Contract.factory;
+  let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
+  let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
 
   const data = await factory.pair({
     assetInfos: [firstAsset, secondAsset]
@@ -288,6 +289,14 @@ const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
   return tokenInfo.denom;
 };
 
+const getOraichainTokenItemTypeFromAssetInfo = (assetInfo: AssetInfo) => {
+  return oraichainTokens.find(token => {
+    if ('native_token' in assetInfo)
+      return token.denom === assetInfo.native_token.denom
+    return token.contractAddress === assetInfo.token.contract_addr
+  })
+}
+
 const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
     throw new Error('KWT and MILKY not supported in this function');
@@ -305,10 +314,13 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   return sent_funds;
 };
 
-const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
-  const pair = Pairs.getPair(denoms);
+const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): SwapOperation[] => {
+  const pairExist = Pairs.pairs.some(pair => {
+    let assetInfos = pair.asset_infos;
+    return (assetInfos[0] === offerInfo && assetInfos[1] === askInfo) || (assetInfos[1] === offerInfo && assetInfos[0] === askInfo)
+  });
 
-  return pair
+  return pairExist
     ? [
       {
         orai_swap: {
@@ -347,7 +359,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo);
 
-  const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
+  const operations = generateSwapOperationMsgs(offerInfo, askInfo);
   try {
     const data = await Contract.router.simulateSwapOperations({
       offerAmount: amount.toString(),
@@ -422,7 +434,7 @@ function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo),
+          operations: generateSwapOperationMsgs(offerInfo, askInfo),
           minimum_receive: swapQuery.minimumReceive
         }
       };
@@ -741,5 +753,6 @@ export {
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
   parseTokenInfoRawDenom,
-  getTokenOnOraichain
+  getTokenOnOraichain,
+  getOraichainTokenItemTypeFromAssetInfo
 };

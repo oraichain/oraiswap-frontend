@@ -14,7 +14,15 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { PairInfo } from 'libs/contracts';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
+import {
+  buildMultipleMessages,
+  getSubAmountDetails,
+  getUsd,
+  toAmount,
+  toDecimal,
+  toDisplay,
+  toSumDisplay
+} from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -195,7 +203,7 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      const oraiAddress = await handleCheckAddress()
+      const oraiAddress = await handleCheckAddress();
 
       if (token1AllowanceToPair < amount1) {
         await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, oraiAddress);
@@ -240,7 +248,7 @@ const LiquidityModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in providing liquidity: ', error);
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setActionLoading(false);
     }
@@ -282,7 +290,7 @@ const LiquidityModal: FC<ModalProps> = ({
       }
     } catch (error) {
       console.log('error in Withdraw Liquidity: ', error);
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setActionLoading(false);
     }
@@ -350,7 +358,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply')}>
         <div className={cx('header')}>
@@ -569,9 +577,7 @@ const LiquidityModal: FC<ModalProps> = ({
                   decimalScale={6}
                   prefix={''}
                 />
-                <TokenBalance
-                  balance={getUsd(lp1BurnAmount, token1, prices)}
-                  className={cx('des')} decimalScale={2} />
+                <TokenBalance balance={getUsd(lp1BurnAmount, token1, prices)} className={cx('des')} decimalScale={2} />
               </div>
             </div>{' '}
             <div className={cx('seperator')} />

@@ -1,6 +1,6 @@
 import cn from 'classnames/bind';
 import Pie from 'components/Pie';
-import { Pairs, Pair } from 'config/pools';
+import { Pairs } from 'config/pools';
 import Content from 'layouts/Content';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -19,7 +19,7 @@ import styles from './PoolDetail.module.scss';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType, oraichainTokens } from 'config/bridgeTokens';
 import { Contract } from 'config/contracts';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -30,13 +30,13 @@ import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
+import { PairInfo } from 'libs/contracts';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
-  let pair: Pair | undefined;
 
   const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
   const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
@@ -51,20 +51,24 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const loadTokenAmounts = useLoadTokens();
   const getPairInfo = async () => {
     if (!poolUrl) return;
-
-    pair = Pairs.getPair(poolUrl.split('_'));
-    if (!pair) return;
-    const token1 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[0]);
-
-    const token2 = Pairs.poolTokens.find((token) => token.denom === pair!.asset_denoms[1]);
-
-    const info = await fetchPairInfo([token1!, token2!]);
-
+    const pairRawData = poolUrl.split('_');
+    const tokenTypes = pairRawData.map((raw) =>
+      oraichainTokens.find((token) => token.denom === raw || token.contractAddress === raw)
+    );
+    let isPairExist = true;
+    let info: PairInfo;
+    try {
+      info = await fetchPairInfo([tokenTypes[0], tokenTypes[1]]);
+    } catch (error) {
+      console.log('error getting pair info in pool details: ', error);
+      isPairExist = false;
+    }
+    if (!isPairExist) return;
     return {
       info,
-      token1,
-      token2,
-      apr: cachedApr?.[pair.contract_addr] || 0
+      token1: tokenTypes[0],
+      token2: tokenTypes[1],
+      apr: cachedApr?.[info.contract_addr] || 0
     };
   };
 
@@ -73,7 +77,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   }, []);
 
   const fetchCachedLpTokenAll = async () => {
-    const queries = Pairs.pairs.map((pair) => ({
+    const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+    const queries = pairs.map((pair) => ({
       address: pair.liquidity_token,
       data: toBinary({
         balance: {
@@ -87,7 +92,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     });
 
     const lpTokenData = Object.fromEntries(
-      Pairs.pairs.map((pair, ind) => {
+      pairs.map((pair, ind) => {
         const data = res.return_data[ind];
         if (!data.success) {
           return [pair.liquidity_token, {}];

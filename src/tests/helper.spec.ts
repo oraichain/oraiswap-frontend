@@ -2,8 +2,11 @@ import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens'
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
-import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
+import { getOraichainTokenItemTypeFromAssetInfo, getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
+import { AssetInfo } from 'libs/contracts';
+import { ORAI } from 'config/constants';
+import { parseAssetInfo } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -103,5 +106,19 @@ describe('should utils functions in libs/utils run exactly', () => {
     } catch (error) {
       expect(error).toEqual(new Error(err));
     }
+  })
+
+  it.each<[AssetInfo, string]>([
+    [{ native_token: { denom: ORAI } }, ORAI],
+    [{ token: { contract_addr: 'foobar' } }, 'foobar']
+  ])('test-parseAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
+    expect(parseAssetInfo(assetInfo)).toEqual(expectedResult)
+  })
+
+  it.each<[AssetInfo, string]>([
+    [{ native_token: { denom: ORAI } }, ORAI],
+    [{ token: { contract_addr: process.env.REACT_APP_AIRI_CONTRACT } }, process.env.REACT_APP_AIRI_CONTRACT]
+  ])('test-getOraichainTokenItemTypeFromAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
+    expect(parseTokenInfoRawDenom(getOraichainTokenItemTypeFromAssetInfo(assetInfo))).toEqual(expectedResult)
   })
 });

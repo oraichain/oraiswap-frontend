@@ -6,18 +6,37 @@ import { updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
 import {
   fetchAprResult,
-  fetchCachedPairsData,
+  fetchPairsData,
   fetchMyCachedPairsData,
   fetchPoolListAndOraiPrice,
   PairInfoData
 } from './helpers';
+import { Contract } from 'config/contracts';
+import { Pairs } from 'config/pools';
+import { PairInfo } from 'libs/contracts';
+
+// Fetch my pair data
+export const useFetchAllPairs = () => {
+  const [pairs, setMyPairs] = useState([] as PairInfo[]);
+
+  const fetchAllPairs = async () => {
+    const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+    setMyPairs(pairs);
+  };
+
+  useEffect(() => {
+    fetchAllPairs();
+  }, []);
+
+  return pairs;
+};
 
 // Fetch APR
-export const useFetchApr = (pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
+export const useFetchApr = (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const [cachedApr, setCachedApr] = useConfigReducer('apr');
 
   const fetchApr = async () => {
-    const cachedApr = await fetchAprResult(pairInfos, prices);
+    const cachedApr = await fetchAprResult(pairs, pairInfos, prices);
     setCachedApr(cachedApr);
   };
 
@@ -30,12 +49,12 @@ export const useFetchApr = (pairInfos: PairInfoData[], prices: CoinGeckoPrices<s
 };
 
 // Fetch all pair data
-export const useFetchCachePairs = () => {
+export const useFetchCachePairs = (pairs: PairInfo[]) => {
   const dispatch = useDispatch();
   const setCachedPairs = (payload: PairDetails) => dispatch(updatePairs(payload));
 
   const fetchCachedPairs = async () => {
-    const pairsData = await fetchCachedPairsData();
+    const { pairDetails: pairsData } = await fetchPairsData(pairs, Contract.multicall);
     setCachedPairs(pairsData);
   };
 
@@ -45,12 +64,12 @@ export const useFetchCachePairs = () => {
 };
 
 // Fetch my pair data
-export const useFetchMyPairs = () => {
+export const useFetchMyPairs = (pairs: PairInfo[]) => {
   const [address] = useConfigReducer('address');
   const [myPairsData, setMyPairsData] = useState({});
 
   const fetchMyCachedPairs = async () => {
-    const myPairData = await fetchMyCachedPairsData(address);
+    const myPairData = await fetchMyCachedPairsData(pairs, address, Contract.multicall);
     setMyPairsData(myPairData);
   };
 

@@ -1,10 +1,10 @@
 import { coin } from '@cosmjs/proto-signing';
 import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { COMMISSION_RATE } from 'config/constants';
+import { COMMISSION_RATE, ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pairs, Pair } from 'config/pools';
-import { AggregateResult } from 'libs/contracts';
+import { Pairs } from 'config/pools';
+import { AggregateResult, AssetInfo, OraiswapFactoryReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { buildMultipleMessages } from 'libs/utils';
@@ -310,5 +310,12 @@ describe('pool', () => {
         }
       });
     });
+  });
+
+  it.each<[AssetInfo[], number]>([
+    [[{ native_token: { denom: ORAI } }, { token: { contract_addr: 'foobar' } }], 1],
+    [[{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }], 0],
+  ])('test-getStakingAssetInfo', (assetInfos, expectedIndex) => {
+    expect(Pairs.getStakingAssetInfo(assetInfos)).toEqual(assetInfos[expectedIndex]);
   });
 });
