@@ -154,11 +154,9 @@ const SwapComponent: React.FC<{
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
-      
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress)
-
       const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: checksumMetamaskAddress, tronAddress });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {

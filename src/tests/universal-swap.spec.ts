@@ -909,7 +909,7 @@ describe('universal-swap', () => {
     const testCases = [
       ['0x01', '', undefined],
       ['0x38', '', undefined],
-      ['0x2b6653dc', undefined, ''],
+      ['0x2b6653dc', undefined, '']
     ];
     it.each(testCases)(
       'throws an error when not logged in to wallet (%s)',
@@ -919,24 +919,20 @@ describe('universal-swap', () => {
         }).toThrow();
       }
     );
-  
     it('does not throw an error when logged in to Metamask on Ethereum', () => {
       expect(() => {
         checkEvmAddress('0x01', '0x1234abcd');
       }).not.toThrow();
     });
-  
     it('does not throw an error when logged in to Metamask on BSC', () => {
       expect(() => {
         checkEvmAddress('0x38', '0x5678efgh');
       }).not.toThrow();
     });
-  
     it('does not throw an error when logged in to Tron wallet', () => {
       expect(() => {
         checkEvmAddress('0x2b6653dc', '', 'TRON_ADDRESS');
       }).not.toThrow();
     });
-  })
- 
+  });
 });
