@@ -109,14 +109,16 @@ function parsePoolAmount(poolInfo: PoolResponse, trueAsset: AssetInfo): bigint {
 async function getPairAmountInfo(
   fromToken: TokenItemType,
   toToken: TokenItemType,
-  cachedPairs?: PairDetails
+  cachedPairs?: PairDetails,
+  poolInfo?: PoolInfo,
+  oraiUsdtPoolInfo?: PoolInfo,
 ): Promise<PairAmountInfo> {
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
+  const poolData = poolInfo || await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const poolOraiUsdData = oraiUsdtPoolInfo || await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -134,13 +136,14 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
-  cachedPairs?: PairDetails
+  cachedPairs?: PairDetails,
+  pairInfo?: PairInfo,
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-  const pair = await fetchPairInfo([fromTokenInfo, toTokenInfo]);
+  const pair = pairInfo || await fetchPairInfo([fromTokenInfo, toTokenInfo]);
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
@@ -148,12 +151,19 @@ async function fetchPoolInfoAmount(
   } else {
     // handle multi-swap case
     const oraiTokenType = oraichainTokens.find(token => token.denom === ORAI);
-    const fromPairInfo = await fetchPairInfo([fromTokenInfo, oraiTokenType]);
-    const toPairInfo = await fetchPairInfo([oraiTokenType, toTokenInfo]);
-    const fromPoolInfo =
-      cachedPairs?.[fromPairInfo.contract_addr] || (await Contract.pair(fromPairInfo.contract_addr).pool());
-    const toPoolInfo =
-      cachedPairs?.[toPairInfo.contract_addr] || (await Contract.pair(toPairInfo.contract_addr).pool());
+    const [fromPairInfo, toPairInfo] = await Promise.all([fetchPairInfo([fromTokenInfo, oraiTokenType]), fetchPairInfo([oraiTokenType, toTokenInfo])]);
+    let fromPoolInfo: PoolResponse;
+    let toPoolInfo: PoolResponse;
+    if (cachedPairs) {
+      fromPoolInfo =
+        cachedPairs?.[fromPairInfo.contract_addr];
+      toPoolInfo =
+        cachedPairs?.[toPairInfo.contract_addr];
+    } else {
+      const result = await Promise.all([Contract.pair(fromPairInfo.contract_addr).pool(), Contract.pair(toPairInfo.contract_addr).pool()]);
+      fromPoolInfo = result[0];
+      toPoolInfo = result[1];
+    }
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
@@ -162,7 +172,7 @@ async function fetchPoolInfoAmount(
 
 async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factory = tokenTypes.some((a) => a.factoryV2) ? Contract.factory_v2 : Contract.factory;
+  const factory = tokenTypes.some((a) => a.factoryV1) ? Contract.factory : Contract.factory_v2;
   let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
   let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
 

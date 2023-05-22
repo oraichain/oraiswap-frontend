@@ -1,5 +1,5 @@
 import { network } from 'config/networks';
-import { AggregateResult, PairInfo } from 'libs/contracts/types';
+import { AggregateResult, AssetInfo, PairInfo } from 'libs/contracts/types';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
@@ -32,6 +32,9 @@ interface PoolInfo {
 }
 export type PairInfoData = {
   pair: PairInfo;
+} & PairInfoDataRaw & PoolInfo;
+
+export type PairInfoDataRaw = {
   amount: number;
   fromToken: TokenItemType;
   toToken: TokenItemType;
@@ -74,14 +77,16 @@ export const calculateAprResult = (
 // Fetch APR
 const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-
   const assetTokens = pairs.map((p) => getOraichainTokenItemTypeFromAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos)));
   try {
+    const start = Date.now();
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
+    const end = Date.now();
+    console.log(`Execution time fetch apr result: ${end - start} ms`);
     return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
@@ -89,12 +94,18 @@ const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], pric
 };
 
 // Fetch Pair Info Data List
-const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails) => {
+const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDetails) => {
   if (!cachedPairs) {
     // wait for cached pair updated
     return;
   }
-  let poolList: PairInfoData[] = compact(await Promise.all(Pairs.pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
+  let poolList: PairInfoData[] = await Promise.all(pairs.map(async (p: PairInfo) => {
+    const pairInfoDataRaw = await fetchPairInfoData(p, cachedPairs);
+    return {
+      pair: p,
+      ...pairInfoDataRaw,
+    } as PairInfoData
+  }));
   const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
   if (!oraiUsdtPool) {
     // retry after 3 seconds
@@ -102,9 +113,13 @@ const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails) => {
   } else {
     const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
     try {
+      const start = Date.now();
+      const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
       const pairAmounts = await Promise.all(
-        poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs))
+        poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData))
       );
+      const end = Date.now();
+      console.log(`Execution time get pair amount info: ${end - start} ms`);
       poolList.forEach((pool, ind) => {
         pool.amount = pairAmounts[ind].tokenUsd;
       });
@@ -119,20 +134,16 @@ const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails) => {
   }
 };
 
-export const fetchPairInfoData = async (pair: PairMapping, cached: PairDetails): Promise<PairInfoData> => {
-  const fromToken = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[0]);
-  const toToken = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[1]);
+export const fetchPairInfoData = async (pairInfo: PairInfo, cached: PairDetails): Promise<PairInfoDataRaw> => {
+  const fromToken = getOraichainTokenItemTypeFromAssetInfo(pairInfo.asset_infos[0]);
+  const toToken = getOraichainTokenItemTypeFromAssetInfo(pairInfo.asset_infos[1]);
   if (!fromToken || !toToken) return;
 
   try {
-    const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached);
-    const firstTokenItemType = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[0]);
-    const secondTokenItemType = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[1]);
-    const pairInfo = await fetchPairInfo([firstTokenItemType, secondTokenItemType]);
+    const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached, pairInfo);
     return {
       ...poolData,
       amount: 0,
-      pair: pairInfo,
       fromToken,
       toToken
     };

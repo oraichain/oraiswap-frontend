@@ -212,7 +212,7 @@ const Pools: React.FC<PoolsProps> = () => {
 
   const pairs = useFetchAllPairs();
   const { data: prices } = useCoinGeckoPrices();
-  const { pairInfos, oraiPrice } = useFetchPairInfoDataList();
+  const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   const [myPairsData] = useFetchMyPairs(pairs);
   useFetchCachePairs(pairs);

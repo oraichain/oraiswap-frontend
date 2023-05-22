@@ -1,10 +1,11 @@
 import { TokenItemType, cosmosTokens } from './bridgeTokens';
 import { ORAI } from './constants';
-import { AssetInfo, OraiswapFactoryQueryClient, OraiswapFactoryReadOnlyInterface, PairInfo } from 'libs/contracts';
+import { AssetInfo, MulticallReadOnlyInterface, OraiswapFactoryQueryClient, OraiswapFactoryReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { parseAssetInfo } from 'helper';
 import { Contract } from './contracts';
 import { flatten, uniq } from 'lodash';
-import { parseTokenInfo } from 'rest/api';
+import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo } from 'rest/api';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -48,13 +49,31 @@ export class Pairs {
 
   static poolTokens = cosmosTokens.filter(token => uniq(flatten(this.pairs.map(pair => pair.asset_infos))).includes(parseTokenInfo(token).info))
 
-  static getAllPairs = async (factoryClient: OraiswapFactoryReadOnlyInterface): Promise<PairInfo[]> => {
-    return (await factoryClient.pairs({})).pairs;
+  static getAllPairs = async (pairs: PairMapping[], factoryAddress: string, multicall: MulticallReadOnlyInterface): Promise<PairInfo[]> => {
+    const results = await multicall.aggregate({
+      queries: pairs.map(pair => {
+        return {
+          address: factoryAddress, data: toBinary(
+            {
+              pair: {
+                asset_infos: pair.asset_infos
+              }
+            }
+          )
+        }
+      })
+    });
+    console.dir(results.return_data.map(data => fromBinary(data.data)), { depth: null })
+    return results.return_data.map(data => fromBinary(data.data));
   };
 
   static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
-    const firstVersionAllPairs = await this.getAllPairs(Contract.factory);
-    const secondVersionAllPairs = await this.getAllPairs(Contract.factory_v2);
+    const start = Date.now();
+    const firstVersionWhiteListPairs = this.pairs.filter(pair => pair.asset_infos.some(info => getOraichainTokenItemTypeFromAssetInfo(info).factoryV1));
+    const secondVersionWhiteListPairs = this.pairs.filter(pair => !firstVersionWhiteListPairs.includes(pair));
+    const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall), this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)]);
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
     return flatten([firstVersionAllPairs, secondVersionAllPairs]);
   }
 

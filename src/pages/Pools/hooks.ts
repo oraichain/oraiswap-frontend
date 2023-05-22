@@ -81,19 +81,24 @@ export const useFetchMyPairs = (pairs: PairInfo[]) => {
 };
 
 // Fetch Pair Info Data List
-export const useFetchPairInfoDataList = () => {
+export const useFetchPairInfoDataList = (pairs: PairInfo[]) => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [oraiPrice, setOraiPrice] = useState(0);
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const fetchPairInfoDataList = async () => {
-    const res = await fetchPoolListAndOraiPrice(cachedPairs);
-    res.pairInfo && setPairInfos(res.pairInfo);
-    res.oraiPrice && setOraiPrice(res.oraiPrice);
+    try {
+      const res = await fetchPoolListAndOraiPrice(pairs, cachedPairs);
+      res && res.pairInfo && setPairInfos(res.pairInfo);
+      res && res.oraiPrice && setOraiPrice(res.oraiPrice);
+    } catch (error) {
+      console.log("error in fetch pair info data list: ", error);
+    }
   };
 
   useEffect(() => {
-    fetchPairInfoDataList();
-  }, [cachedPairs]);
+    if (pairs.length > 0)
+      fetchPairInfoDataList();
+  }, [cachedPairs, pairs]);
 
   return { pairInfos, oraiPrice };
 };
