@@ -39,7 +39,7 @@ export class Pairs {
       asset_infos: [{ token: { contract_addr: process.env.REACT_APP_MILKY_CONTRACT } }, { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }],
     },
     {
-      asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }],
+      asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_USDC_CONTRACT } }],
     },
     {
       asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }],
