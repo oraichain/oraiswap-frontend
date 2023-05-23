@@ -1,21 +1,20 @@
 import { coin } from '@cosmjs/proto-signing';
 import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { COMMISSION_RATE, ORAI } from 'config/constants';
+import { ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
-import { AggregateResult, AssetInfo, OraiswapFactoryReadOnlyInterface, PairInfo } from 'libs/contracts';
+import { PairMapping, Pairs } from 'config/pools';
+import { AggregateResult, AssetInfo, PairInfo } from 'libs/contracts';
 import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
 import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
 import { buildMultipleMessages } from 'libs/utils';
-import compact from 'lodash/compact';
 import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
-  fetchCachedPairsData,
-  fetchMyCachedPairsData,
+  fetchMyPairsData,
   fetchPairInfoData,
+  fetchPairsData,
   fetchPoolListAndOraiPrice,
   PairInfoData,
   toPairDetails
@@ -47,6 +46,8 @@ describe('pool', () => {
   let pairsData: PairDetails;
   let pairInfos: PairInfoData[] = [];
   let assetTokens = [];
+  let pairs: PairInfo[];
+
   const prices = {
     'oraichain-token': 3.93,
     oraidex: 0.01004476
@@ -60,8 +61,11 @@ describe('pool', () => {
 
     // update simulate contract for network
     network.factory = factory;
+    network.factory_v2 = factory;
     network.multicall = multicall;
     network.staking = staking;
+    Contract.factory.contractAddress = factory;
+    Contract.factory_v2.contractAddress = factory;
 
     airiContractAddress = await instantiateCw20Token('airi', tokenCodeId);
     usdtContractAddress = await instantiateCw20Token('usdt', tokenCodeId);
@@ -76,21 +80,21 @@ describe('pool', () => {
     await addPairAndLpToken(network.factory, airiContractAddress, staking);
     await addPairAndLpToken(network.factory, usdtContractAddress, staking);
     const listPairs = await getPairs(network.factory);
+
     // update config pairs to test
     Pairs.pairs = listPairs.pairs.map((pair, index) => {
       return {
-        contract_addr: pair.contract_addr,
-        asset_denoms: index === 0 ? ['orai', 'airi'] : ['orai', 'usdt'],
-        liquidity_token: pair.liquidity_token,
-        commission_rate: COMMISSION_RATE,
-        token_asset: index === 0 ? 'airi' : 'usdt'
+        asset_infos: [
+          { native_token: { denom: ORAI } },
+          { token: { contract_addr: index === 0 ? airiContractAddress : usdtContractAddress } }
+        ]
       };
     });
 
-    assetTokens = Pairs.pairs.map((p: Pair) => {
+    assetTokens = Pairs.pairs.map((p: PairMapping, index) => {
       return {
-        ...tokenMap[p.token_asset],
-        contractAddress: p.token_asset === 'airi' ? airiContractAddress : usdtContractAddress
+        ...tokenMap[index === 0 ? 'airi' : 'usdt'],
+        contractAddress: p.asset_infos[1].token.contract_addr
       };
     });
 
@@ -123,44 +127,47 @@ describe('pool', () => {
     usdtTokenInfo.contractAddress = usdtContractAddress;
     airiTokenInfo.contractAddress = airiContractAddress;
 
-    it('should fetch pairs data correctly', async () => {
-      pairsData = await fetchCachedPairsData();
-      console.log("pair data: ", pairsData)
+    beforeAll(async () => {
+      pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+    });
 
-      expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
-      expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({
+    it('should fetch pairs data correctly', async () => {
+      const { pairDetails } = await fetchPairsData(pairs, Contract.multicall);
+      pairsData = { ...pairDetails };
+      expect(pairsData[pairs[0].contract_addr].total_share).toBe('0');
+      expect(pairsData[pairs[0].contract_addr].assets[0].info).toEqual({
         native_token: {
           denom: 'orai'
         }
       });
-      expect(pairsData[Pairs.pairs[0].contract_addr].assets[1].info).toEqual({
+      expect(pairsData[pairs[0].contract_addr].assets[1].info).toEqual({
         token: {
           contract_addr: airiContractAddress
         }
       });
-      expect(pairsData[Pairs.pairs[1].contract_addr].assets[1].info).toEqual({
+      expect(pairsData[pairs[1].contract_addr].assets[1].info).toEqual({
         token: {
           contract_addr: usdtContractAddress
         }
       });
-      expect(pairsData[Pairs.pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
+      expect(pairsData[pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
     it('should fetch my pairs data correctly', async () => {
       // keep contractAddress of asset token.
-      Pairs.pairs.forEach((pair) => {
-        const assetToken = tokenMap[pair.token_asset];
-        assetToken.contractAddress = pair.token_asset === 'airi' ? airiContractAddress : usdtContractAddress;
+      pairs.forEach((pair, index) => {
+        const assetToken = tokenMap[index === 0 ? 'airi' : 'usdt'];
+        assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
       });
-      const myCachedPairs = await fetchMyCachedPairsData(devAddress);
-      expect(myCachedPairs[Pairs.pairs[0].contract_addr]).toBe(true);
-      expect(myCachedPairs[Pairs.pairs[1].contract_addr]).toBe(true);
+      const myCachedPairs = await fetchMyPairsData(pairs, devAddress, Contract.multicall);
+      expect(myCachedPairs[pairs[0].contract_addr]).toBe(true);
+      expect(myCachedPairs[pairs[1].contract_addr]).toBe(true);
     });
 
     it.each(testCaculateRewardData)(
       'should caculate my reward info',
       (aggregateRes: AggregateResult, expectedRewardInfo) => {
-        const rewardInfo = calculateReward(aggregateRes);
+        const rewardInfo = calculateReward(pairs, aggregateRes);
         expect(Object.values(rewardInfo)).toEqual(expectedRewardInfo);
       }
     );
@@ -170,11 +177,8 @@ describe('pool', () => {
       expect(poolInfoAmount.offerPoolAmount).toBe(10000000n);
       expect(poolInfoAmount.askPoolAmount).toBe(10000000n);
 
-      const pairInfoData = await fetchPairInfoData(Pairs.pairs[1], pairsData);
-
+      const pairInfoData = await fetchPairInfoData(pairs[1], pairsData);
       expect(pairInfoData.amount).toBe(0);
-      expect(JSON.stringify(pairInfoData.pair)).toBe(JSON.stringify(Pairs.pairs[1]));
-      expect(pairInfoData.commissionRate).toBe(COMMISSION_RATE);
       expect(pairInfoData.fromToken).toEqual(fromTokenInfo);
       expect(pairInfoData.toToken).toEqual(usdtTokenInfo);
     });
@@ -182,13 +186,13 @@ describe('pool', () => {
     it.each(testConverToPairsDetailData)(
       'should caculate my reward info',
       (aggregateRes: AggregateResult, expectedPairsDetail) => {
-        const pairsDetail = toPairDetails(aggregateRes);
+        const pairsDetail = toPairDetails(pairs, aggregateRes);
         expect(Object.values(pairsDetail)).toEqual(expectedPairsDetail);
       }
     );
 
     it('should fetch pool info amount and pool list infos, orai price correctly', async () => {
-      const res = await fetchPoolListAndOraiPrice(pairsData);
+      const res = await fetchPoolListAndOraiPrice(pairs, pairsData);
       pairInfos = res.pairInfo;
 
       expect(res.pairInfo[0].offerPoolAmount).toEqual(10000000n);
@@ -201,18 +205,17 @@ describe('pool', () => {
       expect(res.pairInfo[1].askPoolAmount).toEqual(0n);
       expect(JSON.stringify(res.pairInfo[1].fromToken)).toEqual(JSON.stringify(fromTokenInfo));
       expect(JSON.stringify(res.pairInfo[1].toToken)).toEqual(JSON.stringify(airiTokenInfo));
-      expect(res.pairInfo[0].commissionRate).toEqual(COMMISSION_RATE);
 
       expect(res.oraiPrice).toEqual(1);
     });
 
     describe('fetch apr', () => {
       it('should fetch LP token infos with multicall correctly', async () => {
-        const lpTokens = Pairs.pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
+        const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
         allLpTokenInfos = await fetchTokenInfos(lpTokens);
         // expect LP token contract address and total supply is correctly
-        expect(allLpTokenInfos[0].contractAddress).toBe(Pairs.pairs[0].liquidity_token);
-        expect(allLpTokenInfos[1].contractAddress).toBe(Pairs.pairs[1].liquidity_token);
+        expect(allLpTokenInfos[0].contractAddress).toBe(pairs[0].liquidity_token);
+        expect(allLpTokenInfos[1].contractAddress).toBe(pairs[1].liquidity_token);
         expect(allLpTokenInfos[0].total_supply).toBe('0');
         expect(allLpTokenInfos[1].total_supply).toBe('10000000');
       });
@@ -250,19 +253,17 @@ describe('pool', () => {
         ]);
       });
 
-      // it.each(testCaculateAprDatas)(
-      //   'should fetch apr correctly',
-      //   ({ poolList, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec }) => {
-      //     const aprResult = calculateAprResult(poolList, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
-      //     console.log({ aprResult });
-      //     // expect(something...)
-      //   }
-      // );
-
       it('should fetch apr correctly', () => {
-        const aprResult = calculateAprResult(pairInfos, prices, allLpTokenInfos, allTokenAssetInfos, allRewardPerSec);
-        expect(aprResult[Pairs.pairs[0].contract_addr]).toBe(0);
-        expect(aprResult[Pairs.pairs[1].contract_addr]).toBe(6196.830196830198);
+        const aprResult = calculateAprResult(
+          pairs,
+          pairInfos,
+          prices,
+          allLpTokenInfos,
+          allTokenAssetInfos,
+          allRewardPerSec
+        );
+        expect(aprResult[pairs[0].contract_addr]).toBe(0);
+        expect(aprResult[pairs[1].contract_addr]).toBe(6196.830196830198);
       });
     });
 
@@ -286,19 +287,19 @@ describe('pool', () => {
         toInfo: token2InfoData!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: Pairs.pairs[0].contract_addr
+        pair: pairs[0].contract_addr
       } as ProvideQuery);
 
       const msg = msgs[0];
       // check if the contract address, sent_funds and sender are correct
-      expect(msg.contract).toEqual(Pairs.pairs[0].contract_addr);
+      expect(msg.contract).toEqual(pairs[0].contract_addr);
       expect(msg.sender).toEqual(devAddress);
-      expect(msg.sent_funds).toEqual([{ denom: 'orai', amount: '100' }]);
+      expect(msg.sent_funds).toEqual([{ amount: '100', denom: 'orai' }]);
       expect(msg).toHaveProperty('msg');
 
       const messages = buildMultipleMessages(msg, [], []);
       // check if the contract address, sent_funds and sender are correct
-      expect(messages[0].contractAddress).toEqual(Pairs.pairs[0].contract_addr);
+      expect(messages[0].contractAddress).toEqual(pairs[0].contract_addr);
       expect(messages[0]).toHaveProperty('handleOptions');
 
       expect(JSON.parse(messages[0].handleMsg)).toEqual({
@@ -314,7 +315,7 @@ describe('pool', () => {
 
   it.each<[AssetInfo[], number]>([
     [[{ native_token: { denom: ORAI } }, { token: { contract_addr: 'foobar' } }], 1],
-    [[{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }], 0],
+    [[{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }], 0]
   ])('test-getStakingAssetInfo', (assetInfos, expectedIndex) => {
     expect(Pairs.getStakingAssetInfo(assetInfos)).toEqual(assetInfos[expectedIndex]);
   });

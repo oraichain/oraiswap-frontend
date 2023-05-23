@@ -1,7 +1,7 @@
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
+import { cosmosTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
@@ -17,7 +17,7 @@ import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -128,6 +128,8 @@ const ListPools = memo<{
     );
   }, [myPairsData, pairInfos]);
 
+  console.log({ listMyPool, lpPools, pairInfos })
+
   useEffect(() => {
     if (typeFilter === KeyFilterPool.my_pool) {
       setFilteredPairInfos(listMyPool);
@@ -149,6 +151,8 @@ const ListPools = memo<{
     },
     [pairInfos, listMyPool, typeFilter]
   );
+
+  console.log({ filteredPairInfos })
 
   return (
     <div className={styles.listpools}>
@@ -215,6 +219,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   const [myPairsData] = useFetchMyPairs(pairs);
+  console.log({ myPairsData })
   useFetchCachePairs(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);

@@ -4,13 +4,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
-import {
-  fetchAprResult,
-  fetchPairsData,
-  fetchMyCachedPairsData,
-  fetchPoolListAndOraiPrice,
-  PairInfoData
-} from './helpers';
+import { fetchAprResult, fetchPairsData, fetchMyPairsData, fetchPoolListAndOraiPrice, PairInfoData } from './helpers';
 import { Contract } from 'config/contracts';
 import { Pairs } from 'config/pools';
 import { PairInfo } from 'libs/contracts';
@@ -69,7 +63,7 @@ export const useFetchMyPairs = (pairs: PairInfo[]) => {
   const [myPairsData, setMyPairsData] = useState({});
 
   const fetchMyCachedPairs = async () => {
-    const myPairData = await fetchMyCachedPairsData(pairs, address, Contract.multicall);
+    const myPairData = await fetchMyPairsData(pairs, address, Contract.multicall);
     setMyPairsData(myPairData);
   };
 
@@ -91,13 +85,12 @@ export const useFetchPairInfoDataList = (pairs: PairInfo[]) => {
       res && res.pairInfo && setPairInfos(res.pairInfo);
       res && res.oraiPrice && setOraiPrice(res.oraiPrice);
     } catch (error) {
-      console.log("error in fetch pair info data list: ", error);
+      console.log('error in fetch pair info data list: ', error);
     }
   };
 
   useEffect(() => {
-    if (pairs.length > 0)
-      fetchPairInfoDataList();
+    if (pairs.length > 0) fetchPairInfoDataList();
   }, [cachedPairs, pairs]);
 
   return { pairInfos, oraiPrice };

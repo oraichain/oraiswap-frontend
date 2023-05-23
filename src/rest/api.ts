@@ -1,32 +1,30 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { coin, Coin } from '@cosmjs/stargate';
+import { Coin, coin } from '@cosmjs/stargate';
 import { TokenItemType, oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { AssetInfo, OraiswapFactoryQueryClient, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
+import { AssetInfo, PairInfo, SwapOperation, Uint128 } from 'libs/contracts';
 import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
 import { DistributionInfoResponse } from 'libs/contracts/OraiswapRewarder.types';
 import {
   PoolInfoResponse,
-  QueryMsg as StakingQueryMsg,
   RewardInfoResponse,
-  RewardsPerSecResponse
+  RewardsPerSecResponse,
+  QueryMsg as StakingQueryMsg
 } from 'libs/contracts/OraiswapStaking.types';
 import { QueryMsg as TokenQueryMsg } from 'libs/contracts/OraiswapToken.types';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
-import isEqual from 'lodash/isEqual';
-import Long from 'long';
-import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
-import { TokenInfo } from 'types/token';
 import { CoinGeckoId } from 'config/chainInfos';
+import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp } from 'helper';
+import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import isEqual from 'lodash/isEqual';
+import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
-import { getCosmWasmClient } from 'libs/cosmjs';
+import { TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -111,14 +109,15 @@ async function getPairAmountInfo(
   toToken: TokenItemType,
   cachedPairs?: PairDetails,
   poolInfo?: PoolInfo,
-  oraiUsdtPoolInfo?: PoolInfo,
+  oraiUsdtPoolInfo?: PoolInfo
 ): Promise<PairAmountInfo> {
-  const poolData = poolInfo || await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
+  const poolData = poolInfo || (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const poolOraiUsdData = oraiUsdtPoolInfo || await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const poolOraiUsdData =
+      oraiUsdtPoolInfo || (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -137,30 +136,34 @@ async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
   cachedPairs?: PairDetails,
-  pairInfo?: PairInfo,
+  pairInfo?: PairInfo
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-  const pair = pairInfo || await fetchPairInfo([fromTokenInfo, toTokenInfo]);
+  const pair = pairInfo || (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
   if (pair) {
     const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const oraiTokenType = oraichainTokens.find(token => token.denom === ORAI);
-    const [fromPairInfo, toPairInfo] = await Promise.all([fetchPairInfo([fromTokenInfo, oraiTokenType]), fetchPairInfo([oraiTokenType, toTokenInfo])]);
+    const oraiTokenType = oraichainTokens.find((token) => token.denom === ORAI);
+    const [fromPairInfo, toPairInfo] = await Promise.all([
+      fetchPairInfo([fromTokenInfo, oraiTokenType]),
+      fetchPairInfo([oraiTokenType, toTokenInfo])
+    ]);
     let fromPoolInfo: PoolResponse;
     let toPoolInfo: PoolResponse;
     if (cachedPairs) {
-      fromPoolInfo =
-        cachedPairs?.[fromPairInfo.contract_addr];
-      toPoolInfo =
-        cachedPairs?.[toPairInfo.contract_addr];
+      fromPoolInfo = cachedPairs?.[fromPairInfo.contract_addr];
+      toPoolInfo = cachedPairs?.[toPairInfo.contract_addr];
     } else {
-      const result = await Promise.all([Contract.pair(fromPairInfo.contract_addr).pool(), Contract.pair(toPairInfo.contract_addr).pool()]);
+      const result = await Promise.all([
+        Contract.pair(fromPairInfo.contract_addr).pool(),
+        Contract.pair(toPairInfo.contract_addr).pool()
+      ]);
       fromPoolInfo = result[0];
       toPoolInfo = result[1];
     }
@@ -292,20 +295,19 @@ function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
-};
+}
 
 const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
   if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
   return tokenInfo.denom;
 };
 
-const getOraichainTokenItemTypeFromAssetInfo = (assetInfo: AssetInfo) => {
-  return oraichainTokens.find(token => {
-    if ('native_token' in assetInfo)
-      return token.denom === assetInfo.native_token.denom
-    return token.contractAddress === assetInfo.token.contract_addr
-  })
-}
+const getOraichainTokenItemTypeFromAssetInfo = (assetInfo: AssetInfo): TokenItemType => {
+  return oraichainTokens.find((token) => {
+    if ('native_token' in assetInfo) return token.denom === assetInfo.native_token.denom;
+    return token.contractAddress === assetInfo.token.contract_addr;
+  });
+};
 
 const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
@@ -325,34 +327,37 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
 };
 
 const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): SwapOperation[] => {
-  const pairExist = Pairs.pairs.some(pair => {
+  const pairExist = Pairs.pairs.some((pair) => {
     let assetInfos = pair.asset_infos;
-    return (assetInfos[0] === offerInfo && assetInfos[1] === askInfo) || (assetInfos[1] === offerInfo && assetInfos[0] === askInfo)
+    return (
+      (isEqual(assetInfos[0], offerInfo) && isEqual(assetInfos[1], askInfo)) ||
+      (isEqual(assetInfos[1], offerInfo) && isEqual(assetInfos[0], askInfo))
+    );
   });
 
   return pairExist
     ? [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: askInfo
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: askInfo
+          }
         }
-      }
-    ]
+      ]
     : [
-      {
-        orai_swap: {
-          offer_asset_info: offerInfo,
-          ask_asset_info: ORAI_INFO
+        {
+          orai_swap: {
+            offer_asset_info: offerInfo,
+            ask_asset_info: ORAI_INFO
+          }
+        },
+        {
+          orai_swap: {
+            offer_asset_info: ORAI_INFO,
+            ask_asset_info: askInfo
+          }
         }
-      },
-      {
-        orai_swap: {
-          offer_asset_info: ORAI_INFO,
-          ask_asset_info: askInfo
-        }
-      }
-    ];
+      ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
