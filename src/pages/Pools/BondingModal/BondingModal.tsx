@@ -58,7 +58,7 @@ const BondingModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress()
 
-      const msgs = await generateMiningMsgs({
+      const msgs = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),

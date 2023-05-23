@@ -555,7 +555,7 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
+function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
   const { type, sender, ...params } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
