@@ -3,7 +3,7 @@ import { parseAssetInfo } from 'helper';
 import { AssetInfo, MulticallReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { flatten, uniq } from 'lodash';
 import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo } from 'rest/api';
-import { TokenItemType, cosmosTokens } from './bridgeTokens';
+import { TokenItemType, assetInfoMap, cosmosTokens } from './bridgeTokens';
 import { ORAI } from './constants';
 import { Contract } from './contracts';
 
@@ -71,9 +71,7 @@ export class Pairs {
     }
   ];
 
-  static poolTokens = cosmosTokens.filter((token) =>
-    uniq(flatten(this.pairs.map((pair) => pair.asset_infos))).includes(parseTokenInfo(token).info)
-  );
+  static poolTokens = uniq(flatten(this.pairs.map(pair => pair.asset_infos)).map(info => assetInfoMap[parseAssetInfo(info)]));
 
   static getAllPairs = async (
     pairs: PairMapping[],
@@ -101,7 +99,7 @@ export class Pairs {
 
   static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
     const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
-      pair.asset_infos.some((info) => getOraichainTokenItemTypeFromAssetInfo(info)?.factoryV1)
+      pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
     );
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
