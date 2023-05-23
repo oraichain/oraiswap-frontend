@@ -23,10 +23,6 @@ import {
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
 
-interface PoolInfo {
-  offerPoolAmount: bigint;
-  askPoolAmount: bigint;
-}
 export type PairInfoData = {
   pair: PairInfo;
 } & PairInfoDataRaw &

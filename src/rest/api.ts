@@ -121,7 +121,7 @@ async function getPairAmountInfo(
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
-    // must be stable coin
+    // must be stable coin for ask pool amount
     tokenPrice = toDecimal(poolData.askPoolAmount, poolData.offerPoolAmount);
   }
 
@@ -337,27 +337,27 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
 
   return pairExist
     ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: askInfo
         }
-      ]
+      }
+    ]
     : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
+      {
+        orai_swap: {
+          offer_asset_info: offerInfo,
+          ask_asset_info: ORAI_INFO
         }
-      ];
+      },
+      {
+        orai_swap: {
+          offer_asset_info: ORAI_INFO,
+          ask_asset_info: askInfo
+        }
+      }
+    ];
 };
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {

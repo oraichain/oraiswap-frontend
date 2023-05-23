@@ -108,7 +108,13 @@ export class Pairs {
       this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall),
       this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
     ]);
-    return flatten([firstVersionAllPairs, secondVersionAllPairs]);
+    return flatten([firstVersionAllPairs, secondVersionAllPairs]).map(pair => {
+      // we reverse the pair because the main asset info is not USDT, but the other token
+      if (parseAssetInfo(pair.asset_infos[0]) === process.env.REACT_APP_USDT_CONTRACT) {
+        return { ...pair, asset_infos: [pair.asset_infos[1], pair.asset_infos[0]] }
+      }
+      return pair;
+    });
   };
 
   static getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
