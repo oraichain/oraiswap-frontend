@@ -100,7 +100,6 @@ export class Pairs {
   };
 
   static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
-    const start = Date.now();
     const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
       pair.asset_infos.some((info) => getOraichainTokenItemTypeFromAssetInfo(info)?.factoryV1)
     );
@@ -109,8 +108,6 @@ export class Pairs {
       this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall),
       this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
     ]);
-    const end = Date.now();
-    console.log(`Execution time: ${end - start} ms`);
     return flatten([firstVersionAllPairs, secondVersionAllPairs]);
   };
 

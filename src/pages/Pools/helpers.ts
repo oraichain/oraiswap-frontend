@@ -79,14 +79,11 @@ const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], pric
     getOraichainTokenItemTypeFromAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))
   );
   try {
-    const start = Date.now();
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
-    const end = Date.now();
-    console.log(`Execution time fetch apr result: ${end - start} ms`);
     return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
@@ -116,15 +113,12 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
   } else {
     const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
     try {
-      const start = Date.now();
       const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
       const pairAmounts = await Promise.all(
         poolList.map((pool) =>
           getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData)
         )
       );
-      const end = Date.now();
-      console.log(`Execution time get pair amount info: ${end - start} ms`);
       poolList.forEach((pool, ind) => {
         pool.amount = pairAmounts[ind].tokenUsd;
       });
