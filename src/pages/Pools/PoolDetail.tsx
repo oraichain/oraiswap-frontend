@@ -68,7 +68,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       info,
       token1: tokenTypes[0],
       token2: tokenTypes[1],
-      apr: cachedApr?.[info.contract_addr] || 0
+      apr: cachedApr?.[info.contract_addr] ?? 0
     };
   };
 

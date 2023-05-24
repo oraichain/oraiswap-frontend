@@ -80,6 +80,7 @@ export const tokens = [otherChainTokens, oraichainTokens];
 export const flattenTokens = flatten(tokens);
 
 export const tokenMap = Object.fromEntries(flattenTokens.map((c) => [c.denom, c]));
+export const assetInfoMap = Object.fromEntries(flattenTokens.map((c) => [c.contractAddress || c.denom, c]));
 
 export const cosmosTokens = uniqBy(
   flattenTokens.filter(

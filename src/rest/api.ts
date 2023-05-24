@@ -111,13 +111,13 @@ async function getPairAmountInfo(
   poolInfo?: PoolInfo,
   oraiUsdtPoolInfo?: PoolInfo
 ): Promise<PairAmountInfo> {
-  const poolData = poolInfo || (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
+  const poolData = poolInfo ?? (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
     const poolOraiUsdData =
-      oraiUsdtPoolInfo || (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
+      oraiUsdtPoolInfo ?? (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
@@ -142,9 +142,9 @@ async function fetchPoolInfoAmount(
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-  const pair = pairInfo || (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
+  const pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
   if (pair) {
-    const poolInfo = cachedPairs?.[pair.contract_addr] || (await Contract.pair(pair.contract_addr).pool());
+    const poolInfo = cachedPairs?.[pair.contract_addr] ?? (await Contract.pair(pair.contract_addr).pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
@@ -300,13 +300,6 @@ function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
 const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
   if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
   return tokenInfo.denom;
-};
-
-const getOraichainTokenItemTypeFromAssetInfo = (assetInfo: AssetInfo): TokenItemType => {
-  return oraichainTokens.find((token) => {
-    if ('native_token' in assetInfo) return token.denom === assetInfo.native_token.denom;
-    return token.contractAddress === assetInfo.token.contract_addr;
-  });
 };
 
 const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
@@ -769,5 +762,4 @@ export {
   generateMoveOraib2OraiMessages,
   parseTokenInfoRawDenom,
   getTokenOnOraichain,
-  getOraichainTokenItemTypeFromAssetInfo
 };

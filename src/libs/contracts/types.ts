@@ -148,6 +148,7 @@ export interface Config {
 }
 export interface PairInfo {
   asset_infos: [AssetInfo, AssetInfo];
+  asset_infos_raw: [string, string];
   commission_rate: string;
   contract_addr: Addr;
   liquidity_token: Addr;

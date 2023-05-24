@@ -1,5 +1,5 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType, assetInfoMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
@@ -17,7 +17,6 @@ import {
   fetchAllTokenAssetPools,
   fetchPoolInfoAmount,
   fetchTokenInfos,
-  getOraichainTokenItemTypeFromAssetInfo,
   getPairAmountInfo,
   parseTokenInfo
 } from 'rest/api';
@@ -72,7 +71,7 @@ export const calculateAprResult = (
 const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
   const assetTokens = pairs.map((p) =>
-    getOraichainTokenItemTypeFromAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))
+    assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))]
   );
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
@@ -130,8 +129,8 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
 };
 
 export const fetchPairInfoData = async (pairInfo: PairInfo, cached: PairDetails): Promise<PairInfoDataRaw> => {
-  const fromToken = getOraichainTokenItemTypeFromAssetInfo(pairInfo.asset_infos[0]);
-  const toToken = getOraichainTokenItemTypeFromAssetInfo(pairInfo.asset_infos[1]);
+  const fromToken = assetInfoMap[pairInfo.asset_infos_raw[0]];
+  const toToken = assetInfoMap[pairInfo.asset_infos_raw[1]];
   if (!fromToken || !toToken) return;
 
   try {
@@ -193,10 +192,10 @@ export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
 
 const generateRewardInfoQueries = (pairs: PairInfo[], stakerAddress: string) => {
   const queries = pairs.map((pair) => {
-    let assetToken = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[0]);
+    let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
     const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
     // we implicitly set asset info of the pool as non-ORAI token. If the first asset info in the pair list is ORAI then we get the other asset info
-    if (firstParsedAssetInfo === ORAI) assetToken = getOraichainTokenItemTypeFromAssetInfo(pair.asset_infos[1]);
+    if (firstParsedAssetInfo === ORAI) assetToken = assetInfoMap[pair.asset_infos_raw[1]];
     const { info: assetInfo } = parseTokenInfo(assetToken);
     return {
       address: network.staking,

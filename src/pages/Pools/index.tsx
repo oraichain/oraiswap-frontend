@@ -1,7 +1,7 @@
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens } from 'config/bridgeTokens';
+import { assetInfoMap, cosmosTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
@@ -15,9 +15,9 @@ import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
-import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
+import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -57,7 +57,7 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({ amount, oraiPrice }
 
 const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, apr }) => {
   const navigate = useNavigate();
-  const [token1, token2] = pair.asset_infos.map((info) => getOraichainTokenItemTypeFromAssetInfo(info));
+  const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
 
   if (!token1 || !token2) return null;
 
@@ -124,11 +124,11 @@ const ListPools = memo<{
   const listMyPool = useMemo(() => {
     return pairInfos.filter(
       (pairInfo) =>
-        myPairsData[pairInfo?.pair?.contract_addr] || parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
+        myPairsData[pairInfo?.pair?.contract_addr] ?? parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
     );
   }, [myPairsData, pairInfos]);
 
-  console.log({ listMyPool, lpPools, pairInfos })
+  console.log({ listMyPool, lpPools, pairInfos });
 
   useEffect(() => {
     if (typeFilter === KeyFilterPool.my_pool) {
@@ -152,7 +152,7 @@ const ListPools = memo<{
     [pairInfos, listMyPool, typeFilter]
   );
 
-  console.log({ filteredPairInfos })
+  console.log({ filteredPairInfos });
 
   return (
     <div className={styles.listpools}>
@@ -219,7 +219,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   const [myPairsData] = useFetchMyPairs(pairs);
-  console.log({ myPairsData })
+  console.log({ myPairsData });
   useFetchCachePairs(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);

@@ -2,8 +2,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { parseAssetInfo } from 'helper';
 import { AssetInfo, MulticallReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { flatten, uniq } from 'lodash';
-import { getOraichainTokenItemTypeFromAssetInfo, parseTokenInfo } from 'rest/api';
-import { TokenItemType, assetInfoMap, cosmosTokens } from './bridgeTokens';
+import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { ORAI } from './constants';
 import { Contract } from './contracts';
 
@@ -107,11 +106,15 @@ export class Pairs {
       this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
     ]);
     return flatten([firstVersionAllPairs, secondVersionAllPairs]).map(pair => {
+      let firstInfoIndex = 0;
+      let secondInfoIndex = 1;
       // we reverse the pair because the main asset info is not USDT, but the other token
       if (parseAssetInfo(pair.asset_infos[0]) === process.env.REACT_APP_USDT_CONTRACT) {
-        return { ...pair, asset_infos: [pair.asset_infos[1], pair.asset_infos[0]] }
+        firstInfoIndex = 1;
+        secondInfoIndex = 0;
       }
-      return pair;
+      const { asset_infos } = pair;
+      return { ...pair, asset_infos: [asset_infos[firstInfoIndex], asset_infos[secondInfoIndex]], asset_infos_raw: [parseAssetInfo(asset_infos[firstInfoIndex]), parseAssetInfo(asset_infos[secondInfoIndex])] };
     });
   };
 
