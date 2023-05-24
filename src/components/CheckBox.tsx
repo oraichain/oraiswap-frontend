@@ -7,18 +7,20 @@ const CheckBox: FC<{
   label: string;
   checked: boolean;
   onCheck: Function;
-}> = ({ className, label, checked = false, onCheck }) => (
-  <label className={classNames(styles.container, className)}>
-    {label}
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => {
-        onCheck(e.target.checked);
-      }}
-    />
-    <span className={styles.checkmark}></span>
-  </label>
-);
+}> = ({ className, label, checked = false, onCheck }) => {
 
+  return (
+    <label className={classNames(styles.container, className)}>
+      {label}
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => {
+          onCheck(e.target.checked);
+        }}
+      />
+      <span className={classNames(styles.checkmark)}></span>
+    </label>
+  );
+}
 export default CheckBox;

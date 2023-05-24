@@ -5,6 +5,7 @@ import { DEFAULT_MANUAL_SLIPPAGE, DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from 'con
 import { FC, useState } from 'react';
 import NumberFormat, { NumberFormatValues } from 'react-number-format';
 import styles from './SlippageModal.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -16,9 +17,10 @@ interface ModalProps {
 const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
   const [indexChosenOption, setIndexChosenOption] = useState(OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE));
   const [manualSlippage, setManualSlippage] = useState(DEFAULT_MANUAL_SLIPPAGE);
+  const [theme] = useConfigReducer('theme');
 
   return (
-    <div className={cx('setting')}>
+    <div className={cx('setting', `${theme}-modal`)}>
       <div className={cx('header')}>
         <div className={cx('title')}>
           <img className={cx('btn')} src={TransSetting} alt="btn" />

@@ -1,3 +1,6 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
 .pool-detail {
   padding: 40px;
 
@@ -55,6 +58,10 @@
           /* aiRight/White */
 
           color: #ffffff;
+
+          &.light {
+            color: $light-text-color;
+          }
         }
 
         .value {
@@ -67,6 +74,10 @@
           font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
 
           color: #ffffff;
+
+          &.light {
+            color: $light-text-color;
+          }
         }
       }
     }
@@ -85,36 +96,6 @@
 
       color: #777e90;
     }
-
-    .btn {
-      padding: 16px 24px;
-      text-align: center;
-      border-radius: 8px;
-
-      font-style: normal;
-      font-weight: 600;
-      font-size: 16px;
-      line-height: 100%;
-      /* identical to box height, or 16px */
-
-      text-align: center;
-
-      /* aiRight/White */
-
-      color: #ffffff;
-      // cursor: pointer;
-    }
-
-    .swap {
-      background: #191b21;
-    }
-
-    .liquidity {
-      background: #612fca;
-      /* Inner/Button */
-
-      box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
-    }
   }
 
   .info {
@@ -126,7 +107,10 @@
 
       &:first-child {
         padding-bottom: 40px;
-        border-bottom: 1px solid #2d2938;
+
+        @include theme() {
+          border-bottom: theme-get('hr-color');
+        }
       }
     }
 
@@ -155,8 +139,12 @@
 
     .container {
       padding: 25px;
-      background: #17181c;
       border-radius: 16px;
+
+      @include theme() {
+        background-color: theme-get('bg-container');
+        box-shadow: theme-get('shadow-pair');
+      }
 
       font-style: normal;
       font-weight: 600;
@@ -164,7 +152,9 @@
       line-height: 100%;
       /* identical to box height, or 22px */
 
-      font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+      font-feature-settings: 'tnum' on,
+      'lnum' on,
+      'zero' on;
 
       /* aiRight/White */
 
@@ -193,13 +183,18 @@
             font-weight: 600;
             font-size: 18px;
             line-height: 100%;
+
+            &.light {
+              background-color: $light-bg-primary-box;
+              color: $light-text-color;
+            }
           }
 
           .amount-usd {
             font-weight: 600;
             font-size: 14px;
             line-height: 100%;
-            color: #777e90;
+            color: $light-text-color-gray;
           }
         }
 
@@ -225,6 +220,10 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+
+                &.light {
+                  color: $light-text-color;
+                }
               }
             }
 
@@ -239,6 +238,10 @@
                 font-weight: 600;
                 font-size: 18px;
                 line-height: 100%;
+
+                &.light {
+                  color: $light-text-color;
+                }
               }
 
               .amount-usd {
@@ -268,6 +271,10 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -288,6 +295,10 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {
@@ -301,6 +312,7 @@
 
         .pool-catalyst_token_lp {
           display: flex;
+
           .pool-catalyst_token_name {
             display: flex;
             gap: 5px;
@@ -310,6 +322,10 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .icon {
@@ -330,6 +346,10 @@
               font-weight: 600;
               font-size: 18px;
               line-height: 100%;
+
+              &.light {
+                color: $light-text-color;
+              }
             }
 
             .amount-usd {
@@ -344,8 +364,11 @@
     }
 
     .btn {
-      background: #612fca;
-      box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+      @include theme() {
+        background-color: theme-get('bg-btn-primary');
+        box-shadow: theme-get('shadow-btn');
+      }
+
       padding: 16px;
       width: 100%;
       text-align: center;
@@ -356,7 +379,7 @@
       font-size: 16px;
       line-height: 100%;
       text-align: center;
-      color: #ffffff;
+      color: $white-color;
       cursor: pointer;
       display: flex;
       justify-content: center;
@@ -402,7 +425,7 @@
 
           &-apr {
             .bonded-value {
-              background: #612fca;
+              background: $blue-color;
               border-radius: 8px;
               padding: 5px;
             }
@@ -474,55 +497,70 @@
   .pool-detail {
     padding: 0;
     margin-top: 20px;
+
     .header {
       margin-bottom: 20px;
+
       .token-info {
         gap: 16px;
+
         .logo {
           width: 45px;
           height: 50px;
+
           .token1,
           .token2 {
             width: 32px;
             height: 32px;
           }
         }
+
         .title {
           .name {
             font-size: 16px;
           }
+
           .value {
             font-size: 24px;
           }
         }
       }
+
       .des {
         font-size: 14px;
       }
     }
+
     .info {
       .container {
         padding: 16px;
         width: 100%;
+
         &.tokens {
           flex-wrap: wrap;
           min-width: auto;
           gap: 15px;
+
           .available-tokens {
             width: 100%;
           }
+
           .liquidity {
             width: 100%;
+
             .liquidity_token {
               margin-top: 15px;
+
               .liquidity_token_name {
                 .token-name {
                   font-size: 16px;
                 }
+
                 .amount {
                   font-size: 16px;
                 }
               }
+
               .liquidity_token_value {
                 .amount {
                   font-size: 16px;
@@ -531,17 +569,21 @@
             }
           }
         }
+
         .btn {
           font-size: 14px;
         }
+
         &.pool-catalyst {
           .pool-catalyst_token {
             margin-top: 15px;
+
             .pool-catalyst_token_name {
               .token-name {
                 font-size: 16px;
               }
             }
+
             .pool-catalyst_token_value {
               .amount {
                 font-size: 16px;

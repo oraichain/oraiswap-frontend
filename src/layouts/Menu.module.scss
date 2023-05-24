@@ -1,7 +1,7 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .menu {
-  background: #191b21;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -14,6 +14,7 @@
   height: 100vh;
   transition: margin-left 0.2s ease-in-out;
   overflow: auto;
+
   @include mobile {
     margin-left: calc(-1 * var(--menu-width));
     padding-top: 75px;
@@ -24,9 +25,8 @@
     }
   }
 
-  // light mode
-  &.light {
-    background-color: #fcfcfc;
+  @include theme() {
+    background-color: theme-get('bg-color');
   }
 }
 
@@ -67,35 +67,55 @@
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 10px;
+  cursor: pointer;
+
+  &.light {
+    svg {
+      path {
+        fill: #989CA0;
+      }
+    }
+  }
+
 
   &:hover {
-    background: #2d2938;
+    background: $blue-color;
     cursor: pointer;
-  }
 
-  &.light:hover {
-    background: #612fca;
-  }
+    span {
 
-  &.light:hover span {
-    color: #fff;
+      color: $white-color;
+    }
+
+    svg {
+      path {
+        fill: $white-color;
+      }
+    }
   }
 
   &.active {
-    background: #612fca;
+    background: $blue-color;
+
+    svg {
+      path {
+        fill: $white-color;
+      }
+    }
   }
 
   &_text {
     font-weight: 400;
     font-size: 16px;
     line-height: 100%;
-    color: #fff;
     margin-left: 16px;
-    &.light {
-      color: #6f767e;
+
+    @include theme() {
+      color: theme-get('text-color-menu');
     }
+
     &.active {
-      color: #fff;
+      color: $white-color;
     }
   }
 }
@@ -125,6 +145,7 @@
 
   &.active {
     background: #2d2938;
+
     &.light {
       background-color: #fcfcfc;
       box-shadow: 0px 1px 6px -2px rgba(0, 0, 0, 0.25), inset 0px -0.833333px 0.833333px rgba(0, 0, 0, 0.04),
@@ -154,7 +175,7 @@
 
 .connect {
   color: #fff;
-  background: #612fca;
+  background: $blue-color;
   border-radius: 8px;
   font-weight: 400;
   font-size: 14px;

@@ -88,7 +88,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <ToggleIcon onClick={handleToggle} />
         </div>
       )}
-      <div className={classNames(styles.menu, styles[theme], { [styles.open]: open })}>
+      <div className={classNames(styles.menu, { [styles.open]: open })}>
         <div>
           {!mobileMode && (
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
@@ -101,10 +101,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
             {renderLink('/swap', 'Swap', setLink, <Swap />)}
             {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
-            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => {}, <OrderBook />, true)}
-            {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
-            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
-            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)}
+            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => { }, <OrderBook />, true)}
+            {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}
+            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => { }, <BuyFiat />, true)}
+            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => { }, <Faucet />, true)}
           </div>
         </div>
 

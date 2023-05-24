@@ -6,6 +6,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
 import { FC } from 'react';
 import styles from './SelectTokenModal.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -30,12 +31,15 @@ const SelectTokenModal: FC<ModalProps> = ({
   items,
   setToken,
   prices,
-  amounts
+  amounts,
 }) => {
+
+  const [theme] = useConfigReducer('theme')
+
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
-      <div className={cx('select')}>
-        <div className={cx('title')}>
+    <Modal theme={theme} isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
+      <div className={cx('select', `select ${styles[theme]}`)}>
+        <div className={cx('title', `title ${styles[theme]}`)}>
           <div>{type === 'token' ? 'Select a token' : 'Select a network'}</div>
         </div>
         <div className={cx('options')}>
@@ -69,14 +73,14 @@ const SelectTokenModal: FC<ModalProps> = ({
             }
             return (
               <div
-                className={cx('item')}
+                className={cx('item', `item ${styles[theme]}`)}
                 key={key}
                 onClick={() => {
                   setToken(key);
                   close();
                 }}
               >
-                <item.Icon className={cx('logo')} />
+                {theme === 'light' ? (item.IconLight ? <item.IconLight className={cx('logo')} /> : <item.Icon className={cx('logo')} />) : item.Icon && <item.Icon className={cx('logo')} />}
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

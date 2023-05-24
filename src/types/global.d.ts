@@ -1,6 +1,7 @@
 import { Keplr as keplr } from '@keplr-wallet/types';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Network } from 'bip32';
-import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
+import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
@@ -20,7 +21,7 @@ declare global {
     timeoutTimestamp: number;
   };
   type PairDetails = {
-    [key: string]: PoolResponse;
+    [key: string]: OraiswapPairTypes.PoolResponse;
   };
   type PairAmountInfo = {
     token1Amount: string;
@@ -118,6 +119,7 @@ declare global {
     ReactNativeWebView?: {
       postMessage(msg: string): void;
     };
+    client: SigningCosmWasmClient;
     keplr: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
@@ -180,4 +182,4 @@ declare global {
   type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
-export { };
+export {};

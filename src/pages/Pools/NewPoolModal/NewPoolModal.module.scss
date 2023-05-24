@@ -1,3 +1,4 @@
+@import 'src/styles/themes';
 .modal {
   max-width: 568px;
 
@@ -417,7 +418,7 @@
 
     .swap-btn {
       width: 100%;
-      background: #612fca;
+      background: $blue-color;
       /* Inner/Button */
 
       box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
@@ -727,7 +728,7 @@
       }
 
       .isChosen {
-        background: #612fca;
+        background: $blue-color;
       }
 
       .input {

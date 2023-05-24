@@ -1,5 +1,6 @@
 @import 'src/styles/mixins';
 @import 'src/styles/variables';
+@import 'src/styles/themes';
 
 .swap-box {
   margin: auto;
@@ -9,10 +10,13 @@
   align-items: center;
   padding: 16px 16px 32px 16px;
   width: 100%;
-  background: linear-gradient(144.98deg, rgba(51, 51, 51, 0.8) 5.29%, rgba(7, 7, 7, 0.8) 95.51%);
-  box-shadow: -6px 6px 9px -10px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(5px);
   border-radius: 24px;
+
+  @include theme() {
+    background: theme-get('bg-swap-box');
+    box-shadow: theme-get('shadow-swap-box');
+  }
 
   @include mobile {
     position: static;
@@ -32,19 +36,21 @@
     padding: 16px 24px 36px;
     gap: 15px;
     width: 100%;
-    background: #141416;
-    box-shadow: 0px 0px 30px rgba(23, 11, 70, 0.5);
+
+    @include theme() {
+      background: theme-get('bg-chart');
+      box-shadow: theme-get('shadow-swap-from-to');
+    }
+
     border-radius: 16px;
     border: 1px solid;
     border-image: linear-gradient(99.99deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.15) 26.06%,
-        rgba(225, 240, 255, 0.202656) 64.17%,
-        rgba(232, 241, 255, 0) 98.89%) 1;
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.15) 26.06%,
+      rgba(225, 240, 255, 0.202656) 64.17%,
+      rgba(232, 241, 255, 0) 98.89%) 1;
 
     @include mobile {
-      padding-left: 0;
-      padding-right: 0;
       border: none;
       border-radius: 0;
       background: none;
@@ -65,35 +71,33 @@
         font-size: 16px;
         line-height: 100%;
         margin: 5.5px 0;
-        /* identical to box height, or 16px */
+        flex-grow: 1;
 
         letter-spacing: 0.02em;
         text-transform: uppercase;
 
-        /* aiRight/White */
+        @include theme() {
+          color: theme-get('text-color');
+        }
 
-        color: #ffffff;
-
-        /* Inside auto layout */
-
-        flex-grow: 1;
       }
 
       .btn {
         cursor: pointer;
         display: flex;
-        /* Color/Button */
-
-        background: #191b21;
         border-radius: 8px;
-
-        /* Inside auto layout */
-
         padding: 12px;
 
-        img {
-          height: 11px;
-          width: 11px;
+        @include theme() {
+          background-color: theme-get('bg-color-secondary');
+        }
+
+        svg {
+          path {
+            @include theme() {
+              fill: theme-get('svg-fill-color');
+            }
+          }
         }
       }
     }
@@ -144,7 +148,9 @@
         align-items: center;
         padding: 4px 6px;
 
-        background: #191b21;
+        @include theme() {
+          background-color: theme-get('bg-color-active');
+        }
 
         border-radius: 4px;
 
@@ -159,12 +165,16 @@
         color: #a871df;
 
         &:hover {
-          background: #333642 !important;
+          @include theme() {
+            background-color: theme-get('bg-color-active');
+          }
         }
       }
 
       .active {
-        background: rgba(168, 113, 223, 0.3) !important;
+        @include theme() {
+          background-color: theme-get('bg-color-active');
+        }
       }
     }
 
@@ -193,9 +203,11 @@
       padding: 10px;
       gap: 5px;
 
-      /* aiRight/Dark card */
+      @include theme() {
+        background: theme-get('bg-color-secondary');
+        color: theme-get('text-color');
+      }
 
-      background: #1e1e21;
       border-radius: 8px;
 
       font-style: normal;
@@ -205,11 +217,9 @@
       /* identical to box height, or 24px */
 
       text-align: center;
-      font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
-
-      /* aiRight/White */
-
-      color: #ffffff;
+      font-feature-settings: 'tnum' on,
+      'lnum' on,
+      'zero' on;
 
       .token {
         cursor: pointer;
@@ -230,7 +240,9 @@
           border-left: 6px solid transparent;
           border-right: 6px solid transparent;
 
-          border-top: 6px solid #ffffff;
+          @include theme() {
+            border-top: theme-get('bg-color-arrow');
+          }
         }
       }
 
@@ -242,64 +254,6 @@
 
         @include mobile {
           width: 100%;
-        }
-      }
-    }
-
-    .fee {
-      font-style: normal;
-      font-weight: 500;
-      font-size: 14px;
-      line-height: 150%;
-      /* identical to box height, or 21px */
-
-      text-align: center;
-      font-feature-settings: 'ss03' on;
-
-      /* aiRight/Gray 3 */
-
-      color: #777e90;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      justify-content: flex-end;
-      margin-left: auto;
-
-      .token {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 5px;
-        padding: 6px;
-
-        background: #191b21;
-        border-radius: 8px;
-
-        font-style: normal;
-        font-weight: 600;
-        font-size: 16px;
-        line-height: 100%;
-        /* identical to box height, or 16px */
-
-        text-align: center;
-
-        /* aiRight/White */
-
-        color: #ffffff;
-        cursor: pointer;
-
-        .logo {
-          width: 16px;
-          height: 16px;
-        }
-
-        .arrow-down {
-          width: 0;
-          height: 0;
-          border-left: 6px solid transparent;
-          border-right: 6px solid transparent;
-
-          border-top: 6px solid #ffffff;
         }
       }
     }
@@ -324,6 +278,10 @@
   .swap-icon {
     padding: 5px;
 
+    @include theme() {
+      background-color: theme-get('bg-btn-switch');
+    }
+
     img {
       cursor: pointer;
       height: 44px;
@@ -335,10 +293,12 @@
 
   .swap-btn {
     width: 100%;
-    background: #612fca;
+    background: $blue-color;
     /* Inner/Button */
 
-    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    @include theme() {
+      box-shadow: theme-get('shadow-btn');
+    }
     border-radius: 8px;
 
     padding: 16px;

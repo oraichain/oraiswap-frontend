@@ -10,19 +10,19 @@ import {
   tokenMap,
   UniversalSwapType
 } from 'config/bridgeTokens';
-import { CosmosChainId, chainInfos, NetworkChainId } from 'config/chainInfos';
+import { chainInfos, CosmosChainId, NetworkChainId } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
-import { TransferBackMsg } from 'libs/contracts';
+
+import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
-import Long from 'long';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -351,6 +351,7 @@ export const transferToRemoteChainIbcWasm = async (
   ibcInfo: IBCInfo,
   fromToken: TokenItemType,
   toToken: TokenItemType,
+  fromAddress: string,
   toAddress: string,
   amount: string,
   ibcMemo: string
@@ -360,7 +361,7 @@ export const transferToRemoteChainIbcWasm = async (
     throw generateError('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
 
   const { info: assetInfo } = parseTokenInfo(fromToken);
-  const ibcWasmContract = Contract.ibcwasm(ibcWasmContractAddress);
+  const ibcWasmContract = new CwIcs20LatestClient(window.client, fromAddress, ibcWasmContractAddress);
   try {
     // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
     await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
@@ -391,7 +392,7 @@ export const transferToRemoteChainIbcWasm = async (
       memo: msg.memo
     };
     console.log({ transferBackMsgCw20Msg });
-    const cw20Token = Contract.token(fromToken.contractAddress);
+    const cw20Token = new OraiswapTokenClient(window.client, fromAddress, fromToken.contractAddress);
     result = await cw20Token.send(
       {
         amount,
@@ -450,7 +451,15 @@ export const transferIbcCustom = async (
     try {
       console.log({ ibcInfo, fromToken, toToken, toAddress, amount: amount.amount, ibcMemo });
       // special case. We try-catch because cosmwasm stargate already check tx code for us & throw an error if code != 0 => we can safely cast to DeliverTxResponse if there's no error
-      const result = await transferToRemoteChainIbcWasm(ibcInfo, fromToken, toToken, toAddress, amount.amount, ibcMemo);
+      const result = await transferToRemoteChainIbcWasm(
+        ibcInfo,
+        fromToken,
+        toToken,
+        fromAddress,
+        toAddress,
+        amount.amount,
+        ibcMemo
+      );
       return { ...result, code: 0 };
     } catch (error) {
       throw generateError(error.toString());
