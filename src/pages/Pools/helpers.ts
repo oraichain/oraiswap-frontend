@@ -161,7 +161,6 @@ export const toPairDetails = (pairs: PairInfo[], res: AggregateResult): PairDeta
 
 // Fetch all pair data
 const fetchPairsData = async (pairs: PairInfo[], multicall: MulticallReadOnlyInterface) => {
-  // TODO: remove hard code limit 100 fetching pairs
   const queries = pairs.map((pair) => ({
     address: pair.contract_addr,
     data: toBinary({

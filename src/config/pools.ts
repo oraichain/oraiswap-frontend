@@ -70,8 +70,10 @@ export class Pairs {
     }
   ];
 
+  // TODO: add test cases for this object
   static poolTokens = uniq(flatten(this.pairs.map(pair => pair.asset_infos)).map(info => assetInfoMap[parseAssetInfo(info)]));
 
+  // TODO: add test cases for this function
   static getAllPairs = async (
     pairs: PairMapping[],
     factoryAddress: string,
@@ -96,16 +98,9 @@ export class Pairs {
     return results.return_data.map((data) => fromBinary(data.data));
   };
 
-  static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
-    const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
-      pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
-    );
-    const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
-    const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
-      this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall),
-      this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
-    ]);
-    return flatten([firstVersionAllPairs, secondVersionAllPairs]).map(pair => {
+  // TODO: add test cases for this function
+  static processFetchedAllPairInfos = (pairs: PairInfo[]): PairInfo[] => {
+    return pairs.map(pair => {
       let firstInfoIndex = 0;
       let secondInfoIndex = 1;
       // we reverse the pair because the main asset info is not USDT, but the other token
@@ -115,7 +110,20 @@ export class Pairs {
       }
       const { asset_infos } = pair;
       return { ...pair, asset_infos: [asset_infos[firstInfoIndex], asset_infos[secondInfoIndex]], asset_infos_raw: [parseAssetInfo(asset_infos[firstInfoIndex]), parseAssetInfo(asset_infos[secondInfoIndex])] };
-    });
+    })
+  }
+
+  // TODO: add test cases for this function
+  static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
+    const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
+      pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
+    );
+    const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
+    const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
+      this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall),
+      this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
+    ]);
+    return this.processFetchedAllPairInfos([...firstVersionAllPairs, ...secondVersionAllPairs]);
   };
 
   static getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
