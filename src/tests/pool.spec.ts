@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/proto-signing';
-import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { assetInfoMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
@@ -159,9 +159,12 @@ describe('pool', () => {
         const assetToken = tokenMap[index === 0 ? 'airi' : 'usdt'];
         assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
       });
-      const myCachedPairs = await fetchMyPairsData(pairs, devAddress, Contract.multicall);
-      expect(myCachedPairs[pairs[0].contract_addr]).toBe(true);
-      expect(myCachedPairs[pairs[1].contract_addr]).toBe(true);
+
+      assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
+      assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
+      const myPairs = await fetchMyPairsData(pairs, devAddress, Contract.multicall);
+      expect(myPairs[pairs[0].contract_addr]).toBe(true);
+      expect(myPairs[pairs[1].contract_addr]).toBe(true);
     });
 
     it.each(testCaculateRewardData)(

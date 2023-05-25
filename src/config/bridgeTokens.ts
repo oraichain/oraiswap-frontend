@@ -13,7 +13,10 @@ import {
 
 export type EvmDenom = 'bep20_orai' | 'bep20_airi' | 'erc20_orai' | 'kawaii_orai';
 
-export type UniversalSwapType = 'other-networks-to-oraichain' | 'oraichain-to-oraichain' | 'oraichain-to-other-networks';
+export type UniversalSwapType =
+  | 'other-networks-to-oraichain'
+  | 'oraichain-to-oraichain'
+  | 'oraichain-to-other-networks';
 
 export type TokenItemType = {
   name: string;
@@ -37,7 +40,17 @@ export type TokenItemType = {
 };
 
 // use factory v1 by looking up minimumDenom as key
-export const factoryV1CoinDenoms = [process.env.REACT_APP_ATOM_ORAICHAIN_DENOM, 'airi', 'usdt', process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM, 'kwt', process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM, 'milky', 'oraix'];
+export const factoryV1CoinDenoms = [
+  process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
+  'airi',
+  'usdt',
+  process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
+  process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
+  'kwt',
+  process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
+  'milky',
+  'oraix'
+];
 const evmDenomsMap = {
   kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
   milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]
@@ -78,10 +91,8 @@ export const oraichainTokens: TokenItemType[] = getTokensFromNetwork(oraichainNe
 
 export const tokens = [otherChainTokens, oraichainTokens];
 export const flattenTokens = flatten(tokens);
-
 export const tokenMap = Object.fromEntries(flattenTokens.map((c) => [c.denom, c]));
 export const assetInfoMap = Object.fromEntries(flattenTokens.map((c) => [c.contractAddress || c.denom, c]));
-
 export const cosmosTokens = uniqBy(
   flattenTokens.filter(
     (token) =>
@@ -124,6 +135,19 @@ export const gravityContracts: Omit<Record<EvmChainId, string>, '0x1ae6'> = {
 };
 
 // universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
-export const swapFromTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2' && token.chainId !== 'cosmoshub-4' && token.chainId !== 'osmosis-1' && token.chainId !== 'kawaii_6886-1');
+export const swapFromTokens = flattenTokens.filter(
+  (token) =>
+    token.coinGeckoId !== 'kawaii-islands' &&
+    token.coinGeckoId !== 'milky-token' &&
+    token.chainId !== 'oraibridge-subnet-2' &&
+    token.chainId !== 'cosmoshub-4' &&
+    token.chainId !== 'osmosis-1' &&
+    token.chainId !== 'kawaii_6886-1'
+);
 // universal swap. We dont support kwt & milky for simplicity. We also skip OraiBridge tokens because users dont care about them
-export const swapToTokens = flattenTokens.filter(token => token.coinGeckoId !== 'kawaii-islands' && token.coinGeckoId !== 'milky-token' && token.chainId !== 'oraibridge-subnet-2');
+export const swapToTokens = flattenTokens.filter(
+  (token) =>
+    token.coinGeckoId !== 'kawaii-islands' &&
+    token.coinGeckoId !== 'milky-token' &&
+    token.chainId !== 'oraibridge-subnet-2'
+);

@@ -70,9 +70,7 @@ export const calculateAprResult = (
 // Fetch APR
 const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  const assetTokens = pairs.map((p) =>
-    assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))]
-  );
+  const assetTokens = pairs.map((p) => assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))]);
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
@@ -193,6 +191,7 @@ const generateRewardInfoQueries = (pairs: PairInfo[], stakerAddress: string) => 
   const queries = pairs.map((pair) => {
     let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
     const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
+
     // we implicitly set asset info of the pool as non-ORAI token. If the first asset info in the pair list is ORAI then we get the other asset info
     if (firstParsedAssetInfo === ORAI) assetToken = assetInfoMap[pair.asset_infos_raw[1]];
     const { info: assetInfo } = parseTokenInfo(assetToken);
