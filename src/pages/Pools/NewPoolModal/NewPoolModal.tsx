@@ -370,7 +370,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('white-line')} />
             {steps.map((undefine, _idx) => {
               const idx = _idx + 1;
-              if (step > idx) return <img key={idx} className={cx('done', `point-${idx}`)} src={DoneStepImg} />;
+              if (step > idx) return <img key={idx} className={cx('done', `point-${idx}`)} alt='done-step' src={DoneStepImg} />;
               if (step === idx)
                 return (
                   <div key={idx} className={cx('point', `point-${idx}`, 'highlight')}>

@@ -7,7 +7,7 @@ import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -38,6 +38,9 @@ import { RootState } from 'store/configure';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityModal.module.scss';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
+import { TooltipIcon } from 'components/Modals/SettingTooltip';
+import SlippageModal from 'components/Modals/SlippageModal';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 
 const cx = cn.bind(styles);
 
@@ -88,6 +91,9 @@ const LiquidityModal: FC<ModalProps> = ({
   const [recentInput, setRecentInput] = useState(1);
   const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
   const [estimatedLP, setEstimatedLP] = useState(BigInt(0));
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [visible, setVisible] = useState(false);
+
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const loadTokenAmounts = useLoadTokens();
@@ -226,7 +232,8 @@ const LiquidityModal: FC<ModalProps> = ({
         toInfo: token2InfoData!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.contract_addr
+        pair: pairInfoData.contract_addr,
+        slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
       const msg = msgs[0];
@@ -303,8 +310,9 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const totalSupply = BigInt(lpTokenInfoData!.total_supply ?? 0);
 
-  const Token1Icon = token1!.Icon;
-  const Token2Icon = token2!.Icon;
+  const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
+  const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
+
   const lp1BurnAmount = (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
   const lp2BurnAmount = (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
   const addTab = (
@@ -359,7 +367,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply', `supply ${styles[theme]}`)}>
         <div className={cx('header')}>
@@ -413,7 +421,6 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('row')}>
           <div className={cx('row-title')}>
             <span>Total supply</span>
-            {/* <TooltipIcon /> */}
           </div>
 
           <TokenBalance
@@ -626,16 +633,28 @@ const LiquidityModal: FC<ModalProps> = ({
   );
 
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
+    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div
         className={cx('container', `container ${styles[theme]}`)}
         style={{
           paddingBottom: isMobile() ? 200 : 0
         }}
       >
-        <div
-          className={cx('title', `title ${styles[theme]}`)}
-        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
+        <div className={cx('header')}>
+          <div className={cx('title', `title ${styles[theme]}`)}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
+          <div className={cx('btn-group')}>
+            <TooltipIcon
+              placement="bottom-end"
+              visible={visible}
+              setVisible={setVisible}
+              content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+            />
+            <div className={cx('btn-close')} onClick={close}>
+              <CloseIcon width={20} height={20} />
+            </div>
+          </div>
+        </div>
+
         <div className={cx('switch', `switch ${styles[theme]}`)}>
           <div className={cx({ 'active-tab': activeTab === 0 })} onClick={() => setActiveTab(0)}>
             Add

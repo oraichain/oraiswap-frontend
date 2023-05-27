@@ -485,7 +485,8 @@ function generateContractMessages(
               amount: provideQuery.toAmount.toString()
             },
             { info: fromInfoData, amount: provideQuery.fromAmount.toString() }
-          ]
+          ],
+          slippage_tolerance: provideQuery.slippage
         }
       };
       contractAddr = provideQuery.pair;
