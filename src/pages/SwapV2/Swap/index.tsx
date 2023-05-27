@@ -296,7 +296,7 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           amounts={amounts}
@@ -311,7 +311,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {

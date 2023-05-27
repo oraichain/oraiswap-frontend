@@ -40,6 +40,9 @@ import {
 } from './listing-simulate';
 import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 
+/**
+ * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
+ */
 describe('pool', () => {
   let usdtContractAddress = '',
     airiContractAddress = '';
@@ -321,5 +324,115 @@ describe('pool', () => {
     [[{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }], 0]
   ])('test-getStakingAssetInfo', (assetInfos, expectedIndex) => {
     expect(Pairs.getStakingAssetInfo(assetInfos)).toEqual(assetInfos[expectedIndex]);
+  });
+
+  it('test Pairs getPoolTokens', () => {
+    const poolTokens = Pairs.getPoolTokens();
+    expect(Array.isArray(poolTokens)).toBe(true);
+    expect(poolTokens.length).toBe(3);
+    expect(poolTokens).toEqual([
+      assetInfoMap['orai'],
+      assetInfoMap[airiContractAddress],
+      assetInfoMap[usdtContractAddress]
+    ]);
+  });
+
+  describe('test Pairs method', () => {
+    let allPairs: PairInfo[] = [];
+
+    it('test getAllPairs should have properties correctly', async () => {
+      allPairs = await Pairs.getAllPairs(Pairs.pairs, network.factory_v2, Contract.multicall);
+      for (const info of allPairs) {
+        expect(info).toHaveProperty('asset_infos');
+        expect(info).toHaveProperty('contract_addr');
+        expect(info).toHaveProperty('liquidity_token');
+        expect(info).toHaveProperty('oracle_addr');
+        expect(info).toHaveProperty('commission_rate');
+      }
+    });
+
+    it.each([
+      [
+        'have pair USDT/other-token should return asset info correctly',
+        [
+          {
+            asset_infos: [
+              {
+                token: {
+                  contract_addr: process.env.REACT_APP_USDT_CONTRACT
+                }
+              },
+              {
+                token: {
+                  contract_addr: 'other_contract_addr'
+                }
+              }
+            ],
+            contract_addr: 'contract_addr',
+            liquidity_token: 'liquidity_token',
+            oracle_addr: 'oracle_addr',
+            commission_rate: '0.003'
+          }
+        ] as PairInfo[],
+        [
+          {
+            token: {
+              contract_addr: 'other_contract_addr'
+            }
+          },
+          {
+            token: {
+              contract_addr: process.env.REACT_APP_USDT_CONTRACT
+            }
+          }
+        ] as AssetInfo[]
+      ],
+      [
+        'dont have pair USDT/other-token',
+        [
+          {
+            asset_infos: [
+              {
+                native_token: {
+                  denom: ORAI
+                }
+              },
+              {
+                token: {
+                  contract_addr: 'other_contract_addr'
+                }
+              }
+            ],
+            contract_addr: 'contract_addr',
+            liquidity_token: 'liquidity_token',
+            oracle_addr: 'oracle_addr',
+            commission_rate: '0.003'
+          }
+        ] as PairInfo[],
+        [
+          {
+            native_token: {
+              denom: ORAI
+            }
+          },
+          {
+            token: {
+              contract_addr: 'other_contract_addr'
+            }
+          }
+        ]
+      ]
+    ])(
+      'test processFetchedAllPairInfos that %s should return asset info correctly',
+      (_name: string, input: PairInfo[], expectedAssetInfo: AssetInfo[]) => {
+        const processedPairs = Pairs.processFetchedAllPairInfos(input);
+        expect(processedPairs[0].asset_infos).toStrictEqual(expectedAssetInfo);
+      }
+    );
+
+    it('test getAllPairsFromTwoFactoryVersions', async () => {
+      const allPairsFromTwoFactoryVersions = await Pairs.getAllPairsFromTwoFactoryVersions();
+      expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
+    });
   });
 });
