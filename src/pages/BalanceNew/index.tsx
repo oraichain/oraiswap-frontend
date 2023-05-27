@@ -210,7 +210,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
-       {window?.location?.pathname === '/' && <KwtModal /> }
         {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
         <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
         <div className={styles.header}>
