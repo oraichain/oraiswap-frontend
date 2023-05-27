@@ -1,13 +1,14 @@
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { network } from 'config/networks';
+import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
-import { fetchAprResult, fetchPairsData, fetchMyPairsData, fetchPoolListAndOraiPrice, PairInfoData } from './helpers';
-import { Contract } from 'config/contracts';
-import { Pairs } from 'config/pools';
-import { PairInfo } from 'libs/contracts';
+import { PairInfoData, fetchAprResult, fetchMyPairsData, fetchPairsData, fetchPoolListAndOraiPrice } from './helpers';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -48,7 +49,10 @@ export const useFetchCachePairs = (pairs: PairInfo[]) => {
   const setCachedPairs = (payload: PairDetails) => dispatch(updatePairs(payload));
 
   const fetchCachedPairs = async () => {
-    const { pairDetails: pairsData } = await fetchPairsData(pairs, Contract.multicall);
+    const { pairDetails: pairsData } = await fetchPairsData(
+      pairs,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
     setCachedPairs(pairsData);
   };
 
@@ -63,7 +67,11 @@ export const useFetchMyPairs = (pairs: PairInfo[]) => {
   const [myPairsData, setMyPairsData] = useState({});
 
   const fetchMyCachedPairs = async () => {
-    const myPairData = await fetchMyPairsData(pairs, address, Contract.multicall);
+    const myPairData = await fetchMyPairsData(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
     setMyPairsData(myPairData);
   };
 

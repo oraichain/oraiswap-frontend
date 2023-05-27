@@ -2,6 +2,13 @@
   margin-top: -5px;
   align-self: flex-start;
 }
+
+.btn_close_light {
+  path {
+    fill: #777E90;
+  }
+}
+
 .btn_close_img:hover {
   path {
     fill: #a871df;
@@ -11,37 +18,37 @@
 .toast_content {
   display: flex;
   justify-content: flex-start;
-  > img {
+
+  >img {
     height: 50px;
   }
 }
 
-.toast_broadcasting {
-}
-.toast_failed {
-}
-.toast_success {
-}
+.toast_broadcasting {}
+
+.toast_failed {}
+
+.toast_success {}
 
 .toast_section {
   h6 {
-    color: #ffffff;
     font-weight: 600;
     font-size: 18px;
     line-height: 100%;
     margin-bottom: 10px;
     text-align: left;
   }
+
   p {
     font-weight: 500;
     font-size: 14px;
     line-height: 120%;
     font-feature-settings: 'zero' on;
-    color: #bdc3d3;
     text-align: left;
-    max-width:230px;
+    max-width: 230px;
     overflow-wrap: break-word;
   }
+
   a {
     font-weight: 500;
     font-size: 14px;
@@ -50,6 +57,7 @@
     font-feature-settings: 'zero' on;
     color: #a871df;
   }
+
   display: flex;
   flex-direction: column;
   justify-content: center;

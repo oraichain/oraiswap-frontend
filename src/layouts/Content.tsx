@@ -12,7 +12,7 @@ const Content: React.FC<ContentProps> = ({ children, nonBackground }) => {
   const theme = useTheme();
   return (
     <div
-      className={classNames(styles.content, styles[theme], {
+      className={classNames(styles.content, styles.content + ` ${styles[theme]}`, {
         non_background: nonBackground
       })}
     >

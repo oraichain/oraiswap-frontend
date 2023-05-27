@@ -1,4 +1,5 @@
 @import 'src/styles/variables';
+@import 'src/styles/mixins';
 
 .container {
   display: flex;
@@ -48,17 +49,14 @@ button.connect {
     margin-bottom: 28px;
   }
 
-  &.light:hover {
-    background: #612fca !important;
+  &:hover {
+    @include theme() {
+      background-color: theme-get('bg-btn-primary');
+    }
   }
 
   &.light:hover .des {
     color: #efefef !important;
-  }
-
-  &:hover {
-    cursor: pointer;
-    background: #333642 !important;
   }
 
   .logo {

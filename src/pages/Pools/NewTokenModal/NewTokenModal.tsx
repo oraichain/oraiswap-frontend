@@ -8,14 +8,15 @@ import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
 import Input from 'components/Input';
 import NumberFormat from 'react-number-format';
 import Loader from 'components/Loader';
-import { handleErrorTransaction, networks } from 'helper';
+import { handleErrorTransaction } from 'helper';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { toAmount, toDisplay } from 'libs/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { Asset, OraidexListingContractClient } from 'libs/contracts';
+import { OraidexListingContractClient } from 'libs/contracts';
 import { ORAI } from 'config/constants';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import { Asset } from '@oraichain/oraidex-contracts-sdk';
 const cx = cn.bind(styles);
 
 interface ModalProps {

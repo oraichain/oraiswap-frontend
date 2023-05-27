@@ -7,7 +7,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
-import { AssetInfo } from 'libs/contracts';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
 
 export interface Tokens {
   denom?: string;
@@ -60,7 +60,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 

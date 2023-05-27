@@ -1,6 +1,8 @@
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
+import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
+import classNames from 'classnames';
 import CheckBox from 'components/CheckBox';
 import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
@@ -9,7 +11,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
-import { getTransactionUrl, handleCheckWallet, networks, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks, tronToEthAddress } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -44,6 +46,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [oraiAddress] = useConfigReducer('address');
+  const [theme] = useConfigReducer('theme');
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [filterNetwork, setFilterNetwork] = useConfigReducer('filterNetwork');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
@@ -59,7 +62,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
@@ -162,9 +164,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      displayToast(TToastType.TX_FAILED, {
-        message: ex.ex.message
-      });
+      handleErrorTransaction(ex)
     }
   };
 
@@ -210,29 +210,39 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
+       {window?.location?.pathname === '/' && <KwtModal /> }
         {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
         <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
         <div className={styles.header}>
           <div className={styles.asset}>
             <span className={styles.totalAssets}>Total Assets</span>
-            <TokenBalance balance={totalUsd} className={styles.balance} decimalScale={2} />
+            <TokenBalance
+              balance={totalUsd}
+              className={classNames(styles.balance, styles.balance + ` ${styles[theme]}`)}
+              decimalScale={2}
+            />
           </div>
         </div>
-        <div className={styles.divider} />
+        <div className={classNames(styles.divider, styles.divider + ` ${styles[theme]}`)} />
         <div className={styles.action}>
           <div className={styles.search}>
-            <div className={styles.search_filter} onClick={() => setIsSelectNetwork(true)}>
+            <div
+              className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
+              onClick={() => setIsSelectNetwork(true)}
+            >
               <div className={styles.search_box}>
                 {network && (
                   <div className={styles.search_flex}>
                     <div className={styles.search_logo}>
-                      <network.Icon />
+                      {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
                     </div>
-                    <span className={styles.search_text}>{network.chainName}</span>
+                    <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
+                      {network.chainName}
+                    </span>
                   </div>
                 )}
                 <div>
-                  <ArrowDownIcon />
+                  {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
                 </div>
               </div>
             </div>
@@ -243,11 +253,12 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                 if (!text) return navigate('');
                 navigate(`?token=${text}`);
               }}
+              theme={theme}
             />
           </div>
         </div>
         <div className={styles.balances}>
-          <div className={styles.box}>
+          <div className={classNames(styles.box, styles.box + ` ${styles[theme]}`)}>
             <div>
               <CheckBox label="Hide small balances" checked={hideOtherSmallAmount} onCheck={setHideOtherSmallAmount} />
             </div>
@@ -274,12 +285,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                 }
                 return (
                   <TokenItem
-                    className={styles.tokens_element}
+                    className={classNames(styles.tokens_element, styles.tokens_element + ` ${styles[theme]}`)}
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
                     active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
+                    theme={theme}
                     onClick={() => onClickToken(t)}
                     onClickTransfer={async (
                       fromAmount: number,
@@ -313,6 +325,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           amounts={amounts}
           type="network"
           items={networks}
+          theme={theme}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}

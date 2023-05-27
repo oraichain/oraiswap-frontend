@@ -11,7 +11,7 @@ import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PairInfo } from 'libs/contracts';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import {
@@ -76,6 +76,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const token2Amount = BigInt(pairAmountInfoData.token2Amount);
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
+  const [theme] = useConfigReducer('theme');
 
   const { data: prices } = useCoinGeckoPrices();
 
@@ -308,9 +309,9 @@ const LiquidityModal: FC<ModalProps> = ({
   const lp2BurnAmount = (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
   const addTab = (
     <>
-      <div className={cx('supply')}>
+      <div className={cx('supply', `supply ${styles[theme]}`)}>
         <div className={cx('header')}>
-          <div className={cx('title')}>Supply</div>
+          <div className={cx('title', `title ${styles[theme]}`)}>Supply</div>
         </div>
         <div className={cx('balance')}>
           <TokenBalance
@@ -322,10 +323,10 @@ const LiquidityModal: FC<ModalProps> = ({
             prefix="Balance: "
             decimalScale={6}
           />
-          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance)}>
+          <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => onChangeAmount1(token1Balance)}>
             MAX
           </div>
-          <div className={cx('btn')} onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
+          <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -337,13 +338,13 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('input')}>
           <div className={cx('token')}>
             {Token1Icon && <Token1Icon className={cx('logo')} />}
-            <div className={cx('title')}>
+            <div className={cx('title', `title ${styles[theme]}`)}>
               <div>{token1InfoData?.name}</div>
               <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
           <NumberFormat
-            className={cx('amount')}
+            className={cx('amount', `amount ${styles[theme]}`)}
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
@@ -360,9 +361,9 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img src={FluentAddImg} onClick={() => {}} />
       </div>
-      <div className={cx('supply')}>
+      <div className={cx('supply', `supply ${styles[theme]}`)}>
         <div className={cx('header')}>
-          <div className={cx('title')}>Supply</div>
+          <div className={cx('title', `title ${styles[theme]}`)}>Supply</div>
         </div>
         <div className={cx('balance')}>
           <TokenBalance
@@ -374,10 +375,10 @@ const LiquidityModal: FC<ModalProps> = ({
             prefix="Balance: "
             decimalScale={6}
           />
-          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance)}>
+          <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => onChangeAmount2(token2Balance)}>
             MAX
           </div>
-          <div className={cx('btn')} onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
+          <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
             HALF
           </div>
           <TokenBalance
@@ -389,13 +390,13 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('input')}>
           <div className={cx('token')}>
             {Token2Icon && <Token2Icon className={cx('logo')} />}
-            <div className={cx('title')}>
+            <div className={cx('title', `title ${styles[theme]}`)}>
               <div>{token2InfoData?.name}</div>
               <div className={cx('des')}>Oraichain</div>
             </div>
           </div>
           <NumberFormat
-            className={cx('amount')}
+            className={cx('amount', `amount ${styles[theme]}`)}
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
@@ -481,9 +482,9 @@ const LiquidityModal: FC<ModalProps> = ({
   );
   const withdrawTab = (
     <>
-      <div className={cx('supply')}>
+      <div className={cx('supply', `supply ${styles[theme]}`)}>
         <div className={cx('header')}>
-          <div className={cx('title')}>WITHDRAW</div>
+          <div className={cx('title', `title ${styles[theme]}`)}>WITHDRAW</div>
         </div>
         <div className={cx('balance')}>
           <TokenBalance
@@ -506,7 +507,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
         <div className={cx('input')}>
           <NumberFormat
-            className={cx('amount')}
+            className={cx('amount', `amount ${styles[theme]}`)}
             thousandSeparator
             decimalScale={6}
             placeholder={'0'}
@@ -518,7 +519,7 @@ const LiquidityModal: FC<ModalProps> = ({
         <div className={cx('options')}>
           {[25, 50, 75, 100].map((option, idx) => (
             <div
-              className={cx('item', {
+              className={cx('item', `item ${styles[theme]}`, {
                 isChosen: chosenWithdrawPercent === idx
               })}
               key={idx}
@@ -531,7 +532,7 @@ const LiquidityModal: FC<ModalProps> = ({
             </div>
           ))}
           <div
-            className={cx('item', 'border', {
+            className={cx('item', `item ${styles[theme]}`, 'border', {
               isChosen: chosenWithdrawPercent === 4
             })}
             onClick={() => setChosenWithdrawPercent(4)}
@@ -539,7 +540,7 @@ const LiquidityModal: FC<ModalProps> = ({
             <input
               placeholder="0.00"
               type={'number'}
-              className={cx('input')}
+              className={cx('input', `input ${styles[theme]}`)}
               // value={
               //   chosenWithdrawPercent === 4 && !!withdrawPercent
               //     ? withdrawPercent
@@ -556,19 +557,19 @@ const LiquidityModal: FC<ModalProps> = ({
       <div className={cx('swap-icon')}>
         <img src={ArrowDownImg} />
       </div>
-      <div className={cx('receive')}>
+      <div className={cx('receive', `receive ${styles[theme]}`)}>
         <div className={cx('header')}>
-          <div className={cx('title')}>RECEIVE</div>
+          <div className={cx('title', `title ${styles[theme]}`)}>RECEIVE</div>
         </div>
         {!!pairAmountInfoData && !!lpTokenInfoData && (
           <>
             <div className={cx('row')}>
               {Token1Icon && <Token1Icon className={cx('logo')} />}
-              <div className={cx('title')}>
+              <div className={cx('title', `title ${styles[theme]}`)}>
                 <div>{token1InfoData?.name}</div>
                 <div className={cx('des')}>Oraichain</div>
               </div>
-              <div className={cx('value')}>
+              <div className={cx('value', `value ${styles[theme]}`)}>
                 <TokenBalance
                   balance={{
                     amount: lp1BurnAmount,
@@ -583,11 +584,11 @@ const LiquidityModal: FC<ModalProps> = ({
             <div className={cx('seperator')} />
             <div className={cx('row')}>
               {Token2Icon && <Token2Icon className={cx('logo')} />}
-              <div className={cx('title')}>
+              <div className={cx('title', `title ${styles[theme]}`)}>
                 <div>{token2InfoData?.name}</div>
                 <div className={cx('des')}>Oraichain</div>
               </div>
-              <div className={cx('value')}>
+              <div className={cx('value', `value ${styles[theme]}`)}>
                 <TokenBalance
                   balance={{
                     amount: lp2BurnAmount,
@@ -627,13 +628,15 @@ const LiquidityModal: FC<ModalProps> = ({
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       <div
-        className={cx('container')}
+        className={cx('container', `container ${styles[theme]}`)}
         style={{
           paddingBottom: isMobile() ? 200 : 0
         }}
       >
-        <div className={cx('title')}>{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
-        <div className={cx('switch')}>
+        <div
+          className={cx('title', `title ${styles[theme]}`)}
+        >{`${token1InfoData?.name}/${token2InfoData?.name} Pool`}</div>
+        <div className={cx('switch', `switch ${styles[theme]}`)}>
           <div className={cx({ 'active-tab': activeTab === 0 })} onClick={() => setActiveTab(0)}>
             Add
           </div>

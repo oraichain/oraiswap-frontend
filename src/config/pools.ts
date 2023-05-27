@@ -1,10 +1,11 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { parseAssetInfo } from 'helper';
-import { AssetInfo, MulticallReadOnlyInterface, PairInfo } from 'libs/contracts';
 import { flatten, uniq } from 'lodash';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { ORAI } from './constants';
-import { Contract } from './contracts';
+import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { network } from './networks';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -123,9 +124,11 @@ export class Pairs {
       pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
     );
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
+
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
-      this.getAllPairs(firstVersionWhiteListPairs, Contract.factory.contractAddress, Contract.multicall),
-      this.getAllPairs(secondVersionWhiteListPairs, Contract.factory_v2.contractAddress, Contract.multicall)
+      this.getAllPairs(firstVersionWhiteListPairs, network.factory, multicall),
+      this.getAllPairs(secondVersionWhiteListPairs, network.factory_v2, multicall)
     ]);
     return this.processFetchedAllPairInfos([...firstVersionAllPairs, ...secondVersionAllPairs]);
   };

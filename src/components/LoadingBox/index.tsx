@@ -8,12 +8,13 @@ const LoadingBox: React.FC<{
   loading: boolean;
   children: React.ReactElement | React.ReactNode;
   styles?: CSSProperties;
-}> = ({ loading, children, styles }) => {
+  theme?: string;
+}> = ({ loading, children, styles, theme }) => {
   return (
     <>
       {loading ? (
         <div style={styles} className={cx('loading-wrap')}>
-          <BlocLoaderDex open={true} />
+          <BlocLoaderDex open={true} theme={theme} />
           {children}
         </div>
       ) : (

@@ -1,3 +1,4 @@
+import useConfigReducer from 'hooks/useConfigReducer';
 import { formateNumberDecimalsAuto } from 'libs/utils';
 import { createChart } from 'lightweight-charts';
 import { useEffect, useRef, memo, useCallback } from 'react';
@@ -10,6 +11,8 @@ const ChartComponent = (props) => {
   } = props;
   const chartContainerRef = useRef();
 
+  const [theme] = useConfigReducer('theme')
+
   useEffect(() => {
     const chart = createChart(chartContainerRef.current, {
       // rightPriceScale: {
@@ -21,7 +24,7 @@ const ChartComponent = (props) => {
       // },
       layout: {
         backgroundColor: 'rgba(31, 33, 40,0)',
-        textColor: '#c3c5cb',
+        textColor: '#777E90',
         fontFamily: 'Roboto, sans-serif'
       },
       localization: {
@@ -47,7 +50,7 @@ const ChartComponent = (props) => {
         horzLine: {
           visible: true,
           color: '#A871DF',
-          labelVisible: true
+          labelVisible: true,
         },
         vertLine: {
           visible: true,
@@ -59,7 +62,12 @@ const ChartComponent = (props) => {
         rightOffset: 1,
         barSpacing: 12,
         lockVisibleTimeRangeOnResize: true,
-        timeVisible: true
+        timeVisible: true,
+        borderColor: theme === 'light' ? '#CCCCCC' : '#3A3D4D',
+      },
+      rightPriceScale: {
+        borderColor: theme === 'light' ? '#CCCCCC' : '#3A3D4D',
+
       }
     });
     // chart.timeScale().fitContent();
@@ -88,7 +96,7 @@ const ChartComponent = (props) => {
     return () => {
       chart.remove();
     };
-  }, [data, backgroundColor, lineColor, textColor, areaTopColor, areaBottomColor]);
+  }, [data, backgroundColor, lineColor, textColor, areaTopColor, areaBottomColor, theme]);
 
   useEffect(() => {
     setValueChartMove(data[data.length - 1]?.close, data[data.length - 1]?.time);

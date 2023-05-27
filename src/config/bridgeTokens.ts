@@ -28,6 +28,7 @@ export type TokenItemType = {
   bridgeNetworkIdentifier?: NetworkChainId;
   bridgeTo?: NetworkChainId[];
   Icon: CoinIcon;
+  IconLight?: CoinIcon;
   chainId: NetworkChainId;
   coinType?: number;
   rpc: string;

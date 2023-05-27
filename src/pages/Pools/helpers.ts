@@ -1,14 +1,12 @@
+import { Pairs } from 'config/pools';
+import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { AggregateResult, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { OraiswapPairTypes, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { TokenItemType, assetInfoMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
-import { parseAssetInfo } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { MulticallReadOnlyInterface } from 'libs/contracts';
-import { PoolResponse } from 'libs/contracts/OraiswapPair.types';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
-import { AggregateResult, PairInfo } from 'libs/contracts/types';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
@@ -34,7 +32,7 @@ export type PairInfoDataRaw = {
 } & PoolInfo;
 
 type PairDetails = {
-  [key: string]: PoolResponse;
+  [key: string]: OraiswapPairTypes.PoolResponse;
 };
 
 export const calculateAprResult = (
@@ -42,8 +40,8 @@ export const calculateAprResult = (
   pairInfos: PairInfoData[],
   prices: CoinGeckoPrices<string>,
   allTokenInfo: TokenInfo[],
-  allLpTokenAsset: PoolInfoResponse[],
-  allRewardPerSec: RewardsPerSecResponse[]
+  allLpTokenAsset: OraiswapStakingTypes.PoolInfoResponse[],
+  allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[]
 ) => {
   const aprResult = pairs.reduce((acc, pair, ind) => {
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);

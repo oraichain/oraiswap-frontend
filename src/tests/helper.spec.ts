@@ -4,9 +4,9 @@ import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDispl
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
-import { AssetInfo } from 'libs/contracts';
 import { ORAI } from 'config/constants';
 import { parseAssetInfo } from 'helper';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -89,29 +89,39 @@ describe('should utils functions in libs/utils run exactly', () => {
   });
 
   it.each<[TokenItemType, string]>([
-    [flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain').contractAddress],
-    [flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'), flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain').denom],
-  ])("test-parseTokenInfoRawDenom-given-%j-should-receive-%s", (token, expectedDenom) => {
+    [
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'),
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain').contractAddress
+    ],
+    [
+      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'),
+      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain').denom
+    ]
+  ])('test-parseTokenInfoRawDenom-given-%j-should-receive-%s', (token, expectedDenom) => {
     expect(parseTokenInfoRawDenom(token)).toEqual(expectedDenom);
-  })
+  });
 
   it.each<[CoinGeckoId, TokenItemType, string]>([
-    ['airight', cosmosTokens.find(token => token.coinGeckoId === 'airight' && token.chainId === 'Oraichain'), ""],
-    ['tether', cosmosTokens.find(token => token.coinGeckoId === 'tether' && token.chainId === 'Oraichain'), ""],
-    ['tron', cosmosTokens.find(token => token.coinGeckoId === 'tron' && token.chainId === 'Oraichain'), ""],
-    ['kawaii-islands', cosmosTokens.find(token => token.coinGeckoId === 'kawaii-islands' && token.chainId === 'Oraichain'), "KWT and MILKY not supported in this function"],
-  ])("test-getTokenOnOraichain-given-%s-should-receive-%j", (coingeckoId, expectedToken, err) => {
+    ['airight', cosmosTokens.find((token) => token.coinGeckoId === 'airight' && token.chainId === 'Oraichain'), ''],
+    ['tether', cosmosTokens.find((token) => token.coinGeckoId === 'tether' && token.chainId === 'Oraichain'), ''],
+    ['tron', cosmosTokens.find((token) => token.coinGeckoId === 'tron' && token.chainId === 'Oraichain'), ''],
+    [
+      'kawaii-islands',
+      cosmosTokens.find((token) => token.coinGeckoId === 'kawaii-islands' && token.chainId === 'Oraichain'),
+      'KWT and MILKY not supported in this function'
+    ]
+  ])('test-getTokenOnOraichain-given-%s-should-receive-%j', (coingeckoId, expectedToken, err) => {
     try {
       expect(getTokenOnOraichain(coingeckoId)).toEqual(expectedToken);
     } catch (error) {
       expect(error).toEqual(new Error(err));
     }
-  })
+  });
 
   it.each<[AssetInfo, string]>([
     [{ native_token: { denom: ORAI } }, ORAI],
     [{ token: { contract_addr: 'foobar' } }, 'foobar']
   ])('test-parseAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
-    expect(parseAssetInfo(assetInfo)).toEqual(expectedResult)
-  })
+    expect(parseAssetInfo(assetInfo)).toEqual(expectedResult);
+  });
 });

@@ -1,14 +1,8 @@
-import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
+import 'polyfill';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from 'components/Toasts/context';
-import { NetworkChainId } from 'config/chainInfos';
-import { Contract } from 'config/contracts';
-import { network } from 'config/networks';
-import { collectWallet } from 'libs/cosmjs';
-import 'polyfill';
-import { StrictMode } from 'react';
+import { initClient } from 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -38,12 +32,11 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
-    tracesSampleRate: 0.7
+    tracesSampleRate: 1
   });
 }
 
-const startApp = async () => {
-  Contract.client = await CosmWasmClient.connect(network.rpc);
+initClient().then(() => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -60,29 +53,4 @@ const startApp = async () => {
       </PersistGate>
     </Provider>
   );
-  try {
-    const keplr = await window.Keplr.getKeplr();
-
-    // suggest our chain
-    if (keplr) {
-      // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
-        try {
-          await window.Keplr.suggestChain(networkId);
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-
-      const wallet = await collectWallet(network.chainId);
-      Contract.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-        prefix: network.prefix,
-        gasPrice: GasPrice.fromString(`0${network.denom}`)
-      });
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
-};
-
-startApp();
+});

@@ -1,12 +1,11 @@
 import { coin } from '@cosmjs/proto-signing';
 import { assetInfoMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { PairMapping, Pairs } from 'config/pools';
-import { AggregateResult, AssetInfo, PairInfo } from 'libs/contracts';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
+import { client } from './common';
+import { AggregateResult, AssetInfo, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { buildMultipleMessages } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import {
@@ -32,7 +31,6 @@ import { TokenInfo } from 'types/token';
 import {
   addLiquidity,
   addPairAndLpToken,
-  client,
   constants,
   deployOraiDexContracts,
   getPairs,
@@ -58,7 +56,6 @@ describe('pool', () => {
   const { devAddress } = constants;
 
   beforeAll(async () => {
-    Contract.client = client;
     // deploy factory, multicall, staking contract.
     const { factory, tokenCodeId, multicall, staking } = await deployOraiDexContracts();
 
@@ -67,8 +64,6 @@ describe('pool', () => {
     network.factory_v2 = factory;
     network.multicall = multicall;
     network.staking = staking;
-    Contract.factory.contractAddress = factory;
-    Contract.factory_v2.contractAddress = factory;
 
     airiContractAddress = await instantiateCw20Token('airi', tokenCodeId);
     usdtContractAddress = await instantiateCw20Token('usdt', tokenCodeId);
@@ -120,9 +115,9 @@ describe('pool', () => {
   });
 
   describe('get info liquidity pool, pair', () => {
-    let allTokenAssetInfos: PoolInfoResponse[] = [];
+    let allTokenAssetInfos: OraiswapStakingTypes.PoolInfoResponse[] = [];
     let allLpTokenInfos: TokenInfo[] = [];
-    let allRewardPerSec: RewardsPerSecResponse[] = [];
+    let allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[] = [];
 
     const fromTokenInfo = flattenTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
     const usdtTokenInfo = flattenTokens.find((t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain');
@@ -135,7 +130,8 @@ describe('pool', () => {
     });
 
     it('should fetch pairs data correctly', async () => {
-      const { pairDetails } = await fetchPairsData(pairs, Contract.multicall);
+      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      const { pairDetails } = await fetchPairsData(pairs, multicall);
       pairsData = { ...pairDetails };
       expect(pairsData[pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[pairs[0].contract_addr].assets[0].info).toEqual({
@@ -165,7 +161,8 @@ describe('pool', () => {
 
       assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
       assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
-      const myPairs = await fetchMyPairsData(pairs, devAddress, Contract.multicall);
+      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      const myPairs = await fetchMyPairsData(pairs, devAddress, multicall);
       expect(myPairs[pairs[0].contract_addr]).toBe(true);
       expect(myPairs[pairs[1].contract_addr]).toBe(true);
     });
@@ -341,7 +338,8 @@ describe('pool', () => {
     let allPairs: PairInfo[] = [];
 
     it('test getAllPairs should have properties correctly', async () => {
-      allPairs = await Pairs.getAllPairs(Pairs.pairs, network.factory_v2, Contract.multicall);
+      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      allPairs = await Pairs.getAllPairs(Pairs.pairs, network.factory_v2, multicall);
       for (const info of allPairs) {
         expect(info).toHaveProperty('asset_infos');
         expect(info).toHaveProperty('contract_addr');

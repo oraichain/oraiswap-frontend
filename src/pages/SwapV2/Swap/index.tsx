@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
-import RefreshImg from 'assets/images/refresh.svg';
+import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -24,6 +26,7 @@ import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -41,6 +44,7 @@ const SwapComponent: React.FC<{
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [theme] = useConfigReducer('theme')
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const loadTokenAmounts = useLoadTokens();
@@ -151,8 +155,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = fromToken?.Icon;
-  const ToIcon = toToken?.Icon;
+  const FromIcon = theme === 'light' ? fromToken?.IconLight || fromToken?.Icon : fromToken?.Icon;
+  const ToIcon = theme === 'light' ? toToken?.IconLight || toToken?.Icon : toToken?.Icon;
 
   return (
     <div className={cx('swap-box')}>
@@ -165,8 +169,8 @@ const SwapComponent: React.FC<{
             setVisible={setVisible}
             content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
           />
-          <button onClick={() => setRefresh(!refresh)}>
-            <img className={cx('btn')} src={RefreshImg} alt="btn" />
+          <button className={cx('btn')} onClick={() => setRefresh(!refresh)}>
+            <RefreshImg />
           </button>
         </div>
         <div className={cx('balance')}>
@@ -212,7 +216,7 @@ const SwapComponent: React.FC<{
       </div>
       <div className={cx('swap-icon')}>
         <img
-          src={AntSwapImg}
+          src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
           onClick={() => {
             setSwapTokens([toTokenDenom, fromTokenDenom]);
             setSwapAmount([toAmountToken, fromAmountToken]);
