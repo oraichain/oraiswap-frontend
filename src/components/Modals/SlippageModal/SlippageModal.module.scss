@@ -1,0 +1,137 @@
+@import "src/styles/mixins";
+
+.setting {
+  border-radius: 8px;
+  padding: 20px 24px 24px;
+  border: 1px solid #A871DF;
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+
+    .title {
+      display: flex;
+      align-items: center;
+
+      font-style: normal;
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 100%;
+      /* identical to box height, or 18px */
+      text-align: center;
+      color: #F0B90B;
+
+      img {
+        margin-right: 10px;
+      }
+    }
+
+    .close-icon {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+
+      path {
+        fill: #777E91;
+        ;
+      }
+    }
+  }
+
+
+  .subtitle {
+    color: #A871DF;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    text-indent: 15px;
+    margin-bottom: 15px;
+    text-align: left;
+  }
+
+  .options {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+
+    .item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 100%;
+      /* identical to box height, or 16px */
+
+      text-align: center;
+      font-feature-settings: 'zero' on;
+      border-radius: 4px;
+      padding: 6px 14px;
+      margin: 0 4px;
+      color: #A871DF;
+
+      .input {
+        max-width: 40px;
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    .border {
+      border: 1px solid transparent;
+      background: #141416;
+      opacity: 0.5;
+    }
+
+    .isChosen {
+      border: 1px solid #A871DF;
+      opacity: 1;
+    }
+  }
+
+  .tooltip {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    /* or 24px */
+
+    text-align: center;
+
+    /* aiRight/White */
+
+    color: #ffffff;
+    padding: 16px 24px;
+
+    /* aiRight/Dark BG */
+
+    background: #141416;
+    border-radius: 24px;
+  }
+}
+
+.light-modal {
+  background-color: #FCFCFC;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.05);
+
+  .options {
+    .item {
+      background: #EEE7FF;
+    }
+  }
+}
+
+.dark-modal {
+  background-color: #2B2D3B;
+
+  .options {
+    .item {
+      background: #423A56;
+    }
+  }
+}
