@@ -136,4 +136,8 @@ export class Pairs {
   static getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
     return parseAssetInfo(assetInfos[0]) === ORAI ? assetInfos[1] : assetInfos[0];
   };
+
+  static getStakingInfoTokenItemTypeFromPairs = (pairs: PairInfo[]): TokenItemType[] => {
+    return pairs.map((p) => assetInfoMap[parseAssetInfo(this.getStakingAssetInfo(p.asset_infos))])
+  }
 }

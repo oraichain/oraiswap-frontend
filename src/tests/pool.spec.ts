@@ -2,7 +2,7 @@ import { coin } from '@cosmjs/proto-signing';
 import { assetInfoMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
-import { PairMapping, Pairs } from 'config/pools';
+import { Pairs } from 'config/pools';
 import { client } from './common';
 import { AggregateResult, AssetInfo, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
@@ -37,6 +37,7 @@ import {
   instantiateCw20Token
 } from './listing-simulate';
 import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
+import { parseAssetInfo } from 'helper';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
@@ -46,7 +47,7 @@ describe('pool', () => {
     airiContractAddress = '';
   let pairsData: PairDetails;
   let pairInfos: PairInfoData[] = [];
-  let assetTokens = [];
+  let assetTokens: TokenItemType[] = [];
   let pairs: PairInfo[];
 
   const prices = {
@@ -68,6 +69,9 @@ describe('pool', () => {
     airiContractAddress = await instantiateCw20Token('airi', tokenCodeId);
     usdtContractAddress = await instantiateCw20Token('usdt', tokenCodeId);
 
+    assetInfoMap[airiContractAddress] = tokenMap['airi'];
+    assetInfoMap[usdtContractAddress] = tokenMap['usdt'];
+
     /// set balance for native token orai - atom
     client.app.bank.setBalance(devAddress, [
       coin(constants.devInitialBalances, constants.oraiDenom),
@@ -80,21 +84,10 @@ describe('pool', () => {
     const listPairs = await getPairs(network.factory);
 
     // update config pairs to test
-    Pairs.pairs = listPairs.pairs.map((pair, index) => {
-      return {
-        asset_infos: [
-          { native_token: { denom: ORAI } },
-          { token: { contract_addr: index === 0 ? airiContractAddress : usdtContractAddress } }
-        ]
-      };
-    });
+    Pairs.pairs = listPairs.pairs.map(pair => ({ asset_infos: pair.asset_infos }));
+    pairs = listPairs.pairs;
 
-    assetTokens = Pairs.pairs.map((p: PairMapping, index) => {
-      return {
-        ...tokenMap[index === 0 ? 'airi' : 'usdt'],
-        contractAddress: p.asset_infos[1].token.contract_addr
-      };
-    });
+    assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(listPairs.pairs);
 
     /// increase allowance for airi
     const airiContract = new OraiswapTokenClient(client, devAddress, airiContractAddress);
@@ -114,6 +107,18 @@ describe('pool', () => {
     await addLiquidity(listPairs.pairs[1]);
   });
 
+  it('test getStakingInfoTokenItemTypeFromPairs should return correct token types', () => {
+    const testPairs = pairs.map((pair, index) => {
+      if (index === 0) return { ...pair, asset_infos: [{ token: { contract_addr: "foobar" } }, { native_token: { denom: ORAI } }] as [AssetInfo, AssetInfo] };
+      return pair
+    });
+    const result = Pairs.getStakingInfoTokenItemTypeFromPairs(testPairs);
+    // we only have two simulate tokens, so length should be two
+    expect(result.length).toBe(2);
+    expect(result[0]).toBeUndefined();
+    expect(result[1]).toEqual(assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(pairs[1].asset_infos))]);
+  })
+
   describe('get info liquidity pool, pair', () => {
     let allTokenAssetInfos: OraiswapStakingTypes.PoolInfoResponse[] = [];
     let allLpTokenInfos: TokenInfo[] = [];
@@ -130,13 +135,13 @@ describe('pool', () => {
     });
 
     it('should fetch pairs data correctly', async () => {
-      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      const multicall = new MulticallQueryClient(client, network.multicall);
       const { pairDetails } = await fetchPairsData(pairs, multicall);
       pairsData = { ...pairDetails };
       expect(pairsData[pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[pairs[0].contract_addr].assets[0].info).toEqual({
         native_token: {
-          denom: 'orai'
+          denom: ORAI
         }
       });
       expect(pairsData[pairs[0].contract_addr].assets[1].info).toEqual({
@@ -161,7 +166,7 @@ describe('pool', () => {
 
       assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
       assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
-      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      const multicall = new MulticallQueryClient(client, network.multicall);
       const myPairs = await fetchMyPairsData(pairs, devAddress, multicall);
       expect(myPairs[pairs[0].contract_addr]).toBe(true);
       expect(myPairs[pairs[1].contract_addr]).toBe(true);
@@ -243,7 +248,7 @@ describe('pool', () => {
         allRewardPerSec = await fetchAllRewardPerSecInfos(assetTokens);
         expect(allRewardPerSec[0].assets).toEqual([
           { amount: constants.rewardPerSecAmount, info: { token: { contract_addr: airiContractAddress } } },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: 'orai' } } }
+          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
         ]);
         expect(allRewardPerSec[1].assets).toEqual([
           {
@@ -252,7 +257,7 @@ describe('pool', () => {
             },
             amount: constants.rewardPerSecAmount
           },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: 'orai' } } }
+          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
         ]);
       });
 
@@ -297,7 +302,7 @@ describe('pool', () => {
       // check if the contract address, sent_funds and sender are correct
       expect(msg.contract).toEqual(pairs[0].contract_addr);
       expect(msg.sender).toEqual(devAddress);
-      expect(msg.sent_funds).toEqual([{ amount: '100', denom: 'orai' }]);
+      expect(msg.sent_funds).toEqual([{ amount: '100', denom: ORAI }]);
       expect(msg).toHaveProperty('msg');
 
       const messages = buildMultipleMessages(msg, [], []);
@@ -309,7 +314,7 @@ describe('pool', () => {
         provide_liquidity: {
           assets: [
             { info: { token: { contract_addr: token2InfoData.contractAddress } }, amount: '100' },
-            { info: { native_token: { denom: 'orai' } }, amount: '100' }
+            { info: { native_token: { denom: ORAI } }, amount: '100' }
           ]
         }
       });
@@ -328,7 +333,7 @@ describe('pool', () => {
     expect(Array.isArray(poolTokens)).toBe(true);
     expect(poolTokens.length).toBe(3);
     expect(poolTokens).toEqual([
-      assetInfoMap['orai'],
+      assetInfoMap[ORAI],
       assetInfoMap[airiContractAddress],
       assetInfoMap[usdtContractAddress]
     ]);
@@ -338,7 +343,7 @@ describe('pool', () => {
     let allPairs: PairInfo[] = [];
 
     it('test getAllPairs should have properties correctly', async () => {
-      const multicall = new MulticallQueryClient(window.client, network.multicall);
+      const multicall = new MulticallQueryClient(client, network.multicall);
       allPairs = await Pairs.getAllPairs(Pairs.pairs, network.factory_v2, multicall);
       for (const info of allPairs) {
         expect(info).toHaveProperty('asset_infos');
@@ -430,6 +435,33 @@ describe('pool', () => {
 
     it('test getAllPairsFromTwoFactoryVersions', async () => {
       const allPairsFromTwoFactoryVersions = await Pairs.getAllPairsFromTwoFactoryVersions();
+      console.dir(allPairsFromTwoFactoryVersions, { depth: null });
+      expect(allPairsFromTwoFactoryVersions.map(pair => pair.asset_infos)).toEqual([
+        [
+          { native_token: { denom: ORAI } },
+          {
+            token: {
+              contract_addr: airiContractAddress
+            }
+          }
+        ],
+        [
+          { native_token: { denom: ORAI } },
+          {
+            token: {
+              contract_addr: usdtContractAddress
+            }
+          }
+        ]
+      ])
+      expect(allPairsFromTwoFactoryVersions.map(pair => pair.asset_infos_raw)).toEqual([
+        [
+          ORAI, airiContractAddress
+        ],
+        [
+          ORAI, usdtContractAddress
+        ]
+      ])
       expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
     });
   });

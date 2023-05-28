@@ -68,7 +68,7 @@ export const calculateAprResult = (
 // Fetch APR
 const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
   const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  const assetTokens = pairs.map((p) => assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(p.asset_infos))]);
+  const assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(pairs);
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
