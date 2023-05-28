@@ -98,29 +98,24 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
   );
 
   const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
-  if (!oraiUsdtPool) {
-    // retry after 3 seconds
-    setTimeout(fetchPoolListAndOraiPrice, 3000);
-  } else {
-    const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
-    try {
-      const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
-      const pairAmounts = await Promise.all(
-        poolList.map((pool) =>
-          getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData)
-        )
-      );
-      poolList.forEach((pool, ind) => {
-        pool.amount = pairAmounts[ind].tokenUsd;
-      });
-      poolList.sort((a, b) => b.amount - a.amount);
-      return {
-        pairInfo: poolList,
-        oraiPrice
-      };
-    } catch (error) {
-      console.log('error getPairAmountInfo', error);
-    }
+  const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
+  try {
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const pairAmounts = await Promise.all(
+      poolList.map((pool) =>
+        getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData)
+      )
+    );
+    poolList.forEach((pool, ind) => {
+      pool.amount = pairAmounts[ind].tokenUsd;
+    });
+    poolList.sort((a, b) => b.amount - a.amount);
+    return {
+      pairInfo: poolList,
+      oraiPrice
+    };
+  } catch (error) {
+    console.log('error getPairAmountInfo', error);
   }
 };
 
