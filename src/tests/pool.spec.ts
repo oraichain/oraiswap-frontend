@@ -199,7 +199,7 @@ describe('pool', () => {
       }
     );
 
-    it('should fetch pool info amount and pool list infos, orai price correctly', async () => {
+    it('test fetchPoolListAndOraiPrice should fetch pool info amount and pool list infos, orai price correctly', async () => {
       const res = await fetchPoolListAndOraiPrice(pairs, pairsData);
       pairInfos = res.pairInfo;
 
@@ -215,6 +215,11 @@ describe('pool', () => {
       expect(JSON.stringify(res.pairInfo[1].toToken)).toEqual(JSON.stringify(airiTokenInfo));
 
       expect(res.oraiPrice).toEqual(1);
+    });
+
+    it('test fetchPoolListAndOraiPrice should given no cached pair data should return undefined', async () => {
+      const res = await fetchPoolListAndOraiPrice(pairs, undefined);
+      expect(res).toBeUndefined();
     });
 
     describe('fetch apr', () => {

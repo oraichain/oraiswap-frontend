@@ -106,10 +106,9 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
         getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData)
       )
     );
-    poolList.forEach((pool, ind) => {
-      pool.amount = pairAmounts[ind].tokenUsd;
-    });
-    poolList.sort((a, b) => b.amount - a.amount);
+    poolList = poolList.map((pool, ind) => ({
+      ...pool, amount: pairAmounts[ind].tokenUsd
+    })).sort((a, b) => b.amount - a.amount);
     return {
       pairInfo: poolList,
       oraiPrice
