@@ -45,7 +45,6 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
           return acc;
         }, [] as RemainingOraibTokenItem[])
         .filter((token: RemainingOraibTokenItem) => toDisplay(token.amount, token.decimals) > 0);
-      console.log('remainingOraib', remainingOraib);
 
       setRemainingOraib(remainingOraib);
     } catch (error) {
