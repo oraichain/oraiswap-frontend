@@ -1,4 +1,10 @@
 //@ts-nocheck
+import { NetworkChainId } from 'config/chainInfos';
+import { network } from 'config/networks';
+import { collectWallet } from 'libs/cosmjs';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
+import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import _BigInt from 'big-integer';
@@ -132,4 +138,32 @@ export const initEthereum = async () => {
     await provider.enable();
     (window.ethereum as any) = provider;
   }
+};
+
+export const initClient = async () => {
+  let wallet: OfflineAminoSigner | OfflineDirectSigner;
+  try {
+    const keplr = await window.Keplr.getKeplr();
+
+    // suggest our chain
+    if (keplr) {
+      // always trigger suggest chain when users enter the webpage
+      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
+        try {
+          await window.Keplr.suggestChain(networkId);
+        } catch (error) {
+          console.log({ error });
+        }
+      }
+      wallet = await collectWallet(network.chainId);
+    }
+  } catch (ex) {
+    console.log(ex);
+  }
+
+  // finally assign it
+  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    prefix: network.prefix,
+    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  });
 };

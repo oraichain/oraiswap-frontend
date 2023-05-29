@@ -1,4 +1,5 @@
 import NoDataSvg from 'assets/images/NoDataPool.svg';
+import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import SearchInput from 'components/SearchInput';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
@@ -15,8 +16,9 @@ import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
+import classNames from 'classnames';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -34,7 +36,7 @@ const LIST_FILTER_POOL = [
   }
 ];
 
-const Header: FC<{ amount: number; oraiPrice: number }> = ({ amount, oraiPrice }) => {
+const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amount, oraiPrice, theme }) => {
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>Pools</div>
@@ -54,7 +56,7 @@ const Header: FC<{ amount: number; oraiPrice: number }> = ({ amount, oraiPrice }
   );
 };
 
-const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commissionRate, apr }) => {
+const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, amount, commissionRate, apr, theme }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_denoms.map((denom) => tokenMap[denom]);
 
@@ -62,18 +64,22 @@ const PairBox = memo<PairInfoData & { apr: number }>(({ pair, amount, commission
 
   return (
     <div
-      className={styles.pairbox}
-      onClick={() =>
-        navigate(
-          `/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(token2.denom)}`
-          // { replace: true }
-        )
-      }
+      className={classNames(styles.pairbox)}
+      onClick={() => navigate(`/pool/${encodeURIComponent(token1.denom)}_${encodeURIComponent(token2.denom)}`)}
     >
       <div className={styles.pairbox_header}>
         <div className={styles.pairbox_logos}>
-          <token1.Icon className={styles.pairbox_logo1} />
-          <token2.Icon className={styles.pairbox_logo2} />
+          {theme === 'light' && token1?.IconLight ? (
+            <token1.IconLight className={styles.pairbox_logo1} />
+          ) : (
+            <token1.Icon className={styles.pairbox_logo1} />
+          )}
+
+          {theme === 'light' && token2?.IconLight ? (
+            <token2.IconLight className={styles.pairbox_logo2} />
+          ) : (
+            <token2.Icon className={styles.pairbox_logo2} />
+          )}
         </div>
         <div className={styles.pairbox_pair}>
           <div className={styles.pairbox_pair_name}>
@@ -108,7 +114,8 @@ const ListPools = memo<{
   allPoolApr: { [key: string]: number };
   myPairsData?: Object;
   setIsOpenNewTokenModal?: (isOpenNewToken: boolean) => void;
-}>(({ pairInfos, allPoolApr, myPairsData, setIsOpenNewTokenModal }) => {
+  theme?: string;
+}>(({ pairInfos, allPoolApr, myPairsData, setIsOpenNewTokenModal, theme }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -193,11 +200,12 @@ const ListPools = memo<{
               {...info}
               apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
               key={info.pair.contract_addr}
+              theme={theme}
             />
           ))
         ) : (
           <div className={styles.no_data}>
-            <img src={NoDataSvg} alt="nodata" />
+            <img src={theme === 'light' ? NoDataLightSvg : NoDataSvg} alt="nodata" />
             <span>No data</span>
           </div>
         )}
@@ -210,6 +218,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
 
+  const [theme] = useConfigReducer('theme');
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList();
   const [cachedApr] = useFetchApr(pairInfos, prices);
@@ -220,12 +229,13 @@ const Pools: React.FC<PoolsProps> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header amount={totalAmount} oraiPrice={oraiPrice} />
+        <Header theme={theme} amount={totalAmount} oraiPrice={oraiPrice} />
         <ListPools
           setIsOpenNewTokenModal={setIsOpenNewTokenModal}
           pairInfos={pairInfos}
           allPoolApr={cachedApr}
           myPairsData={myPairsData}
+          theme={theme}
         />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}

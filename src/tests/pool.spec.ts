@@ -1,14 +1,12 @@
 import { coin } from '@cosmjs/proto-signing';
 import { flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { COMMISSION_RATE } from 'config/constants';
-import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
+import { client } from './common';
 import { Pairs, Pair } from 'config/pools';
-import { AggregateResult } from 'libs/contracts';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
-import { OraiswapTokenClient } from 'libs/contracts/OraiswapToken.client';
+import { AggregateResult } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { buildMultipleMessages } from 'libs/utils';
-import compact from 'lodash/compact';
 import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
@@ -33,7 +31,6 @@ import { TokenInfo } from 'types/token';
 import {
   addLiquidity,
   addPairAndLpToken,
-  client,
   constants,
   deployOraiDexContracts,
   getPairs,
@@ -54,7 +51,6 @@ describe('pool', () => {
   const { devAddress } = constants;
 
   beforeAll(async () => {
-    Contract.client = client;
     // deploy factory, multicall, staking contract.
     const { factory, tokenCodeId, multicall, staking } = await deployOraiDexContracts();
 
@@ -113,9 +109,9 @@ describe('pool', () => {
   });
 
   describe('get info liquidity pool, pair', () => {
-    let allTokenAssetInfos: PoolInfoResponse[] = [];
+    let allTokenAssetInfos: OraiswapStakingTypes.PoolInfoResponse[] = [];
     let allLpTokenInfos: TokenInfo[] = [];
-    let allRewardPerSec: RewardsPerSecResponse[] = [];
+    let allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[] = [];
 
     const fromTokenInfo = flattenTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
     const usdtTokenInfo = flattenTokens.find((t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain');
@@ -125,7 +121,7 @@ describe('pool', () => {
 
     it('should fetch pairs data correctly', async () => {
       pairsData = await fetchCachedPairsData();
-      console.log("pair data: ", pairsData)
+      console.log('pair data: ', pairsData);
 
       expect(pairsData[Pairs.pairs[0].contract_addr].total_share).toBe('0');
       expect(pairsData[Pairs.pairs[0].contract_addr].assets[0].info).toEqual({

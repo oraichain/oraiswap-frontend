@@ -1,6 +1,5 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { Contract } from 'config/contracts';
 import { network } from 'config/networks';
 import { displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -94,14 +93,12 @@ const RequireAuthButton: React.FC<any> = () => {
     const oraiAddress = await window.Keplr.getKeplrAddr();
     console.log('oraiAddress', oraiAddress);
     loadTokenAmounts({ oraiAddress });
-    Contract.sender = oraiAddress;
     setAddress(oraiAddress);
   };
 
   const disconnectKeplr = async () => {
     try {
       window.Keplr.disconnect();
-      Contract.sender = '';
       setAddress('');
     } catch (ex) {
       console.log(ex);

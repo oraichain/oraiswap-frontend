@@ -1,4 +1,4 @@
-import {Uint128, AssetInfo, Addr, Logo, EmbeddedLogo, Binary, ListTokenMsg, Cw20Coin, Asset, InstantiateMarketingInfo, Config} from "./types";
+import { Uint128, AssetInfo, Addr, Logo, EmbeddedLogo, Binary, Asset, InstantiateMarketingInfo, Config } from './types';
 export interface InstantiateMsg {
   cw20_code_id: number;
   factory_addr: string;
@@ -6,6 +6,13 @@ export interface InstantiateMsg {
 export type ExecuteMsg = {
   list_token: ListTokenMsg;
 };
+export interface ListTokenMsg {
+  label?: string | null;
+  liquidity_pool_reward_assets: Asset[];
+  marketing?: InstantiateMarketingInfo | null;
+  mint?: MinterResponse | null;
+  symbol: string;
+}
 export interface MinterResponse {
   cap?: Uint128 | null;
   minter: string;

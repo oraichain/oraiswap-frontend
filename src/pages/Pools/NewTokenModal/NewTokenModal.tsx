@@ -13,7 +13,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { toAmount, toDisplay } from 'libs/utils';
 import { oraichainTokens } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { Asset, OraidexListingContractClient } from 'libs/contracts';
+// import { Asset, OraidexListingContractClient } from 'libs/contracts';
 import { ORAI } from 'config/constants';
 import { getCosmWasmClient } from 'libs/cosmjs';
 const cx = cn.bind(styles);
@@ -49,11 +49,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
       setIsLoading(true);
       const { client, defaultAddress: address } = await getCosmWasmClient();
-      console.log({
-        address,
-        client
-      });
-
       if (!address)
         return displayToast(TToastType.TX_FAILED, {
           message: 'Wallet address does not exist!'
@@ -65,20 +60,20 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         });
       }
 
-      const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
+      // const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
       // TODO: add more options for users like name, marketing, additional token rewards
-      const result = await oraidexListing.listToken({
-        symbol: tokenSymbol,
-        liquidityPoolRewardAssets: [
-          { amount: rewardPerSecondOrai.toString(), info: { native_token: { denom: ORAI } } } as Asset
-        ]
-      });
-      if (result) {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
-        setIsLoading(false);
-      }
+      // const result = await oraidexListing.listToken({
+      //   symbol: tokenSymbol,
+      //   liquidityPoolRewardAssets: [
+      //     { amount: rewardPerSecondOrai.toString(), info: { native_token: { denom: ORAI } } } as Asset
+      //   ]
+      // });
+      // if (result) {
+      //   displayToast(TToastType.TX_SUCCESSFUL, {
+      //     customLink: `${network.explorer}/txs/${result.transactionHash}`
+      //   });
+      //   setIsLoading(false);
+      // }
     } catch (error) {
       console.log('error listing token: ', error);
       handleErrorTransaction(error);

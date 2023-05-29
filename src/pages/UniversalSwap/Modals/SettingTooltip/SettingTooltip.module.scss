@@ -46,4 +46,16 @@
     background: #191b21;
     border-radius: 8px;
     padding: 12px;
+
+    @include theme() {
+        background-color: theme-get('bg-color-secondary');
+    }
+
+    svg {
+        path {
+            @include theme() {
+                fill: theme-get('svg-fill-color');
+            }
+        }
+    }
 }

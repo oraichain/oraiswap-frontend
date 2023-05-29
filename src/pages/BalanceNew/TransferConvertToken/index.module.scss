@@ -1,37 +1,49 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .transferTab {
   width: 100%;
   margin-top: 20px;
+
   // @include flex(space-between);
   .tfBtn {
-    background: #612fca;
-    box-shadow: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
+    @include theme() {
+      background-color: theme-get('bg-btn-primary');
+      box-shadow: theme-get('shadow-btn');
+    }
+
+    color: $white-color;
     border-radius: 8px;
     padding: 16px;
     @include flex();
     align-content: center;
     margin-top: 24px;
     cursor: pointer;
+
     svg {
       margin-right: 5px !important;
     }
   }
+
   .tfTxt {
     font-weight: 600;
     font-size: 16px;
   }
+
   @include mobile {
     flex-direction: column;
     align-items: center;
   }
 }
+
 .balanceDescription {
   width: 100%;
   text-align: left !important;
+
   @include mobile {
     padding-top: 10px;
   }
+
   font-weight: 500;
   font-size: 14px;
   line-height: 150%;
@@ -40,6 +52,7 @@
   align-self: flex-start;
   margin: 8px 8px 8px 0;
 }
+
 .balanceAmount {
   display: flex;
   flex-wrap: wrap;
@@ -49,29 +62,17 @@
 .token {
   @include flex();
   margin-right: 10px;
+
   .tokenInfo {
     padding-left: 16px;
+
     .tokenName {
       font-weight: 600;
       font-size: 22px;
     }
-    .tokenOrg {
-      padding-left: 4px;
-      padding-right: 4px;
-      border-radius: 4px;
-      background: #612fca;
-      float: left;
-    }
-    .tokenOrgTxt {
-      font-weight: 600;
-      font-size: 14px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      float: left;
-      white-space: nowrap;
-    }
   }
 }
+
 .table {
   .tableDes {
     padding: 24px;
@@ -80,27 +81,34 @@
     display: flex;
   }
 }
+
 .subLabel {
   font-weight: 600;
   font-size: 16px;
   line-height: 100%;
   color: #777e90;
+
   &.token {
     align-self: flex-end;
   }
 }
+
 .fromBalanceDes {
   @include flex(space-between);
 }
+
 .balanceFromGroup {
   display: flex;
+
   @include mobile {
     width: 50%;
   }
+
   @media (max-width: 575px) {
     width: 100%;
     margin-top: 10px;
   }
+
   // padding-left: 24px;
   // padding-left: 12px;
   .balanceBtn {
@@ -110,18 +118,22 @@
     width: 66px;
     padding: 10px;
     margin-left: 12px;
+
     &:first-child {
       @media (max-width: 575px) {
         margin-left: 0;
       }
     }
+
     @include mobile {
       margin-left: 8px;
       padding: 6px;
     }
+
     color: #a871df;
   }
 }
+
 .amount {
   text-align: left;
   background: #2b2d3b;
@@ -133,6 +145,12 @@
   color: #ebebeb;
   font-weight: 600;
   font-size: 24px;
+
+  &.light {
+    background: #efefef;
+    color: $light-text-color;
+  }
+
   @include mobile {
     width: 100%;
     font-size: 20px;
@@ -144,6 +162,7 @@
   flex-direction: column;
   text-align: end;
 }
+
 .itemSubAmounts {
   color: #777e90;
   font-weight: 600;
@@ -157,15 +176,23 @@
     .amount {
       height: 48px;
       font-size: 16px;
+
       @include mobile {
         // width: 106px;
       }
+
       border-radius: 8px;
     }
+
     .balanceBtn {
       background: #2e283d;
       font-weight: 500;
       border-radius: 8px;
+
+      &.light {
+        background-color: #efe6f8;
+      }
+
       @include desktop {
         width: 66px;
         font-size: 16px;
@@ -175,39 +202,52 @@
         width: 25%;
         font-size: 12px;
       }
+
       height: 48px;
       color: #a871df;
       text-align: center;
     }
+
     .tfBtn {
       margin-top: 15px;
       width: 100%;
       border-radius: 8px;
+
+      &.light {
+        background-color: #7E5CC5;
+      }
     }
   }
 }
+
 .tokenIcon {
   width: 44px;
   height: 44px;
 }
+
 .network {
   @include desktop {
     @include flex(space-between);
   }
+
   @include mobile {
     width: 100%;
   }
+
   .box {
     @include desktop {
       width: 50%;
     }
+
     .transfer {
       .content {
         @include flex(space-between);
+
         @include mobile {
           padding-top: 20px;
           justify-content: flex-start;
         }
+
         .title {
           font-size: 16px;
           font-weight: 600;
@@ -216,7 +256,12 @@
           -webkit-line-clamp: 1;
           display: -webkit-box;
           -webkit-box-orient: vertical;
+
+          &.light {
+            color: $light-text-color;
+          }
         }
+
         .address {
           margin-left: 10px;
           border-radius: 8px;
@@ -224,43 +269,60 @@
           padding: 2px 8px;
           color: #777e90;
           font-size: 13px;
+          display: flex;
+          justify-content: center;
         }
       }
     }
+
     .search {
       position: relative;
       padding-top: 16px;
       cursor: pointer;
-      background: #191b21;
+
       &_filter {
         background: #2b2d3b;
         text-align: center;
         border-radius: 8px;
         padding: 12px;
+
+        &.light {
+          background: #efefef;
+        }
       }
+
       &_box {
         @include flex(space-between);
         padding: 0 10px;
       }
+
       &_logo {
         display: flex;
         align-items: center;
       }
+
       &_text {
         font-size: 16px;
         font-weight: 600;
         padding-left: 10px;
+
+        &.light {
+          color: #6f767e;
+        }
       }
     }
   }
 }
+
 .loading {
   @include desktop {
     width: 50%;
     height: 180px;
   }
+
   @include flex();
 }
+
 .tokenFromGroupBalance {
   @include mobile {
     @include flex(space-between, center, column-reverse);
@@ -272,19 +334,39 @@
   width: 100%;
   background: #2b2d3b;
   border: 1.5px solid #5a5270;
+
+  &.light {
+    background: #efefef;
+    border-color: none;
+
+
+  }
+
   border-radius: 8px;
   margin-top: 10px;
+
   li {
     padding: 12px 24px 12px 24px;
+
   }
+
   li:hover {
     background-color: #703cde;
+
+    div {
+      color: $white-color;
+    }
   }
+
   &_title {
     padding-left: 10px;
     color: #ebebeb;
     font-weight: 600;
     font-size: 16px;
     line-height: 100%;
+
+    &.light {
+      color: #6f767e;
+    }
   }
 }

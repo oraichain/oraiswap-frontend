@@ -1,4 +1,5 @@
 @import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .badge {
   $height: 21px;
@@ -7,7 +8,7 @@
   height: $height;
   border-radius: ($height / 2);
   background: fade-out(white, 0.9);
-  color: white;
+  color: $white-color;
   font-size: 10px;
   font-weight: 500;
   min-width: 90px;

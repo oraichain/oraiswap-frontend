@@ -1,13 +1,13 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { PoolInfoResponse, RewardsPerSecResponse } from 'libs/contracts/OraiswapStaking.types';
+import { OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { TokenInfo } from 'types/token';
 import { PairInfoData } from 'pages/Pools/helpers';
 import { constants } from '../listing-simulate';
 interface TestCaculateApr {
   poolList: PairInfoData[];
   allLpTokenInfos: TokenInfo[];
-  allTokenAssetInfos: PoolInfoResponse[];
-  allRewardPerSec: RewardsPerSecResponse[];
+  allTokenAssetInfos: OraiswapStakingTypes.PoolInfoResponse[];
+  allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[];
 }
 
 // export const testCaculateAprDatas: TestCaculateApr[] = [

@@ -68,8 +68,8 @@ export const useFetchPairInfoDataList = () => {
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);
   const fetchPairInfoDataList = async () => {
     const res = await fetchPoolListAndOraiPrice(cachedPairs);
-    res.pairInfo && setPairInfos(res.pairInfo);
-    res.oraiPrice && setOraiPrice(res.oraiPrice);
+    res?.pairInfo && setPairInfos(res.pairInfo);
+    res?.oraiPrice && setOraiPrice(res.oraiPrice);
   };
 
   useEffect(() => {

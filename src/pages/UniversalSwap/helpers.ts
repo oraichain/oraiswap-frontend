@@ -3,12 +3,12 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
-import { NetworkChainId } from 'config/chainInfos';
+import { NetworkChainId, chainInfos } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
-import { TransferBackMsg, Uint128 } from 'libs/contracts';
+import { TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
@@ -21,6 +21,21 @@ export interface SwapData {
   metamaskAddress?: string;
   tronAddress?: string;
 }
+
+export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: string, tronAddress?: string | boolean) => {
+  switch (chainId) {
+    case '0x01':
+    case '0x38':
+      if (!metamaskAddress) {
+        throw generateError('Please login Metamask wallet!');
+      }
+      break;
+    case '0x2b6653dc':
+      if (!tronAddress) {
+        throw generateError('Please login Tron wallet!');
+      }
+  }
+};
 
 export class UniversalSwapHandler {
   private _sender: string;

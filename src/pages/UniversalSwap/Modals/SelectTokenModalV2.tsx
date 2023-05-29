@@ -7,6 +7,7 @@ import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'l
 import { FC, useRef } from 'react';
 import styles from './SelectTokenModalV2.module.scss';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -32,6 +33,7 @@ const SelectTokenModal: FC<ModalProps> = ({
   setSearchTokenName
 }) => {
   const ref = useRef(null);
+  const [theme] = useConfigReducer('theme');
 
   useOnClickOutside(ref, () => {
     setSearchTokenName('')
@@ -86,10 +88,14 @@ const SelectTokenModal: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
+                setSearchTokenName('')
                 close();
               }}
             >
-              <item.Icon className={cx('logo')} />
+              {theme === 'light'
+                ? item.IconLight ? <item.IconLight className={cx('logo')} /> : <item.Icon className={cx('logo')} />
+                : <item.Icon className={cx('logo')} />
+              }
               <div className={cx('grow')}>
                 <div>{title}</div>
                 <div className={cx('org')}>{org}</div>
