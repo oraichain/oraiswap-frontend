@@ -80,7 +80,8 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     minAmountSwap: minAmountSwapMap[currency.coinMinimalDenom],
     evmDenoms: evmDenomsMap[currency.coinMinimalDenom],
     factoryV1: factoryV1CoinDenoms.includes(currency.coinMinimalDenom),
-    Icon: currency.Icon
+    Icon: currency.Icon,
+    IconLight: currency?.IconLight
   }));
 };
 
