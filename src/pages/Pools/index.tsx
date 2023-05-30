@@ -150,8 +150,6 @@ const ListPools = memo<{
     );
   }, [myPairsData, pairInfos]);
 
-  console.log({ listMyPool, lpPools, pairInfos });
-
   useEffect(() => {
     if (typeFilter === KeyFilterPool.my_pool) {
       setFilteredPairInfos(listMyPool);
@@ -174,26 +172,40 @@ const ListPools = memo<{
     [pairInfos, listMyPool, typeFilter]
   );
 
-  console.log({ filteredPairInfos });
-
   return (
     <div className={styles.listpools}>
-      <div className={styles.listpools_header}>
-        <div className={styles.listpools_filter}>
-          {LIST_FILTER_POOL.map((item) => (
-            <div
-              key={item.key}
-              className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
-              onClick={() => setTypeFilter(item.key)}
-            >
-              {item.text}
-            </div>
-          ))}
+      <div className={styles.listpools_all}>
+
+        <div className={styles.listpools_header}>
+          <div className={styles.listpools_filter}>
+            {LIST_FILTER_POOL.map((item) => (
+              <div
+                key={item.key}
+                className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
+                onClick={() => setTypeFilter(item.key)}
+              >
+                {item.text}
+              </div>
+            ))}
+          </div>
+          <div className={styles.listpools_search}>
+            <SearchInput theme={theme} placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+          </div>
         </div>
-        <div className={styles.listpools_search}>
-          <SearchInput theme={theme} placeholder="Search by pools or tokens name" onSearch={filterPairs} />
+        <div className={styles.listpoolsToken_create}>
+          <div
+            style={{
+              color: '#fff',
+              background: '#612fca'
+            }}
+            className={styles.create_item}
+            onClick={() => setIsOpenNewTokenModal(true)}
+          >
+            List a new token
+          </div>
         </div>
       </div>
+
       <div className={styles.listpools_list}>
         {filteredPairInfos.length > 0 ? (
           filteredPairInfos.map((info) => (
