@@ -101,15 +101,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      // const msgs = await generateMiningMsgs({
-      //   type: Type.BOND_LIQUIDITY,
-      //   sender: `${walletAddr}`,
-      //   amount: `${parsedAmount}`,
-      //   lpToken: lpTokenInfoData.contract_addr,
-      //   assetToken
-      // });
-
-      const msgs = await generateMiningMsgs({
+      const msgs = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
         assetToken: assetToken

@@ -75,3 +75,7 @@ export const ORAIX_INFO = {
 export const OPTIONS_SLIPPAGE = [1, 3, 5];
 export const DEFAULT_SLIPPAGE = OPTIONS_SLIPPAGE[0];
 export const DEFAULT_MANUAL_SLIPPAGE = 2.5;
+
+// create cw20 token
+export const CODE_ID_CW20 = 761;
+export const CW20_DECIMALS = 6;

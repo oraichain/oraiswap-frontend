@@ -1,19 +1,19 @@
-import React, { FC, useState } from 'react';
-import Modal from 'components/Modal';
-import styles from './UnbondModal.module.scss';
 import cn from 'classnames/bind';
+import Loader from 'components/Loader';
+import Modal from 'components/Modal';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { toAmount, toDisplay } from 'libs/utils';
-import NumberFormat from 'react-number-format';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { generateMiningMsgs, Type } from 'rest/api';
-import CosmJs from 'libs/cosmjs';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
-import Loader from 'components/Loader';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { TokenInfo } from 'types/token';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
+import CosmJs from 'libs/cosmjs';
+import { toAmount, toDisplay } from 'libs/utils';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { Type, generateMiningMsgs } from 'rest/api';
+import { TokenInfo } from 'types/token';
+import styles from './UnbondModal.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -55,7 +55,7 @@ const UnbondModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = await generateMiningMsgs({
+      const msgs = generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),

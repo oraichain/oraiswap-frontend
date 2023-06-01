@@ -14,6 +14,7 @@ export const network: CustomChainInfo & NetworkConfig = {
   staking: process.env.REACT_APP_STAKING_CONTRACT,
   rewarder: process.env.REACT_APP_REWARDER_CONTRACT,
   converter: process.env.REACT_APP_CONVERTER_CONTRACT,
+  oraidex_listing: process.env.REACT_APP_ORAIDEX_LISTING_CONTRACT,
   multicall: process.env.REACT_APP_MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io'
 };

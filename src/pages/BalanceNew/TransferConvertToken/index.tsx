@@ -138,7 +138,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         return;
       }
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of BalanceNew based on the user's token destination choice
-      // TODO: to is Oraibridge tokens
+      // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const to = findToToken(token, filterNetwork);
       await onClickTransfer(convertAmount, token, to);

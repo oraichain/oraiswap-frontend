@@ -7,6 +7,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
 
 export interface Tokens {
   denom?: string;
@@ -46,7 +47,7 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
         case 'kawaii_6886-1':
           return `${KWT_SCAN}/tx/${transactionHash}`;
         case 'Oraichain':
-          return `${network.explorer}/txs/${transactionHash}`
+          return `${network.explorer}/txs/${transactionHash}`;
       }
       return null;
   }
@@ -113,18 +114,21 @@ export const handleErrorTransaction = (error: any) => {
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
   } else {
-    if (error?.ex?.message)
-      finalError = String(error.ex.message);
-    else
-      finalError = String(error);
+    if (error?.ex?.message) finalError = String(error.ex.message);
+    else finalError = String(error);
   }
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
-}
+};
 
 export const calculateTimeoutTimestamp = (timeout: number): string => {
   return Long.fromNumber(Math.floor(Date.now() / 1000) + timeout)
     .multiply(1000000000)
     .toString();
-}
+};
+
+export const parseAssetInfo = (assetInfo: AssetInfo): string => {
+  if ('native_token' in assetInfo) return assetInfo.native_token.denom;
+  return assetInfo.token.contract_addr;
+};
