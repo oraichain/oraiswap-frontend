@@ -149,7 +149,7 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setSwapLoading(false);
     }
@@ -261,7 +261,7 @@ const SwapComponent: React.FC<{
         {swapLoading && <Loader width={40} height={40} />}
         {/* hardcode check minimum tron */}
         {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-          <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+          <span>Minimum amount: {(fromToken.minAmountSwap ?? '0') + ' ' + fromToken.name} </span>
         ) : (
           <span>Swap</span>
         )}
@@ -300,7 +300,7 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           amounts={amounts}
@@ -315,7 +315,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {

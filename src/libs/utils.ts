@@ -2,8 +2,8 @@ import bech32 from 'bech32';
 import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
-import { AssetInfo } from './contracts';
-import { TokenInfoResponse } from './contracts/OraiswapToken.types';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 
 export const truncDecimals = 6;
 export const atomic = 10 ** truncDecimals;

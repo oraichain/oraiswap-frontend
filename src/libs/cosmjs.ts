@@ -1,7 +1,7 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import { EncodeObject } from '@cosmjs/proto-signing';
-import { Coin, isDeliverTxFailure, logs } from '@cosmjs/stargate';
+import { Coin, GasPrice, isDeliverTxFailure, logs } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 
@@ -41,8 +41,8 @@ const getCosmWasmClient = async () => {
   const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
     gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
   });
-  return { wallet, client, defaultAddress: defaultAddress };
-}
+  return { wallet, client, defaultAddress };
+};
 
 const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
   console.log('messages in parse execute contract: ', msgs);
@@ -302,6 +302,12 @@ class CosmJs {
   }
 }
 
-export { getCosmWasmClient, collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple, getAminoExecuteContractMsgs };
+export {
+  getCosmWasmClient,
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs
+};
 
 export default CosmJs;
