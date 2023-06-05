@@ -15,6 +15,7 @@ import { Coin, StargateClient } from '@cosmjs/stargate';
 import { OfflineDirectSigner } from '@keplr-wallet/types';
 import { getEvmAddress } from './utils';
 import { chainInfos } from 'config/chainInfos';
+import { calculateTimeoutTimestamp } from 'helper';
 
 async function getAccountInfo(accAddress: string) {
   const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
@@ -249,7 +250,7 @@ export default class KawaiiverseJs {
 
       const params = {
         ...ibcInfo,
-        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(),
+        timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeoutTimestamp),
         revisionNumber: 0,
         revisionHeight: 0
       };
@@ -301,7 +302,6 @@ export default class KawaiiverseJs {
       const { wallet, accounts } = await getWallet(subnetwork.chainId as string);
 
       const fee = { ...gasAmount, gas: gasLimits.exec.toString() };
-
       let senderInfo = await getSenderInfo(sender, accounts[0].pubkey);
 
       const params = {
@@ -309,13 +309,12 @@ export default class KawaiiverseJs {
         contractAddress: contractAddr,
         destinationAddress: sender, // we want to convert erc20 token from eth address to native token with native address => use native sender address
         amount,
-        timeoutTimestamp: Long.fromNumber(ibcInfo.timeoutTimestamp).multiply(1000000000).toString(),
+        timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeoutTimestamp),
         revisionNumber: 0,
         revisionHeight: 0
       };
 
       const evmAddress = getEvmAddress(senderInfo.accountAddress);
-
       const { signDirect } = createMessageConvertIbcTransferERC20(
         { chainId: chainIdNumber, cosmosChainId: subnetwork.chainId as string },
         senderInfo,
