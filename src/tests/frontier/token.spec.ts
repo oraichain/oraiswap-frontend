@@ -1,6 +1,6 @@
 // import { addPairAndLpToken, msgsTextProposal, deployCw20Token, getPairAndLpAddress } from 'libs/frontier/token';
 import { toAmount } from 'libs/utils';
-import { client, deployOraiDexContracts } from 'tests/listing-simulate';
+import { deployOraiDexContracts } from 'tests/listing-simulate';
 import { network } from 'config/networks';
 import { CODE_ID_CW20 } from 'config/constants';
 
