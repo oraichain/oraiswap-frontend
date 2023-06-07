@@ -16,12 +16,12 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { toAmount, toDisplay } from 'libs/utils';
 import { oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { ORAI } from 'config/constants';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { Asset } from '@oraichain/oraidex-contracts-sdk';
 import useClickOutside from 'hooks/useClickOutSide';
 import { Pairs } from 'config/pools';
 import { OraidexListingContractClient } from 'libs/contracts';
+import CheckBox from 'components/CheckBox';
+import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -37,12 +37,96 @@ const checkRegex = (str: string) => {
   return regex.test(str);
 };
 
-const NewRewardItems = ({ setIsNewReward, oraiReward, isNewReward, i }) => {
-  const [oraiPer, setOraiPer] = useState(BigInt(1e6));
+const ModalListToken = ({ position, isNewReward, setIsNewReward, allRewardSelect }) => {
   const [searchText, setSearchText] = useState('');
-  const originalFromToken = tokenMap?.[isNewReward?.[i]?.denom];
-  let Icon = originalFromToken?.Icon ?? originalFromToken?.IconLight;
+  return (
+    <div className={cx('dropdown-reward')}>
+      <div>
+        <div className={cx('label')}>Enter Token’s contract to add new tokens !</div>
+        <div className={cx('check')}>
+          <Input
+            value={searchText}
+            onChange={(e) => setSearchText(e?.target?.value)}
+            placeholder="0xd3f2jlwxt...1f009"
+          />
+          <div className={cx('btn')}>
+            <div>
+              <PlusIcon />
+              <span>Add Token</span>
+            </div>
+          </div>
+        </div>
+        <div className={cx('list')}>
+          <ul>
+            {Pairs.getPoolTokens()
+              .filter((pair) => !allRewardSelect.includes(pair.denom))
+              .map((t, index) => {
+                return (
+                  <li
+                    key={index + '' + t?.name}
+                    onClick={() => {
+                      setIsNewReward(
+                        isNewReward.map((isReward, ind) => {
+                          return position == ind + 1
+                            ? { ...isReward, denom: t.denom, name: t.name, contract_addr: t?.contractAddress }
+                            : isReward;
+                        })
+                      );
+                    }}
+                  >
+                    <t.Icon className={cx('logo')} />
+                    <span>{t?.name}</span>
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
 
+const ModalDelete = ({ setDeleteReward, deleteReward, setIsNewReward, isNewReward }) => {
+  return (
+    <div
+      className={cx('dropdown-reward')}
+      style={{
+        width: 430,
+        fontSize: 16
+      }}
+    >
+      <div className={cx('title-reward')}>
+        <span> Delete Token Reward</span>
+      </div>
+      <div className={cx('content-reward')}>
+        Are you sure delete <span>{isNewReward?.[deleteReward - 1]?.name} Reward</span> ?
+      </div>
+      <div className={cx('action')}>
+        <div
+          className={cx('btn', 'btn-cancel')}
+          onClick={() => {
+            setDeleteReward(0);
+          }}
+        >
+          <span>Cancel</span>
+        </div>
+        <div
+          className={cx('btn', 'btn-delete')}
+          onClick={() => {
+            setIsNewReward([...isNewReward.filter((_, ind) => ind + 1 !== deleteReward)]);
+            setDeleteReward(0);
+          }}
+        >
+          <span>Delete</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const NewRewardItems = ({ item, i, setPosition, setDeleteReward }) => {
+  const originalFromToken = tokenMap?.[item?.denom];
+  let Icon = originalFromToken?.Icon ?? originalFromToken?.IconLight;
   return (
     <div className={cx('orai')}>
       <div className={cx('orai_label')}>
@@ -50,123 +134,11 @@ const NewRewardItems = ({ setIsNewReward, oraiReward, isNewReward, i }) => {
         <div
           className={cx('per')}
           onClick={() => {
-            const isNewArrReward = isNewReward.map((reward, index) => {
-              return {
-                ...reward,
-                isOpen: i === index && !isNewReward[index]?.isOpen ? true : false
-              };
-            });
-            setIsNewReward(isNewArrReward);
+            setPosition(i + 1);
           }}
         >
-          <span style={{ textTransform: 'uppercase' }}>{isNewReward?.[i]?.denom}</span> Reward/s
+          <span>{item?.name}</span> Reward/s
         </div>
-        {isNewReward?.[i]?.isOpen && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 50,
-              background: '#23262F',
-              width: 330,
-              maxHeight: 373,
-              zIndex: 1,
-              overflow: 'auto',
-              borderRadius: 8,
-              padding: 16
-            }}
-          >
-            <div>
-              <div style={{ paddingLeft: 10, paddingRight: 10, color: 'rgba(255, 222, 91, 1)', fontSize: 14 }}>
-                Enter Token’s contract to add new tokens !
-              </div>
-              <div
-                style={{
-                  height: 48,
-                  backgroundColor: '#333443',
-                  borderRadius: 8,
-                  fontWeight: 500,
-                  fontSize: 16,
-                  color: 'white',
-                  marginTop: 16,
-                  padding: '13px 4px 13px 16px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <Input
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  placeholder="0xd3f2jlwxt...1f009"
-                />
-                <div
-                  style={{
-                    backgroundColor: 'rgba(126, 92, 197, 1)',
-                    color: 'rgba(217, 217, 217, 1)',
-                    borderRadius: 8,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      paddingTop: 8,
-                      paddingBottom: 8,
-                      paddingLeft: 4,
-                      paddingRight: 4
-                    }}
-                  >
-                    <PlusIcon />
-                    <span
-                      style={{
-                        fontSize: 12
-                      }}
-                    >
-                      Add Token
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <ul
-                  style={{
-                    paddingTop: 16
-                  }}
-                >
-                  {Pairs.getPoolTokens().map((t, index) => {
-                    return (
-                      <li
-                        key={index + '' + t.name}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: 10,
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                          setIsNewReward(
-                            isNewReward.map((isReward, ind) => {
-                              return i == ind ? { ...isReward, denom: t.denom, isOpen: false } : isReward;
-                            })
-                          );
-                        }}
-                      >
-                        <t.Icon
-                          style={{
-                            width: 28,
-                            height: 28
-                          }}
-                        />
-                        <span style={{ paddingLeft: 10 }}>{t.name}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <div className={cx('input_per')}>
         <NumberFormat
@@ -174,22 +146,21 @@ const NewRewardItems = ({ setIsNewReward, oraiReward, isNewReward, i }) => {
           thousandSeparator
           decimalScale={6}
           customInput={Input}
-          value={toDisplay(oraiPer.toString(), oraiReward.decimals)}
+          value={toDisplay('1000000', 6)}
           onClick={(event) => {
             event.stopPropagation();
           }}
-          onValueChange={(e) => {
-            setOraiPer(toAmount(Number(e.value), 6));
-          }}
+          onValueChange={(e) => {}}
           className={cx('value')}
         />
       </div>
       <div
         style={{
-          cursor: 'pointer'
+          cursor: 'pointer',
+          marginLeft: 6
         }}
         onClick={() => {
-          setIsNewReward([...isNewReward.filter((_, ind) => ind !== i)]);
+          setDeleteReward(i + 1);
         }}
       >
         <TrashIcon />
@@ -200,31 +171,46 @@ const NewRewardItems = ({ setIsNewReward, oraiReward, isNewReward, i }) => {
 
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [tokenName, setTokenName] = useState('');
+  const [isMinter, setIsMinter] = useState(false);
   const [minter, setMinter] = useState('');
-  // const [numToken, setNumToken] = useState(1);
-  // const [oraiPer, setOraiPer] = useState(BigInt(1e6));
-  // const [oraixPer, setOraixPer] = useState(BigInt(1e6));
-  const [isLoading, setIsLoading] = useState(false);
-  const [isNewReward, setIsNewReward] = useState([
+
+  const [name, setName] = useState('');
+  const [marketing, setMarketing] = useState({
+    description: null,
+    logo: null,
+    marketing: null,
+    project: null
+  });
+
+  const [isInitBalances, setIsInitBalances] = useState(false);
+  const [initBalances, setInitBalances] = useState([
     {
-      denom: 'orai',
-      isOpen: false,
-      value: 100000
+      address: '',
+      amount: BigInt(1e6)
     }
   ]);
 
+  const [position, setPosition] = useState(0);
+  const [deleteReward, setDeleteReward] = useState(0);
+  const [cap, setCap] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNewReward, setIsNewReward] = useState([
+    {
+      name: 'orai',
+      denom: 'orai',
+      value: BigInt(1e6),
+      contract_addr: ''
+    }
+  ]);
+
+  const allRewardSelect = isNewReward.map((item) => item['denom']);
   const handleOutsideClick = () => {
-    const checkOpenReward = isNewReward.find((re) => re.isOpen);
-    if (!checkOpenReward) return;
-    setIsNewReward(isNewReward.map((re) => ({ ...re, isOpen: false })));
+    if (position) setPosition(0);
+    if (deleteReward) setDeleteReward(0);
   };
 
   const ref = useClickOutside(handleOutsideClick);
 
-  const oraiReward = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
-  // const oraixReward = oraichainTokens.find(
-  //   (token) => token.contractAddress === 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge'
-  // );
   const handleCreateToken = async () => {
     try {
       if (!checkRegex(tokenName))
@@ -239,34 +225,57 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           message: 'Wallet address does not exist!'
         });
 
-      if (!tokenName) {
+      if (!tokenName)
         return displayToast(TToastType.TX_FAILED, {
           message: 'Empty token symbol!'
         });
+
+      if (isInitBalances) {
+        initBalances.every((inBa) => {
+          if (!inBa.address) {
+            return displayToast(TToastType.TX_FAILED, {
+              message: 'Wrong address format!'
+            });
+          }
+        });
       }
 
-      const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
+      if (isMinter && !minter)
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'Wrong minter format!'
+        });
+
+      const initialBalances = initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }));
       const liquidityPoolRewardAssets = isNewReward.map((isReward) => {
         return {
-          amount: isReward?.value,
-          info: { native_token: { denom: ORAI } }
+          amount: isReward?.value.toString(),
+          info: getInfoLiquidityPool(isReward)
         };
       });
+      const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
       // TODO: add more options for users like name, marketing, additional token rewards
+      const msg = generateMsgFrontierAddToken({
+        marketing,
+        symbol: tokenName,
+        liquidityPoolRewardAssets,
+        name,
+        isInitBalances,
+        initialBalances,
+        isMinter,
+        mint: {
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
+      });
 
-      // const result = await oraidexListing.listToken({
-      //   symbol: tokenSymbol,
-      //   liquidityPoolRewardAssets: [
-      //     { amount: rewardPerSecondOrai.toString(), info: { native_token: { denom: ORAI } } },
-      //     { amount: envVariables.orai_reward_per_sec, info: { native_token: { denom: 'orai' } } }
-      //   ]
-      // });
-      // if (result) {
-      //   displayToast(TToastType.TX_SUCCESSFUL, {
-      //     customLink: `${network.explorer}/txs/${result.transactionHash}`
-      //   });
-      //   setIsLoading(false);
-      // }
+      const result = await oraidexListing.listToken(msg);
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        close();
+        setIsLoading(false);
+      }
     } catch (error) {
       console.log('error listing token: ', error);
       handleErrorTransaction(error);
@@ -276,57 +285,148 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
+      {position || deleteReward ? <div className={cx('overlay')} /> : null}
       <div className={cx('container')}>
         <RewardIcon className={cx('reward-icon')} />
         <div className={cx('title')}>List a new token</div>
         <div className={cx('content')}>
           <div className={cx('token')}>
-            <div className={cx('label')}>Token name</div>
-            <div className={cx('input')}>
-              <div>
-                <Input value={tokenName} onChange={(e) => setTokenName(e?.target?.value)} placeholder="ORAICHAIN" />
+            <div className={cx('row')}>
+              <div className={cx('label')}>Token name</div>
+              <div className={cx('input')}>
+                <div>
+                  <Input value={tokenName} onChange={(e) => setTokenName(e?.target?.value)} placeholder="ORAICHAIN" />
+                </div>
               </div>
             </div>
-          </div>
-          <div style={{ height: 24 }} />
-          <div className={cx('token')}>
-            <div className={cx('label')}>Minter</div>
-            <Input
-              className={cx('input')}
-              value={minter}
-              onChange={(e) => setMinter(e?.target?.value)}
-              placeholder="MINTER"
-            />
+            <div className={cx('option')}>
+              <CheckBox
+                className={cx('c-box')}
+                label="Init balance"
+                checked={isInitBalances}
+                onCheck={setIsInitBalances}
+              />
+              <CheckBox label="Minter" checked={isMinter} onCheck={setIsMinter} />
+            </div>
+            {isInitBalances &&
+              initBalances.map((inBa, ind) => {
+                return (
+                  <div key={ind}>
+                    <div className={cx('row')}>
+                      <div className={cx('label')}>Address</div>
+                      <Input
+                        className={cx('input')}
+                        value={inBa.address}
+                        onChange={(e) => {
+                          setInitBalances(
+                            initBalances.map((ba, i) => ({
+                              amount: ba.amount,
+                              address: ind === i ? e?.target?.value : ba.address
+                            }))
+                          );
+                        }}
+                        placeholder="ADDRESS"
+                      />
+                    </div>
+                    <div className={cx('row')}>
+                      <div className={cx('label')}>Amount</div>
+                      <NumberFormat
+                        placeholder="0"
+                        className={cx('input')}
+                        style={{
+                          color: 'rgb(255, 222, 91)'
+                        }}
+                        thousandSeparator
+                        decimalScale={6}
+                        type="text"
+                        value={toDisplay(inBa.amount)}
+                        onValueChange={({ floatValue }) => {
+                          setInitBalances(
+                            initBalances.map((ba, i) => ({
+                              amount: toAmount(ind === i ? floatValue?.toString() : ba.amount.toString()),
+                              address: ba.address
+                            }))
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            {isMinter && (
+              <>
+                <div className={cx('row')}>
+                  <div className={cx('label')}>Minter</div>
+                  <Input
+                    className={cx('input')}
+                    value={minter}
+                    onChange={(e) => setMinter(e?.target?.value)}
+                    placeholder="MINTER"
+                  />
+                </div>
+                <div className={cx('row')}>
+                  <div className={cx('label')}>Cap (Option)</div>
+                  <NumberFormat
+                    placeholder="0"
+                    className={cx('input')}
+                    style={{
+                      color: 'rgb(255, 222, 91)'
+                    }}
+                    thousandSeparator
+                    decimalScale={6}
+                    type="text"
+                    value={cap}
+                    onValueChange={({ floatValue }) => {
+                      setCap(floatValue);
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <div
             className={cx('add-reward-btn')}
-            onClick={() =>
+            onClick={() => {
+              const filterPair = Pairs.getPoolTokens().find((pair) => !allRewardSelect.includes(pair.denom));
+              if (!filterPair) return;
               setIsNewReward([
                 ...isNewReward,
                 {
-                  denom: 'orai',
-                  isOpen: false,
-                  value: 100000
+                  name: filterPair?.name,
+                  denom: filterPair?.denom,
+                  value: BigInt(1e6),
+                  contract_addr: filterPair?.contractAddress
                 }
-              ])
-            }
+              ]);
+            }}
           >
             <span> Add Token Reward</span>
           </div>
           <div className={cx('rewards')} ref={ref}>
-            {isNewReward?.map((items, index) => {
+            {isNewReward?.map((item, index) => {
               return (
                 <div key={index}>
-                  <NewRewardItems
-                    i={index}
-                    setIsNewReward={setIsNewReward}
-                    isNewReward={isNewReward}
-                    oraiReward={oraiReward}
-                  />
-                  {index != 4 && <div style={{ height: 32 }} />}
+                  <NewRewardItems setPosition={setPosition} i={index} item={item} setDeleteReward={setDeleteReward} />
+                  {index >= 0 && <div style={{ height: 32 }} />}
                 </div>
               );
             })}
+            {deleteReward ? (
+              <ModalDelete
+                deleteReward={deleteReward}
+                setIsNewReward={setIsNewReward}
+                setDeleteReward={setDeleteReward}
+                isNewReward={isNewReward}
+              />
+            ) : null}
+            {position ? (
+              <ModalListToken
+                position={position}
+                setIsNewReward={setIsNewReward}
+                isNewReward={isNewReward}
+                allRewardSelect={allRewardSelect}
+              />
+            ) : null}
           </div>
         </div>
         <div
