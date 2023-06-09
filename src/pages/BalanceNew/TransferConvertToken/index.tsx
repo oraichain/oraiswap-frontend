@@ -43,7 +43,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   onClickTransfer,
   subAmounts
 }) => {
-  const bridgeNetworks = networks.filter(item => filterChainBridge(token, item));
+  const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
 
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
@@ -63,12 +63,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   useEffect(() => {
     const chainDefault = bridgeNetworks?.[0].chainId;
     setFilterNetwork(chainDefault);
-    const findNetwork = networks.find(net => net.chainId == chainDefault);
+    const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
   }, [token?.chainId]);
 
   // list of tokens where it exists in at least two different chains
-  const listedTokens = cosmosTokens.filter(t => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
+  const listedTokens = cosmosTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
   const maxAmount = toDisplay(
     amountDetail.amount, // amount detail here can be undefined
     token?.decimals
@@ -131,7 +131,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       }
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
       if (
-        evmChains.find(chain => chain.chainId === token.chainId) ||
+        evmChains.find((chain) => chain.chainId === token.chainId) ||
         (token.chainId === 'Oraichain' && filterNetwork === 'kawaii_6886-1')
       ) {
         await onClickTransfer(convertAmount);
@@ -150,9 +150,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
-  const network = bridgeNetworks.find(n => n.chainId == filterNetwork);
+  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
+    const buttonName = filterNetwork === token.chainId ? 'Convert to' : 'Transfer to';
     return buttonName + network?.chainName;
   };
 
@@ -188,7 +188,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             <div className={styles.transfer}>
               <div
                 className={styles.content}
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   copy(addressTransfer);
                   setCopied(true);
@@ -204,7 +204,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             <div className={styles.search}>
               <div
                 className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
-                onClick={event => {
+                onClick={(event) => {
                   event.stopPropagation();
                   setCopied(false);
                   if (bridgeNetworks.length > 1) setIsOpen(!isOpen);
@@ -238,12 +238,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 <div>
                   <ul className={classNames(styles.items, styles.items + ` ${styles[theme]}`)}>
                     {networks
-                      .filter(item => filterChainBridge(token, item))
-                      .map(network => {
+                      .filter((item) => filterChainBridge(token, item))
+                      .map((network) => {
                         return (
                           <li
                             key={network.chainId}
-                            onClick={async e => {
+                            onClick={async (e) => {
                               e.stopPropagation();
                               setFilterNetwork(network.chainId);
                               await getAddressTransfer(network);
@@ -286,7 +286,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 decimalScale={Math.min(6, token?.decimals)}
                 customInput={Input}
                 value={convertAmount}
-                onClick={event => {
+                onClick={(event) => {
                   event.stopPropagation();
                 }}
                 onValueChange={({ floatValue }) => {
@@ -306,7 +306,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 <button
                   key={coeff}
                   className={classNames(styles.balanceBtn, styles.balanceBtn + ` ${styles[theme]}`)}
-                  onClick={event => {
+                  onClick={(event) => {
                     event.stopPropagation();
                     // hardcode estimate fee oraichain
                     let finalAmount = maxAmount;
@@ -331,7 +331,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          if (listedTokens.length > 0 || evmChains.find(chain => chain.chainId === token.chainId)) {
+          if (listedTokens.length > 0 || evmChains.find((chain) => chain.chainId === token.chainId)) {
             return (
               <button
                 disabled={transferLoading || !addressTransfer}
