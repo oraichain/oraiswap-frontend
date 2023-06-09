@@ -8,7 +8,16 @@ import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 
 export default class Metamask {
-  constructor() { }
+  constructor() {}
+
+  public static checkEthereum() {
+    if (window.ethereum) {
+      return true;
+    }
+
+    displayInstallWallet('Metamask');
+    return false;
+  }
 
   public isWindowEthereum() {
     return !!window.ethereum;
@@ -78,18 +87,22 @@ export default class Metamask {
   }
 
   public async switchNetwork(chainId: string | number) {
-    await window.ethereum.request!({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x' + Number(chainId).toString(16) }]
-    });
+    if (Metamask.checkEthereum()) {
+      await window.ethereum.request!({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x' + Number(chainId).toString(16) }]
+      });
+    }
   }
 
   public async getEthAddress() {
-    const [address] = await window.ethereum!.request({
-      method: 'eth_requestAccounts',
-      params: []
-    });
-    return address;
+    if (Metamask.checkEthereum()) {
+      const [address] = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+        params: []
+      });
+      return address;
+    }
   }
 
   public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
@@ -110,7 +123,7 @@ export default class Metamask {
           ],
           tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
-    } else {
+    } else if (Metamask.checkEthereum()) {
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
       if (!gravityContractAddr || !from || !to) return;
@@ -146,7 +159,7 @@ export default class Metamask {
           ],
           ownerHex
         );
-    } else {
+    } else if (Metamask.checkEthereum()) {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
       const web3 = new Web3(window.ethereum);
