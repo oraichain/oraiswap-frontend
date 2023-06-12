@@ -3,20 +3,65 @@ import { toAmount } from 'libs/utils';
 import { deployOraiDexContracts } from 'tests/listing-simulate';
 import { network } from 'config/networks';
 import { CODE_ID_CW20 } from 'config/constants';
+import { generateMsgFrontierAddToken, getInfoLiquidityPool } from 'pages/Pools/helpers';
 
 describe('frontier-cw20-token', () => {
-  let cw20ContractAddress = null;
-  let codeId = CODE_ID_CW20;
-  let pairAddressSimulate = null;
-  let lpAddressSimulate = null;
-  let factoryContract = '';
+  const marketing = {
+    description: null,
+    logo: null,
+    marketing: null,
+    project: null
+  };
+  const tokenName = 'BabyMario';
+  const name = '';
+  const isNewReward = [
+    {
+      name: 'orai',
+      denom: 'orai',
+      value: BigInt(1e6),
+      contract_addr: ''
+    }
+  ];
 
-  const senderAddress = 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g';
-  const tokenSymbol = 'TokenTest';
-  const rewardPerSecondOrai = toAmount(1e6);
-  const rewardPerSecondOraiX = toAmount(1e6);
+  const mint = {
+    minter: 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz',
+    cap: '100000000000000'
+  };
 
-  it('todo: update new testcase', () => {});
+  const initBalances = [
+    {
+      address: 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz',
+      amount: BigInt(1e6)
+    }
+  ];
+
+  it('msgs-list-token', async () => {
+    const initialBalances = initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }));
+    const liquidityPoolRewardAssets = isNewReward.map((isReward) => {
+      return {
+        amount: isReward?.value.toString(),
+        info: getInfoLiquidityPool(isReward)
+      };
+    });
+
+    const msgs = await generateMsgFrontierAddToken({
+      marketing,
+      symbol: tokenName,
+      liquidityPoolRewardAssets,
+      name,
+      initialBalances,
+      mint
+    });
+
+    expect(msgs && typeof msgs === 'object').toBe(true);
+    expect(msgs).toHaveProperty('marketing');
+    expect(msgs).toHaveProperty('symbol');
+    expect(msgs).toHaveProperty('mint');
+    expect(msgs).toHaveProperty('name');
+    expect(msgs).toHaveProperty('initialBalances');
+    expect(Array.isArray(msgs.initialBalances)).toBe(true);
+    expect(Array.isArray(msgs.liquidityPoolRewardAssets)).toBe(true);
+  });
 
   // beforeAll(async () => {
   //   const { factory, tokenCodeId } = await deployOraiDexContracts();

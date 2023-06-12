@@ -222,16 +222,12 @@ const generateMsgFrontierAddToken = ({
   symbol,
   liquidityPoolRewardAssets,
   name,
-  isInitBalances,
   initialBalances,
-  isMinter,
   mint,
   label
 }: {
   initialBalances?: Cw20Coin[];
   mint?: MinterResponse;
-  isMinter?: boolean;
-  isInitBalances?: boolean;
   marketing?: InstantiateMarketingInfo;
   label?: string;
   name?: string;
@@ -250,8 +246,8 @@ const generateMsgFrontierAddToken = ({
     symbol,
     liquidityPoolRewardAssets
   };
-  if (isMinter) msgAddTokenFrontier.mint = mint;
-  if (isInitBalances) msgAddTokenFrontier.initialBalances = initialBalances;
+  if (mint) msgAddTokenFrontier.mint = mint;
+  if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
 
   if (marketing) msgAddTokenFrontier.marketing = marketing;
   if (name) msgAddTokenFrontier.name = name;
