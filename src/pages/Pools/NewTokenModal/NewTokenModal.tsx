@@ -20,7 +20,8 @@ import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import _ from 'lodash';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex } from 'libs/utils';
+import { checkRegex, reduceString, toAmount, toDisplay } from 'libs/utils';
+import sumBy from 'lodash/sumBy';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -58,7 +59,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   ]);
 
   const [indReward, setIndReward] = useState(0);
-  const [cap, setCap] = useState(0);
+  const [cap, setCap] = useState(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
   const [rewardTokens, setRewardTokens] = useState([
     {
@@ -78,40 +79,53 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const ref = useClickOutside(handleOutsideClick);
 
   const handleCreateToken = async () => {
-    try {
-      if (!checkRegex(tokenName))
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Token name is required and must be letter (3 to 12 characters)'
-        });
+    if (!checkRegex(tokenName))
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Token name is required and must be letter (3 to 12 characters)'
+      });
 
-      setIsLoading(true);
-      const { client, defaultAddress: address } = await getCosmWasmClient();
-      if (!address)
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Wallet address does not exist!'
-        });
+    const { client, defaultAddress: address } = await getCosmWasmClient();
+    if (!address)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Wallet address does not exist!'
+      });
 
-      if (!tokenName)
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Empty token symbol!'
-        });
+    if (!tokenName)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Empty token symbol!'
+      });
 
-      if (isInitBalances) {
-        initBalances.every((inBa) => {
-          if (!inBa.address) {
-            return displayToast(TToastType.TX_FAILED, {
-              message: 'Wrong address format!'
-            });
-          }
+    if (isInitBalances) {
+      initBalances.every((inBa) => {
+        if (!inBa.address || inBa.address.length !== 43 || inBa.address.slice(0, 4).toLowerCase() !== 'orai') {
+          return displayToast(TToastType.TX_FAILED, {
+            message: 'Wrong address format!'
+          });
+        }
+      });
+    }
+
+    if (isMinter && !minter)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Wrong minter format!'
+      });
+
+    //TODO: check minter addresss
+    //TODO: check balances mint and init balances
+    if (isMinter && isInitBalances && cap) {
+      const amountAllInit = sumBy(initBalances, 'amount');
+      if (amountAllInit > cap) {
+        return displayToast(TToastType.TX_FAILED, {
+          message: 'Cap need bigger init balances!'
         });
       }
+    }
+    await signFrontierListToken(client, address);
+  };
 
-      if (isMinter && !minter)
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Wrong minter format!'
-        });
-
-      const initialBalances = initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }));
+  const signFrontierListToken = async (client, address) => {
+    try {
+      setIsLoading(true);
       const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
         return {
           amount: isReward?.value.toString(),
@@ -127,13 +141,16 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           }
         : undefined;
 
-      const initialBalancesArr = isInitBalances ? initialBalances : undefined;
+      const initialBalances = isInitBalances
+        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
+        : undefined;
+
       const msg = generateMsgFrontierAddToken({
         marketing,
         symbol: tokenName,
         liquidityPoolRewardAssets,
         name,
-        initialBalances: initialBalancesArr,
+        initialBalances,
         mint
       });
 
@@ -143,11 +160,11 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
         close();
-        setIsLoading(false);
       }
     } catch (error) {
       console.log('error listing token: ', error);
       handleErrorTransaction(error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -197,7 +214,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <div className={cx('label')}>Minter</div>
                     <Input
                       className={cx('input')}
-                      value={minter}
+                      value={reduceString(minter, 12, 12)}
                       onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
@@ -218,9 +235,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       thousandSeparator
                       decimalScale={6}
                       type="text"
-                      value={cap}
+                      value={toDisplay(cap)}
                       onValueChange={({ floatValue }) => {
-                        setCap(floatValue);
+                        setCap(toAmount(floatValue));
                       }}
                     />
                   </div>

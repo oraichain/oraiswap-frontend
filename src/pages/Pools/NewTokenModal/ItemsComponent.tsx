@@ -5,7 +5,7 @@ import _ from 'lodash';
 import NumberFormat from 'react-number-format';
 import CheckBox from 'components/CheckBox';
 import { tokenMap } from 'config/bridgeTokens';
-import { toAmount, toDisplay } from 'libs/utils';
+import { reduceString, toAmount, toDisplay } from 'libs/utils';
 import { ReactComponent as WalletIcon } from 'assets/icons/wallet1.svg';
 
 const cx = cn.bind(styles);
@@ -92,7 +92,7 @@ export const InitBalancesItems = ({
         <div className={cx('label')}>Address</div>
         <Input
           className={cx('input')}
-          value={item.address}
+          value={reduceString(item.address, 12, 12)}
           onChange={(e) => {
             setInitBalances(
               initBalances.map((ba, i) => ({
