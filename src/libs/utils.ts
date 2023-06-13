@@ -8,6 +8,11 @@ import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/Oraisw
 export const truncDecimals = 6;
 export const atomic = 10 ** truncDecimals;
 
+export const checkRegex = (str: string, regex?: RegExp) => {
+  const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
+  return re.test(str);
+};
+
 export const getEvmAddress = (bech32Address: string) => {
   if (!bech32Address) return;
   const decoded = bech32.decode(bech32Address);
@@ -136,10 +141,10 @@ export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): Tok
 export const toAssetInfo = (token: TokenInfo): AssetInfo => {
   return token.contractAddress
     ? {
-      token: {
-        contract_addr: token.contractAddress
+        token: {
+          contract_addr: token.contractAddress
+        }
       }
-    }
     : { native_token: { denom: token.denom } };
 };
 

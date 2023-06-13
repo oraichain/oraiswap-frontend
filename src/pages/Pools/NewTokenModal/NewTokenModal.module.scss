@@ -1,3 +1,6 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+
 .modal {
   max-width: 900px;
   .container {
@@ -12,6 +15,9 @@
       align-items: center;
       .title {
         font-size: 32px;
+        @include mobile {
+          font-size: 20px;
+        }
         font-weight: 600;
         padding-left: 16px;
         text-transform: uppercase;
@@ -22,8 +28,13 @@
       width: 100%;
       height: 60vh;
       display: flex;
+      @include mobile {
+        flex-direction: column;
+        height: 50vh;
+      }
       .box {
         width: 50%;
+
         background-color: #17181c;
         border: 1px solid rgba(225, 240, 255, 0.2027);
         border-radius: 16px;
@@ -32,6 +43,17 @@
         }
         &:nth-child(2) {
           margin-left: 4px;
+        }
+        @include mobile {
+          width: 100%;
+          &:nth-child(1) {
+            margin-right: 0px;
+          }
+          &:nth-child(2) {
+            margin-left: 0px;
+          }
+          margin-top: 10px;
+          margin-bottom: 10px;
         }
         padding: 24px;
         height: 100%;
@@ -62,11 +84,11 @@
               display: flex;
               align-items: center;
               justify-content: space-between;
-              // position: relative;
-              @media (max-width: 575px) {
+              @include mobile {
                 font-size: 15px;
-                width: 100%;
+                width: 60%;
               }
+
               &::placeholder {
                 color: #505665;
               }
@@ -122,6 +144,7 @@
         .rewards {
           max-height: 400px;
           .orai {
+            padding-bottom: 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -155,11 +178,13 @@
               border-radius: 8px;
               .value {
                 padding-left: 16px;
+                padding-right: 16px;
                 color: rgba(255, 222, 91, 1);
                 font-weight: 500;
                 font-size: 18px;
                 text-align: center;
                 line-height: 100%;
+                width: 100%;
               }
             }
           }
@@ -235,6 +260,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
+  @include mobile {
+    max-width: 80%;
+    font-size: 12px;
+  }
   background: #23262f;
   width: 330px;
   max-height: 373px;

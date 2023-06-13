@@ -1,17 +1,14 @@
 import cn from 'classnames/bind';
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import styles from './NewTokenModal.module.scss';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
 import { Pairs } from 'config/pools';
 import _ from 'lodash';
-import NumberFormat from 'react-number-format';
-import CheckBox from 'components/CheckBox';
-import { tokenMap } from 'config/bridgeTokens';
-import { toDisplay } from 'libs/utils';
+
 const cx = cn.bind(styles);
 
-export const ModalListToken = ({ position, isNewReward, setIsNewReward, allRewardSelect }) => {
+export const ModalListToken = ({ indReward, rewardTokens, setRewardTokens, allRewardSelect }) => {
   const [searchText, setSearchText] = useState('');
   return (
     <div className={cx('dropdown-reward')}>
@@ -39,9 +36,9 @@ export const ModalListToken = ({ position, isNewReward, setIsNewReward, allRewar
                   <li
                     key={index + '' + t?.name}
                     onClick={() => {
-                      setIsNewReward(
-                        isNewReward.map((isReward, ind) => {
-                          return position == ind + 1
+                      setRewardTokens(
+                        rewardTokens.map((isReward, ind) => {
+                          return indReward == ind + 1
                             ? { ...isReward, denom: t.denom, name: t.name, contract_addr: t?.contractAddress }
                             : isReward;
                         })
@@ -65,8 +62,8 @@ export const ModalDelete = ({
   setTypeDelete,
   setSelectedReward,
   selectedReward,
-  isNewReward,
-  setIsNewReward,
+  rewardTokens,
+  setRewardTokens,
   initBalances,
   setInitBalances,
   selectedInitBalances,
@@ -78,7 +75,7 @@ export const ModalDelete = ({
       <div className={cx('content-reward')}>
         Are you sure delete{' '}
         <span>
-          {isNewReward
+          {rewardTokens
             .filter((_, i) => selectedReward?.includes(i))
             .map(function (elem) {
               return elem?.denom;
@@ -104,20 +101,15 @@ export const ModalDelete = ({
       </div>
       {contentReward}
       <div className={cx('action')}>
-        <div
-          className={cx('btn', 'btn-cancel')}
-          onClick={() => {
-            setTypeDelete('');
-          }}
-        >
+        <div className={cx('btn', 'btn-cancel')} onClick={() => setTypeDelete('')}>
           <span>Cancel</span>
         </div>
         <div
           className={cx('btn', 'btn-delete')}
           onClick={() => {
             if (typeDelete === 'Reward') {
-              const filterReward = isNewReward.filter((e, i) => !selectedReward.includes(i));
-              setIsNewReward(filterReward);
+              const filterReward = rewardTokens.filter((e, i) => !selectedReward.includes(i));
+              setRewardTokens(filterReward);
               setTypeDelete('');
               setSelectedReward([]);
             }
@@ -131,48 +123,6 @@ export const ModalDelete = ({
         >
           <span>Delete</span>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export const NewRewardItems = ({ item, i, setPosition, selectedReward, setSelectedReward }) => {
-  const originalFromToken = tokenMap?.[item?.denom];
-  let Icon = originalFromToken?.Icon ?? originalFromToken?.IconLight;
-  return (
-    <div className={cx('orai')}>
-      <CheckBox
-        checked={selectedReward.includes(i)}
-        label=""
-        onCheck={() => {
-          const arr = selectedReward.includes(i) ? selectedReward.filter((e) => e !== i) : [...selectedReward, i];
-          setSelectedReward(arr);
-        }}
-      />
-      <div className={cx('orai_label')}>
-        <Icon className={cx('logo')} />
-        <div
-          className={cx('per')}
-          onClick={() => {
-            setPosition(i + 1);
-          }}
-        >
-          <span>{item?.name}</span> Reward/s
-        </div>
-      </div>
-      <div className={cx('input_per')}>
-        <NumberFormat
-          placeholder="0"
-          thousandSeparator
-          decimalScale={6}
-          customInput={Input}
-          value={toDisplay('1000000', 6)}
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
-          onValueChange={(e) => {}}
-          className={cx('value')}
-        />
       </div>
     </div>
   );
