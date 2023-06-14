@@ -22,6 +22,8 @@ import { ModalDelete, ModalListToken } from './ModalComponent';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
 import { checkRegex, reduceString, toAmount, toDisplay } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { AccountData } from '@cosmjs/proto-signing';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -123,7 +125,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     await signFrontierListToken(client, address);
   };
 
-  const signFrontierListToken = async (client, address) => {
+  const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
     try {
       setIsLoading(true);
       const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
