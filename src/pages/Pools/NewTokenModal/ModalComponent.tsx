@@ -5,31 +5,96 @@ import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
 import { Pairs } from 'config/pools';
 import _ from 'lodash';
+import { ReactComponent as SuccessIcon } from 'assets/icons/success.svg';
+import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
+import { reduceString } from 'libs/utils';
+import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 
-export const ModalListToken = ({ indReward, rewardTokens, setRewardTokens, allRewardSelect }) => {
-  const [searchText, setSearchText] = useState('');
+export const AddTokenStatus = ({ status }) => {
+  if (status === null) return <></>;
+  return (
+    <div
+      style={{
+        paddingTop: 4,
+        color: !status ? 'rgba(255, 47, 54, 1)' : 'rgba(6, 201, 88, 1)',
+        fontSize: 12,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      {!status ? (
+        <div>This Token‘s contract address does not exist ! </div>
+      ) : (
+        <>
+          <div style={{ paddingRight: 4 }}>Add Token success</div>
+          <SuccessIcon />
+        </>
+      )}
+    </div>
+  );
+};
+
+export const ModalListToken = ({
+  indReward,
+  rewardTokens,
+  setRewardTokens,
+  allRewardSelect,
+  tokensNew,
+  setTokensNew
+}) => {
+  const [contractAddr, setContractAddr] = useState('');
+  const [isAddToken, setIsAddToken] = useState(null);
+
   return (
     <div className={cx('dropdown-reward')}>
       <div>
         <div className={cx('label')}>Enter Token’s contract to add new tokens !</div>
         <div className={cx('check')}>
           <Input
-            value={searchText}
-            onChange={(e) => setSearchText(e?.target?.value)}
+            value={contractAddr}
+            onChange={(e) => setContractAddr(e?.target?.value)}
             placeholder="0xd3f2jlwxt...1f009"
           />
-          <div className={cx('btn')}>
-            <div>
+          <div
+            className={cx('btn')}
+            onClick={async () => {
+              try {
+                if (!contractAddr) return;
+                const cw20Token = new OraiswapTokenQueryClient(window.client, contractAddr);
+                await cw20Token.tokenInfo();
+
+                const existContractAddress = [...Pairs.getPoolTokens(), ...tokensNew].find(
+                  (e) => e.contractAddress === contractAddr
+                );
+                if (existContractAddress) return setIsAddToken(false);
+                setTokensNew([
+                  ...tokensNew,
+                  {
+                    contractAddress: contractAddr,
+                    name: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`,
+                    denom: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`
+                  }
+                ]);
+                setIsAddToken(true);
+              } catch (error) {
+                console.log({ error });
+                setIsAddToken(false);
+              }
+            }}
+          >
+            <div style={{ opacity: contractAddr ? 1 : 0.5 }}>
               <PlusIcon />
               <span>Add Token</span>
             </div>
           </div>
         </div>
+        <AddTokenStatus status={isAddToken} />
         <div className={cx('list')}>
           <ul>
-            {Pairs.getPoolTokens()
+            {[...Pairs.getPoolTokens(), ...tokensNew]
               .filter((pair) => !allRewardSelect.includes(pair.denom))
               .map((t, index) => {
                 return (
@@ -45,7 +110,7 @@ export const ModalListToken = ({ indReward, rewardTokens, setRewardTokens, allRe
                       );
                     }}
                   >
-                    <t.Icon className={cx('logo')} />
+                    {t.Icon ? <t.Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
                     <span>{t?.name}</span>
                   </li>
                 );

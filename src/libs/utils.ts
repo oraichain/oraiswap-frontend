@@ -20,6 +20,15 @@ export const getEvmAddress = (bech32Address: string) => {
   return evmAddress;
 };
 
+export const validateAddressCosmos = (bech32Address: string, prefix?: string): boolean => {
+  try {
+    const { prefix: decodedPrefix } = bech32.decode(bech32Address);
+    return prefix && prefix === decodedPrefix;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const validateNumber = (amount: number | string): number => {
   if (typeof amount === 'string') return validateNumber(Number(amount));
   if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;

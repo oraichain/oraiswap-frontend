@@ -20,7 +20,7 @@ import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import _ from 'lodash';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex, reduceString, toAmount, toDisplay } from 'libs/utils';
+import { checkRegex, reduceString, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
@@ -63,6 +63,8 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [indReward, setIndReward] = useState(0);
   const [cap, setCap] = useState(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
+
+  const [tokensNew, setTokensNew] = useState([]);
   const [rewardTokens, setRewardTokens] = useState([
     {
       name: 'orai',
@@ -85,7 +87,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
-
     const { client, defaultAddress: address } = await getCosmWasmClient();
     if (!address)
       return displayToast(TToastType.TX_FAILED, {
@@ -99,9 +100,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
     if (isInitBalances) {
       initBalances.every((inBa) => {
-        if (!inBa.address || inBa.address.length !== 43 || inBa.address.slice(0, 4).toLowerCase() !== 'orai') {
+        if (!inBa.address || !validateAddressCosmos(inBa.address, 'orai')) {
           return displayToast(TToastType.TX_FAILED, {
-            message: 'Wrong address format!'
+            message: 'Wrong address init balances format!'
           });
         }
       });
@@ -112,8 +113,11 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         message: 'Wrong minter format!'
       });
 
-    //TODO: check minter addresss
-    //TODO: check balances mint and init balances
+    if (minter && !validateAddressCosmos(minter, 'orai'))
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Invalid Address Minter!'
+      });
+
     if (isMinter && isInitBalances && cap) {
       const amountAllInit = sumBy(initBalances, 'amount');
       if (amountAllInit > cap) {
@@ -216,7 +220,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <div className={cx('label')}>Minter</div>
                     <Input
                       className={cx('input')}
-                      value={reduceString(minter, 12, 12)}
+                      value={minter}
                       onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
@@ -349,9 +353,10 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   </div>
                 );
               })}
-
               {indReward ? (
                 <ModalListToken
+                  tokensNew={tokensNew}
+                  setTokensNew={setTokensNew}
                   indReward={indReward}
                   setRewardTokens={setRewardTokens}
                   rewardTokens={rewardTokens}

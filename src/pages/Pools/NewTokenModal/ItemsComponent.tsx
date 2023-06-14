@@ -7,6 +7,7 @@ import CheckBox from 'components/CheckBox';
 import { tokenMap } from 'config/bridgeTokens';
 import { reduceString, toAmount, toDisplay } from 'libs/utils';
 import { ReactComponent as WalletIcon } from 'assets/icons/wallet1.svg';
+import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
 
 const cx = cn.bind(styles);
 
@@ -32,7 +33,7 @@ export const RewardItems = ({
         }}
       />
       <div className={cx('orai_label')}>
-        <Icon className={cx('logo')} />
+        {Icon ? <Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
         <div className={cx('per')} onClick={() => setIndReward(ind + 1)}>
           <span>{item?.name}</span> Reward/s
         </div>
@@ -92,7 +93,7 @@ export const InitBalancesItems = ({
         <div className={cx('label')}>Address</div>
         <Input
           className={cx('input')}
-          value={reduceString(item.address, 12, 12)}
+          value={item.address}
           onChange={(e) => {
             setInitBalances(
               initBalances.map((ba, i) => ({
