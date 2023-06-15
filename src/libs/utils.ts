@@ -130,7 +130,6 @@ export const toSumDisplay = (amounts: AmountDetails): number => {
  * @returns The shortened string, or '-' if the input string is null or undefined.
  */
 export const reduceString = (str: string, from: number, end: number) => {
-  if (str?.length < 30) return str;
   return str ? str.substring(0, from) + '...' + str.substring(str.length - end) : '-';
 };
 
