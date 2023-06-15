@@ -2,7 +2,14 @@ import { Pairs } from 'config/pools';
 import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { AggregateResult, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
-import { OraiswapPairTypes, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import {
+  Asset,
+  Cw20Coin,
+  InstantiateMarketingInfo,
+  OraiswapPairTypes,
+  OraiswapStakingTypes,
+  PairInfo
+} from '@oraichain/oraidex-contracts-sdk';
 import { TokenItemType, assetInfoMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
@@ -19,6 +26,7 @@ import {
   parseTokenInfo
 } from 'rest/api';
 import { TokenInfo } from 'types/token';
+import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 
 export type PairInfoData = {
   pair: PairInfo;
@@ -102,13 +110,14 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
   try {
     const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     const pairAmounts = await Promise.all(
-      poolList.map((pool) =>
-        getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData)
-      )
+      poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData))
     );
-    poolList = poolList.map((pool, ind) => ({
-      ...pool, amount: pairAmounts[ind].tokenUsd
-    })).sort((a, b) => b.amount - a.amount);
+    poolList = poolList
+      .map((pool, ind) => ({
+        ...pool,
+        amount: pairAmounts[ind].tokenUsd
+      }))
+      .sort((a, b) => b.amount - a.amount);
     return {
       pairInfo: poolList,
       oraiPrice
@@ -208,4 +217,59 @@ const fetchMyPairsData = async (pairs: PairInfo[], stakerAddress: string, multic
   return calculateReward(pairs, res);
 };
 
-export { fetchAprResult, fetchPoolListAndOraiPrice, fetchPairsData, fetchMyPairsData };
+const generateMsgFrontierAddToken = ({
+  marketing,
+  symbol,
+  liquidityPoolRewardAssets,
+  name,
+  initialBalances,
+  mint,
+  label
+}: {
+  initialBalances?: Cw20Coin[];
+  mint?: MinterResponse;
+  marketing?: InstantiateMarketingInfo;
+  label?: string;
+  name?: string;
+  symbol: string;
+  liquidityPoolRewardAssets: Asset[];
+}) => {
+  const msgAddTokenFrontier: {
+    initialBalances?: Cw20Coin[];
+    mint?: MinterResponse;
+    marketing?: InstantiateMarketingInfo;
+    label?: string;
+    name?: string;
+    symbol: string;
+    liquidityPoolRewardAssets: Asset[];
+  } = {
+    symbol,
+    liquidityPoolRewardAssets
+  };
+  if (mint) msgAddTokenFrontier.mint = mint;
+  if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
+
+  if (marketing) msgAddTokenFrontier.marketing = marketing;
+  if (name) msgAddTokenFrontier.name = name;
+  if (label) msgAddTokenFrontier.label = label;
+  return msgAddTokenFrontier;
+};
+
+const getInfoLiquidityPool = ({ denom, contract_addr }) => {
+  if (contract_addr)
+    return {
+      token: {
+        contract_addr
+      }
+    };
+  return { native_token: { denom } };
+};
+
+export {
+  fetchAprResult,
+  fetchPoolListAndOraiPrice,
+  fetchPairsData,
+  fetchMyPairsData,
+  generateMsgFrontierAddToken,
+  getInfoLiquidityPool
+};

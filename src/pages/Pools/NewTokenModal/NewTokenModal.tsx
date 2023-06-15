@@ -2,21 +2,28 @@ import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import { FC, useState } from 'react';
 import styles from './NewTokenModal.module.scss';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
+import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
+import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
 import NumberFormat from 'react-number-format';
 import Loader from 'components/Loader';
 import { handleErrorTransaction } from 'helper';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { toAmount, toDisplay } from 'libs/utils';
-import { oraichainTokens } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { OraidexListingContractClient } from 'libs/contracts';
-import { ORAI } from 'config/constants';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { Asset } from '@oraichain/oraidex-contracts-sdk';
+import useClickOutside from 'hooks/useClickOutSide';
+import { Pairs } from 'config/pools';
+import { OraidexListingContractClient } from 'libs/contracts';
+import CheckBox from 'components/CheckBox';
+import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
+import _ from 'lodash';
+import { ModalDelete, ModalListToken } from './ModalComponent';
+import { InitBalancesItems, RewardItems } from './ItemsComponent';
+import { checkRegex, reduceString, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import sumBy from 'lodash/sumBy';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { AccountData } from '@cosmjs/proto-signing';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -27,132 +34,355 @@ interface ModalProps {
   isCloseBtn?: boolean;
 }
 
-const checkRegex = (str: string) => {
-  const regex = /^[a-zA-Z\-]{3,12}$/;
-  return regex.test(str);
-};
-
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [tokenName, setTokenName] = useState('');
-  const [oraiPer, setOraiPer] = useState(BigInt(1e6));
-  const [oraixPer, setOraixPer] = useState(BigInt(1e6));
-  const [isLoading, setIsLoading] = useState(false);
-  const oraiReward = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
-  const oraixReward = oraichainTokens.find(
-    (token) => token.contractAddress === 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge'
-  );
-  const handleCreateToken = async (tokenSymbol: string, rewardPerSecondOrai: bigint, rewardPerSecondOraiX: bigint) => {
-    try {
-      if (!checkRegex(tokenSymbol))
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Token name is required and must be letter (3 to 12 characters)'
-        });
+  const [isMinter, setIsMinter] = useState(false);
+  const [minter, setMinter] = useState('');
 
-      setIsLoading(true);
-      const { client, defaultAddress: address } = await getCosmWasmClient();
-      console.log({
-        address,
-        client
+  const [name, setName] = useState('');
+  const [marketing, setMarketing] = useState({
+    description: null,
+    logo: null,
+    marketing: null,
+    project: null
+  });
+
+  const [selectedReward, setSelectedReward] = useState([]);
+  const [selectedInitBalances, setSelectedInitBalances] = useState([]);
+
+  const [typeDelete, setTypeDelete] = useState('');
+
+  const [isInitBalances, setIsInitBalances] = useState(false);
+  const [initBalances, setInitBalances] = useState([
+    {
+      address: '',
+      amount: BigInt(1e6)
+    }
+  ]);
+
+  const [indReward, setIndReward] = useState(0);
+  const [cap, setCap] = useState(BigInt(0));
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [tokensNew, setTokensNew] = useState([]);
+  const [rewardTokens, setRewardTokens] = useState([
+    {
+      name: 'orai',
+      denom: 'orai',
+      value: BigInt(1e6),
+      contract_addr: ''
+    }
+  ]);
+
+  const allRewardSelect = rewardTokens.map((item) => item['denom']);
+  const handleOutsideClick = () => {
+    if (indReward) setIndReward(0);
+    // if (typeDelete) setTypeDelete('');
+  };
+
+  const ref = useClickOutside(handleOutsideClick);
+
+  const handleCreateToken = async () => {
+    if (!checkRegex(tokenName))
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Token name is required and must be letter (3 to 12 characters)'
+      });
+    const { client, defaultAddress: address } = await getCosmWasmClient();
+    if (!address)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Wallet address does not exist!'
       });
 
-      if (!address)
-        return displayToast(TToastType.TX_FAILED, {
-          message: 'Wallet address does not exist!'
-        });
+    if (!tokenName)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Empty token symbol!'
+      });
 
-      if (!tokenSymbol) {
+    if (isInitBalances) {
+      initBalances.every((inBa) => {
+        if (!inBa.address || !validateAddressCosmos(inBa.address, 'orai')) {
+          return displayToast(TToastType.TX_FAILED, {
+            message: 'Wrong address init balances format!'
+          });
+        }
+      });
+    }
+
+    if (isMinter && !minter)
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Wrong minter format!'
+      });
+
+    if (minter && !validateAddressCosmos(minter, 'orai'))
+      return displayToast(TToastType.TX_FAILED, {
+        message: 'Invalid Address Minter!'
+      });
+
+    if (isMinter && isInitBalances && cap) {
+      const amountAllInit = sumBy(initBalances, 'amount');
+      if (amountAllInit > cap) {
         return displayToast(TToastType.TX_FAILED, {
-          message: 'Empty token symbol!'
+          message: 'Cap need bigger init balances!'
         });
       }
+    }
+    await signFrontierListToken(client, address);
+  };
 
+  const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
+    try {
+      setIsLoading(true);
+      const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
+        return {
+          amount: isReward?.value.toString(),
+          info: getInfoLiquidityPool(isReward)
+        };
+      });
       const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
       // TODO: add more options for users like name, marketing, additional token rewards
-      const result = await oraidexListing.listToken({
-        symbol: tokenSymbol,
-        liquidityPoolRewardAssets: [
-          { amount: rewardPerSecondOrai.toString(), info: { native_token: { denom: ORAI } } } as Asset
-        ]
+      const mint = isMinter
+        ? {
+            minter,
+            cap: !!cap ? cap.toString() : null
+          }
+        : undefined;
+
+      const initialBalances = isInitBalances
+        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
+        : undefined;
+
+      const msg = generateMsgFrontierAddToken({
+        marketing,
+        symbol: tokenName,
+        liquidityPoolRewardAssets,
+        name,
+        initialBalances,
+        mint
       });
+
+      const result = await oraidexListing.listToken(msg);
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setIsLoading(false);
+        close();
       }
     } catch (error) {
       console.log('error listing token: ', error);
       handleErrorTransaction(error);
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOnCheck = (selected, setState, state) => {
+    if (selected.length === state.length) {
+      setState([]);
+    } else {
+      let arr = [];
+      for (let i = 0; i < state.length; i++) {
+        arr.push(i);
+      }
+      setState(arr);
     }
   };
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
+      {indReward || typeDelete ? <div className={cx('overlay')} /> : null}
       <div className={cx('container')}>
-        <RewardIcon className={cx('reward-icon')} />
-        <div className={cx('title')}>List a new token</div>
+        <div className={cx('container-inner')}>
+          <RewardIcon />
+          <div className={cx('title')}>List a new token</div>
+        </div>
         <div className={cx('content')}>
-          <div className={cx('token')}>
-            <div className={cx('label')}>Token name</div>
-            <Input
-              className={cx('input')}
-              value={tokenName}
-              onChange={(e) => setTokenName(e?.target?.value)}
-              placeholder="ORAICHAIN"
+          <div className={cx('box')}>
+            <div className={cx('token')}>
+              <div className={cx('row')}>
+                <div className={cx('label')}>Token name</div>
+                <div className={cx('input')}>
+                  <div>
+                    <Input value={tokenName} onChange={(e) => setTokenName(e?.target?.value)} placeholder="ORAICHAIN" />
+                  </div>
+                </div>
+              </div>
+              <div className={cx('option')}>
+                <CheckBox label="Minter" checked={isMinter} onCheck={setIsMinter} />
+              </div>
+              {isMinter && (
+                <div>
+                  <div
+                    className={cx('row')}
+                    style={{
+                      paddingTop: 16
+                    }}
+                  >
+                    <div className={cx('label')}>Minter</div>
+                    <Input
+                      className={cx('input')}
+                      value={minter}
+                      onChange={(e) => setMinter(e?.target?.value)}
+                      placeholder="MINTER"
+                    />
+                  </div>
+                  <div
+                    className={cx('row')}
+                    style={{
+                      paddingTop: 16
+                    }}
+                  >
+                    <div className={cx('label')}>Cap (Option)</div>
+                    <NumberFormat
+                      placeholder="0"
+                      className={cx('input')}
+                      style={{
+                        color: 'rgb(255, 222, 91)'
+                      }}
+                      thousandSeparator
+                      decimalScale={6}
+                      type="text"
+                      value={toDisplay(cap)}
+                      onValueChange={({ floatValue }) => {
+                        setCap(toAmount(floatValue));
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              <hr />
+              <div>
+                <CheckBox label="Init balance" checked={isInitBalances} onCheck={setIsInitBalances} />
+              </div>
+              {isInitBalances && (
+                <div
+                  className={cx('btn-add-init')}
+                  onClick={() =>
+                    setInitBalances([
+                      ...initBalances,
+                      {
+                        address: '',
+                        amount: BigInt(1e6)
+                      }
+                    ])
+                  }
+                >
+                  <PlusIcon />
+                  <span>Add</span>
+                </div>
+              )}
+
+              {isInitBalances && (
+                <div className={cx('header-init')}>
+                  <CheckBox
+                    label={`Select All  ( ${selectedInitBalances.length} )`}
+                    checked={initBalances.length && selectedInitBalances.length === initBalances.length}
+                    onCheck={() => handleOnCheck(selectedInitBalances, setSelectedInitBalances, initBalances)}
+                  />
+                  <div
+                    className={cx('trash')}
+                    onClick={() => selectedInitBalances.length && setTypeDelete('Init Balances')}
+                  >
+                    <TrashIcon />
+                  </div>
+                </div>
+              )}
+
+              <div style={{ height: 10 }} />
+
+              {isInitBalances &&
+                initBalances.map((item, ind) => {
+                  return (
+                    <div key={ind}>
+                      <InitBalancesItems
+                        item={item}
+                        ind={ind}
+                        selectedInitBalances={selectedInitBalances}
+                        setSelectedInitBalances={setSelectedInitBalances}
+                        setInitBalances={setInitBalances}
+                        initBalances={initBalances}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+          <div className={cx('box')}>
+            <div
+              className={cx('add-reward-btn')}
+              onClick={() => {
+                const filterPair = Pairs.getPoolTokens().find((pair) => !allRewardSelect.includes(pair.denom));
+                if (!filterPair) return;
+                setRewardTokens([
+                  ...rewardTokens,
+                  {
+                    name: filterPair?.name,
+                    denom: filterPair?.denom,
+                    value: BigInt(1e6),
+                    contract_addr: filterPair?.contractAddress
+                  }
+                ]);
+              }}
+            >
+              <PlusIcon />
+              <span>Add Token</span>
+            </div>
+            <div className={cx('rewards')} ref={ref}>
+              <div className={cx('rewards-list')}>
+                <CheckBox
+                  label={`Select All  ( ${selectedReward.length} )`}
+                  checked={rewardTokens.length && selectedReward.length === rewardTokens.length}
+                  onCheck={() => handleOnCheck(selectedReward, setSelectedReward, rewardTokens)}
+                />
+                <div className={cx('trash')} onClick={() => selectedReward.length && setTypeDelete('Reward')}>
+                  <TrashIcon />
+                </div>
+              </div>
+              <div style={{ height: 24 }} />
+              {rewardTokens?.map((item, index) => {
+                return (
+                  <div key={index}>
+                    <RewardItems
+                      rewardTokens={rewardTokens}
+                      selectedReward={selectedReward}
+                      setRewardTokens={setRewardTokens}
+                      setSelectedReward={setSelectedReward}
+                      setIndReward={setIndReward}
+                      ind={index}
+                      item={item}
+                    />
+                  </div>
+                );
+              })}
+              {indReward ? (
+                <ModalListToken
+                  tokensNew={tokensNew}
+                  setTokensNew={setTokensNew}
+                  indReward={indReward}
+                  setRewardTokens={setRewardTokens}
+                  rewardTokens={rewardTokens}
+                  allRewardSelect={allRewardSelect}
+                />
+              ) : null}
+            </div>
+          </div>
+          {typeDelete ? (
+            <ModalDelete
+              rewardTokens={rewardTokens}
+              typeDelete={typeDelete}
+              setTypeDelete={setTypeDelete}
+              selectedReward={selectedReward}
+              setSelectedReward={setSelectedReward}
+              setRewardTokens={setRewardTokens}
+              initBalances={initBalances}
+              setInitBalances={setInitBalances}
+              selectedInitBalances={selectedInitBalances}
+              setSelectedInitBalances={setSelectedInitBalances}
             />
-          </div>
-          <div className={cx('rewards')}>
-            <div className={cx('orai')}>
-              <div className={cx('orai_label')}>
-                <OraiIcon className={cx('logo')} />
-                <div className={cx('per')}>ORAI Reward/s</div>
-              </div>
-              <div className={cx('input_per')}>
-                <NumberFormat
-                  placeholder="0"
-                  thousandSeparator
-                  decimalScale={6}
-                  customInput={Input}
-                  value={toDisplay(oraiPer.toString(), oraiReward.decimals)}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                  onValueChange={(e) => {
-                    setOraiPer(toAmount(Number(e.value), 6));
-                  }}
-                  className={cx('value')}
-                />
-              </div>
-            </div>
-            <div style={{ height: 32 }} />
-            <div className={cx('orai')}>
-              <div className={cx('orai_label')}>
-                <OraixIcon className={cx('logo')} />
-                <div className={cx('per')}>ORAIX Reward/s</div>
-              </div>
-              <div className={cx('input_per')}>
-                <NumberFormat
-                  placeholder="0"
-                  thousandSeparator
-                  decimalScale={6}
-                  customInput={Input}
-                  value={toDisplay(oraixPer.toString(), oraixReward.decimals)}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                  onValueChange={(e) => {
-                    setOraixPer(toAmount(Number(e.value), 6));
-                  }}
-                  className={cx('value')}
-                />
-              </div>
-            </div>
-          </div>
+          ) : null}
         </div>
         <div
-          className={cx('create-btn', (isLoading || !checkRegex(tokenName)) && 'disable-btn')}
-          onClick={() => !isLoading && checkRegex(tokenName) && handleCreateToken(tokenName, oraiPer, oraixPer)}
+          className={cx('create-btn', (isLoading || !checkRegex(tokenName) || !rewardTokens.length) && 'disable-btn')}
+          onClick={() => !isLoading && checkRegex(tokenName) && rewardTokens.length && handleCreateToken()}
         >
           {isLoading && <Loader width={20} height={20} />}
           {isLoading && <div style={{ width: 8 }}></div>}

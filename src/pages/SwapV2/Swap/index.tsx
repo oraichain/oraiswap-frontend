@@ -44,7 +44,7 @@ const SwapComponent: React.FC<{
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const [theme] = useConfigReducer('theme')
+  const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const loadTokenAmounts = useLoadTokens();

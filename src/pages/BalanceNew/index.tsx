@@ -330,7 +330,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           amounts={amounts}
           type="network"
           items={networks}
-          theme={theme}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}

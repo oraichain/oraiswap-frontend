@@ -19,7 +19,7 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -50,18 +50,14 @@ const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amou
         </div>
         <div className={styles.header_data_item}>
           <span className={styles.header_data_name}>Total Liquidity</span>
-          <TokenBalance
-            balance={amount}
-            className={styles.header_data_value}
-            decimalScale={2}
-          />
+          <TokenBalance balance={amount} className={styles.header_data_value} decimalScale={2} />
         </div>
       </div>
     </div>
   );
 };
 
-const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, amount, commissionRate, apr, theme }) => {
+const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, amount, apr, theme }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
 
@@ -105,9 +101,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
         {!!apr && (
           <div className={styles.pairbox_data}>
             <span className={styles.pairbox_data_name}>APR</span>
-            <span className={styles.pairbox_data_value}>
-              {apr.toFixed(2)}%
-            </span>
+            <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
           </div>
         )}
         <div className={styles.pairbox_data}>
@@ -116,11 +110,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
         </div>
         <div className={styles.pairbox_data}>
           <span className={styles.pairbox_data_name}>Liquidity</span>
-          <TokenBalance
-            balance={amount}
-            className={styles.pairbox_data_value}
-            decimalScale={2}
-          />
+          <TokenBalance balance={amount} className={styles.pairbox_data_value} decimalScale={2} />
         </div>
       </div>
     </div>
@@ -175,7 +165,6 @@ const ListPools = memo<{
   return (
     <div className={styles.listpools}>
       <div className={styles.listpools_all}>
-
         <div className={styles.listpools_header}>
           <div className={styles.listpools_filter}>
             {LIST_FILTER_POOL.map((item) => (
