@@ -24,6 +24,7 @@ import { checkRegex, reduceString, toAmount, toDisplay, validateAddressCosmos } 
 import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
+import useConfigReducer from 'hooks/useConfigReducer';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -35,6 +36,7 @@ interface ModalProps {
 }
 
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
+  const [theme] = useConfigReducer('theme');
   const [tokenName, setTokenName] = useState('');
   const [isMinter, setIsMinter] = useState(false);
   const [minter, setMinter] = useState('');
@@ -190,19 +192,26 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       {indReward || typeDelete ? <div className={cx('overlay')} /> : null}
-      <div className={cx('container')}>
+      <div className={cx('container', `container ${styles[theme]}`)}>
         <div className={cx('container-inner')}>
           <RewardIcon />
-          <div className={cx('title')}>List a new token</div>
+          <div className={cx('title', `title ${styles[theme]}`)}>List a new token</div>
         </div>
         <div className={cx('content')}>
-          <div className={cx('box')}>
+          <div className={cx('box', `box ${styles[theme]}`)}>
             <div className={cx('token')}>
               <div className={cx('row')}>
                 <div className={cx('label')}>Token name</div>
-                <div className={cx('input')}>
+                <div className={cx('input', `input ${styles[theme]}`)}>
                   <div>
-                    <Input value={tokenName} onChange={(e) => setTokenName(e?.target?.value)} placeholder="ORAICHAIN" />
+                    <Input
+                      value={tokenName}
+                      style={{
+                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                      }}
+                      onChange={(e) => setTokenName(e?.target?.value)}
+                      placeholder="ORAICHAIN"
+                    />
                   </div>
                 </div>
               </div>
@@ -219,7 +228,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   >
                     <div className={cx('label')}>Minter</div>
                     <Input
-                      className={cx('input')}
+                      className={cx('input', `input ${styles[theme]}`)}
                       value={minter}
                       onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
@@ -234,9 +243,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <div className={cx('label')}>Cap (Option)</div>
                     <NumberFormat
                       placeholder="0"
-                      className={cx('input')}
+                      className={cx('input', `input ${styles[theme]}`)}
                       style={{
-                        color: 'rgb(255, 222, 91)'
+                        color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
                       }}
                       thousandSeparator
                       decimalScale={6}
@@ -255,7 +264,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               </div>
               {isInitBalances && (
                 <div
-                  className={cx('btn-add-init')}
+                  className={cx('btn-add-init', `btn-add-init ${styles[theme]}`)}
                   onClick={() =>
                     setInitBalances([
                       ...initBalances,
@@ -300,13 +309,14 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                         setSelectedInitBalances={setSelectedInitBalances}
                         setInitBalances={setInitBalances}
                         initBalances={initBalances}
+                        theme={theme}
                       />
                     </div>
                   );
                 })}
             </div>
           </div>
-          <div className={cx('box')}>
+          <div className={cx('box', `box ${styles[theme]}`)}>
             <div
               className={cx('add-reward-btn')}
               onClick={() => {
@@ -349,6 +359,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       setIndReward={setIndReward}
                       ind={index}
                       item={item}
+                      theme={theme}
                     />
                   </div>
                 );
@@ -361,6 +372,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   setRewardTokens={setRewardTokens}
                   rewardTokens={rewardTokens}
                   allRewardSelect={allRewardSelect}
+                  theme={theme}
                 />
               ) : null}
             </div>
@@ -377,6 +389,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               setInitBalances={setInitBalances}
               selectedInitBalances={selectedInitBalances}
               setSelectedInitBalances={setSelectedInitBalances}
+              theme={theme}
             />
           ) : null}
         </div>
