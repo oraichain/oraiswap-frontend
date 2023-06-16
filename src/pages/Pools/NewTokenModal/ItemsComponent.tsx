@@ -5,7 +5,7 @@ import _ from 'lodash';
 import NumberFormat from 'react-number-format';
 import CheckBox from 'components/CheckBox';
 import { tokenMap } from 'config/bridgeTokens';
-import { reduceString, toAmount, toDisplay } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import { ReactComponent as WalletIcon } from 'assets/icons/wallet1.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
 
@@ -18,10 +18,11 @@ export const RewardItems = ({
   selectedReward,
   setSelectedReward,
   setRewardTokens,
-  rewardTokens
+  rewardTokens,
+  theme
 }) => {
   const originalFromToken = tokenMap?.[item?.denom];
-  let Icon = originalFromToken?.Icon ?? originalFromToken?.IconLight;
+  let Icon = theme === 'light' ? originalFromToken?.IconLight ?? originalFromToken?.Icon : originalFromToken?.Icon;
   return (
     <div className={cx('orai')}>
       <CheckBox
@@ -38,8 +39,9 @@ export const RewardItems = ({
           <span>{item?.name}</span> Reward/s
         </div>
       </div>
-      <div className={cx('input_per')}>
+      <div className={cx('input_per', `input_per ${styles[theme]}`)}>
         <NumberFormat
+          className={cx('value')}
           placeholder="0"
           thousandSeparator
           decimalScale={6}
@@ -55,7 +57,6 @@ export const RewardItems = ({
               })
             );
           }}
-          className={cx('value')}
         />
       </div>
     </div>
@@ -68,7 +69,8 @@ export const InitBalancesItems = ({
   setSelectedInitBalances,
   item,
   setInitBalances,
-  initBalances
+  initBalances,
+  theme
 }) => {
   return (
     <div>
@@ -84,7 +86,7 @@ export const InitBalancesItems = ({
             }}
           />
         </div>
-        <div className={cx('wallet')}>
+        <div className={cx('wallet', `${styles[theme]}`)}>
           <span>{ind + 1}</span>
           <WalletIcon />
         </div>
@@ -92,7 +94,7 @@ export const InitBalancesItems = ({
       <div className={cx('row')}>
         <div className={cx('label')}>Address</div>
         <Input
-          className={cx('input')}
+          className={cx('input', `input ${styles[theme]}`)}
           value={item.address}
           onChange={(e) => {
             setInitBalances(
@@ -114,9 +116,9 @@ export const InitBalancesItems = ({
         <div className={cx('label')}>Amount</div>
         <NumberFormat
           placeholder="0"
-          className={cx('input')}
+          className={cx('input', `${styles[theme]}`)}
           style={{
-            color: 'rgb(255, 222, 91)'
+            color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
           }}
           thousandSeparator
           decimalScale={6}
