@@ -17,10 +17,9 @@ import { Pairs } from 'config/pools';
 import { OraidexListingContractClient } from 'libs/contracts';
 import CheckBox from 'components/CheckBox';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
-import _ from 'lodash';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex, reduceString, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
@@ -79,7 +78,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const allRewardSelect = rewardTokens.map((item) => item['denom']);
   const handleOutsideClick = () => {
     if (indReward) setIndReward(0);
-    // if (typeDelete) setTypeDelete('');
   };
 
   const ref = useClickOutside(handleOutsideClick);
@@ -144,9 +142,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-            minter,
-            cap: !!cap ? cap.toString() : null
-          }
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
         : undefined;
 
       const initialBalances = isInitBalances

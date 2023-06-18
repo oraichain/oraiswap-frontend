@@ -4,10 +4,8 @@ import styles from './NewTokenModal.module.scss';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
 import { Pairs } from 'config/pools';
-import _ from 'lodash';
 import { ReactComponent as SuccessIcon } from 'assets/icons/success.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
-import { reduceString } from 'libs/utils';
 import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
@@ -76,8 +74,8 @@ export const ModalListToken = ({
                   ...tokensNew,
                   {
                     contractAddress: contractAddr,
-                    name: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`,
-                    denom: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`
+                    name: `New Token ${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`,
+                    denom: `New Token ${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`
                   }
                 ]);
                 setIsAddToken(true);

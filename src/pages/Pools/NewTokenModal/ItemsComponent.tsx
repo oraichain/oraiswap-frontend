@@ -1,7 +1,6 @@
 import cn from 'classnames/bind';
 import styles from './NewTokenModal.module.scss';
 import Input from 'components/Input';
-import _ from 'lodash';
 import NumberFormat from 'react-number-format';
 import CheckBox from 'components/CheckBox';
 import { tokenMap } from 'config/bridgeTokens';
