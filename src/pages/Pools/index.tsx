@@ -190,7 +190,7 @@ const ListPools = memo<{
             className={styles.create_item}
             onClick={() => setIsOpenNewTokenModal(true)}
           >
-            List a new ORAI / CW20 token pool
+            List a new ORAI/CW20 token pool
           </div>
         </div>
       </div>
