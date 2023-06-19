@@ -30,7 +30,7 @@ export const deployToken = async (
     client,
     senderAddress,
     (
-      await oraidexArtifacts.deployContract<OraiswapTokenTypes.InstantiateMsg>(
+      await oraidexArtifacts.deployContract(
         client,
         senderAddress,
 
@@ -56,7 +56,7 @@ export const deployIcs20Token = async (
     client,
     senderAddress,
     (
-      await commonArtifacts.deployContract<CwIcs20LatestTypes.InstantiateMsg>(
+      await commonArtifacts.deployContract(
         client,
         senderAddress,
 
@@ -66,7 +66,7 @@ export const deployIcs20Token = async (
           gov_contract,
           swap_router_contract
         },
-        'cw-ics20',
+        'cw-ics20-latest',
         'cw-ics20-latest'
       )
     ).contractAddress

@@ -61,7 +61,7 @@ export async function deployOraiDexContracts(): Promise<{
     'oraiswap_oracle'
   );
   // deploy factory contract
-  const { contractAddress: factoryAddr } = await oraidexArtifacts.deployContract<OraiswapFactoryTypes.InstantiateMsg>(
+  const { contractAddress: factoryAddr } = await oraidexArtifacts.deployContract(
     client,
     devAddress,
 
@@ -75,7 +75,7 @@ export async function deployOraiDexContracts(): Promise<{
     'oraiswap_factory'
   );
   // deploy staking contract address
-  const { contractAddress: stakingAddr } = await oraidexArtifacts.deployContract<OraiswapStakingTypes.InstantiateMsg>(
+  const { contractAddress: stakingAddr } = await oraidexArtifacts.deployContract(
     client,
     devAddress,
 
@@ -92,7 +92,7 @@ export async function deployOraiDexContracts(): Promise<{
   );
 
   // deploy multicall contract address
-  const { contractAddress: multicallAddr } = await commonArtifacts.deployContract<MulticallTypes.InstantiateMsg>(
+  const { contractAddress: multicallAddr } = await commonArtifacts.deployContract(
     client,
     devAddress,
     {},
@@ -235,5 +235,5 @@ export async function getPairs(factory: string) {
 }
 
 describe('test', () => {
-  it('', () => {});
+  it('', () => { });
 });

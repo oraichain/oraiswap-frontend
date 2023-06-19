@@ -17,10 +17,9 @@ import { Pairs } from 'config/pools';
 import { OraidexListingContractClient } from 'libs/contracts';
 import CheckBox from 'components/CheckBox';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
-import _ from 'lodash';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex, reduceString, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
@@ -62,7 +61,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   ]);
 
-  const [indReward, setIndReward] = useState(0);
+  const [isAddListToken, setIsAddListToken] = useState(false);
   const [cap, setCap] = useState(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,8 +77,8 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const allRewardSelect = rewardTokens.map((item) => item['denom']);
   const handleOutsideClick = () => {
-    if (indReward) setIndReward(0);
-    // if (typeDelete) setTypeDelete('');
+    if (isAddListToken) setIsAddListToken(false);
+    if (typeDelete) setTypeDelete('');
   };
 
   const ref = useClickOutside(handleOutsideClick);
@@ -191,13 +190,13 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
-      {indReward || typeDelete ? <div className={cx('overlay')} /> : null}
+      {isAddListToken || typeDelete ? <div className={cx('overlay')} /> : null}
       <div className={cx('container', `container ${styles[theme]}`)}>
         <div className={cx('container-inner')}>
           <RewardIcon />
           <div className={cx('title', `title ${styles[theme]}`)}>List a new token</div>
         </div>
-        <div className={cx('content')}>
+        <div className={cx('content')} ref={ref}>
           <div className={cx('box', `box ${styles[theme]}`)}>
             <div className={cx('token')}>
               <div className={cx('row')}>
@@ -216,7 +215,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 </div>
               </div>
               <div className={cx('option')}>
-                <CheckBox label="Minter" checked={isMinter} onCheck={setIsMinter} />
+                <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
               </div>
               {isMinter && (
                 <div>
@@ -240,7 +239,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       paddingTop: 16
                     }}
                   >
-                    <div className={cx('label')}>Cap (Option)</div>
+                    <div className={cx('label')}>Cap (Optional)</div>
                     <NumberFormat
                       placeholder="0"
                       className={cx('input', `input ${styles[theme]}`)}
@@ -260,7 +259,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               )}
               <hr />
               <div>
-                <CheckBox label="Init balance" checked={isInitBalances} onCheck={setIsInitBalances} />
+                <CheckBox label="Initial Balances (Optional)" checked={isInitBalances} onCheck={setIsInitBalances} />
               </div>
               {isInitBalances && (
                 <div
@@ -317,26 +316,11 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             </div>
           </div>
           <div className={cx('box', `box ${styles[theme]}`)}>
-            <div
-              className={cx('add-reward-btn')}
-              onClick={() => {
-                const filterPair = Pairs.getPoolTokens().find((pair) => !allRewardSelect.includes(pair.denom));
-                if (!filterPair) return;
-                setRewardTokens([
-                  ...rewardTokens,
-                  {
-                    name: filterPair?.name,
-                    denom: filterPair?.denom,
-                    value: BigInt(1e6),
-                    contract_addr: filterPair?.contractAddress
-                  }
-                ]);
-              }}
-            >
+            <div className={cx('add-reward-btn')} onClick={() => setIsAddListToken(true)}>
               <PlusIcon />
-              <span>Add Token</span>
+              <span>Add a new pool reward token</span>
             </div>
-            <div className={cx('rewards')} ref={ref}>
+            <div className={cx('rewards')}>
               <div className={cx('rewards-list')}>
                 <CheckBox
                   label={`Select All  ( ${selectedReward.length} )`}
@@ -356,7 +340,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       selectedReward={selectedReward}
                       setRewardTokens={setRewardTokens}
                       setSelectedReward={setSelectedReward}
-                      setIndReward={setIndReward}
                       ind={index}
                       item={item}
                       theme={theme}
@@ -364,19 +347,19 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   </div>
                 );
               })}
-              {indReward ? (
-                <ModalListToken
-                  tokensNew={tokensNew}
-                  setTokensNew={setTokensNew}
-                  indReward={indReward}
-                  setRewardTokens={setRewardTokens}
-                  rewardTokens={rewardTokens}
-                  allRewardSelect={allRewardSelect}
-                  theme={theme}
-                />
-              ) : null}
             </div>
           </div>
+          {isAddListToken ? (
+            <ModalListToken
+              tokensNew={tokensNew}
+              setTokensNew={setTokensNew}
+              setRewardTokens={setRewardTokens}
+              rewardTokens={rewardTokens}
+              allRewardSelect={allRewardSelect}
+              theme={theme}
+              setIsAddListToken={setIsAddListToken}
+            />
+          ) : null}
           {typeDelete ? (
             <ModalDelete
               rewardTokens={rewardTokens}

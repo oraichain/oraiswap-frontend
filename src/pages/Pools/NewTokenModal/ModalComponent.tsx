@@ -4,10 +4,8 @@ import styles from './NewTokenModal.module.scss';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
 import { Pairs } from 'config/pools';
-import _ from 'lodash';
 import { ReactComponent as SuccessIcon } from 'assets/icons/success.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
-import { reduceString } from 'libs/utils';
 import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
@@ -26,10 +24,10 @@ export const AddTokenStatus = ({ status }) => {
       }}
     >
       {!status ? (
-        <div>This Token‘s contract address does not exist ! </div>
+        <div>This address is not a valid CW20 token! </div>
       ) : (
         <>
-          <div style={{ paddingRight: 4 }}>Add Token success</div>
+          <div style={{ paddingRight: 4 }}>Added CW20 token successfully</div>
           <SuccessIcon />
         </>
       )}
@@ -38,7 +36,7 @@ export const AddTokenStatus = ({ status }) => {
 };
 
 export const ModalListToken = ({
-  indReward,
+  setIsAddListToken,
   rewardTokens,
   setRewardTokens,
   allRewardSelect,
@@ -52,7 +50,7 @@ export const ModalListToken = ({
   return (
     <div className={cx('dropdown-reward')}>
       <div>
-        <div className={cx('label')}>Enter Token’s contract to add new tokens !</div>
+        <div className={cx('label')}>Enter a valid CW20 token address for the pool's reward</div>
         <div className={cx('check')}>
           <Input
             value={contractAddr}
@@ -76,8 +74,8 @@ export const ModalListToken = ({
                   ...tokensNew,
                   {
                     contractAddress: contractAddr,
-                    name: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`,
-                    denom: 'New Token ' + `${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`
+                    name: `New Token ${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`,
+                    denom: `New Token ${contractAddr?.slice(contractAddr?.length - 4, contractAddr?.length)}`
                   }
                 ]);
                 setIsAddToken(true);
@@ -88,7 +86,7 @@ export const ModalListToken = ({
             }}
           >
             <div style={{ opacity: contractAddr ? 1 : 0.5 }}>
-              <PlusIcon />
+              <PlusIcon className={cx('plus')} />
               <span>Add Token</span>
             </div>
           </div>
@@ -103,13 +101,16 @@ export const ModalListToken = ({
                   <li
                     key={index + '' + t?.name}
                     onClick={() => {
-                      setRewardTokens(
-                        rewardTokens.map((isReward, ind) => {
-                          return indReward == ind + 1
-                            ? { ...isReward, denom: t.denom, name: t.name, contract_addr: t?.contractAddress }
-                            : isReward;
-                        })
-                      );
+                      setIsAddListToken(false);
+                      setRewardTokens([
+                        ...rewardTokens,
+                        {
+                          denom: t.denom,
+                          name: t.name,
+                          contract_addr: t?.contractAddress,
+                          value: BigInt(1e6)
+                        }
+                      ]);
                     }}
                   >
                     {t.Icon ? <t.Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}

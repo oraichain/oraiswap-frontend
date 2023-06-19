@@ -41,32 +41,32 @@ describe('frontier-cw20-token', () => {
   let liquidityPoolRewardAssets = [];
   let initialBalances = [];
 
-  it('get-info-native-token-liquidity-pool', async () => {
-    const nativeTokenInfo = getInfoLiquidityPool({ denom: ORAI, contract_addr: '' });
-    expect(typeof nativeTokenInfo === 'object').toBe(true);
-    expect(nativeTokenInfo).toHaveProperty('native_token');
-    expect(nativeTokenInfo).toEqual({
-      native_token: {
-        denom: ORAI
-      }
-    });
-  });
-
-  it('get-info-cw20-token-liquidity-pool', async () => {
-    const cw20TokenInfo = getInfoLiquidityPool({
+  it.each([
+    { denom: ORAI, contract_addr: '' },
+    {
       denom: 'milky',
       contract_addr: process.env.REACT_APP_AIRI_CONTRACT
-    });
-    expect(typeof cw20TokenInfo === 'object').toBe(true);
-    expect(cw20TokenInfo).toHaveProperty('token');
-    expect(cw20TokenInfo).toEqual({
-      token: {
-        contract_addr: process.env.REACT_APP_AIRI_CONTRACT
-      }
-    });
+    }
+  ])('get-info-native-cw20-token-liquidity-pool', (item) => {
+    const tokenInfo = getInfoLiquidityPool(item);
+    expect(typeof tokenInfo === 'object').toBe(true);
+    if (tokenInfo.native_token) {
+      expect(tokenInfo).toEqual({
+        native_token: {
+          denom: item.denom
+        }
+      });
+    }
+    if (tokenInfo.token) {
+      expect(tokenInfo).toEqual({
+        token: {
+          contract_addr: item.contract_addr
+        }
+      });
+    }
   });
 
-  it('get-init-balances', async () => {
+  it('get-init-balances', () => {
     initialBalances = initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }));
     expect(Array.isArray(initialBalances)).toBe(true);
     for (const info of initialBalances) {
@@ -74,7 +74,7 @@ describe('frontier-cw20-token', () => {
     }
   });
 
-  it('get-liquidity-pool-reward-assets', async () => {
+  it('get-liquidity-pool-reward-assets', () => {
     liquidityPoolRewardAssets = isNewReward.map((isReward) => {
       return {
         amount: isReward?.value.toString(),
@@ -101,8 +101,8 @@ describe('frontier-cw20-token', () => {
     }
   });
 
-  it('msgs-list-token', async () => {
-    const msgs = await generateMsgFrontierAddToken({
+  it('msgs-list-token', () => {
+    const msgs = generateMsgFrontierAddToken({
       marketing,
       symbol: tokenName,
       liquidityPoolRewardAssets,
