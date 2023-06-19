@@ -142,9 +142,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-          minter,
-          cap: !!cap ? cap.toString() : null
-        }
+            minter,
+            cap: !!cap ? cap.toString() : null
+          }
         : undefined;
 
       const initialBalances = isInitBalances
@@ -224,7 +224,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       paddingTop: 16
                     }}
                   >
-                    <div className={cx('label')}>Minter</div>
+                    <div className={cx('label')}>Minter {'(Optional)'}</div>
                     <Input
                       className={cx('input', `input ${styles[theme]}`)}
                       value={minter}
@@ -238,7 +238,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       paddingTop: 16
                     }}
                   >
-                    <div className={cx('label')}>Cap (Option)</div>
+                    <div className={cx('label')}>Cap (Optional)</div>
                     <NumberFormat
                       placeholder="0"
                       className={cx('input', `input ${styles[theme]}`)}
@@ -258,7 +258,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               )}
               <hr />
               <div>
-                <CheckBox label="Init balance" checked={isInitBalances} onCheck={setIsInitBalances} />
+                <CheckBox label="Initial Balances (Optional)" checked={isInitBalances} onCheck={setIsInitBalances} />
               </div>
               {isInitBalances && (
                 <div
@@ -332,7 +332,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               }}
             >
               <PlusIcon />
-              <span>Add Token</span>
+              <span>Add a new pool reward token</span>
             </div>
             <div className={cx('rewards')} ref={ref}>
               <div className={cx('rewards-list')}>

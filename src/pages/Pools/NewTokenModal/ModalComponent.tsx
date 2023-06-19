@@ -24,10 +24,10 @@ export const AddTokenStatus = ({ status }) => {
       }}
     >
       {!status ? (
-        <div>This Token‘s contract address does not exist ! </div>
+        <div>This address is not a valid CW20 token! </div>
       ) : (
         <>
-          <div style={{ paddingRight: 4 }}>Add Token success</div>
+          <div style={{ paddingRight: 4 }}>Added CW20 token successfully</div>
           <SuccessIcon />
         </>
       )}
@@ -50,7 +50,7 @@ export const ModalListToken = ({
   return (
     <div className={cx('dropdown-reward')}>
       <div>
-        <div className={cx('label')}>Enter Token’s contract to add new tokens !</div>
+        <div className={cx('label')}>Enter a valid CW20 token address for the pool's reward</div>
         <div className={cx('check')}>
           <Input
             value={contractAddr}

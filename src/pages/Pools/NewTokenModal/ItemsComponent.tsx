@@ -35,7 +35,7 @@ export const RewardItems = ({
       <div className={cx('orai_label')}>
         {Icon ? <Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
         <div className={cx('per')} onClick={() => setIndReward(ind + 1)}>
-          <span>{item?.name}</span> Reward/s
+          <span>{item?.name}</span> /s
         </div>
       </div>
       <div className={cx('input_per', `input_per ${styles[theme]}`)}>
