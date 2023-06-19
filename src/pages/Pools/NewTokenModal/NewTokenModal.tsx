@@ -215,7 +215,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 </div>
               </div>
               <div className={cx('option')}>
-                <CheckBox label="Minter" checked={isMinter} onCheck={setIsMinter} />
+                <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
               </div>
               {isMinter && (
                 <div>
@@ -225,7 +225,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       paddingTop: 16
                     }}
                   >
-                    <div className={cx('label')}>Minter {'(Optional)'}</div>
+                    <div className={cx('label')}>Minter</div>
                     <Input
                       className={cx('input', `input ${styles[theme]}`)}
                       value={minter}
