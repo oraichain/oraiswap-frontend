@@ -191,7 +191,6 @@
                 padding-left: 14px;
                 font-weight: 500;
                 font-size: 14px;
-                cursor: pointer;
                 span {
                   text-transform: uppercase;
                 }
@@ -325,7 +324,16 @@
     padding: 13px 4px 13px 16px;
     display: flex;
     align-items: center;
+    .input {
+      width: 70%;
+      padding-right: 10px;
+      @include mobile {
+        font-size: 13px;
+      }
+    }
     .btn {
+      width: 30%;
+      max-height: 48px;
       background-color: rgba(126, 92, 197, 1);
       color: rgba(217, 217, 217, 1);
       border-radius: 8px;
@@ -336,7 +344,16 @@
         align-items: center;
         padding: 8px 4px;
         span {
-          font-size: 12px;
+          font-size: 10px;
+        }
+        @include mobile {
+          .plus {
+            width: 16px;
+            height: 24px;
+          }
+          span {
+            font-size: 9px;
+          }
         }
       }
     }

@@ -10,16 +10,7 @@ import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
 
 const cx = cn.bind(styles);
 
-export const RewardItems = ({
-  item,
-  ind,
-  setIndReward,
-  selectedReward,
-  setSelectedReward,
-  setRewardTokens,
-  rewardTokens,
-  theme
-}) => {
+export const RewardItems = ({ item, ind, selectedReward, setSelectedReward, setRewardTokens, rewardTokens, theme }) => {
   const originalFromToken = tokenMap?.[item?.denom];
   let Icon = theme === 'light' ? originalFromToken?.IconLight ?? originalFromToken?.Icon : originalFromToken?.Icon;
   return (
@@ -34,7 +25,7 @@ export const RewardItems = ({
       />
       <div className={cx('orai_label')}>
         {Icon ? <Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
-        <div className={cx('per')} onClick={() => setIndReward(ind + 1)}>
+        <div className={cx('per')}>
           <span>{item?.name}</span> /s
         </div>
       </div>

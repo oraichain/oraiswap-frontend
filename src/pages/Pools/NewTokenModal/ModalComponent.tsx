@@ -36,7 +36,7 @@ export const AddTokenStatus = ({ status }) => {
 };
 
 export const ModalListToken = ({
-  indReward,
+  setIsAddListToken,
   rewardTokens,
   setRewardTokens,
   allRewardSelect,
@@ -86,7 +86,7 @@ export const ModalListToken = ({
             }}
           >
             <div style={{ opacity: contractAddr ? 1 : 0.5 }}>
-              <PlusIcon />
+              <PlusIcon className={cx('plus')} />
               <span>Add Token</span>
             </div>
           </div>
@@ -101,13 +101,16 @@ export const ModalListToken = ({
                   <li
                     key={index + '' + t?.name}
                     onClick={() => {
-                      setRewardTokens(
-                        rewardTokens.map((isReward, ind) => {
-                          return indReward == ind + 1
-                            ? { ...isReward, denom: t.denom, name: t.name, contract_addr: t?.contractAddress }
-                            : isReward;
-                        })
-                      );
+                      setIsAddListToken(false);
+                      setRewardTokens([
+                        ...rewardTokens,
+                        {
+                          denom: t.denom,
+                          name: t.name,
+                          contract_addr: t?.contractAddress,
+                          value: BigInt(1e6)
+                        }
+                      ]);
                     }}
                   >
                     {t.Icon ? <t.Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
