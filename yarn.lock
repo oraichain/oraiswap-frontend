@@ -2457,15 +2457,17 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.12.0.tgz#19c959bdb900986e74939d4227e757aa16936b91"
   integrity sha512-hO+bdeGOlJwqowUBoZF5LyP3ORUFOP1G0GRv8N45W/cztXbT2ZEXaAzfokRS9Xc9FWmYrDj32mF6SzH6wuoIyA==
 
-"@oraichain/common-contracts-build@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.7.tgz#17989bdec0b7d5fd88b93db7db89bd88d90c2878"
-  integrity sha512-gbjCDpkqIF2x7iZfaVdrHizo8/D3Bfo0uWuBE0NAfnksgs21dC1ErgwKYthX1djahBsTYr5qb7STaLn18eFFHg==
+"@oraichain/common-contracts-build@1.0.18":
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.18.tgz#a95ec75242184510d57af115d4a42756d78e6b66"
+  integrity sha512-Lx9uMs0ueciXsKzX2vJL3DeFCcuHFC02v9NFcrSia8RPVgWe5Q9zxn/ZBrV5RihrbhM+gl+cWY1CfJ1IXTvcpQ==
+  dependencies:
+    "@oraichain/common-contracts-sdk" "1.0.13"
 
-"@oraichain/common-contracts-sdk@^1.0.5":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.6.tgz#b7666195a1d7d355def04c5a701fe73f57ab954b"
-  integrity sha512-ASrFTCMkFr48+XMtBokB22lnSYFO987/9lk54in2D8SNWeM48/GP98ZcWQMyXLsvBHJXfh5nTS1QltGOjmQvJQ==
+"@oraichain/common-contracts-sdk@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.13.tgz#5a6cd9320b995e184b5d484313e4b4e8ecd4b4bb"
+  integrity sha512-XfDDaggu7WcM/vxRxIn0ipLq6+c9+5FBqK/qzWh5HRHxn4e71OvNKVAxXoLOIATscAXkrkOimv55s1CD+hZGmw==
 
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
