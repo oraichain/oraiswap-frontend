@@ -3,12 +3,12 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
-import { NetworkChainId, chainInfos } from 'config/chainInfos';
+import { NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
-import { TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
+import { CwIcs20LatestQueryClient, Ratio, TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
@@ -16,6 +16,22 @@ import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/
 import { findToToken, transferEvmToIBC } from 'pages/BalanceNew/helpers';
 import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
+
+/**
+ * Get transfer token fee when universal swap
+ * @param param0
+ * @returns
+ */
+export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio | undefined> => {
+  try {
+    const ibcWasmContractAddress = process.env.REACT_APP_IBC_WASM_CONTRACT;
+    const ibcWasmContract = new CwIcs20LatestQueryClient(window.client, ibcWasmContractAddress);
+    const ratio = await ibcWasmContract.getTransferTokenFee({ remoteTokenDenom });
+    return ratio;
+  } catch (error) {
+    console.log({ error });
+  }
+};
 
 export interface SwapData {
   metamaskAddress?: string;

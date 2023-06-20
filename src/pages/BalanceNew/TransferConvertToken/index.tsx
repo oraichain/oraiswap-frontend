@@ -18,6 +18,7 @@ import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { findToToken } from '../helpers';
+import useTokenFee from 'hooks/useTokenFee';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
@@ -149,9 +150,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.chainId ? 'Convert ' : 'Transfer ';
+    const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
     return buttonName + network?.chainName;
   };
+
+  const to = findToToken(token, filterNetwork);
+  const fromTokenFee = useTokenFee(token.prefix + token.contractAddress)
+  const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress)
+  const bridgeFee = fromTokenFee || toTokenFee
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -257,7 +263,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           </div>
         </div>
         <div style={{ width: '100%' }}>
-          <div className={styles.balanceDescription}>Convert Amount:</div>
+          <div className={styles.balanceDescription}>Convert Amount: <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} /></div>
           <div className={styles.balanceAmount}>
             <div>
               <NumberFormat
@@ -276,9 +282,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 className={classNames(styles.amount, styles.amount + ` ${styles[theme]}`)}
               />
-              <div style={{ paddingTop: 8 }}>
+              {/* <div style={{ paddingTop: 8 }}>
                 <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} />
-              </div>
+              </div> */}
             </div>
 
             <div className={styles.balanceFromGroup}>
@@ -307,6 +313,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               ))}
             </div>
           </div>
+        </div>
+        <div className={styles.bridgeFee}>
+          Bridge fee: <span>{bridgeFee}%</span>  - Received amount:
+          <span>
+            {" "} {convertAmount ? convertAmount * (1 - bridgeFee / 100) : 0} {token.name}
+          </span>
         </div>
       </div>
       <div className={styles.transferTab}>
