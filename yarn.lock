@@ -2457,15 +2457,17 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.12.0.tgz#19c959bdb900986e74939d4227e757aa16936b91"
   integrity sha512-hO+bdeGOlJwqowUBoZF5LyP3ORUFOP1G0GRv8N45W/cztXbT2ZEXaAzfokRS9Xc9FWmYrDj32mF6SzH6wuoIyA==
 
-"@oraichain/common-contracts-build@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.7.tgz#17989bdec0b7d5fd88b93db7db89bd88d90c2878"
-  integrity sha512-gbjCDpkqIF2x7iZfaVdrHizo8/D3Bfo0uWuBE0NAfnksgs21dC1ErgwKYthX1djahBsTYr5qb7STaLn18eFFHg==
+"@oraichain/common-contracts-build@1.0.18":
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.18.tgz#a95ec75242184510d57af115d4a42756d78e6b66"
+  integrity sha512-Lx9uMs0ueciXsKzX2vJL3DeFCcuHFC02v9NFcrSia8RPVgWe5Q9zxn/ZBrV5RihrbhM+gl+cWY1CfJ1IXTvcpQ==
+  dependencies:
+    "@oraichain/common-contracts-sdk" "1.0.13"
 
-"@oraichain/common-contracts-sdk@^1.0.5":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.6.tgz#b7666195a1d7d355def04c5a701fe73f57ab954b"
-  integrity sha512-ASrFTCMkFr48+XMtBokB22lnSYFO987/9lk54in2D8SNWeM48/GP98ZcWQMyXLsvBHJXfh5nTS1QltGOjmQvJQ==
+"@oraichain/common-contracts-sdk@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.13.tgz#5a6cd9320b995e184b5d484313e4b4e8ecd4b4bb"
+  integrity sha512-XfDDaggu7WcM/vxRxIn0ipLq6+c9+5FBqK/qzWh5HRHxn4e71OvNKVAxXoLOIATscAXkrkOimv55s1CD+hZGmw==
 
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
@@ -2499,15 +2501,17 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-contracts-build@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.7.tgz#a7585add66c53db5fd8cbbd452268e20e34760f1"
-  integrity sha512-8VuwoMvqk16sh91IfUhZaaiWT0Kwpgt7X4lGtp0t6s2jrobU52FPTQi6pbYdqY4Z5P8UxT64HQHGET3Z9AA/rg==
+"@oraichain/oraidex-contracts-build@1.0.13":
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.13.tgz#0435d1d8730241aa86e8f0f42b38e74052b165dd"
+  integrity sha512-f1ePD0uWJJU1UdFhxtYplJ9GvTLYexSlOs9ndohOP4vQMMAkOPlCeUHOlmL5A5g6SZ1XQEZg1um4AXmVZo+iyg==
+  dependencies:
+    "@oraichain/oraidex-contracts-sdk" "^1.0.10"
 
-"@oraichain/oraidex-contracts-sdk@^1.0.5":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.7.tgz#95608af1d2ef547033bede2c1e461f987e9e5665"
-  integrity sha512-EaHQUDuoFVdvyKwXZMlbKn1EsKuE+dH1SO6gTABrymWhod2N2OyLztzi6VINfU54nMInFCIlP1rfj75r6VypUw==
+"@oraichain/oraidex-contracts-sdk@1.0.10", "@oraichain/oraidex-contracts-sdk@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.10.tgz#340c1ccee0ed9d0335f95bb3d13037e129b00505"
+  integrity sha512-gxaE0B3NxGvY/XCeakVkxxPUcuGdg5oHDqVSjDP5+QTfoKzu/j87Wo4O6TIcEu8us/pQAuIaTBZzHUkiWhpGaw==
 
 "@pedrouid/environment@^1.0.1":
   version "1.0.1"

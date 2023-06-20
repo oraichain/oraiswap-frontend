@@ -12,6 +12,7 @@ $blue-color: #7E5CC5;
 $themes: (
   dark: ('text-color': white,
     'text-color-secondary': #fff,
+    'text-color-third': #fff,
     'text-color-hover': black,
     'text-color-filter': #505665,
     'text-color-placeholder': #505665,
@@ -43,6 +44,7 @@ $themes: (
     'hr-color': 1px solid #2d2938),
   light: ('text-color': #272B30,
     'text-color-secondary': #A871DF,
+    'text-color-third': #484D56,
     'text-color-hover': white,
     'text-color-filter': #B5B9C2,
     'text-color-placeholder': #cccdd0,
