@@ -155,9 +155,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const to = findToToken(token, filterNetwork);
-  const fromTokenFee = useTokenFee(token.prefix + token.contractAddress)
-  const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress)
-  const bridgeFee = fromTokenFee || toTokenFee
+  const fromTokenFee = useTokenFee(token.prefix + token.contractAddress);
+  const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress);
+  const bridgeFee = fromTokenFee || toTokenFee;
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -206,7 +206,15 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   {network && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div className={styles.search_logo}>
-                        {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
+                        {theme === 'light' ? (
+                          network.IconLight ? (
+                            <network.IconLight />
+                          ) : (
+                            <network.Icon />
+                          )
+                        ) : (
+                          <network.Icon />
+                        )}
                       </div>
                       <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
                         {network.chainName}
@@ -214,9 +222,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     </div>
                   )}
                   {bridgeNetworks.length > 1 && (
-                    <div>
-                      {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
-                    </div>
+                    <div>{theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
                   )}
                 </div>
               </div>
@@ -263,7 +269,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           </div>
         </div>
         <div style={{ width: '100%' }}>
-          <div className={styles.balanceDescription}>Convert Amount: <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} /></div>
+          <div className={styles.balanceDescription}>
+            Convert Amount:{' '}
+            <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} />
+          </div>
           <div className={styles.balanceAmount}>
             <div>
               <NumberFormat
@@ -315,9 +324,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           </div>
         </div>
         <div className={styles.bridgeFee}>
-          Bridge fee: <span>{bridgeFee}%</span>  - Received amount:
+          Bridge fee: <span>{bridgeFee}%</span> - Received amount:
           <span>
-            {" "} {convertAmount ? convertAmount * (1 - bridgeFee / 100) : 0} {token.name}
+            {' '}
+            {convertAmount ? (convertAmount * (1 - bridgeFee / 100)).toFixed(6) : 0} {token.name}
           </span>
         </div>
       </div>
