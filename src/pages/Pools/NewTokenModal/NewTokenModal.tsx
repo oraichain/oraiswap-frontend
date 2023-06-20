@@ -75,7 +75,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   ]);
 
-  const allRewardSelect = rewardTokens.map((item) => item['denom']);
+  const allRewardSelect = rewardTokens.map(item => item['denom']);
   const handleOutsideClick = () => {
     if (isAddListToken) setIsAddListToken(false);
     if (typeDelete) setTypeDelete('');
@@ -100,7 +100,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       });
 
     if (isInitBalances) {
-      initBalances.every((inBa) => {
+      initBalances.every(inBa => {
         if (!inBa.address || !validateAddressCosmos(inBa.address, 'orai')) {
           return displayToast(TToastType.TX_FAILED, {
             message: 'Wrong address init balances format!'
@@ -133,7 +133,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
     try {
       setIsLoading(true);
-      const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
+      const liquidityPoolRewardAssets = rewardTokens.map(isReward => {
         return {
           amount: isReward?.value.toString(),
           info: getInfoLiquidityPool(isReward)
@@ -149,7 +149,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         : undefined;
 
       const initialBalances = isInitBalances
-        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
+        ? initBalances.map(e => ({ ...e, amount: e?.amount.toString() }))
         : undefined;
 
       const msg = generateMsgFrontierAddToken({
@@ -163,9 +163,19 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
       const result = await oraidexListing.listToken(msg);
       if (result) {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
+        const wasm = result?.logs?.[0]?.events.find(e => e.type === 'wasm')?.attributes;
+        const cw20Address = wasm?.find(w => w.key === 'cw20_address')?.value;
+        displayToast(
+          TToastType.TX_SUCCESSFUL,
+          {
+            customLink: `${network.explorer}/txs/${result.transactionHash}`,
+            linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+            cw20Address: `${cw20Address}`
+          },
+          {
+            autoClose: 100000000
+          }
+        );
         close();
       }
     } catch (error) {
@@ -208,7 +218,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       style={{
                         color: theme === 'light' && 'rgba(39, 43, 48, 1)'
                       }}
-                      onChange={(e) => setTokenName(e?.target?.value)}
+                      onChange={e => setTokenName(e?.target?.value)}
                       placeholder="ORAICHAIN"
                     />
                   </div>
@@ -229,7 +239,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <Input
                       className={cx('input', `input ${styles[theme]}`)}
                       value={minter}
-                      onChange={(e) => setMinter(e?.target?.value)}
+                      onChange={e => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
                   </div>
