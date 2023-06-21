@@ -182,7 +182,7 @@ async function fetchCachedPairInfo(
   tokenTypes: [TokenItemType, TokenItemType],
   cachedPairs?: PairInfoExtend[]
 ): Promise<PairInfo> {
-  if (!cachedPairs) return fetchPairInfo(tokenTypes);
+  if (!cachedPairs || cachedPairs.length === 0) return fetchPairInfo(tokenTypes);
   const pair = cachedPairs.find((pair) =>
     pair.asset_infos.find(
       (info) =>
