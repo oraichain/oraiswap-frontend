@@ -6,6 +6,7 @@ import { ORAI } from './constants';
 import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { network } from './networks';
+import { PairInfoExtend } from 'types/token';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -101,7 +102,7 @@ export class Pairs {
    * @returns pairs info after processed to have correctly index of asset info matched with list pairs of Pairs.pairs
    * note: this case use for pair that have USDT token with other token (example: USDT/MILKY should return MILKY/USDT)
    */
-  static processFetchedAllPairInfos = (pairs: PairInfo[]): PairInfo[] => {
+  static processFetchedAllPairInfos = (pairs: PairInfo[]): PairInfoExtend[] => {
     return pairs.map((pair) => {
       let firstInfoIndex = 0;
       let secondInfoIndex = 1;
@@ -119,13 +120,15 @@ export class Pairs {
     });
   };
 
-  static getAllPairsFromTwoFactoryVersions = async (): Promise<PairInfo[]> => {
+  static getAllPairsFromTwoFactoryVersions = async (
+    multicallClient?: MulticallReadOnlyInterface
+  ): Promise<PairInfoExtend[]> => {
     const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
       pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
     );
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
 
-    const multicall = new MulticallQueryClient(window.client, network.multicall);
+    const multicall = multicallClient ? multicallClient : new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
       this.getAllPairs(firstVersionWhiteListPairs, network.factory, multicall),
       this.getAllPairs(secondVersionWhiteListPairs, network.factory_v2, multicall)
@@ -138,6 +141,6 @@ export class Pairs {
   };
 
   static getStakingInfoTokenItemTypeFromPairs = (pairs: PairInfo[]): TokenItemType[] => {
-    return pairs.map((p) => assetInfoMap[parseAssetInfo(this.getStakingAssetInfo(p.asset_infos))])
-  }
+    return pairs.map((p) => assetInfoMap[parseAssetInfo(this.getStakingAssetInfo(p.asset_infos))]);
+  };
 }

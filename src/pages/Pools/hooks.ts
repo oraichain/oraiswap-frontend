@@ -9,14 +9,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
 import { PairInfoData, fetchAprResult, fetchMyPairsData, fetchPairsData, fetchPoolListAndOraiPrice } from './helpers';
+import { updatePairInfos } from 'reducer/pairs';
+import { PairInfoExtend } from 'types/token';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
-  const [pairs, setMyPairs] = useState([] as PairInfo[]);
+  const [pairs, setMyPairs] = useState([] as PairInfoExtend[]);
+  const dispatch = useDispatch();
+  const setCachedPairInfos = (payload: PairInfoExtend[]) => dispatch(updatePairInfos(payload));
 
   const fetchAllPairs = async () => {
     const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
     setMyPairs(pairs);
+    setCachedPairInfos(pairs);
   };
 
   useEffect(() => {
@@ -62,7 +67,7 @@ export const useFetchCachePairs = (pairs: PairInfo[]) => {
 };
 
 // Fetch my pair data
-export const useFetchMyPairs = (pairs: PairInfo[]) => {
+export const useFetchMyPairs = (pairs: PairInfoExtend[]) => {
   const [address] = useConfigReducer('address');
   const [myPairsData, setMyPairsData] = useState({});
 
@@ -83,7 +88,7 @@ export const useFetchMyPairs = (pairs: PairInfo[]) => {
 };
 
 // Fetch Pair Info Data List
-export const useFetchPairInfoDataList = (pairs: PairInfo[]) => {
+export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
   const [pairInfos, setPairInfos] = useState<PairInfoData[]>([]);
   const [oraiPrice, setOraiPrice] = useState(0);
   const cachedPairs = useSelector((state: RootState) => state.token.pairs);

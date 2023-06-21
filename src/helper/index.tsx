@@ -60,7 +60,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -131,4 +131,8 @@ export const calculateTimeoutTimestamp = (timeout: number): string => {
 export const parseAssetInfo = (assetInfo: AssetInfo): string => {
   if ('native_token' in assetInfo) return assetInfo.native_token.denom;
   return assetInfo.token.contract_addr;
+};
+
+export const floatToPercent = (value: number): number => {
+  return value * 100;
 };

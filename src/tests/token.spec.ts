@@ -8,7 +8,7 @@ describe('token', () => {
 
   beforeAll(async () => {
     // init airi token
-    const initAiriRes = await oraidexArtifacts.deployContract<OraiswapTokenTypes.InstantiateMsg>(
+    const initAiriRes = await oraidexArtifacts.deployContract(
       client,
       senderAddress,
 

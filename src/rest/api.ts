@@ -22,12 +22,12 @@ import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp } from 'helper';
+import { calculateTimeoutTimestamp, parseAssetInfo } from 'helper';
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
-import { TokenInfo } from 'types/token';
+import { PairInfoExtend, TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -176,6 +176,21 @@ async function fetchPoolInfoAmount(
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }
   return { offerPoolAmount, askPoolAmount };
+}
+
+async function fetchCachedPairInfo(
+  tokenTypes: [TokenItemType, TokenItemType],
+  cachedPairs?: PairInfoExtend[]
+): Promise<PairInfo> {
+  if (!cachedPairs) return fetchPairInfo(tokenTypes);
+  const pair = cachedPairs.find((pair) =>
+    pair.asset_infos.find(
+      (info) =>
+        info.toString() === parseTokenInfo(tokenTypes[0]).info.toString() ||
+        info.toString() === parseTokenInfo(tokenTypes[1]).info.toString()
+    )
+  );
+  return pair;
 }
 
 async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
@@ -753,6 +768,7 @@ function generateMoveOraib2OraiMessages(
 
 export {
   fetchPairInfo,
+  fetchCachedPairInfo,
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,

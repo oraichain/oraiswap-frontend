@@ -25,11 +25,11 @@ import {
   getPairAmountInfo,
   parseTokenInfo
 } from 'rest/api';
-import { TokenInfo } from 'types/token';
+import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 
 export type PairInfoData = {
-  pair: PairInfo;
+  pair: PairInfoExtend;
 } & PairInfoDataRaw &
   PoolInfo;
 
@@ -90,13 +90,13 @@ const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], pric
 };
 
 // Fetch Pair Info Data List
-const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDetails) => {
+const fetchPoolListAndOraiPrice = async (pairs: PairInfoExtend[], cachedPairs: PairDetails) => {
   if (!cachedPairs) {
     // wait for cached pair updated
     return;
   }
   let poolList: PairInfoData[] = await Promise.all(
-    pairs.map(async (p: PairInfo) => {
+    pairs.map(async (p: PairInfoExtend) => {
       const pairInfoDataRaw = await fetchPairInfoData(p, cachedPairs);
       return {
         pair: p,
@@ -127,7 +127,7 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfo[], cachedPairs: PairDet
   }
 };
 
-export const fetchPairInfoData = async (pairInfo: PairInfo, cached: PairDetails): Promise<PairInfoDataRaw> => {
+export const fetchPairInfoData = async (pairInfo: PairInfoExtend, cached: PairDetails): Promise<PairInfoDataRaw> => {
   const fromToken = assetInfoMap[pairInfo.asset_infos_raw[0]];
   const toToken = assetInfoMap[pairInfo.asset_infos_raw[1]];
   if (!fromToken || !toToken) return;
@@ -188,7 +188,7 @@ export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
   return myPairData;
 };
 
-const generateRewardInfoQueries = (pairs: PairInfo[], stakerAddress: string) => {
+const generateRewardInfoQueries = (pairs: PairInfoExtend[], stakerAddress: string) => {
   const queries = pairs.map((pair) => {
     let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
     const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
@@ -209,7 +209,11 @@ const generateRewardInfoQueries = (pairs: PairInfo[], stakerAddress: string) => 
   return queries;
 };
 
-const fetchMyPairsData = async (pairs: PairInfo[], stakerAddress: string, multicall: MulticallReadOnlyInterface) => {
+const fetchMyPairsData = async (
+  pairs: PairInfoExtend[],
+  stakerAddress: string,
+  multicall: MulticallReadOnlyInterface
+) => {
   const queries = generateRewardInfoQueries(pairs, stakerAddress);
   const res = await multicall.aggregate({
     queries

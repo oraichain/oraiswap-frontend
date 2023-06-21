@@ -1,6 +1,7 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import tokenReducer from '../reducer/token';
 import configReducer from '../reducer/config';
+import pairInfosReduce from '../reducer/pairs';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import { PERSIST_CONFIG_KEY } from './constants';
@@ -12,7 +13,8 @@ const rootPersistConfig = {
 
 const rootReducer = combineReducers({
   config: configReducer,
-  token: tokenReducer
+  token: tokenReducer,
+  pairInfos: pairInfosReduce
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

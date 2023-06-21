@@ -27,7 +27,7 @@ import {
   ProvideQuery,
   Type
 } from 'rest/api';
-import { TokenInfo } from 'types/token';
+import { PairInfoExtend, TokenInfo } from 'types/token';
 import {
   addLiquidity,
   addPairAndLpToken,
@@ -48,7 +48,7 @@ describe('pool', () => {
   let pairsData: PairDetails;
   let pairInfos: PairInfoData[] = [];
   let assetTokens: TokenItemType[] = [];
-  let pairs: PairInfo[];
+  let pairs: PairInfoExtend[];
 
   const prices = {
     'oraichain-token': 3.93,
@@ -84,8 +84,11 @@ describe('pool', () => {
     const listPairs = await getPairs(network.factory);
 
     // update config pairs to test
-    Pairs.pairs = listPairs.pairs.map(pair => ({ asset_infos: pair.asset_infos }));
-    pairs = listPairs.pairs;
+    Pairs.pairs = listPairs.pairs.map((pair) => ({ asset_infos: pair.asset_infos }));
+    pairs = listPairs.pairs.map((pair) => ({
+      ...pair,
+      asset_infos_raw: [parseAssetInfo(pair.asset_infos[0]), parseAssetInfo(pair.asset_infos[1])]
+    })) as PairInfoExtend[];
 
     assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(listPairs.pairs);
 
@@ -109,15 +112,22 @@ describe('pool', () => {
 
   it('test getStakingInfoTokenItemTypeFromPairs should return correct token types', () => {
     const testPairs = pairs.map((pair, index) => {
-      if (index === 0) return { ...pair, asset_infos: [{ token: { contract_addr: "foobar" } }, { native_token: { denom: ORAI } }] as [AssetInfo, AssetInfo] };
-      return pair
+      if (index === 0)
+        return {
+          ...pair,
+          asset_infos: [{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }] as [
+            AssetInfo,
+            AssetInfo
+          ]
+        };
+      return pair;
     });
     const result = Pairs.getStakingInfoTokenItemTypeFromPairs(testPairs);
     // we only have two simulate tokens, so length should be two
     expect(result.length).toBe(2);
     expect(result[0]).toBeUndefined();
     expect(result[1]).toEqual(assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(pairs[1].asset_infos))]);
-  })
+  });
 
   describe('get info liquidity pool, pair', () => {
     let allTokenAssetInfos: OraiswapStakingTypes.PoolInfoResponse[] = [];
@@ -441,7 +451,7 @@ describe('pool', () => {
     it('test getAllPairsFromTwoFactoryVersions', async () => {
       const allPairsFromTwoFactoryVersions = await Pairs.getAllPairsFromTwoFactoryVersions();
       console.dir(allPairsFromTwoFactoryVersions, { depth: null });
-      expect(allPairsFromTwoFactoryVersions.map(pair => pair.asset_infos)).toEqual([
+      expect(allPairsFromTwoFactoryVersions.map((pair) => pair.asset_infos)).toEqual([
         [
           { native_token: { denom: ORAI } },
           {
@@ -458,15 +468,11 @@ describe('pool', () => {
             }
           }
         ]
-      ])
-      expect(allPairsFromTwoFactoryVersions.map(pair => pair.asset_infos_raw)).toEqual([
-        [
-          ORAI, airiContractAddress
-        ],
-        [
-          ORAI, usdtContractAddress
-        ]
-      ])
+      ]);
+      expect(allPairsFromTwoFactoryVersions.map((pair) => pair.asset_infos_raw)).toEqual([
+        [ORAI, airiContractAddress],
+        [ORAI, usdtContractAddress]
+      ]);
       expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
     });
   });
