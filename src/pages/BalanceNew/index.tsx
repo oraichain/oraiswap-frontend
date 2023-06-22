@@ -72,6 +72,14 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     _initEthereum();
   }, []);
 
+
+  // Popup maintain Kawaii chain.
+  useEffect(() => {
+    displayToast(TToastType.KWT_MAINTAIN, {
+      chainName: 'Kawaii chain', message: ' is under system maintenance. We will complete as soon as possible !'
+    })
+  }, [])
+
   const _initEthereum = async () => {
     try {
       await initEthereum();

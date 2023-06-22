@@ -2,6 +2,10 @@ import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as MaintainIcon } from 'assets/icons/toast_maintain.svg';
+import { ReactComponent as KwtSmIcon } from 'assets/icons/kwt_sm.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+
 import classNames from 'classnames';
 import Loader from 'components/Loader';
 import { FunctionComponent } from 'react';
@@ -11,7 +15,8 @@ import styles from './Toast.module.scss';
 const CloseButton = ({ closeToast }: { closeToast: () => void }) => {
   return (
     <button onClick={closeToast} className={styles.btn_close}>
-  </button>
+      <CloseIcon className={styles.btn_close} />
+    </button>
   )
 }
 
@@ -39,10 +44,12 @@ export enum TToastType {
   KEPLR_FAILED,
   METAMASK_FAILED,
   TRONLINK_FAILED,
+  KWT_MAINTAIN
 }
 
 interface IToastExtra {
   message: string;
+  chainName: string;
   customLink: string;
   textLink: string;
 }
@@ -86,6 +93,11 @@ export type DisplayToastFn = ((
     extraData?: Partial<
       Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>
     >,
+    options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.KWT_MAINTAIN,
+    extraData?: Partial<Pick<IToastExtra, 'message' | 'chainName'>>,
     options?: Partial<ToastOptions>
   ) => void);
 
@@ -146,6 +158,11 @@ export const displayToast: DisplayToastFn = (
       return toast(
         <ToastTronLinkFailed message={inputExtraData.message} />,
         inputOptions
+      );
+    case TToastType.KWT_MAINTAIN:
+      return toast(
+        <ToastMaintain message={inputExtraData.message} chainName={inputExtraData.chainName} />,
+        { ...inputOptions, autoClose: false }
       );
     default:
       return console.error(`Undefined toast type - ${type}`);
@@ -234,6 +251,17 @@ const ToastTxSuccess: FunctionComponent<{ link: string }> = ({ link }) => (
       <a target="__blank" href={link}>
         View on Explorer <LinkIcon />
       </a>
+    </section>
+  </div>
+);
+
+const ToastMaintain: FunctionComponent<{ chainName: string, message: string }> = ({ chainName, message }) => (
+  <div className={classNames(styles.toast_content, styles.toast_success)}>
+    <MaintainIcon />
+    <section className={styles.toast_section}>
+      <p className={styles.toast_maintain} style={{ fontSize: 16 }}>
+        <KwtSmIcon />
+        <span style={{ color: '#F0B90B' }}>{chainName} </span><span>{message}</span></p>
     </section>
   </div>
 );

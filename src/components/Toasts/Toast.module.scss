@@ -1,5 +1,6 @@
 .btn_close {
   margin-top: -5px;
+  margin-right: 5px;
   align-self: flex-start;
 }
 
@@ -18,6 +19,7 @@
 .toast_content {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 
   >img {
     height: 50px;
@@ -62,4 +64,16 @@
   flex-direction: column;
   justify-content: center;
   margin: 0 15px;
+
+  .toast_maintain {
+    line-height: 1.3;
+
+    svg {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: 8px;
+      right: 5px;
+    }
+  }
 }
