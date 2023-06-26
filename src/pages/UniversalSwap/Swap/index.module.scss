@@ -112,13 +112,12 @@
     }
 
     .token-symbol {
-      display: 'flex';
-      align-self: 'flex-start';
+      font-weight: 400;
     }
 
     .token-org {
       opacity: 0.5;
-      font-size: 10px;
+      font-size: 13px;
       width: max-content;
     }
 
@@ -190,6 +189,15 @@
             font-size: 18px;
           }
         }
+      }
+
+      .token-fee {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 500;
+        color: #777e90;
+        margin-top: 10px;
       }
     }
 
@@ -299,6 +307,7 @@
     @include theme() {
       box-shadow: theme-get('shadow-btn');
     }
+
     border-radius: 8px;
 
     padding: 16px;

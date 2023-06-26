@@ -327,6 +327,20 @@
   @include mobile {
     @include flex(space-between, center, column-reverse);
   }
+
+  .bridgeFee {
+    font-weight: 400;
+    font-size: 14px;
+    margin-top: 12px;
+
+    @include theme() {
+      color: theme-get('text-color-third');
+    }
+
+    span {
+      color: #F0B90B;
+    }
+  }
 }
 
 .items {

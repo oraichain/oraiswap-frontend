@@ -186,7 +186,7 @@ export const transferIBCKwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: parseInt(calculateTimeoutTimestamp(ibcInfo.timeout))
+      timeoutTimestamp: ibcInfo.timeout
     },
     customMessages
   });
@@ -228,7 +228,7 @@ export const convertTransferIBCErc20Kwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: parseInt(calculateTimeoutTimestamp(ibcInfo.timeout))
+      timeoutTimestamp: ibcInfo.timeout
     },
     amount: amount.amount,
     contractAddr: fromToken?.contractAddress

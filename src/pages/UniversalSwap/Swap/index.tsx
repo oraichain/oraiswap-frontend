@@ -26,6 +26,7 @@ import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import { UniversalSwapHandler, checkEvmAddress } from '../helpers';
 import styles from './index.module.scss';
+import useTokenFee from 'hooks/useTokenFee';
 
 const cx = cn.bind(styles);
 
@@ -92,6 +93,9 @@ const SwapComponent: React.FC<{
   const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
+
+  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress)
+  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress)
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -184,6 +188,9 @@ const SwapComponent: React.FC<{
     token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
   )
 
+  // minimum receive after slippage
+  const minimumReceive = simulateData?.amount ? BigInt(simulateData.amount) - BigInt(simulateData.amount) * BigInt(userSlippage) / 100n : '0'
+
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>
@@ -244,16 +251,26 @@ const SwapComponent: React.FC<{
                 }}
               />
             </div>
-            {isSelectFrom && <SelectTokenModalV2
-              close={() => setIsSelectFrom(false)}
-              prices={prices}
-              items={filteredFromTokens}
-              amounts={amounts}
-              setToken={(denom) => {
-                setSwapTokens([denom, toTokenDenom]);
-              }}
-              setSearchTokenName={setSearchTokenName}
-            />}
+            {fromTokenFee !== 0 &&
+              <div className={cx('token-fee')}>
+                <span>
+                  Token Fee
+                </span>
+                <span>{fromTokenFee}%</span>
+              </div>
+            }
+            {isSelectFrom && (
+              <SelectTokenModalV2
+                close={() => setIsSelectFrom(false)}
+                prices={prices}
+                items={filteredFromTokens}
+                amounts={amounts}
+                setToken={(denom) => {
+                  setSwapTokens([denom, toTokenDenom]);
+                }}
+                setSearchTokenName={setSearchTokenName}
+              />
+            )}
           </div>
 
         </div>
@@ -299,16 +316,26 @@ const SwapComponent: React.FC<{
 
               <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
             </div>
-            {isSelectTo && <SelectTokenModalV2
-              close={() => setIsSelectTo(false)}
-              prices={prices}
-              items={filteredToTokens}
-              amounts={amounts}
-              setToken={(denom) => {
-                setSwapTokens([fromTokenDenom, denom]);
-              }}
-              setSearchTokenName={setSearchTokenName}
-            />}
+            {toTokenFee !== 0 &&
+              <div className={cx('token-fee')}>
+                <span>
+                  Token Fee
+                </span>
+                <span>{toTokenFee}%</span>
+              </div>
+            }
+            {isSelectTo && (
+              <SelectTokenModalV2
+                close={() => setIsSelectTo(false)}
+                prices={prices}
+                items={filteredToTokens}
+                amounts={amounts}
+                setToken={(denom) => {
+                  setSwapTokens([fromTokenDenom, denom]);
+                }}
+                setSearchTokenName={setSearchTokenName}
+              />
+            )}
           </div>
 
         </div>
@@ -332,19 +359,22 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: simulateData?.amount,
+                amount: minimumReceive,
                 denom: toTokenInfoData?.symbol,
                 decimals: toTokenInfoData?.decimals
               }}
               decimalScale={6}
             />
           </div>
-          {/* <div className={cx('row')}>
-            <div className={cx('title')}>
-              <span>Tax rate</span>
+
+          {!fromTokenFee && !toTokenFee &&
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Tax rate</span>
+              </div>
+              <span>0.3 %</span>
             </div>
-            <span>0.3 %</span>
-          </div> */}
+          }
         </div>
       </div>
     </LoadingBox>
