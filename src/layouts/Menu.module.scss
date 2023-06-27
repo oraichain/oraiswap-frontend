@@ -92,6 +92,13 @@
         fill: $white-color;
       }
     }
+
+    .universal_icon {
+      path {
+        fill: none;
+        stroke: $white-color;
+      }
+    }
   }
 
   &.active {
@@ -100,6 +107,13 @@
     svg {
       path {
         fill: $white-color;
+      }
+    }
+
+    .universal_icon {
+      path {
+        fill: none;
+        stroke: $white-color;
       }
     }
   }
