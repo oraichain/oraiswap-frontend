@@ -1,7 +1,7 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import { EncodeObject } from '@cosmjs/proto-signing';
-import { Coin, isDeliverTxFailure, logs } from '@cosmjs/stargate';
+import { Coin, GasPrice, isDeliverTxFailure, logs } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 
@@ -33,6 +33,15 @@ const collectWallet = async (chainId?: string) => {
   }
   // use keplr instead
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
+};
+
+const getCosmWasmClient = async () => {
+  const wallet = await collectWallet();
+  const defaultAddress = (await wallet.getAccounts())[0];
+  const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
+    gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
+  });
+  return { wallet, client, defaultAddress };
 };
 
 const parseExecuteContractMultiple = (msgs: ExecuteMultipleMsg[]) => {
@@ -293,6 +302,12 @@ class CosmJs {
   }
 }
 
-export { collectWallet, getExecuteContractMsgs, parseExecuteContractMultiple, getAminoExecuteContractMsgs };
+export {
+  getCosmWasmClient,
+  collectWallet,
+  getExecuteContractMsgs,
+  parseExecuteContractMultiple,
+  getAminoExecuteContractMsgs
+};
 
 export default CosmJs;

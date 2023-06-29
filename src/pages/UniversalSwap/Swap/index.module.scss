@@ -112,236 +112,18 @@
     }
 
     .token-symbol {
-      font-weight: 400;
-    }
-
-    .token-org {
-      opacity: 0.5;
-      font-size: 13px;
-      width: max-content;
-    }
-
-    .balance {
-      font-style: normal;
       font-weight: 500;
-      font-size: 14px;
-      line-height: 150%;
-      /* identical to box height, or 21px */
-
-      text-align: center;
-      font-feature-settings: 'ss03' on;
-
-      /* aiRight/Gray 3 */
-
-      color: #777e90;
-
-      display: flex;
-      gap: 8px;
-      width: 100%;
-
-      .btn {
-        cursor: pointer;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        padding: 4px 6px;
-
-        @include theme() {
-          background-color: theme-get('bg-color-active');
-        }
-
-        border-radius: 4px;
-
-        font-style: normal;
-        font-weight: 500;
-        font-size: 13px;
-        line-height: 100%;
-        /* identical to box height, or 13px */
-
-        /* Stroke/Primary */
-
-        color: #a871df;
-
-        &:hover {
-          @include theme() {
-            background-color: theme-get('bg-color-active');
-          }
-        }
-      }
-
-      .active {
-        @include theme() {
-          background-color: theme-get('bg-color-active');
-        }
-      }
-    }
-
-    .input-wrapper {
-      width: 100%;
-      position: relative;
-
-      @include medium-desktop {
-        .input {
-          font-size: 20px;
-
-          .amount {
-            font-size: 18px;
-          }
-        }
-      }
-
-      .token-fee {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-weight: 500;
-        color: #777e90;
-        margin-top: 10px;
-      }
-    }
-
-    .input {
-      /* Auto layout */
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      gap: 5px;
-
-      @include theme() {
-        background: theme-get('bg-color-secondary');
-        color: theme-get('text-color');
-      }
-
-      border-radius: 8px;
-
-      font-style: normal;
-      font-weight: 600;
       font-size: 24px;
-      line-height: 100%;
-      /* identical to box height, or 24px */
-
-      text-align: center;
-      font-feature-settings: 'tnum' on,
-      'lnum' on,
-      'zero' on;
-
-      .token {
-        cursor: pointer;
-        display: flex;
-
-        align-items: center;
-
-        gap: 5px;
-
-        .logo {
-          width: 32px;
-          height: 32px;
-        }
-
-        .arrow-down {
-          width: 0;
-          height: 0;
-          border-left: 6px solid transparent;
-          border-right: 6px solid transparent;
-
-          @include theme() {
-            border-top: theme-get('bg-color-arrow');
-          }
-        }
-      }
-
-      .amount {
-        flex-grow: 1;
-        text-align: right;
-        max-width: 50%;
-        width: inherit;
-
-        @include mobile {
-          width: 100%;
-        }
-      }
     }
   }
 
-  .from {
-    @include mobile {
-      border-bottom: 1px solid;
-    }
+  .token-org {
+    opacity: 0.5;
+    font-size: 13px;
+    width: max-content;
   }
 
-  .to {
-    input.amount {
-      color: #505665;
-    }
-
-    @include mobile {
-      border-top: 1px solid;
-    }
-  }
-
-  .swap-icon {
-    padding: 5px;
-
-    @include theme() {
-      background-color: theme-get('bg-btn-switch');
-    }
-
-    img {
-      cursor: pointer;
-      height: 44px;
-      width: 44px;
-      position: absolute;
-      transform: translate(-50%, -50%);
-    }
-  }
-
-  .swap-btn {
-    width: 100%;
-    background: $blue-color;
-    /* Inner/Button */
-
-    @include theme() {
-      box-shadow: theme-get('shadow-btn');
-    }
-
-    border-radius: 8px;
-
-    padding: 16px;
-
-    font-style: normal;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 100%;
-    /* identical to box height, or 16px */
-
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    /* aiRight/White */
-
-    color: #ffffff;
-    cursor: pointer;
-
-    margin: 20px 0;
-    height: 60px;
-
-    svg {
-      margin: 0 5px 0 0 !important;
-    }
-  }
-
-  .detail {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
+  .balance {
     font-style: normal;
     font-weight: 500;
     font-size: 14px;
@@ -355,17 +137,236 @@
 
     color: #777e90;
 
-    .row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+
+    .btn {
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 4px 6px;
+
+      @include theme() {
+        background-color: theme-get('bg-color-active');
+      }
+
+      border-radius: 4px;
+
+      font-style: normal;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 100%;
+      /* identical to box height, or 13px */
+
+      /* Stroke/Primary */
+
+      color: #a871df;
+
+      &:hover {
+        @include theme() {
+          background-color: theme-get('bg-color-active');
+        }
+      }
+    }
+
+    .active {
+      @include theme() {
+        background-color: theme-get('bg-color-active');
+      }
+    }
+  }
+
+  .input-wrapper {
+    width: 100%;
+    position: relative;
+
+    @include medium-desktop {
+      .input {
+        font-size: 20px;
+
+        .amount {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .token-fee {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 500;
+      color: #777e90;
+      margin-top: 10px;
+    }
+  }
+
+  .input {
+    /* Auto layout */
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    gap: 5px;
+
+    @include theme() {
+      background: theme-get('bg-color-secondary');
+      color: theme-get('text-color');
+    }
+
+    border-radius: 8px;
+
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 100%;
+    /* identical to box height, or 24px */
+
+    text-align: center;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
+
+    .token {
+      cursor: pointer;
+      display: flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      .logo {
+        width: 32px;
+        height: 32px;
+      }
+
+      .arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+
+        @include theme() {
+          border-top: theme-get('bg-color-arrow');
+        }
+      }
+    }
+
+    .amount {
+      flex-grow: 1;
+      text-align: right;
+      max-width: 50%;
+      width: inherit;
+
+      @include mobile {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.from {
+  @include mobile {
+    border-bottom: 1px solid;
+  }
+}
+
+.to {
+  input.amount {
+    color: #505665;
+  }
+
+  @include mobile {
+    border-top: 1px solid;
+  }
+}
+
+.swap-icon {
+  padding: 5px;
+
+  @include theme() {
+    background-color: theme-get('bg-btn-switch');
+  }
+
+  img {
+    cursor: pointer;
+    height: 44px;
+    width: 44px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.swap-btn {
+  width: 100%;
+  background: $blue-color;
+  /* Inner/Button */
+
+  @include theme() {
+    box-shadow: theme-get('shadow-btn');
+  }
+
+  border-radius: 8px;
+
+  padding: 16px;
+
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 100%;
+  /* identical to box height, or 16px */
+
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* aiRight/White */
+
+  color: #ffffff;
+  cursor: pointer;
+
+  margin: 20px 0;
+  height: 60px;
+
+  svg {
+    margin: 0 5px 0 0 !important;
+  }
+}
+
+.detail {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+  /* identical to box height, or 21px */
+
+  text-align: center;
+  font-feature-settings: 'ss03' on;
+
+  /* aiRight/Gray 3 */
+
+  color: #777e90;
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
       display: flex;
       justify-content: space-between;
       align-items: center;
-
-      .title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 5px;
-      }
+      gap: 5px;
     }
   }
 }

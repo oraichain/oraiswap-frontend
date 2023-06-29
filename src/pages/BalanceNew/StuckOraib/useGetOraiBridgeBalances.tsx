@@ -22,22 +22,22 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
       }
 
       const data: readonly Coin[] = uniqBy(
-        cosmosTokens.filter((token) => !token.contractAddress && token.chainId === 'oraibridge-subnet-2'),
-        (c) => c.denom
+        cosmosTokens.filter(token => !token.contractAddress && token.chainId === 'oraibridge-subnet-2'),
+        c => c.denom
       )
-        .map((token) => ({ denom: token.denom, amount: amounts[token.denom] }))
-        .filter((coin) => Number(coin.amount) > 0);
+        .map(token => ({ denom: token.denom, amount: amounts[token.denom] }))
+        .filter(coin => Number(coin.amount) > 0);
 
       const remainingOraib = data
         .reduce((acc, item) => {
           // denom: "uoraib" not use => filter out
           if (item.denom !== ORAI_BRIDGE_UDENOM) {
-            const findedOraib = otherChainTokens.find(
+            const oraibFound = otherChainTokens.find(
               (token: TokenItemType) => token.denom.toLowerCase() === item.denom.toLowerCase()
             );
-            if (findedOraib) {
+            if (oraibFound) {
               acc.push({
-                ...findedOraib,
+                ...oraibFound,
                 amount: item.amount
               });
             }
@@ -45,6 +45,7 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
           return acc;
         }, [] as RemainingOraibTokenItem[])
         .filter((token: RemainingOraibTokenItem) => toDisplay(token.amount, token.decimals) > 0);
+
       setRemainingOraib(remainingOraib);
     } catch (error) {
       console.log('error in getBalanceOraibridge: ', error);

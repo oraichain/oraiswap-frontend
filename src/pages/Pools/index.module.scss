@@ -87,11 +87,13 @@
   padding: 24px 24px 35px;
   width: calc(25% - 27px);
   border: 1px solid;
-  border-image-source: linear-gradient(99.99deg,
+  border-image-source: linear-gradient(
+    99.99deg,
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0.15) 26.06%,
     rgba(225, 240, 255, 0.202656) 64.17%,
-    rgba(232, 241, 255, 0) 98.89%);
+    rgba(232, 241, 255, 0) 98.89%
+  );
 
   @media (max-width: 1600px) {
     width: calc((100% / 3) - 24px);
@@ -193,9 +195,42 @@
   }
 }
 
+.listpoolsToken {
+  &_create {
+    display: flex;
+    align-items: center;
+    @media (max-width: 930px) {
+      padding-top: 10px;
+    }
+    .create_item {
+      height: 48px;
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 15px;
+      background: #1e1e21;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        background: #804af2 !important;
+      }
+    }
+  }
+}
+
 .listpools {
   margin-top: 40px;
-
+  .listpools_all {
+    display: flex;
+    justify-content: space-between;
+    @media (max-width: 930px) {
+      flex-direction: column;
+      justify-content: space-between;
+    }
+  }
   .no_data {
     display: flex;
     flex-direction: column;

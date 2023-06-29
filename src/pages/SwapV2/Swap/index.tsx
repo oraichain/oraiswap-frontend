@@ -11,7 +11,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
@@ -19,7 +19,7 @@ import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { fetchTokenInfos, simulateSwap } from 'rest/api';
+import { fetchCachedPairInfo, fetchPairInfo, fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
@@ -44,8 +44,9 @@ const SwapComponent: React.FC<{
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const [theme] = useConfigReducer('theme')
+  const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const cachedPairs = useSelector((state: RootState) => state.pairInfos.pairInfos);
 
   const loadTokenAmounts = useLoadTokens();
 
@@ -78,6 +79,12 @@ const SwapComponent: React.FC<{
   const {
     data: [fromTokenInfoData, toTokenInfoData]
   } = useQuery(['token-infos', fromToken, toToken], () => fetchTokenInfos([fromToken!, toToken!]), { initialData: [] });
+
+  const { data: pairInfo } = useQuery(
+    ['pair-info', fromTokenInfoData, toTokenInfoData],
+    () => fetchCachedPairInfo([fromTokenInfoData!, toTokenInfoData!], cachedPairs),
+    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
+  );
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -149,7 +156,7 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
       }
     } catch (error) {
-      handleErrorTransaction(error)
+      handleErrorTransaction(error);
     } finally {
       setSwapLoading(false);
     }
@@ -261,7 +268,7 @@ const SwapComponent: React.FC<{
         {swapLoading && <Loader width={40} height={40} />}
         {/* hardcode check minimum tron */}
         {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-          <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+          <span>Minimum amount: {(fromToken.minAmountSwap ?? '0') + ' ' + fromToken.name} </span>
         ) : (
           <span>Swap</span>
         )}
@@ -282,9 +289,9 @@ const SwapComponent: React.FC<{
         </div>
         <div className={cx('row')}>
           <div className={cx('title')}>
-            <span>Tax rate</span>
+            <span>Commission rate</span>
           </div>
-          <span>0.3 %</span>
+          <span>{pairInfo && floatToPercent(parseFloat(pairInfo.commission_rate)) + '%'}</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
@@ -300,7 +307,7 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
           )}
           amounts={amounts}
@@ -315,7 +322,7 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          items={Pairs.poolTokens.filter((token) =>
+          items={Pairs.getPoolTokens().filter((token) =>
             fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
           )}
           setToken={(denom) => {

@@ -5,7 +5,7 @@
 
 .btn_close_light {
   path {
-    fill: #777E90;
+    fill: #777e90;
   }
 }
 
@@ -19,16 +19,19 @@
   display: flex;
   justify-content: flex-start;
 
-  >img {
+  > img {
     height: 50px;
   }
 }
 
-.toast_broadcasting {}
+.toast_broadcasting {
+}
 
-.toast_failed {}
+.toast_failed {
+}
 
-.toast_success {}
+.toast_success {
+}
 
 .toast_section {
   h6 {
@@ -62,4 +65,37 @@
   flex-direction: column;
   justify-content: center;
   margin: 0 15px;
+}
+
+.cw20_section {
+  padding-bottom: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  &_label {
+    color: #a871df;
+  }
+  &_value {
+    color: #bdc3d3;
+    padding-left: 6px;
+    padding-right: 6px;
+    &:hover {
+    }
+  }
+}
+.cw20_section {
+  padding-bottom: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  &_label {
+    color: #a871df;
+  }
+  &_value {
+    color: #bdc3d3;
+    padding-left: 6px;
+    padding-right: 6px;
+    &:hover {
+    }
+  }
 }

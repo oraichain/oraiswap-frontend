@@ -30,7 +30,7 @@ export const deployToken = async (
     client,
     senderAddress,
     (
-      await oraidexArtifacts.deployContract<OraiswapTokenTypes.InstantiateMsg>(
+      await oraidexArtifacts.deployContract(
         client,
         senderAddress,
 

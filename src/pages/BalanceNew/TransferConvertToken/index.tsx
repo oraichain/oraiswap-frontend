@@ -18,6 +18,8 @@ import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { findToToken } from '../helpers';
+import copy from 'copy-to-clipboard';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import useTokenFee from 'hooks/useTokenFee';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
@@ -46,6 +48,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
@@ -136,7 +139,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         return;
       }
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of BalanceNew based on the user's token destination choice
-      // TODO: to is Oraibridge tokens
+      // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const to = findToToken(token, filterNetwork);
       await onClickTransfer(convertAmount, token, to);
@@ -189,9 +192,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           </div>
           <div className={styles.box}>
             <div className={styles.transfer}>
-              <div className={styles.content}>
+              <div
+                className={styles.content}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copy(addressTransfer);
+                  setCopied(true);
+                }}
+              >
                 <div className={classNames(styles.title, styles.title + ` ${styles[theme]}`)}>Transfer to</div>
-                <div className={styles.address}>{reduceString(addressTransfer, 10, 7)}</div>
+                <div className={styles.address}>
+                  {reduceString(addressTransfer, 10, 7)}
+                  {copied ? <SuccessIcon width={20} height={20} /> : null}
+                </div>
               </div>
             </div>
             <div className={styles.search}>
@@ -199,6 +212,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
                 onClick={(event) => {
                   event.stopPropagation();
+                  setCopied(false);
                   if (bridgeNetworks.length > 1) setIsOpen(!isOpen);
                 }}
               >

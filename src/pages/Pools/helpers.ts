@@ -1,10 +1,19 @@
-import { network } from 'config/networks';
-import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { Pairs } from 'config/pools';
+import { parseAssetInfo } from 'helper';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { AggregateResult, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import {
+  Asset,
+  Cw20Coin,
+  InstantiateMarketingInfo,
+  OraiswapPairTypes,
+  OraiswapStakingTypes,
+  PairInfo
+} from '@oraichain/oraidex-contracts-sdk';
+import { TokenItemType, assetInfoMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { AggregateResult, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { OraiswapStakingTypes, OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
@@ -16,18 +25,16 @@ import {
   getPairAmountInfo,
   parseTokenInfo
 } from 'rest/api';
-import { TokenInfo } from 'types/token';
-import { Pairs, Pair } from 'config/pools';
-import { compact } from 'lodash';
+import { PairInfoExtend, TokenInfo } from 'types/token';
+import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 
-interface PoolInfo {
-  offerPoolAmount: bigint;
-  askPoolAmount: bigint;
-}
 export type PairInfoData = {
-  pair: Pair;
+  pair: PairInfoExtend;
+} & PairInfoDataRaw &
+  PoolInfo;
+
+export type PairInfoDataRaw = {
   amount: number;
-  commissionRate: string;
   fromToken: TokenItemType;
   toToken: TokenItemType;
 } & PoolInfo;
@@ -37,13 +44,14 @@ type PairDetails = {
 };
 
 export const calculateAprResult = (
+  pairs: PairInfo[],
   pairInfos: PairInfoData[],
   prices: CoinGeckoPrices<string>,
   allTokenInfo: TokenInfo[],
   allLpTokenAsset: OraiswapStakingTypes.PoolInfoResponse[],
   allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[]
 ) => {
-  const aprResult = Pairs.pairs.reduce((acc, pair, ind) => {
+  const aprResult = pairs.reduce((acc, pair, ind) => {
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
     const lpToken = allLpTokenAsset[ind];
     const tokenSupply = allTokenInfo[ind];
@@ -66,63 +74,69 @@ export const calculateAprResult = (
 };
 
 // Fetch APR
-const fetchAprResult = async (pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const lpTokens = Pairs.pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  const assetTokens = Pairs.pairs.map((p) => tokenMap[p.token_asset]);
+const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
+  const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
+  const assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(pairs);
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
       fetchTokenInfos(lpTokens),
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
-    return calculateAprResult(pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
+    return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
   }
 };
 
 // Fetch Pair Info Data List
-const fetchPoolListAndOraiPrice = async (cachedPairs: PairDetails) => {
+const fetchPoolListAndOraiPrice = async (pairs: PairInfoExtend[], cachedPairs: PairDetails) => {
   if (!cachedPairs) {
     // wait for cached pair updated
     return;
   }
-  let poolList: PairInfoData[] = compact(await Promise.all(Pairs.pairs.map((p) => fetchPairInfoData(p, cachedPairs))));
-  const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
-  if (!oraiUsdtPool) {
-    // retry after 3 seconds
-    setTimeout(fetchPoolListAndOraiPrice, 3000);
-  } else {
-    const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
-    try {
-      const pairAmounts = await Promise.all(
-        poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs))
-      );
-      poolList.forEach((pool, ind) => {
-        pool.amount = pairAmounts[ind].tokenUsd;
-      });
-      poolList.sort((a, b) => b.amount - a.amount);
+  let poolList: PairInfoData[] = await Promise.all(
+    pairs.map(async (p: PairInfoExtend) => {
+      const pairInfoDataRaw = await fetchPairInfoData(p, cachedPairs);
       return {
-        pairInfo: poolList,
-        oraiPrice
-      };
-    } catch (error) {
-      console.log('error getPairAmountInfo', error);
-    }
+        pair: p,
+        ...pairInfoDataRaw
+      } as PairInfoData;
+    })
+  );
+
+  const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
+  const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
+  try {
+    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const pairAmounts = await Promise.all(
+      poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData))
+    );
+    poolList = poolList
+      .map((pool, ind) => ({
+        ...pool,
+        amount: pairAmounts[ind].tokenUsd
+      }))
+      .sort((a, b) => b.amount - a.amount);
+    return {
+      pairInfo: poolList,
+      oraiPrice
+    };
+  } catch (error) {
+    console.log('error getPairAmountInfo', error);
   }
 };
 
-export const fetchPairInfoData = async (pair: Pair, cached: PairDetails): Promise<PairInfoData> => {
-  const [fromToken, toToken] = pair.asset_denoms.map((denom) => tokenMap[denom]);
+export const fetchPairInfoData = async (pairInfo: PairInfoExtend, cached: PairDetails): Promise<PairInfoDataRaw> => {
+  const fromToken = assetInfoMap[pairInfo.asset_infos_raw[0]];
+  const toToken = assetInfoMap[pairInfo.asset_infos_raw[1]];
   if (!fromToken || !toToken) return;
 
   try {
-    const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached);
+    const poolData = await fetchPoolInfoAmount(fromToken, toToken, cached, pairInfo);
     return {
       ...poolData,
       amount: 0,
-      pair,
-      commissionRate: pair.commission_rate,
       fromToken,
       toToken
     };
@@ -131,9 +145,9 @@ export const fetchPairInfoData = async (pair: Pair, cached: PairDetails): Promis
   }
 };
 
-export const toPairDetails = (res: AggregateResult): PairDetails => {
+export const toPairDetails = (pairs: PairInfo[], res: AggregateResult): PairDetails => {
   const pairsData = Object.fromEntries(
-    Pairs.pairs.map((pair, ind) => {
+    pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
         return [pair.contract_addr, {}];
@@ -145,9 +159,8 @@ export const toPairDetails = (res: AggregateResult): PairDetails => {
 };
 
 // Fetch all pair data
-const fetchCachedPairsData = async () => {
-  const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const queries = Pairs.pairs.map((pair) => ({
+const fetchPairsData = async (pairs: PairInfo[], multicall: MulticallReadOnlyInterface) => {
+  const queries = pairs.map((pair) => ({
     address: pair.contract_addr,
     data: toBinary({
       pool: {}
@@ -157,13 +170,12 @@ const fetchCachedPairsData = async () => {
   const res = await multicall.aggregate({
     queries
   });
-
-  return toPairDetails(res);
+  return { pairs, pairDetails: toPairDetails(pairs, res) };
 };
 
-export const calculateReward = (res: AggregateResult) => {
+export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
   const myPairData = Object.fromEntries(
-    Pairs.pairs.map((pair, ind) => {
+    pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
         return [pair.contract_addr, {}];
@@ -176,9 +188,13 @@ export const calculateReward = (res: AggregateResult) => {
   return myPairData;
 };
 
-const generateRewardInfoQueries = (stakerAddress: string) => {
-  const queries = Pairs.pairs.map((pair) => {
-    const assetToken = tokenMap[pair.token_asset];
+const generateRewardInfoQueries = (pairs: PairInfoExtend[], stakerAddress: string) => {
+  const queries = pairs.map((pair) => {
+    let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
+    const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
+
+    // we implicitly set asset info of the pool as non-ORAI token. If the first asset info in the pair list is ORAI then we get the other asset info
+    if (firstParsedAssetInfo === ORAI) assetToken = assetInfoMap[pair.asset_infos_raw[1]];
     const { info: assetInfo } = parseTokenInfo(assetToken);
     return {
       address: network.staking,
@@ -193,15 +209,71 @@ const generateRewardInfoQueries = (stakerAddress: string) => {
   return queries;
 };
 
-const fetchMyCachedPairsData = async (stakerAddress: string) => {
-  const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const queries = generateRewardInfoQueries(stakerAddress);
-
+const fetchMyPairsData = async (
+  pairs: PairInfoExtend[],
+  stakerAddress: string,
+  multicall: MulticallReadOnlyInterface
+) => {
+  const queries = generateRewardInfoQueries(pairs, stakerAddress);
   const res = await multicall.aggregate({
     queries
   });
-
-  return calculateReward(res);
+  return calculateReward(pairs, res);
 };
 
-export { fetchAprResult, fetchPoolListAndOraiPrice, fetchCachedPairsData, fetchMyCachedPairsData };
+const generateMsgFrontierAddToken = ({
+  marketing,
+  symbol,
+  liquidityPoolRewardAssets,
+  name,
+  initialBalances,
+  mint,
+  label
+}: {
+  initialBalances?: Cw20Coin[];
+  mint?: MinterResponse;
+  marketing?: InstantiateMarketingInfo;
+  label?: string;
+  name?: string;
+  symbol: string;
+  liquidityPoolRewardAssets: Asset[];
+}) => {
+  const msgAddTokenFrontier: {
+    initialBalances?: Cw20Coin[];
+    mint?: MinterResponse;
+    marketing?: InstantiateMarketingInfo;
+    label?: string;
+    name?: string;
+    symbol: string;
+    liquidityPoolRewardAssets: Asset[];
+  } = {
+    symbol,
+    liquidityPoolRewardAssets
+  };
+  if (mint) msgAddTokenFrontier.mint = mint;
+  if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
+
+  if (marketing) msgAddTokenFrontier.marketing = marketing;
+  if (name) msgAddTokenFrontier.name = name;
+  if (label) msgAddTokenFrontier.label = label;
+  return msgAddTokenFrontier;
+};
+
+const getInfoLiquidityPool = ({ denom, contract_addr }) => {
+  if (contract_addr)
+    return {
+      token: {
+        contract_addr
+      }
+    };
+  return { native_token: { denom } };
+};
+
+export {
+  fetchAprResult,
+  fetchPoolListAndOraiPrice,
+  fetchPairsData,
+  fetchMyPairsData,
+  generateMsgFrontierAddToken,
+  getInfoLiquidityPool
+};

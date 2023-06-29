@@ -6,7 +6,8 @@ import { ReactComponent as Faucet } from 'assets/icons/faucet.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
 import { ReactComponent as Pools } from 'assets/icons/pool.svg';
-import { ReactComponent as Swap } from 'assets/icons/swap.svg';
+import { ReactComponent as UniversalSwap } from 'assets/icons/universal_swap.svg';
+import { ReactComponent as InternalSwap } from 'assets/icons/internal_swap.svg';
 import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
 import { ReactComponent as OrderBook } from 'assets/icons/orderbook.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
@@ -98,8 +99,8 @@ const Menu: React.FC<{}> = React.memo((props) => {
           <div className={classNames(styles.menu_items)}>
             <RequireAuthButton />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
-            {renderLink('/swap', 'Swap', setLink, <Swap />)}
-            {renderLink('/universalswap', 'Universal Swap', setLink, <Swap />)}
+            {renderLink('/swap', 'Internal Swap', setLink, <InternalSwap />)}
+            {renderLink('/universalswap', 'Universal Swap', setLink, <UniversalSwap className={styles.universal_icon} />)}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
             {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => { }, <OrderBook />, true)}
             {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}

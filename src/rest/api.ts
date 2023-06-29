@@ -1,4 +1,4 @@
-import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { AssetInfo, Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import {
@@ -22,12 +22,12 @@ import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp } from 'helper';
+import { calculateTimeoutTimestamp, parseAssetInfo } from 'helper';
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
-import { TokenInfo } from 'types/token';
+import { PairInfoExtend, TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -118,18 +118,21 @@ function parsePoolAmount(poolInfo: OraiswapPairTypes.PoolResponse, trueAsset: As
 async function getPairAmountInfo(
   fromToken: TokenItemType,
   toToken: TokenItemType,
-  cachedPairs?: PairDetails
+  cachedPairs?: PairDetails,
+  poolInfo?: PoolInfo,
+  oraiUsdtPoolInfo?: PoolInfo
 ): Promise<PairAmountInfo> {
-  const poolData = await fetchPoolInfoAmount(fromToken, toToken, cachedPairs);
+  const poolData = poolInfo ?? (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
   // default is usdt
   let tokenPrice = 0;
 
   if (fromToken.denom === ORAI) {
-    const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
+    const poolOraiUsdData =
+      oraiUsdtPoolInfo ?? (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
     // orai price
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
-    // must be stable coin
+    // must be stable coin for ask pool amount
     tokenPrice = toDecimal(poolData.askPoolAmount, poolData.offerPoolAmount);
   }
 
@@ -143,14 +146,15 @@ async function getPairAmountInfo(
 async function fetchPoolInfoAmount(
   fromTokenInfo: TokenItemType,
   toTokenInfo: TokenItemType,
-  cachedPairs?: PairDetails
+  cachedPairs?: PairDetails,
+  pairInfo?: PairInfo
 ): Promise<PoolInfo> {
   const { info: fromInfo } = parseTokenInfo(fromTokenInfo);
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
+  const pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
 
-  const pair = Pairs.getPair(fromTokenInfo.denom, toTokenInfo.denom);
   const client = window.client;
   if (pair) {
     const pairContract = new OraiswapPairQueryClient(client, pair.contract_addr);
@@ -159,8 +163,11 @@ async function fetchPoolInfoAmount(
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
     // handle multi-swap case
-    const fromPairInfo = Pairs.getPair(fromTokenInfo.denom, ORAI);
-    const toPairInfo = Pairs.getPair(ORAI, toTokenInfo.denom);
+    const oraiTokenType = oraichainTokens.find((token) => token.denom === ORAI);
+    const [fromPairInfo, toPairInfo] = await Promise.all([
+      fetchPairInfo([fromTokenInfo, oraiTokenType]),
+      fetchPairInfo([oraiTokenType, toTokenInfo])
+    ]);
     const pairContractFrom = new OraiswapPairQueryClient(client, fromPairInfo.contract_addr);
     const pairContractTo = new OraiswapPairQueryClient(client, toPairInfo.contract_addr);
     const fromPoolInfo = cachedPairs?.[fromPairInfo.contract_addr] || (await pairContractFrom.pool());
@@ -171,11 +178,26 @@ async function fetchPoolInfoAmount(
   return { offerPoolAmount, askPoolAmount };
 }
 
-async function fetchPairInfo(assetInfos: [TokenItemType, TokenItemType]): Promise<PairInfo> {
+async function fetchCachedPairInfo(
+  tokenTypes: [TokenItemType, TokenItemType],
+  cachedPairs?: PairInfoExtend[]
+): Promise<PairInfo> {
+  if (!cachedPairs || cachedPairs.length === 0) return fetchPairInfo(tokenTypes);
+  const pair = cachedPairs.find((pair) =>
+    pair.asset_infos.find(
+      (info) =>
+        info.toString() === parseTokenInfo(tokenTypes[0]).info.toString() ||
+        info.toString() === parseTokenInfo(tokenTypes[1]).info.toString()
+    )
+  );
+  return pair;
+}
+
+async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factoryAddr = assetInfos.some((a) => a.factoryV2) ? network.factory_v2 : network.factory;
-  let { info: firstAsset } = parseTokenInfo(assetInfos[0]);
-  let { info: secondAsset } = parseTokenInfo(assetInfos[1]);
+  const factoryAddr = tokenTypes.some((a) => a.factoryV1) ? network.factory : network.factory_v2;
+  let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
+  let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
   const factoryContract = new OraiswapFactoryQueryClient(window.client, factoryAddr);
   const data = await factoryContract.pair({
     assetInfos: [firstAsset, secondAsset]
@@ -290,7 +312,7 @@ function generateConvertCw20Erc20Message(
   return msgConverts;
 }
 
-const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
+function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
   if (!tokenInfo?.contractAddress) {
     if (amount)
       return {
@@ -300,7 +322,7 @@ const parseTokenInfo = (tokenInfo: TokenItemType, amount?: string | number) => {
     return { info: { native_token: { denom: tokenInfo.denom } } };
   }
   return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
-};
+}
 
 const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
   if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
@@ -324,10 +346,16 @@ const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   return sent_funds;
 };
 
-const generateSwapOperationMsgs = (denoms: [string, string], offerInfo: any, askInfo: any): SwapOperation[] => {
-  const pair = Pairs.getPair(denoms);
+const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): SwapOperation[] => {
+  const pairExist = Pairs.pairs.some((pair) => {
+    let assetInfos = pair.asset_infos;
+    return (
+      (isEqual(assetInfos[0], offerInfo) && isEqual(assetInfos[1], askInfo)) ||
+      (isEqual(assetInfos[1], offerInfo) && isEqual(assetInfos[0], askInfo))
+    );
+  });
 
-  return pair
+  return pairExist
     ? [
         {
           orai_swap: {
@@ -366,7 +394,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
   const { info: askInfo } = parseTokenInfo(toInfo);
   const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
-  const operations = generateSwapOperationMsgs([fromInfo.denom, toInfo.denom], offerInfo, askInfo);
+  const operations = generateSwapOperationMsgs(offerInfo, askInfo);
   try {
     const data = await routerContract.simulateSwapOperations({
       offerAmount: amount.toString(),
@@ -441,7 +469,7 @@ function generateContractMessages(
       sent_funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
-          operations: generateSwapOperationMsgs([swapQuery.fromInfo.denom, swapQuery.toInfo.denom], offerInfo, askInfo),
+          operations: generateSwapOperationMsgs(offerInfo, askInfo),
           minimum_receive: swapQuery.minimumReceive
         }
       };
@@ -548,7 +576,7 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-async function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
+function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
   const { type, sender, ...params } = msg;
   let sent_funds;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
@@ -740,6 +768,7 @@ function generateMoveOraib2OraiMessages(
 
 export {
   fetchPairInfo,
+  fetchCachedPairInfo,
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,

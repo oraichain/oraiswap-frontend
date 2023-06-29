@@ -40,7 +40,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const BalanceNew: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -87,7 +87,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       });
     } else {
       displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: customLink || `${rpc}/tx?hash=0x${result.transactionHash}`
+        customLink: customLink ?? `${rpc}/tx?hash=0x${result.transactionHash}`
       });
     }
     setTxHash(result.transactionHash);
@@ -164,7 +164,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      handleErrorTransaction(ex)
+      handleErrorTransaction(ex);
     }
   };
 
@@ -233,21 +233,27 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                 {network && (
                   <div className={styles.search_flex}>
                     <div className={styles.search_logo}>
-                      {theme === 'light' ? network.IconLight ? <network.IconLight /> : <network.Icon /> : <network.Icon />}
+                      {theme === 'light' ? (
+                        network.IconLight ? (
+                          <network.IconLight />
+                        ) : (
+                          <network.Icon />
+                        )
+                      ) : (
+                        <network.Icon />
+                      )}
                     </div>
                     <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
                       {network.chainName}
                     </span>
                   </div>
                 )}
-                <div>
-                  {theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}
-                </div>
+                <div>{theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
               </div>
             </div>
 
             <SearchInput
-              placeholder="Search Token of Network"
+              placeholder="Search Token"
               onSearch={(text) => {
                 if (!text) return navigate('');
                 navigate(`?token=${text}`);
@@ -324,7 +330,6 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           amounts={amounts}
           type="network"
           items={networks}
-          theme={theme}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}
