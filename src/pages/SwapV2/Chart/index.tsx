@@ -80,7 +80,9 @@ const SwapChart: React.FC<{
                     <IconFromToken />
                   </div>
                   <span className={cx('item-text')}>
-                    {Pairs.getPoolTokens().find((el) => el.denom === fromTokenDenom)?.name?.toUpperCase()}
+                    {Pairs.getPoolTokens()
+                      .find((el) => el.denom === fromTokenDenom)
+                      ?.name?.toUpperCase()}
                   </span>
                 </div>
                 <span className={cx('percent', price24hChange >= 0 ? 'up' : 'down')}>
@@ -119,7 +121,7 @@ const SwapChart: React.FC<{
                     <button
                       key={item.key}
                       onClick={() => setTypeData(item.tf)}
-                      className={cx(item.tf === typeData ? 'active' : '')}
+                      className={cx({ active: item.tf === typeData })}
                     >
                       {item.text}
                     </button>

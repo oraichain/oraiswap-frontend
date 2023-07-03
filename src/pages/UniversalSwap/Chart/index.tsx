@@ -70,7 +70,7 @@ const SwapChart: React.FC<{
   }, [tokenName, typeData]);
 
   return (
-    <div className={cx('chart-container', `chart-container ${styles[theme]}`)}>
+    <div className={cx('chart-container', theme)}>
       <LoadingBox loading={loading} theme={theme}>
         <div className={cx('head-info')}>
           {price24hChange && (
@@ -115,16 +115,12 @@ const SwapChart: React.FC<{
                 </p>
               </div>
               <div>
-                <div className={cx('date-select', `date-select ${styles[theme]}`)}>
+                <div className={cx('date-select', theme)}>
                   {INTERVALS.map((item) => (
                     <button
                       key={item.key}
                       onClick={() => setTypeData(item.tf)}
-                      className={cx(
-                        item.tf === typeData ? 'active' : '',
-                        'date-select-btn',
-                        `date-select-btn ${styles[theme]}`
-                      )}
+                      className={cx({ active: item.tf === typeData }, 'date-select-btn', theme)}
                     >
                       {item.text}
                     </button>

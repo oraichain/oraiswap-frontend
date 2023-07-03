@@ -166,8 +166,8 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
       const result = await oraidexListing.listToken(msg as any);
       if (result) {
-        const wasm = result?.logs?.[0]?.events.find((e) => e.type === 'wasm')?.attributes;
-        const cw20Address = wasm?.find((w) => w.key === 'cw20_address')?.value;
+        const wasm = result.logs?.[0]?.events.find((e) => e.type === 'wasm');
+        const cw20Address = wasm?.attributes.find((w) => w.key === 'cw20_address')?.value;
         displayToast(
           TToastType.TX_SUCCESSFUL,
           {
@@ -204,17 +204,17 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       {isAddListToken || typeDelete ? <div className={cx('overlay')} /> : null}
-      <div className={cx('container', `container ${styles[theme]}`)}>
+      <div className={cx('container', theme)}>
         <div className={cx('container-inner')}>
           <RewardIcon />
-          <div className={cx('title', `title ${styles[theme]}`)}>List a new token</div>
+          <div className={cx('title', theme)}>List a new token</div>
         </div>
         <div className={cx('content')} ref={ref}>
-          <div className={cx('box', `box ${styles[theme]}`)}>
+          <div className={cx('box', theme)}>
             <div className={cx('token')}>
               <div className={cx('row')}>
                 <div className={cx('label')}>Token name</div>
-                <div className={cx('input', `input ${styles[theme]}`)}>
+                <div className={cx('input', theme)}>
                   <div>
                     <Input
                       value={tokenName}
@@ -229,7 +229,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               </div>
               <div className={cx('row')}>
                 <div className={cx('label')}>Pair token</div>
-                <div className={cx('input', `input ${styles[theme]}`)}>
+                <div className={cx('input', theme)}>
                   <div>
                     <Input
                       value={pairAssetInfo}
@@ -255,7 +255,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   >
                     <div className={cx('label')}>Minter</div>
                     <Input
-                      className={cx('input', `input ${styles[theme]}`)}
+                      className={cx('input', theme)}
                       value={minter}
                       onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
@@ -270,7 +270,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <div className={cx('label')}>Cap (Optional)</div>
                     <NumberFormat
                       placeholder="0"
-                      className={cx('input', `input ${styles[theme]}`)}
+                      className={cx('input', theme)}
                       style={{
                         color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
                       }}
@@ -291,7 +291,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               </div>
               {isInitBalances && (
                 <div
-                  className={cx('btn-add-init', `btn-add-init ${styles[theme]}`)}
+                  className={cx('btn-add-init', theme)}
                   onClick={() =>
                     setInitBalances([
                       ...initBalances,
@@ -343,7 +343,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 })}
             </div>
           </div>
-          <div className={cx('box', `box ${styles[theme]}`)}>
+          <div className={cx('box', theme)}>
             <div className={cx('add-reward-btn')} onClick={() => setIsAddListToken(true)}>
               <PlusIcon />
               <span>Add a new pool reward token</span>

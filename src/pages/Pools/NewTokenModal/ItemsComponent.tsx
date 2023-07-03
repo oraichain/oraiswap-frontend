@@ -29,7 +29,7 @@ export const RewardItems = ({ item, ind, selectedReward, setSelectedReward, setR
           <span>{item?.name}</span> /s
         </div>
       </div>
-      <div className={cx('input_per', `input_per ${styles[theme]}`)}>
+      <div className={cx('input_per', theme)}>
         <NumberFormat
           className={cx('value')}
           placeholder="0"
@@ -76,7 +76,7 @@ export const InitBalancesItems = ({
             }}
           />
         </div>
-        <div className={cx('wallet', `${styles[theme]}`)}>
+        <div className={cx('wallet', theme)}>
           <span>{ind + 1}</span>
           <WalletIcon />
         </div>
@@ -84,7 +84,7 @@ export const InitBalancesItems = ({
       <div className={cx('row')}>
         <div className={cx('label')}>Address</div>
         <Input
-          className={cx('input', `input ${styles[theme]}`)}
+          className={cx('input', theme)}
           value={item.address}
           onChange={(e) => {
             setInitBalances(
@@ -106,7 +106,7 @@ export const InitBalancesItems = ({
         <div className={cx('label')}>Amount</div>
         <NumberFormat
           placeholder="0"
-          className={cx('input', `${styles[theme]}`)}
+          className={cx('input', theme)}
           style={{
             color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
           }}

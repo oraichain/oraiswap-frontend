@@ -215,20 +215,13 @@ const BalanceNew: React.FC<BalanceProps> = () => {
         <div className={styles.header}>
           <div className={styles.asset}>
             <span className={styles.totalAssets}>Total Assets</span>
-            <TokenBalance
-              balance={totalUsd}
-              className={classNames(styles.balance, styles.balance + ` ${styles[theme]}`)}
-              decimalScale={2}
-            />
+            <TokenBalance balance={totalUsd} className={classNames(styles.balance, styles[theme])} decimalScale={2} />
           </div>
         </div>
-        <div className={classNames(styles.divider, styles.divider + ` ${styles[theme]}`)} />
+        <div className={classNames(styles.divider, styles[theme])} />
         <div className={styles.action}>
           <div className={styles.search}>
-            <div
-              className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
-              onClick={() => setIsSelectNetwork(true)}
-            >
+            <div className={classNames(styles.search_filter, styles[theme])} onClick={() => setIsSelectNetwork(true)}>
               <div className={styles.search_box}>
                 {network && (
                   <div className={styles.search_flex}>
@@ -243,9 +236,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                         <network.Icon />
                       )}
                     </div>
-                    <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
-                      {network.chainName}
-                    </span>
+                    <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
                   </div>
                 )}
                 <div>{theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
@@ -263,7 +254,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
           </div>
         </div>
         <div className={styles.balances}>
-          <div className={classNames(styles.box, styles.box + ` ${styles[theme]}`)}>
+          <div className={classNames(styles.box, styles[theme])}>
             <div>
               <CheckBox label="Hide small balances" checked={hideOtherSmallAmount} onCheck={setHideOtherSmallAmount} />
             </div>
@@ -290,7 +281,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
                 }
                 return (
                   <TokenItem
-                    className={classNames(styles.tokens_element, styles.tokens_element + ` ${styles[theme]}`)}
+                    className={classNames(styles.tokens_element, styles[theme])}
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}

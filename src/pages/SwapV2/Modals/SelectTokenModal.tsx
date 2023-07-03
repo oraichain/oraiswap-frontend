@@ -31,15 +31,14 @@ const SelectTokenModal: FC<ModalProps> = ({
   items,
   setToken,
   prices,
-  amounts,
+  amounts
 }) => {
-
-  const [theme] = useConfigReducer('theme')
+  const [theme] = useConfigReducer('theme');
 
   return (
     <Modal theme={theme} isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
-      <div className={cx('select', `select ${styles[theme]}`)}>
-        <div className={cx('title', `title ${styles[theme]}`)}>
+      <div className={cx('select', theme)}>
+        <div className={cx('title', theme)}>
           <div>{type === 'token' ? 'Select a token' : 'Select a network'}</div>
         </div>
         <div className={cx('options')}>
@@ -73,14 +72,22 @@ const SelectTokenModal: FC<ModalProps> = ({
             }
             return (
               <div
-                className={cx('item', `item ${styles[theme]}`)}
+                className={cx('item', theme)}
                 key={key}
                 onClick={() => {
                   setToken(key);
                   close();
                 }}
               >
-                {theme === 'light' ? (item.IconLight ? <item.IconLight className={cx('logo')} /> : <item.Icon className={cx('logo')} />) : item.Icon && <item.Icon className={cx('logo')} />}
+                {theme === 'light' ? (
+                  item.IconLight ? (
+                    <item.IconLight className={cx('logo')} />
+                  ) : (
+                    <item.Icon className={cx('logo')} />
+                  )
+                ) : (
+                  item.Icon && <item.Icon className={cx('logo')} />
+                )}
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

@@ -41,7 +41,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
         <a
           target="_blank"
           href={to}
-          className={classNames(styles.menu_item + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`)}
+          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
           onClick={() => {
             setOpen(!open);
             onClick(to);
@@ -49,9 +49,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
           rel="noreferrer"
         >
           {icon}
-          <span className={classNames(styles.menu_item_text + ` ${styles[theme]}`, styles.menu_item_text)}>
-            {title}
-          </span>
+          <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
         </a>
       );
     return (
@@ -61,15 +59,10 @@ const Menu: React.FC<{}> = React.memo((props) => {
           setOpen(!open);
           onClick(to);
         }}
-        className={classNames(styles.menu_item + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`)}
+        className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
       >
         {icon}
-        <span
-          className={classNames(
-            styles.menu_item_text + (link === to ? ` ${styles.active}` : '') + ` ${styles[theme]}`,
-            styles.menu_item_text
-          )}
-        >
+        <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
         </span>
       </Link>
@@ -100,12 +93,17 @@ const Menu: React.FC<{}> = React.memo((props) => {
             <RequireAuthButton />
             {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
             {renderLink('/swap', 'Internal Swap', setLink, <InternalSwap />)}
-            {renderLink('/universalswap', 'Universal Swap', setLink, <UniversalSwap className={styles.universal_icon} />)}
+            {renderLink(
+              '/universalswap',
+              'Universal Swap',
+              setLink,
+              <UniversalSwap className={styles.universal_icon} />
+            )}
             {renderLink('/pools', 'Pools', setLink, <Pools />)}
-            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => { }, <OrderBook />, true)}
-            {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}
-            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => { }, <BuyFiat />, true)}
-            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => { }, <Faucet />, true)}
+            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => {}, <OrderBook />, true)}
+            {renderLink('https://info.oraidex.io/', 'Info', () => {}, <InfoIcon />, true)}
+            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => {}, <BuyFiat />, true)}
+            {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)}
           </div>
         </div>
 
