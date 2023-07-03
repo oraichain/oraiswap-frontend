@@ -14,7 +14,7 @@ import { network } from 'config/networks';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import useClickOutside from 'hooks/useClickOutSide';
 import { Pairs } from 'config/pools';
-import { OraidexListingContractClient } from 'libs/contracts';
+import { OraidexListingContractClient } from 'libs/contracts/OraidexListingContract.client';
 import CheckBox from 'components/CheckBox';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import { ModalDelete, ModalListToken } from './ModalComponent';
@@ -37,6 +37,7 @@ interface ModalProps {
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [theme] = useConfigReducer('theme');
   const [tokenName, setTokenName] = useState('');
+  const [pairAssetInfo, setPairAssetInfo] = useState('');
   const [isMinter, setIsMinter] = useState(false);
   const [minter, setMinter] = useState('');
 
@@ -75,7 +76,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   ]);
 
-  const allRewardSelect = rewardTokens.map(item => item['denom']);
+  const allRewardSelect = rewardTokens.map((item) => item['denom']);
   const handleOutsideClick = () => {
     if (isAddListToken) setIsAddListToken(false);
     if (typeDelete) setTypeDelete('');
@@ -100,7 +101,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       });
 
     if (isInitBalances) {
-      initBalances.every(inBa => {
+      initBalances.every((inBa) => {
         if (!inBa.address || !validateAddressCosmos(inBa.address, 'orai')) {
           return displayToast(TToastType.TX_FAILED, {
             message: 'Wrong address init balances format!'
@@ -133,7 +134,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
     try {
       setIsLoading(true);
-      const liquidityPoolRewardAssets = rewardTokens.map(isReward => {
+      const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
         return {
           amount: isReward?.value.toString(),
           info: getInfoLiquidityPool(isReward)
@@ -149,7 +150,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         : undefined;
 
       const initialBalances = isInitBalances
-        ? initBalances.map(e => ({ ...e, amount: e?.amount.toString() }))
+        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
         : undefined;
 
       const msg = generateMsgFrontierAddToken({
@@ -158,13 +159,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         liquidityPoolRewardAssets,
         name,
         initialBalances,
-        mint
+        mint,
+        pairAssetInfo: JSON.parse(pairAssetInfo)
       });
+      console.log('msg: ', msg);
 
-      const result = await oraidexListing.listToken(msg);
+      const result = await oraidexListing.listToken(msg as any);
       if (result) {
-        const wasm = result?.logs?.[0]?.events.find(e => e.type === 'wasm')?.attributes;
-        const cw20Address = wasm?.find(w => w.key === 'cw20_address')?.value;
+        const wasm = result?.logs?.[0]?.events.find((e) => e.type === 'wasm')?.attributes;
+        const cw20Address = wasm?.find((w) => w.key === 'cw20_address')?.value;
         displayToast(
           TToastType.TX_SUCCESSFUL,
           {
@@ -218,8 +221,23 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                       style={{
                         color: theme === 'light' && 'rgba(39, 43, 48, 1)'
                       }}
-                      onChange={e => setTokenName(e?.target?.value)}
+                      onChange={(e) => setTokenName(e?.target?.value)}
                       placeholder="ORAICHAIN"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className={cx('row')}>
+                <div className={cx('label')}>Pair token</div>
+                <div className={cx('input', `input ${styles[theme]}`)}>
+                  <div>
+                    <Input
+                      value={pairAssetInfo}
+                      style={{
+                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                      }}
+                      onChange={(e) => setPairAssetInfo(e?.target?.value)}
+                      placeholder='{"native_token":{...}}'
                     />
                   </div>
                 </div>
@@ -239,7 +257,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     <Input
                       className={cx('input', `input ${styles[theme]}`)}
                       value={minter}
-                      onChange={e => setMinter(e?.target?.value)}
+                      onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
                   </div>

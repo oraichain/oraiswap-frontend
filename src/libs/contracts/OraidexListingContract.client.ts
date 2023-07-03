@@ -38,6 +38,7 @@ export interface OraidexListingContractInterface extends OraidexListingContractR
     marketing,
     mint,
     name,
+    pairAssetInfo,
     symbol
   }: {
     initialBalances?: Cw20Coin[];
@@ -46,6 +47,7 @@ export interface OraidexListingContractInterface extends OraidexListingContractR
     marketing?: InstantiateMarketingInfo;
     mint?: MinterResponse;
     name?: string;
+    pairAssetInfo: AssetInfo;
     symbol: string;
   }, $fee?: number | StdFee | "auto", $memo?: string, $funds?: Coin[]) => Promise<ExecuteResult>;
 }
@@ -69,6 +71,7 @@ export class OraidexListingContractClient extends OraidexListingContractQueryCli
     marketing,
     mint,
     name,
+    pairAssetInfo,
     symbol
   }: {
     initialBalances?: Cw20Coin[];
@@ -77,6 +80,7 @@ export class OraidexListingContractClient extends OraidexListingContractQueryCli
     marketing?: InstantiateMarketingInfo;
     mint?: MinterResponse;
     name?: string;
+    pairAssetInfo: AssetInfo;
     symbol: string;
   }, $fee: number | StdFee | "auto" = "auto", $memo?: string, $funds?: Coin[]): Promise<ExecuteResult> => {
     return await this.client.execute(this.sender, this.contractAddress, {
@@ -87,6 +91,7 @@ export class OraidexListingContractClient extends OraidexListingContractQueryCli
         marketing,
         mint,
         name,
+        pair_asset_info: pairAssetInfo,
         symbol
       }
     }, $fee, $memo, $funds);

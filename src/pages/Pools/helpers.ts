@@ -1,7 +1,7 @@
 import { Pairs } from 'config/pools';
 import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { AggregateResult, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { AggregateResult, AssetInfo, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import {
   Asset,
   Cw20Coin,
@@ -27,6 +27,7 @@ import {
 } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { ListTokenMsg } from 'libs/contracts/OraidexListingContract.types';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -228,7 +229,8 @@ const generateMsgFrontierAddToken = ({
   name,
   initialBalances,
   mint,
-  label
+  label,
+  pairAssetInfo
 }: {
   initialBalances?: Cw20Coin[];
   mint?: MinterResponse;
@@ -237,6 +239,7 @@ const generateMsgFrontierAddToken = ({
   name?: string;
   symbol: string;
   liquidityPoolRewardAssets: Asset[];
+  pairAssetInfo: AssetInfo;
 }) => {
   const msgAddTokenFrontier: {
     initialBalances?: Cw20Coin[];
@@ -246,9 +249,11 @@ const generateMsgFrontierAddToken = ({
     name?: string;
     symbol: string;
     liquidityPoolRewardAssets: Asset[];
+    pairAssetInfo: AssetInfo;
   } = {
     symbol,
-    liquidityPoolRewardAssets
+    liquidityPoolRewardAssets,
+    pairAssetInfo
   };
   if (mint) msgAddTokenFrontier.mint = mint;
   if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
@@ -256,6 +261,7 @@ const generateMsgFrontierAddToken = ({
   if (marketing) msgAddTokenFrontier.marketing = marketing;
   if (name) msgAddTokenFrontier.name = name;
   if (label) msgAddTokenFrontier.label = label;
+  msgAddTokenFrontier.pairAssetInfo = pairAssetInfo;
   return msgAddTokenFrontier;
 };
 
