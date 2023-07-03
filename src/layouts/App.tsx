@@ -16,7 +16,7 @@ import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
-import './index.scss'
+import './index.scss';
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
@@ -160,7 +160,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <GlobalStyles />
-      <div className={`${theme}`}>
+      <div className={`app ${theme}`}>
         <Menu />
         {routes()}
       </div>
