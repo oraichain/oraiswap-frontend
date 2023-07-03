@@ -82,7 +82,7 @@ export const useFetchMyPairs = (pairs: PairInfoExtend[]) => {
 
   useEffect(() => {
     fetchMyCachedPairs();
-  }, []);
+  }, [pairs]);
 
   return [myPairsData];
 };
