@@ -37,7 +37,8 @@ interface ModalProps {
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [theme] = useConfigReducer('theme');
   const [tokenName, setTokenName] = useState('');
-  const [pairAssetInfo, setPairAssetInfo] = useState('');
+  const [pairAssetType, setPairAssetType] = useState(false); // 0.token - 1.native_token
+  const [pairAssetAddress, setPairAssetAddress] = useState('') // address / denom pair asset
   const [isMinter, setIsMinter] = useState(false);
   const [minter, setMinter] = useState('');
 
@@ -65,7 +66,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [isAddListToken, setIsAddListToken] = useState(false);
   const [cap, setCap] = useState(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
-
   const [tokensNew, setTokensNew] = useState([]);
   const [rewardTokens, setRewardTokens] = useState([
     {
@@ -144,14 +144,19 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-            minter,
-            cap: !!cap ? cap.toString() : null
-          }
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
         : undefined;
 
       const initialBalances = isInitBalances
         ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
         : undefined;
+
+      const pairAssetInfo = getInfoLiquidityPool({
+        contract_addr: !pairAssetType && pairAssetAddress,
+        denom: pairAssetType && pairAssetAddress
+      });
 
       const msg = generateMsgFrontierAddToken({
         marketing,
@@ -160,7 +165,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         name,
         initialBalances,
         mint,
-        pairAssetInfo: JSON.parse(pairAssetInfo)
+        pairAssetInfo
       });
       console.log('msg: ', msg);
 
@@ -227,20 +232,32 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                   </div>
                 </div>
               </div>
-              <div className={cx('row')}>
+              <div className={cx('row', 'pt-16')}>
                 <div className={cx('label')}>Pair token</div>
-                <div className={cx('input', theme)}>
-                  <div>
-                    <Input
-                      value={pairAssetInfo}
-                      style={{
-                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
-                      }}
-                      onChange={(e) => setPairAssetInfo(e?.target?.value)}
-                      placeholder='{"native_token":{...}}'
-                    />
-                  </div>
+                <div>
+                  <CheckBox radioBox label="Token" checked={!pairAssetType} onCheck={() => {
+                    setPairAssetType(false);
+                    setPairAssetAddress('');
+                  }} />
                 </div>
+                <div>
+                  <CheckBox radioBox label="Native Token" checked={pairAssetType} onCheck={() => {
+                    setPairAssetType(true);
+                    setPairAssetAddress('');
+                  }} />
+                </div>
+              </div>
+              <div className={cx('row', 'pt-16')}>
+                <div className={cx('label')}>{!pairAssetType ? 'Contract Address' : 'Denom'}</div>
+                <Input
+                  className={cx('input', theme)}
+                  value={pairAssetAddress}
+                  style={{
+                    color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                  }}
+                  onChange={(e) => setPairAssetAddress(e?.target?.value)}
+                  placeholder={!pairAssetType ? "oraixxxxxxxx.....xxxxxxx" : "orai"}
+                />
               </div>
               <div className={cx('option')}>
                 <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
@@ -248,24 +265,21 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {isMinter && (
                 <div>
                   <div
-                    className={cx('row')}
-                    style={{
-                      paddingTop: 16
-                    }}
+                    className={cx('row', 'pt-16')}
                   >
                     <div className={cx('label')}>Minter</div>
                     <Input
                       className={cx('input', theme)}
                       value={minter}
+                      style={{
+                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                      }}
                       onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
                   </div>
                   <div
-                    className={cx('row')}
-                    style={{
-                      paddingTop: 16
-                    }}
+                    className={cx('row', 'pt-16')}
                   >
                     <div className={cx('label')}>Cap (Optional)</div>
                     <NumberFormat
@@ -310,7 +324,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {isInitBalances && (
                 <div className={cx('header-init')}>
                   <CheckBox
-                    label={`Select All  ( ${selectedInitBalances.length} )`}
+                    label={`Select All(${selectedInitBalances.length})`}
                     checked={initBalances.length && selectedInitBalances.length === initBalances.length}
                     onCheck={() => handleOnCheck(selectedInitBalances, setSelectedInitBalances, initBalances)}
                   />
@@ -351,7 +365,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('rewards')}>
               <div className={cx('rewards-list')}>
                 <CheckBox
-                  label={`Select All  ( ${selectedReward.length} )`}
+                  label={`Select All(${selectedReward.length})`}
                   checked={rewardTokens.length && selectedReward.length === rewardTokens.length}
                   onCheck={() => handleOnCheck(selectedReward, setSelectedReward, rewardTokens)}
                 />

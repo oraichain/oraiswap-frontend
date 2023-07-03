@@ -34,6 +34,10 @@
   transform: translateY(-50%);
 }
 
+.radioBox {
+  border-radius: 50%;
+}
+
 /* On mouse-over, add a grey background color */
 .container:hover input ~ .checkmark {
   border-color: $blue-color;
