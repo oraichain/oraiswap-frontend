@@ -19,7 +19,7 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -120,10 +120,9 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
 const ListPools = memo<{
   pairInfos: PairInfoData[];
   allPoolApr: { [key: string]: number };
-  myPairsData?: Object;
   setIsOpenNewTokenModal?: (isOpenNewToken: boolean) => void;
   theme?: string;
-}>(({ pairInfos, allPoolApr, myPairsData, setIsOpenNewTokenModal, theme }) => {
+}>(({ pairInfos, allPoolApr, setIsOpenNewTokenModal, theme }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -136,9 +135,9 @@ const ListPools = memo<{
   const listMyPool = useMemo(() => {
     return pairInfos.filter(
       (pairInfo) =>
-        myPairsData[pairInfo?.pair?.contract_addr] ?? parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
+        parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
     );
-  }, [myPairsData, pairInfos]);
+  }, [pairInfos]);
 
   useEffect(() => {
     if (typeFilter === KeyFilterPool.my_pool) {
@@ -225,7 +224,6 @@ const Pools: React.FC<PoolsProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
-  const [myPairsData] = useFetchMyPairs(pairs);
   useFetchCachePairs(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
@@ -237,7 +235,6 @@ const Pools: React.FC<PoolsProps> = () => {
           setIsOpenNewTokenModal={setIsOpenNewTokenModal}
           pairInfos={pairInfos}
           allPoolApr={cachedApr}
-          myPairsData={myPairsData}
           theme={theme}
         />
         <NewPoolModal

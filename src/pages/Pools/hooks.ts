@@ -62,8 +62,8 @@ export const useFetchCachePairs = (pairs: PairInfo[]) => {
   };
 
   useEffect(() => {
-    fetchCachedPairs();
-  }, []);
+    if (pairs.length > 0) fetchCachedPairs();
+  }, [pairs]);
 };
 
 // Fetch my pair data
