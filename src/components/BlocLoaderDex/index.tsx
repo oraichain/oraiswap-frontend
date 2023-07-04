@@ -15,7 +15,7 @@ const BlocLoaderDex: React.FC<{
     <div
       className={cx(
         open
-          ? ['loaderRootDisplayed', classNameLoading]
+          ? ['loaderRoot', 'loaderRootDisplayed', classNameLoading]
           : ['loaderRoot', theme, { loaderRootBorderRadius: borderRadius }]
       )}
     >
