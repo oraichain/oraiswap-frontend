@@ -14,13 +14,12 @@ import { PairInfoExtend } from 'types/token';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
-  const [pairs, setMyPairs] = useState([] as PairInfoExtend[]);
   const dispatch = useDispatch();
   const setCachedPairInfos = (payload: PairInfoExtend[]) => dispatch(updatePairInfos(payload));
+  const cachedPairInfoExtend = useSelector((state: RootState) => state.pairInfos.pairInfos);
 
   const fetchAllPairs = async () => {
     const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
-    setMyPairs(pairs);
     setCachedPairInfos(pairs);
   };
 
@@ -28,7 +27,7 @@ export const useFetchAllPairs = () => {
     fetchAllPairs();
   }, []);
 
-  return pairs;
+  return cachedPairInfoExtend;
 };
 
 // Fetch APR
