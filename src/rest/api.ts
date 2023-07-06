@@ -158,7 +158,7 @@ async function fetchPoolInfoAmount(
   const client = window.client;
   if (pair) {
     const pairContract = new OraiswapPairQueryClient(client, pair.contract_addr);
-    const poolInfo = cachedPairs?.[pair.contract_addr] || (await pairContract.pool());
+    const poolInfo = cachedPairs?.[pair.contract_addr] ?? (await pairContract.pool());
     offerPoolAmount = parsePoolAmount(poolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(poolInfo, toInfo);
   } else {
@@ -170,8 +170,8 @@ async function fetchPoolInfoAmount(
     ]);
     const pairContractFrom = new OraiswapPairQueryClient(client, fromPairInfo.contract_addr);
     const pairContractTo = new OraiswapPairQueryClient(client, toPairInfo.contract_addr);
-    const fromPoolInfo = cachedPairs?.[fromPairInfo.contract_addr] || (await pairContractFrom.pool());
-    const toPoolInfo = cachedPairs?.[toPairInfo.contract_addr] || (await pairContractTo.pool());
+    const fromPoolInfo = cachedPairs?.[fromPairInfo.contract_addr] ?? (await pairContractFrom.pool());
+    const toPoolInfo = cachedPairs?.[toPairInfo.contract_addr] ?? (await pairContractTo.pool());
     offerPoolAmount = parsePoolAmount(fromPoolInfo, fromInfo);
     askPoolAmount = parsePoolAmount(toPoolInfo, toInfo);
   }

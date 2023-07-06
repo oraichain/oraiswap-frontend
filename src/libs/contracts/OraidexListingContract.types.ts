@@ -13,6 +13,7 @@ export interface ListTokenMsg {
   marketing?: InstantiateMarketingInfo | null;
   mint?: MinterResponse | null;
   name?: string | null;
+  pair_asset_info: AssetInfo;
   symbol: string;
 }
 export interface MinterResponse {

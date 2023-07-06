@@ -31,13 +31,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
 }) => {
   return (
     <div
-      className={classNames(
-        styles.tokenWrapper,
-        styles.tokenWrapper + ` ${styles[theme]}`,
-        { [styles.active]: active },
-        { [styles.active + ` ${styles[theme]}`]: active },
-        className
-      )}
+      className={classNames(styles.tokenWrapper, styles[theme], { [styles.active]: active }, className)}
       onClick={(event) => {
         event.stopPropagation();
         onClick();
@@ -45,9 +39,13 @@ const TokenItem: React.FC<TokenItemProps> = ({
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
-          {token.Icon && token.IconLight && theme === 'light' ? <token.IconLight className={styles.tokenIcon} /> : <token.Icon className={styles.tokenIcon} />}
+          {token.Icon && token.IconLight && theme === 'light' ? (
+            <token.IconLight className={styles.tokenIcon} />
+          ) : (
+            <token.Icon className={styles.tokenIcon} />
+          )}
           <div className={styles.tokenInfo}>
-            <div className={classNames(styles.tokenName, styles.tokenName + ` ${styles[theme]}`)}>{token.name}</div>
+            <div className={classNames(styles.tokenName, styles[theme])}>{token.name}</div>
           </div>
         </div>
         <div className={styles.tokenBalance}>
@@ -58,7 +56,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
                 denom: '',
                 decimals: token.decimals
               }}
-              className={classNames(styles.tokenAmount, styles.tokenAmount + ` ${styles[theme]}`)}
+              className={classNames(styles.tokenAmount, styles[theme])}
               decimalScale={Math.min(6, token.decimals)}
             />
           </div>

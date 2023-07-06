@@ -109,7 +109,8 @@ describe('frontier-cw20-token', () => {
       name,
       initialBalances,
       mint,
-      label
+      label,
+      pairAssetInfo: { native_token: { denom: 'foobar' } }
     });
     expect(typeof msgs === 'object').toBe(true);
     expect(msgs).toHaveProperty('marketing');
@@ -118,6 +119,7 @@ describe('frontier-cw20-token', () => {
     expect(msgs).toHaveProperty('mint');
     expect(msgs).toHaveProperty('name');
     expect(msgs).toHaveProperty('initialBalances');
+    expect(msgs).toHaveProperty('pairAssetInfo');
     expect(Array.isArray(msgs.initialBalances)).toBe(true);
     expect(Array.isArray(msgs.liquidityPoolRewardAssets)).toBe(true);
   });

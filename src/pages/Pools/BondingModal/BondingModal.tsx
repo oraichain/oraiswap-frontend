@@ -93,10 +93,10 @@ const BondingModal: FC<ModalProps> = ({
   };
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
-      <div className={cx('container', `container ${styles[theme]}`)}>
-        <div className={cx('title', `title ${styles[theme]}`)}>Bond LP tokens</div>
+      <div className={cx('container', theme)}>
+        <div className={cx('title', theme)}>Bond LP tokens</div>
 
-        <div className={cx('detail', `detail ${styles[theme]}`)}>
+        <div className={cx('detail', theme)}>
           {apr && (
             <div className={cx('row')}>
               <div className={cx('row-title')}>
@@ -106,9 +106,9 @@ const BondingModal: FC<ModalProps> = ({
             </div>
           )}
         </div>
-        <div className={cx('supply', `supply ${styles[theme]}`)}>
+        <div className={cx('supply', theme)}>
           <div className={cx('header')}>
-            <div className={cx('title', `title ${styles[theme]}`)}>AMOUNT TO BOND</div>
+            <div className={cx('title', theme)}>AMOUNT TO BOND</div>
           </div>
           <div className={cx('balance')}>
             <TokenBalance
@@ -121,20 +121,17 @@ const BondingModal: FC<ModalProps> = ({
               prefix="Balance: "
             />
 
-            <div className={cx('btn', `btn ${styles[theme]}`)} onClick={() => setBondAmount(lpTokenBalance)}>
+            <div className={cx('btn', theme)} onClick={() => setBondAmount(lpTokenBalance)}>
               MAX
             </div>
-            <div
-              className={cx('btn', `btn ${styles[theme]}`)}
-              onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}
-            >
+            <div className={cx('btn', theme)} onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
               HALF
             </div>
             <TokenBalance style={{ flexGrow: 1, textAlign: 'right' }} balance={liquidityValue} decimalScale={2} />
           </div>
           <div className={cx('input')}>
             <NumberFormat
-              className={cx('amount', `amount ${styles[theme]}`)}
+              className={cx('amount', theme)}
               thousandSeparator
               decimalScale={6}
               placeholder={'0'}

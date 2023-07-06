@@ -14,7 +14,7 @@ import { network } from 'config/networks';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import useClickOutside from 'hooks/useClickOutSide';
 import { Pairs } from 'config/pools';
-import { OraidexListingContractClient } from 'libs/contracts';
+import { OraidexListingContractClient } from 'libs/contracts/OraidexListingContract.client';
 import CheckBox from 'components/CheckBox';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import { ModalDelete, ModalListToken } from './ModalComponent';
@@ -37,6 +37,8 @@ interface ModalProps {
 const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [theme] = useConfigReducer('theme');
   const [tokenName, setTokenName] = useState('');
+  const [pairAssetType, setPairAssetType] = useState(false); // 0.token - 1.native_token
+  const [pairAssetAddress, setPairAssetAddress] = useState('') // address / denom pair asset
   const [isMinter, setIsMinter] = useState(false);
   const [minter, setMinter] = useState('');
 
@@ -64,7 +66,6 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [isAddListToken, setIsAddListToken] = useState(false);
   const [cap, setCap] = useState(BigInt(0));
   const [isLoading, setIsLoading] = useState(false);
-
   const [tokensNew, setTokensNew] = useState([]);
   const [rewardTokens, setRewardTokens] = useState([
     {
@@ -75,7 +76,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   ]);
 
-  const allRewardSelect = rewardTokens.map(item => item['denom']);
+  const allRewardSelect = rewardTokens.map((item) => item['denom']);
   const handleOutsideClick = () => {
     if (isAddListToken) setIsAddListToken(false);
     if (typeDelete) setTypeDelete('');
@@ -100,7 +101,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       });
 
     if (isInitBalances) {
-      initBalances.every(inBa => {
+      initBalances.every((inBa) => {
         if (!inBa.address || !validateAddressCosmos(inBa.address, 'orai')) {
           return displayToast(TToastType.TX_FAILED, {
             message: 'Wrong address init balances format!'
@@ -133,7 +134,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
     try {
       setIsLoading(true);
-      const liquidityPoolRewardAssets = rewardTokens.map(isReward => {
+      const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
         return {
           amount: isReward?.value.toString(),
           info: getInfoLiquidityPool(isReward)
@@ -143,14 +144,19 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-            minter,
-            cap: !!cap ? cap.toString() : null
-          }
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
         : undefined;
 
       const initialBalances = isInitBalances
-        ? initBalances.map(e => ({ ...e, amount: e?.amount.toString() }))
+        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
         : undefined;
+
+      const pairAssetInfo = getInfoLiquidityPool({
+        contract_addr: !pairAssetType && pairAssetAddress,
+        denom: pairAssetType && pairAssetAddress
+      });
 
       const msg = generateMsgFrontierAddToken({
         marketing,
@@ -158,13 +164,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         liquidityPoolRewardAssets,
         name,
         initialBalances,
-        mint
+        mint,
+        pairAssetInfo
       });
+      console.log('msg: ', msg);
 
-      const result = await oraidexListing.listToken(msg);
+      const result = await oraidexListing.listToken(msg as any);
       if (result) {
-        const wasm = result?.logs?.[0]?.events.find(e => e.type === 'wasm')?.attributes;
-        const cw20Address = wasm?.find(w => w.key === 'cw20_address')?.value;
+        const wasm = result.logs?.[0]?.events.find((e) => e.type === 'wasm');
+        const cw20Address = wasm?.attributes.find((w) => w.key === 'cw20_address')?.value;
         displayToast(
           TToastType.TX_SUCCESSFUL,
           {
@@ -201,28 +209,55 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true} className={cx('modal')}>
       {isAddListToken || typeDelete ? <div className={cx('overlay')} /> : null}
-      <div className={cx('container', `container ${styles[theme]}`)}>
+      <div className={cx('container', theme)}>
         <div className={cx('container-inner')}>
           <RewardIcon />
-          <div className={cx('title', `title ${styles[theme]}`)}>List a new token</div>
+          <div className={cx('title', theme)}>List a new token</div>
         </div>
         <div className={cx('content')} ref={ref}>
-          <div className={cx('box', `box ${styles[theme]}`)}>
+          <div className={cx('box', theme)}>
             <div className={cx('token')}>
               <div className={cx('row')}>
                 <div className={cx('label')}>Token name</div>
-                <div className={cx('input', `input ${styles[theme]}`)}>
+                <div className={cx('input', theme)}>
                   <div>
                     <Input
                       value={tokenName}
                       style={{
                         color: theme === 'light' && 'rgba(39, 43, 48, 1)'
                       }}
-                      onChange={e => setTokenName(e?.target?.value)}
+                      onChange={(e) => setTokenName(e?.target?.value)}
                       placeholder="ORAICHAIN"
                     />
                   </div>
                 </div>
+              </div>
+              <div className={cx('row', 'pt-16')}>
+                <div className={cx('label')}>Pair token</div>
+                <div>
+                  <CheckBox radioBox label="Token" checked={!pairAssetType} onCheck={() => {
+                    setPairAssetType(false);
+                    setPairAssetAddress('');
+                  }} />
+                </div>
+                <div>
+                  <CheckBox radioBox label="Native Token" checked={pairAssetType} onCheck={() => {
+                    setPairAssetType(true);
+                    setPairAssetAddress('');
+                  }} />
+                </div>
+              </div>
+              <div className={cx('row', 'pt-16')}>
+                <div className={cx('label')}>{!pairAssetType ? 'Contract Address' : 'Denom'}</div>
+                <Input
+                  className={cx('input', theme)}
+                  value={pairAssetAddress}
+                  style={{
+                    color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                  }}
+                  onChange={(e) => setPairAssetAddress(e?.target?.value)}
+                  placeholder={!pairAssetType ? "oraixxxxxxxx.....xxxxxxx" : "orai"}
+                />
               </div>
               <div className={cx('option')}>
                 <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
@@ -230,29 +265,26 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {isMinter && (
                 <div>
                   <div
-                    className={cx('row')}
-                    style={{
-                      paddingTop: 16
-                    }}
+                    className={cx('row', 'pt-16')}
                   >
                     <div className={cx('label')}>Minter</div>
                     <Input
-                      className={cx('input', `input ${styles[theme]}`)}
+                      className={cx('input', theme)}
                       value={minter}
-                      onChange={e => setMinter(e?.target?.value)}
+                      style={{
+                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                      }}
+                      onChange={(e) => setMinter(e?.target?.value)}
                       placeholder="MINTER"
                     />
                   </div>
                   <div
-                    className={cx('row')}
-                    style={{
-                      paddingTop: 16
-                    }}
+                    className={cx('row', 'pt-16')}
                   >
                     <div className={cx('label')}>Cap (Optional)</div>
                     <NumberFormat
                       placeholder="0"
-                      className={cx('input', `input ${styles[theme]}`)}
+                      className={cx('input', theme)}
                       style={{
                         color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
                       }}
@@ -273,7 +305,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               </div>
               {isInitBalances && (
                 <div
-                  className={cx('btn-add-init', `btn-add-init ${styles[theme]}`)}
+                  className={cx('btn-add-init', theme)}
                   onClick={() =>
                     setInitBalances([
                       ...initBalances,
@@ -292,7 +324,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {isInitBalances && (
                 <div className={cx('header-init')}>
                   <CheckBox
-                    label={`Select All  ( ${selectedInitBalances.length} )`}
+                    label={`Select All(${selectedInitBalances.length})`}
                     checked={initBalances.length && selectedInitBalances.length === initBalances.length}
                     onCheck={() => handleOnCheck(selectedInitBalances, setSelectedInitBalances, initBalances)}
                   />
@@ -325,7 +357,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 })}
             </div>
           </div>
-          <div className={cx('box', `box ${styles[theme]}`)}>
+          <div className={cx('box', theme)}>
             <div className={cx('add-reward-btn')} onClick={() => setIsAddListToken(true)}>
               <PlusIcon />
               <span>Add a new pool reward token</span>
@@ -333,7 +365,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('rewards')}>
               <div className={cx('rewards-list')}>
                 <CheckBox
-                  label={`Select All  ( ${selectedReward.length} )`}
+                  label={`Select All(${selectedReward.length})`}
                   checked={rewardTokens.length && selectedReward.length === rewardTokens.length}
                   onCheck={() => handleOnCheck(selectedReward, setSelectedReward, rewardTokens)}
                 />

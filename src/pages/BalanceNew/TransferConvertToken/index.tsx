@@ -200,7 +200,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   setCopied(true);
                 }}
               >
-                <div className={classNames(styles.title, styles.title + ` ${styles[theme]}`)}>Transfer to</div>
+                <div className={classNames(styles.title, styles[theme])}>Transfer to</div>
                 <div className={styles.address}>
                   {reduceString(addressTransfer, 10, 7)}
                   {copied ? <SuccessIcon width={20} height={20} /> : null}
@@ -209,7 +209,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             </div>
             <div className={styles.search}>
               <div
-                className={classNames(styles.search_filter, styles.search_filter + ` ${styles[theme]}`)}
+                className={classNames(styles.search_filter, styles[theme])}
                 onClick={(event) => {
                   event.stopPropagation();
                   setCopied(false);
@@ -230,9 +230,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                           <network.Icon />
                         )}
                       </div>
-                      <span className={classNames(styles.search_text, styles.search_text + ` ${styles[theme]}`)}>
-                        {network.chainName}
-                      </span>
+                      <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
                     </div>
                   )}
                   {bridgeNetworks.length > 1 && (
@@ -242,7 +240,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               </div>
               {isOpen && (
                 <div>
-                  <ul className={classNames(styles.items, styles.items + ` ${styles[theme]}`)}>
+                  <ul className={classNames(styles.items, styles[theme])}>
                     {networks
                       .filter((item) => filterChainBridge(token, item))
                       .map((network) => {
@@ -266,11 +264,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                 <div>
                                   <network.Icon />
                                 </div>
-                                <div
-                                  className={classNames(styles.items_title, styles.items_title + ` ${styles[theme]}`)}
-                                >
-                                  {network.chainName}
-                                </div>
+                                <div className={classNames(styles.items_title, styles[theme])}>{network.chainName}</div>
                               </div>
                             )}
                           </li>
@@ -303,7 +297,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   const usdValue = floatValue * (prices[token.coinGeckoId] ?? 0);
                   setConvertAmount([floatValue!, usdValue]);
                 }}
-                className={classNames(styles.amount, styles.amount + ` ${styles[theme]}`)}
+                className={classNames(styles.amount, styles[theme])}
               />
               {/* <div style={{ paddingTop: 8 }}>
                 <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} />
@@ -314,7 +308,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
               {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
                 <button
                   key={coeff}
-                  className={classNames(styles.balanceBtn, styles.balanceBtn + ` ${styles[theme]}`)}
+                  className={classNames(styles.balanceBtn, styles[theme])}
                   onClick={(event) => {
                     event.stopPropagation();
                     // hardcode estimate fee oraichain
@@ -351,7 +345,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             return (
               <button
                 disabled={transferLoading || !addressTransfer}
-                className={classNames(styles.tfBtn, styles.tfBtn + `${styles[theme]}`)}
+                className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >
                 {transferLoading && <Loader width={20} height={20} />}

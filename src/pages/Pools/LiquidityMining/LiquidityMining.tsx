@@ -140,7 +140,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       <div className={cx('row')} style={{ marginBottom: '30px', marginTop: '40px' }}>
         <>
           <div className={cx('mining')}>
-            <div className={cx('label--bold', `label--bold ${styles[theme]}`)}>Liquidity Mining</div>
+            <div className={cx('label--bold', theme)}>Liquidity Mining</div>
             <div className={cx('label--sub')}>Bond liquidity to earn ORAI liquidity reward and swap fees</div>
           </div>
           <div className={cx('earning')}>
@@ -157,7 +157,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       <div className={cx('row')} style={{ flexWrap: 'wrap' }}>
         <>
           <div className={cx('mining')}>
-            <div className={cx('container', 'container_mining', `container ${styles[theme]}`)}>
+            <div className={cx('container', 'container_mining', theme)}>
               <img className={cx('icon')} src={theme === 'light' ? miningLightImage : miningImage} />
               <div className={cx('bonded')}>
                 <div className={cx('label')}>Bonded</div>
@@ -168,7 +168,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       decimals: lpTokenInfoData.decimals,
                       denom: lpTokenInfoData?.symbol
                     }}
-                    className={cx('amount', `amount ${styles[theme]}`)}
+                    className={cx('amount', theme)}
                     decimalScale={6}
                   />
                   <div>
@@ -207,12 +207,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             </div>
           </div>
           <div className={cx('earning')}>
-            <div className={cx('container', 'container_earning', `container ${styles[theme]}`)}>
+            <div className={cx('container', 'container_earning', theme)}>
               <div className={cx('label')}>Estimated Earnings</div>
               {!!pendingRewards &&
                 pendingRewards.map((r, idx) => (
                   <div key={idx}>
-                    <div className={cx('amount', `amount ${styles[theme]}`)}>
+                    <div className={cx('amount', theme)}>
                       <TokenBalance
                         balance={{
                           amount: r.amount,

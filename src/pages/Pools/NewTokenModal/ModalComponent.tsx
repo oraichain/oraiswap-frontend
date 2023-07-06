@@ -54,7 +54,7 @@ export const ModalListToken = ({
         <div className={cx('check')}>
           <Input
             value={contractAddr}
-            className={cx('input', `input ${styles[theme]}`)}
+            className={cx('input', theme)}
             onChange={(e) => setContractAddr(e?.target?.value)}
             placeholder="0xd3f2jlwxt...1f009"
           />
@@ -114,7 +114,7 @@ export const ModalListToken = ({
                     }}
                   >
                     {t.Icon ? <t.Icon className={cx('logo')} /> : <TokensIcon className={cx('logo')} />}
-                    <span className={cx('name', `name ${styles[theme]}`)}>{t?.name}</span>
+                    <span className={cx('name', theme)}>{t?.name}</span>
                   </li>
                 );
               })}
@@ -141,7 +141,7 @@ export const ModalDelete = ({
   let contentReward = <></>;
   if (typeDelete === 'Reward') {
     contentReward = (
-      <div className={cx('content-reward', `content-reward ${styles[theme]}`)}>
+      <div className={cx('content-reward', theme)}>
         Are you sure delete{' '}
         <span>
           {rewardTokens
@@ -165,7 +165,7 @@ export const ModalDelete = ({
         fontSize: 16
       }}
     >
-      <div className={cx('title-reward', `title-reward ${styles[theme]}`)}>
+      <div className={cx('title-reward', theme)}>
         <span> Delete {typeDelete}</span>
       </div>
       {contentReward}
