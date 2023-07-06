@@ -29,7 +29,7 @@ export const tokenSlice = createSlice({
         ...action.payload
       };
     },
-    removeToken: (state, action: PayloadAction<AmountDetails>) => {
+    removeToken: (state) => {
       state.amounts = {};
       state.pairs = {};
       state.lpPools = {};
@@ -38,7 +38,7 @@ export const tokenSlice = createSlice({
       state.lpPools = {
         ...state.lpPools,
         ...action.payload
-      }
+      };
     }
   }
 });

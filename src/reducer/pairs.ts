@@ -17,11 +17,14 @@ export const pairsSlice = createSlice({
   reducers: {
     updatePairInfos: (state, action: PayloadAction<PairInfoExtend[]>) => {
       state.pairInfos = action.payload;
+    },
+    removePairInfos: (state) => {
+      state.pairInfos = [];
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { updatePairInfos } = pairsSlice.actions;
+export const { updatePairInfos, removePairInfos } = pairsSlice.actions;
 
 export default pairsSlice.reducer;
