@@ -16,14 +16,8 @@ import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
-
-import { useDispatch } from 'react-redux';
-import { removeToken } from 'reducer/token';
-import { removePairInfos } from 'reducer/pairs';
-
 import './index.scss';
 const App = () => {
-  const dispatch = useDispatch();
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
@@ -89,8 +83,6 @@ const App = () => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
       localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
-      dispatch(removeToken());
-      dispatch(removePairInfos());
       setPersistVersion(PERSIST_VER);
     };
 
