@@ -25,7 +25,7 @@ import {
 } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { isMobile } from '@walletconnect/browser-utils';
 import {
   fetchTokenAllowance,
@@ -56,7 +56,7 @@ interface ModalProps {
   lpTokenBalance: string;
   pairAmountInfoData: PairAmountInfo;
   refetchPairAmountInfo: Function;
-  fetchCachedLpTokenAll: () => void;
+  fetchCachedLpTokenAll: (address, dispatch) => void;
   pairInfoData: PairInfo;
 }
 
@@ -80,7 +80,7 @@ const LiquidityModal: FC<ModalProps> = ({
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-
+  const dispatch = useDispatch();
   const { data: prices } = useCoinGeckoPrices();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -172,7 +172,7 @@ const LiquidityModal: FC<ModalProps> = ({
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll();
+    fetchCachedLpTokenAll(address, dispatch);
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -367,7 +367,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>

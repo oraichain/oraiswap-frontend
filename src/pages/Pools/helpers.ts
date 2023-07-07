@@ -28,6 +28,8 @@ import {
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { ListTokenMsg } from 'libs/contracts/OraidexListingContract.types';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { updateLpPools } from 'reducer/token';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -275,11 +277,42 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
   return { native_token: { denom } };
 };
 
+const fetchCacheLpPools = async (address, dispatch) => {
+  if (!address || !dispatch) return;
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+  const queries = pairs.map((pair) => ({
+    address: pair.liquidity_token,
+    data: toBinary({
+      balance: {
+        address
+      }
+    })
+  }));
+
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
+  const res = await multicall.aggregate({
+    queries
+  });
+
+  const lpTokenData = Object.fromEntries(
+    pairs.map((pair, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [pair.liquidity_token, {}];
+      }
+      return [pair.liquidity_token, fromBinary(data.data)];
+    })
+  );
+  setCachedLpPools(lpTokenData);
+};
+
 export {
   fetchAprResult,
   fetchPoolListAndOraiPrice,
   fetchPairsData,
   fetchMyPairsData,
+  fetchCacheLpPools,
   generateMsgFrontierAddToken,
   getInfoLiquidityPool
 };
