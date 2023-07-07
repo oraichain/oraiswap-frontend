@@ -139,7 +139,7 @@ const ListPools = memo<{
       (pairInfo) =>
         parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
     );
-  }, [typeFilter, lpPools]);
+  }, [pairInfos]);
 
   useEffect(() => {
     if (pairInfos.length) {
