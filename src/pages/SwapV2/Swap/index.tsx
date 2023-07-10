@@ -11,7 +11,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, floatToPercent, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, getPairSwap, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
@@ -307,12 +307,20 @@ const SwapComponent: React.FC<{
           open={() => setIsSelectFrom(true)}
           close={() => setIsSelectFrom(false)}
           prices={prices}
-          items={Pairs.getPoolTokens().filter((token) =>
-            toTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== toTokenDenom
-          )}
+          items={Pairs.getPoolTokens().filter((token) => {
+            const { arr, arrLength } = getPairSwap(toTokenDenom)
+            if (arrLength) {
+              return arr.includes(token.denom)
+            }
+            return token.denom !== toTokenDenom
+          })}
           amounts={amounts}
           setToken={(denom) => {
-            setSwapTokens([denom, denom === MILKY ? STABLE_DENOM : toTokenDenom]);
+            const { arr, arrLength } = getPairSwap(denom);
+            if (arrLength) {
+              setSwapTokens([denom, arr[0]])
+            }
+            setSwapTokens([denom, toTokenDenom]);
           }}
         />
       ) : (
@@ -322,11 +330,19 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectTo(false)}
           prices={prices}
           amounts={amounts}
-          items={Pairs.getPoolTokens().filter((token) =>
-            fromTokenDenom === MILKY ? token.denom === STABLE_DENOM : token.denom !== fromTokenDenom
-          )}
+          items={Pairs.getPoolTokens().filter((token) => {
+            const { arr, arrLength } = getPairSwap(fromTokenDenom);
+            if (arrLength) {
+              return arr.includes(token.denom)
+            }
+            return token.denom !== fromTokenDenom
+          })}
           setToken={(denom) => {
-            setSwapTokens([denom === MILKY ? STABLE_DENOM : fromTokenDenom, denom]);
+            const { arr, arrLength } = getPairSwap(denom);
+            if (arrLength) {
+              setSwapTokens([arr[0], denom])
+            }
+            setSwapTokens([fromTokenDenom, denom]);
           }}
         />
       )}

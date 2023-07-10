@@ -8,6 +8,7 @@ import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { Pairs } from 'config/pools';
 
 export interface Tokens {
   denom?: string;
@@ -60,7 +61,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -136,3 +137,18 @@ export const parseAssetInfo = (assetInfo: AssetInfo): string => {
 export const floatToPercent = (value: number): number => {
   return value * 100;
 };
+
+export const getPairSwap = (denom) => {
+  if (!denom)
+    return {
+      arr: [],
+      arrLength: 0,
+    }
+
+  const findPair = Pairs.pairs.filter((p) => p.token0 == denom);
+  const arrStringPair = findPair.map(item => item['token1']);
+  return {
+    arr: arrStringPair,
+    arrLength: findPair?.length
+  }
+}

@@ -30,6 +30,10 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { useFetchAllPairs } from './hooks';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { updateLpPools } from 'reducer/token';
+
 const cx = cn.bind(styles);
 
 interface PoolDetailProps { }
@@ -45,9 +49,11 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [theme] = useConfigReducer('theme');
   const [cachePrices] = useConfigReducer('coingecko');
   const [assetToken, setAssetToken] = useState<TokenItemType>();
+  const pairs = useFetchAllPairs();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
   const loadTokenAmounts = useLoadTokens();
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const getPairInfo = async () => {
     if (!poolUrl) return;
     const pairRawData = poolUrl.split('_');
@@ -71,11 +77,19 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     };
   };
 
+  const fetchCachedLpTokenAll = async () => {
+    const lpTokenData = await fetchCacheLpPools(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
+    setCachedLpPools(lpTokenData);
+  }
 
   const onBondingAction = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
-    fetchCacheLpPools(address, dispatch)
+    fetchCachedLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -374,7 +388,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData.info}
-                fetchCachedLpTokenAll={fetchCacheLpPools}
+                pairs={pairs}
               />
             )}
           {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (
