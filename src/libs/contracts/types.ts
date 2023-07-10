@@ -39,3 +39,4 @@ export interface Config {
   factory_addr: Addr;
   owner: Addr;
 }
+export { CosmWasmClient, SigningCosmWasmClient, ExecuteResult } from "@cosmjs/cosmwasm-stargate";

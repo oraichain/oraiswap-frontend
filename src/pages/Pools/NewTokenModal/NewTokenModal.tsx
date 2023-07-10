@@ -38,8 +38,11 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [theme] = useConfigReducer('theme');
   const [tokenName, setTokenName] = useState('');
   const [pairAssetType, setPairAssetType] = useState(false); // 0.token - 1.native_token
-  const [pairAssetAddress, setPairAssetAddress] = useState('') // address / denom pair asset
+  const [pairAssetAddress, setPairAssetAddress] = useState(''); // address / denom pair asset
+  const [targetedAssetType, setTargetedAssetType] = useState(false); // 0.token - 1.native_token
+  const [targetedAssetInfo, setTargetedAssetInfo] = useState(''); // address / denom pair asset
   const [isMinter, setIsMinter] = useState(false);
+  const [isMintNewToken, setIsMintNewToken] = useState(true);
   const [minter, setMinter] = useState('');
 
   const [name, setName] = useState('');
@@ -85,7 +88,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const ref = useClickOutside(handleOutsideClick);
 
   const handleCreateToken = async () => {
-    if (!checkRegex(tokenName))
+    if (isMintNewToken && !checkRegex(tokenName))
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
@@ -95,7 +98,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         message: 'Wallet address does not exist!'
       });
 
-    if (!tokenName)
+    if (isMintNewToken && !tokenName)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Empty token symbol!'
       });
@@ -144,9 +147,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-          minter,
-          cap: !!cap ? cap.toString() : null
-        }
+            minter,
+            cap: !!cap ? cap.toString() : null
+          }
         : undefined;
 
       const initialBalances = isInitBalances
@@ -158,28 +161,45 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         denom: pairAssetType && pairAssetAddress
       });
 
-      const msg = generateMsgFrontierAddToken({
+      console.log('targeted asset info: ', targetedAssetInfo);
+
+      let msg = generateMsgFrontierAddToken({
         marketing,
         symbol: tokenName,
         liquidityPoolRewardAssets,
         name,
         initialBalances,
         mint,
-        pairAssetInfo
+        pairAssetInfo,
+        targetedAssetInfo: targetedAssetInfo
+          ? getInfoLiquidityPool({
+              contract_addr: !targetedAssetType && targetedAssetInfo,
+              denom: targetedAssetType && targetedAssetInfo
+            })
+          : undefined
       });
+      // if users use their existing tokens to list, then we allow them to
       console.log('msg: ', msg);
 
       const result = await oraidexListing.listToken(msg as any);
       if (result) {
         const wasm = result.logs?.[0]?.events.find((e) => e.type === 'wasm');
         const cw20Address = wasm?.attributes.find((w) => w.key === 'cw20_address')?.value;
+        const lpAddress = wasm?.attributes.find((w) => w.key === 'liquidity_token_address')?.value;
+        const pairAddress = wasm?.attributes.find((w) => w.key === '"pair_contract_address"')?.value;
         displayToast(
           TToastType.TX_SUCCESSFUL,
-          {
-            customLink: `${network.explorer}/txs/${result.transactionHash}`,
-            linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
-            cw20Address: `${cw20Address}`
-          },
+          cw20Address
+            ? {
+                customLink: `${network.explorer}/txs/${result.transactionHash}`,
+                linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+                cw20Address: `${cw20Address}`
+              }
+            : {
+                customLink: `${network.explorer}/txs/${result.transactionHash}`,
+                linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
+                linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
+              },
           {
             autoClose: 100000000
           }
@@ -217,34 +237,214 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('content')} ref={ref}>
           <div className={cx('box', theme)}>
             <div className={cx('token')}>
-              <div className={cx('row')}>
-                <div className={cx('label')}>Token name</div>
-                <div className={cx('input', theme)}>
-                  <div>
+              <div className={cx('row', 'pt-16')}>
+                <div className={cx('label')}>Listing option</div>
+                <div>
+                  <CheckBox
+                    radioBox
+                    label="Create new CW20"
+                    checked={isMintNewToken}
+                    onCheck={() => {
+                      console.log('set is mint token true');
+                      setIsMintNewToken(true);
+                    }}
+                  />
+                </div>
+                <div>
+                  <CheckBox
+                    radioBox
+                    label="Use existing"
+                    checked={!isMintNewToken}
+                    onCheck={() => {
+                      console.log('set is mint token false');
+                      setIsMintNewToken(false);
+                    }}
+                  />
+                </div>
+              </div>
+              {!isMintNewToken && (
+                <div>
+                  <div className={cx('row', 'pt-16')}>
+                    <div className={cx('label')}>Targeted token</div>
+                    <div>
+                      <CheckBox
+                        radioBox
+                        label="Token"
+                        checked={!targetedAssetType}
+                        onCheck={() => {
+                          setTargetedAssetType(false);
+                          setTargetedAssetInfo('');
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <CheckBox
+                        radioBox
+                        label="Native Token"
+                        checked={targetedAssetType}
+                        onCheck={() => {
+                          setTargetedAssetType(true);
+                          setTargetedAssetInfo('');
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className={cx('row', 'pt-16')}>
+                    <div className={cx('label')}>{!targetedAssetType ? 'Contract Address' : 'Denom'}</div>
                     <Input
-                      value={tokenName}
+                      className={cx('input', theme)}
+                      value={targetedAssetInfo}
                       style={{
                         color: theme === 'light' && 'rgba(39, 43, 48, 1)'
                       }}
-                      onChange={(e) => setTokenName(e?.target?.value)}
-                      placeholder="ORAICHAIN"
+                      onChange={(e) => setTargetedAssetInfo(e?.target?.value)}
+                      placeholder={!targetedAssetType ? 'oraixxxxxxxx.....xxxxxxx' : 'orai'}
                     />
                   </div>
                 </div>
-              </div>
+              )}
+              {isMintNewToken && (
+                <div>
+                  <div className={cx('row', 'pt-16')}>
+                    <div className={cx('label')}>Token name</div>
+                    <div className={cx('input', theme)}>
+                      <div>
+                        <Input
+                          value={tokenName}
+                          style={{
+                            color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                          }}
+                          onChange={(e) => setTokenName(e?.target?.value)}
+                          placeholder="ORAICHAIN"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className={cx('option')}>
+                    <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
+                  </div>
+                  {isMinter && (
+                    <div>
+                      <div className={cx('row', 'pt-16')}>
+                        <div className={cx('label')}>Minter</div>
+                        <Input
+                          className={cx('input', theme)}
+                          value={minter}
+                          style={{
+                            color: theme === 'light' && 'rgba(39, 43, 48, 1)'
+                          }}
+                          onChange={(e) => setMinter(e?.target?.value)}
+                          placeholder="MINTER"
+                        />
+                      </div>
+                      <div className={cx('row', 'pt-16')}>
+                        <div className={cx('label')}>Cap (Optional)</div>
+                        <NumberFormat
+                          placeholder="0"
+                          className={cx('input', theme)}
+                          style={{
+                            color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
+                          }}
+                          thousandSeparator
+                          decimalScale={6}
+                          type="text"
+                          value={toDisplay(cap)}
+                          onValueChange={({ floatValue }) => {
+                            setCap(toAmount(floatValue));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <hr />
+                  <div>
+                    <CheckBox
+                      label="Initial Balances (Optional)"
+                      checked={isInitBalances}
+                      onCheck={setIsInitBalances}
+                    />
+                  </div>
+                  {isInitBalances && (
+                    <div>
+                      {isInitBalances && (
+                        <div
+                          className={cx('btn-add-init', theme)}
+                          onClick={() =>
+                            setInitBalances([
+                              ...initBalances,
+                              {
+                                address: '',
+                                amount: BigInt(1e6)
+                              }
+                            ])
+                          }
+                        >
+                          <PlusIcon />
+                          <span>Add</span>
+                        </div>
+                      )}
+
+                      {isInitBalances && (
+                        <div className={cx('header-init')}>
+                          <CheckBox
+                            label={`Select All(${selectedInitBalances.length})`}
+                            checked={initBalances.length && selectedInitBalances.length === initBalances.length}
+                            onCheck={() => handleOnCheck(selectedInitBalances, setSelectedInitBalances, initBalances)}
+                          />
+                          <div
+                            className={cx('trash')}
+                            onClick={() => selectedInitBalances.length && setTypeDelete('Init Balances')}
+                          >
+                            <TrashIcon />
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{ height: 10 }} />
+
+                      {isInitBalances &&
+                        initBalances.map((item, ind) => {
+                          return (
+                            <div key={ind}>
+                              <InitBalancesItems
+                                item={item}
+                                ind={ind}
+                                selectedInitBalances={selectedInitBalances}
+                                setSelectedInitBalances={setSelectedInitBalances}
+                                setInitBalances={setInitBalances}
+                                initBalances={initBalances}
+                                theme={theme}
+                              />
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className={cx('row', 'pt-16')}>
                 <div className={cx('label')}>Pair token</div>
                 <div>
-                  <CheckBox radioBox label="Token" checked={!pairAssetType} onCheck={() => {
-                    setPairAssetType(false);
-                    setPairAssetAddress('');
-                  }} />
+                  <CheckBox
+                    radioBox
+                    label="Token"
+                    checked={!pairAssetType}
+                    onCheck={() => {
+                      setPairAssetType(false);
+                      setPairAssetAddress('');
+                    }}
+                  />
                 </div>
                 <div>
-                  <CheckBox radioBox label="Native Token" checked={pairAssetType} onCheck={() => {
-                    setPairAssetType(true);
-                    setPairAssetAddress('');
-                  }} />
+                  <CheckBox
+                    radioBox
+                    label="Native Token"
+                    checked={pairAssetType}
+                    onCheck={() => {
+                      setPairAssetType(true);
+                      setPairAssetAddress('');
+                    }}
+                  />
                 </div>
               </div>
               <div className={cx('row', 'pt-16')}>
@@ -256,105 +456,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                     color: theme === 'light' && 'rgba(39, 43, 48, 1)'
                   }}
                   onChange={(e) => setPairAssetAddress(e?.target?.value)}
-                  placeholder={!pairAssetType ? "oraixxxxxxxx.....xxxxxxx" : "orai"}
+                  placeholder={!pairAssetType ? 'oraixxxxxxxx.....xxxxxxx' : 'orai'}
                 />
               </div>
-              <div className={cx('option')}>
-                <CheckBox label="Minter (Optional)" checked={isMinter} onCheck={setIsMinter} />
-              </div>
-              {isMinter && (
-                <div>
-                  <div
-                    className={cx('row', 'pt-16')}
-                  >
-                    <div className={cx('label')}>Minter</div>
-                    <Input
-                      className={cx('input', theme)}
-                      value={minter}
-                      style={{
-                        color: theme === 'light' && 'rgba(39, 43, 48, 1)'
-                      }}
-                      onChange={(e) => setMinter(e?.target?.value)}
-                      placeholder="MINTER"
-                    />
-                  </div>
-                  <div
-                    className={cx('row', 'pt-16')}
-                  >
-                    <div className={cx('label')}>Cap (Optional)</div>
-                    <NumberFormat
-                      placeholder="0"
-                      className={cx('input', theme)}
-                      style={{
-                        color: theme === 'light' ? 'rgba(126, 92, 197, 1)' : 'rgb(255, 222, 91)'
-                      }}
-                      thousandSeparator
-                      decimalScale={6}
-                      type="text"
-                      value={toDisplay(cap)}
-                      onValueChange={({ floatValue }) => {
-                        setCap(toAmount(floatValue));
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-              <hr />
-              <div>
-                <CheckBox label="Initial Balances (Optional)" checked={isInitBalances} onCheck={setIsInitBalances} />
-              </div>
-              {isInitBalances && (
-                <div
-                  className={cx('btn-add-init', theme)}
-                  onClick={() =>
-                    setInitBalances([
-                      ...initBalances,
-                      {
-                        address: '',
-                        amount: BigInt(1e6)
-                      }
-                    ])
-                  }
-                >
-                  <PlusIcon />
-                  <span>Add</span>
-                </div>
-              )}
-
-              {isInitBalances && (
-                <div className={cx('header-init')}>
-                  <CheckBox
-                    label={`Select All(${selectedInitBalances.length})`}
-                    checked={initBalances.length && selectedInitBalances.length === initBalances.length}
-                    onCheck={() => handleOnCheck(selectedInitBalances, setSelectedInitBalances, initBalances)}
-                  />
-                  <div
-                    className={cx('trash')}
-                    onClick={() => selectedInitBalances.length && setTypeDelete('Init Balances')}
-                  >
-                    <TrashIcon />
-                  </div>
-                </div>
-              )}
-
-              <div style={{ height: 10 }} />
-
-              {isInitBalances &&
-                initBalances.map((item, ind) => {
-                  return (
-                    <div key={ind}>
-                      <InitBalancesItems
-                        item={item}
-                        ind={ind}
-                        selectedInitBalances={selectedInitBalances}
-                        setSelectedInitBalances={setSelectedInitBalances}
-                        setInitBalances={setInitBalances}
-                        initBalances={initBalances}
-                        theme={theme}
-                      />
-                    </div>
-                  );
-                })}
             </div>
           </div>
           <div className={cx('box', theme)}>
@@ -419,8 +523,11 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           ) : null}
         </div>
         <div
-          className={cx('create-btn', (isLoading || !checkRegex(tokenName) || !rewardTokens.length) && 'disable-btn')}
-          onClick={() => !isLoading && checkRegex(tokenName) && rewardTokens.length && handleCreateToken()}
+          className={cx(
+            'create-btn',
+            (isLoading || (!tokenName && !targetedAssetInfo) || !rewardTokens.length) && 'disable-btn'
+          )}
+          onClick={() => !isLoading && (tokenName || targetedAssetInfo) && rewardTokens.length && handleCreateToken()}
         >
           {isLoading && <Loader width={20} height={20} />}
           {isLoading && <div style={{ width: 8 }}></div>}

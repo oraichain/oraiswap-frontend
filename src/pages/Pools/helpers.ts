@@ -224,16 +224,7 @@ const fetchMyPairsData = async (
   return calculateReward(pairs, res);
 };
 
-const generateMsgFrontierAddToken = ({
-  marketing,
-  symbol,
-  liquidityPoolRewardAssets,
-  name,
-  initialBalances,
-  mint,
-  label,
-  pairAssetInfo
-}: {
+export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
   mint?: MinterResponse;
   marketing?: InstantiateMarketingInfo;
@@ -242,20 +233,26 @@ const generateMsgFrontierAddToken = ({
   symbol: string;
   liquidityPoolRewardAssets: Asset[];
   pairAssetInfo: AssetInfo;
-}) => {
-  const msgAddTokenFrontier: {
-    initialBalances?: Cw20Coin[];
-    mint?: MinterResponse;
-    marketing?: InstantiateMarketingInfo;
-    label?: string;
-    name?: string;
-    symbol: string;
-    liquidityPoolRewardAssets: Asset[];
-    pairAssetInfo: AssetInfo;
-  } = {
+  targetedAssetInfo?: AssetInfo;
+};
+
+const generateMsgFrontierAddToken = (tokenMsg: ListTokenJsMsg) => {
+  const {
     symbol,
     liquidityPoolRewardAssets,
-    pairAssetInfo
+    label,
+    pairAssetInfo,
+    marketing,
+    mint,
+    initialBalances,
+    name,
+    targetedAssetInfo
+  } = tokenMsg;
+  const msgAddTokenFrontier: ListTokenJsMsg = {
+    symbol,
+    liquidityPoolRewardAssets,
+    pairAssetInfo,
+    targetedAssetInfo
   };
   if (mint) msgAddTokenFrontier.mint = mint;
   if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
