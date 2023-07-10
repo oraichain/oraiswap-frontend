@@ -16,6 +16,7 @@ import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as ScAtomIcon } from 'assert/icons/scatom.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -75,7 +76,8 @@ export type CoinGeckoId =
   | 'scorai'
   | 'oraidex'
   | 'usd-coin'
-  | 'tron';
+  | 'tron'
+  | 'scatom';
 
 export type NetworkType = 'cosmos' | 'evm';
 export type CoinIcon = React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
@@ -309,6 +311,15 @@ export const oraichainNetwork: CustomChainInfo = {
       bridgeTo: ['0x2b6653dc'],
       coinDecimals: 6,
       Icon: TronIcon
+    },
+    {
+      coinDenom: 'scATOM',
+      coinMinimalDenom: 'scatom',
+      type: 'cw20',
+      contractAddress: process.env.REACT_APP_SCATOM_CONTRACT,
+      coinGeckoId: 'scatom',
+      coinDecimals: 6,
+      Icon: ScAtomIcon
     }
   ]
 };

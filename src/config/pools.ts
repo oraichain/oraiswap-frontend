@@ -69,6 +69,12 @@ export class Pairs {
     },
     {
       asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }]
+    },
+    {
+      asset_infos: [
+        { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } },
+        { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } }
+      ]
     }
   ];
 
