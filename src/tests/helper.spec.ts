@@ -5,7 +5,7 @@ import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDi
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
-import { parseAssetInfo } from 'helper';
+import { parseAssetInfo, getPairSwapV2 } from 'helper';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 
 describe('should utils functions in libs/utils run exactly', () => {
@@ -124,4 +124,14 @@ describe('should utils functions in libs/utils run exactly', () => {
   ])('test-parseAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
     expect(parseAssetInfo(assetInfo)).toEqual(expectedResult);
   });
+
+  it.each([process.env.REACT_APP_MILKY_CONTRACT, process.env.REACT_APP_KWT_CONTRACT])(
+    'test-get-pair-swap',
+    (contractAddress) => {
+      const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(contractAddress);
+      expect(Array.isArray(arr)).toBe(true);
+      expect(arrLength).toEqual(arr.length);
+      expect(typeof arrIncludesOrai == 'boolean').toBe(true);
+    }
+  );
 });

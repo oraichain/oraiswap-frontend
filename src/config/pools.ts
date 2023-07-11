@@ -10,8 +10,6 @@ import { PairInfoExtend } from 'types/token';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
-  token0?: string;
-  token1?: string;
 };
 
 export type TokensSwap = { [key: string]: TokenItemType };
@@ -58,8 +56,6 @@ export class Pairs {
       ]
     },
     {
-      token0: MILKY,
-      token1: STABLE_DENOM,
       asset_infos: [
         { token: { contract_addr: process.env.REACT_APP_MILKY_CONTRACT } },
         { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }

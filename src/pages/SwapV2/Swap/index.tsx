@@ -11,7 +11,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, floatToPercent, getPairSwap, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction, parseAssetInfo } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
@@ -308,19 +308,19 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectFrom(false)}
           prices={prices}
           items={Pairs.getPoolTokens().filter((token) => {
-            const { arr, arrLength } = getPairSwap(toTokenDenom)
-            if (arrLength) {
-              return arr.includes(token.denom)
+            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(toToken?.contractAddress)
+            if (!arrLength || arrIncludesOrai) {
+              return token.denom !== toTokenDenom
             }
-            return token.denom !== toTokenDenom
+            return arr.includes(token?.contractAddress)
           })}
           amounts={amounts}
-          setToken={(denom) => {
-            const { arr, arrLength } = getPairSwap(denom);
-            if (arrLength) {
-              setSwapTokens([denom, arr[0]])
+          setToken={(denom, contractAddress) => {
+            const { arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
+            if (!arrLength || arrIncludesOrai) {
+              return setSwapTokens([denom, toTokenDenom]);
             }
-            setSwapTokens([denom, toTokenDenom]);
+            setSwapTokens([denom, arrDenom]);
           }}
         />
       ) : (
@@ -331,18 +331,18 @@ const SwapComponent: React.FC<{
           prices={prices}
           amounts={amounts}
           items={Pairs.getPoolTokens().filter((token) => {
-            const { arr, arrLength } = getPairSwap(fromTokenDenom);
-            if (arrLength) {
-              return arr.includes(token.denom)
+            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(fromToken?.contractAddress)
+            if (!arrLength || arrIncludesOrai) {
+              return token.denom !== fromTokenDenom
             }
-            return token.denom !== fromTokenDenom
+            return arr.includes(token?.contractAddress)
           })}
-          setToken={(denom) => {
-            const { arr, arrLength } = getPairSwap(denom);
-            if (arrLength) {
-              setSwapTokens([arr[0], denom])
+          setToken={(denom, contractAddress) => {
+            const { arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
+            if (!arrLength || arrIncludesOrai) {
+              return setSwapTokens([fromTokenDenom, denom]);
             }
-            setSwapTokens([fromTokenDenom, denom]);
+            setSwapTokens([arrDenom, denom]);
           }}
         />
       )}
