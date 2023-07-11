@@ -41,6 +41,7 @@ import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { TooltipIcon } from 'components/Modals/SettingTooltip';
 import SlippageModal from 'components/Modals/SlippageModal';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { isBigIntZero } from '../helpers';
 
 const cx = cn.bind(styles);
 
@@ -155,8 +156,8 @@ const LiquidityModal: FC<ModalProps> = ({
     setRecentInput(1);
     setAmountToken1(value);
     if (token1Amount > 0) setAmountToken2((value * token2Amount) / token1Amount);
-
-    const estimatedLP = (value / (value + token1Amount)) * BigInt(lpTokenInfoData.total_supply);
+    const newValue = value + token1Amount;
+    const estimatedLP = isBigIntZero(newValue) ? BigInt(0) : (value / newValue) * BigInt(lpTokenInfoData.total_supply);
     setEstimatedLP(estimatedLP);
   };
 
@@ -164,8 +165,8 @@ const LiquidityModal: FC<ModalProps> = ({
     setRecentInput(2);
     setAmountToken2(value);
     if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
-
-    const estimatedLP = (value / (value + token2Amount)) * BigInt(lpTokenInfoData.total_supply);
+    const newValue = value + token2Amount;
+    const estimatedLP = isBigIntZero(newValue) ? BigInt(0) : (value / newValue) * BigInt(lpTokenInfoData.total_supply);
 
     setEstimatedLP(estimatedLP);
   };
@@ -232,8 +233,8 @@ const LiquidityModal: FC<ModalProps> = ({
         toInfo: token2InfoData!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.contract_addr,
-        slippage: (userSlippage / 100).toString()
+        pair: pairInfoData.contract_addr
+        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
       } as ProvideQuery);
 
       const msg = msgs[0];
@@ -313,8 +314,8 @@ const LiquidityModal: FC<ModalProps> = ({
   const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
-  const lp1BurnAmount = (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
-  const lp2BurnAmount = (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
+  const lp1BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
+  const lp2BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
   const addTab = (
     <>
       <div className={cx('supply', theme)}>
@@ -367,7 +368,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>

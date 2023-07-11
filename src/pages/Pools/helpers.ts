@@ -306,6 +306,11 @@ const fetchCacheLpPools = async (address, dispatch) => {
   setCachedLpPools(lpTokenData);
 };
 
+const isBigIntZero = (value: BigInt): boolean => {
+  if (value === BigInt(0)) return true;
+  return false;
+};
+
 export {
   fetchAprResult,
   fetchPoolListAndOraiPrice,
@@ -313,5 +318,6 @@ export {
   fetchMyPairsData,
   fetchCacheLpPools,
   generateMsgFrontierAddToken,
-  getInfoLiquidityPool
+  getInfoLiquidityPool,
+  isBigIntZero
 };
