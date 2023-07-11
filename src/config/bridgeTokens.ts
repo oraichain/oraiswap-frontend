@@ -34,24 +34,10 @@ export type TokenItemType = {
   rpc: string;
   decimals: number;
   maxGas?: number;
-  factoryV1?: boolean;
   coinGeckoId: CoinGeckoId;
   cosmosBased: Boolean;
   minAmountSwap?: number;
 };
-
-// use factory v1 by looking up minimumDenom as key
-export const factoryV1CoinDenoms = [
-  process.env.REACT_APP_ATOM_ORAICHAIN_DENOM,
-  'airi',
-  'usdt',
-  process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM,
-  process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM,
-  'kwt',
-  process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM,
-  'milky',
-  'oraix'
-];
 const evmDenomsMap = {
   kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
   milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]
@@ -79,7 +65,6 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     maxGas: (network.feeCurrencies?.[0].gasPriceStep?.high ?? 0) * 20000,
     minAmountSwap: minAmountSwapMap[currency.coinMinimalDenom],
     evmDenoms: evmDenomsMap[currency.coinMinimalDenom],
-    factoryV1: factoryV1CoinDenoms.includes(currency.coinMinimalDenom),
     Icon: currency.Icon,
     IconLight: currency?.IconLight
   }));

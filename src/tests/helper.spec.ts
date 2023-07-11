@@ -5,7 +5,7 @@ import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDi
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
-import { parseAssetInfo } from 'helper';
+import { isFactoryV1, parseAssetInfo } from 'helper';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 
 describe('should utils functions in libs/utils run exactly', () => {
@@ -123,5 +123,21 @@ describe('should utils functions in libs/utils run exactly', () => {
     [{ token: { contract_addr: 'foobar' } }, 'foobar']
   ])('test-parseAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
     expect(parseAssetInfo(assetInfo)).toEqual(expectedResult);
+  });
+
+  it('test-isFactoryV1-true', () => {
+    const data = isFactoryV1([
+      { native_token: { denom: 'orai' } },
+      { token: { contract_addr: 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg' } }
+    ]);
+    expect(data).toEqual(true);
+  });
+
+  it('test-isFactoryV1-false', () => {
+    const data = isFactoryV1([
+      { native_token: { denom: 'orai' } },
+      { token: { contract_addr: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd' } }
+    ]);
+    expect(data).toEqual(false);
   });
 });
