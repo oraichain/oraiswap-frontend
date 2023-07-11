@@ -58,9 +58,11 @@ export const calculateAprResult = (
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
     const lpToken = allLpTokenAsset[ind];
     const tokenSupply = allTokenInfo[ind];
+    const rewardsPerSecData = allRewardPerSec[ind];
+    if (!lpToken || !tokenSupply || !rewardsPerSecData) return acc;
     const bondValue =
       (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) / validateNumber(tokenSupply.total_supply);
-    const rewardsPerSec = allRewardPerSec[ind].assets;
+    const rewardsPerSec = rewardsPerSecData.assets;
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
       if (isEqual(info, ORAI_INFO)) {

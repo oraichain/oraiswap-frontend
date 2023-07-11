@@ -10,6 +10,7 @@ import { PairInfoExtend } from 'types/token';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
+  factoryV1?: boolean;
 };
 
 export type TokensSwap = { [key: string]: TokenItemType };
@@ -20,13 +21,15 @@ export class Pairs {
       asset_infos: [
         { native_token: { denom: ORAI } },
         { token: { contract_addr: process.env.REACT_APP_AIRI_CONTRACT } }
-      ]
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
         { native_token: { denom: ORAI } },
         { token: { contract_addr: process.env.REACT_APP_ORAIX_CONTRACT } }
-      ]
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
@@ -38,28 +41,36 @@ export class Pairs {
       asset_infos: [
         { native_token: { denom: ORAI } },
         { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } }
-      ]
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
         { native_token: { denom: ORAI } },
         { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }
-      ]
+      ],
+      factoryV1: true
     },
     {
-      asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_KWT_CONTRACT } }]
+      asset_infos: [
+        { native_token: { denom: ORAI } },
+        { token: { contract_addr: process.env.REACT_APP_KWT_CONTRACT } }
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
         { native_token: { denom: ORAI } },
         { native_token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM } }
-      ]
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
         { token: { contract_addr: process.env.REACT_APP_MILKY_CONTRACT } },
         { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }
-      ]
+      ],
+      factoryV1: true
     },
     {
       asset_infos: [
@@ -123,10 +134,9 @@ export class Pairs {
   static getAllPairsFromTwoFactoryVersions = async (
     multicallClient?: MulticallReadOnlyInterface
   ): Promise<PairInfoExtend[]> => {
-    const firstVersionWhiteListPairs = this.pairs.filter((pair) =>
-      pair.asset_infos.some((info) => assetInfoMap[parseAssetInfo(info)]?.factoryV1)
-    );
+    const firstVersionWhiteListPairs = this.pairs.filter((pair) => pair.factoryV1);
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
+    console.dir(secondVersionWhiteListPairs, { depth: null });
 
     const multicall = multicallClient ? multicallClient : new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([

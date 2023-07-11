@@ -152,6 +152,7 @@ declare global {
       REACT_APP_AIRI_CONTRACT: string;
       REACT_APP_ORAIX_CONTRACT: string;
       REACT_APP_USDT_CONTRACT: string;
+      REACT_APP_USDC_CONTRACT: string;
 
       // config for oraichain contract
       REACT_APP_FACTORY_CONTRACT: string;
