@@ -16,7 +16,7 @@ import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as ScAtomIcon } from 'assert/icons/scatom.svg';
+import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 
 import {
   AIRI_BSC_CONTRACT,
