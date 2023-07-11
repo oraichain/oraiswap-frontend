@@ -28,6 +28,8 @@ import {
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { ListTokenMsg } from 'libs/contracts/OraidexListingContract.types';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { updateLpPools } from 'reducer/token';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -56,9 +58,11 @@ export const calculateAprResult = (
     const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
     const lpToken = allLpTokenAsset[ind];
     const tokenSupply = allTokenInfo[ind];
+    const rewardsPerSecData = allRewardPerSec[ind];
+    if (!lpToken || !tokenSupply || !rewardsPerSecData) return acc;
     const bondValue =
       (validateNumber(lpToken.total_bond_amount) * liquidityAmount.amount) / validateNumber(tokenSupply.total_supply);
-    const rewardsPerSec = allRewardPerSec[ind].assets;
+    const rewardsPerSec = rewardsPerSecData.assets;
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
       if (isEqual(info, ORAI_INFO)) {
@@ -222,16 +226,7 @@ const fetchMyPairsData = async (
   return calculateReward(pairs, res);
 };
 
-const generateMsgFrontierAddToken = ({
-  marketing,
-  symbol,
-  liquidityPoolRewardAssets,
-  name,
-  initialBalances,
-  mint,
-  label,
-  pairAssetInfo
-}: {
+export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
   mint?: MinterResponse;
   marketing?: InstantiateMarketingInfo;
@@ -240,20 +235,26 @@ const generateMsgFrontierAddToken = ({
   symbol: string;
   liquidityPoolRewardAssets: Asset[];
   pairAssetInfo: AssetInfo;
-}) => {
-  const msgAddTokenFrontier: {
-    initialBalances?: Cw20Coin[];
-    mint?: MinterResponse;
-    marketing?: InstantiateMarketingInfo;
-    label?: string;
-    name?: string;
-    symbol: string;
-    liquidityPoolRewardAssets: Asset[];
-    pairAssetInfo: AssetInfo;
-  } = {
+  targetedAssetInfo?: AssetInfo;
+};
+
+const generateMsgFrontierAddToken = (tokenMsg: ListTokenJsMsg) => {
+  const {
     symbol,
     liquidityPoolRewardAssets,
-    pairAssetInfo
+    label,
+    pairAssetInfo,
+    marketing,
+    mint,
+    initialBalances,
+    name,
+    targetedAssetInfo
+  } = tokenMsg;
+  const msgAddTokenFrontier: ListTokenJsMsg = {
+    symbol,
+    liquidityPoolRewardAssets,
+    pairAssetInfo,
+    targetedAssetInfo
   };
   if (mint) msgAddTokenFrontier.mint = mint;
   if (initialBalances) msgAddTokenFrontier.initialBalances = initialBalances;
@@ -275,11 +276,42 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
   return { native_token: { denom } };
 };
 
+const fetchCacheLpPools = async (address, dispatch) => {
+  if (!address || !dispatch) return;
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+  const queries = pairs.map((pair) => ({
+    address: pair.liquidity_token,
+    data: toBinary({
+      balance: {
+        address
+      }
+    })
+  }));
+
+  const multicall = new MulticallQueryClient(window.client, network.multicall);
+  const res = await multicall.aggregate({
+    queries
+  });
+
+  const lpTokenData = Object.fromEntries(
+    pairs.map((pair, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [pair.liquidity_token, {}];
+      }
+      return [pair.liquidity_token, fromBinary(data.data)];
+    })
+  );
+  setCachedLpPools(lpTokenData);
+};
+
 export {
   fetchAprResult,
   fetchPoolListAndOraiPrice,
   fetchPairsData,
   fetchMyPairsData,
+  fetchCacheLpPools,
   generateMsgFrontierAddToken,
   getInfoLiquidityPool
 };

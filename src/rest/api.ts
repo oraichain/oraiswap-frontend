@@ -22,7 +22,7 @@ import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp, parseAssetInfo } from 'helper';
+import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
 import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
@@ -83,11 +83,11 @@ async function fetchAllRewardPerSecInfos(
     };
   });
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
+  const res = await multicall.tryAggregate({
     queries
   });
   // aggregate no trybbb
-  return res.return_data.map((data) => fromBinary(data.data));
+  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<OraiswapStakingTypes.PoolInfoResponse[]> {
@@ -103,12 +103,12 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<Oraiswa
   });
 
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
+  const res = await multicall.tryAggregate({
     queries
   });
 
   // aggregate no try
-  return res.return_data.map((data) => fromBinary(data.data));
+  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
 function parsePoolAmount(poolInfo: OraiswapPairTypes.PoolResponse, trueAsset: AssetInfo): bigint {
@@ -195,7 +195,9 @@ async function fetchCachedPairInfo(
 
 async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factoryAddr = tokenTypes.some((a) => a.factoryV1) ? network.factory : network.factory_v2;
+  const factoryAddr = isFactoryV1([parseTokenInfo(tokenTypes[0]).info, parseTokenInfo(tokenTypes[1]).info])
+    ? network.factory
+    : network.factory_v2;
   let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
   let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
   const factoryContract = new OraiswapFactoryQueryClient(window.client, factoryAddr);

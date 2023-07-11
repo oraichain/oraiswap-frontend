@@ -8,6 +8,8 @@ import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { parseTokenInfo } from 'rest/api';
+import { Pairs } from 'config/pools';
 
 export interface Tokens {
   denom?: string;
@@ -131,6 +133,19 @@ export const calculateTimeoutTimestamp = (timeout: number): string => {
 export const parseAssetInfo = (assetInfo: AssetInfo): string => {
   if ('native_token' in assetInfo) return assetInfo.native_token.denom;
   return assetInfo.token.contract_addr;
+};
+
+export const isFactoryV1 = (assetInfos: [AssetInfo, AssetInfo]): boolean => {
+  console.dir(Pairs.pairs, { depth: null });
+  const pair = Pairs.pairs.find(
+    (pair) =>
+      pair.asset_infos.find((info) => parseAssetInfo(info) === parseAssetInfo(assetInfos[0])) &&
+      pair.asset_infos.find((info) => parseAssetInfo(info) === parseAssetInfo(assetInfos[1]))
+  );
+  if (!pair) {
+    return true;
+  }
+  return pair.factoryV1 ?? false;
 };
 
 export const floatToPercent = (value: number): number => {
