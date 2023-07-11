@@ -1,5 +1,5 @@
 <h2 align="center">
-  Oraidex Explorer's Frontend
+  Oraidex's Frontend
 </h2>
 
 # Oraichain
