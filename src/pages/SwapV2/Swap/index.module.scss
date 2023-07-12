@@ -177,7 +177,7 @@
       .token {
         cursor: pointer;
         display: flex;
-
+        width: 50%;
         align-items: center;
 
         gap: 5px;
@@ -206,7 +206,8 @@
       .amount {
         flex-grow: 1;
         text-align: right;
-        max-width: calc(100% - 118px);
+        // max-width: calc(100% - 118px);
+        width: 50%;
 
         @include mobile {
           width: 100%;
