@@ -488,11 +488,12 @@ describe.only('IBCModule', () => {
       const firstPairInfo = await factoryContract.pair({
         assetInfos
       });
-      await scatomToken.increaseAllowance({ amount: initialBalanceAmount, spender: firstPairInfo.contract_addr });
-      oraiClient.app.bank.setBalance(firstPairInfo.contract_addr, coins(initialBalanceAmount, atomIbc));
+      const pairAddress = firstPairInfo.contract_addr;
+      await scatomToken.increaseAllowance({ amount: initialBalanceAmount, spender: pairAddress });
+      oraiClient.app.bank.setBalance(pairAddress, coins(initialBalanceAmount, atomIbc));
       oraiClient.app.bank.setBalance(oraiSenderAddress, coins(initialBalanceAmount, atomIbc));
 
-      const pairContract = new OraiswapPairClient(oraiClient, oraiSenderAddress, firstPairInfo.contract_addr);
+      const pairContract = new OraiswapPairClient(oraiClient, oraiSenderAddress, pairAddress);
       await pairContract.provideLiquidity(
         {
           assets: [
@@ -516,7 +517,7 @@ describe.only('IBCModule', () => {
       // now we withdraw lp
       await lpToken.send({
         amount: '1000',
-        contract: firstPairInfo.contract_addr,
+        contract: pairAddress,
         msg: Buffer.from(JSON.stringify({ withdraw_liquidity: {} })).toString('base64')
       });
     });
