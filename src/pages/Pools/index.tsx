@@ -7,17 +7,18 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
 import sumBy from 'lodash/sumBy';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCacheLpPools, PairInfoData } from './helpers';
-import { useFetchAllPairs, useFetchApr, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
+import { PairInfoData } from './helpers';
+import { useFetchAllPairs, useFetchApr, useFetchCacheLpPools, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 interface PoolsProps { }
 
@@ -122,12 +123,12 @@ const ListPools = memo<{
   allPoolApr: { [key: string]: number };
   setIsOpenNewTokenModal?: (isOpenNewToken: boolean) => void;
   theme?: string;
-}>(({ pairInfos, allPoolApr, setIsOpenNewTokenModal, theme }) => {
+  pairs: PairInfo[];
+}>(({ pairInfos, allPoolApr, setIsOpenNewTokenModal, theme, pairs }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const [address] = useConfigReducer('address');
-  const dispatch = useDispatch();
+  useFetchCacheLpPools(pairs, typeFilter);
   useEffect(() => {
     if (!!!typeFilter) {
       setTypeFilter(KeyFilterPool.all_pool);
@@ -150,10 +151,6 @@ const ListPools = memo<{
       }
     }
   }, [listMyPool, typeFilter, pairInfos]);
-
-  useEffect(() => {
-    fetchCacheLpPools(address, dispatch);
-  }, [typeFilter])
 
   const filterPairs = useCallback(
     (text: string) => {
@@ -244,6 +241,7 @@ const Pools: React.FC<PoolsProps> = () => {
           pairInfos={pairInfos}
           allPoolApr={cachedApr}
           theme={theme}
+          pairs={pairs}
         />
         <NewPoolModal
           isOpen={isOpenNewPoolModal}

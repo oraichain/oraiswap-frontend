@@ -276,10 +276,7 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
   return { native_token: { denom } };
 };
 
-const fetchCacheLpPools = async (address, dispatch) => {
-  if (!address || !dispatch) return;
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
-  const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+const generateLpPoolsInfoQueries = (pairs: PairInfo[], address: string) => {
   const queries = pairs.map((pair) => ({
     address: pair.liquidity_token,
     data: toBinary({
@@ -288,12 +285,10 @@ const fetchCacheLpPools = async (address, dispatch) => {
       }
     })
   }));
+  return queries;
+};
 
-  const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
-    queries
-  });
-
+const calculateLpPools = (pairs: PairInfo[], res: AggregateResult) => {
   const lpTokenData = Object.fromEntries(
     pairs.map((pair, ind) => {
       const data = res.return_data[ind];
@@ -303,7 +298,15 @@ const fetchCacheLpPools = async (address, dispatch) => {
       return [pair.liquidity_token, fromBinary(data.data)];
     })
   );
-  setCachedLpPools(lpTokenData);
+  return lpTokenData;
+};
+
+const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
+  const queries = generateLpPoolsInfoQueries(pairs, address);
+  const res = await multicall.aggregate({
+    queries
+  });
+  return calculateLpPools(pairs, res);
 };
 
 const isBigIntZero = (value: BigInt): boolean => {
