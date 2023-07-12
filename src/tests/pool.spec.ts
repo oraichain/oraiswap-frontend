@@ -11,6 +11,7 @@ import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
   fetchPairsData,
@@ -49,7 +50,6 @@ describe('pool', () => {
   let pairInfos: PairInfoData[] = [];
   let assetTokens: TokenItemType[] = [];
   let pairs: PairInfoExtend[];
-
   const prices = {
     'oraichain-token': 3.93,
     oraidex: 0.01004476
@@ -142,6 +142,17 @@ describe('pool', () => {
 
     beforeAll(async () => {
       pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
+    });
+
+    it('should fetch pairs data correctly', async () => {
+      const multicall = new MulticallQueryClient(client, network.multicall);
+      const lpPoolsDetails = await fetchCacheLpPools(pairs, devAddress, multicall);
+      expect(typeof lpPoolsDetails === 'object').toBe(true);
+      if (pairs.length) {
+        for (const info of pairs) {
+          expect(lpPoolsDetails[info.liquidity_token]).toHaveProperty('balance');
+        }
+      }
     });
 
     it('should fetch pairs data correctly', async () => {

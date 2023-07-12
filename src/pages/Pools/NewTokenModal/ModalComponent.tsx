@@ -7,6 +7,7 @@ import { Pairs } from 'config/pools';
 import { ReactComponent as SuccessIcon } from 'assets/icons/success.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
 import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import CheckBox from 'components/CheckBox';
 
 const cx = cn.bind(styles);
 
@@ -46,7 +47,7 @@ export const ModalListToken = ({
 }) => {
   const [contractAddr, setContractAddr] = useState('');
   const [isAddToken, setIsAddToken] = useState(null);
-
+  const [isToken, setIsToken] = useState(false);
   return (
     <div className={cx('dropdown-reward')}>
       <div>
@@ -92,9 +93,18 @@ export const ModalListToken = ({
           </div>
         </div>
         <AddTokenStatus status={isAddToken} />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          paddingTop: 10
+        }}>
+          <CheckBox radioBox label="Token" checked={!isToken} onCheck={() => isToken && setIsToken(false)} />
+          <CheckBox radioBox label="Native Token" checked={isToken} onCheck={() => !isToken && setIsToken(true)} />
+        </div>
         <div className={cx('list')}>
           <ul>
             {[...Pairs.getPoolTokens(), ...tokensNew]
+              .filter(p => isToken ? !p.contractAddress : p.contractAddress)
               .filter((pair) => !allRewardSelect.includes(pair.denom))
               .map((t, index) => {
                 return (
