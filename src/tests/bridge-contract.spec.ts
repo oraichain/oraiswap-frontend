@@ -11,7 +11,9 @@ import {
   OraiswapTokenClient,
   OraiswapFactoryTypes,
   OraiswapOracleTypes,
-  OraiswapRouterTypes
+  OraiswapRouterTypes,
+  OraiswapPairClient,
+  OraiswapOracleClient
 } from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
@@ -354,7 +356,9 @@ describe.only('IBCModule', () => {
     let factoryContract: OraiswapFactoryClient;
     let routerContract: OraiswapRouterClient;
     let usdtToken: OraiswapTokenClient;
+    let oracleContract: OraiswapOracleClient;
     let assetInfos: AssetInfo[];
+    let lpId: number;
     let icsPackage: FungibleTokenPacketData = {
       amount: ibcTransferAmount,
       denom: airiIbcDenom,
@@ -375,6 +379,7 @@ describe.only('IBCModule', () => {
         readFileSync(oraidexArtifacts.getContractDir('oraiswap_token')),
         'auto'
       );
+      lpId = lpCodeId;
       // deploy another cw20 for oraiswap testing
       const { contractAddress: usdtAddress } = await oraiClient.instantiate(
         oraiSenderAddress,
@@ -399,6 +404,7 @@ describe.only('IBCModule', () => {
         'oraiswap-oracle'
       );
       // deploy factory contract
+      oracleContract = new OraiswapOracleClient(oraiClient, oraiSenderAddress, oracleAddress);
       const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryTypes.InstantiateMsg>(
         oraiSenderAddress,
         oraidexArtifacts.getContractDir('oraiswap_factory'),
@@ -454,6 +460,66 @@ describe.only('IBCModule', () => {
       airiToken.mint({ amount: initialBalanceAmount, recipient: firstPairInfo.contract_addr });
       oraiClient.app.bank.setBalance(secondPairInfo.contract_addr, coins(initialBalanceAmount, ORAI));
       usdtToken.mint({ amount: initialBalanceAmount, recipient: secondPairInfo.contract_addr });
+    });
+
+    it('test-simulate-withdraw-liquidity', async () => {
+      // deploy another cw20 for oraiswap testing
+      let scatomToken: OraiswapTokenClient;
+      const atomIbc = 'ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78';
+      const { contractAddress: scatomAddress } = await oraiClient.instantiate(
+        oraiSenderAddress,
+        lpId,
+        {
+          decimals: 6,
+          symbol: 'scATOM',
+          name: 'scATOM token',
+          initial_balances: [{ address: oraiSenderAddress, amount: initialBalanceAmount }],
+          mint: {
+            minter: oraiSenderAddress
+          }
+        },
+        'cw20-scatom'
+      );
+      scatomToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, scatomAddress);
+      const assetInfos = [{ native_token: { denom: atomIbc } }, { token: { contract_addr: scatomAddress } }];
+      await factoryContract.createPair({
+        assetInfos
+      });
+      const firstPairInfo = await factoryContract.pair({
+        assetInfos
+      });
+      const pairAddress = firstPairInfo.contract_addr;
+      await scatomToken.increaseAllowance({ amount: initialBalanceAmount, spender: pairAddress });
+      oraiClient.app.bank.setBalance(pairAddress, coins(initialBalanceAmount, atomIbc));
+      oraiClient.app.bank.setBalance(oraiSenderAddress, coins(initialBalanceAmount, atomIbc));
+
+      const pairContract = new OraiswapPairClient(oraiClient, oraiSenderAddress, pairAddress);
+      await pairContract.provideLiquidity(
+        {
+          assets: [
+            { amount: '10000000', info: { token: { contract_addr: scatomAddress } } },
+            { amount: '10000000', info: { native_token: { denom: atomIbc } } }
+          ]
+        },
+        'auto',
+        undefined,
+        [{ denom: atomIbc, amount: '10000000' }]
+      );
+      // query liquidity balance
+      const lpToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, firstPairInfo.liquidity_token);
+      const result = await lpToken.balance({ address: oraiSenderAddress });
+      console.log('result: ', result);
+
+      // set tax rate
+      await oracleContract.updateTaxRate({ rate: '0.003' });
+      await oracleContract.updateTaxCap({ denom: atomIbc, cap: '1000000' });
+
+      // now we withdraw lp
+      await lpToken.send({
+        amount: '1000',
+        contract: pairAddress,
+        msg: Buffer.from(JSON.stringify({ withdraw_liquidity: {} })).toString('base64')
+      });
     });
 
     it('cw-ics20-test-simulate-swap-ops-mock-pair-contract', async () => {

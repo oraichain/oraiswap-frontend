@@ -14,7 +14,7 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
-import { generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
+import { fetchTokenInfo, generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityMining.module.scss';
 import { handleErrorTransaction } from 'helper';
@@ -70,23 +70,40 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     }
   }, [totalRewardInfoData, rewardPerSecInfoData, stakingPoolInfoData]);
 
-  const setNewReward = () => {
+  const setNewReward = async () => {
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
 
     const totalRewardPerSec = rewardPerSecInfoData.map((a) => BigInt(a.amount)).reduce((a, b) => a + b, BigInt(0));
 
-    let res = rewardPerSecInfoData
+    const result = rewardPerSecInfoData
       .filter((p) => parseInt(p.amount))
-      .map((r) => {
+      .map(async (r) => {
         const pendingWithdraw = BigInt(
           totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
         );
 
         const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
 
-        const token =
-          'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
+        let token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
+        if (!token && 'token' in r.info && r.info?.token?.contract_addr) {
+          const tokenInfo = await fetchTokenInfo({
+            contractAddress: r.info.token.contract_addr,
+            name: '',
+            org: 'Oraichain',
+            denom: '',
+            Icon: undefined,
+            chainId: 'Oraichain',
+            rpc: '',
+            decimals: 0,
+            coinGeckoId: 'oraichain-token',
+            cosmosBased: undefined
+          });
 
+          token = {
+            ...tokenInfo,
+            denom: tokenInfo?.symbol
+          };
+        }
         return {
           ...token,
           amount,
@@ -94,6 +111,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         };
       });
 
+    const res = await Promise.all(result);
     setPendingRewards(res);
   };
 
@@ -216,7 +234,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       <TokenBalance
                         balance={{
                           amount: r.amount,
-                          denom: r.denom.toUpperCase(),
+                          denom: r?.denom.toUpperCase(),
                           decimals: 6
                         }}
                         decimalScale={6}

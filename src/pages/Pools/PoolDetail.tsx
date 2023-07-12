@@ -16,25 +16,28 @@ import BondingModal from './BondingModal/BondingModal';
 import LiquidityModal from './LiquidityModal/LiquidityModal';
 import styles from './PoolDetail.module.scss';
 
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, oraichainTokens } from 'config/bridgeTokens';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateLpPools } from 'reducer/token';
+import { fetchCacheLpPools } from './helpers';
 import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { useFetchAllPairs } from './hooks';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { updateLpPools } from 'reducer/token';
+
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps {}
+interface PoolDetailProps { }
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -45,12 +48,13 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useConfigReducer('address');
   const [cachedApr] = useConfigReducer('apr');
   const [theme] = useConfigReducer('theme');
-  const [cachePrices] = useConfigReducer('coingecko');
+  const { data: prices } = useCoinGeckoPrices();
   const [assetToken, setAssetToken] = useState<TokenItemType>();
+  const pairs = useFetchAllPairs();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const loadTokenAmounts = useLoadTokens();
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const getPairInfo = async () => {
     if (!poolUrl) return;
     const pairRawData = poolUrl.split('_');
@@ -74,38 +78,14 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     };
   };
 
-  useEffect(() => {
-    fetchCachedLpTokenAll();
-  }, []);
-
   const fetchCachedLpTokenAll = async () => {
-    const pairs = await Pairs.getAllPairsFromTwoFactoryVersions();
-    const queries = pairs.map((pair) => ({
-      address: pair.liquidity_token,
-      data: toBinary({
-        balance: {
-          address
-        }
-      })
-    }));
-
-    const multicall = new MulticallQueryClient(window.client, network.multicall);
-
-    const res = await multicall.aggregate({
-      queries
-    });
-
-    const lpTokenData = Object.fromEntries(
-      pairs.map((pair, ind) => {
-        const data = res.return_data[ind];
-        if (!data.success) {
-          return [pair.liquidity_token, {}];
-        }
-        return [pair.liquidity_token, fromBinary(data.data)];
-      })
+    const lpTokenData = await fetchCacheLpPools(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  };
+  }
 
   const onBondingAction = () => {
     refetchRewardInfo();
@@ -262,7 +242,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity1, pairInfoData.token1, cachePrices)}
+                            balance={getUsd(liquidity1, pairInfoData.token1, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -284,7 +264,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity2, pairInfoData.token2, cachePrices)}
+                            balance={getUsd(liquidity2, pairInfoData.token2, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -409,7 +389,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
                 pairInfoData={pairInfoData.info}
-                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
+                pairs={pairs}
               />
             )}
           {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (

@@ -45,6 +45,8 @@ interface IToastExtra {
   textLink: string;
   linkCw20Token?: string;
   cw20Address?: string;
+  linkLpAddress?: string;
+  linkPairAddress?: string;
 }
 
 export type DisplayToastFn = ((
@@ -55,7 +57,9 @@ export type DisplayToastFn = ((
   ((type: TToastType.TX_BROADCASTING, options?: Partial<ToastOptions>) => void) &
   ((
     type: TToastType.TX_SUCCESSFUL,
-    extraData?: Partial<Pick<IToastExtra, 'customLink' | 'linkCw20Token' | 'cw20Address'>>,
+    extraData?: Partial<
+      Pick<IToastExtra, 'customLink' | 'linkCw20Token' | 'cw20Address' | 'linkLpAddress' | 'linkPairAddress'>
+    >,
     options?: Partial<ToastOptions>
   ) => void) &
   ((
@@ -123,6 +127,8 @@ export const displayToast: DisplayToastFn = (
           link={inputExtraData.customLink}
           linkCw20Token={inputExtraData.linkCw20Token}
           cw20Address={inputExtraData.cw20Address}
+          linkLpAddress={inputExtraData.linkLpAddress}
+          linkPairAddress={inputExtraData.linkPairAddress}
         />,
         inputOptions
       );
@@ -211,7 +217,9 @@ const ToastTxSuccess: FunctionComponent<{
   link: string;
   linkCw20Token?: string;
   cw20Address?: string;
-}> = ({ link, linkCw20Token, cw20Address }) => (
+  linkLpAddress?: string;
+  linkPairAddress?: string;
+}> = ({ link, linkCw20Token, cw20Address, linkLpAddress, linkPairAddress }) => (
   <div className={classNames(styles.toast_content, styles.toast_success)}>
     <SuccessIcon />
     <section className={styles.toast_section}>
@@ -221,6 +229,16 @@ const ToastTxSuccess: FunctionComponent<{
           <span className={styles.cw20_section_label}>CW20 Token</span>:{' '}
           <span className={styles.cw20_section_value}>{reduceString(cw20Address, 6, 6)}</span>
           <LinkIcon />
+        </div>
+      )}
+      {linkLpAddress && (
+        <div className={styles.cw20_section} onClick={() => window.open(linkLpAddress)}>
+          <span className={styles.cw20_section_label}>LP Token</span>: <LinkIcon />
+        </div>
+      )}
+      {linkPairAddress && (
+        <div className={styles.cw20_section} onClick={() => window.open(linkPairAddress)}>
+          <span className={styles.cw20_section_label}>Pair contract</span>: <LinkIcon />
         </div>
       )}
       <a target="__blank" href={link}>

@@ -19,7 +19,7 @@ interface ModalProps {
   amounts: AmountDetails;
   prices: CoinGeckoPrices<string>;
   items?: TokenItemType[] | CustomChainInfo[];
-  setToken: (denom: string) => void;
+  setToken: (denom: string, contract_addr?: string) => void;
   type?: 'token' | 'network';
 }
 
@@ -75,7 +75,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 className={cx('item', theme)}
                 key={key}
                 onClick={() => {
-                  setToken(key);
+                  setToken(key, item?.contractAddress);
                   close();
                 }}
               >

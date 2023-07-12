@@ -22,8 +22,8 @@ import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp, parseAssetInfo } from 'helper';
-import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
+import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
@@ -83,11 +83,11 @@ async function fetchAllRewardPerSecInfos(
     };
   });
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
+  const res = await multicall.tryAggregate({
     queries
   });
   // aggregate no trybbb
-  return res.return_data.map((data) => fromBinary(data.data));
+  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
 async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<OraiswapStakingTypes.PoolInfoResponse[]> {
@@ -103,12 +103,12 @@ async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<Oraiswa
   });
 
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
+  const res = await multicall.tryAggregate({
     queries
   });
 
   // aggregate no try
-  return res.return_data.map((data) => fromBinary(data.data));
+  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
 function parsePoolAmount(poolInfo: OraiswapPairTypes.PoolResponse, trueAsset: AssetInfo): bigint {
@@ -133,7 +133,8 @@ async function getPairAmountInfo(
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
     // must be stable coin for ask pool amount
-    tokenPrice = toDecimal(poolData.askPoolAmount, poolData.offerPoolAmount);
+    const poolUsdData = await fetchPairPriceWithStablecoin(fromToken, toToken);
+    tokenPrice = toDisplay(poolUsdData, toToken.decimals);
   }
 
   return {
@@ -141,6 +142,27 @@ async function getPairAmountInfo(
     token2Amount: poolData.askPoolAmount.toString(),
     tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
   };
+}
+
+// fetch price of a pair using simulate swap with amount = 1 so we know the ratio of the token and USDT
+async function fetchPairPriceWithStablecoin(fromTokenInfo: TokenItemType, toTokenInfo: TokenItemType): Promise<string> {
+  const result = await Promise.allSettled([
+    simulateSwap({
+      fromInfo: fromTokenInfo,
+      toInfo: tokenMap[STABLE_DENOM],
+      amount: toAmount(1, fromTokenInfo!.decimals).toString()
+    }),
+    simulateSwap({
+      fromInfo: toTokenInfo,
+      toInfo: tokenMap[STABLE_DENOM],
+      amount: toAmount(1, toTokenInfo!.decimals).toString()
+    })
+  ]).then((results) => {
+    for (let res of results) {
+      if (res.status === 'fulfilled') return res.value; // only collect the result of the actual existing pool. If both exist then we only need data from one pool
+    }
+  });
+  return result.amount;
 }
 
 async function fetchPoolInfoAmount(
@@ -153,7 +175,12 @@ async function fetchPoolInfoAmount(
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-  const pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
+  let pair: PairInfo;
+  try {
+    pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
+  } catch (error) {
+    console.log('pair not found when fetching pair info');
+  }
 
   const client = window.client;
   if (pair) {
@@ -195,7 +222,9 @@ async function fetchCachedPairInfo(
 
 async function fetchPairInfo(tokenTypes: [TokenItemType, TokenItemType]): Promise<PairInfo> {
   // scorai is in factory_v2
-  const factoryAddr = tokenTypes.some((a) => a.factoryV1) ? network.factory : network.factory_v2;
+  const factoryAddr = isFactoryV1([parseTokenInfo(tokenTypes[0]).info, parseTokenInfo(tokenTypes[1]).info])
+    ? network.factory
+    : network.factory_v2;
   let { info: firstAsset } = parseTokenInfo(tokenTypes[0]);
   let { info: secondAsset } = parseTokenInfo(tokenTypes[1]);
   const factoryContract = new OraiswapFactoryQueryClient(window.client, factoryAddr);

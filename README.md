@@ -1,5 +1,5 @@
 <h2 align="center">
-  Oraidex Explorer's Frontend
+  Oraidex's Frontend
 </h2>
 
 # Oraichain
@@ -50,3 +50,5 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 ## License
 
 Released under the [Apache 2.0 License](LICENSE).
+
+Happy comment
