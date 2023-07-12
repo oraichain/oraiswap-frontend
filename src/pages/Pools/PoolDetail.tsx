@@ -34,6 +34,7 @@ import { useFetchAllPairs } from './hooks';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { updateLpPools } from 'reducer/token';
 
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps { }
@@ -47,7 +48,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useConfigReducer('address');
   const [cachedApr] = useConfigReducer('apr');
   const [theme] = useConfigReducer('theme');
-  const [cachePrices] = useConfigReducer('coingecko');
+  const { data: prices } = useCoinGeckoPrices();
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const pairs = useFetchAllPairs();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -241,7 +242,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity1, pairInfoData.token1, cachePrices)}
+                            balance={getUsd(liquidity1, pairInfoData.token1, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -263,7 +264,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity2, pairInfoData.token2, cachePrices)}
+                            balance={getUsd(liquidity2, pairInfoData.token2, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
