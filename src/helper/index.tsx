@@ -154,7 +154,7 @@ export const floatToPercent = (value: number): number => {
 
 export const getPairSwapV2 = (contractAddress) => {
   let arr = [];
-  let arrDenom = '';
+  let arrDenom = ORAI;
   if (!contractAddress) return { arrLength: 0 };
   const pairMapping = Pairs.pairs.filter((p) =>
     p?.asset_infos.find(
@@ -169,11 +169,13 @@ export const getPairSwapV2 = (contractAddress) => {
       if (assets1 !== contractAddress) arr.push(assets1);
     }
   }
-  if (arr.length) arrDenom = oraichainTokens.find((e) => e.contractAddress === arr?.[0])?.denom;
+  if (arr.length) {
+    arrDenom = oraichainTokens.find((e) => e.contractAddress === arr[0])?.denom ?? arr[0];
+  }
   return {
     arr,
     arrLength: arr?.length,
     arrDenom,
-    arrIncludesOrai: arr?.includes(ORAI)
+    arrIncludesOrai: arr?.includes(ORAI),
   };
 };

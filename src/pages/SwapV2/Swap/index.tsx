@@ -308,11 +308,11 @@ const SwapComponent: React.FC<{
           close={() => setIsSelectFrom(false)}
           prices={prices}
           items={Pairs.getPoolTokens().filter((token) => {
-            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(toToken?.contractAddress)
+            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(toToken?.contractAddress);
             if (!arrLength || arrIncludesOrai) {
               return token.denom !== toTokenDenom
             }
-            return arr.includes(token?.contractAddress)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
           })}
           amounts={amounts}
           setToken={(denom, contractAddress) => {
@@ -320,7 +320,7 @@ const SwapComponent: React.FC<{
             if (!arrLength || arrIncludesOrai) {
               return setSwapTokens([denom, toTokenDenom]);
             }
-            setSwapTokens([denom, arrDenom]);
+            setSwapTokens([denom, arrDenom ?? toTokenDenom]);
           }}
         />
       ) : (
@@ -335,14 +335,14 @@ const SwapComponent: React.FC<{
             if (!arrLength || arrIncludesOrai) {
               return token.denom !== fromTokenDenom
             }
-            return arr.includes(token?.contractAddress)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
           })}
           setToken={(denom, contractAddress) => {
             const { arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
             if (!arrLength || arrIncludesOrai) {
               return setSwapTokens([fromTokenDenom, denom]);
             }
-            setSwapTokens([arrDenom, denom]);
+            setSwapTokens([arrDenom ?? fromTokenDenom, denom]);
           }}
         />
       )}
