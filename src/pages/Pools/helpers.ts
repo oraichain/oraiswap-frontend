@@ -67,8 +67,18 @@ export const calculateAprResult = (
     rewardsPerSec.forEach(({ amount, info }) => {
       if (isEqual(info, ORAI_INFO)) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
-      } else if (isEqual(info, ORAIX_INFO))
+      } else if (isEqual(info, ORAIX_INFO)) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
+      } else if (
+        // TODO: hardcode token xOCH: $0.4
+        isEqual(info, {
+          token: {
+            contract_addr: 'orai1lplapmgqnelqn253stz6kmvm3ulgdaytn89a8mz9y85xq8wd684s6xl3lt'
+          }
+        })
+      ) {
+        rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * 0.4) / atomic;
+      }
     });
     return {
       ...acc,
@@ -88,6 +98,12 @@ const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], pric
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
+    console.log({
+      allTokenInfo,
+      allLpTokenAsset,
+      allRewardPerSec
+    });
+
     return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
