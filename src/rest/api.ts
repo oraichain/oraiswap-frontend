@@ -144,6 +144,7 @@ async function getPairAmountInfo(
   };
 }
 
+// fetch price of a pair using simulate swap with amount = 1 so we know the ratio of the token and USDT
 async function fetchPairPriceWithStablecoin(fromTokenInfo: TokenItemType, toTokenInfo: TokenItemType): Promise<string> {
   const result = await Promise.allSettled([
     simulateSwap({
@@ -158,7 +159,7 @@ async function fetchPairPriceWithStablecoin(fromTokenInfo: TokenItemType, toToke
     })
   ]).then((results) => {
     for (let res of results) {
-      if (res.status === 'fulfilled') return res.value; // only collect the result of the actual existing pool
+      if (res.status === 'fulfilled') return res.value; // only collect the result of the actual existing pool. If both exist then we only need data from one pool
     }
   });
   return result.amount;
