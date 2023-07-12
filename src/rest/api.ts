@@ -23,7 +23,7 @@ import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
-import { getSubAmountDetails, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
+import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
@@ -133,7 +133,8 @@ async function getPairAmountInfo(
     tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
   } else {
     // must be stable coin for ask pool amount
-    tokenPrice = toDecimal(poolData.askPoolAmount, poolData.offerPoolAmount);
+    const poolUsdData = await fetchPairPriceWithStablecoin(fromToken, toToken);
+    tokenPrice = toDisplay(poolUsdData, toToken.decimals);
   }
 
   return {
@@ -141,6 +142,26 @@ async function getPairAmountInfo(
     token2Amount: poolData.askPoolAmount.toString(),
     tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
   };
+}
+
+async function fetchPairPriceWithStablecoin(fromTokenInfo: TokenItemType, toTokenInfo: TokenItemType): Promise<string> {
+  const result = await Promise.allSettled([
+    simulateSwap({
+      fromInfo: fromTokenInfo,
+      toInfo: tokenMap[STABLE_DENOM],
+      amount: toAmount(1, fromTokenInfo!.decimals).toString()
+    }),
+    simulateSwap({
+      fromInfo: toTokenInfo,
+      toInfo: tokenMap[STABLE_DENOM],
+      amount: toAmount(1, toTokenInfo!.decimals).toString()
+    })
+  ]).then((results) => {
+    for (let res of results) {
+      if (res.status === 'fulfilled') return res.value; // only collect the result of the actual existing pool
+    }
+  });
+  return result.amount;
 }
 
 async function fetchPoolInfoAmount(
@@ -153,7 +174,12 @@ async function fetchPoolInfoAmount(
   const { info: toInfo } = parseTokenInfo(toTokenInfo);
 
   let offerPoolAmount: bigint, askPoolAmount: bigint;
-  const pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
+  let pair: PairInfo;
+  try {
+    pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
+  } catch (error) {
+    console.log('pair not found when fetching pair info');
+  }
 
   const client = window.client;
   if (pair) {

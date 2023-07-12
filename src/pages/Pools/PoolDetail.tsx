@@ -30,9 +30,10 @@ import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -43,7 +44,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const [address] = useConfigReducer('address');
   const [cachedApr] = useConfigReducer('apr');
   const [theme] = useConfigReducer('theme');
-  const [cachePrices] = useConfigReducer('coingecko');
+  const { data: prices } = useCoinGeckoPrices();
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const dispatch = useDispatch();
@@ -71,11 +72,10 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     };
   };
 
-
   const onBondingAction = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
-    fetchCacheLpPools(address, dispatch)
+    fetchCacheLpPools(address, dispatch);
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -227,7 +227,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity1, pairInfoData.token1, cachePrices)}
+                            balance={getUsd(liquidity1, pairInfoData.token1, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
@@ -249,7 +249,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                             decimalScale={6}
                           />
                           <TokenBalance
-                            balance={getUsd(liquidity2, pairInfoData.token2, cachePrices)}
+                            balance={getUsd(liquidity2, pairInfoData.token2, prices)}
                             className={cx('amount-usd')}
                             decimalScale={2}
                           />
