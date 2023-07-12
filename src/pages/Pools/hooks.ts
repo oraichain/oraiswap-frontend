@@ -6,9 +6,16 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updatePairs } from 'reducer/token';
+import { updateLpPools, updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
-import { PairInfoData, fetchAprResult, fetchMyPairsData, fetchPairsData, fetchPoolListAndOraiPrice } from './helpers';
+import {
+  PairInfoData,
+  fetchAprResult,
+  fetchMyPairsData,
+  fetchPairsData,
+  fetchPoolListAndOraiPrice,
+  fetchCacheLpPools
+} from './helpers';
 import { updatePairInfos } from 'reducer/pairs';
 import { PairInfoExtend } from 'types/token';
 
@@ -45,6 +52,26 @@ export const useFetchApr = (pairs: PairInfo[], pairInfos: PairInfoData[], prices
   }, [pairInfos]);
 
   return [cachedApr];
+};
+
+// Fetch all lp pools
+export const useFetchCacheLpPools = (pairs: PairInfo[], typeFilter: string) => {
+  const dispatch = useDispatch();
+  const [address] = useConfigReducer('address');
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+
+  const fetchCachedLpPool = async () => {
+    const lpTokenData = await fetchCacheLpPools(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
+    setCachedLpPools(lpTokenData);
+  };
+
+  useEffect(() => {
+    if (pairs.length > 0 && address) fetchCachedLpPool();
+  }, [typeFilter]);
 };
 
 // Fetch all pair data
