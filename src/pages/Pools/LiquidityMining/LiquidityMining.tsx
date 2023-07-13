@@ -152,9 +152,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     }
     setActionLoading(false);
   };
-  console.log({
-    pendingRewards
-  });
 
   return (
     <>
@@ -244,7 +241,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       />
                     </div>
                     <TokenBalance
-                      balance={getUsd(r.amount, r, cachePrices, 0.4)}
+                      balance={getUsd(r.amount, r, cachePrices, r.coinGeckoId === 'scatom' && 0.4)}
                       className={cx('amount-usd')}
                       decimalScale={2}
                     />
