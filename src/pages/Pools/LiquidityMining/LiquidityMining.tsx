@@ -8,7 +8,7 @@ import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { Asset, RewardInfoResponseItem, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
+import { Asset, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
@@ -24,7 +24,7 @@ const cx = cn.bind(styles);
 interface LiquidityMiningProps {
   setIsOpenBondingModal: (val: boolean) => void;
   lpTokenBalance: string;
-  rewardInfoFirst: RewardInfoResponseItem;
+  rewardInfoFirst: OraiswapStakingTypes.RewardInfoResponseItem;
   lpTokenInfoData: TokenInfo;
   setIsOpenUnbondModal: (val: boolean) => void;
   pairAmountInfoData: PairAmountInfo;
@@ -95,7 +95,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
             chainId: 'Oraichain',
             rpc: '',
             decimals: 0,
-            coinGeckoId: 'oraichain-token',
+            coinGeckoId: 'scatom',
             cosmosBased: undefined
           });
 
@@ -152,6 +152,9 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     }
     setActionLoading(false);
   };
+  console.log({
+    pendingRewards
+  });
 
   return (
     <>
@@ -241,7 +244,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
                       />
                     </div>
                     <TokenBalance
-                      balance={getUsd(r.amount, r, cachePrices)}
+                      balance={getUsd(r.amount, r, cachePrices, 0.4)}
                       className={cx('amount-usd')}
                       decimalScale={2}
                     />

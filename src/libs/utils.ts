@@ -71,7 +71,15 @@ export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecima
   return Number(returnAmount) / (displayDecimals === truncDecimals ? atomic : 10 ** displayDecimals);
 };
 
-export const getUsd = (amount: string | bigint, tokenInfo: TokenItemType, prices: CoinGeckoPrices<string>): number => {
+export const getUsd = (
+  amount: string | bigint,
+  tokenInfo: TokenItemType,
+  prices: CoinGeckoPrices<string>,
+  pricesAmount?: number
+): number => {
+  if (pricesAmount) {
+    return toDisplay(amount, tokenInfo.decimals) * pricesAmount;
+  }
   return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coinGeckoId] ?? 0);
 };
 
