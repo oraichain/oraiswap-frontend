@@ -71,6 +71,12 @@ export const ORAIX_INFO = {
   }
 };
 
+export const ORAIXOCH_INFO = {
+  token: {
+    contract_addr: process.env.REACT_APP_XOCH_CONTRACT
+  }
+};
+
 // slippage swap
 export const OPTIONS_SLIPPAGE = [1, 3, 5];
 export const DEFAULT_SLIPPAGE = OPTIONS_SLIPPAGE[0];

@@ -10,8 +10,8 @@ import {
   OraiswapStakingTypes,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType, assetInfoMap, tokenMap } from 'config/bridgeTokens';
-import { ORAI, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { TokenItemType, assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
+import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
@@ -65,18 +65,12 @@ export const calculateAprResult = (
     const rewardsPerSec = rewardsPerSecData.assets;
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
-      if (isEqual(info, ORAI_INFO)) {
-        rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraichain-token']) / atomic;
-      } else if (isEqual(info, ORAIX_INFO)) {
-        rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices['oraidex']) / atomic;
-      } else if (
-        // TODO: hardcode token xOCH: $0.4
-        isEqual(info, {
-          token: {
-            contract_addr: 'orai1lplapmgqnelqn253stz6kmvm3ulgdaytn89a8mz9y85xq8wd684s6xl3lt'
-          }
-        })
-      ) {
+      const assets = parseAssetInfo(info);
+      const coinGeckoId = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets)?.coinGeckoId;
+      if (coinGeckoId) {
+        rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices[coinGeckoId]) / atomic;
+      } else if (isEqual(info, ORAIXOCH_INFO)) {
+        //TODO: hardcode token xOCH: $0.4
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * 0.4) / atomic;
       }
     });
@@ -98,12 +92,6 @@ const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], pric
       fetchAllTokenAssetPools(assetTokens),
       fetchAllRewardPerSecInfos(assetTokens)
     ]);
-    console.log({
-      allTokenInfo,
-      allLpTokenAsset,
-      allRewardPerSec
-    });
-
     return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
   } catch (error) {
     console.log({ error });
