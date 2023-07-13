@@ -52,7 +52,9 @@ describe('pool', () => {
   let pairs: PairInfoExtend[];
   const prices = {
     'oraichain-token': 3.93,
-    oraidex: 0.01004476
+    oraidex: 0.01004476,
+    tether: 1,
+    airight: 0.00283
   };
   const { devAddress } = constants;
 
@@ -297,7 +299,7 @@ describe('pool', () => {
           allRewardPerSec
         );
         expect(aprResult[pairs[0].contract_addr]).toBe(0);
-        expect(aprResult[pairs[1].contract_addr]).toBe(6196.830196830198);
+        expect(aprResult[pairs[1].contract_addr]).toBe(7773.631773631774);
       });
     });
 
