@@ -55,7 +55,7 @@ export const useFetchApr = (pairs: PairInfo[], pairInfos: PairInfoData[], prices
 };
 
 // Fetch all lp pools
-export const useFetchCacheLpPools = (pairs: PairInfo[], typeFilter: string) => {
+export const useFetchCacheLpPools = (pairs: PairInfo[]) => {
   const dispatch = useDispatch();
   const [address] = useConfigReducer('address');
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
@@ -71,7 +71,7 @@ export const useFetchCacheLpPools = (pairs: PairInfo[], typeFilter: string) => {
 
   useEffect(() => {
     if (pairs.length > 0 && address) fetchCachedLpPool();
-  }, [typeFilter]);
+  }, [pairs]);
 };
 
 // Fetch all pair data

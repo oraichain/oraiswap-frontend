@@ -128,7 +128,6 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  useFetchCacheLpPools(pairs, typeFilter);
   useEffect(() => {
     if (!!!typeFilter) {
       setTypeFilter(KeyFilterPool.all_pool);
@@ -230,6 +229,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   useFetchCachePairs(pairs);
+  useFetchCacheLpPools(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
   return (
