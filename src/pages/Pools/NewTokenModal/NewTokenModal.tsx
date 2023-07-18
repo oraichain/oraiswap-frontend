@@ -183,10 +183,10 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
       const result = await oraidexListing.listToken(msg as any);
       if (result) {
-        const wasm = result.logs?.[0]?.events.find((e) => e.type === 'wasm');
-        const cw20Address = wasm?.attributes.find((w) => w.key === 'cw20_address')?.value;
-        const lpAddress = wasm?.attributes.find((w) => w.key === 'liquidity_token_address')?.value;
-        const pairAddress = wasm?.attributes.find((w) => w.key === '"pair_contract_address"')?.value;
+        const wasmAttributes = result.logs?.[0]?.events.filter((e) => e.type === 'wasm').flatMap((e) => e.attributes);
+        const cw20Address = wasmAttributes?.find((w) => w.key === 'cw20_address')?.value;
+        const lpAddress = wasmAttributes?.find((w) => w.key === 'liquidity_token_address')?.value;
+        const pairAddress = wasmAttributes?.find((w) => w.key === '"pair_contract_address"')?.value;
         displayToast(
           TToastType.TX_SUCCESSFUL,
           cw20Address
