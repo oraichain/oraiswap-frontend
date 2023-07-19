@@ -1,6 +1,6 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coins } from '@cosmjs/proto-signing';
-import { CWSimulateApp, GenericError, IbcOrder, IbcPacket, SimulateCosmWasmClient } from '@terran-one/cw-simulate';
+import { CWSimulateApp, GenericError, IbcOrder, IbcPacket, SimulateCosmWasmClient } from '@oraichain/cw-simulate';
 import { Ok } from 'ts-results';
 import bech32 from 'bech32';
 import { readFileSync } from 'fs';

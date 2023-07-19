@@ -46,7 +46,7 @@
     "@oraichain/common-contracts-build": "1.0.18",
     "@oraichain/oraidex-contracts-build": "1.0.13",
     "@sentry/webpack-plugin": "^1.20.0",
-    "@terran-one/cw-simulate": "https://github.com/oraichain/cw-simulate.git",
+    "@oraichain/cw-simulate": "^2.8.7",
     "@types/classnames": "^2.2.10",
     "@types/jest": "^26.0.14",
     "@types/lodash": "^4.14.182",

@@ -1,4 +1,4 @@
-import { SimulateCosmWasmClient } from '@terran-one/cw-simulate/src';
+import { SimulateCosmWasmClient } from '@oraichain/cw-simulate';
 import { OraiswapTokenClient, Cw20Coin, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestTypes, CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
