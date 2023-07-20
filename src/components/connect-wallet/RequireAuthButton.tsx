@@ -65,12 +65,12 @@ const RequireAuthButton: React.FC<any> = () => {
           }
           tronAddress = window.tronWeb.defaultAddress.base58;
         }
-        console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
       }
     } catch (ex) {
       console.log('error in connecting tron link: ', ex);
+      displayToast(TToastType.TRONLINK_FAILED, { message: JSON.stringify(ex) });
     }
   };
 
