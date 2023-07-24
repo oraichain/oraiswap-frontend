@@ -10,7 +10,7 @@ import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
-import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -19,7 +19,7 @@ import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
+import { fetchTaxRate, fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
@@ -45,7 +45,7 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [oraiAddress] = useConfigReducer('address');
-
+  const [taxRate, setTaxRate] = useState('');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
@@ -137,6 +137,15 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
+
+  const queryTaxRate = async () => {
+    const data = await fetchTaxRate();
+    setTaxRate(data?.rate)
+  }
+
+  useEffect(() => {
+    queryTaxRate();
+  }, [])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -382,7 +391,7 @@ const SwapComponent: React.FC<{
               <div className={cx('title')}>
                 <span>Tax rate</span>
               </div>
-              <span>0.3 %</span>
+              <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
             </div>
           )}
         </div>
