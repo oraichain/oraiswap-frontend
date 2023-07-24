@@ -13,7 +13,7 @@ import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'li
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import { findToToken, transferEvmToIBC } from 'pages/BalanceNew/helpers';
+import { findToToken, transferEvmToIBC } from 'pages/Balance/helpers';
 import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 

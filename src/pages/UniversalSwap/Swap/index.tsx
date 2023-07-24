@@ -15,7 +15,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import { combineReceiver } from 'pages/BalanceNew/helpers';
+import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -94,8 +94,8 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress)
-  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress)
+  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
+  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -157,11 +157,19 @@ const SwapComponent: React.FC<{
         userSlippage
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
-      const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
+      const { combinedReceiver, universalSwapType } = combineReceiver(
+        oraiAddress,
+        originalFromToken,
+        originalToToken,
+        toAddress
+      );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress)
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: checksumMetamaskAddress, tronAddress });
+      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress);
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
+        metamaskAddress: checksumMetamaskAddress,
+        tronAddress
+      });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
@@ -180,16 +188,18 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  const filteredFromTokens = swapFromTokens.filter((token) =>
-    token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  )
+  const filteredFromTokens = swapFromTokens.filter(
+    (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
+  );
 
-  const filteredToTokens = swapToTokens.filter((token) =>
-    token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  )
+  const filteredToTokens = swapToTokens.filter(
+    (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
+  );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount ? BigInt(simulateData.amount) - BigInt(simulateData.amount) * BigInt(userSlippage) / 100n : '0'
+  const minimumReceive = simulateData?.amount
+    ? BigInt(simulateData.amount) - (BigInt(simulateData.amount) * BigInt(userSlippage)) / 100n
+    : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -251,14 +261,12 @@ const SwapComponent: React.FC<{
                 }}
               />
             </div>
-            {fromTokenFee !== 0 &&
+            {fromTokenFee !== 0 && (
               <div className={cx('token-fee')}>
-                <span>
-                  Token Fee
-                </span>
+                <span>Token Fee</span>
                 <span>{fromTokenFee}%</span>
               </div>
-            }
+            )}
             {isSelectFrom && (
               <SelectTokenModalV2
                 close={() => setIsSelectFrom(false)}
@@ -272,7 +280,6 @@ const SwapComponent: React.FC<{
               />
             )}
           </div>
-
         </div>
         <div className={cx('swap-icon')}>
           <img
@@ -314,16 +321,20 @@ const SwapComponent: React.FC<{
                 <div className={cx('arrow-down')} />
               </div>
 
-              <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+              <NumberFormat
+                className={cx('amount')}
+                thousandSeparator
+                decimalScale={6}
+                type="text"
+                value={toAmountToken}
+              />
             </div>
-            {toTokenFee !== 0 &&
+            {toTokenFee !== 0 && (
               <div className={cx('token-fee')}>
-                <span>
-                  Token Fee
-                </span>
+                <span>Token Fee</span>
                 <span>{toTokenFee}%</span>
               </div>
-            }
+            )}
             {isSelectTo && (
               <SelectTokenModalV2
                 close={() => setIsSelectTo(false)}
@@ -337,7 +348,6 @@ const SwapComponent: React.FC<{
               />
             )}
           </div>
-
         </div>
         <button
           className={cx('swap-btn')}
@@ -367,18 +377,17 @@ const SwapComponent: React.FC<{
             />
           </div>
 
-          {!fromTokenFee && !toTokenFee &&
+          {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Tax rate</span>
               </div>
               <span>0.3 %</span>
             </div>
-          }
+          )}
         </div>
       </div>
     </LoadingBox>
-
   );
 };
 

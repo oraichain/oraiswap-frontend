@@ -15,7 +15,7 @@ import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
-import { combineReceiver, findToToken, getDestination } from 'pages/BalanceNew/helpers';
+import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
 import { UniversalSwapHandler, checkEvmAddress } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';

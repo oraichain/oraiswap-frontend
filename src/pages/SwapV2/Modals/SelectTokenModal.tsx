@@ -75,7 +75,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 className={cx('item', theme)}
                 key={key}
                 onClick={() => {
-                  setToken(key, item?.contractAddress);
+                  setToken(key, type === 'token' && (item as TokenItemType).contractAddress);
                   close();
                 }}
               >

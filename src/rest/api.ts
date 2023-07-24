@@ -25,7 +25,7 @@ import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
+import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 

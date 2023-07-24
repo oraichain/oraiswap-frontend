@@ -4,7 +4,7 @@ import NotFound from 'pages/NotFound';
 import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import BalanceNew from 'pages/BalanceNew';
+import Balance from 'pages/Balance';
 import Pools from 'pages/Pools/index';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import SwapV2 from 'pages/SwapV2/index';
@@ -27,11 +27,11 @@ export default () => (
     }
   >
     <Routes>
-      <Route path="/" element={<BalanceNew />} />
+      <Route path="/" element={<Balance />} />
       <Route path="/swap" element={<SwapV2 />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
-      <Route path="/bridge" element={<BalanceNew />} />
+      <Route path="/bridge" element={<Balance />} />
       <Route path="/pool/:poolUrl" element={<PoolDetail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

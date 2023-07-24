@@ -19,7 +19,7 @@ import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { buildMultipleMessages, toAmount } from 'libs/utils';
 import Long from 'long';
-import { findDefaultToToken, getSourceReceiver } from 'pages/BalanceNew/helpers';
+import { findDefaultToToken, getSourceReceiver } from 'pages/Balance/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
 
 // @ts-ignore

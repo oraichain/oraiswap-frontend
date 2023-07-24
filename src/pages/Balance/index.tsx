@@ -42,7 +42,7 @@ import TokenItem from './TokenItem';
 
 interface BalanceProps {}
 
-const BalanceNew: React.FC<BalanceProps> = () => {
+const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
   const [oraiAddress] = useConfigReducer('address');
@@ -205,7 +205,7 @@ const BalanceNew: React.FC<BalanceProps> = () => {
     }
   };
 
-  const network = networks.find((n) => n.chainId == filterNetwork);
+  const network = networks.find((n) => n.chainId == filterNetwork) ?? networks[0];
 
   return (
     <Content nonBackground>
@@ -330,4 +330,4 @@ const BalanceNew: React.FC<BalanceProps> = () => {
   );
 };
 
-export default BalanceNew;
+export default Balance;
