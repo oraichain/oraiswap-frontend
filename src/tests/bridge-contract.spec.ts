@@ -397,34 +397,37 @@ describe.only('IBCModule', () => {
       );
       usdtToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, usdtAddress);
       // deploy oracle addr
-      const { contractAddress: oracleAddress } = await oraiClient.deploy<OraiswapOracleTypes.InstantiateMsg>(
+      const { contractAddress: oracleAddress } = await oraidexArtifacts.deployContract(
+        oraiClient,
         oraiSenderAddress,
-        oraidexArtifacts.getContractDir('oraiswap_oracle'),
         {},
-        'oraiswap-oracle'
+        'oraiswap-oracle',
+        'oraiswap_oracle'
       );
       // deploy factory contract
       oracleContract = new OraiswapOracleClient(oraiClient, oraiSenderAddress, oracleAddress);
-      const { contractAddress: factoryAddress } = await oraiClient.deploy<OraiswapFactoryTypes.InstantiateMsg>(
+      const { contractAddress: factoryAddress } = await oraidexArtifacts.deployContract(
+        oraiClient,
         oraiSenderAddress,
-        oraidexArtifacts.getContractDir('oraiswap_factory'),
         {
           commission_rate: '0',
           oracle_addr: oracleAddress,
           pair_code_id: pairCodeId,
           token_code_id: lpCodeId
         },
-        'oraiswap-factory'
+        'oraiswap-factory',
+        'oraiswap_factory'
       );
 
-      const { contractAddress: routerAddress } = await oraiClient.deploy<OraiswapRouterTypes.InstantiateMsg>(
+      const { contractAddress: routerAddress } = await oraidexArtifacts.deployContract(
+        oraiClient,
         oraiSenderAddress,
-        oraidexArtifacts.getContractDir('oraiswap_router'),
         {
           factory_addr: factoryAddress,
           factory_addr_v2: factoryAddress
         },
-        'oraiswap-router'
+        'oraiswap-router',
+        'oraiswap_router'
       );
       factoryContract = new OraiswapFactoryClient(oraiClient, oraiSenderAddress, factoryAddress);
       routerContract = new OraiswapRouterClient(oraiClient, oraiSenderAddress, routerAddress);
