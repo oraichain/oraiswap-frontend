@@ -107,7 +107,7 @@ if (typeof BigInt === 'undefined') {
       let array;
       if (littleEndian) {
         array = Array.from(uint8arr).reverse();
-      } else {
+          } else {
         array = Array.from(uint8arr);
       }
       return new MyBigInt(_BigInt.fromArray(array, 2 ** 8));
@@ -143,6 +143,10 @@ export const initEthereum = async () => {
 export const initClient = async () => {
   let wallet: OfflineAminoSigner | OfflineDirectSigner;
   try {
+    const type = localStorage.getItem('typeWallet');
+    if (type === 'owallet') {
+      idow.Keplr = new Keplr(type);
+    }
     const keplr = await window.Keplr.getKeplr();
 
     // suggest our chain

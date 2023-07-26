@@ -13,12 +13,12 @@ export const LoginWidget: FC<{
   address: string | null;
   connect?: () => Promise<void>;
   disconnect: () => Promise<void>;
-}> = ({ logo, text, address, connect, disconnect }) => {
+  open?: () => void;
+}> = ({ logo, text, address, connect, disconnect, label, open }) => {
   const [theme] = useConfigReducer('theme');
   const onClick = () => {
-    if (!address && connect) {
-      connect();
-    }
+    if (!address && connect) return connect();
+    if (!address && open) open()
   };
   return (
     <div className={cx('item', theme)} onClick={onClick}>

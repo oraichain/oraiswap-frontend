@@ -6,14 +6,14 @@ import TronLinkImage from 'assets/images/tronlink.jpg';
 import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/owallet.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
-
+import ConnectWalletModalCosmos from './ConnectWalletModal';
 interface ConnectWalletModalProps {
   address: string;
   metamaskAddress: string | null;
   tronAddress: string | null;
   disconnectMetamask: () => Promise<void>;
   disconnectKeplr: () => Promise<void>;
-  connectKeplr: () => Promise<void>;
+  connectKeplr: (type) => Promise<void>;
   connectMetamask: () => Promise<void>;
   connectTronLink: () => Promise<void>;
   disconnectTronLink: () => Promise<void>;
@@ -31,7 +31,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
   address
 }) => {
   const mobileMode = isMobile();
-
+  const [openConnectWalletModal, setOpenConnectWalletModal] = React.useState(false);
   return (
     <div className={styles.options}>
       {mobileMode ? (
@@ -54,8 +54,18 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           text="Connect Keplr"
           address={address}
           logo={KeplrImage}
-          connect={connectKeplr}
+          open={() => setOpenConnectWalletModal(true)}
           disconnect={disconnectKeplr}
+        />
+      )}
+      {openConnectWalletModal && (
+        <ConnectWalletModalCosmos
+          setOpenConnectWalletModal={setOpenConnectWalletModal}
+          isOpen={openConnectWalletModal}
+          close={() => setOpenConnectWalletModal(false)}
+          connectKeplr={connectKeplr}
+          address={address}
+          open={() => setOpenConnectWalletModal(true)}
         />
       )}
 
