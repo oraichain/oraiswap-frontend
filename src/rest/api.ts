@@ -12,6 +12,7 @@ import {
   OraiswapRewarderTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes,
+  OraiswapOracleQueryClient,
   PairInfo,
   SwapOperation
 } from '@oraichain/oraidex-contracts-sdk';
@@ -408,6 +409,16 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
         }
       ];
 };
+
+async function fetchTaxRate() {
+  const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);
+  try {
+    const data = await oracleContract.taxRate();
+    return data;
+  } catch (error) {
+    throw new Error(`Error when query TaxRate using oracle: ${error}`);
+  }
+}
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
   const { amount, fromInfo, toInfo } = query;
@@ -810,6 +821,7 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
+  fetchTaxRate,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,

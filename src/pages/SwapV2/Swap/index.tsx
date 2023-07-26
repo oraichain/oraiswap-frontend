@@ -19,7 +19,7 @@ import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { fetchCachedPairInfo, fetchPairInfo, fetchTokenInfos, simulateSwap } from 'rest/api';
+import { fetchCachedPairInfo, fetchPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
@@ -38,6 +38,7 @@ const SwapComponent: React.FC<{
   const { data: prices } = useCoinGeckoPrices();
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
+  const [taxRate, setTaxRate] = useState('');
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
   const [averageRatio, setAverageRatio] = useState('0');
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
@@ -85,6 +86,16 @@ const SwapComponent: React.FC<{
     () => fetchCachedPairInfo([fromTokenInfoData!, toTokenInfoData!], cachedPairs),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
+
+  const queryTaxRate = async () => {
+    const data = await fetchTaxRate();
+    setTaxRate(data?.rate)
+  }
+
+  useEffect(() => {
+    queryTaxRate();
+  }, [])
+
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -292,6 +303,13 @@ const SwapComponent: React.FC<{
             <span>Commission rate</span>
           </div>
           <span>{pairInfo && floatToPercent(parseFloat(pairInfo.commission_rate)) + '%'}</span>
+        </div>
+        <div className={cx('row')}>
+          <div className={cx('title')}>
+            <span>Tax rate</span>
+          </div>
+          <span>{
+            taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
