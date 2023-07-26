@@ -80,7 +80,7 @@ export default class Metamask {
       const singedTransaction = await window.tronWeb.trx.sign(transaction.transaction);
       console.log('signed tx: ', singedTransaction);
       const result = await tronWeb.trx.sendRawTransaction(singedTransaction);
-      return { transactionHash: result.transaction.txID };
+      return { transactionHash: result.txid };
     } catch (error) {
       throw new Error(error);
     }
