@@ -90,7 +90,7 @@ const RequireAuthButton: React.FC<any> = () => {
 
   const connectKeplr = async (type) => {
     window.Keplr = new Keplr(type);
-    localStorage.setItem('typeWallet', type)
+    localStorage.setItem('typeWallet', type);
     if (!(await window.Keplr.getKeplr())) {
       return displayInstallWallet();
     }

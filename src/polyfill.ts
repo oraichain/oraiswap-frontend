@@ -11,6 +11,7 @@ import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
+import { switchWallet } from 'helper';
 
 // inject global
 window.TronWeb = require('tronweb');
@@ -107,7 +108,7 @@ if (typeof BigInt === 'undefined') {
       let array;
       if (littleEndian) {
         array = Array.from(uint8arr).reverse();
-          } else {
+      } else {
         array = Array.from(uint8arr);
       }
       return new MyBigInt(_BigInt.fromArray(array, 2 ** 8));
@@ -143,10 +144,7 @@ export const initEthereum = async () => {
 export const initClient = async () => {
   let wallet: OfflineAminoSigner | OfflineDirectSigner;
   try {
-    const type = localStorage.getItem('typeWallet');
-    if (type === 'owallet') {
-      idow.Keplr = new Keplr(type);
-    }
+    await switchWallet();
     const keplr = await window.Keplr.getKeplr();
 
     // suggest our chain

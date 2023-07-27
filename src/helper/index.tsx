@@ -1,4 +1,4 @@
-import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, ORAI, TRON_SCAN } from 'config/constants';
+import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, ORAI, TRON_SCAN, TYPE_WALLET_KEPLR, TYPE_WALLET_OWALLET } from 'config/constants';
 
 import { EvmDenom, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
@@ -10,6 +10,7 @@ import Long from 'long';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { parseTokenInfo } from 'rest/api';
 import { Pairs } from 'config/pools';
+import Keplr from 'libs/keplr';
 
 export interface Tokens {
   denom?: string;
@@ -89,11 +90,11 @@ export const ethToTronAddress = (address: string) => {
   return ethers.utils.base58.encode(evmAddress + checkSum);
 };
 
-export const displayInstallWallet = (altWallet = 'Keplr') => {
+export const displayInstallWallet = (altWallet = 'Keplr', message?: string) => {
   displayToast(
     TToastType.TX_INFO,
     {
-      message: `You need to install OWallet or ${altWallet} to continue.`,
+      message: message ?? `You need to install OWallet or ${altWallet} to continue.`,
       customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
       textLink: 'View on store'
     },
@@ -179,3 +180,18 @@ export const getPairSwapV2 = (contractAddress) => {
     arrIncludesOrai: arr?.includes(ORAI),
   };
 };
+
+export const getStorageKey = (key = 'typeWallet') => {
+  return localStorage.getItem(key);
+}
+
+export const checkVersionWallet = () => {
+  return window.keplr && window.keplr.version.slice(0, 3) === '0.9'
+}
+
+export const switchWallet = () => {
+  const type = getStorageKey();
+  if (type === TYPE_WALLET_OWALLET) {
+    window.Keplr = new Keplr(type);
+  }
+}

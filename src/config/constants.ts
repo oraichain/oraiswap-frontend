@@ -85,3 +85,7 @@ export const DEFAULT_MANUAL_SLIPPAGE = 2.5;
 // create cw20 token
 export const CODE_ID_CW20 = 761;
 export const CW20_DECIMALS = 6;
+
+// type switch wallet between keplr and owallet
+export const TYPE_WALLET_OWALLET = 'owallet';
+export const TYPE_WALLET_KEPLR = 'keplr';
