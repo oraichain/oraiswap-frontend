@@ -9,9 +9,6 @@ import {
   OraiswapFactoryClient,
   OraiswapRouterClient,
   OraiswapTokenClient,
-  OraiswapFactoryTypes,
-  OraiswapOracleTypes,
-  OraiswapRouterTypes,
   OraiswapPairClient,
   OraiswapOracleClient
 } from '@oraichain/oraidex-contracts-sdk';
