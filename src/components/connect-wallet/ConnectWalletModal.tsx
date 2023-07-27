@@ -29,7 +29,7 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
   connectKeplr,
   disconnect,
   address,
-  open,
+  open
 }) => {
   const [theme] = useConfigReducer('theme');
   const typeWallet = getStorageKey();
@@ -37,8 +37,9 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
 
   const isCheckKeplr = typeWallet === TYPE_WALLET_KEPLR && address && !checkVersionWallet();
   const isCheckOwallet =
-    (typeWallet === TYPE_WALLET_OWALLET && address && window.owallet) ||
-    (typeWallet === TYPE_WALLET_KEPLR && address && checkVersionWallet());
+    address &&
+    ((typeWallet === TYPE_WALLET_OWALLET && window.owallet) ||
+      (typeWallet === TYPE_WALLET_KEPLR && checkVersionWallet()));
 
   const onClick = async (type: string) => {
     if (type === TYPE_WALLET_OWALLET && !window.owallet) {
@@ -70,7 +71,7 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
       title: 'Connect Owallet',
       label: 'Owallet'
     }
-  ]
+  ];
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={true}>
@@ -81,39 +82,41 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
           </div>
           <div className={cx('options')}>
             {arr.map((e, i) => {
-              return <div
-                key={i}
-                onClick={() => {
-                  if (e.isCheck) {
-                    return disconnect();
-                  }
-                  onClick(e.type);
-                }}
-              >
-                <div className={cx('item', theme)}>
-                  <img src={e.img} className={cx('logo')} />
-                  <div className={cx('grow')}>
-                    {e.isCheck ? (
-                      <>
-                        <div className={cx('network-title')}>{e.label}</div>
-                        <div className={cx('des')}>
-                          <CenterEllipsis size={6} text={address} />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className={cx('network-title')}>{e.title}</div>
-                        <div className={cx('des')}>Connect using browser wallet</div>
-                      </>
+              return (
+                <div
+                  key={i}
+                  onClick={() => {
+                    if (e.isCheck) {
+                      return disconnect();
+                    }
+                    onClick(e.type);
+                  }}
+                >
+                  <div className={cx('item', theme)}>
+                    <img src={e.img} className={cx('logo')} />
+                    <div className={cx('grow')}>
+                      {e.isCheck ? (
+                        <>
+                          <div className={cx('network-title')}>{e.label}</div>
+                          <div className={cx('des')}>
+                            <CenterEllipsis size={6} text={address} />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className={cx('network-title')}>{e.title}</div>
+                          <div className={cx('des')}>Connect using browser wallet</div>
+                        </>
+                      )}
+                    </div>
+                    {e.isCheck && (
+                      <div>
+                        <Logout />
+                      </div>
                     )}
                   </div>
-                  {e.isCheck && (
-                    <div>
-                      <Logout />
-                    </div>
-                  )}
                 </div>
-              </div>
+              );
             })}
           </div>
         </div>

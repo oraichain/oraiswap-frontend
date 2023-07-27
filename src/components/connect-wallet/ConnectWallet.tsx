@@ -54,7 +54,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           text="Connect Keplr"
           address={address}
           logo={KeplrImage}
-          switchWallet={true}
+          isSwitchWallet={true}
           open={() => setOpenConnectWalletModal(true)}
           disconnect={disconnectKeplr}
         />
