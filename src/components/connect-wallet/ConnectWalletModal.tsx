@@ -4,7 +4,7 @@ import React from 'react';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
 import { TYPE_WALLET_KEPLR, TYPE_WALLET_OWALLET } from 'config/constants';
-import { checkVersionWallet, displayInstallWallet, getStorageKey } from 'helper';
+import { checkVersionWallet, displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import KeplrImage from 'assets/images/keplr.png';
 import { ReactComponent as Logout } from 'assets/icons/logout.svg';
@@ -21,6 +21,8 @@ interface ConnectWalletModalProps {
   address: string;
   disconnect: () => Promise<void>;
   connectKeplr: (type) => Promise<void>;
+  isCheckKeplr: boolean,
+  isCheckOwallet: boolean,
 }
 
 const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
@@ -29,30 +31,30 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
   connectKeplr,
   disconnect,
   address,
-  open
+  open,
+  isCheckOwallet,
+  isCheckKeplr
 }) => {
   const [theme] = useConfigReducer('theme');
-  const typeWallet = getStorageKey();
   const [loadingWallet, setLoadingWallet] = React.useState(false);
-
-  const isCheckKeplr = typeWallet === TYPE_WALLET_KEPLR && address && !checkVersionWallet();
-  const isCheckOwallet =
-    address &&
-    ((typeWallet === TYPE_WALLET_OWALLET && window.owallet) ||
-      (typeWallet === TYPE_WALLET_KEPLR && checkVersionWallet()));
 
   const onClick = async (type: string) => {
     if (type === TYPE_WALLET_OWALLET && !window.owallet) {
       return displayInstallWallet('', `You need to install OWallet to continue.`);
     }
     if (type === TYPE_WALLET_KEPLR && (!window.keplr || checkVersionWallet())) {
-      return displayInstallWallet('', `You need to install Keplr to continue.`);
+      return displayInstallWallet(
+        '',
+        `You need to install Keplr to continue.`,
+        'https://chrome.google.com/webstore/detail/keplr/dmkamcknogkgcdfhhbddcghachkejeap'
+      );
     }
     try {
-      setLoadingWallet(true)
+      setLoadingWallet(true);
       await connectKeplr(type);
-    } finally {
-      setTimeout(() => setLoadingWallet(false), 1500)
+      setTimeout(() => setLoadingWallet(false), 1000);
+    } catch (err) {
+      setLoadingWallet(false);
     }
   };
 
@@ -81,43 +83,41 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
             <div>Connect wallet</div>
           </div>
           <div className={cx('options')}>
-            {arr.map((e, i) => {
-              return (
-                <div
-                  key={i}
-                  onClick={() => {
-                    if (e.isCheck) {
-                      return disconnect();
-                    }
-                    onClick(e.type);
-                  }}
-                >
-                  <div className={cx('item', theme)}>
-                    <img src={e.img} className={cx('logo')} />
-                    <div className={cx('grow')}>
-                      {e.isCheck ? (
-                        <>
-                          <div className={cx('network-title')}>{e.label}</div>
-                          <div className={cx('des')}>
-                            <CenterEllipsis size={6} text={address} />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className={cx('network-title')}>{e.title}</div>
-                          <div className={cx('des')}>Connect using browser wallet</div>
-                        </>
-                      )}
-                    </div>
-                    {e.isCheck && (
-                      <div>
-                        <Logout />
-                      </div>
+            {arr.map((e, i) => (
+              <div
+                key={i}
+                onClick={() => {
+                  if (e.isCheck) {
+                    return disconnect();
+                  }
+                  onClick(e.type);
+                }}
+              >
+                <div className={cx('item', theme)}>
+                  <img src={e.img} className={cx('logo')} />
+                  <div className={cx('grow')}>
+                    {e.isCheck ? (
+                      <>
+                        <div className={cx('network-title')}>{e.label}</div>
+                        <div className={cx('des')}>
+                          <CenterEllipsis size={6} text={address} />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className={cx('network-title')}>{e.title}</div>
+                        <div className={cx('des')}>Connect using browser wallet</div>
+                      </>
                     )}
                   </div>
+                  {e.isCheck && (
+                    <div>
+                      <Logout />
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </LoadingBox>

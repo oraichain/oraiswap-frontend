@@ -4,9 +4,10 @@ import styles from './ConnectWallet.module.scss';
 import MetamaskImage from 'assets/images/metamask.png';
 import TronLinkImage from 'assets/images/tronlink.jpg';
 import KeplrImage from 'assets/images/keplr.png';
-import OWalletImage from 'assets/images/owallet.png';
+import OWalletImage from 'assets/images/orai_wallet_logo.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
 import ConnectWalletModalCosmos from './ConnectWalletModal';
+import { keplrCheck, owalletCheck } from 'helper';
 interface ConnectWalletModalProps {
   address: string;
   metamaskAddress: string | null;
@@ -32,6 +33,9 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
 }) => {
   const mobileMode = isMobile();
   const [openConnectWalletModal, setOpenConnectWalletModal] = React.useState(false);
+  const isCheckKeplr = address && keplrCheck();
+  const isCheckOwallet = address && owalletCheck();
+
   return (
     <div className={styles.options}>
       {mobileMode ? (
@@ -53,7 +57,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         <LoginWidget
           text="Connect Keplr"
           address={address}
-          logo={KeplrImage}
+          logo={isCheckOwallet ? OWalletImage : KeplrImage}
           isSwitchWallet={true}
           open={() => setOpenConnectWalletModal(true)}
           disconnect={disconnectKeplr}
@@ -65,6 +69,8 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
           close={() => setOpenConnectWalletModal(false)}
           connectKeplr={connectKeplr}
           disconnect={disconnectKeplr}
+          isCheckKeplr={isCheckKeplr}
+          isCheckOwallet={isCheckOwallet}
           address={address}
           open={() => setOpenConnectWalletModal(true)}
         />
