@@ -15,7 +15,7 @@ import {
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
-import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress } from './common';
+import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress, senderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
 import { ORAI } from 'config/constants';
 
@@ -27,6 +27,7 @@ const bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
 const bridgeReceiver = 'tron-testnet0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222';
 const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
 const cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiSenderAddress).words);
+const oraibridgeSenderAddress = bech32.encode('oraib', bech32.decode(oraiSenderAddress).words);
 console.log({ cosmosSenderAddress });
 const ibcTransferAmount = '100000000';
 const initialBalanceAmount = '10000000000000';
@@ -456,6 +457,7 @@ describe.only('IBCModule', () => {
         assetInfos: [assetInfos[0], { token: { contract_addr: usdtToken.contractAddress } }]
       });
       // mint lots of orai, airi for the pair contracts to mock provide lp
+      // here, ratio is 1:1 => 1 AIRI = 1 ORAI
       oraiClient.app.bank.setBalance(firstPairInfo.contract_addr, coins(initialBalanceAmount, ORAI));
       airiToken.mint({ amount: initialBalanceAmount, recipient: firstPairInfo.contract_addr });
       oraiClient.app.bank.setBalance(secondPairInfo.contract_addr, coins(initialBalanceAmount, ORAI));
@@ -598,12 +600,41 @@ describe.only('IBCModule', () => {
 
     it.each([
       [channel, 'abcd', 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3'], // hard-coded usdt address
-      [channel, 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g', 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu'], // edge case, dest denom is also airi
-      [channel, 'cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm', 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3'], // hard-coded usdt
-      [channel, 'cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm', ORAI],
       [channel, '0x', 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3'],
       [channel, '0xabcd', 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu'],
       [channel, 'tron-testnet0xabcd', 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu'] // bad evm address case
+    ])(
+      'cw-ics20-test-single-step-has-ibc-msg-dest-fail memo %s dest denom %s expected error',
+      async (destChannel: string, destReceiver: string, destDenom: string) => {
+        // now send ibc package
+        icsPackage.memo = `${destChannel}/${destReceiver}:${destDenom}`;
+        // transfer from cosmos to oraichain, should pass
+        const result = await cosmosChain.ibc.sendPacketReceive({
+          packet: {
+            data: toBinary(icsPackage),
+            ...packetData
+          },
+          relayer: cosmosSenderAddress
+        });
+        const ibcEvent = result.events.find(
+          (event) => event.type === 'transfer' && event.attributes.find((attr) => attr.key === 'channel')
+        );
+        // get swap operation event
+        expect(ibcEvent).toBeUndefined();
+        console.log('result: ', result);
+        const ibcErrorMsg = result.attributes.find(
+          (attr) =>
+            attr.key === 'ibc_error_msg' &&
+            attr.value === 'Generic error: The destination info is neither evm or cosmos based'
+        );
+        expect(ibcErrorMsg).not.toBeUndefined();
+      }
+    );
+
+    it.each([
+      [channel, 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g', 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu'], // edge case, dest denom is also airi
+      [channel, 'cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm', 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3'], // hard-coded usdt
+      [channel, 'cosmos1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejl67nlm', ORAI]
     ])(
       'cw-ics20-test-single-step-has-ibc-msg-dest-receiver-cosmos-based memo %s dest denom %s expected recipient %s',
       async (destChannel: string, destReceiver: string, destDenom: string) => {
@@ -845,6 +876,119 @@ describe.only('IBCModule', () => {
       expect(
         transferEvent.attributes.filter((attr) => attr.key === 'channel' && attr.value === channel).length
       ).toBeGreaterThan(0);
+    });
+
+    it('cw-ics20-test-single-step-handle_ibc_packet_receive_native_remote_chain-has-relayer-fee-should-be-deducted', async () => {
+      // setup relayer fee
+      const relayerFee = '100000';
+      await ics20Contract.updateConfig({ relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }] });
+
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: oraibridgeSenderAddress,
+        memo: `${channel}/${bobAddress}:orai`
+      };
+      // transfer from cosmos to oraichain, should pass
+      let result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      const hasRelayerFee = result.events.find(
+        (event) =>
+          event.type === 'wasm' &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'amount' && attr.value === relayerFee)
+      );
+      expect(hasRelayerFee).not.toBeUndefined();
+      expect(
+        result.attributes.find((attr) => attr.key === 'relayer_fee' && attr.value === relayerFee)
+      ).not.toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-ibc-handle_ibc_packet_receive_native_remote_chain-has-token-fee-should-be-deducted', async () => {
+      // setup relayer fee
+      const numberator = 1;
+      const denominator = 10;
+      const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
+      await ics20Contract.updateConfig({
+        tokenFee: [{ token_denom: airiIbcDenom, ratio: { numerator: 1, denominator: 10 } }]
+      });
+
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: oraibridgeSenderAddress,
+        memo: `${channel}/${bobAddress}:orai`
+      };
+      // transfer from cosmos to oraichain, should pass
+      let result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      const hasTokenFee = result.events.find(
+        (event) =>
+          event.type === 'wasm' &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'amount' && attr.value === tokenFee)
+      );
+      expect(hasTokenFee).not.toBeUndefined();
+      expect(result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === tokenFee)).not.toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-handle_ibc_packet_receive_native_remote_chain-has-both-token-fee-and-relayer-fee-should-be-both-deducted', async () => {
+      // setup relayer fee
+      const relayerFee = '100000';
+      const numberator = 1;
+      const denominator = 10;
+      const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
+      await ics20Contract.updateConfig({
+        tokenFee: [{ token_denom: airiIbcDenom, ratio: { numerator: 1, denominator: 10 } }],
+        relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }]
+      });
+
+      const icsPackage: FungibleTokenPacketData = {
+        amount: ibcTransferAmount,
+        denom: airiIbcDenom,
+        receiver: bobAddress,
+        sender: oraibridgeSenderAddress,
+        memo: `${channel}/${bobAddress}:orai`
+      };
+      // transfer from cosmos to oraichain, should pass
+      let result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      const hasRelayerFee = result.events.find(
+        (event) =>
+          event.type === 'wasm' &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'amount' && attr.value === relayerFee)
+      );
+      expect(hasRelayerFee).not.toBeUndefined();
+      expect(
+        result.attributes.find((attr) => attr.key === 'relayer_fee' && attr.value === relayerFee)
+      ).not.toBeUndefined();
+
+      const hasTokenFee = result.events.find(
+        (event) =>
+          event.type === 'wasm' &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'amount' && attr.value === tokenFee)
+      );
+      expect(hasTokenFee).not.toBeUndefined();
+      expect(result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === tokenFee)).not.toBeUndefined();
     });
   });
 });
