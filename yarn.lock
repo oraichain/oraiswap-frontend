@@ -2603,16 +2603,16 @@
     protobufjs "^6.10.2"
     secp256k1 "^4.0.2"
 
-"@oraichain/cosmwasm-vm-js@^0.2.44":
-  version "0.2.44"
-  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.44.tgz#b53dfea8c915525dd02c5dd9139c0bf41d63bb7d"
-  integrity sha512-cXrPN4I2y8scg7bdhsaw5aia+TICSCoD7k2BRKF5Vlteza5mMEUbk13N7eEgAw8z9PviWR7pxvZYcqje7hZLew==
+"@oraichain/cosmwasm-vm-js@^0.2.45":
+  version "0.2.45"
+  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.45.tgz#45acba5b3a10405b02cacfb33c65ff6eb2f0feb1"
+  integrity sha512-n9HD6PFROQPrUIGbNhUSya3BC9i0zWDll3+J0IwV2ul3aes9kRVSBdRV3ssQoP6pRESCGM0g72miva56rZaUDg==
   dependencies:
     "@cosmjs/amino" "^0.29.5"
     "@cosmjs/crypto" "^0.29.5"
     "@cosmjs/encoding" "^0.29.5"
     "@oraichain/cosmwasm-vm-zk-nodejs" "^0.0.7"
-    "@oraichain/wasm-json-toolkit" "^1.0.20"
+    "@oraichain/wasm-json-toolkit" "^1.0.21"
     bech32 "1.1.4"
     elliptic "^6.5.4"
     immutable "^4.1.0"
@@ -2626,17 +2626,17 @@
   resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-zk-nodejs/-/cosmwasm-vm-zk-nodejs-0.0.7.tgz#d640c4a144c35157ac0e4292a02b92e357d90cf0"
   integrity sha512-ZbRFSWL81a/gDrPUsHzpwOttI0SdGNrYEDcmGGcl4cN0853XAzFkYt71PM2xckWZ0Mlh21erbTpZJNTFH78FYg==
 
-"@oraichain/cw-simulate@^2.8.30":
-  version "2.8.30"
-  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.30.tgz#ef5ebc056764ef2a7dbdcfda56ee15f6e741e3de"
-  integrity sha512-lLCIZQQz/wuVKqZ0peSnhjkzUrJv3X8V6ru22sEihjmNT/IT0Oky4KEmI0pYmpy8OopH8OxYuzsK/Jn6qm2cnA==
+"@oraichain/cw-simulate@^2.8.31":
+  version "2.8.31"
+  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.31.tgz#465cb3a702c5f87578b6f570dd486cae72fae18a"
+  integrity sha512-uwewcCDG4q6Upzr0FbLqFt2/rfRliJjTYTfeg3oiDN26dKmjw5T+P7xQYOGyykiT8WVlc/etx4UURpBkmH55sg==
   dependencies:
     "@cosmjs/amino" "^0.29.5"
     "@cosmjs/cosmwasm-stargate" "^0.29.5"
     "@cosmjs/crypto" "^0.29.5"
     "@cosmjs/encoding" "^0.29.5"
     "@kiruse/serde" "^0.8.0-rc.6"
-    "@oraichain/cosmwasm-vm-js" "^0.2.44"
+    "@oraichain/cosmwasm-vm-js" "^0.2.45"
     eventemitter3 "^5.0.0"
     immutable "^4.1.0"
     lobyte "^0.0.3"
@@ -2681,10 +2681,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.17.tgz#7ef1b9fc96eabe45091caabb2084762ad0f9f9bb"
   integrity sha512-NDemh5stfuqT8MUkw5hAXQhNuUKn+sBy0Lj9lqtepiZj9LFsZxkAa1pdaFQV1ea1uNiicOvK++7oRcimsjjQgw==
 
-"@oraichain/wasm-json-toolkit@^1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@oraichain/wasm-json-toolkit/-/wasm-json-toolkit-1.0.20.tgz#80f840c4206dee898ce358b6afc7759ebbd2d249"
-  integrity sha512-W/pbZA6JJFY0W/AiRnebQaFSHlFyFFo26VPtw+3g50VLQRqCL2yV+rQd5qe4Gt8Eu9AFRYa217kuD2xN4kPHbg==
+"@oraichain/wasm-json-toolkit@^1.0.21":
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/@oraichain/wasm-json-toolkit/-/wasm-json-toolkit-1.0.21.tgz#88dd04ccc9bcf76d8b9c3e5b5ba3e9ebb09825ac"
+  integrity sha512-nv3CHf04Jai3VhrrzbLJ7slGa/Lr3u6iMEr+L4RemegOG5CHFLszBKivUp1EJYjUcqIfLVJsvxeukLsTDNNDTg==
   dependencies:
     bn.js "^5.2.1"
 
