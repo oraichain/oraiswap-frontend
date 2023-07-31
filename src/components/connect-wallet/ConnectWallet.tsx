@@ -55,7 +55,7 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
         )
       ) : (
         <LoginWidget
-          text="Connect Keplr"
+          text="Connect Wallet"
           address={address}
           logo={isCheckOwallet ? OWalletImage : KeplrImage}
           isSwitchWallet={true}

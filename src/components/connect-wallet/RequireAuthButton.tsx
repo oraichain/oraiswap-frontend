@@ -12,6 +12,7 @@ import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
+import { WalletType } from 'config/constants';
 
 const RequireAuthButton: React.FC<any> = () => {
   const [, setIsInactiveMetamask] = useState(false);
@@ -88,7 +89,7 @@ const RequireAuthButton: React.FC<any> = () => {
     }
   };
 
-  const connectKeplr = async (type) => {
+  const connectKeplr = async (type: WalletType) => {
     window.Keplr = new Keplr(type);
     localStorage.setItem('typeWallet', type);
     if (!(await window.Keplr.getKeplr())) {

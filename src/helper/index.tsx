@@ -6,8 +6,7 @@ import {
   MULTIPLIER,
   ORAI,
   TRON_SCAN,
-  TYPE_WALLET_KEPLR,
-  TYPE_WALLET_OWALLET
+  WalletType
 } from 'config/constants';
 
 import { EvmDenom, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
@@ -73,7 +72,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -193,7 +192,7 @@ export const getPairSwapV2 = (contractAddress) => {
 
 // Switch Wallet Keplr Owallet
 export const getStorageKey = (key = 'typeWallet') => {
-  return localStorage.getItem(key);
+  return localStorage.getItem(key) as WalletType;
 };
 
 export const checkVersionWallet = () => {
@@ -202,17 +201,17 @@ export const checkVersionWallet = () => {
 
 export const keplrCheck = () => {
   const type = getStorageKey();
-  return (type === TYPE_WALLET_OWALLET && !window.owallet) || (type === TYPE_WALLET_KEPLR && !checkVersionWallet());
+  return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
 };
 
 export const owalletCheck = () => {
   const type = getStorageKey();
-  return (type === TYPE_WALLET_OWALLET && !!window.owallet) || (type === TYPE_WALLET_KEPLR && checkVersionWallet());
+  return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
 };
 
 export const switchWallet = () => {
   const type = getStorageKey();
-  if (type === TYPE_WALLET_OWALLET && window.owallet) {
+  if (type === 'owallet' && window.owallet) {
     window.Keplr = new Keplr(type);
   }
 };

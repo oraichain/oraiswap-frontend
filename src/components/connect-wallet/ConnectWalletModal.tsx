@@ -3,7 +3,6 @@ import Modal from 'components/Modal';
 import React from 'react';
 import style from './ConnectWalletModal.module.scss';
 import cn from 'classnames/bind';
-import { TYPE_WALLET_KEPLR, TYPE_WALLET_OWALLET } from 'config/constants';
 import { checkVersionWallet, displayInstallWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import KeplrImage from 'assets/images/keplr.png';
@@ -11,6 +10,7 @@ import { ReactComponent as Logout } from 'assets/icons/logout.svg';
 import OWalletImage from 'assets/images/orai_wallet_logo.png';
 import CenterEllipsis from 'components/CenterEllipsis';
 import LoadingBox from 'components/LoadingBox';
+import { WalletType } from 'config/constants';
 
 const cx = cn.bind(style);
 
@@ -21,8 +21,8 @@ interface ConnectWalletModalProps {
   address: string;
   disconnect: () => Promise<void>;
   connectKeplr: (type) => Promise<void>;
-  isCheckKeplr: boolean,
-  isCheckOwallet: boolean,
+  isCheckKeplr: boolean;
+  isCheckOwallet: boolean;
 }
 
 const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
@@ -38,11 +38,11 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
   const [theme] = useConfigReducer('theme');
   const [loadingWallet, setLoadingWallet] = React.useState(false);
 
-  const onClick = async (type: string) => {
-    if (type === TYPE_WALLET_OWALLET && !window.owallet) {
+  const onClick = async (type: WalletType) => {
+    if (type === 'owallet' && !window.owallet) {
       return displayInstallWallet('', `You need to install OWallet to continue.`);
     }
-    if (type === TYPE_WALLET_KEPLR && (!window.keplr || checkVersionWallet())) {
+    if (type === 'keplr' && (!window.keplr || checkVersionWallet())) {
       return displayInstallWallet(
         '',
         `You need to install Keplr to continue.`,
@@ -62,14 +62,14 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
     {
       img: KeplrImage,
       isCheck: isCheckKeplr,
-      type: TYPE_WALLET_KEPLR,
+      type: 'keplr',
       title: 'Connect Keplr',
       label: 'Keplr Wallet'
     },
     {
       img: OWalletImage,
       isCheck: isCheckOwallet,
-      type: TYPE_WALLET_OWALLET,
+      type: 'owallet',
       title: 'Connect Owallet',
       label: 'Owallet'
     }
@@ -90,7 +90,7 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
                   if (e.isCheck) {
                     return disconnect();
                   }
-                  onClick(e.type);
+                  onClick(e.type as WalletType);
                 }}
               >
                 <div className={cx('item', theme)}>
@@ -106,7 +106,7 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
                     ) : (
                       <>
                         <div className={cx('network-title')}>{e.title}</div>
-                        <div className={cx('des')}>Connect using browser wallet</div>
+                        <div className={cx('des')}>Connect using extension wallet</div>
                       </>
                     )}
                   </div>
