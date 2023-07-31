@@ -7,7 +7,8 @@ import KeplrImage from 'assets/images/keplr.png';
 import OWalletImage from 'assets/images/orai_wallet_logo.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
 import ConnectWalletModalCosmos from './ConnectWalletModal';
-import { keplrCheck, owalletCheck } from 'helper';
+import { getStorageKey, keplrCheck, owalletCheck } from 'helper';
+import { WalletType } from 'config/constants';
 interface ConnectWalletModalProps {
   address: string;
   metamaskAddress: string | null;
@@ -33,8 +34,9 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({
 }) => {
   const mobileMode = isMobile();
   const [openConnectWalletModal, setOpenConnectWalletModal] = React.useState(false);
-  const isCheckKeplr = address && keplrCheck();
-  const isCheckOwallet = address && owalletCheck();
+  const walletType = getStorageKey() as WalletType;
+  const isCheckKeplr = address && keplrCheck(walletType);
+  const isCheckOwallet = address && owalletCheck(walletType);
 
   return (
     <div className={styles.options}>

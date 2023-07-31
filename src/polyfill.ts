@@ -11,7 +11,8 @@ import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
-import { switchWallet } from 'helper';
+import { getStorageKey, switchWallet } from 'helper';
+import { WalletType } from 'config/constants';
 
 // inject global
 window.TronWeb = require('tronweb');
@@ -144,7 +145,7 @@ export const initEthereum = async () => {
 export const initClient = async () => {
   let wallet: OfflineAminoSigner | OfflineDirectSigner;
   try {
-    await switchWallet();
+    switchWallet(getStorageKey() as WalletType);
     const keplr = await window.Keplr.getKeplr();
 
     // suggest our chain

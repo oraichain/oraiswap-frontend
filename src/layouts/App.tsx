@@ -1,8 +1,8 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
+import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { displayInstallWallet, getNetworkGasPrice, switchWallet } from 'helper';
+import { displayInstallWallet, getNetworkGasPrice, getStorageKey, switchWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -142,7 +142,7 @@ const App = () => {
         }
       }
 
-      await switchWallet();
+      switchWallet(getStorageKey() as WalletType);
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       setAddress(oraiAddress);

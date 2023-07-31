@@ -192,25 +192,22 @@ export const getPairSwapV2 = (contractAddress) => {
 
 // Switch Wallet Keplr Owallet
 export const getStorageKey = (key = 'typeWallet') => {
-  return localStorage.getItem(key) as WalletType;
+  return localStorage.getItem(key);
 };
 
 export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
 
-export const keplrCheck = () => {
-  const type = getStorageKey();
+export const keplrCheck = (type: WalletType) => {
   return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
 };
 
-export const owalletCheck = () => {
-  const type = getStorageKey();
+export const owalletCheck = (type: WalletType) => {
   return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
 };
 
-export const switchWallet = () => {
-  const type = getStorageKey();
+export const switchWallet = (type: WalletType) => {
   if (type === 'owallet' && window.owallet) {
     window.Keplr = new Keplr(type);
   }
