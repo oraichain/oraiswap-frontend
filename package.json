@@ -11,7 +11,7 @@
     "@cosmjs/stargate": "^0.29.5",
     "@oraichain/common-contracts-sdk": "1.0.21",
     "@oraichain/kawaiiverse-txs": "0.0.2",
-    "@oraichain/oraidex-contracts-sdk": "^1.0.18",
+    "@oraichain/oraidex-contracts-sdk": "^1.0.19",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.47.0",
     "@tanstack/react-query": "^4.24.6",
