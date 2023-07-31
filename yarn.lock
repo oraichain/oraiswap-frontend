@@ -2676,10 +2676,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.10.tgz#340c1ccee0ed9d0335f95bb3d13037e129b00505"
   integrity sha512-gxaE0B3NxGvY/XCeakVkxxPUcuGdg5oHDqVSjDP5+QTfoKzu/j87Wo4O6TIcEu8us/pQAuIaTBZzHUkiWhpGaw==
 
-"@oraichain/oraidex-contracts-sdk@^1.0.17":
-  version "1.0.17"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.17.tgz#7ef1b9fc96eabe45091caabb2084762ad0f9f9bb"
-  integrity sha512-NDemh5stfuqT8MUkw5hAXQhNuUKn+sBy0Lj9lqtepiZj9LFsZxkAa1pdaFQV1ea1uNiicOvK++7oRcimsjjQgw==
+"@oraichain/oraidex-contracts-sdk@^1.0.19":
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.19.tgz#bfee69c75e4a01c6d68931066d4f3fd8124a6883"
+  integrity sha512-UhZXsFvUnJo47H9qaPTckYItzdFDalndcYdjveV3esD0wuj+9olq/Sfq5+CGw13txrYirx9yr5y5J4xR9V+kLA==
 
 "@oraichain/wasm-json-toolkit@^1.0.22":
   version "1.0.22"
