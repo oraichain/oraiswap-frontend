@@ -14,7 +14,7 @@ import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransact
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { atomic, toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
@@ -198,7 +198,7 @@ const SwapComponent: React.FC<{
 
   // minimum receive after slippage
   const minimumReceive = simulateData?.amount
-    ? BigInt(simulateData.amount) - (BigInt(simulateData.amount) * BigInt(userSlippage)) / 100n
+    ? BigInt(simulateData.amount) - (BigInt(simulateData.amount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic))
     : '0';
 
   return (
