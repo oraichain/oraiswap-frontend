@@ -24,7 +24,7 @@ import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
-import { UniversalSwapHandler, checkEvmAddress } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 
@@ -207,7 +207,7 @@ const SwapComponent: React.FC<{
 
   // minimum receive after slippage
   const minimumReceive = simulateData?.amount
-    ? BigInt(simulateData.amount) - (BigInt(simulateData.amount) * BigInt(userSlippage)) / 100n
+    ? calculateMinimum(simulateData.amount, userSlippage)
     : '0';
 
   return (
