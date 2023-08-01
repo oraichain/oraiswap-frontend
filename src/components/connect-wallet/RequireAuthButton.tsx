@@ -3,7 +3,7 @@ import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { displayInstallWallet } from 'helper';
+import { displayInstallWallet, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveConnect } from 'hooks/useMetamask';
@@ -91,7 +91,7 @@ const RequireAuthButton: React.FC<any> = () => {
 
   const connectKeplr = async (type: WalletType) => {
     window.Keplr = new Keplr(type);
-    localStorage.setItem('typeWallet', type);
+    setStorageKey('typeWallet', type);
     if (!(await window.Keplr.getKeplr())) {
       return displayInstallWallet();
     }
