@@ -72,7 +72,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -210,5 +210,7 @@ export const owalletCheck = (type: WalletType) => {
 export const switchWallet = (type: WalletType) => {
   if (type === 'owallet' && window.owallet) {
     window.Keplr = new Keplr(type);
+    return true;
   }
+  return false;
 };
