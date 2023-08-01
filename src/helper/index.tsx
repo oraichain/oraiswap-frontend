@@ -195,6 +195,10 @@ export const getStorageKey = (key = 'typeWallet') => {
   return localStorage.getItem(key);
 };
 
+export const setStorageKey = (key = 'typeWallet', value) => {
+  return localStorage.setItem(key, value);
+};
+
 export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
