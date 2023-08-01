@@ -1,13 +1,18 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { displayInstallWallet } from 'helper';
+import { displayInstallWallet, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveConnect } from 'hooks/useMetamask';
+import { collectWallet } from 'libs/cosmjs';
+import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
+import { WalletType } from 'config/constants';
 
 const RequireAuthButton: React.FC<any> = () => {
   const [, setIsInactiveMetamask] = useState(false);
@@ -84,11 +89,17 @@ const RequireAuthButton: React.FC<any> = () => {
     }
   };
 
-  const connectKeplr = async () => {
+  const connectKeplr = async (type: WalletType) => {
+    window.Keplr = new Keplr(type);
+    setStorageKey('typeWallet', type);
     if (!(await window.Keplr.getKeplr())) {
       return displayInstallWallet();
     }
-
+    const wallet = await collectWallet(network.chainId);
+    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+      prefix: network.prefix,
+      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+    });
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
     console.log('oraiAddress', oraiAddress);
