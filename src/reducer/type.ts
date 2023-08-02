@@ -80,6 +80,7 @@ export interface TradingState {
   listTokenFilter: PairToken[];
   currentToken: PairToken | null;
   currentPrice: string;
+  chartLoading: boolean;
 }
 
 export interface TypeDecimal {

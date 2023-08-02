@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useLocalStorage, useMedia } from "react-use";
 import cn from 'classnames/bind';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Loader from 'components/Loader';
-import { selectCurrentToken } from "reducer/tradingSlice";
+import { selectChartLoading, selectCurrentToken, setChartLoading } from "reducer/tradingSlice";
 import useTheme from "hooks/useTheme";
 import { SUPPORTED_RESOLUTIONS, TV_CHART_RELOAD_INTERVAL } from "components/TVChartContainer/helpers/constants";
 import useTVDatafeed from "./helpers/useTVDatafeed";
@@ -39,10 +39,11 @@ export function useLocalStorageSerializeKey<T>(
 
 export default function TVChartContainer() {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const currentPair = useSelector(selectCurrentToken);
+  const chartLoading = useSelector(selectChartLoading);
   const tvWidgetRef = useRef<IChartingLibraryWidget | null>(null);
-  const [chartDataLoading, setChartDataLoading] = useState(false);
   const [tvCharts, setTvCharts] = useLocalStorage<ChartData[] | undefined>('TV_SAVE_LOAD_CHARTS_KEY', []);
   const { datafeed, resetCache } = useTVDatafeed({ dataProvider: new TVDataProvider() });
   const isMobile = useMedia("(max-width: 550px)");
@@ -130,7 +131,7 @@ export default function TVChartContainer() {
         });
 
       tvWidgetRef.current?.activeChart().dataReady(() => {
-        setChartDataLoading(false);
+        dispatch(setChartLoading(false))
       });
     });
 
@@ -138,17 +139,17 @@ export default function TVChartContainer() {
       if (tvWidgetRef.current) {
         tvWidgetRef.current.remove();
         tvWidgetRef.current = null;
-        setChartDataLoading(true);
+        dispatch(setChartLoading(true))
       }
     };
   }, [currentPair, theme]);
 
   return (
     <div className={cx('chart-container')}>
-      {chartDataLoading && <Loader />}
+      {chartLoading && <Loader />}
       <div
         className={cx('chart-content')}
-        style={{ width: chartDataLoading ? "0%" : "100%" }}
+        style={{ width: chartLoading ? "0%" : "100%" }}
         ref={chartContainerRef}
       />
     </div>

@@ -89,7 +89,6 @@ export class TVDataProvider {
     periodParams: PeriodParams,
     shouldRefetchBars: boolean
   ) {
-    console.log({ pair });
     try {
       const bars = await this.getTokenHistoryBars(pair, ticker, periodParams, shouldRefetchBars, resolution);
       return bars.sort((a, b) => a.time - b.time).map(formatTimeInBarToMs);

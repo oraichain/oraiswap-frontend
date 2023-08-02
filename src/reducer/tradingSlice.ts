@@ -8,7 +8,8 @@ const initialState: TradingState = {
   listToken: [],
   listTokenFilter: [],
   currentToken: DATA_PAIRS[0],
-  currentPrice: ''
+  currentPrice: '',
+  chartLoading: false
 };
 
 const tradingSlice = createSlice({
@@ -30,16 +31,26 @@ const tradingSlice = createSlice({
     },
     setCurrentPrice: (state, action: PayloadAction<string>) => {
       state.currentPrice = action.payload;
+    },
+    setChartLoading: (state, action: PayloadAction<boolean>) => {
+      state.chartLoading = action.payload;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { searchToken, setCurrentToken, setListToken, setListTokenFilterInitial, setCurrentPrice } =
-  tradingSlice.actions;
+export const {
+  searchToken,
+  setCurrentToken,
+  setListToken,
+  setListTokenFilterInitial,
+  setCurrentPrice,
+  setChartLoading
+} = tradingSlice.actions;
 
 export const selectTokenFilter = (state: RootState): PairToken[] => state.trading.listTokenFilter;
 export const selectCurrentToken = (state: RootState): PairToken => state.trading.currentToken;
+export const selectChartLoading = (state: RootState): boolean => state.trading.chartLoading;
 export const selectCurrentPrice = (state: RootState): string => state.trading.currentPrice;
 export const selectListToken = (state: RootState): PairToken[] => state.trading.listToken;
 
