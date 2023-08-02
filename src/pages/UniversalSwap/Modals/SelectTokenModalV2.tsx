@@ -21,6 +21,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
+  setDenomPair: (tokenAddress: string, name: string) => void;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -30,7 +31,8 @@ const SelectTokenModal: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  setSearchTokenName
+  setSearchTokenName,
+  setDenomPair
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
@@ -38,6 +40,15 @@ const SelectTokenModal: FC<ModalProps> = ({
   useOnClickOutside(ref, () => {
     setSearchTokenName('')
     close()
+  });
+
+  console.log({
+    items: items.map(i => {
+      return {
+        denom: i.denom,
+        contractAddress: i.contractAddress
+      }
+    })
   });
 
   return (
@@ -53,11 +64,12 @@ const SelectTokenModal: FC<ModalProps> = ({
       </div>
       <div className={cx('options')}>
         {items?.map((item: TokenItemType | CustomChainInfo) => {
-          let key: string, title: string, balance: string, org: string;
+          let key: string, title: string, balance: string, org: string, denomPair: string;
 
           if (type === 'token') {
             const token = item as TokenItemType;
             key = token.denom;
+            denomPair = token.contractAddress || token.denom;
             title = token.name;
             org = token.org;
             let sumAmountDetails: AmountDetails = {};
@@ -88,6 +100,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
+                setDenomPair(denomPair, title)
                 setSearchTokenName('')
                 close();
               }}

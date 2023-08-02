@@ -18,7 +18,7 @@ import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { fetchTaxRate, fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
@@ -27,6 +27,7 @@ import SlippageModal from '../Modals/SlippageModal';
 import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
+import { setCurrentToken } from 'reducer/tradingSlice';
 
 const cx = cn.bind(styles);
 
@@ -51,8 +52,10 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-
+  const dispatch = useDispatch()
   const [searchTokenName, setSearchTokenName] = useState('');
+
+  const [[fromPair, toPair], setPair] = useState<[any, any]>([{ symbol: "ORAI", denom: 'orai' }, { symbol: "USDT", denom: process.env.REACT_APP_USDT_CONTRACT }]);
 
   const refreshBalances = async () => {
     try {
@@ -146,6 +149,15 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     queryTaxRate();
   }, [])
+
+  console.log({ fromPair, toPair });
+  useEffect(() => {
+    console.log({ fromPair, toPair });
+    dispatch(setCurrentToken({
+      symbol: `${fromPair.symbol}/${toPair.symbol}`,
+      info: `${fromPair.denom}-${toPair.denom}`
+    }));
+  }, [dispatch, fromPair, toPair])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -286,6 +298,15 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                setDenomPair={(denom, name) => {
+                  setPair([
+                    {
+                      symbol: name,
+                      denom
+                    },
+                    toPair
+                  ])
+                }}
               />
             )}
           </div>
@@ -354,6 +375,15 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                setDenomPair={(denom, name) => {
+                  setPair([
+                    fromPair,
+                    {
+                      symbol: name,
+                      denom
+                    }
+                  ])
+                }}
               />
             )}
           </div>
