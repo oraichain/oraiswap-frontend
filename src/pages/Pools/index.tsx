@@ -188,7 +188,7 @@ const ListPools = memo<{
             <SearchInput theme={theme} placeholder="Search by pools or tokens name" onSearch={filterPairs} />
           </div>
         </div>
-        <div className={styles.listpoolsToken_create}>
+        {/* <div className={styles.listpoolsToken_create}>
           <div
             style={{
               color: '#fff',
@@ -199,7 +199,7 @@ const ListPools = memo<{
           >
             List a new ORAI/CW20 token pool
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.listpools_list}>
