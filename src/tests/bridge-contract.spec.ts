@@ -67,7 +67,8 @@ describe.only('IBCModule', () => {
 
     oraiClient = new SimulateCosmWasmClient({
       chainId: 'Oraichain',
-      bech32Prefix: ORAI
+      bech32Prefix: ORAI,
+      metering: process.env.METERING === 'true'
     });
 
     ics20Contract = await deployIcs20Token(oraiClient, { swap_router_contract: routerContractAddress });

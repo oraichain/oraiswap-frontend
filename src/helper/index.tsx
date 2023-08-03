@@ -1,4 +1,13 @@
-import { BSC_SCAN, ETHEREUM_SCAN, HIGH_GAS_PRICE, KWT_SCAN, MULTIPLIER, ORAI, TRON_SCAN } from 'config/constants';
+import {
+  BSC_SCAN,
+  ETHEREUM_SCAN,
+  HIGH_GAS_PRICE,
+  KWT_SCAN,
+  MULTIPLIER,
+  ORAI,
+  TRON_SCAN,
+  WalletType
+} from 'config/constants';
 
 import { EvmDenom, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
@@ -10,6 +19,7 @@ import Long from 'long';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { parseTokenInfo } from 'rest/api';
 import { Pairs } from 'config/pools';
+import Keplr from 'libs/keplr';
 
 export interface Tokens {
   denom?: string;
@@ -89,12 +99,12 @@ export const ethToTronAddress = (address: string) => {
   return ethers.utils.base58.encode(evmAddress + checkSum);
 };
 
-export const displayInstallWallet = (altWallet = 'Keplr') => {
+export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {
   displayToast(
     TToastType.TX_INFO,
     {
-      message: `You need to install OWallet or ${altWallet} to continue.`,
-      customLink: 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
+      message: message ?? `You need to install OWallet or ${altWallet} to continue.`,
+      customLink: link ?? 'https://chrome.google.com/webstore/detail/owallet/hhejbopdnpbjgomhpmegemnjogflenga',
       textLink: 'View on store'
     },
     {
@@ -176,6 +186,35 @@ export const getPairSwapV2 = (contractAddress) => {
     arr,
     arrLength: arr?.length,
     arrDenom,
-    arrIncludesOrai: arr?.includes(ORAI),
+    arrIncludesOrai: arr?.includes(ORAI)
   };
+};
+
+// Switch Wallet Keplr Owallet
+export const getStorageKey = (key = 'typeWallet') => {
+  return localStorage.getItem(key);
+};
+
+export const setStorageKey = (key = 'typeWallet', value) => {
+  return localStorage.setItem(key, value);
+};
+
+export const checkVersionWallet = () => {
+  return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
+};
+
+export const keplrCheck = (type: WalletType) => {
+  return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
+};
+
+export const owalletCheck = (type: WalletType) => {
+  return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
+};
+
+export const switchWallet = (type: WalletType) => {
+  if (type === 'owallet' && window.owallet) {
+    window.Keplr = new Keplr(type);
+    return true;
+  }
+  return false;
 };
