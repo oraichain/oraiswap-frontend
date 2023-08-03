@@ -17,7 +17,7 @@ import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
 import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { UniversalSwapHandler, checkEvmAddress } from 'pages/UniversalSwap/helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -68,6 +68,11 @@ describe('universal-swap', () => {
 
     let finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
     expect(finalAmount).toBe(0.499999);
+  });
+
+  it('calculate minimum', async () => {
+    const calculate = await calculateMinimum('36363993', 2.5);
+    expect(calculate).toBe(35454894n);
   });
 
   describe('generate msgs contract for swap action', () => {

@@ -12,7 +12,7 @@ import { CwIcs20LatestQueryClient, Ratio, TransferBackMsg, Uint128 } from '@orai
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
+import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
 import { findToToken, transferEvmToIBC } from 'pages/Balance/helpers';
 import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -30,6 +30,16 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
     return ratio;
   } catch (error) {
     console.log({ error });
+  }
+};
+
+export const calculateMinimum = (simulateAmount: number | string, userSlippage: number): bigint | string => {
+  if (!simulateAmount) return '0';
+  try {
+    return BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+  } catch (error) {
+    console.log({ error });
+    return '0';
   }
 };
 
