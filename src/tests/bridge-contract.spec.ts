@@ -1,4 +1,4 @@
-import { toBinary } from '@cosmjs/cosmwasm-stargate';
+import { Event, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coins } from '@cosmjs/proto-signing';
 import { CWSimulateApp, GenericError, IbcOrder, IbcPacket, SimulateCosmWasmClient } from '@oraichain/cw-simulate';
 import { Ok } from 'ts-results';
@@ -365,6 +365,10 @@ describe.only('IBCModule', () => {
       sender: cosmosSenderAddress,
       memo: ''
     };
+    const findWasmEvent = (events: Event[], key: string, value: string) =>
+      events.find(
+        (event) => event.type === 'wasm' && event.attributes.find((attr) => attr.key === key && attr.value === value)
+      );
     beforeEach(async () => {
       assetInfos = [{ native_token: { denom: ORAI } }, { token: { contract_addr: airiToken.contractAddress } }];
       // upload pair & lp token code id
@@ -460,9 +464,9 @@ describe.only('IBCModule', () => {
       // mint lots of orai, airi for the pair contracts to mock provide lp
       // here, ratio is 1:1 => 1 AIRI = 1 ORAI
       oraiClient.app.bank.setBalance(firstPairInfo.contract_addr, coins(initialBalanceAmount, ORAI));
-      airiToken.mint({ amount: initialBalanceAmount, recipient: firstPairInfo.contract_addr });
+      await airiToken.mint({ amount: initialBalanceAmount, recipient: firstPairInfo.contract_addr });
       oraiClient.app.bank.setBalance(secondPairInfo.contract_addr, coins(initialBalanceAmount, ORAI));
-      usdtToken.mint({ amount: initialBalanceAmount, recipient: secondPairInfo.contract_addr });
+      await usdtToken.mint({ amount: initialBalanceAmount, recipient: secondPairInfo.contract_addr });
     });
 
     it('test-simulate-withdraw-liquidity', async () => {
@@ -547,14 +551,13 @@ describe.only('IBCModule', () => {
       expect(simulateResult.amount).toEqual('1');
     });
 
-    it.each([
+    it.each<[string, string, string]>([
       [`${bobAddress}:orai`, bobAddress, 'Generic error: Destination channel empty in build ibc msg'],
       [
         `channel-0/not-evm-based-nor-cosmos-based:orai`,
         bobAddress,
         'Generic error: The destination info is neither evm or cosmos based'
       ]
-      // [`channel-0/${bobAddressEth}:foo`, 'cannot find pair mappings']
     ])(
       'cw-ics20-test-single-step-native-token-swap-operations-to-dest-denom memo %s expected recipient %s',
       async (memo: string, expectedRecipient: string, expectedIbcErrorMsg: string) => {
@@ -568,6 +571,7 @@ describe.only('IBCModule', () => {
           },
           relayer: cosmosSenderAddress
         });
+
         const bobBalance = oraiClient.app.bank.getBalance(expectedRecipient);
         expect(bobBalance.length).toBeGreaterThan(0);
         expect(bobBalance[0].denom).toEqual(ORAI);
@@ -585,12 +589,21 @@ describe.only('IBCModule', () => {
     );
 
     it.each([
-      [`${bobAddress}`, 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3', bobAddress], // hard-coded usdt address
-      [`${bobAddress}`, 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu', bobAddress], // edge case, dest denom is also airi
-      [`foobar`, 'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu', bobAddress] // we ignore receiver in memo since its not reliable. Get receiver from ics package
+      [
+        `${bobAddress}`,
+        'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3',
+        bobAddress,
+        'Generic error: Destination channel empty in build ibc msg'
+      ], // hard-coded usdt address
+      [
+        `${bobAddress}`,
+        'orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu',
+        bobAddress,
+        'Generic error: Destination channel empty in build ibc msg'
+      ] // edge case, dest denom is also airi
     ])(
       'cw-ics20-test-single-step-cw20-token-swap-operations-to-dest-denom memo %s dest denom %s expected recipient %s',
-      async (memo: string, destDenom: string, expectedRecipient: string) => {
+      async (memo: string, destDenom: string, expectedRecipient: string, expectedIbcErrorMsg: string) => {
         // now send ibc package
         icsPackage.memo = memo + `:${destDenom}`;
         // transfer from cosmos to oraichain, should pass
@@ -601,15 +614,145 @@ describe.only('IBCModule', () => {
           },
           relayer: cosmosSenderAddress
         });
-        console.dir(result, { depth: null });
+
         const token = new OraiswapTokenClient(oraiClient, oraiSenderAddress, destDenom);
         const cw20Balance = await token.balance({ address: expectedRecipient });
         expect(parseInt(cw20Balance.balance)).toBeGreaterThan(1000);
-        expect(result.attributes.find((attr) => attr.key === 'ibc_error_msg').value).toEqual(
-          'Generic error: Destination channel empty in build ibc msg'
-        );
+        expect(result.attributes.find((attr) => attr.key === 'ibc_error_msg').value).toEqual(expectedIbcErrorMsg);
       }
     );
+
+    it('cw-ics20-test-single-step-cw20-token-swap-operations-to-dest-denom-FAILED-cannot-simulate-swap', async () => {
+      // now send ibc package
+      icsPackage.memo = `channel-0/${bobAddressEth}:foo`;
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      expect(result.attributes.find((attr) => attr.key === 'ibc_error_msg').value).toEqual(
+        'Cannot simulate swap with ops: [OraiSwap { offer_asset_info: Token { contract_addr: Addr("orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu") }, ask_asset_info: NativeToken { denom: "orai" } }, OraiSwap { offer_asset_info: NativeToken { denom: "orai" }, ask_asset_info: NativeToken { denom: "foo" } }] with error: "Error parsing into type oraiswap::router::SimulateSwapOperationsResponse: unknown field `ok`, expected `amount`"'
+      );
+    });
+
+    it('cw-ics20-test-single-step-cw20-FAILED-NATIVE_RECEIVE_ID-ack-SUCCESS', async () => {
+      // now send ibc package
+      icsPackage.memo = '';
+      icsPackage.amount = initialBalanceAmount + '0';
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      expect(findWasmEvent(result.events, 'action', 'native_receive_id')).not.toBeUndefined();
+      // ack should be successful
+      expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
+
+      // other types of reply id must not be called
+      expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'follow_up_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'refund_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-cw20-FAILED-SWAP_OPS_FAILURE_ID', async () => {
+      // fixture
+      icsPackage.memo = `${bobAddress}:${usdtToken.contractAddress}`;
+      icsPackage.amount = initialBalanceAmount + '0';
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).not.toBeUndefined();
+      // ack should be successful
+      expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
+      // refunding also fails because of not enough balance to refund
+      expect(findWasmEvent(result.events, 'action', 'refund_failure_id')).not.toBeUndefined();
+
+      // other types of reply id must not be called
+      expect(findWasmEvent(result.events, 'action', 'native_receive_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'follow_up_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-cw20-FAILED-IBC_TRANSFER_NATIVE_ERROR_ID-ack-SUCCESS', async () => {
+      // fixture
+      icsPackage.memo = `unknown-channel/${bobAddress}:${usdtToken.contractAddress}`;
+      icsPackage.amount = initialBalanceAmount;
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      // refunding also fails because of not enough balance to refund
+      expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).not.toBeUndefined();
+      // ack should be successful
+      expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
+      expect(findWasmEvent(result.events, 'undo_increase_channel', channel)).toBeUndefined();
+
+      // other types of reply id must not be called
+      expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'native_receive_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'follow_up_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'refund_failure_id')).toBeUndefined();
+
+      // for ibc native transfer case, we wont have refund either
+      expect(
+        result.events.find(
+          (ev) =>
+            ev.type === 'wasm' &&
+            ev.attributes.find((attr) => attr.key === 'action' && attr.value === 'transfer') &&
+            ev.attributes.find((attr) => attr.key === 'to' && attr.value === bobAddress)
+        )
+      ).toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-cw20-success-FOLLOW_UP_IBC_SEND_FAILURE_ID-must-not-have-SWAP_OPS_FAILURE_ID-or-on_packet_failure-ack-SUCCESS', async () => {
+      // fixture
+      icsPackage.memo = `${channel}/${bobAddress}:${airiToken.contractAddress}`;
+      icsPackage.amount = initialBalanceAmount;
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      // all id types of reply id must not be called, especially swap_ops_failure_id
+      expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'native_receive_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'follow_up_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'refund_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'acknowledge')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'undo_reduce_channel', channel)).toBeUndefined();
+      // ack should be successful
+      expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
+
+      // for ibc native transfer case, we wont have refund either
+      expect(
+        result.events.find(
+          (ev) =>
+            ev.type === 'wasm' &&
+            ev.attributes.find((attr) => attr.key === 'action' && attr.value === 'transfer') &&
+            ev.attributes.find((attr) => attr.key === 'to' && attr.value === bobAddress)
+        )
+      ).toBeUndefined();
+    });
 
     it.each([
       [channel, 'abcd', 'orai1n6fwuamldz6mv5f3qwe9296pudjjemhmkfcgc3'], // hard-coded usdt address
@@ -661,13 +804,11 @@ describe.only('IBCModule', () => {
           relayer: cosmosSenderAddress
         });
 
-        console.log('result: ', JSON.stringify(result.events));
         const sendPacketEvent = result.events.find((event) => event.type === 'send_packet');
         expect(sendPacketEvent).not.toBeUndefined();
         const packetHex = sendPacketEvent.attributes.find((attr) => attr.key === 'packet_data_hex').value;
         expect(packetHex).not.toBeUndefined();
         const packet = JSON.parse(Buffer.from(packetHex, 'hex').toString('ascii'));
-        console.log('packet: ', packet);
         expect(packet.receiver).toEqual(icsPackage.sender);
         expect(packet.sender).toEqual(ics20Contract.contractAddress);
         // expect(packet.memo).toEqual(ics20Contract.contractAddress);
@@ -874,7 +1015,7 @@ describe.only('IBCModule', () => {
             },
             relayer: cosmosSenderAddress
           });
-          console.dir(result, { depth: null });
+
           const ibcEvent = result.events.find(
             (event) => event.type === 'transfer' && event.attributes.find((attr) => attr.key === 'channel')
           );
@@ -995,7 +1136,6 @@ describe.only('IBCModule', () => {
         },
         relayer: cosmosSenderAddress
       });
-      console.dir(result, { depth: null });
       expect(result.messages.length).toEqual(1);
       expect((result.messages[0].msg as any).ibc.transfer.channel_id).toEqual(unknownChannel);
       expect((result.messages[0].msg as any).ibc.transfer.to_address).toEqual(bobAddress);
@@ -1113,6 +1253,66 @@ describe.only('IBCModule', () => {
       );
       expect(hasTokenFee).not.toBeUndefined();
       expect(result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === tokenFee)).not.toBeUndefined();
+    });
+
+    // execute transfer to remote test cases
+    it('test-execute_transfer_back_to_remote_chain-native-FAILED-no-funds-sent', async () => {
+      oraiClient.app.bank.setBalance(senderAddress, coins(initialBalanceAmount, ORAI));
+      try {
+        await ics20Contract.transferToRemote(
+          {
+            localChannelId: '1',
+            memo: null,
+            remoteAddress: 'a',
+            remoteDenom: 'a',
+            timeout: 60
+          },
+          'auto',
+          null
+        );
+      } catch (error) {
+        expect(error.toString()).toContain('No funds sent');
+      }
+    });
+
+    it('test-execute_transfer_back_to_remote_chain-native-FAILED-no-mapping-found', async () => {
+      oraiClient.app.bank.setBalance(senderAddress, coins(initialBalanceAmount, ORAI));
+      try {
+        await ics20Contract.transferToRemote(
+          {
+            localChannelId: '1',
+            memo: null,
+            remoteAddress: 'a',
+            remoteDenom: 'a',
+            timeout: 60
+          },
+          'auto',
+          null,
+          [{ denom: ORAI, amount: '100' }]
+        );
+      } catch (error) {
+        expect(error.toString()).toContain('Could not find the mapping pair');
+      }
+    });
+
+    it('test-execute_transfer_back_to_remote_chain-native-FAILED-no-mapping-found', async () => {
+      oraiClient.app.bank.setBalance(senderAddress, coins(initialBalanceAmount, ORAI));
+      try {
+        await ics20Contract.transferToRemote(
+          {
+            localChannelId: '1',
+            memo: null,
+            remoteAddress: 'a',
+            remoteDenom: 'a',
+            timeout: 60
+          },
+          'auto',
+          null,
+          [{ denom: ORAI, amount: '100' }]
+        );
+      } catch (error) {
+        expect(error.toString()).toContain('Could not find the mapping pair');
+      }
     });
   });
 });
