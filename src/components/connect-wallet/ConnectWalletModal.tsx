@@ -60,18 +60,18 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
 
   const arr = [
     {
-      img: KeplrImage,
-      isCheck: isCheckKeplr,
-      type: 'keplr',
-      title: 'Connect Keplr',
-      label: 'Keplr Wallet'
-    },
-    {
       img: OWalletImage,
       isCheck: isCheckOwallet,
       type: 'owallet',
       title: 'Connect Owallet',
       label: 'Owallet'
+    },
+    {
+      img: KeplrImage,
+      isCheck: isCheckKeplr,
+      type: 'keplr',
+      title: 'Connect Keplr',
+      label: 'Keplr Wallet'
     }
   ];
 
