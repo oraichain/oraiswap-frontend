@@ -661,7 +661,7 @@ describe.only('IBCModule', () => {
       expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).toBeUndefined();
     });
 
-    it('cw-ics20-test-single-step-cw20-FAILED-SWAP_OPS_FAILURE_ID', async () => {
+    it('cw-ics20-test-single-step-cw20-FAILED-SWAP_OPS_FAILURE_ID-ack-SUCCESS', async () => {
       // fixture
       icsPackage.memo = `${bobAddress}:${usdtToken.contractAddress}`;
       icsPackage.amount = initialBalanceAmount + '0';
@@ -718,6 +718,31 @@ describe.only('IBCModule', () => {
             ev.attributes.find((attr) => attr.key === 'to' && attr.value === bobAddress)
         )
       ).toBeUndefined();
+    });
+
+    it('cw-ics20-test-single-step-cw20-FAILED-REFUND_FAILURE_ID-ack-SUCCESS', async () => {
+      // fixture
+      icsPackage.memo = `${bobAddress}:${usdtToken.contractAddress}`;
+      icsPackage.amount = initialBalanceAmount + '0';
+      // transfer from cosmos to oraichain, should pass
+      const result = await cosmosChain.ibc.sendPacketReceive({
+        packet: {
+          data: toBinary(icsPackage),
+          ...packetData
+        },
+        relayer: cosmosSenderAddress
+      });
+      console.dir(result, { depth: null });
+      expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).not.toBeUndefined();
+      // ack should be successful
+      expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
+      // refunding also fails because of not enough balance to refund
+      expect(findWasmEvent(result.events, 'action', 'refund_failure_id')).not.toBeUndefined();
+
+      // other types of reply id must not be called
+      expect(findWasmEvent(result.events, 'action', 'native_receive_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'follow_up_failure_id')).toBeUndefined();
+      expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).toBeUndefined();
     });
 
     it('cw-ics20-test-single-step-cw20-success-FOLLOW_UP_IBC_SEND_FAILURE_ID-must-not-have-SWAP_OPS_FAILURE_ID-or-on_packet_failure-ack-SUCCESS', async () => {
