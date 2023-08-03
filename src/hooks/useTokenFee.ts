@@ -10,7 +10,7 @@ export default function useTokenFee(remoteTokenDenom) {
         let tokenFee = 0;
         const ratio = await getTransferTokenFee({ remoteTokenDenom });
         if (ratio) {
-          tokenFee = (ratio.numerator / ratio.denominator) * 100;
+          tokenFee = (ratio.nominator / ratio.denominator) * 100;
         }
         setTokenFee(tokenFee);
       }

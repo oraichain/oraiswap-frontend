@@ -4,9 +4,13 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
+import { WalletType } from 'config/constants';
 import { network } from 'config/networks';
 export default class Keplr {
-  constructor() {}
+  typeWallet: WalletType;
+  constructor(type: WalletType = 'keplr') {
+    this.typeWallet = type;
+  }
 
   disconnect() {
     // clear data?
@@ -14,7 +18,7 @@ export default class Keplr {
 
   // priority with owallet
   private get keplr(): keplr {
-    return window.keplr;
+    return this.typeWallet === 'owallet' ? window.owallet : window.keplr;
   }
 
   async getOfflineSigner(chainId: string): Promise<OfflineSigner | OfflineDirectSigner> {
