@@ -1205,7 +1205,7 @@ describe.only('IBCModule', () => {
       const denominator = 10;
       const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
       await ics20Contract.updateConfig({
-        tokenFee: [{ token_denom: airiIbcDenom, ratio: { numerator: 1, denominator: 10 } }]
+        tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }]
       });
 
       const icsPackage: FungibleTokenPacketData = {
@@ -1240,7 +1240,7 @@ describe.only('IBCModule', () => {
       const denominator = 10;
       const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
       await ics20Contract.updateConfig({
-        tokenFee: [{ token_denom: airiIbcDenom, ratio: { numerator: 1, denominator: 10 } }],
+        tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }],
         relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }]
       });
 
