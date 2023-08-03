@@ -71,8 +71,10 @@ describe('universal-swap', () => {
   });
 
   it('calculate minimum', async () => {
-    const calculate = await calculateMinimum('36363993', 2.5);
+    const calculate = calculateMinimum('36363993', 2.5);
     expect(calculate).toBe(35454894n);
+    const errorCase = calculateMinimum(undefined, 2.5);
+    expect(errorCase).toEqual('0');
   });
 
   describe('generate msgs contract for swap action', () => {
