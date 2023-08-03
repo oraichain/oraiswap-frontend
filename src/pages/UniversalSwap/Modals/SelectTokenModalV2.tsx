@@ -42,15 +42,6 @@ const SelectTokenModal: FC<ModalProps> = ({
     close()
   });
 
-  console.log({
-    items: items.map(i => {
-      return {
-        denom: i.denom,
-        contractAddress: i.contractAddress
-      }
-    })
-  });
-
   return (
     <div ref={ref} className={cx('select')}>
       <div className={cx('title')}>
@@ -69,7 +60,7 @@ const SelectTokenModal: FC<ModalProps> = ({
           if (type === 'token') {
             const token = item as TokenItemType;
             key = token.denom;
-            denomPair = token.contractAddress || token.denom;
+            denomPair = token.contractAddress ?? token.denom;
             title = token.name;
             org = token.org;
             let sumAmountDetails: AmountDetails = {};

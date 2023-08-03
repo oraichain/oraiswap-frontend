@@ -1,6 +1,6 @@
-import { DATA_PAIRS } from 'layouts/App';
 import { CHART_PERIODS } from './constants';
 import { Bar } from './types';
+import { pairsChart } from '../config';
 
 export function getObjectKeyFromValue(value, object) {
   return Object.keys(object).find((key) => object[key] === value);
@@ -70,7 +70,7 @@ export function parseFullSymbol(fullSymbol) {
 
 export function parseChannelFromPair(pair: string): string {
   try {
-    const pairInfo = DATA_PAIRS.find((p) => p.info === pair);
+    const pairInfo = pairsChart.find((p) => p.info === pair);
     return pairInfo.symbol;
   } catch (error) {
     console.error('error parse channel from pair', error);

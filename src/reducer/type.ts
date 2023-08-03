@@ -59,6 +59,11 @@ export interface Orderbook {
   time: string;
 }
 
+export type TVToken = {
+  symbol: string;
+  denom: string;
+};
+
 export type PairToken = {
   symbol: string;
   info: string;
@@ -77,9 +82,7 @@ export type InfoAToken = {
 
 export interface TradingState {
   listToken: PairToken[];
-  listTokenFilter: PairToken[];
   currentToken: PairToken | null;
-  currentPrice: string;
   chartLoading: boolean;
 }
 

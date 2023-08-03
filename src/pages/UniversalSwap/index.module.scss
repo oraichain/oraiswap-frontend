@@ -5,11 +5,14 @@
   flex-wrap: wrap;
   margin: 0 -12px;
   padding: 80px 32px 32px 32px;
+
   .swap-col {
     padding: 0 12px;
+
     &.w60 {
       width: 60%;
     }
+
     &.w40 {
       width: 40%;
     }
@@ -19,10 +22,13 @@
 @include mobile {
   .swap-container {
     padding: 0;
+
     .swap-col {
       &.w60 {
         width: 100%;
+        height: 400px;
       }
+
       &.w40 {
         width: 100%;
         margin-top: 20px;

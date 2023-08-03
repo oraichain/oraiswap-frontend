@@ -1,12 +1,13 @@
 import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
+import { formateNumberDecimalsAuto, generateNewPair, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
 import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { PairToken, TVToken } from 'reducer/type';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -149,4 +150,83 @@ describe('should utils functions in libs/utils run exactly', () => {
     ]);
     expect(data).toEqual(false);
   });
+
+  it.each<[string, TVToken, TVToken, PairToken, PairToken | null]>([
+    [
+      'from-&-to-are-NOT-pair-in-pool-and-are-NOT-reversed',
+      {
+        symbol: 'FOO',
+        denom: 'foo'
+      },
+      {
+        symbol: 'BAR',
+        denom: 'bar'
+      },
+      {
+        symbol: 'ORAI/USDT',
+        info: 'orai-usdt'
+      },
+      {
+        symbol: 'FOO/BAR',
+        info: 'foo-bar'
+      }
+    ],
+    [
+      'from-&-to-are-NOT-pair-in-pool-and-are-reversed',
+      {
+        symbol: 'FOO',
+        denom: 'foo'
+      },
+      {
+        symbol: 'BAR',
+        denom: 'bar'
+      },
+      {
+        symbol: 'FOO/BAR',
+        info: 'foo-bar'
+      },
+      null
+    ],
+    [
+      'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
+      {
+        symbol: 'ORAI',
+        denom: 'orai'
+      },
+      {
+        symbol: 'USDT',
+        denom: process.env.REACT_APP_USDT_CONTRACT
+      },
+      {
+        symbol: 'FOO/BAR',
+        info: 'foo-bar'
+      },
+      {
+        symbol: 'ORAI/USDT',
+        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+      }
+    ],
+    [
+      'from-&-to-are-pair-in-pool-and-are-reversed',
+      {
+        symbol: 'USDT',
+        denom: process.env.REACT_APP_USDT_CONTRACT
+      },
+      {
+        symbol: 'ORAI',
+        denom: 'orai'
+      },
+      {
+        symbol: 'ORAI/USDT',
+        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+      },
+      null
+    ]
+  ])(
+    'test-generateNewPair-with-%s-should-return-correctly-new-pair',
+    (_caseName, from, to, currentPair, expectedResult) => {
+      const result = generateNewPair(from, to, currentPair);
+      expect(result).toEqual(expectedResult);
+    }
+  );
 });

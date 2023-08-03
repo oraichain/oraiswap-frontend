@@ -125,7 +125,7 @@ describe.only('test-utils-func', () => {
 
   it.each([
     ['invalid-pair', undefined],
-    ['orai - orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh', 'ORAI/USDT']
+    ['orai-orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh', 'ORAI/USDT']
   ])(
     'test-parseChannelFromPair-with-%s-should-return-correctly-channel-name',
     (pair: string, expectedResult: string) => {

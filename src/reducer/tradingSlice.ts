@@ -2,13 +2,11 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from 'store/configure';
 import { PairToken, TradingState } from './type';
-import { DATA_PAIRS } from 'layouts/App';
+import { pairsChart } from 'components/TVChartContainer/config';
 
 const initialState: TradingState = {
   listToken: [],
-  listTokenFilter: [],
-  currentToken: DATA_PAIRS[0],
-  currentPrice: '',
+  currentToken: pairsChart.find((pair) => pair.symbol === 'ORAI/USDT'),
   chartLoading: false
 };
 
@@ -16,21 +14,12 @@ const tradingSlice = createSlice({
   name: 'trading',
   initialState,
   reducers: {
-    searchToken: (state, action: PayloadAction<string>) => {
-      console.log('actin', action.payload);
-    },
     setListToken: (state, action: PayloadAction<PairToken[]>) => {
       state.listToken = action.payload;
-    },
-    setListTokenFilterInitial: (state, action: PayloadAction<PairToken[]>) => {
-      state.listTokenFilter = action.payload;
     },
     setCurrentToken: (state, action: PayloadAction<PairToken>) => {
       console.log('st', action.payload);
       state.currentToken = action.payload;
-    },
-    setCurrentPrice: (state, action: PayloadAction<string>) => {
-      state.currentPrice = action.payload;
     },
     setChartLoading: (state, action: PayloadAction<boolean>) => {
       state.chartLoading = action.payload;
@@ -39,19 +28,10 @@ const tradingSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const {
-  searchToken,
-  setCurrentToken,
-  setListToken,
-  setListTokenFilterInitial,
-  setCurrentPrice,
-  setChartLoading
-} = tradingSlice.actions;
+export const { setCurrentToken, setListToken, setChartLoading } = tradingSlice.actions;
 
-export const selectTokenFilter = (state: RootState): PairToken[] => state.trading.listTokenFilter;
 export const selectCurrentToken = (state: RootState): PairToken => state.trading.currentToken;
 export const selectChartLoading = (state: RootState): boolean => state.trading.chartLoading;
-export const selectCurrentPrice = (state: RootState): string => state.trading.currentPrice;
 export const selectListToken = (state: RootState): PairToken[] => state.trading.listToken;
 
 export default tradingSlice.reducer;

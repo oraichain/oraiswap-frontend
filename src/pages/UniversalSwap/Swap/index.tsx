@@ -14,7 +14,7 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { generateNewPair, toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
@@ -27,7 +27,8 @@ import SlippageModal from '../Modals/SlippageModal';
 import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
-import { setCurrentToken } from 'reducer/tradingSlice';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { TVToken } from 'reducer/type';
 
 const cx = cn.bind(styles);
 
@@ -54,8 +55,9 @@ const SwapComponent: React.FC<{
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch()
   const [searchTokenName, setSearchTokenName] = useState('');
+  const currentPair = useSelector(selectCurrentToken);
 
-  const [[fromPair, toPair], setPair] = useState<[any, any]>([{ symbol: "ORAI", denom: 'orai' }, { symbol: "USDT", denom: process.env.REACT_APP_USDT_CONTRACT }]);
+  const [[fromPair, toPair], setPair] = useState<[TVToken, TVToken]>([{ symbol: "ORAI", denom: 'orai' }, { symbol: "USDT", denom: process.env.REACT_APP_USDT_CONTRACT }]);
 
   const refreshBalances = async () => {
     try {
@@ -150,14 +152,11 @@ const SwapComponent: React.FC<{
     queryTaxRate();
   }, [])
 
-  console.log({ fromPair, toPair });
   useEffect(() => {
-    console.log({ fromPair, toPair });
-    dispatch(setCurrentToken({
-      symbol: `${fromPair.symbol}/${toPair.symbol}`,
-      info: `${fromPair.denom}-${toPair.denom}`
-    }));
-  }, [dispatch, fromPair, toPair])
+    const newTVPair = generateNewPair(fromPair, toPair, currentPair)
+    if (newTVPair) dispatch(setCurrentToken(newTVPair));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromPair, toPair])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -317,6 +316,10 @@ const SwapComponent: React.FC<{
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
+              setPair([
+                toPair,
+                fromPair,
+              ])
             }}
             alt="ant"
           />

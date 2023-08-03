@@ -7,7 +7,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
@@ -17,15 +17,9 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
 import './index.scss';
-import { setCurrentToken, setListToken, setListTokenFilterInitial } from 'reducer/tradingSlice';
+import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
-
-export const DATA_PAIRS = [
-  {
-    symbol: 'ORAI/USDT',
-    info: "orai-orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh",
-  }
-];
+import { pairsChart } from 'components/TVChartContainer/config';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -40,9 +34,7 @@ const App = () => {
 
   const dispatch = useDispatch();
   const getPairs = () => {
-    dispatch(setListToken(DATA_PAIRS));
-    dispatch(setListTokenFilterInitial(DATA_PAIRS));
-    dispatch(setCurrentToken(DATA_PAIRS[0]));
+    dispatch(setListToken(pairsChart));
   };
 
   useEffect(() => {
