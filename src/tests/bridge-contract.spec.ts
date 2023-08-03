@@ -547,14 +547,14 @@ describe.only('IBCModule', () => {
       expect(simulateResult.amount).toEqual('1');
     });
 
-    it.each([
+    it.each<[string, string, string]>([
       [`${bobAddress}:orai`, bobAddress, 'Generic error: Destination channel empty in build ibc msg'],
       [
         `channel-0/not-evm-based-nor-cosmos-based:orai`,
         bobAddress,
         'Generic error: The destination info is neither evm or cosmos based'
-      ]
-      // [`channel-0/${bobAddressEth}:foo`, 'cannot find pair mappings']
+      ],
+      [`channel-0/${bobAddressEth}:foo`, bobAddress, 'cannot find pair mappings']
     ])(
       'cw-ics20-test-single-step-native-token-swap-operations-to-dest-denom memo %s expected recipient %s',
       async (memo: string, expectedRecipient: string, expectedIbcErrorMsg: string) => {
