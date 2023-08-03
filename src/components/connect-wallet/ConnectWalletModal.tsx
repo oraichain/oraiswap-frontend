@@ -63,8 +63,8 @@ const ConnectWalletModalCosmos: React.FC<ConnectWalletModalProps> = ({
       img: OWalletImage,
       isCheck: isCheckOwallet,
       type: 'owallet',
-      title: 'Connect Owallet',
-      label: 'Owallet'
+      title: 'Connect OWallet',
+      label: 'OWallet'
     },
     {
       img: KeplrImage,
