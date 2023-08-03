@@ -11,7 +11,14 @@ import { useSelector } from 'react-redux';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PairInfoData } from './helpers';
-import { useFetchAllPairs, useFetchApr, useFetchCacheLpPools, useFetchCachePairs, useFetchMyPairs, useFetchPairInfoDataList } from './hooks';
+import {
+  useFetchAllPairs,
+  useFetchApr,
+  useFetchCacheLpPools,
+  useFetchCachePairs,
+  useFetchMyPairs,
+  useFetchPairInfoDataList
+} from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import { RootState } from 'store/configure';
@@ -20,7 +27,7 @@ import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -135,10 +142,7 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter(
-      (pairInfo) =>
-        parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance)
-    );
+    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance));
   }, [pairInfos]);
 
   useEffect(() => {

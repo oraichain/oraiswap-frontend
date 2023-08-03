@@ -87,6 +87,12 @@ export class Pairs {
         { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } }
       ]
     }
+    // {
+    //   asset_infos: [
+    //     { native_token: { denom: ORAI } }, // or your ibc native / cw20 token pair
+    //     { token: { contract_addr: 'orai17l2zk3arrx0a0fyuneyx8raln68622a2lrsz8ph75u7gw9tgz3esayqryf' } }
+    //   ]
+    // }
   ];
 
   public static getPoolTokens(): TokenItemType[] {
