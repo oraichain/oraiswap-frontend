@@ -95,7 +95,7 @@ export async function deployOraiDexContracts(): Promise<{
   const { contractAddress: multicallAddr } = await commonArtifacts.deployContract(
     client,
     devAddress,
-    {},
+    undefined,
     'multicall',
     'multicall'
   );
