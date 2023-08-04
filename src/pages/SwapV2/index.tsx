@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Content from 'layouts/Content';
 import SwapComponent from './Swap';
-import SwapChart from './Chart';
 import cn from 'classnames/bind';
 import styles from './index.module.scss';
+import TVChartContainer from 'components/TVChartContainer/TVChartContainer';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -13,7 +13,7 @@ const Swap: React.FC = () => {
     <Content nonBackground>
       <div className={cx('swap-container')}>
         <div className={cx('swap-col', 'w60')}>
-          <SwapChart fromTokenDenom={fromTokenDenom} />
+          <TVChartContainer />
         </div>
         <div className={cx('swap-col', 'w40')}>
           <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />

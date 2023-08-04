@@ -21,6 +21,7 @@ interface ModalProps {
   items?: TokenItemType[] | CustomChainInfo[];
   setToken: (denom: string, contract_addr?: string) => void;
   type?: 'token' | 'network';
+  setSymbol: (symbol: string) => void;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -31,7 +32,8 @@ const SelectTokenModal: FC<ModalProps> = ({
   items,
   setToken,
   prices,
-  amounts
+  amounts,
+  setSymbol
 }) => {
   const [theme] = useConfigReducer('theme');
 
@@ -76,6 +78,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 key={key}
                 onClick={() => {
                   setToken(key, type === 'token' && (item as TokenItemType).contractAddress);
+                  setSymbol(title)
                   close();
                 }}
               >
