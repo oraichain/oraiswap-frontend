@@ -8,18 +8,18 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, STABLE_DENOM, TRON_DENOM } from 'config/constants';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction, parseAssetInfo } from 'helper';
+import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
-import { fetchCachedPairInfo, fetchPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCachedPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
@@ -27,6 +27,9 @@ import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { TVToken } from 'reducer/type';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 
 const cx = cn.bind(styles);
 
@@ -48,6 +51,9 @@ const SwapComponent: React.FC<{
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const cachedPairs = useSelector((state: RootState) => state.pairInfos.pairInfos);
+  const [[fromSymbol, toSymbol], setSymbols] = useState<[TVToken, TVToken]>([{ symbol: "ORAI" }, { symbol: "USDT" }]);
+  const dispatch = useDispatch()
+  const currentPair = useSelector(selectCurrentToken);
 
   const loadTokenAmounts = useLoadTokens();
 
@@ -130,6 +136,12 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
+
+  useEffect(() => {
+    const newTVPair = generateNewSymbol(fromSymbol, toSymbol, currentPair)
+    if (newTVPair) dispatch(setCurrentToken(newTVPair));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromSymbol, toSymbol])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -238,6 +250,10 @@ const SwapComponent: React.FC<{
           onClick={() => {
             setSwapTokens([toTokenDenom, fromTokenDenom]);
             setSwapAmount([toAmountToken, fromAmountToken]);
+            setSymbols([
+              toSymbol,
+              fromSymbol,
+            ])
           }}
           alt="ant"
         />
@@ -340,6 +356,14 @@ const SwapComponent: React.FC<{
             }
             setSwapTokens([denom, arrDenom ?? toTokenDenom]);
           }}
+          setSymbol={(symbol) => {
+            setSymbols([
+              {
+                symbol,
+              },
+              toSymbol
+            ])
+          }}
         />
       ) : (
         <SelectTokenModal
@@ -361,6 +385,14 @@ const SwapComponent: React.FC<{
               return setSwapTokens([fromTokenDenom, denom]);
             }
             setSwapTokens([arrDenom ?? fromTokenDenom, denom]);
+          }}
+          setSymbol={(symbol) => {
+            setSymbols([
+              fromSymbol,
+              {
+                symbol,
+              }
+            ])
           }}
         />
       )}
