@@ -61,7 +61,6 @@ export interface Orderbook {
 
 export type TVToken = {
   symbol: string;
-  denom: string;
 };
 
 export type PairToken = {
@@ -84,6 +83,7 @@ export interface TradingState {
   listToken: PairToken[];
   currentToken: PairToken | null;
   chartLoading: boolean;
+  chartDataLength: number;
 }
 
 export interface TypeDecimal {

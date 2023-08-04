@@ -8,4 +8,5 @@ export type Bar = BarType & {
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
   symbols: [string, string];
+  denoms?: [string, string];
 };

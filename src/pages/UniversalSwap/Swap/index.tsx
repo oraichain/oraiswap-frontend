@@ -14,7 +14,7 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { generateNewPair, toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
@@ -29,6 +29,7 @@ import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { TVToken } from 'reducer/type';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 
 const cx = cn.bind(styles);
 
@@ -57,7 +58,7 @@ const SwapComponent: React.FC<{
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
 
-  const [[fromPair, toPair], setPair] = useState<[TVToken, TVToken]>([{ symbol: "ORAI", denom: 'orai' }, { symbol: "USDT", denom: process.env.REACT_APP_USDT_CONTRACT }]);
+  const [[fromSymbol, toSymbol], setSymbols] = useState<[TVToken, TVToken]>([{ symbol: "ORAI" }, { symbol: "USDT" }]);
 
   const refreshBalances = async () => {
     try {
@@ -153,10 +154,10 @@ const SwapComponent: React.FC<{
   }, [])
 
   useEffect(() => {
-    const newTVPair = generateNewPair(fromPair, toPair, currentPair)
+    const newTVPair = generateNewSymbol(fromSymbol, toSymbol, currentPair)
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromPair, toPair])
+  }, [fromSymbol, toSymbol])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -297,13 +298,12 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
-                setDenomPair={(denom, name) => {
-                  setPair([
+                setSymbol={(symbol) => {
+                  setSymbols([
                     {
-                      symbol: name,
-                      denom
+                      symbol,
                     },
-                    toPair
+                    toSymbol
                   ])
                 }}
               />
@@ -316,9 +316,9 @@ const SwapComponent: React.FC<{
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
-              setPair([
-                toPair,
-                fromPair,
+              setSymbols([
+                toSymbol,
+                fromSymbol,
               ])
             }}
             alt="ant"
@@ -378,12 +378,11 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
-                setDenomPair={(denom, name) => {
-                  setPair([
-                    fromPair,
+                setSymbol={(symbol) => {
+                  setSymbols([
+                    fromSymbol,
                     {
-                      symbol: name,
-                      denom
+                      symbol,
                     }
                   ])
                 }}

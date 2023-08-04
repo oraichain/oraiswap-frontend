@@ -3,8 +3,7 @@ import { useLocalStorage, useMedia } from "react-use";
 import cn from 'classnames/bind';
 import { useDispatch, useSelector } from "react-redux";
 
-import Loader from 'components/Loader';
-import { selectChartLoading, selectCurrentToken, setChartLoading } from "reducer/tradingSlice";
+import { selectChartDataLength, selectChartLoading, selectCurrentToken, setChartLoading } from "reducer/tradingSlice";
 import useTheme from "hooks/useTheme";
 import { SUPPORTED_RESOLUTIONS, TV_CHART_RELOAD_INTERVAL } from "components/TVChartContainer/helpers/constants";
 import useTVDatafeed from "./helpers/useTVDatafeed";
@@ -42,7 +41,7 @@ export default function TVChartContainer() {
   const dispatch = useDispatch();
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const currentPair = useSelector(selectCurrentToken);
-  const chartLoading = useSelector(selectChartLoading);
+  const chartDataLength = useSelector(selectChartDataLength)
   const tvWidgetRef = useRef<IChartingLibraryWidget | null>(null);
   const [tvCharts, setTvCharts] = useLocalStorage<ChartData[] | undefined>('TV_SAVE_LOAD_CHARTS_KEY', []);
   const { datafeed, resetCache } = useTVDatafeed({ dataProvider: new TVDataProvider() });
@@ -146,10 +145,9 @@ export default function TVChartContainer() {
 
   return (
     <div className={cx('chart-container')}>
-      {chartLoading && <Loader />}
       <div
         className={cx('chart-content')}
-        style={{ width: chartLoading ? "0%" : "100%" }}
+        style={{ width: chartDataLength > 0 ? "100%" : "0%" }}
         ref={chartContainerRef}
       />
     </div>

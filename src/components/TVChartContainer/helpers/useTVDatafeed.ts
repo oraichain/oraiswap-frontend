@@ -8,7 +8,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectCurrentToken, setChartLoading } from 'reducer/tradingSlice';
+import { selectCurrentToken, setChartDataLength, setChartLoading } from 'reducer/tradingSlice';
 import { TVDataProvider } from './TVDataProvider';
 import { SUPPORTED_RESOLUTIONS } from './constants';
 import { subscribeOnStream } from './streaming';
@@ -103,12 +103,11 @@ export default function useTVDatafeed({ dataProvider }: Props) {
               shouldRefetchBars.current
             );
 
-            dispatch(setChartLoading(false));
-
             if (periodParams.firstDataRequest) {
               lastBarsCache.set(symbolInfo.full_name, {
                 ...bars[bars.length - 1]
               });
+              dispatch(setChartDataLength(bars.length));
             }
             console.log(`[getBars]: returned ${bars.length} bar(s)`);
 

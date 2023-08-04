@@ -156,7 +156,7 @@ export const pairs: PairMapping[] = [
   },
   {
     asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }],
-    symbols: ['ORAI', 'WTRX']
+    symbols: ['ORAI', 'wTRX']
   },
   {
     asset_infos: [

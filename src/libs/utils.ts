@@ -4,8 +4,6 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-import { PairToken, TVToken } from 'reducer/type';
-import { pairsChart } from 'components/TVChartContainer/config';
 
 export const truncDecimals = 6;
 export const atomic = 10 ** truncDecimals;
@@ -279,25 +277,4 @@ export const processWsResponseMsg = (message: any): string => {
 
 export const generateError = (message: string) => {
   return { ex: { message } };
-};
-
-export const generateNewPair = (fromPair: TVToken, toPair: TVToken, currentPair: PairToken): PairToken | null => {
-  let newTVPair: PairToken = { ...currentPair };
-  const findedPair = pairsChart.find((p) => p.assets.includes(fromPair.denom) && p.assets.includes(toPair.denom));
-  if (!findedPair) {
-    // this case when user click button reverse swap flow  of pair NOT in pool.
-    if (
-      currentPair.symbol.split('/').includes(fromPair.symbol) &&
-      currentPair.symbol.split('/').includes(toPair.symbol)
-    )
-      return null;
-    newTVPair.symbol = `${fromPair.symbol}/${toPair.symbol}`;
-    newTVPair.info = `${fromPair.denom}-${toPair.denom}`;
-  } else {
-    // this case when user click button reverse swap flow of pair in pool.
-    if (findedPair.symbol === currentPair.symbol) return null;
-    newTVPair.symbol = findedPair.symbol;
-    newTVPair.info = findedPair.info;
-  }
-  return newTVPair;
 };

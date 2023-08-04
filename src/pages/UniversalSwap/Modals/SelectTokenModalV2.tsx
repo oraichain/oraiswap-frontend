@@ -21,7 +21,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
-  setDenomPair: (tokenAddress: string, name: string) => void;
+  setSymbol: (symbol: string) => void;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -32,7 +32,7 @@ const SelectTokenModal: FC<ModalProps> = ({
   prices,
   amounts,
   setSearchTokenName,
-  setDenomPair
+  setSymbol
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
@@ -55,12 +55,11 @@ const SelectTokenModal: FC<ModalProps> = ({
       </div>
       <div className={cx('options')}>
         {items?.map((item: TokenItemType | CustomChainInfo) => {
-          let key: string, title: string, balance: string, org: string, denomPair: string;
+          let key: string, title: string, balance: string, org: string;
 
           if (type === 'token') {
             const token = item as TokenItemType;
             key = token.denom;
-            denomPair = token.contractAddress ?? token.denom;
             title = token.name;
             org = token.org;
             let sumAmountDetails: AmountDetails = {};
@@ -91,7 +90,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
-                setDenomPair(denomPair, title)
+                setSymbol(title)
                 setSearchTokenName('')
                 close();
               }}
