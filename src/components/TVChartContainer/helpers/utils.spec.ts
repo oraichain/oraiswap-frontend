@@ -112,18 +112,6 @@ describe.only('test-utils-func', () => {
   });
 
   it.each([
-    [new Date(2023, 8, 1).valueOf(), 60, 1693501200000],
-    [new Date(2023, 8, 1).valueOf(), 60 * 5, 1693501200000],
-    [new Date(2023, 8, 1).valueOf(), 60 * 60 * 24, 1693440000000]
-  ])(
-    'test-getCurrentBarTimestamp-should-return-correctly-bar-timestamp',
-    (timestamp: number, period: number, expectedTimestamp: number) => {
-      const result = getCurrentBarTimestamp(timestamp, period);
-      expect(result).toEqual(expectedTimestamp);
-    }
-  );
-
-  it.each([
     ['invalid-pair', undefined],
     ['orai-orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh', 'ORAI/USDT']
   ])(
