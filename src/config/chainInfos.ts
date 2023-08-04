@@ -604,67 +604,67 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 195
     }
   },
-  {
-    rpc: 'https://bsc-dataseed1.binance.org',
-    networkType: 'evm',
-    Icon: BnbIcon,
-    chainId: '0x38',
-    chainName: 'BNB Chain',
-    bip44: {
-      coinType: 60
-    },
-    currencies: [
-      {
-        coinDenom: 'ORAI',
-        coinMinimalDenom: 'bep20_orai',
-        contractAddress: ORAI_BSC_CONTRACT,
-        bridgeTo: ['Oraichain'],
-        coinDecimals: 18,
-        coinGeckoId: 'oraichain-token',
-        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
-        Icon: OraiIcon,
-        IconLight: OraiLightIcon
-      },
-      {
-        coinDenom: 'AIRI',
-        coinMinimalDenom: 'bep20_airi',
-        contractAddress: AIRI_BSC_CONTRACT,
-        bridgeTo: ['Oraichain'],
-        coinDecimals: 18,
-        coinGeckoId: 'airight',
-        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
-        Icon: AiriIcon
-      },
-      {
-        coinDenom: 'USDT',
-        coinMinimalDenom: 'bep20_usdt',
-        contractAddress: USDT_BSC_CONTRACT,
-        bridgeTo: ['Oraichain'],
-        coinDecimals: 18,
-        coinGeckoId: 'tether',
-        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
-        Icon: UsdtIcon
-      },
-      {
-        coinDenom: 'KWT',
-        coinMinimalDenom: 'bep20_kwt',
-        contractAddress: KWT_BSC_CONTRACT,
-        bridgeTo: ['Oraichain'],
-        coinDecimals: 18,
-        coinGeckoId: 'kawaii-islands',
-        Icon: KwtIcon
-      },
-      {
-        coinDenom: 'MILKY',
-        coinMinimalDenom: 'bep20_milky',
-        contractAddress: MILKY_BSC_CONTRACT,
-        coinDecimals: 18,
-        coinGeckoId: 'milky-token',
-        bridgeTo: ['Oraichain'],
-        Icon: MilkyIcon
-      }
-    ]
-  },
+  // {
+  //   rpc: 'https://bsc-dataseed1.binance.org',
+  //   networkType: 'evm',
+  //   Icon: BnbIcon,
+  //   chainId: '0x38',
+  //   chainName: 'BNB Chain',
+  //   bip44: {
+  //     coinType: 60
+  //   },
+  //   currencies: [
+  //     {
+  //       coinDenom: 'ORAI',
+  //       coinMinimalDenom: 'bep20_orai',
+  //       contractAddress: ORAI_BSC_CONTRACT,
+  //       bridgeTo: ['Oraichain'],
+  //       coinDecimals: 18,
+  //       coinGeckoId: 'oraichain-token',
+  //       prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  //       Icon: OraiIcon,
+  //       IconLight: OraiLightIcon
+  //     },
+  //     {
+  //       coinDenom: 'AIRI',
+  //       coinMinimalDenom: 'bep20_airi',
+  //       contractAddress: AIRI_BSC_CONTRACT,
+  //       bridgeTo: ['Oraichain'],
+  //       coinDecimals: 18,
+  //       coinGeckoId: 'airight',
+  //       prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  //       Icon: AiriIcon
+  //     },
+  //     {
+  //       coinDenom: 'USDT',
+  //       coinMinimalDenom: 'bep20_usdt',
+  //       contractAddress: USDT_BSC_CONTRACT,
+  //       bridgeTo: ['Oraichain'],
+  //       coinDecimals: 18,
+  //       coinGeckoId: 'tether',
+  //       prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  //       Icon: UsdtIcon
+  //     },
+  //     {
+  //       coinDenom: 'KWT',
+  //       coinMinimalDenom: 'bep20_kwt',
+  //       contractAddress: KWT_BSC_CONTRACT,
+  //       bridgeTo: ['Oraichain'],
+  //       coinDecimals: 18,
+  //       coinGeckoId: 'kawaii-islands',
+  //       Icon: KwtIcon
+  //     },
+  //     {
+  //       coinDenom: 'MILKY',
+  //       coinMinimalDenom: 'bep20_milky',
+  //       contractAddress: MILKY_BSC_CONTRACT,
+  //       coinDecimals: 18,
+  //       coinGeckoId: 'milky-token',
+  //       bridgeTo: ['Oraichain'],
+  //       Icon: MilkyIcon
+  //     }
+  //   ]
+  // },
   {
     rpc: 'https://endpoint1.kawaii.global',
     chainId: '0x1ae6',
