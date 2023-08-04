@@ -7,6 +7,8 @@ import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
 import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { PairToken, TVToken } from 'reducer/type';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -149,4 +151,59 @@ describe('should utils functions in libs/utils run exactly', () => {
     ]);
     expect(data).toEqual(false);
   });
+
+  it.each<[string, TVToken, TVToken, PairToken, PairToken | null]>([
+    [
+      'from-&-to-are-NOT-pair-in-pool-and-are-NOT-reversed',
+      { symbol: 'FOO' },
+      { symbol: 'BAR' },
+      {
+        symbol: 'ORAI/USDT',
+        info: 'orai-usdt'
+      },
+      {
+        symbol: 'FOO/BAR',
+        info: ''
+      }
+    ],
+    [
+      'from-&-to-are-NOT-pair-in-pool-and-are-reversed',
+      { symbol: 'FOO' },
+      { symbol: 'BAR' },
+      {
+        symbol: 'FOO/BAR',
+        info: 'foo-bar'
+      },
+      null
+    ],
+    [
+      'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
+      { symbol: 'ORAI' },
+      { symbol: 'USDT' },
+      {
+        symbol: 'FOO/BAR',
+        info: 'foo-bar'
+      },
+      {
+        symbol: 'ORAI/USDT',
+        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+      }
+    ],
+    [
+      'from-&-to-are-pair-in-pool-and-are-reversed',
+      { symbol: 'USDT' },
+      { symbol: 'ORAI' },
+      {
+        symbol: 'ORAI/USDT',
+        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+      },
+      null
+    ]
+  ])(
+    'test-generateNewSymbol-with-%s-should-return-correctly-new-pair',
+    (_caseName, from, to, currentPair, expectedResult) => {
+      const result = generateNewSymbol(from, to, currentPair);
+      expect(result).toEqual(expectedResult);
+    }
+  );
 });

@@ -17,6 +17,10 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
 import './index.scss';
+import { setListToken } from 'reducer/tradingSlice';
+import { useDispatch } from 'react-redux';
+import { pairsChart } from 'components/TVChartContainer/config';
+
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
@@ -27,6 +31,15 @@ const App = () => {
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
   useTronEventListener();
+
+  const dispatch = useDispatch();
+  const getPairs = () => {
+    dispatch(setListToken(pairsChart));
+  };
+
+  useEffect(() => {
+    getPairs();
+  }, []);
 
   //Public API that will echo messages sent to it back to the client
 

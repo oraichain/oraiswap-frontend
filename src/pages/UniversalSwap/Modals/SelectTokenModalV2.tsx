@@ -21,6 +21,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
+  setSymbol: (symbol: string) => void;
 }
 
 const SelectTokenModal: FC<ModalProps> = ({
@@ -30,7 +31,8 @@ const SelectTokenModal: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  setSearchTokenName
+  setSearchTokenName,
+  setSymbol
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
@@ -88,6 +90,7 @@ const SelectTokenModal: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
+                setSymbol(title)
                 setSearchTokenName('')
                 close();
               }}
