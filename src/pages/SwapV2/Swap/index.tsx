@@ -11,7 +11,7 @@ import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, TRON_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction, parseAssetInfo } from 'helper';
+import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
