@@ -2,6 +2,7 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import tokenReducer from '../reducer/token';
 import configReducer from '../reducer/config';
 import pairInfosReduce from '../reducer/pairs';
+import tradingReducer from '../reducer/tradingSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import { PERSIST_CONFIG_KEY } from './constants';
@@ -14,7 +15,8 @@ const rootPersistConfig = {
 const rootReducer = combineReducers({
   config: configReducer,
   token: tokenReducer,
-  pairInfos: pairInfosReduce
+  pairInfos: pairInfosReduce,
+  trading: tradingReducer
 });
 
 const persistedReducer = persistReducer(rootPersistConfig, rootReducer);

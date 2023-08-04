@@ -321,6 +321,16 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 6,
       Icon: ScAtomIcon
     }
+    // {
+    //   coinDenom: 'ATOM-CW20',
+    //   coinGeckoId: 'cosmos',
+    //   coinMinimalDenom: 'uatom',
+    //   type: 'cw20',
+    //   contractAddress: 'orai17l2zk3arrx0a0fyuneyx8raln68622a2lrsz8ph75u7gw9tgz3esayqryf',
+    //   bridgeTo: ['cosmoshub-4'],
+    //   coinDecimals: 6,
+    //   Icon: AtomIcon
+    // }
   ]
 };
 

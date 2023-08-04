@@ -12,6 +12,7 @@ import {
   OraiswapRewarderTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes,
+  OraiswapOracleQueryClient,
   PairInfo,
   SwapOperation
 } from '@oraichain/oraidex-contracts-sdk';
@@ -25,7 +26,7 @@ import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import { RemainingOraibTokenItem } from 'pages/BalanceNew/StuckOraib/useGetOraiBridgeBalances';
+import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 
@@ -408,6 +409,16 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
         }
       ];
 };
+
+async function fetchTaxRate() {
+  const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);
+  try {
+    const data = await oracleContract.taxRate();
+    return data;
+  } catch (error) {
+    throw new Error(`Error when query TaxRate using oracle: ${error}`);
+  }
+}
 
 async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
   const { amount, fromInfo, toInfo } = query;
@@ -810,6 +821,7 @@ export {
   fetchRewardPerSecInfo,
   fetchStakingPoolInfo,
   fetchDistributionInfo,
+  fetchTaxRate,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,

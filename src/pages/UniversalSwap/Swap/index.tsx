@@ -10,23 +10,26 @@ import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
-import { feeEstimate, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
-import { combineReceiver } from 'pages/BalanceNew/helpers';
+import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
-import { fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTaxRate, fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
-import { UniversalSwapHandler, checkEvmAddress } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { TVToken } from 'reducer/type';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 
 const cx = cn.bind(styles);
 
@@ -45,14 +48,17 @@ const SwapComponent: React.FC<{
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [oraiAddress] = useConfigReducer('address');
-
+  const [taxRate, setTaxRate] = useState('');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-
+  const dispatch = useDispatch()
   const [searchTokenName, setSearchTokenName] = useState('');
+  const currentPair = useSelector(selectCurrentToken);
+
+  const [[fromSymbol, toSymbol], setSymbols] = useState<[TVToken, TVToken]>([{ symbol: "ORAI" }, { symbol: "USDT" }]);
 
   const refreshBalances = async () => {
     try {
@@ -94,8 +100,8 @@ const SwapComponent: React.FC<{
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress)
-  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress)
+  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
+  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -138,6 +144,21 @@ const SwapComponent: React.FC<{
     setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
+  const queryTaxRate = async () => {
+    const data = await fetchTaxRate();
+    setTaxRate(data?.rate)
+  }
+
+  useEffect(() => {
+    queryTaxRate();
+  }, [])
+
+  useEffect(() => {
+    const newTVPair = generateNewSymbol(fromSymbol, toSymbol, currentPair)
+    if (newTVPair) dispatch(setCurrentToken(newTVPair));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromSymbol, toSymbol])
+
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -157,11 +178,19 @@ const SwapComponent: React.FC<{
         userSlippage
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
-      const { combinedReceiver, universalSwapType } = combineReceiver(oraiAddress, originalFromToken, originalToToken, toAddress);
+      const { combinedReceiver, universalSwapType } = combineReceiver(
+        oraiAddress,
+        originalFromToken,
+        originalToToken,
+        toAddress
+      );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress)
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, { metamaskAddress: checksumMetamaskAddress, tronAddress });
+      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress);
+      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
+        metamaskAddress: checksumMetamaskAddress,
+        tronAddress
+      });
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
@@ -180,16 +209,18 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  const filteredFromTokens = swapFromTokens.filter((token) =>
-    token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  )
+  const filteredFromTokens = swapFromTokens.filter(
+    (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
+  );
 
-  const filteredToTokens = swapToTokens.filter((token) =>
-    token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  )
+  const filteredToTokens = swapToTokens.filter(
+    (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
+  );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount ? BigInt(simulateData.amount) - BigInt(simulateData.amount) * BigInt(userSlippage) / 100n : '0'
+  const minimumReceive = simulateData?.amount
+    ? calculateMinimum(simulateData.amount, userSlippage)
+    : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -251,14 +282,12 @@ const SwapComponent: React.FC<{
                 }}
               />
             </div>
-            {fromTokenFee !== 0 &&
+            {fromTokenFee !== 0 && (
               <div className={cx('token-fee')}>
-                <span>
-                  Token Fee
-                </span>
+                <span>Token Fee</span>
                 <span>{fromTokenFee}%</span>
               </div>
-            }
+            )}
             {isSelectFrom && (
               <SelectTokenModalV2
                 close={() => setIsSelectFrom(false)}
@@ -269,10 +298,17 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                setSymbol={(symbol) => {
+                  setSymbols([
+                    {
+                      symbol,
+                    },
+                    toSymbol
+                  ])
+                }}
               />
             )}
           </div>
-
         </div>
         <div className={cx('swap-icon')}>
           <img
@@ -280,6 +316,10 @@ const SwapComponent: React.FC<{
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
+              setSymbols([
+                toSymbol,
+                fromSymbol,
+              ])
             }}
             alt="ant"
           />
@@ -314,16 +354,20 @@ const SwapComponent: React.FC<{
                 <div className={cx('arrow-down')} />
               </div>
 
-              <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
+              <NumberFormat
+                className={cx('amount')}
+                thousandSeparator
+                decimalScale={6}
+                type="text"
+                value={toAmountToken}
+              />
             </div>
-            {toTokenFee !== 0 &&
+            {toTokenFee !== 0 && (
               <div className={cx('token-fee')}>
-                <span>
-                  Token Fee
-                </span>
+                <span>Token Fee</span>
                 <span>{toTokenFee}%</span>
               </div>
-            }
+            )}
             {isSelectTo && (
               <SelectTokenModalV2
                 close={() => setIsSelectTo(false)}
@@ -334,10 +378,17 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                setSymbol={(symbol) => {
+                  setSymbols([
+                    fromSymbol,
+                    {
+                      symbol,
+                    }
+                  ])
+                }}
               />
             )}
           </div>
-
         </div>
         <button
           className={cx('swap-btn')}
@@ -367,18 +418,17 @@ const SwapComponent: React.FC<{
             />
           </div>
 
-          {!fromTokenFee && !toTokenFee &&
+          {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Tax rate</span>
               </div>
-              <span>0.3 %</span>
+              <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
             </div>
-          }
+          )}
         </div>
       </div>
     </LoadingBox>
-
   );
 };
 

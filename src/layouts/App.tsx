@@ -1,8 +1,8 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
+import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { displayInstallWallet, getNetworkGasPrice } from 'helper';
+import { checkVersionWallet, displayInstallWallet, getNetworkGasPrice, getStorageKey, setStorageKey, switchWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -17,6 +17,10 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
 import './index.scss';
+import { setListToken } from 'reducer/tradingSlice';
+import { useDispatch } from 'react-redux';
+import { pairsChart } from 'components/TVChartContainer/config';
+
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
@@ -27,6 +31,15 @@ const App = () => {
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
   useTronEventListener();
+
+  const dispatch = useDispatch();
+  const getPairs = () => {
+    dispatch(setListToken(pairsChart));
+  };
+
+  useEffect(() => {
+    getPairs();
+  }, []);
 
   //Public API that will echo messages sent to it back to the client
 
@@ -124,6 +137,9 @@ const App = () => {
         return displayInstallWallet();
       }
 
+      if (checkVersionWallet()) {
+        setStorageKey('typeWallet', 'owallet');
+      }
       // TODO: owallet get address tron
       if (!isMobile()) {
         if (window.tronWeb && window.tronLink) {
@@ -142,6 +158,7 @@ const App = () => {
         }
       }
 
+      switchWallet(getStorageKey() as WalletType);
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       setAddress(oraiAddress);
