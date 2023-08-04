@@ -1,15 +1,36 @@
 import { FAVORITES_INTERVAL } from 'components/TVChartContainer/helpers/constants';
-import { addMinutes, format as formatDateFn } from 'date-fns';
 import { PairMapping } from './helpers/types';
 import { ORAI } from 'config/constants';
 
+const dateFormat = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit'
+});
+
+const timeFormat = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
+const formatToJson = function (format: Intl.DateTimeFormat, date: Date) {
+  return Object.fromEntries(
+    format
+      .formatToParts(date)
+      .filter((item) => item.type !== 'literal')
+      .map((item) => [item.type, item.value])
+  ) as Record<Intl.DateTimeFormatPartTypes, string>;
+};
+
 export function formatTVDate(date: Date) {
-  // https://github.com/date-fns/date-fns/issues/1401#issuecomment-578580199
-  return formatDateFn(addMinutes(date, date.getTimezoneOffset()), 'dd MMM yyyy');
+  const obj = formatToJson(dateFormat, date);
+  return `${obj.day} ${obj.month} ${obj.year}`;
 }
 
 export function formatTVTime(date: Date) {
-  return formatDateFn(addMinutes(date, date.getTimezoneOffset()), 'h:mm:ss a');
+  const obj = formatToJson(timeFormat, date);
+  return `${obj.hour}:${obj.minute}:${obj.second} ${obj.dayPeriod}`;
 }
 
 const RED = '#fa3c58';
