@@ -1,9 +1,19 @@
-import bech32 from 'bech32';
-import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { TokenInfo } from 'types/token';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
+import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { isMobile } from '@walletconnect/browser-utils';
+import WalletConnectProvider from '@walletconnect/ethereum-provider';
+import bech32 from 'bech32';
+import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { chainInfos, NetworkChainId } from 'config/chainInfos';
+import { WalletType } from 'config/constants';
+import { network } from 'config/networks';
+import { getStorageKey, switchWallet } from 'helper';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { collectWallet } from 'libs/cosmjs';
+import { TokenInfo } from 'types/token';
 
 export const truncDecimals = 6;
 export const atomic = 10 ** truncDecimals;
@@ -277,4 +287,51 @@ export const processWsResponseMsg = (message: any): string => {
 
 export const generateError = (message: string) => {
   return { ex: { message } };
+};
+
+export const initEthereum = async () => {
+  // support only https
+  if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
+    const bscChain = chainInfos.find((c) => c.chainId === '0x38');
+    const provider = new WalletConnectProvider({
+      chainId: Networks.bsc,
+      storageId: 'metamask',
+      qrcode: true,
+      rpc: { [Networks.bsc]: bscChain.rpc },
+      qrcodeModalOptions: {
+        mobileLinks: ['metamask']
+      }
+    });
+    await provider.enable();
+    (window.ethereum as any) = provider;
+  }
+};
+
+export const initClient = async () => {
+  let wallet: OfflineAminoSigner | OfflineDirectSigner;
+  try {
+    switchWallet(getStorageKey() as WalletType);
+    const keplr = await window.Keplr.getKeplr();
+
+    // suggest our chain
+    if (keplr) {
+      // always trigger suggest chain when users enter the webpage
+      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
+        try {
+          await window.Keplr.suggestChain(networkId);
+        } catch (error) {
+          console.log({ error });
+        }
+      }
+      wallet = await collectWallet(network.chainId);
+    }
+  } catch (ex) {
+    console.log(ex);
+  }
+
+  // finally assign it
+  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    prefix: network.prefix,
+    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  });
 };

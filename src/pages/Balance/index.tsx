@@ -16,10 +16,9 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
-import { getTotalUsd, getUsd, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, getUsd, initEthereum, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
-import { initEthereum } from 'polyfill';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -69,16 +68,10 @@ const Balance: React.FC<BalanceProps> = () => {
   }, [tokenUrl]);
 
   useEffect(() => {
-    _initEthereum();
-  }, []);
-
-  const _initEthereum = async () => {
-    try {
-      await initEthereum();
-    } catch (error) {
+    initEthereum().catch((error) => {
       console.log(error);
-    }
-  };
+    });
+  }, []);
 
   const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
