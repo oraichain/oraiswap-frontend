@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocalStorage, useMedia } from "react-use";
 import cn from 'classnames/bind';
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
-import { selectChartDataLength, selectChartLoading, selectCurrentToken, setChartLoading } from "reducer/tradingSlice";
+import { selectChartDataLength, selectCurrentToken } from "reducer/tradingSlice";
 import useTheme from "hooks/useTheme";
 import { SUPPORTED_RESOLUTIONS, TV_CHART_RELOAD_INTERVAL } from "components/TVChartContainer/helpers/constants";
 import useTVDatafeed from "./helpers/useTVDatafeed";
@@ -38,7 +38,6 @@ export function useLocalStorageSerializeKey<T>(
 
 export default function TVChartContainer() {
   const theme = useTheme();
-  const dispatch = useDispatch();
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const currentPair = useSelector(selectCurrentToken);
   const chartDataLength = useSelector(selectChartDataLength)
@@ -46,8 +45,15 @@ export default function TVChartContainer() {
   const [tvCharts, setTvCharts] = useLocalStorage<ChartData[] | undefined>('TV_SAVE_LOAD_CHARTS_KEY', []);
   const { datafeed, resetCache } = useTVDatafeed({ dataProvider: new TVDataProvider() });
   const isMobile = useMedia("(max-width: 550px)");
-
+  const [chartReady, setChartReady] = useState(false);
   const [period, setPeriod] = useLocalStorageSerializeKey([currentPair.symbol, "Chart-period"], DEFAULT_PERIOD);
+  const symbolRef = useRef(currentPair.symbol);
+
+  useEffect(() => {
+    if (chartReady && tvWidgetRef.current && currentPair.symbol !== tvWidgetRef.current?.activeChart?.().symbol()) {
+      tvWidgetRef.current.setSymbol(currentPair.symbol, tvWidgetRef.current.activeChart().resolution(), () => { });
+    }
+  }, [currentPair, chartReady, period]);
 
   /* Tradingview charting library only fetches the historical data once so if the tab is inactive or system is in sleep mode
   for a long time, the historical data will be outdated. */
@@ -75,7 +81,7 @@ export default function TVChartContainer() {
   useEffect(() => {
     const widgetOptions = {
       debug: false,
-      symbol: currentPair.symbol, // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
+      symbol: symbolRef.current, // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
       datafeed: datafeed,
       theme: theme === 'dark' ? 'Dark' : 'Light',
       container: chartContainerRef.current,
@@ -98,7 +104,7 @@ export default function TVChartContainer() {
       interval: getObjectKeyFromValue(period, SUPPORTED_RESOLUTIONS),
       favorites: defaultChartProps.favorites,
       custom_formatters: defaultChartProps.custom_formatters,
-      save_load_adapter: new SaveLoadAdapter(currentPair.symbol, tvCharts, setTvCharts),
+      save_load_adapter: new SaveLoadAdapter(symbolRef.current, tvCharts, setTvCharts),
       studies: [],
       timeframe: '1M',
       time_scale: {
@@ -114,6 +120,7 @@ export default function TVChartContainer() {
     };
     tvWidgetRef.current = new (window as any).TradingView.widget(widgetOptions);
     tvWidgetRef.current!.onChartReady(function () {
+      setChartReady(true);
       tvWidgetRef.current!.applyOverrides({
         "paneProperties.background": theme === 'dark' ? DARK_BACKGROUND_CHART : LIGHT_BACKGROUND_CHART,
         "paneProperties.backgroundType": "solid",
@@ -130,7 +137,6 @@ export default function TVChartContainer() {
         });
 
       tvWidgetRef.current?.activeChart().dataReady(() => {
-        dispatch(setChartLoading(false))
       });
     });
 
@@ -138,10 +144,10 @@ export default function TVChartContainer() {
       if (tvWidgetRef.current) {
         tvWidgetRef.current.remove();
         tvWidgetRef.current = null;
-        dispatch(setChartLoading(true))
+        setChartReady(false);
       }
     };
-  }, [currentPair, theme]);
+  }, [theme]);
 
   return (
     <div className={cx('chart-container')}>

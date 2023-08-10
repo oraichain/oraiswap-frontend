@@ -1,18 +1,9 @@
 //@ts-nocheck
-import { NetworkChainId } from 'config/chainInfos';
-import { network } from 'config/networks';
-import { collectWallet } from 'libs/cosmjs';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
-import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
-import { isMobile } from '@walletconnect/browser-utils';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
+
 import _BigInt from 'big-integer';
-import { chainInfos } from 'config/chainInfos';
+
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
-import { getStorageKey, switchWallet } from 'helper';
-import { WalletType } from 'config/constants';
 
 // inject global
 window.TronWeb = require('tronweb');
@@ -24,7 +15,18 @@ window.Metamask = new Metamask();
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;
-window.process = require('process/browser');
+// window.process = require('process/browser');
+
+// extend formatToJson
+Intl.DateTimeFormat.prototype.formatToJson = function (date: Date) {
+  const _this = this as Intl.DateTimeFormat;
+  return Object.fromEntries(
+    _this
+      .formatToParts(date)
+      .filter((item) => item.type !== 'literal')
+      .map((item) => [item.type, item.value])
+  ) as Record<Intl.DateTimeFormatPartTypes, string>;
+};
 
 if (typeof BigInt === 'undefined') {
   (window as any)._BigInt = _BigInt;
@@ -123,50 +125,3 @@ if (typeof BigInt === 'undefined') {
 
   (window as any).BigInt = MyBigInt;
 }
-
-export const initEthereum = async () => {
-  // support only https
-  if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
-    const bscChain = chainInfos.find((c) => c.chainId === '0x38');
-    const provider = new WalletConnectProvider({
-      chainId: Networks.bsc,
-      storageId: 'metamask',
-      qrcode: true,
-      rpc: { [Networks.bsc]: bscChain.rpc },
-      qrcodeModalOptions: {
-        mobileLinks: ['metamask']
-      }
-    });
-    await provider.enable();
-    (window.ethereum as any) = provider;
-  }
-};
-
-export const initClient = async () => {
-  let wallet: OfflineAminoSigner | OfflineDirectSigner;
-  try {
-    switchWallet(getStorageKey() as WalletType);
-    const keplr = await window.Keplr.getKeplr();
-
-    // suggest our chain
-    if (keplr) {
-      // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
-        try {
-          await window.Keplr.suggestChain(networkId);
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-      wallet = await collectWallet(network.chainId);
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
-
-  // finally assign it
-  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-    prefix: network.prefix,
-    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  });
-};

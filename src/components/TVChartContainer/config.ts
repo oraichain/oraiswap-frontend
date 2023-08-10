@@ -14,22 +14,13 @@ const timeFormat = new Intl.DateTimeFormat('en-US', {
   second: '2-digit'
 });
 
-const formatToJson = function (format: Intl.DateTimeFormat, date: Date) {
-  return Object.fromEntries(
-    format
-      .formatToParts(date)
-      .filter((item) => item.type !== 'literal')
-      .map((item) => [item.type, item.value])
-  ) as Record<Intl.DateTimeFormatPartTypes, string>;
-};
-
 export function formatTVDate(date: Date) {
-  const obj = formatToJson(dateFormat, date);
+  const obj = dateFormat.formatToJson(date);
   return `${obj.day} ${obj.month} ${obj.year}`;
 }
 
 export function formatTVTime(date: Date) {
-  const obj = formatToJson(timeFormat, date);
+  const obj = timeFormat.formatToJson(date);
   return `${obj.hour}:${obj.minute}:${obj.second} ${obj.dayPeriod}`;
 }
 

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
+const { EsbuildPlugin } = require('esbuild-loader');
 const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
@@ -59,9 +59,9 @@ const rewiredEsbuild = (config, env) => {
       target,
       css: true
     };
-    // replace TerserPlugin to ESBuildMinifyPlugin
+    // replace TerserPlugin to EsbuildPlugin
     if (minimizer.constructor.name === 'TerserPlugin') {
-      config.optimization.minimizer.splice(index, 1, new ESBuildMinifyPlugin(options));
+      config.optimization.minimizer.splice(index, 1, new EsbuildPlugin(options));
     }
     // remove OptimizeCssAssetsWebpackPlugin
     if (options.css && minimizer.constructor.name === 'OptimizeCssAssetsWebpackPlugin') {

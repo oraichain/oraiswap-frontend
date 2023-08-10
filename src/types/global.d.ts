@@ -128,6 +128,13 @@ declare global {
 
   declare const APP_SETTINGS: Record<string, any>;
   type keplrType = keplr;
+
+  // extend Intl namespace
+  namespace Intl {
+    interface DateTimeFormat {
+      formatToJson(date: Date): Record<Intl.DateTimeFormatPartTypes, string>;
+    }
+  }
   namespace NodeJS {
     interface ProcessEnv {
       REACT_APP_SITE_TITLE: string;

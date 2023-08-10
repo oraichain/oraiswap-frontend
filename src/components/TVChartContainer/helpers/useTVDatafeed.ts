@@ -8,10 +8,10 @@ import {
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectCurrentToken, setChartDataLength, setChartLoading } from 'reducer/tradingSlice';
+import { selectCurrentToken, setChartDataLength } from 'reducer/tradingSlice';
 import { TVDataProvider } from './TVDataProvider';
 import { SUPPORTED_RESOLUTIONS } from './constants';
-import { subscribeOnStream } from './streaming';
+import { pairsChart } from '../config';
 
 const configurationData = {
   supported_resolutions: Object.keys(SUPPORTED_RESOLUTIONS),
@@ -37,7 +37,6 @@ export default function useTVDatafeed({ dataProvider }: Props) {
   const lastBarsCache = new Map();
 
   const dispatch = useDispatch();
-
   useEffect(() => {
     if (dataProvider && tvDataProvider.current !== dataProvider) {
       tvDataProvider.current = dataProvider;
@@ -95,8 +94,9 @@ export default function useTVDatafeed({ dataProvider }: Props) {
               onErrorCallback('Invalid ticker!');
               return;
             }
+            const pair = pairsChart.find((p) => p.symbol === symbolInfo.ticker);
             const bars = await tvDataProvider.current?.getBars(
-              currentPair.info,
+              pair?.info,
               ticker,
               resolution,
               periodParams,
