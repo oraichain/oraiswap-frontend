@@ -1,7 +1,8 @@
 import { CHART_PERIODS } from './constants';
 import { Bar } from './types';
 import { pairsChart } from '../config';
-import { PairToken, TVToken } from 'reducer/type';
+import { PairToken } from 'reducer/type';
+import { TokenItemType } from 'config/bridgeTokens';
 
 export function getObjectKeyFromValue(value, object) {
   return Object.keys(object).find((key) => object[key] === value);
@@ -85,27 +86,26 @@ export function roundTime(timeIn: Date, interval: number): number {
   return dateOut / 1000;
 }
 
-export const generateNewSymbol = (fromSymbol: TVToken, toSymbol: TVToken, currentPair: PairToken): PairToken | null => {
+export const generateNewSymbol = (
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  currentPair: PairToken
+): PairToken | null => {
   let newTVPair: PairToken = { ...currentPair };
   // example: ORAI/ORAI
-  if (fromSymbol.symbol === toSymbol.symbol) {
-    newTVPair.symbol = `${fromSymbol.symbol}/${toSymbol.symbol}`;
+  if (fromToken.name === toToken.name) {
+    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
     newTVPair.info = '';
     return newTVPair;
   }
 
-  const findedPair = pairsChart.find(
-    (p) => p.symbols.includes(fromSymbol.symbol) && p.symbols.includes(toSymbol.symbol)
-  );
+  const findedPair = pairsChart.find((p) => p.symbols.includes(fromToken.name) && p.symbols.includes(toToken.name));
   if (!findedPair) {
     // this case when user click button reverse swap flow  of pair NOT in pool.
     // return null to prevent re-call api of this pair.
-    if (
-      currentPair.symbol.split('/').includes(fromSymbol.symbol) &&
-      currentPair.symbol.split('/').includes(toSymbol.symbol)
-    )
+    if (currentPair.symbol.split('/').includes(fromToken.name) && currentPair.symbol.split('/').includes(toToken.name))
       return null;
-    newTVPair.symbol = `${fromSymbol.symbol}/${toSymbol.symbol}`;
+    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
     newTVPair.info = '';
   } else {
     // this case when user click button reverse swap flow of pair in pool.
