@@ -62,7 +62,7 @@ export default function useTVDatafeed({ dataProvider }: Props) {
             ticker: symbolName,
             session: '24x7',
             minmov: 1,
-            pricescale: 100,
+            pricescale: 100000,
             timezone: 'Etc/UTC',
             has_intraday: true,
             has_daily: true,

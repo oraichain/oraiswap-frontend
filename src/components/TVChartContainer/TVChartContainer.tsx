@@ -153,7 +153,7 @@ export default function TVChartContainer() {
     <div className={cx('chart-container')}>
       <div
         className={cx('chart-content')}
-        style={{ width: chartDataLength > 0 ? "100%" : "0%" }}
+        style={{ visibility: chartDataLength > 0 ? "visible" : "hidden" }}
         ref={chartContainerRef}
       />
     </div>

@@ -59,10 +59,6 @@ export interface Orderbook {
   time: string;
 }
 
-export type TVToken = {
-  symbol: string;
-};
-
 export type PairToken = {
   symbol: string;
   info: string;
