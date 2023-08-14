@@ -27,7 +27,6 @@ import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { TVToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 
@@ -51,7 +50,6 @@ const SwapComponent: React.FC<{
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const cachedPairs = useSelector((state: RootState) => state.pairInfos.pairInfos);
-  const [[fromSymbol, toSymbol], setSymbols] = useState<[TVToken, TVToken]>([{ symbol: "ORAI" }, { symbol: "USDT" }]);
   const dispatch = useDispatch()
   const currentPair = useSelector(selectCurrentToken);
 
@@ -107,6 +105,7 @@ const SwapComponent: React.FC<{
   const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
   const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
+
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
@@ -138,10 +137,10 @@ const SwapComponent: React.FC<{
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromSymbol, toSymbol, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromSymbol, toSymbol])
+  }, [fromToken, toToken])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -250,10 +249,6 @@ const SwapComponent: React.FC<{
           onClick={() => {
             setSwapTokens([toTokenDenom, fromTokenDenom]);
             setSwapAmount([toAmountToken, fromAmountToken]);
-            setSymbols([
-              toSymbol,
-              fromSymbol,
-            ])
           }}
           alt="ant"
         />
@@ -356,14 +351,6 @@ const SwapComponent: React.FC<{
             }
             setSwapTokens([denom, arrDenom ?? toTokenDenom]);
           }}
-          setSymbol={(symbol) => {
-            setSymbols([
-              {
-                symbol,
-              },
-              toSymbol
-            ])
-          }}
         />
       ) : (
         <SelectTokenModal
@@ -385,14 +372,6 @@ const SwapComponent: React.FC<{
               return setSwapTokens([fromTokenDenom, denom]);
             }
             setSwapTokens([arrDenom ?? fromTokenDenom, denom]);
-          }}
-          setSymbol={(symbol) => {
-            setSymbols([
-              fromSymbol,
-              {
-                symbol,
-              }
-            ])
           }}
         />
       )}

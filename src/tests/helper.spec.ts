@@ -1,4 +1,4 @@
-import { TokenItemType, cosmosTokens, flattenTokens } from 'config/bridgeTokens';
+import { TokenItemType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
@@ -7,7 +7,7 @@ import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
 import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
-import { PairToken, TVToken } from 'reducer/type';
+import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 
 describe('should utils functions in libs/utils run exactly', () => {
@@ -127,15 +127,17 @@ describe('should utils functions in libs/utils run exactly', () => {
     expect(parseAssetInfo(assetInfo)).toEqual(expectedResult);
   });
 
-  it.each([process.env.REACT_APP_MILKY_CONTRACT, process.env.REACT_APP_KWT_CONTRACT])(
-    'test-get-pair-swap',
-    (contractAddress) => {
-      const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(contractAddress);
-      expect(Array.isArray(arr)).toBe(true);
-      expect(arrLength).toEqual(arr.length);
-      expect(typeof arrIncludesOrai == 'boolean').toBe(true);
-    }
-  );
+  it.each<[string, string[], string, boolean]>([
+    [process.env.REACT_APP_MILKY_CONTRACT, [process.env.REACT_APP_USDT_CONTRACT], 'usdt', false],
+    [process.env.REACT_APP_USDC_CONTRACT, ['orai'], 'orai', true]
+  ])('test-get-pair-swap', (contractAddress, expectedArr, exprectArrDenom, expectedArrIncludesOrai) => {
+    const { arr, arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
+    expect(arr).toEqual(expectedArr);
+    expect(arrLength).toEqual(arr.length);
+    expect(arrDenom).toEqual(exprectArrDenom);
+    expect(arrIncludesOrai).toEqual(expectedArrIncludesOrai);
+  });
+
   it('test-isFactoryV1-true', () => {
     const data = isFactoryV1([
       { native_token: { denom: 'orai' } },
@@ -152,34 +154,34 @@ describe('should utils functions in libs/utils run exactly', () => {
     expect(data).toEqual(false);
   });
 
-  it.each<[string, TVToken, TVToken, PairToken, PairToken | null]>([
+  it.each<[string, string, string, PairToken, PairToken | null]>([
     [
       'from-&-to-are-NOT-pair-in-pool-and-are-NOT-reversed',
-      { symbol: 'FOO' },
-      { symbol: 'BAR' },
+      'AIRI',
+      'OSMO',
       {
         symbol: 'ORAI/USDT',
         info: 'orai-usdt'
       },
       {
-        symbol: 'FOO/BAR',
+        symbol: 'AIRI/OSMO',
         info: ''
       }
     ],
     [
       'from-&-to-are-NOT-pair-in-pool-and-are-reversed',
-      { symbol: 'FOO' },
-      { symbol: 'BAR' },
+      'OSMO',
+      'AIRI',
       {
-        symbol: 'FOO/BAR',
-        info: 'foo-bar'
+        symbol: 'AIRI/OSMO',
+        info: ''
       },
       null
     ],
     [
       'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
-      { symbol: 'ORAI' },
-      { symbol: 'USDT' },
+      'ORAI',
+      'USDT',
       {
         symbol: 'FOO/BAR',
         info: 'foo-bar'
@@ -191,8 +193,8 @@ describe('should utils functions in libs/utils run exactly', () => {
     ],
     [
       'from-&-to-are-pair-in-pool-and-are-reversed',
-      { symbol: 'USDT' },
-      { symbol: 'ORAI' },
+      'USDT',
+      'ORAI',
       {
         symbol: 'ORAI/USDT',
         info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
@@ -202,7 +204,9 @@ describe('should utils functions in libs/utils run exactly', () => {
   ])(
     'test-generateNewSymbol-with-%s-should-return-correctly-new-pair',
     (_caseName, from, to, currentPair, expectedResult) => {
-      const result = generateNewSymbol(from, to, currentPair);
+      const fromToken = oraichainTokens.find((t) => t.name === from);
+      const toToken = oraichainTokens.find((t) => t.name === to);
+      const result = generateNewSymbol(fromToken, toToken, currentPair);
       expect(result).toEqual(expectedResult);
     }
   );

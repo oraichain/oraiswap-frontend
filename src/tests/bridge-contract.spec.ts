@@ -831,6 +831,8 @@ describe.only('IBCModule', () => {
         });
 
         const sendPacketEvent = result.events.find((event) => event.type === 'send_packet');
+        console.log('sendPacketEventhere');
+        console.dir(result.events, { depth: null });
         expect(sendPacketEvent).not.toBeUndefined();
         const packetHex = sendPacketEvent.attributes.find((attr) => attr.key === 'packet_data_hex').value;
         expect(packetHex).not.toBeUndefined();

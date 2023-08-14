@@ -28,7 +28,6 @@ import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../help
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { TVToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 
 const cx = cn.bind(styles);
@@ -57,8 +56,6 @@ const SwapComponent: React.FC<{
   const dispatch = useDispatch()
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
-
-  const [[fromSymbol, toSymbol], setSymbols] = useState<[TVToken, TVToken]>([{ symbol: "ORAI" }, { symbol: "USDT" }]);
 
   const refreshBalances = async () => {
     try {
@@ -154,10 +151,10 @@ const SwapComponent: React.FC<{
   }, [])
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromSymbol, toSymbol, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromSymbol, toSymbol])
+  }, [fromToken, toToken])
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -298,14 +295,6 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
-                setSymbol={(symbol) => {
-                  setSymbols([
-                    {
-                      symbol,
-                    },
-                    toSymbol
-                  ])
-                }}
               />
             )}
           </div>
@@ -316,10 +305,6 @@ const SwapComponent: React.FC<{
             onClick={() => {
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
-              setSymbols([
-                toSymbol,
-                fromSymbol,
-              ])
             }}
             alt="ant"
           />
@@ -378,14 +363,6 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
-                setSymbol={(symbol) => {
-                  setSymbols([
-                    fromSymbol,
-                    {
-                      symbol,
-                    }
-                  ])
-                }}
               />
             )}
           </div>

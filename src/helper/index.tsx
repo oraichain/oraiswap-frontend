@@ -17,7 +17,6 @@ import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
 import { AssetInfo } from '@oraichain/common-contracts-sdk';
-import { parseTokenInfo } from 'rest/api';
 import { Pairs } from 'config/pools';
 import Keplr from 'libs/keplr';
 
@@ -162,15 +161,26 @@ export const floatToPercent = (value: number): number => {
   return value * 100;
 };
 
-export const getPairSwapV2 = (contractAddress) => {
+/**
+ * Get list contract_addr | denom that make a pair when combined with input 
+ * @param contractAddress 
+ * @returns 
+ */
+export const getPairSwapV2 = (contractAddress: string) => {
   let arr = [];
   let arrDenom = ORAI;
   if (!contractAddress) return { arrLength: 0 };
+
   const pairMapping = Pairs.pairs.filter((p) =>
-    p?.asset_infos.find(
-      (asset: { token: { contract_addr: string } }) => asset?.token?.contract_addr === contractAddress
+    p.asset_infos.find(
+      (asset: {
+        token: {
+          contract_addr: string;
+        }
+      }) => asset?.token?.contract_addr === contractAddress
     )
   );
+
   if (pairMapping.length) {
     for (const info of pairMapping) {
       const assets0 = parseAssetInfo(info?.asset_infos?.[0]);
@@ -179,14 +189,16 @@ export const getPairSwapV2 = (contractAddress) => {
       if (assets1 !== contractAddress) arr.push(assets1);
     }
   }
+
   if (arr.length) {
     arrDenom = oraichainTokens.find((e) => e.contractAddress === arr[0])?.denom ?? arr[0];
   }
+
   return {
     arr,
-    arrLength: arr?.length,
+    arrLength: arr.length,
     arrDenom,
-    arrIncludesOrai: arr?.includes(ORAI)
+    arrIncludesOrai: arr.includes(ORAI)
   };
 };
 
