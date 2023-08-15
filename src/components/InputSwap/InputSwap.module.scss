@@ -1,0 +1,105 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.input {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    gap: 5px;
+
+    @include theme() {
+        background: theme-get('bg-color-secondary');
+        color: theme-get('text-color');
+    }
+
+    border-radius: 8px;
+
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 100%;
+
+    text-align: center;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
+
+    .token {
+        cursor: pointer;
+        display: flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        .logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+
+            @include theme() {
+                border-top: theme-get('bg-color-arrow');
+            }
+        }
+
+        .token-info {
+            flex-grow: 1;
+
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .token-symbol {
+            font-weight: 500;
+            font-size: 24px;
+        }
+
+        .token-org {
+            opacity: 0.5;
+            font-size: 13px;
+            width: max-content;
+        }
+    }
+
+    .amount {
+        flex-grow: 1;
+        text-align: right;
+        max-width: 50%;
+        width: inherit;
+
+        @include mobile {
+            width: 100%;
+        }
+    }
+
+    @include medium-desktop {
+        .input {
+            font-size: 20px;
+
+            .amount {
+                font-size: 18px;
+            }
+        }
+    }
+}
+
+.token-fee {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    color: #777e90;
+    margin-top: 10px;
+}

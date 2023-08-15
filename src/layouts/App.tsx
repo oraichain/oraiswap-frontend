@@ -163,7 +163,6 @@ const App = () => {
       loadTokenAmounts({ oraiAddress });
       setAddress(oraiAddress);
 
-      // window.location.reload();
     } catch (error) {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);
