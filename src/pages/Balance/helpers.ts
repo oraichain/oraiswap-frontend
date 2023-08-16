@@ -244,7 +244,7 @@ export const transferEvmToIBC = async (
     tronAddress?: string;
   },
   combinedReceiver?: string
-): Promise<any> => {
+) => {
   const { metamaskAddress, tronAddress } = address;
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();

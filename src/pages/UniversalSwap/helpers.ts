@@ -2,7 +2,7 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
-import { TokenItemType, UniversalSwapType, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
+import { TokenItemType, UniversalSwapType, gravityContracts, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
 import { NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
@@ -26,6 +26,9 @@ import {
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+import { Contract, ethers } from 'ethers';
+import { Bridge, Bridge__factory } from 'types/typechain-types';
+import Web3 from 'web3';
 
 /**
  * Get transfer token fee when universal swap
@@ -60,21 +63,24 @@ export async function handleSimulateSwap(query: {
 }): Promise<SimulateSwapOperationsResponse> {
   // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
   // otherwise, simulate like normal
-  switch (query.fromInfo.chainId) {
+  if (isSupportedNoPoolSwapEvm(query.fromInfo.chainId)) return simulateSwapEvm(query);
+  return simulateSwap(query);
+}
+
+export function isSupportedNoPoolSwapEvm(chainId: string) {
+  switch (chainId) {
     case '0x01':
     case '0x38':
-      return simulateSwapEvm(query);
+      return true;
     default:
-      return simulateSwap(query);
+      return false;
   }
 }
 
-export function filterTokens(fromChainId: string, fromDenom: string, searchTokenName: string) {
-  let filteredToTokens = swapToTokens.filter(
-    (token) => token.denom !== fromDenom && token.name.includes(searchTokenName)
-  );
-  if (fromChainId === '0x01' || fromChainId === '0x38') {
-    const swappableTokens = Object.keys(swapEvmRoutes[fromChainId]).map((key) => key.split('-')[1]);
+export function filterTokens(chainId: string, denom: string, searchTokenName: string) {
+  let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
+  if (isSupportedNoPoolSwapEvm(chainId)) {
+    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
     const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
     filteredToTokens = filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
   }
@@ -311,6 +317,11 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
+    // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
+    if (this._fromToken.chainId === this._toToken.chainId && isSupportedNoPoolSwapEvm(this._fromToken.chainId)) {
+      // TODO: support tron here?
+      return window.Metamask.evmSwap(this._fromToken, this._toToken.contractAddress, metamaskAddress, this._fromAmount);
+    }
     return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 

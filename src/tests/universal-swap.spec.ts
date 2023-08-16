@@ -35,6 +35,10 @@ describe('universal-swap', () => {
     expect(tokens.length).toEqual(6);
   });
 
+  it('test-evmSwap', () => {
+    throw 'evmSwap error';
+  });
+
   it('max amount', () => {
     const amount = 123456789n;
     const decimals = 6;

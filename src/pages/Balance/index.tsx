@@ -140,7 +140,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let result: DeliverTxResponse;
+      let result: DeliverTxResponse | any;
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN

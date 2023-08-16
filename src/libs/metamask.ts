@@ -6,6 +6,12 @@ import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
+import { Bridge, Bridge__factory, IERC20Upgradeable, IERC20Upgradeable__factory } from 'types/typechain-types';
+import { Contract, ethers } from 'ethers';
+
+type TransferToGravityResult = {
+  transactionHash: string;
+};
 
 export default class Metamask {
   constructor() {}
@@ -17,6 +23,10 @@ export default class Metamask {
 
     displayInstallWallet('Metamask');
     return false;
+  }
+
+  public getNewSigner() {
+    return new ethers.providers.Web3Provider(window.ethereum).getSigner();
   }
 
   public isWindowEthereum() {
@@ -55,7 +65,7 @@ export default class Metamask {
     options: { feeLimit?: number } = { feeLimit: 40 * 1e6 }, // submitToCosmos costs about 40 TRX
     parameters = [],
     issuerAddress: string
-  ): Promise<any> {
+  ): Promise<TransferToGravityResult> {
     const tronRpc = chainInfos.find((c) => c.chainId == '0x2b6653dc').rpc;
     const tronUrl = tronRpc.replace('/jsonrpc', '');
     const tronWeb = new TronWeb(tronUrl, tronUrl);
@@ -105,7 +115,35 @@ export default class Metamask {
     }
   }
 
-  public async transferToGravity(token: TokenItemType, amountVal: number, from: string | null, to: string) {
+  // TODO: add test cased & add case where from token is native evm
+  public async evmSwap(fromToken: TokenItemType, toTokenContractAddr: string, address: string, fromAmount: number) {
+    const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
+    const amount = toAmount(fromAmount, fromToken.decimals);
+    const checkSumAddress = ethers.utils.getAddress(address);
+    await window.Metamask.checkOrIncreaseAllowance(fromToken, checkSumAddress, gravityContractAddr, fromAmount);
+    const gravityContract = new Contract(
+      gravityContractAddr,
+      Bridge__factory.abi,
+      new ethers.providers.Web3Provider(window.ethereum).getSigner()
+    ) as Bridge;
+    console.log(fromToken.contractAddress, toTokenContractAddr);
+    const result = await gravityContract.bridgeFromERC20(
+      ethers.utils.getAddress(fromToken.contractAddress),
+      ethers.utils.getAddress(toTokenContractAddr),
+      amount,
+      amount,
+      ''
+    );
+    await result.wait();
+    return { transactionHash: result.hash };
+  }
+
+  public async transferToGravity(
+    token: TokenItemType,
+    amountVal: number,
+    from: string | null,
+    to: string
+  ): Promise<TransferToGravityResult> {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     const balance = toAmount(amountVal, token.decimals);
     console.log('gravity tron address: ', gravityContractAddr);
@@ -125,16 +163,20 @@ export default class Metamask {
         );
     } else if (Metamask.checkEthereum()) {
       await this.switchNetwork(token.chainId);
-      const web3 = new Web3(window.ethereum);
       if (!gravityContractAddr || !from || !to) return;
-      const gravityContract = new web3.eth.Contract(GravityABI as AbiItem[], gravityContractAddr);
-      return await gravityContract.methods.sendToCosmos(token.contractAddress, to, balance).send({
-        from
-      });
+      const gravityContract = new Contract(gravityContractAddr, Bridge__factory.abi, this.getNewSigner()) as Bridge;
+      const result = await gravityContract.sendToCosmos(token.contractAddress, to, balance, { from });
+      await result.wait();
+      return { transactionHash: result.hash };
     }
   }
 
-  public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
+  public async checkOrIncreaseAllowance(
+    token: TokenItemType,
+    owner: string,
+    spender: string,
+    amount: number
+  ): Promise<TransferToGravityResult> {
     // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
     const allowance = toAmount(amount, token.decimals);
@@ -160,11 +202,14 @@ export default class Metamask {
     } else if (Metamask.checkEthereum()) {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
-      const web3 = new Web3(window.ethereum);
-      const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
-      return tokenContract.methods.approve(spender, allowance).send({
-        from: ownerHex
-      });
+      const tokenContract = new Contract(
+        token.contractAddress,
+        IERC20Upgradeable__factory.abi,
+        this.getNewSigner()
+      ) as IERC20Upgradeable;
+      const result = await tokenContract.approve(spender, allowance, { from: ownerHex });
+      await result.wait();
+      return { transactionHash: result.hash };
     }
   }
 }
