@@ -2,9 +2,9 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
-import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
+import { TokenItemType, UniversalSwapType, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
 import { NetworkChainId } from 'config/chainInfos';
-import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
+import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
@@ -14,8 +14,18 @@ import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
 import { findToToken, transferEvmToIBC } from 'pages/Balance/helpers';
-import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
+import {
+  SwapQuery,
+  Type,
+  generateContractMessages,
+  getTokenOnOraichain,
+  parseTokenInfo,
+  simulateSwap,
+  simulateSwapEvm
+} from 'rest/api';
 import { IBCInfo } from 'types/ibc';
+import { TokenInfo } from 'types/token';
+import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 
 /**
  * Get transfer token fee when universal swap
@@ -42,6 +52,34 @@ export const calculateMinimum = (simulateAmount: number | string, userSlippage: 
     return '0';
   }
 };
+
+export async function handleSimulateSwap(query: {
+  fromInfo: TokenInfo;
+  toInfo: TokenInfo;
+  amount: string;
+}): Promise<SimulateSwapOperationsResponse> {
+  // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
+  // otherwise, simulate like normal
+  switch (query.fromInfo.chainId) {
+    case '0x01':
+    case '0x38':
+      return simulateSwapEvm(query);
+    default:
+      return simulateSwap(query);
+  }
+}
+
+export function filterTokens(fromChainId: string, fromDenom: string, searchTokenName: string) {
+  let filteredToTokens = swapToTokens.filter(
+    (token) => token.denom !== fromDenom && token.name.includes(searchTokenName)
+  );
+  if (fromChainId === '0x01' || fromChainId === '0x38') {
+    const swappableTokens = Object.keys(swapEvmRoutes[fromChainId]).map((key) => key.split('-')[1]);
+    const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
+    filteredToTokens = filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
+  }
+  return filteredToTokens;
+}
 
 export interface SwapData {
   metamaskAddress?: string;

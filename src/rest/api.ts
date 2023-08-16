@@ -16,20 +16,29 @@ import {
   PairInfo,
   SwapOperation
 } from '@oraichain/oraidex-contracts-sdk';
-import { oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
+import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import {
+  KWT_DENOM,
+  MILKY_DENOM,
+  ORAI,
+  ORAI_INFO,
+  STABLE_DENOM,
+  proxyContractInfo,
+  swapEvmRoutes
+} from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
-import { CoinGeckoId } from 'config/chainInfos';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
+import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import { getCoingeckoPrices } from 'hooks/useCoingecko';
+import { IUniswapV2Router02, IUniswapV2Router02__factory } from 'types/typechain-types';
+import { Contract, ethers } from 'ethers';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -375,6 +384,10 @@ const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
 };
 
+const getTokenOnSpecificChainId = (coingeckoId: CoinGeckoId, chainId: NetworkChainId): TokenItemType | undefined => {
+  return flattenTokens.find((t) => t.coinGeckoId === coingeckoId && t.chainId === chainId);
+};
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -451,15 +464,57 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
     });
     return data;
   } catch (error) {
-    console.log(`Error when trying to simulate swap using router v2: ${error}`);
-    console.log('amount: ', toDisplay(amount, fromInfo.decimals));
-    // TODO: use corresponding router pool. Currently using coingecko price
-    const result = await getCoingeckoPrices([fromInfo.coinGeckoId, toInfo.coinGeckoId]);
+    throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
+  }
+}
+
+function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
+  return `${fromContractAddr}-${toContractAddr}`;
+}
+
+async function simulateSwapEvm(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
+  const { amount, fromInfo, toInfo } = query;
+
+  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
+  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
     return {
-      amount: toAmount(
-        (toDisplay(amount, fromInfo.decimals) * result[fromInfo.coinGeckoId]) / result[toInfo.coinGeckoId]
-      ).toString()
+      amount
     };
+  }
+  try {
+    // get proxy contract object so that we can query the corresponding router address
+    const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
+    const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
+    const swapRouterV2 = new Contract(
+      proxyContractInfo[fromInfo.chainId].routerAddr,
+      IUniswapV2Router02__factory.abi,
+      provider
+    ) as IUniswapV2Router02;
+    const route =
+      swapEvmRoutes[fromInfo.chainId][
+        buildSwapRouterKey(fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress)
+      ];
+    const [_, outAmount] = await swapRouterV2.getAmountsOut(amount, route);
+    return {
+      amount: outAmount.toString()
+    };
+  } catch (ex) {
+    console.log('error simulating evm: ', ex);
+  }
+
+  // check if they have pairs. If not then we go through ORAI
+  const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
+  const { info: askInfo } = parseTokenInfo(toInfo);
+  const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
+  const operations = generateSwapOperationMsgs(offerInfo, askInfo);
+  try {
+    const data = await routerContract.simulateSwapOperations({
+      offerAmount: amount.toString(),
+      operations
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
   }
 }
 
@@ -847,5 +902,6 @@ export {
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
   parseTokenInfoRawDenom,
-  getTokenOnOraichain
+  getTokenOnOraichain,
+  simulateSwapEvm
 };

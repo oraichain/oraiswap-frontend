@@ -17,7 +17,7 @@ import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
 import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from 'pages/UniversalSwap/helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -28,6 +28,13 @@ describe('universal-swap', () => {
   beforeAll(() => {
     windowSpy = jest.spyOn(window, 'window', 'get');
   });
+
+  it('test-filterTokens', () => {
+    const tokens = filterTokens('0x38', 'bep20_wbnb', '');
+    console.log('filtered to tokens: ', tokens);
+    expect(tokens.length).toEqual(6);
+  });
+
   it('max amount', () => {
     const amount = 123456789n;
     const decimals = 6;

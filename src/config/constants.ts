@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 /* oraiswap:unit */
 export const ORAI = 'orai';
 export const UAIRI = 'uAIRI';
@@ -92,3 +94,29 @@ export const CW20_DECIMALS = 6;
 
 // type switch wallet between keplr and owallet
 export type WalletType = 'keplr' | 'owallet';
+
+// hardcode this to improve performance
+export const proxyContractInfo: { [x: string]: { routerAddr: string } } = {
+  '0x01': {
+    routerAddr: ethers.utils.getAddress('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D') // uniswap router
+  },
+  '0x38': {
+    routerAddr: ethers.utils.getAddress('0x10ED43C718714eb63d5aA57B78B54704E256024E') // pancakeswap router
+  }
+};
+
+export const swapEvmRoutes: {
+  [network: string]: {
+    [pair: string]: string[];
+  };
+} = {
+  '0x38': {
+    [`${WRAP_BNB_CONTRACT}-${USDT_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT],
+    [`${WRAP_BNB_CONTRACT}-${ORAI_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, ORAI_BSC_CONTRACT],
+    [`${WRAP_BNB_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT]
+  },
+  '0x01': {
+    [`${WRAP_ETH_CONTRACT}-${USDC_ETH_CONTRACT}`]: [WRAP_ETH_CONTRACT, USDC_ETH_CONTRACT],
+    [`${WRAP_ETH_CONTRACT}-${ORAI_ETH_CONTRACT}`]: [WRAP_ETH_CONTRACT, ORAI_ETH_CONTRACT]
+  }
+};

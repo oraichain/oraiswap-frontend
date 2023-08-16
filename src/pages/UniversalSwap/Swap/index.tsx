@@ -7,8 +7,8 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, swapEvmRoutes } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -24,7 +24,7 @@ import { RootState } from 'store/configure';
 import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, handleSimulateSwap, filterTokens } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -55,6 +55,8 @@ const SwapComponent: React.FC<{
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
+  const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
+  const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
 
   const refreshBalances = async () => {
@@ -114,7 +116,7 @@ const SwapComponent: React.FC<{
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () =>
-      simulateSwap({
+      handleSimulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
         amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
@@ -125,7 +127,7 @@ const SwapComponent: React.FC<{
   const { data: simulateAverageData } = useQuery(
     ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
     () =>
-      simulateSwap({
+      handleSimulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
         amount: toAmount(1, fromTokenInfoData!.decimals).toString()
@@ -134,12 +136,21 @@ const SwapComponent: React.FC<{
   );
 
   useEffect(() => {
-    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
+    setAverageRatio(toDisplay(simulateAverageData?.amount, fromToken.decimals, toTokenInfoData?.decimals).toString());
   }, [simulateAverageData, toTokenInfoData]);
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
+    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, fromToken.decimals, toTokenInfoData?.decimals)]);
   }, [simulateData, fromAmountToken, toTokenInfoData]);
+
+  // process filter from & to tokens
+  useEffect(() => {
+    const filteredToTokens = filterTokens(fromToken.chainId, fromTokenDenom, searchTokenName);
+    setFilteredToTokens(filteredToTokens);
+
+    const filteredFromTokens = filterTokens(toToken.chainId, toTokenDenom, searchTokenName);
+    setFilteredFromTokens(filteredFromTokens);
+  }, [fromTokenDenom, toTokenDenom]);
 
   const queryTaxRate = async () => {
     const data = await fetchTaxRate();
@@ -206,13 +217,13 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  const filteredFromTokens = swapFromTokens.filter(
-    (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  );
+  // const filteredFromTokens = swapFromTokens.filter(
+  //   (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
+  // );
 
-  const filteredToTokens = swapToTokens.filter(
-    (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  );
+  // const filteredToTokens = swapToTokens.filter(
+  //   (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
+  // );
 
   // minimum receive after slippage
   const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';

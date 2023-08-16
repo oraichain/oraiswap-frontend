@@ -334,3 +334,9 @@ export const initClient = async () => {
     gasPrice: GasPrice.fromString(`0.002${network.denom}`)
   });
 };
+
+export function convertChainIdFromHexToNumber(chainId: string): number {
+  const regex = /^0x[0-9A-Fa-f]+$/g;
+  if (!chainId.match(regex)) return 0;
+  return parseInt(chainId);
+}
