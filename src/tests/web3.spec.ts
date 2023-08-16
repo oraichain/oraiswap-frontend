@@ -2,17 +2,16 @@ import { USDT_TRON_CONTRACT } from 'config/constants';
 import { ethToTronAddress } from 'helper';
 import { chainInfos } from 'config/chainInfos';
 import Metamask from 'libs/metamask';
-import { IERC20Upgradeable, IERC20Upgradeable__factory } from 'types/typechain-types';
-import { Contract, ethers } from 'ethers';
+import { IERC20Upgradeable__factory } from 'types/typechain-types';
+import { ethers } from 'ethers';
 
 describe('bigint', () => {
   it('web3-tron-happy-path', async () => {
     const tronRpc = chainInfos.find((c) => c.chainId === '0x2b6653dc').rpc;
-    const tokenContract = new Contract(
+    const tokenContract = IERC20Upgradeable__factory.connect(
       USDT_TRON_CONTRACT,
-      IERC20Upgradeable__factory.abi,
       new ethers.providers.JsonRpcProvider(tronRpc)
-    ) as IERC20Upgradeable;
+    );
     const owner = '0x993d06fc97f45f16e4805883b98a6c20bab54964';
     const spender = '0x2f1e13A482af1cc89553cDFB8BdF999155D13C35';
     console.log(ethToTronAddress(owner), ethToTronAddress(spender));

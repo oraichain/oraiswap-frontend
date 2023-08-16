@@ -37,8 +37,8 @@ import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import { IUniswapV2Router02, IUniswapV2Router02__factory } from 'types/typechain-types';
-import { Contract, ethers } from 'ethers';
+import { IUniswapV2Router02__factory } from 'types/typechain-types';
+import { ethers } from 'ethers';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -485,11 +485,7 @@ async function simulateSwapEvm(query: { fromInfo: TokenInfo; toInfo: TokenInfo; 
     // get proxy contract object so that we can query the corresponding router address
     const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
     const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
-    const swapRouterV2 = new Contract(
-      proxyContractInfo[fromInfo.chainId].routerAddr,
-      IUniswapV2Router02__factory.abi,
-      provider
-    ) as IUniswapV2Router02;
+    const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route =
       swapEvmRoutes[fromInfo.chainId][
         buildSwapRouterKey(fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress)

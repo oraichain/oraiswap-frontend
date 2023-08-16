@@ -2,15 +2,19 @@ import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
 import { toAmount } from './utils';
-import { Bridge, Bridge__factory, IERC20Upgradeable, IERC20Upgradeable__factory } from 'types/typechain-types';
-import { Contract, ethers } from 'ethers';
+import { Bridge__factory, IERC20Upgradeable__factory } from 'types/typechain-types';
+import { ethers } from 'ethers';
+import { Web3Provider } from '@ethersproject/providers';
 
 type TransferToGravityResult = {
   transactionHash: string;
 };
 
 export default class Metamask {
-  constructor() {}
+  private provider: Web3Provider;
+  constructor() {
+    this.provider = new ethers.providers.Web3Provider(window.ethereum);
+  }
 
   public static checkEthereum() {
     if (window.ethereum) {
@@ -21,8 +25,8 @@ export default class Metamask {
     return false;
   }
 
-  public getNewSigner() {
-    return new ethers.providers.Web3Provider(window.ethereum).getSigner();
+  public getSigner() {
+    return this.provider.getSigner();
   }
 
   public isWindowEthereum() {
@@ -117,11 +121,7 @@ export default class Metamask {
     const amount = toAmount(fromAmount, fromToken.decimals);
     const checkSumAddress = ethers.utils.getAddress(address);
     await window.Metamask.checkOrIncreaseAllowance(fromToken, checkSumAddress, gravityContractAddr, fromAmount);
-    const gravityContract = new Contract(
-      gravityContractAddr,
-      Bridge__factory.abi,
-      new ethers.providers.Web3Provider(window.ethereum).getSigner()
-    ) as Bridge;
+    const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     console.log(fromToken.contractAddress, toTokenContractAddr);
     const result = await gravityContract.bridgeFromERC20(
       ethers.utils.getAddress(fromToken.contractAddress),
@@ -160,7 +160,7 @@ export default class Metamask {
     } else if (Metamask.checkEthereum()) {
       await this.switchNetwork(token.chainId);
       if (!gravityContractAddr || !from || !to) return;
-      const gravityContract = new Contract(gravityContractAddr, Bridge__factory.abi, this.getNewSigner()) as Bridge;
+      const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
       const result = await gravityContract.sendToCosmos(token.contractAddress, to, balance, { from });
       await result.wait();
       return { transactionHash: result.hash };
@@ -177,11 +177,10 @@ export default class Metamask {
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
     const allowance = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm
-    const tokenContract = new Contract(
+    const tokenContract = IERC20Upgradeable__factory.connect(
       token.contractAddress,
-      IERC20Upgradeable__factory.abi,
       new ethers.providers.JsonRpcProvider(token.rpc)
-    ) as IERC20Upgradeable;
+    );
     const currentAllowance = await tokenContract.allowance(ownerHex, spender);
 
     if (currentAllowance.toBigInt() >= allowance) return;
@@ -201,11 +200,7 @@ export default class Metamask {
     } else if (Metamask.checkEthereum()) {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
-      const tokenContract = new Contract(
-        token.contractAddress,
-        IERC20Upgradeable__factory.abi,
-        this.getNewSigner()
-      ) as IERC20Upgradeable;
+      const tokenContract = IERC20Upgradeable__factory.connect(token.contractAddress, this.getSigner());
       const result = await tokenContract.approve(spender, allowance, { from: ownerHex });
       await result.wait();
       return { transactionHash: result.hash };
