@@ -14,21 +14,20 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { toDisplay, toSubAmount } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
-import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTaxRate, fetchTokenInfos, getTokenOnOraichain, simulateSwap } from 'rest/api';
+import { fetchTokenInfos, getTokenOnOraichain } from 'rest/api';
 import { RootState } from 'store/configure';
-import SelectTokenModalV2 from '../Modals/SelectTokenModalV2';
-import { TooltipIcon } from '../Modals/SettingTooltip';
-import SlippageModal from '../Modals/SlippageModal';
+import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
 import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import InputSwap from 'components/InputSwap/InputSwap';
+import { useSimulate, useTaxRate } from './hooks';
 
 const cx = cn.bind(styles);
 
@@ -40,14 +39,11 @@ const SwapComponent: React.FC<{
   const { data: prices } = useCoinGeckoPrices();
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
-  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([0, 0]);
-  const [averageRatio, setAverageRatio] = useState('0');
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [oraiAddress] = useConfigReducer('address');
-  const [taxRate, setTaxRate] = useState('');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
@@ -111,44 +107,9 @@ const SwapComponent: React.FC<{
     : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
-  const { data: simulateData } = useQuery(
-    ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
-    () =>
-      simulateSwap({
-        fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!,
-        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
-      }),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
-  );
-
-  const { data: simulateAverageData } = useQuery(
-    ['simulate-average-data', fromTokenInfoData, toTokenInfoData],
-    () =>
-      simulateSwap({
-        fromInfo: fromTokenInfoData!,
-        toInfo: toTokenInfoData!,
-        amount: toAmount(1, fromTokenInfoData!.decimals).toString()
-      }),
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData }
-  );
-
-  useEffect(() => {
-    setAverageRatio(toDisplay(simulateAverageData?.amount, toTokenInfoData?.decimals).toString());
-  }, [simulateAverageData, toTokenInfoData]);
-
-  useEffect(() => {
-    setSwapAmount([fromAmountToken, toDisplay(simulateData?.amount, toTokenInfoData?.decimals)]);
-  }, [simulateData, fromAmountToken, toTokenInfoData]);
-
-  const queryTaxRate = async () => {
-    const data = await fetchTaxRate();
-    setTaxRate(data?.rate)
-  }
-
-  useEffect(() => {
-    queryTaxRate();
-  }, [])
+  const taxRate = useTaxRate()
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate('simulate-data', fromTokenInfoData, toTokenInfoData)
+  const { toAmountToken: averageRatio } = useSimulate('simulate-average-data', fromTokenInfoData, toTokenInfoData, 1)
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
@@ -257,34 +218,14 @@ const SwapComponent: React.FC<{
             </div>
           </div>
           <div className={cx('input-wrapper')}>
-            <div className={cx('input')}>
-              <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
-                {FromIcon && <FromIcon className={cx('logo')} />}
-                <div className={cx('token-info')}>
-                  <span className={cx('token-symbol')}>{originalFromToken?.name}</span>
-                  <span className={cx('token-org')}>{originalFromToken?.org}</span>
-                </div>
-                <div className={cx('arrow-down')} />
-              </div>
-
-              <NumberFormat
-                placeholder="0"
-                className={cx('amount')}
-                thousandSeparator
-                decimalScale={6}
-                type="text"
-                value={fromAmountToken}
-                onValueChange={({ floatValue }) => {
-                  onChangeFromAmount(floatValue);
-                }}
-              />
-            </div>
-            {fromTokenFee !== 0 && (
-              <div className={cx('token-fee')}>
-                <span>Token Fee</span>
-                <span>{fromTokenFee}%</span>
-              </div>
-            )}
+            <InputSwap
+              Icon={FromIcon}
+              setIsSelectFrom={setIsSelectFrom}
+              token={originalFromToken}
+              amount={fromAmountToken}
+              onChangeAmount={onChangeFromAmount}
+              tokenFee={fromTokenFee}
+            />
             {isSelectFrom && (
               <SelectTokenModalV2
                 close={() => setIsSelectFrom(false)}
@@ -329,30 +270,13 @@ const SwapComponent: React.FC<{
             </span>
           </div>
           <div className={cx('input-wrapper')}>
-            <div className={cx('input')}>
-              <div className={cx('token')} onClick={() => setIsSelectTo(true)}>
-                {ToIcon && <ToIcon className={cx('logo')} />}
-                <div className={cx('token-info')}>
-                  <span className={cx('token-symbol')}>{originalToToken?.name}</span>
-                  <span className={cx('token-org')}>{originalToToken?.org}</span>
-                </div>
-                <div className={cx('arrow-down')} />
-              </div>
-
-              <NumberFormat
-                className={cx('amount')}
-                thousandSeparator
-                decimalScale={6}
-                type="text"
-                value={toAmountToken}
-              />
-            </div>
-            {toTokenFee !== 0 && (
-              <div className={cx('token-fee')}>
-                <span>Token Fee</span>
-                <span>{toTokenFee}%</span>
-              </div>
-            )}
+            <InputSwap
+              Icon={ToIcon}
+              setIsSelectFrom={setIsSelectTo}
+              token={originalToToken}
+              amount={toAmountToken}
+              tokenFee={toTokenFee}
+            />
             {isSelectTo && (
               <SelectTokenModalV2
                 close={() => setIsSelectTo(false)}
