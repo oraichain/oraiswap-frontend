@@ -137,15 +137,13 @@ export default class Metamask {
   public async checkOrIncreaseAllowance(token: TokenItemType, owner: string, spender: string, amount: number) {
     // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
-    const weiAmount = toAmount(amount, token.decimals);
+    const allowance = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm
     const web3 = new Web3(token.rpc);
     const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
     const currentAllowance = BigInt(await tokenContract.methods.allowance(ownerHex, spender).call());
 
-    if (currentAllowance >= weiAmount) return;
-
-    const allowance = toAmount(999999999999999, token.decimals);
+    if (currentAllowance >= allowance) return;
 
     if (this.isTron(token.chainId)) {
       if (Metamask.checkTron())

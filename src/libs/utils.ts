@@ -331,7 +331,6 @@ export const initClient = async () => {
 
   // finally assign it
   window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-    prefix: network.prefix,
     gasPrice: GasPrice.fromString(`0.002${network.denom}`)
   });
 };

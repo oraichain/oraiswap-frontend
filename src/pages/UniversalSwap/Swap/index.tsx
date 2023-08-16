@@ -53,7 +53,7 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
 
@@ -92,8 +92,8 @@ const SwapComponent: React.FC<{
   };
 
   // get token on oraichain to simulate swap amount.
-  const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
-  const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
+  const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
+  const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
 
@@ -143,18 +143,18 @@ const SwapComponent: React.FC<{
 
   const queryTaxRate = async () => {
     const data = await fetchTaxRate();
-    setTaxRate(data?.rate)
-  }
+    setTaxRate(data?.rate);
+  };
 
   useEffect(() => {
     queryTaxRate();
-  }, [])
+  }, []);
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken])
+  }, [fromToken, toToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -215,9 +215,7 @@ const SwapComponent: React.FC<{
   );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount
-    ? calculateMinimum(simulateData.amount, userSlippage)
-    : '0';
+  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>

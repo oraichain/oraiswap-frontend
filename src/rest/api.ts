@@ -29,6 +29,7 @@ import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
+import { getCoingeckoPrices } from 'hooks/useCoingecko';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -63,11 +64,19 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
     } as OraiswapTokenTypes.QueryMsg)
   }));
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
-    queries
-  });
-  let ind = 0;
-  return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
+  let tokenInfos = tokens.map((t) => toTokenInfo(t));
+  try {
+    const res = await multicall.tryAggregate({
+      queries
+    });
+    let ind = 0;
+    tokenInfos = tokens.map((t) =>
+      toTokenInfo(t, t.contractAddress && res.return_data[ind].success ? fromBinary(res.return_data[ind++].data) : t)
+    );
+  } catch (error) {
+    console.log('error fetching token infos: ', error);
+  }
+  return tokenInfos;
 }
 
 async function fetchAllRewardPerSecInfos(
@@ -440,10 +449,17 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
       offerAmount: amount.toString(),
       operations
     });
-    console.log('simulate swap data: ', data);
     return data;
   } catch (error) {
-    throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
+    console.log(`Error when trying to simulate swap using router v2: ${error}`);
+    console.log('amount: ', toDisplay(amount, fromInfo.decimals));
+    // TODO: use corresponding router pool. Currently using coingecko price
+    const result = await getCoingeckoPrices([fromInfo.coinGeckoId, toInfo.coinGeckoId]);
+    return {
+      amount: toAmount(
+        (toDisplay(amount, fromInfo.decimals) * result[fromInfo.coinGeckoId]) / result[toInfo.coinGeckoId]
+      ).toString()
+    };
   }
 }
 
