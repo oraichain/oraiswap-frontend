@@ -2,7 +2,6 @@ import { Keplr as keplr } from '@keplr-wallet/types';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Network } from 'bip32';
 import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
-import Web3 from 'web3';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
@@ -110,7 +109,6 @@ declare global {
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
-    web3: Web3;
     tronWeb: TronWeb;
     tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;

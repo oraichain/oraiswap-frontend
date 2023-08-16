@@ -26,9 +26,6 @@ import {
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
-import { Contract, ethers } from 'ethers';
-import { Bridge, Bridge__factory } from 'types/typechain-types';
-import Web3 from 'web3';
 
 /**
  * Get transfer token fee when universal swap

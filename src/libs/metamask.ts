@@ -1,10 +1,6 @@
-import erc20ABI from 'config/abi/erc20.json';
-import GravityABI from 'config/abi/gravity.json';
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
-import Web3 from 'web3';
-import { AbiItem } from 'web3-utils';
 import { toAmount } from './utils';
 import { Bridge, Bridge__factory, IERC20Upgradeable, IERC20Upgradeable__factory } from 'types/typechain-types';
 import { Contract, ethers } from 'ethers';
@@ -48,15 +44,15 @@ export default class Metamask {
 
   public isEthAddress(address: string): boolean {
     try {
-      const checkSumAddress = Web3.utils.toChecksumAddress(address);
-      return Web3.utils.checkAddressChecksum(checkSumAddress);
+      const checkSumAddress = ethers.utils.getAddress(address);
+      return ethers.utils.isAddress(checkSumAddress);
     } catch (error) {
       return false;
     }
   }
 
   public toCheckSumEthAddress(address: string): string {
-    return Web3.utils.toChecksumAddress(address);
+    return ethers.utils.getAddress(address);
   }
 
   private async submitTronSmartContract(
@@ -181,11 +177,14 @@ export default class Metamask {
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
     const allowance = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm
-    const web3 = new Web3(token.rpc);
-    const tokenContract = new web3.eth.Contract(erc20ABI as AbiItem[], token.contractAddress);
-    const currentAllowance = BigInt(await tokenContract.methods.allowance(ownerHex, spender).call());
+    const tokenContract = new Contract(
+      token.contractAddress,
+      IERC20Upgradeable__factory.abi,
+      new ethers.providers.JsonRpcProvider(token.rpc)
+    ) as IERC20Upgradeable;
+    const currentAllowance = await tokenContract.allowance(ownerHex, spender);
 
-    if (currentAllowance >= allowance) return;
+    if (currentAllowance.toBigInt() >= allowance) return;
 
     if (this.isTron(token.chainId)) {
       if (Metamask.checkTron())
