@@ -13,6 +13,11 @@ export type ChainInfoType = {
   lcd?: string;
 };
 
+export type RewardPoolType = {
+  reward: Array<string>;
+  liquidity_token: string;
+};
+
 export interface ConfigState {
   address: string;
   metamaskAddress: string | null;
@@ -30,6 +35,7 @@ export interface ConfigState {
   apr: {
     [key: string]: number;
   };
+  rewardPools: RewardPoolType[];
   filterDefaultPool: KeyFilterPool;
   persistVersion: number;
 }
@@ -49,8 +55,9 @@ const initialState: ConfigState = {
   theme: 'dark',
   coingecko: {},
   apr: {},
+  rewardPools: [],
   filterDefaultPool: KeyFilterPool.all_pool,
-  persistVersion: PERSIST_VER,
+  persistVersion: PERSIST_VER
 };
 
 export const configSlice = createSlice({
@@ -58,10 +65,7 @@ export const configSlice = createSlice({
   initialState,
   reducers: {
     updateConfig: {
-      reducer(
-        state,
-        action: PayloadAction<string, string, ConfigState[keyof ConfigState]>
-      ) {
+      reducer(state, action: PayloadAction<string, string, ConfigState[keyof ConfigState]>) {
         state[action.payload] = action.meta;
       },
       prepare(key: string, value: ConfigState[keyof ConfigState]) {
