@@ -8,7 +8,10 @@ import {
   IBC_TRANSFER_TIMEOUT,
   ORAI,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  USDT_BSC_CONTRACT,
+  USDT_TRON_CONTRACT,
+  WRAP_BNB_CONTRACT
 } from 'config/constants';
 import { ibcInfos, oraib2oraichain, oraichain2atom, oraichain2oraib, oraichain2osmosis } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -22,10 +25,14 @@ import {
   checkEvmAddress,
   calculateMinimum,
   filterTokens,
-  SwapDirection
+  SwapDirection,
+  isSupportedNoPoolSwapEvm,
+  isEvmSwappable,
+  handleSimulateSwap
 } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
+import * as helpers from 'pages/UniversalSwap/helpers';
 import { IBCInfo } from 'types/ibc';
 import { senderAddress } from './common';
 
@@ -35,25 +42,59 @@ describe('universal-swap', () => {
     windowSpy = jest.spyOn(window, 'window', 'get');
   });
 
-  it('test-filterTokens', () => {
-    const tokens = filterTokens('0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From);
+  it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
+    ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 3],
+    ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 6],
+    ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
+  ])('test-filterTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
+    const tokens = filterTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
     console.log('filtered to tokens: ', tokens.length);
-    // expect(tokens.length).toEqual(6);
-
-    throw 'filterTokens error';
+    expect(tokens.length).toEqual(expectedLength);
   });
 
   it('test-evmSwap', () => {
     throw 'evmSwap error';
   });
 
-  it('test-isSupportedNoPoolSwapEvm', () => {
-    throw 'isSupportedNoPoolSwapEvm error';
+  it.each([
+    ['wbnb', true],
+    ['weth', true],
+    ['bnb', false]
+  ])('test-isSupportedNoPoolSwapEvm', (coingeckoId: CoinGeckoId, expectedResult: boolean) => {
+    expect(isSupportedNoPoolSwapEvm(coingeckoId)).toEqual(expectedResult);
   });
 
-  it('test-isEvmSwappable', () => {
-    throw 'isEvmSwappable error';
+  it.each<[string, string, string, string, boolean]>([
+    ['a', 'b', 'b', 'c', false],
+    ['a', 'a', 'b', 'c', false],
+    ['0x38', '0x38', USDT_TRON_CONTRACT, USDT_BSC_CONTRACT, false],
+    ['0x38', '0x38', WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT, true]
+  ])('test-isEvmSwappable', (fromChainId, toChainId, fromContractAddr, toContractAddr, expectedResult) => {
+    const result = isEvmSwappable({ fromChainId, toChainId, fromContractAddr, toContractAddr });
+    expect(result).toEqual(expectedResult);
   });
+
+  // it.each<[boolean, boolean, string]>([
+  //   [false, false, '1'],
+  //   [false, true, '2'],
+  //   [true, false, '2'],
+  //   [true, true, '2']
+  // ])('test handleSimulateSwap', async (isSupportedNoPoolSwapEvmRes, isEvmSwappableRes, expectedSimulateAmount) => {
+  //   const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
+  //   const simulateSwapEvmSpy = jest.spyOn(restApi, 'simulateSwapEvm');
+  //   simulateSwapSpy.mockResolvedValue({ amount: '1' });
+  //   simulateSwapEvmSpy.mockResolvedValue({ amount: '2' });
+  //   const isSupportedNoPoolSwapEvmSpy = jest.spyOn(helpers, 'isSupportedNoPoolSwapEvm');
+  //   const isEvmSwappableSpy = jest.spyOn(helpers, 'isEvmSwappable');
+  //   isSupportedNoPoolSwapEvmSpy.mockReturnValue(isSupportedNoPoolSwapEvmRes);
+  //   isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
+  //   const simulateData = await handleSimulateSwap(null);
+  //   expect(simulateData.amount).toEqual(expectedSimulateAmount);
+  //   simulateSwapSpy.mockRestore();
+  //   simulateSwapEvmSpy.mockRestore();
+  //   isSupportedNoPoolSwapEvmSpy.mockRestore();
+  //   isEvmSwappableSpy.mockRestore();
+  // });
 
   it('max amount', () => {
     const amount = 123456789n;

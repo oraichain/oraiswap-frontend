@@ -1,7 +1,7 @@
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
-import { toAmount } from './utils';
+import { toAmount, toDisplay } from './utils';
 import { Bridge__factory, IERC20Upgradeable__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
@@ -114,17 +114,30 @@ export default class Metamask {
   }
 
   // TODO: add test cased & add case where from token is native evm
-  public async evmSwap(fromToken: TokenItemType, toTokenContractAddr: string, address: string, fromAmount: number) {
+  public async evmSwap(
+    fromToken: TokenItemType,
+    toTokenContractAddr: string,
+    address: string,
+    fromAmount: number,
+    simulateAmount: string,
+    slippage?: number // from 1 to 100
+  ) {
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
-    const amount = toAmount(fromAmount, fromToken.decimals);
     const checkSumAddress = ethers.utils.getAddress(address);
-    await window.Metamask.checkOrIncreaseAllowance(fromToken, checkSumAddress, gravityContractAddr, fromAmount);
+    console.log('simulate evm swap amount: ', fromAmount, toAmount(fromAmount, fromToken.decimals), simulateAmount);
+    await window.Metamask.checkOrIncreaseAllowance(
+      fromToken,
+      checkSumAddress,
+      gravityContractAddr,
+      fromAmount // increase allowance only take display form as input
+    );
+    console.log('after checking or increase allowance');
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const result = await gravityContract.bridgeFromERC20(
       ethers.utils.getAddress(fromToken.contractAddress),
       ethers.utils.getAddress(toTokenContractAddr),
-      amount,
-      amount,
+      toAmount(fromAmount, fromToken.decimals).toString(),
+      (BigInt(simulateAmount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n, // use
       ''
     );
     await result.wait();

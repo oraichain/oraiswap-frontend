@@ -83,8 +83,15 @@ export async function handleSimulateSwap(query: {
       fromContractAddr: query.originalFromInfo.contractAddress,
       toContractAddr: query.originalToInfo.contractAddress
     })
-  )
-    return simulateSwapEvm({ fromInfo: query.originalFromInfo, toInfo: query.originalToInfo, amount: query.amount });
+  ) {
+    // reset previous amount calculation since now we need to deal with original from & to info, not oraichain token info
+    const originalAmount = toDisplay(query.amount, query.fromInfo.decimals);
+    return simulateSwapEvm({
+      fromInfo: query.originalFromInfo,
+      toInfo: query.originalToInfo,
+      amount: toAmount(originalAmount, query.originalFromInfo.decimals).toString()
+    });
+  }
   return simulateSwap(query);
 }
 
@@ -371,7 +378,14 @@ export class UniversalSwapHandler {
         }))
     ) {
       // TODO: support tron here?
-      return window.Metamask.evmSwap(this._fromToken, this._toToken.contractAddress, metamaskAddress, this._fromAmount);
+      return window.Metamask.evmSwap(
+        this._fromToken,
+        this._toToken.contractAddress,
+        metamaskAddress,
+        this.fromAmount,
+        this.simulateAmount,
+        this._userSlippage
+      );
     }
     return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }

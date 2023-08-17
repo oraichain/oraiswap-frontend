@@ -21,7 +21,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchTokenInfos, getTokenOnOraichain } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
+import {
+  UniversalSwapHandler,
+  checkEvmAddress,
+  calculateMinimum,
+  filterTokens,
+  SwapDirection,
+  isEvmSwappable
+} from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -90,10 +97,20 @@ const SwapComponent: React.FC<{
   };
 
   // get token on oraichain to simulate swap amount.
-  const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
-  const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
+  const isEvmSwap = isEvmSwappable({
+    fromChainId: originalFromToken.chainId,
+    toChainId: originalToToken.chainId,
+    fromContractAddr: originalFromToken.contractAddress,
+    toContractAddr: originalToToken.contractAddress
+  });
+  const fromToken = isEvmSwap
+    ? tokenMap[fromTokenDenom]
+    : getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
+  const toToken = isEvmSwap
+    ? tokenMap[toTokenDenom]
+    : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
   const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
   const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
@@ -349,7 +366,6 @@ const SwapComponent: React.FC<{
               balance={{
                 amount: minimumReceive,
                 denom: toTokenInfoData?.symbol,
-                sourceDecimals: fromTokenInfoData?.decimals,
                 decimals: toTokenInfoData?.decimals
               }}
               decimalScale={6}

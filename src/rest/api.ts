@@ -384,9 +384,12 @@ const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
 };
 
-const getTokenOnSpecificChainId = (coingeckoId: CoinGeckoId, chainId: NetworkChainId): TokenItemType | undefined => {
+export function getTokenOnSpecificChainId(
+  coingeckoId: CoinGeckoId,
+  chainId: NetworkChainId
+): TokenItemType | undefined {
   return flattenTokens.find((t) => t.coinGeckoId === coingeckoId && t.chainId === chainId);
-};
+}
 
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
@@ -468,7 +471,7 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   }
 }
 
-function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
+export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
   return `${fromContractAddr}-${toContractAddr}`;
 }
 
@@ -478,7 +481,9 @@ export function getSwapRoute(chainId: string, fromContractAddr: string, toContra
   if (route) return route;
   // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
   route = chainRoutes[buildSwapRouterKey(toContractAddr, fromContractAddr)];
-  if (route) return route.reverse();
+  if (route) {
+    return [].concat(route).reverse();
+  }
   return undefined;
 }
 
@@ -497,8 +502,9 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
-    console.log('swap route: ', route);
+    console.log('simulate in amount: ', amount);
     const [_, outAmount] = await swapRouterV2.getAmountsOut(amount, route);
+    console.log('out amount: ', outAmount.toString());
     return {
       amount: outAmount.toString()
     };

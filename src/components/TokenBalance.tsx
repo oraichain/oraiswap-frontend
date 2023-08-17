@@ -4,7 +4,6 @@ import { toDisplay } from 'libs/utils';
 
 type BalanceProp = {
   amount: string | bigint;
-  sourceDecimals?: number;
   decimals?: number;
   denom?: string;
 };
@@ -16,7 +15,6 @@ type Props = {
 
 const parseBalance = (balance: BalanceProp): number => {
   if (!balance.decimals) return Number(balance.amount);
-  if (balance.sourceDecimals) return toDisplay(balance.amount, balance.sourceDecimals, balance.decimals);
   return toDisplay(balance.amount, balance.decimals);
 };
 
