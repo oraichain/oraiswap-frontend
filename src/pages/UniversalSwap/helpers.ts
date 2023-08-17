@@ -367,25 +367,28 @@ export class UniversalSwapHandler {
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
-    if (
-      isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId) ||
-      (this._fromToken.chainId === this._toToken.chainId &&
+    if (isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
+      if (
         isEvmSwappable({
           fromChainId: this._fromToken.chainId,
           toChainId: this._toToken.chainId,
           fromContractAddr: this._fromToken.contractAddress,
           toContractAddr: this._toToken.contractAddress
-        }))
-    ) {
-      // TODO: support tron here?
-      return window.Metamask.evmSwap(
-        this._fromToken,
-        this._toToken.contractAddress,
-        metamaskAddress,
-        this.fromAmount,
-        this.simulateAmount,
-        this._userSlippage
-      );
+        })
+      )
+        // TODO: support tron here?
+        return window.Metamask.evmSwap(
+          this._fromToken,
+          this._toToken.contractAddress,
+          metamaskAddress,
+          this.fromAmount,
+          this.simulateAmount,
+          this._userSlippage
+        );
+      else {
+        // TODO: implement this case, where non-pool tokens on evm swap directly to supported tokens on Oraichain
+        throw 'Currently not supported for this case';
+      }
     }
     return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
