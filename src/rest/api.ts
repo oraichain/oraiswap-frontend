@@ -497,21 +497,6 @@ async function simulateSwapEvm(query: { fromInfo: TokenInfo; toInfo: TokenInfo; 
   } catch (ex) {
     console.log('error simulating evm: ', ex);
   }
-
-  // check if they have pairs. If not then we go through ORAI
-  const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
-  const { info: askInfo } = parseTokenInfo(toInfo);
-  const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
-  const operations = generateSwapOperationMsgs(offerInfo, askInfo);
-  try {
-    const data = await routerContract.simulateSwapOperations({
-      offerAmount: amount.toString(),
-      operations
-    });
-    return data;
-  } catch (error) {
-    throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
-  }
 }
 
 export type SwapQuery = {

@@ -47,7 +47,9 @@ export const calculateMinimum = (simulateAmount: number | string, userSlippage: 
   console.log('minimum amount: ', simulateAmount);
   if (!simulateAmount) return '0';
   try {
-    return BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+    const result =
+      BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+    return result;
   } catch (error) {
     console.log({ error });
     return '0';

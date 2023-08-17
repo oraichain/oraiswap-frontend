@@ -14,7 +14,7 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDisplay, toSubAmount } from 'libs/utils';
+import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -326,6 +326,7 @@ const SwapComponent: React.FC<{
               balance={{
                 amount: minimumReceive,
                 denom: toTokenInfoData?.symbol,
+                sourceDecimals: fromTokenInfoData?.decimals,
                 decimals: toTokenInfoData?.decimals
               }}
               decimalScale={6}
