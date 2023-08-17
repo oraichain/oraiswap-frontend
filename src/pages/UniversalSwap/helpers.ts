@@ -3,7 +3,7 @@ import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, gravityContracts, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
-import { NetworkChainId } from 'config/chainInfos';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
@@ -18,6 +18,7 @@ import {
   SwapQuery,
   Type,
   generateContractMessages,
+  getSwapRoute,
   getTokenOnOraichain,
   parseTokenInfo,
   simulateSwap,
@@ -26,6 +27,16 @@ import {
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+
+export enum SwapDirection {
+  From,
+  To
+}
+
+export interface SwapData {
+  metamaskAddress?: string;
+  tronAddress?: string;
+}
 
 /**
  * Get transfer token fee when universal swap
@@ -58,37 +69,69 @@ export const calculateMinimum = (simulateAmount: number | string, userSlippage: 
 export async function handleSimulateSwap(query: {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
+  originalFromInfo: TokenItemType;
+  originalToInfo: TokenItemType;
   amount: string;
 }): Promise<SimulateSwapOperationsResponse> {
   // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
   // otherwise, simulate like normal
-  if (isSupportedNoPoolSwapEvm(query.fromInfo.chainId)) return simulateSwapEvm(query);
+  if (
+    isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId) ||
+    isEvmSwappable({
+      fromChainId: query.originalFromInfo.chainId,
+      toChainId: query.originalToInfo.chainId,
+      fromContractAddr: query.originalFromInfo.contractAddress,
+      toContractAddr: query.originalToInfo.contractAddress
+    })
+  )
+    return simulateSwapEvm({ fromInfo: query.originalFromInfo, toInfo: query.originalToInfo, amount: query.amount });
   return simulateSwap(query);
 }
 
-export function isSupportedNoPoolSwapEvm(chainId: string) {
-  switch (chainId) {
-    case '0x01':
-    case '0x38':
+export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
+  switch (coingeckoId) {
+    case 'wbnb':
+    case 'weth':
       return true;
     default:
       return false;
   }
 }
 
-export function filterTokens(chainId: string, denom: string, searchTokenName: string) {
-  let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
-  if (isSupportedNoPoolSwapEvm(chainId)) {
-    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
-    const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
-    filteredToTokens = filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
-  }
-  return filteredToTokens;
+export function isEvmSwappable(data: {
+  fromChainId: string;
+  toChainId: string;
+  fromContractAddr: string;
+  toContractAddr: string;
+}): boolean {
+  const { fromChainId, fromContractAddr, toChainId, toContractAddr } = data;
+  if (fromChainId !== toChainId) return false;
+  // cant swap on evm if chain id is not eth or bsc
+  if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
+  if (!getSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
+  return true;
 }
 
-export interface SwapData {
-  metamaskAddress?: string;
-  tronAddress?: string;
+export function filterTokens(
+  chainId: string,
+  coingeckoId: CoinGeckoId,
+  denom: string,
+  searchTokenName: string,
+  direction: SwapDirection
+) {
+  // basic filter. Dont include itself & only collect tokens with searched letters
+  let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
+  // special case for tokens not having a pool on Oraichain
+  if (isSupportedNoPoolSwapEvm(coingeckoId)) {
+    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
+    const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
+
+    // tokens that dont have a pool on Oraichain like WETH or WBNB cannot be swapped from a token on Oraichain
+    if (direction === SwapDirection.To)
+      return filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
+    filteredToTokens = filteredTokens;
+  }
+  return filteredToTokens;
 }
 
 export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: string, tronAddress?: string | boolean) => {
@@ -317,7 +360,16 @@ export class UniversalSwapHandler {
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
-    if (this._fromToken.chainId === this._toToken.chainId && isSupportedNoPoolSwapEvm(this._fromToken.chainId)) {
+    if (
+      isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId) ||
+      (this._fromToken.chainId === this._toToken.chainId &&
+        isEvmSwappable({
+          fromChainId: this._fromToken.chainId,
+          toChainId: this._toToken.chainId,
+          fromContractAddr: this._fromToken.contractAddress,
+          toContractAddr: this._toToken.contractAddress
+        }))
+    ) {
       // TODO: support tron here?
       return window.Metamask.evmSwap(this._fromToken, this._toToken.contractAddress, metamaskAddress, this._fromAmount);
     }

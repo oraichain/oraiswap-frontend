@@ -120,7 +120,6 @@ export default class Metamask {
     const checkSumAddress = ethers.utils.getAddress(address);
     await window.Metamask.checkOrIncreaseAllowance(fromToken, checkSumAddress, gravityContractAddr, fromAmount);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
-    console.log(fromToken.contractAddress, toTokenContractAddr);
     const result = await gravityContract.bridgeFromERC20(
       ethers.utils.getAddress(fromToken.contractAddress),
       ethers.utils.getAddress(toTokenContractAddr),

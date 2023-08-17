@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchTokenInfos, getTokenOnOraichain } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -111,20 +111,43 @@ const SwapComponent: React.FC<{
 
   // process filter from & to tokens
   useEffect(() => {
-    const filteredToTokens = filterTokens(fromToken.chainId, fromTokenDenom, searchTokenName);
+    const filteredToTokens = filterTokens(
+      fromToken.chainId,
+      fromToken.coinGeckoId,
+      fromTokenDenom,
+      searchTokenName,
+      SwapDirection.To
+    );
     setFilteredToTokens(filteredToTokens);
 
-    const filteredFromTokens = filterTokens(toToken.chainId, toTokenDenom, searchTokenName);
+    const filteredFromTokens = filterTokens(
+      toToken.chainId,
+      toToken.coinGeckoId,
+      toTokenDenom,
+      searchTokenName,
+      SwapDirection.From
+    );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom]);
+
+    // TODO: need to automatically update from / to token to the correct swappable one when clicking the swap button
+  }, [fromToken, toToken]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
-    toTokenInfoData
+    toTokenInfoData,
+    originalFromToken,
+    originalToToken
   );
-  const { toAmountToken: averageRatio } = useSimulate('simulate-average-data', fromTokenInfoData, toTokenInfoData, 1);
+  const { toAmountToken: averageRatio } = useSimulate(
+    'simulate-average-data',
+    fromTokenInfoData,
+    toTokenInfoData,
+    originalFromToken,
+    originalToToken,
+    1
+  );
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);

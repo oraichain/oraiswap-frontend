@@ -543,7 +543,7 @@ export const chainInfos: CustomChainInfo[] = [
 
   /// evm chain info
   {
-    rpc: 'https://rpc.ankr.com/eth',
+    rpc: 'https://eth.llamarpc.com',
     chainId: '0x01',
     chainName: 'Ethereum',
     bip44: {

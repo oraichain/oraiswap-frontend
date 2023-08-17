@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { TokenItemType } from 'config/bridgeTokens';
 import { toAmount, toDisplay } from 'libs/utils';
 import { handleSimulateSwap } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
@@ -16,6 +17,8 @@ export const useSimulate = (
   queryKey: string,
   fromTokenInfoData: TokenInfo,
   toTokenInfoData: TokenInfo,
+  originalFromTokenInfo: TokenItemType,
+  originalToTokenInfo: TokenItemType,
   initAmount?: number
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || 0, 0]);
@@ -26,6 +29,8 @@ export const useSimulate = (
       handleSimulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
+        originalFromInfo: originalFromTokenInfo,
+        originalToInfo: originalToTokenInfo,
         amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
@@ -36,7 +41,7 @@ export const useSimulate = (
       fromAmountToken,
       toDisplay(simulateData?.amount, fromTokenInfoData?.decimals, toTokenInfoData?.decimals)
     ]);
-  }, [simulateData, fromAmountToken, toTokenInfoData]);
+  }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };
 };

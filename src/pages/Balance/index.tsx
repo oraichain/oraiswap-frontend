@@ -26,6 +26,7 @@ import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
+  combineReceiver,
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
@@ -153,7 +154,14 @@ const Balance: React.FC<BalanceProps> = () => {
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
-      result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
+      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      const { combinedReceiver } = combineReceiver(latestOraiAddress, from);
+      result = await transferEvmToIBC(
+        from,
+        fromAmount,
+        { metamaskAddress, tronAddress, oraiAddress: latestOraiAddress },
+        combinedReceiver
+      );
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {

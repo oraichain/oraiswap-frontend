@@ -95,11 +95,15 @@ export const getDestination = (
   const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
   // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
   let receiverPrefix = '';
+  const toTokenOnOraichain = getTokenOnOraichain(toToken.coinGeckoId);
+  if (!toTokenOnOraichain)
+    return {
+      destination: '',
+      universalSwapType: 'other-networks-to-oraichain'
+    };
   if (window.Metamask.isEthAddress(destReceiver)) receiverPrefix = toToken.prefix;
   return {
-    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(
-      getTokenOnOraichain(toToken.coinGeckoId)
-    )}`,
+    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(toTokenOnOraichain)}`,
     universalSwapType: 'other-networks-to-oraichain'
   };
 };
@@ -242,25 +246,21 @@ export const transferEvmToIBC = async (
   address: {
     metamaskAddress?: string;
     tronAddress?: string;
+    oraiAddress?: string;
   },
-  combinedReceiver?: string
+  combinedReceiver: string
 ) => {
-  const { metamaskAddress, tronAddress } = address;
+  const { metamaskAddress, tronAddress, oraiAddress } = address;
   const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
-  const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
+  const oraiAddr = oraiAddress ?? (await window.Keplr.getKeplrAddr());
+  if (!finalTransferAddress || !oraiAddr) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!];
   if (!gravityContractAddr || !from) {
     throw generateError('No gravity contract addr or no from token');
   }
 
   await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  const result = await window.Metamask.transferToGravity(
-    from,
-    fromAmount,
-    finalTransferAddress,
-    combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver
-  );
+  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, combinedReceiver);
   return result;
 };
 

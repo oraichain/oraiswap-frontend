@@ -472,7 +472,17 @@ function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
   return `${fromContractAddr}-${toContractAddr}`;
 }
 
-async function simulateSwapEvm(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
+export function getSwapRoute(chainId: string, fromContractAddr: string, toContractAddr: string): string[] | undefined {
+  const chainRoutes = swapEvmRoutes[chainId];
+  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromContractAddr, toContractAddr)];
+  if (route) return route;
+  // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
+  route = chainRoutes[buildSwapRouterKey(toContractAddr, fromContractAddr)];
+  if (route) return route.reverse();
+  return undefined;
+}
+
+async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenItemType; amount: string }) {
   const { amount, fromInfo, toInfo } = query;
 
   // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
@@ -486,10 +496,8 @@ async function simulateSwapEvm(query: { fromInfo: TokenInfo; toInfo: TokenInfo; 
     const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
     const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
-    const route =
-      swapEvmRoutes[fromInfo.chainId][
-        buildSwapRouterKey(fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress)
-      ];
+    const route = getSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
+    console.log('swap route: ', route);
     const [_, outAmount] = await swapRouterV2.getAmountsOut(amount, route);
     return {
       amount: outAmount.toString()

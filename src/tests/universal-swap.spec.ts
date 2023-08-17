@@ -17,7 +17,13 @@ import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
 import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens } from 'pages/UniversalSwap/helpers';
+import {
+  UniversalSwapHandler,
+  checkEvmAddress,
+  calculateMinimum,
+  filterTokens,
+  SwapDirection
+} from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
@@ -30,13 +36,23 @@ describe('universal-swap', () => {
   });
 
   it('test-filterTokens', () => {
-    const tokens = filterTokens('0x38', 'bep20_wbnb', '');
-    console.log('filtered to tokens: ', tokens);
-    expect(tokens.length).toEqual(6);
+    const tokens = filterTokens('0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From);
+    console.log('filtered to tokens: ', tokens.length);
+    // expect(tokens.length).toEqual(6);
+
+    throw 'filterTokens error';
   });
 
   it('test-evmSwap', () => {
     throw 'evmSwap error';
+  });
+
+  it('test-isSupportedNoPoolSwapEvm', () => {
+    throw 'isSupportedNoPoolSwapEvm error';
+  });
+
+  it('test-isEvmSwappable', () => {
+    throw 'isEvmSwappable error';
   });
 
   it('max amount', () => {
@@ -322,6 +338,17 @@ describe('universal-swap', () => {
       '0x1234',
       {
         destination: `${oraichain2oraib}/${ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX}0x1234:${process.env.REACT_APP_USDT_CONTRACT}`,
+        universalSwapType: 'other-networks-to-oraichain'
+      }
+    ],
+    [
+      'usd-coin',
+      '0x01',
+      'wbnb',
+      '0x38',
+      '0x1234',
+      {
+        destination: '',
         universalSwapType: 'other-networks-to-oraichain'
       }
     ]
