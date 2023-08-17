@@ -87,7 +87,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
   };
 
   useEffect(() => {
-    if (!cachedReward.length || cachedReward.length < pairs.length) {
+    if (!cachedReward.length || cachedReward?.length < pairs.length) {
       fetchReward();
     }
   }, []);
