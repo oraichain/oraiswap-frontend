@@ -369,6 +369,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                   rewardPerSecInfoData={rewardPerSecInfoData}
                   stakingPoolInfoData={stakingPoolInfoData}
                   apr={pairInfoData.apr}
+                  pairInfoData={pairInfoData.info}
                 />
               )}
             </div>
