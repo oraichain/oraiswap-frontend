@@ -2638,41 +2638,40 @@
     protobufjs "^6.10.2"
     secp256k1 "^4.0.2"
 
-"@oraichain/cosmwasm-vm-js@^0.2.66":
-  version "0.2.67"
-  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.67.tgz#d7c6174999a7adf3e9ae2fe16a1fa56957a0b9e7"
-  integrity sha512-8pm/ts7aTCu4YJAG0YZ0k1GNVMN1yRAwYK/UJVGVuh8/POzgo/FDOKxPqVt2sHUusbOV5kC0yvfTVidyxvLtfg==
+"@oraichain/cosmwasm-vm-js@^0.2.71":
+  version "0.2.71"
+  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.71.tgz#976f1d376d412e2da0e09338819cd3b73e591162"
+  integrity sha512-kG0gNYZSZb9MCgNegCiDVNcxf9jpwp2MVgegMyMQzaYyUbT2HaGvyJyww/8qh2hlbmi6wSvFTlMAv5xjqXZJNQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/crypto" "^0.31.0"
     "@cosmjs/encoding" "^0.31.0"
-    "@oraichain/immutable" "^4.3.5"
+    "@oraichain/immutable" "^4.3.9"
     "@oraichain/wasm-json-toolkit" "^1.0.24"
     bech32 "1.1.4"
     elliptic "^6.5.4"
     secp256k1 "^4.0.3"
 
-"@oraichain/cw-simulate@^2.8.50":
-  version "2.8.50"
-  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.50.tgz#778f8ed00fa9243415cf922994d2bd148b829daf"
-  integrity sha512-b9oN0Ybs1zC5mD4dkORGLg70iAx1GORB6ei1MbGXZxtw/73Cz39t3OASfpoJlIlAgWJnJK4Dl1tFC1cYkxFDsQ==
+"@oraichain/cw-simulate@^2.8.54":
+  version "2.8.54"
+  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.54.tgz#37c32ccea0192a10940dfcee129643e3bb57d386"
+  integrity sha512-nablG14nNL/VE2D/+uEXy6j45rZl3QHsUFfJR48mI6rfemuBE8tlEy7r4y8XLOuLJ8br2Q/X28diBVS13yPUgQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@cosmjs/crypto" "^0.31.0"
     "@cosmjs/encoding" "^0.31.0"
     "@kiruse/serde" "^0.8.0-rc.6"
-    "@oraichain/cosmwasm-vm-js" "^0.2.66"
-    "@oraichain/immutable" "^4.3.5"
+    "@oraichain/cosmwasm-vm-js" "^0.2.71"
     eventemitter3 "^5.0.0"
     protobufjs "^7.2.3"
     ts-results "^3.3.0"
     tslib "^2.6.1"
 
-"@oraichain/immutable@^4.3.5":
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/@oraichain/immutable/-/immutable-4.3.5.tgz#8dc09cdfa3e48ffba5c7cf92abf49d69ab87cff9"
-  integrity sha512-/ezTfhI/kd6YpNCRu2lbpQJafNBNvKrMalMMAvKQ+C7trmvte+NrbNttXymgCfk6oJREVLFC/qgMLF0rh3FTAQ==
+"@oraichain/immutable@^4.3.9":
+  version "4.3.9"
+  resolved "https://registry.yarnpkg.com/@oraichain/immutable/-/immutable-4.3.9.tgz#ff8d5a7b39b5b01f3f72a902cffbfea32ccb20c3"
+  integrity sha512-INpHnhL970OCkR7I71Kssb2aLl2l4Y/x8W6FlyRO0KmC8GHjxc/hlNB1t44BiI7lkOYmcWMRQoC8dwParsp1RQ==
 
 "@oraichain/kawaiiverse-txs@0.0.2":
   version "0.0.2"
@@ -7642,11 +7641,6 @@ extsprintf@^1.2.0:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.1.tgz#8d172c064867f235c0c84a596806d279bf4bcc07"
   integrity sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==
 
-fancy-canvas@0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/fancy-canvas/-/fancy-canvas-0.2.2.tgz#33fd4976724169a1eda5015f515a2a1302d1ec91"
-  integrity sha512-50qi8xA0QkHbjmb8h7XQ6k2fvD7y/yMfiUw9YTarJ7rWrq6o5/3CCXPouYk+XSLASvvxtjyiQLRBFt3qkE3oyA==
-
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
@@ -10390,13 +10384,6 @@ libsodium@^0.7.11:
   version "0.7.11"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.11.tgz#cd10aae7bcc34a300cc6ad0ac88fcca674cfbc2e"
   integrity sha512-WPfJ7sS53I2s4iM58QxY3Inb83/6mjlYgcmZs7DJsvDlnmVUwNinBCi5vBT43P6bHRy01O4zsMU2CoVR6xJ40A==
-
-lightweight-charts@^3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/lightweight-charts/-/lightweight-charts-3.8.0.tgz#8c41ad7c1c083f18621f11ece7fc1096e131a0d3"
-  integrity sha512-7yFGnYuE1RjRJG9RwUTBz5wvF1QtjBOSW4FFlikr8Dh+/TDNt4ci+HsWSYmStgQUpawpvkCJ3j5/W25GppGj9Q==
-  dependencies:
-    fancy-canvas "0.2.2"
 
 lilconfig@^2.0.3, lilconfig@^2.0.5, lilconfig@^2.1.0:
   version "2.1.0"

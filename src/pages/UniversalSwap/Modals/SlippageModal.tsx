@@ -14,7 +14,7 @@ interface ModalProps {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
+export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
   const [indexChosenOption, setIndexChosenOption] = useState(OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE));
   const [manualSlippage, setManualSlippage] = useState(DEFAULT_MANUAL_SLIPPAGE);
   const [theme] = useConfigReducer('theme');
@@ -71,5 +71,3 @@ const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
     </div>
   );
 };
-
-export default SlippageModal;

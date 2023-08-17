@@ -87,7 +87,7 @@ const enabledFeatures = [
 
 export const defaultChartProps = {
   locale: 'en',
-  library_path: '/charting_library/',
+  library_path: 'https://chart.oraidex.io/charting_library/',
   clientId: 'tradingview.com',
   userId: 'public_user_id',
   fullscreen: false,
@@ -96,7 +96,7 @@ export const defaultChartProps = {
   overrides: chartOverrides,
   enabled_features: enabledFeatures,
   disabled_features: disabledFeatures,
-  custom_css_url: '/charting_library/style.css',
+  custom_css_url: 'https://chart.oraidex.io/charting_library/style.css',
   favorites: {
     intervals: FAVORITES_INTERVAL
   },
