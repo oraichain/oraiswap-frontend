@@ -12,9 +12,6 @@ type TransferToGravityResult = {
 
 export default class Metamask {
   private provider: Web3Provider;
-  constructor() {
-    this.provider = new ethers.providers.Web3Provider(window.ethereum);
-  }
 
   public static checkEthereum() {
     if (window.ethereum) {
@@ -26,6 +23,7 @@ export default class Metamask {
   }
 
   public getSigner() {
+    if (!this.provider) this.provider = new ethers.providers.Web3Provider(window.ethereum);
     return this.provider.getSigner();
   }
 

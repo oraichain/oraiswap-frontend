@@ -23,7 +23,7 @@ interface ModalProps {
   setSearchTokenName: (tokenName: string) => void;
 }
 
-const SelectTokenModal: FC<ModalProps> = ({
+export const SelectTokenModalV2: FC<ModalProps> = ({
   type = 'token',
   close,
   items,
@@ -108,5 +108,3 @@ const SelectTokenModal: FC<ModalProps> = ({
     </div>
   );
 };
-
-export default SelectTokenModal;

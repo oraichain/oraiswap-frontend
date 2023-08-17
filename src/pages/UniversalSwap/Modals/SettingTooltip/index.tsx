@@ -25,7 +25,7 @@ interface Props extends TippyProps {
   visible: boolean;
 }
 
-const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
+export const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
   const hide = () => setVisible(false);
 
   const button = (
@@ -70,5 +70,3 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => {
     </div>
   );
 };
-
-export default SettingTooltip;
