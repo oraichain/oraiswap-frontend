@@ -44,7 +44,6 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
 };
 
 export const calculateMinimum = (simulateAmount: number | string, userSlippage: number): bigint | string => {
-  console.log('minimum amount: ', simulateAmount);
   if (!simulateAmount) return '0';
   try {
     const result =
