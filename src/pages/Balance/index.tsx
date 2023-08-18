@@ -22,7 +22,7 @@ import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getSubAmountDetails } from 'rest/api';
+import { getSubAmountDetails, isSupportedNoPoolSwapEvm } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
@@ -177,6 +177,7 @@ const Balance: React.FC<BalanceProps> = () => {
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
+        if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
         return token.chainId == chainId;
       })
       .sort((a, b) => {
