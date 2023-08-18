@@ -7,7 +7,7 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType, evmTokens, tokenMap } from 'config/bridgeTokens';
 import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, swapEvmRoutes } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
@@ -18,7 +18,13 @@ import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTokenInfos, getTokenOnOraichain, isEvmSwappable } from 'rest/api';
+import {
+  fetchTokenInfos,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm
+} from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
 import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
@@ -98,6 +104,8 @@ const SwapComponent: React.FC<{
     fromContractAddr: originalFromToken.contractAddress,
     toContractAddr: originalToToken.contractAddress
   });
+
+  // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
   const fromToken = isEvmSwap
     ? tokenMap[fromTokenDenom]
     : getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
@@ -164,6 +172,20 @@ const SwapComponent: React.FC<{
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  useEffect(() => {
+    // special case for tokens having no pools on Oraichain. When original from token is not swappable, then we switch to an alternative token on the same chain as to token
+    if (isSupportedNoPoolSwapEvm(toToken.coinGeckoId) && !isSupportedNoPoolSwapEvm(fromToken.coinGeckoId)) {
+      const fromTokenSameToChainId = getTokenOnSpecificChainId(fromToken.coinGeckoId, toToken.chainId);
+      if (!fromTokenSameToChainId) {
+        const sameChainIdTokens = evmTokens.find((t) => t.chainId === toToken.chainId);
+        if (!sameChainIdTokens) throw Error('Impossible case!. An evm chain should at least have one token');
+        setSwapTokens([sameChainIdTokens.denom, toToken.denom]);
+        return;
+      }
+      setSwapTokens([fromTokenSameToChainId.denom, toToken.denom]);
+    }
+  }, [fromToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
