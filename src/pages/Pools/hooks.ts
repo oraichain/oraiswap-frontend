@@ -18,6 +18,9 @@ import {
 } from './helpers';
 import { updatePairInfos } from 'reducer/pairs';
 import { PairInfoExtend } from 'types/token';
+import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { fetchRewardPerSecInfo } from 'rest/api';
+import { RewardPoolType } from 'reducer/config';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -52,6 +55,44 @@ export const useFetchApr = (pairs: PairInfo[], pairInfos: PairInfoData[], prices
   }, [pairInfos]);
 
   return [cachedApr];
+};
+
+// Fetch Reward
+export const useFetchCacheReward = (pairs: PairInfo[]) => {
+  const [cachedReward, setCachedReward] = useConfigReducer('rewardPools');
+  const fetchReward = async () => {
+    let rewardAll: RewardPoolType[] = await Promise.all(
+      pairs.map(async (p: PairInfoExtend) => {
+        let denom = '';
+        if (p.asset_infos_raw?.[0] == 'orai') {
+          denom = p.asset_infos_raw?.[1];
+        } else {
+          denom = p.asset_infos_raw?.[0];
+        }
+        const assetToken = oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom);
+        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(assetToken)]);
+        const reward = pairInfoRewardDataRaw.assets.reduce((acc, cur) => {
+          let token =
+            'token' in cur.info ? cw20TokenMap[cur.info.token.contract_addr] : tokenMap[cur.info.native_token.denom];
+          // TODO: hardcode token reward xOCH
+          return [...acc, token?.name ?? token?.denom ?? 'xOCH'];
+        }, []);
+        return {
+          reward,
+          liquidity_token: p.liquidity_token
+        };
+      })
+    );
+    setCachedReward(rewardAll);
+  };
+
+  useEffect(() => {
+    if (!cachedReward?.length || cachedReward?.length < pairs?.length) {
+      fetchReward();
+    }
+  }, [pairs]);
+
+  return [cachedReward];
 };
 
 // Fetch all lp pools

@@ -17,7 +17,8 @@ import {
   useFetchCacheLpPools,
   useFetchCachePairs,
   useFetchMyPairs,
-  useFetchPairInfoDataList
+  useFetchPairInfoDataList,
+  useFetchCacheReward,
 } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
@@ -26,8 +27,9 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { RewardPoolType } from 'reducer/config';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -65,10 +67,10 @@ const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amou
   );
 };
 
-const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, amount, apr, theme }) => {
+const PairBox = memo<PairInfoData & { apr: number; theme?: string, cachedReward?: RewardPoolType[] }>(({ pair, amount, apr, theme, cachedReward }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
-
+  const reward = cachedReward?.find(e => e?.liquidity_token === pair?.liquidity_token)?.reward || ['ORAIX'];
   if (!token1 || !token2) return null;
 
   return (
@@ -102,7 +104,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string }>(({ pair, am
             {token1.name}/{token2.name}
           </div>
           <div className={styles.pairbox_pair_rate}>{/* {token1.name} (50%)/{token2.name} (50%) */}</div>
-          <span className={styles.pairbox_pair_apr}>ORAIX Bonus</span>
+          <span className={styles.pairbox_pair_apr}>{reward.join(' / ')} Bonus</span>
         </div>
       </div>
       <div className={styles.pairbox_content}>
@@ -135,6 +137,7 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const [cachedReward] = useConfigReducer('rewardPools');
   useEffect(() => {
     if (!!!typeFilter) {
       setTypeFilter(KeyFilterPool.all_pool);
@@ -207,6 +210,7 @@ const ListPools = memo<{
           filteredPairInfos.map((info) => (
             <PairBox
               {...info}
+              cachedReward={cachedReward}
               apr={!!allPoolApr ? allPoolApr[info.pair.contract_addr] : 0}
               key={info.pair.contract_addr}
               theme={theme}
@@ -232,6 +236,7 @@ const Pools: React.FC<PoolsProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
+  useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
   useFetchCacheLpPools(pairs);
 
