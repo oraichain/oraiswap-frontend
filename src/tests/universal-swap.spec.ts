@@ -485,20 +485,27 @@ describe('universal-swap', () => {
       }
     );
 
-    // it.each<[boolean]>([[false], [true]])(
-    //   'test-transferAndSwap-mock-evmSwap-should-call-evmSwap',
-    //   async (isEvmSwappableRes) => {
-    //     const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
-    //     const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
-    //     getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
-    //     const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
-    //     isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
-    //     const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
-    //     transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
-    //     const result = await universalSwap.transferAndSwap('', 'foo');
-    //     expect(result.transactionHash).toEqual(expectedResult);
-    //   }
-    // );
+    it('test-transferAndSwap-mock-evmSwap-should-call-evmSwap', async () => {
+      const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
+      const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
+      getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
+      const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
+      const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
+      isSupportedNoPoolSwapEvmSpy.mockReturnValue(true);
+      isEvmSwappableSpy.mockReturnValue(true);
+      // mock evmSwap
+      windowSpy.mockImplementation(() => ({
+        Metamask: {
+          evmSwap: () => {
+            return 'evmSwap';
+          }
+        }
+      }));
+      const result = await universalSwap.transferAndSwap('', 'foo');
+      expect(result).toEqual('evmSwap');
+      isEvmSwappableSpy.mockRestore();
+      isSupportedNoPoolSwapEvmSpy.mockRestore();
+    });
   });
 
   describe('test-processUniversalSwap-with-mock', () => {
