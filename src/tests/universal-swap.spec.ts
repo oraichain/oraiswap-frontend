@@ -362,12 +362,20 @@ describe('universal-swap', () => {
         getKeplrAddr: async (_chainId: string) => {
           return 'orai1234';
         }
-      }
+      },
+      tronWeb: {
+        defaultAddress: {
+          base58: 'TNJksEkvvdmae8uXYkNE9XKHbTDiSQrpbf'
+        }
+      },
+      tronLink: {}
     }));
     let result = await universalSwap.getUniversalSwapToAddress('0x01');
     expect(result).toEqual('0x1234');
     result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
     expect(result).toEqual('orai1234');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
+    expect(result).toEqual('0x8754032ac7966a909e2e753308df56bb08dabd69');
   });
 
   describe('test-processUniversalSwap-with-mock', () => {
