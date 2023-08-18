@@ -570,7 +570,7 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   return result;
 };
 
-export const findToToken = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
+export const findToTokenOnOraiBridge = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
   const toToken = cosmosTokens.find((t) =>
     t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === fromToken.coinGeckoId && t?.bridgeNetworkIdentifier
       ? t.bridgeNetworkIdentifier === toNetwork

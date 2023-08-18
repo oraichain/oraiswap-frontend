@@ -113,6 +113,10 @@ export default class Metamask {
     }
   }
 
+  public calculateEvmSwapSlippage(amount: string, slippage: number): bigint {
+    return (BigInt(amount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n;
+  }
+
   // TODO: add test cased & add case where from token is native evm
   public async evmSwap(data: {
     fromToken: TokenItemType;
@@ -124,23 +128,20 @@ export default class Metamask {
     destination?: string;
   }) {
     const { fromToken, toTokenContractAddr, address, fromAmount, simulateAmount, slippage, destination } = data;
-    console.log('destination: ', destination);
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
     const checkSumAddress = ethers.utils.getAddress(address);
-    console.log('simulate evm swap amount: ', fromAmount, toAmount(fromAmount, fromToken.decimals), simulateAmount);
     await window.Metamask.checkOrIncreaseAllowance(
       fromToken,
       checkSumAddress,
       gravityContractAddr,
       fromAmount // increase allowance only take display form as input
     );
-    console.log('after checking or increase allowance');
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const result = await gravityContract.bridgeFromERC20(
       ethers.utils.getAddress(fromToken.contractAddress),
       ethers.utils.getAddress(toTokenContractAddr),
       toAmount(fromAmount, fromToken.decimals).toString(),
-      (BigInt(simulateAmount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n, // use
+      this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
       destination
     );
     await result.wait();

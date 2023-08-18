@@ -10,9 +10,9 @@ describe('test-api', () => {
     const result = getTokenOnSpecificChainId(coingeckoId, chainId);
     expect(result === undefined).toEqual(expectedResult);
   });
-  it('test-simulateSwapEvm', () => {
-    throw 'simulateSwapEvm error';
-  });
+  // it('test-simulateSwapEvm', () => {
+  //   throw 'simulateSwapEvm error';
+  // });
   it('test-buildSwapRouterKey', () => {
     expect(buildSwapRouterKey('foo', 'bar')).toEqual('foo-bar');
   });

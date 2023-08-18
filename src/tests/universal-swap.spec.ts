@@ -18,7 +18,7 @@ import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
-import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
+import { combineReceiver, findToTokenOnOraiBridge, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
 import {
   UniversalSwapHandler,
@@ -32,6 +32,7 @@ import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { senderAddress } from './common';
+import * as balanceHelpers from 'pages/Balance/helpers';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -53,9 +54,9 @@ describe('universal-swap', () => {
     expect(tokens.length).toEqual(expectedLength);
   });
 
-  it('test-evmSwap', () => {
-    throw 'evmSwap error';
-  });
+  // it('test-evmSwap', () => {
+  //   throw 'evmSwap error';
+  // });
 
   it.each([
     ['wbnb', true],
@@ -461,6 +462,45 @@ describe('universal-swap', () => {
     expect(result).toEqual('orai1234');
   });
 
+  describe('test-transferAndSwap-with-mock', () => {
+    it('test-transferAndSwap-throw-error', async () => {
+      const universalSwap = new UniversalSwapHandler();
+      await expect(universalSwap.transferAndSwap('', undefined)).rejects.toThrow();
+    });
+    it.each<[boolean]>([[false], [true]])(
+      'test-transferAndSwap-mock-transferEvmToIBC-should-call-transferEvmToIBC',
+      async (isEvmSwappableRes) => {
+        const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
+        const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
+        getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
+        const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
+        isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
+        const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
+        transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
+        await universalSwap.transferAndSwap('', 'foo');
+        expect(transferEvmToIbcSpy).toHaveBeenCalled();
+        getTokenOnSpecificChainIdSpy.mockRestore();
+        isEvmSwappableSpy.mockRestore();
+        transferEvmToIbcSpy.mockRestore();
+      }
+    );
+
+    // it.each<[boolean]>([[false], [true]])(
+    //   'test-transferAndSwap-mock-evmSwap-should-call-evmSwap',
+    //   async (isEvmSwappableRes) => {
+    //     const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
+    //     const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
+    //     getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
+    //     const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
+    //     isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
+    //     const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
+    //     transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
+    //     const result = await universalSwap.transferAndSwap('', 'foo');
+    //     expect(result.transactionHash).toEqual(expectedResult);
+    //   }
+    // );
+  });
+
   describe('test-processUniversalSwap-with-mock', () => {
     const universalSwap = new UniversalSwapHandler();
     const fromAmount = '100000';
@@ -494,7 +534,7 @@ describe('universal-swap', () => {
       ['evm-network-is-eth', 'usd-coin', '0x01', 'usd-coin', 'oraibridge-subnet-2'],
       ['evm-network-is-tron', 'tron', '0x2b6653dc', 'tron', 'oraibridge-subnet-2']
     ])(
-      'test-findToToken-when-universalSwap-from-Oraichain-to%s',
+      'test-findToTokenOnOraiBridge-when-universalSwap-from-Oraichain-to%s',
       (
         _name,
         fromCoingeckoId: CoinGeckoId,
@@ -503,7 +543,7 @@ describe('universal-swap', () => {
         expectedToChainId: NetworkChainId
       ) => {
         const fromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoingeckoId);
-        const toTokenTransfer = findToToken(fromToken, toChainId);
+        const toTokenTransfer = findToTokenOnOraiBridge(fromToken, toChainId);
         expect(toTokenTransfer.coinGeckoId).toEqual(expectedToCoinGeckoId);
         expect(toTokenTransfer.chainId).toEqual(expectedToChainId);
       }

@@ -17,7 +17,7 @@ import { reduceString, toDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { findToToken } from '../helpers';
+import { findToTokenOnOraiBridge } from '../helpers';
 import copy from 'copy-to-clipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import useTokenFee from 'hooks/useTokenFee';
@@ -141,7 +141,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
-      const to = findToToken(token, filterNetwork);
+      const to = findToTokenOnOraiBridge(token, filterNetwork);
       await onClickTransfer(convertAmount, token, to);
       return;
     } catch (error) {
@@ -157,7 +157,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return buttonName + network?.chainName;
   };
 
-  const to = findToToken(token, filterNetwork);
+  const to = findToTokenOnOraiBridge(token, filterNetwork);
   const fromTokenFee = useTokenFee(token.prefix + token.contractAddress);
   const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress);
   const bridgeFee = fromTokenFee || toTokenFee;
