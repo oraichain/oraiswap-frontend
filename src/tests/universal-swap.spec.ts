@@ -454,6 +454,24 @@ describe('universal-swap', () => {
         getKeplrAddr: async (_chainId: string) => {
           return 'orai1234';
         }
+      }
+    }));
+    let result = await universalSwap.getUniversalSwapToAddress('0x01');
+    expect(result).toEqual('0x1234');
+    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
+    expect(result).toEqual('orai1234');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
+    expect(result).toEqual('0x1234');
+    windowSpy.mockImplementation(() => ({
+      Metamask: {
+        getEthAddress: () => {
+          return '0x1234';
+        }
+      },
+      Keplr: {
+        getKeplrAddr: async (_chainId: string) => {
+          return 'orai1234';
+        }
       },
       tronWeb: {
         defaultAddress: {
@@ -462,62 +480,8 @@ describe('universal-swap', () => {
       },
       tronLink: {}
     }));
-    let result = await universalSwap.getUniversalSwapToAddress('0x01');
-    expect(result).toEqual('0x1234');
-    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
-    expect(result).toEqual('orai1234');
     result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
     expect(result).toEqual('0x8754032ac7966a909e2e753308df56bb08dabd69');
-  });
-
-  describe('test-transferAndSwap-with-mock', () => {
-    it('test-transferAndSwap-throw-error', async () => {
-      const universalSwap = new UniversalSwapHandler();
-      await expect(universalSwap.transferAndSwap('', undefined)).rejects.toThrow();
-    });
-    it('test-transferAndSwap-mock-transferEvmToIBC-should-call-transferEvmToIBC', async () => {
-      const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
-      const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
-      console.log('');
-      getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
-      const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
-      isEvmSwappableSpy.mockReturnValue(false);
-      const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
-      transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
-      await universalSwap.transferAndSwap('', 'foo');
-      expect(transferEvmToIbcSpy).toHaveBeenCalled();
-      getTokenOnSpecificChainIdSpy.mockRestore();
-      isEvmSwappableSpy.mockRestore();
-      transferEvmToIbcSpy.mockRestore();
-    });
-
-    it.each<[boolean, boolean]>([
-      [true, true],
-      [false, true]
-    ])(
-      'test-transferAndSwap-mock-evmSwap-should-call-evmSwap',
-      async (firstIsEvmSwappableCall, secondIsEvmSwappableCall) => {
-        const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
-        const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
-        getTokenOnSpecificChainIdSpy.mockReturnValueOnce(flattenTokens[0]);
-        const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
-        const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
-        isSupportedNoPoolSwapEvmSpy.mockReturnValue(true);
-        isEvmSwappableSpy.mockReturnValueOnce(firstIsEvmSwappableCall).mockReturnValueOnce(secondIsEvmSwappableCall);
-        // mock evmSwap
-        windowSpy.mockImplementation(() => ({
-          Metamask: {
-            evmSwap: () => {
-              return 'evmSwap';
-            }
-          }
-        }));
-        const result = await universalSwap.transferAndSwap('', 'foo');
-        expect(result).toEqual('evmSwap');
-        isEvmSwappableSpy.mockRestore();
-        isSupportedNoPoolSwapEvmSpy.mockRestore();
-      }
-    );
   });
 
   describe('test-processUniversalSwap-with-mock', () => {

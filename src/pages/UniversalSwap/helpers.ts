@@ -226,8 +226,11 @@ export class UniversalSwapHandler {
       return await window.Metamask.getEthAddress();
     }
     // tron
-    if (toChainId === '0x2b6653dc' && window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
-      return tronToEthAddress(window.tronWeb.defaultAddress.base58);
+    if (toChainId === '0x2b6653dc') {
+      if (window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
+        return tronToEthAddress(window.tronWeb.defaultAddress.base58);
+      return await window.Metamask.getEthAddress();
+    }
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
