@@ -96,11 +96,13 @@ export const CW20_DECIMALS = 6;
 export type WalletType = 'keplr' | 'owallet';
 
 // hardcode this to improve performance
-export const proxyContractInfo: { [x: string]: { routerAddr: string } } = {
+export const proxyContractInfo: { [x: string]: { wrapNativeAddr: string; routerAddr: string } } = {
   '0x01': {
+    wrapNativeAddr: ethers.utils.getAddress(WRAP_ETH_CONTRACT),
     routerAddr: ethers.utils.getAddress('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D') // uniswap router
   },
   '0x38': {
+    wrapNativeAddr: ethers.utils.getAddress(WRAP_BNB_CONTRACT),
     routerAddr: ethers.utils.getAddress('0x10ED43C718714eb63d5aA57B78B54704E256024E') // pancakeswap router
   }
 };
@@ -113,10 +115,10 @@ export const swapEvmRoutes: {
   '0x38': {
     [`${WRAP_BNB_CONTRACT}-${USDT_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT],
     [`${WRAP_BNB_CONTRACT}-${ORAI_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, ORAI_BSC_CONTRACT],
-    [`${WRAP_BNB_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT]
-    // [`${USDT_BSC_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT],
-    // [`${USDT_BSC_CONTRACT}-${ORAI_BSC_CONTRACT}`]: [USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT, ORAI_BSC_CONTRACT],
-    // [`${ORAI_BSC_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [ORAI_BSC_CONTRACT, WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT]
+    [`${WRAP_BNB_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT],
+    [`${USDT_BSC_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT],
+    [`${USDT_BSC_CONTRACT}-${ORAI_BSC_CONTRACT}`]: [USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT, ORAI_BSC_CONTRACT],
+    [`${ORAI_BSC_CONTRACT}-${AIRI_BSC_CONTRACT}`]: [ORAI_BSC_CONTRACT, WRAP_BNB_CONTRACT, AIRI_BSC_CONTRACT]
   },
   '0x01': {
     [`${WRAP_ETH_CONTRACT}-${USDC_ETH_CONTRACT}`]: [WRAP_ETH_CONTRACT, USDC_ETH_CONTRACT],

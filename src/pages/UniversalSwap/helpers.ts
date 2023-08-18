@@ -347,36 +347,44 @@ export class UniversalSwapHandler {
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     if (!metamaskAddress) throw Error('Cannot call evm swap if the metamask address is empty');
-    let finalToToken = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
-    if (!finalToToken) finalToToken = this._toToken; // fallback case when we cannot find to token with the same chain id from token
 
     // normal case, we will transfer evm to ibc like normal when two tokens can not be swapped on evm
     // first case: BNB (bsc) <-> USDT (bsc), then swappable
     // 2nd case: BNB (bsc) -> USDT (oraichain), then find USDT on bsc. We have that and also have route => swappable
     // 3rd case: USDT (bsc) -> ORAI (bsc / Oraichain), both have pools on Oraichain, but we currently dont have the pool route on evm => not swappable => transfer to cosmos like normal
-    if (
-      !isEvmSwappable({
-        fromChainId: this._fromToken.chainId,
-        toChainId: finalToToken.chainId,
-        fromContractAddr: this._fromToken.contractAddress,
-        toContractAddr: finalToToken.contractAddress
-      }) ||
-      (!isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId) && !isSupportedNoPoolSwapEvm(this._toToken.coinGeckoId))
-    )
-      return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
-
-    // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
-    // currently only support evm metamask address
-    // TODO: support tron here?
-    return window.Metamask.evmSwap({
+    let swappableData = {
+      fromChainId: this._fromToken.chainId,
+      toChainId: this._toToken.chainId,
+      fromContractAddr: this._fromToken.contractAddress,
+      toContractAddr: this._toToken.contractAddress
+    };
+    let evmSwapData = {
       fromToken: this._fromToken,
-      toTokenContractAddr: finalToToken.contractAddress,
+      toTokenContractAddr: this._toToken.contractAddress,
       address: metamaskAddress,
       fromAmount: this.fromAmount,
       simulateAmount: this.simulateAmount,
       slippage: this._userSlippage,
-      destination: finalToToken.chainId === this._toToken.chainId ? '' : combinedReceiver // if to token already on same net with from token then no destination is needed
-    });
+      destination: '' // if to token already on same net with from token then no destination is needed
+    };
+
+    if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
+
+    const toTokenSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
+    if (toTokenSameFromChainId) {
+      swappableData.toChainId = toTokenSameFromChainId.chainId;
+      swappableData.toContractAddr = toTokenSameFromChainId.contractAddress;
+      evmSwapData.toTokenContractAddr = toTokenSameFromChainId.contractAddress;
+      // if to token already on same net with from token then no destination is needed
+      evmSwapData.destination = toTokenSameFromChainId.chainId === this._toToken.chainId ? '' : combinedReceiver;
+    }
+
+    // special case for tokens not having a pool on Oraichain. We need to swap on evm instead then transfer to Oraichain
+    // TODO: support tron here?
+    if (isEvmSwappable(swappableData) && isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
+      return window.Metamask.evmSwap(evmSwapData);
+    }
+    return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {

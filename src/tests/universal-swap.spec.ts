@@ -467,45 +467,49 @@ describe('universal-swap', () => {
       const universalSwap = new UniversalSwapHandler();
       await expect(universalSwap.transferAndSwap('', undefined)).rejects.toThrow();
     });
-    it.each<[boolean]>([[false], [true]])(
-      'test-transferAndSwap-mock-transferEvmToIBC-should-call-transferEvmToIBC',
-      async (isEvmSwappableRes) => {
-        const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
-        const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
-        getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
-        const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
-        isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
-        const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
-        transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
-        await universalSwap.transferAndSwap('', 'foo');
-        expect(transferEvmToIbcSpy).toHaveBeenCalled();
-        getTokenOnSpecificChainIdSpy.mockRestore();
-        isEvmSwappableSpy.mockRestore();
-        transferEvmToIbcSpy.mockRestore();
-      }
-    );
-
-    it('test-transferAndSwap-mock-evmSwap-should-call-evmSwap', async () => {
+    it('test-transferAndSwap-mock-transferEvmToIBC-should-call-transferEvmToIBC', async () => {
       const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
       const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
+      console.log('');
       getTokenOnSpecificChainIdSpy.mockReturnValue(flattenTokens[0]);
       const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
-      const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
-      isSupportedNoPoolSwapEvmSpy.mockReturnValue(true);
-      isEvmSwappableSpy.mockReturnValue(true);
-      // mock evmSwap
-      windowSpy.mockImplementation(() => ({
-        Metamask: {
-          evmSwap: () => {
-            return 'evmSwap';
-          }
-        }
-      }));
-      const result = await universalSwap.transferAndSwap('', 'foo');
-      expect(result).toEqual('evmSwap');
+      isEvmSwappableSpy.mockReturnValue(false);
+      const transferEvmToIbcSpy = jest.spyOn(balanceHelpers, 'transferEvmToIBC');
+      transferEvmToIbcSpy.mockResolvedValue({ transactionHash: '1' });
+      await universalSwap.transferAndSwap('', 'foo');
+      expect(transferEvmToIbcSpy).toHaveBeenCalled();
+      getTokenOnSpecificChainIdSpy.mockRestore();
       isEvmSwappableSpy.mockRestore();
-      isSupportedNoPoolSwapEvmSpy.mockRestore();
+      transferEvmToIbcSpy.mockRestore();
     });
+
+    it.each<[boolean, boolean]>([
+      [true, true],
+      [false, true]
+    ])(
+      'test-transferAndSwap-mock-evmSwap-should-call-evmSwap',
+      async (firstIsEvmSwappableCall, secondIsEvmSwappableCall) => {
+        const universalSwap = new UniversalSwapHandler('sender', flattenTokens[0], flattenTokens[1], 1, '1', 1);
+        const getTokenOnSpecificChainIdSpy = jest.spyOn(restApi, 'getTokenOnSpecificChainId');
+        getTokenOnSpecificChainIdSpy.mockReturnValueOnce(flattenTokens[0]);
+        const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
+        const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
+        isSupportedNoPoolSwapEvmSpy.mockReturnValue(true);
+        isEvmSwappableSpy.mockReturnValueOnce(firstIsEvmSwappableCall).mockReturnValueOnce(secondIsEvmSwappableCall);
+        // mock evmSwap
+        windowSpy.mockImplementation(() => ({
+          Metamask: {
+            evmSwap: () => {
+              return 'evmSwap';
+            }
+          }
+        }));
+        const result = await universalSwap.transferAndSwap('', 'foo');
+        expect(result).toEqual('evmSwap');
+        isEvmSwappableSpy.mockRestore();
+        isSupportedNoPoolSwapEvmSpy.mockRestore();
+      }
+    );
   });
 
   describe('test-processUniversalSwap-with-mock', () => {

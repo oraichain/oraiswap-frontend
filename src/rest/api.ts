@@ -502,11 +502,11 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
-    console.log('simulate in amount: ', amount);
-    const [_, outAmount] = await swapRouterV2.getAmountsOut(amount, route);
-    console.log('out amount: ', outAmount.toString());
+    console.log('route: ', route);
+    const outs = await swapRouterV2.getAmountsOut(amount, route);
+    console.log('out amount: ', outs.slice(-1)[0]);
     return {
-      amount: outAmount.toString()
+      amount: outs.slice(-1)[0].toString() // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
