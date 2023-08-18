@@ -95,6 +95,7 @@ export const getDestination = (
   const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
   // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
   let receiverPrefix = '';
+  // TODO: no need to use to token on Oraichain. Can simply use the destination token directly. Fix this requires fixing the logic on ibc wasm as well
   const toTokenOnOraichain = getTokenOnOraichain(toToken.coinGeckoId);
   if (!toTokenOnOraichain)
     return {

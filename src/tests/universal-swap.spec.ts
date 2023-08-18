@@ -26,13 +26,10 @@ import {
   calculateMinimum,
   filterTokens,
   SwapDirection,
-  isSupportedNoPoolSwapEvm,
-  isEvmSwappable,
   handleSimulateSwap
 } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
-import * as helpers from 'pages/UniversalSwap/helpers';
 import { IBCInfo } from 'types/ibc';
 import { senderAddress } from './common';
 
@@ -40,6 +37,10 @@ describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
   beforeAll(() => {
     windowSpy = jest.spyOn(window, 'window', 'get');
+  });
+
+  afterAll(() => {
+    windowSpy.mockRestore();
   });
 
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
@@ -61,40 +62,51 @@ describe('universal-swap', () => {
     ['weth', true],
     ['bnb', false]
   ])('test-isSupportedNoPoolSwapEvm', (coingeckoId: CoinGeckoId, expectedResult: boolean) => {
-    expect(isSupportedNoPoolSwapEvm(coingeckoId)).toEqual(expectedResult);
+    expect(restApi.isSupportedNoPoolSwapEvm(coingeckoId)).toEqual(expectedResult);
   });
 
   it.each<[string, string, string, string, boolean]>([
     ['a', 'b', 'b', 'c', false],
     ['a', 'a', 'b', 'c', false],
     ['0x38', '0x38', USDT_TRON_CONTRACT, USDT_BSC_CONTRACT, false],
+    ['0x38', '0x38', undefined, USDT_BSC_CONTRACT, false],
+    ['0x38', '0x38', USDT_TRON_CONTRACT, undefined, false],
+    ['0x38', '0x38', undefined, undefined, false],
     ['0x38', '0x38', WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT, true]
   ])('test-isEvmSwappable', (fromChainId, toChainId, fromContractAddr, toContractAddr, expectedResult) => {
-    const result = isEvmSwappable({ fromChainId, toChainId, fromContractAddr, toContractAddr });
+    const result = restApi.isEvmSwappable({ fromChainId, toChainId, fromContractAddr, toContractAddr });
     expect(result).toEqual(expectedResult);
   });
 
-  // it.each<[boolean, boolean, string]>([
-  //   [false, false, '1'],
-  //   [false, true, '2'],
-  //   [true, false, '2'],
-  //   [true, true, '2']
-  // ])('test handleSimulateSwap', async (isSupportedNoPoolSwapEvmRes, isEvmSwappableRes, expectedSimulateAmount) => {
-  //   const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
-  //   const simulateSwapEvmSpy = jest.spyOn(restApi, 'simulateSwapEvm');
-  //   simulateSwapSpy.mockResolvedValue({ amount: '1' });
-  //   simulateSwapEvmSpy.mockResolvedValue({ amount: '2' });
-  //   const isSupportedNoPoolSwapEvmSpy = jest.spyOn(helpers, 'isSupportedNoPoolSwapEvm');
-  //   const isEvmSwappableSpy = jest.spyOn(helpers, 'isEvmSwappable');
-  //   isSupportedNoPoolSwapEvmSpy.mockReturnValue(isSupportedNoPoolSwapEvmRes);
-  //   isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
-  //   const simulateData = await handleSimulateSwap(null);
-  //   expect(simulateData.amount).toEqual(expectedSimulateAmount);
-  //   simulateSwapSpy.mockRestore();
-  //   simulateSwapEvmSpy.mockRestore();
-  //   isSupportedNoPoolSwapEvmSpy.mockRestore();
-  //   isEvmSwappableSpy.mockRestore();
-  // });
+  it.each<[boolean, boolean, string]>([
+    [false, false, '1'],
+    [false, true, '2'],
+    [true, false, '2'],
+    [true, true, '2']
+  ])('test handleSimulateSwap', async (isSupportedNoPoolSwapEvmRes, isEvmSwappableRes, expectedSimulateAmount) => {
+    const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
+    const simulateSwapEvmSpy = jest.spyOn(restApi, 'simulateSwapEvm');
+    simulateSwapSpy.mockResolvedValue({ amount: '1' });
+    simulateSwapEvmSpy.mockResolvedValue({ amount: '2' });
+    const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
+    const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
+    isSupportedNoPoolSwapEvmSpy.mockReturnValue(isSupportedNoPoolSwapEvmRes);
+    isEvmSwappableSpy.mockReturnValue(isEvmSwappableRes);
+    console.log(restApi.isSupportedNoPoolSwapEvm('wbnb'), restApi.isEvmSwappable({ fromChainId: '', toChainId: '' }));
+    const fakeTokenInfo = toTokenInfo(flattenTokens[0]);
+    const simulateData = await handleSimulateSwap({
+      fromInfo: fakeTokenInfo,
+      toInfo: fakeTokenInfo,
+      originalFromInfo: flattenTokens[0],
+      originalToInfo: flattenTokens[0],
+      amount: ''
+    });
+    expect(simulateData.amount).toEqual(expectedSimulateAmount);
+    simulateSwapSpy.mockRestore();
+    simulateSwapEvmSpy.mockRestore();
+    isSupportedNoPoolSwapEvmSpy.mockRestore();
+    isEvmSwappableSpy.mockRestore();
+  });
 
   it('max amount', () => {
     const amount = 123456789n;
@@ -467,6 +479,12 @@ describe('universal-swap', () => {
       swapSpy = jest.spyOn(universalSwap, 'swap');
       swapAndTransferSpy = jest.spyOn(universalSwap, 'swapAndTransfer');
       transferAndSwapSpy = jest.spyOn(universalSwap, 'transferAndSwap');
+    });
+
+    afterAll(() => {
+      swapSpy.mockRestore();
+      swapAndTransferSpy.mockRestore();
+      transferAndSwapSpy.mockRestore();
     });
 
     it.each([
@@ -949,12 +967,16 @@ describe('universal-swap', () => {
       const toToken = oraichainTokens.find((t) => t.coinGeckoId === toCoingeckoId);
       const [fromInfo, toInfo] = [toTokenInfo(fromToken), toTokenInfo(toToken)];
       const query = { fromInfo, toInfo, amount };
+      let isMock = false;
+      let simulateSwapSpy: jest.SpyInstance;
       if (fromInfo.coinGeckoId !== toInfo.coinGeckoId) {
-        const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
+        simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
         simulateSwapSpy.mockResolvedValue({ amount: expectedSimulateData });
+        isMock = true;
       }
       const simulateData = await simulateSwap(query);
       expect(simulateData.amount).toEqual(expectedSimulateData);
+      if (isMock) simulateSwapSpy.mockRestore();
     }
   );
 

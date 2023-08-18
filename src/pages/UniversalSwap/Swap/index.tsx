@@ -18,17 +18,10 @@ import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTokenInfos, getTokenOnOraichain } from 'rest/api';
+import { fetchTokenInfos, getTokenOnOraichain, isEvmSwappable } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import {
-  UniversalSwapHandler,
-  checkEvmAddress,
-  calculateMinimum,
-  filterTokens,
-  SwapDirection,
-  isEvmSwappable
-} from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';

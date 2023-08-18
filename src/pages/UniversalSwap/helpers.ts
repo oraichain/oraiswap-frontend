@@ -20,6 +20,9 @@ import {
   generateContractMessages,
   getSwapRoute,
   getTokenOnOraichain,
+  getTokenOnSpecificChainId,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm,
   parseTokenInfo,
   simulateSwap,
   simulateSwapEvm
@@ -75,6 +78,7 @@ export async function handleSimulateSwap(query: {
 }): Promise<SimulateSwapOperationsResponse> {
   // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
   // otherwise, simulate like normal
+  console.log(isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId));
   if (
     isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId) ||
     isEvmSwappable({
@@ -93,30 +97,6 @@ export async function handleSimulateSwap(query: {
     });
   }
   return simulateSwap(query);
-}
-
-export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
-  switch (coingeckoId) {
-    case 'wbnb':
-    case 'weth':
-      return true;
-    default:
-      return false;
-  }
-}
-
-export function isEvmSwappable(data: {
-  fromChainId: string;
-  toChainId: string;
-  fromContractAddr: string;
-  toContractAddr: string;
-}): boolean {
-  const { fromChainId, fromContractAddr, toChainId, toContractAddr } = data;
-  if (fromChainId !== toChainId) return false;
-  // cant swap on evm if chain id is not eth or bsc
-  if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
-  if (!getSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
-  return true;
 }
 
 export function filterTokens(
@@ -366,31 +346,36 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
-    // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
-    if (isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
+    if (!metamaskAddress) throw 'Cannot call evm swap if the metamask address is empty';
+    const toTokenOnSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
+
+    if (
+      isEvmSwappable({
+        fromChainId: this._fromToken.chainId,
+        toChainId: toTokenOnSameFromChainId.chainId,
+        fromContractAddr: this._fromToken.contractAddress,
+        toContractAddr: toTokenOnSameFromChainId.contractAddress
+      })
+    ) {
+      // normal case, we will transfer evm to ibc like normal
       if (
-        isEvmSwappable({
-          fromChainId: this._fromToken.chainId,
-          toChainId: this._toToken.chainId,
-          fromContractAddr: this._fromToken.contractAddress,
-          toContractAddr: this._toToken.contractAddress
-        })
+        !isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId) &&
+        !isSupportedNoPoolSwapEvm(this._toToken.coinGeckoId)
       )
-        // TODO: support tron here?
-        return window.Metamask.evmSwap(
-          this._fromToken,
-          this._toToken.contractAddress,
-          metamaskAddress,
-          this.fromAmount,
-          this.simulateAmount,
-          this._userSlippage
-        );
-      else {
-        // TODO: implement this case, where non-pool tokens on evm swap directly to supported tokens on Oraichain
-        throw 'Currently not supported for this case';
-      }
+        return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
+      // special case with same chain id, then we only need to swap on that chain. No need to transfer ibc
+      // currently only support evm metamask address
+      // TODO: support tron here?
+      return window.Metamask.evmSwap({
+        fromToken: this._fromToken,
+        toTokenContractAddr: toTokenOnSameFromChainId.contractAddress,
+        address: metamaskAddress,
+        fromAmount: this.fromAmount,
+        simulateAmount: this.simulateAmount,
+        slippage: this._userSlippage,
+        destination: toTokenOnSameFromChainId.chainId === this._toToken.chainId ? '' : combinedReceiver // if to token already on same net with from token then no destination is needed
+      });
     }
-    return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {

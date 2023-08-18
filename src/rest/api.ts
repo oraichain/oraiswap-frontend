@@ -513,6 +513,34 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
   }
 }
 
+export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
+  switch (coingeckoId) {
+    case 'wbnb':
+    case 'weth':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function isEvmSwappable(data: {
+  fromChainId: string;
+  toChainId: string;
+  fromContractAddr?: string;
+  toContractAddr?: string;
+}): boolean {
+  const { fromChainId, fromContractAddr, toChainId, toContractAddr } = data;
+  // cant swap if they are not on the same evm chain
+  if (fromChainId !== toChainId) return false;
+  // cant swap on evm if chain id is not eth or bsc
+  if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
+  // if the tokens do not have contract addresses then we skip
+  if (!fromContractAddr || !toContractAddr) return false;
+  // only swappable if there's a route to swap from -> to
+  if (!getSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
+  return true;
+}
+
 export type SwapQuery = {
   type: Type.SWAP;
   fromInfo: TokenInfo;

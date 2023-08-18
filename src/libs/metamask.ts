@@ -114,14 +114,17 @@ export default class Metamask {
   }
 
   // TODO: add test cased & add case where from token is native evm
-  public async evmSwap(
-    fromToken: TokenItemType,
-    toTokenContractAddr: string,
-    address: string,
-    fromAmount: number,
-    simulateAmount: string,
-    slippage?: number // from 1 to 100
-  ) {
+  public async evmSwap(data: {
+    fromToken: TokenItemType;
+    toTokenContractAddr: string;
+    fromAmount: number;
+    address: string;
+    simulateAmount: string;
+    slippage?: number; // from 1 to 100
+    destination?: string;
+  }) {
+    const { fromToken, toTokenContractAddr, address, fromAmount, simulateAmount, slippage, destination } = data;
+    console.log('destination: ', destination);
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
     const checkSumAddress = ethers.utils.getAddress(address);
     console.log('simulate evm swap amount: ', fromAmount, toAmount(fromAmount, fromToken.decimals), simulateAmount);
@@ -138,7 +141,7 @@ export default class Metamask {
       ethers.utils.getAddress(toTokenContractAddr),
       toAmount(fromAmount, fromToken.decimals).toString(),
       (BigInt(simulateAmount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n, // use
-      ''
+      destination
     );
     await result.wait();
     return { transactionHash: result.hash };
