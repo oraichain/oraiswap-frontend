@@ -33,6 +33,8 @@ import {
   USDC_ETH_CONTRACT,
   USDT_BSC_CONTRACT,
   USDT_TRON_CONTRACT,
+  WRAP_BNB_CONTRACT,
+  WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT
 } from './constants';
 
@@ -77,6 +79,8 @@ export type CoinGeckoId =
   | 'oraidex'
   | 'usd-coin'
   | 'tron'
+  | 'weth'
+  | 'wbnb'
   | 'scatom';
 
 export type NetworkType = 'cosmos' | 'evm';
@@ -539,7 +543,7 @@ export const chainInfos: CustomChainInfo[] = [
 
   /// evm chain info
   {
-    rpc: 'https://rpc.ankr.com/eth',
+    rpc: 'https://eth.llamarpc.com',
     chainId: '0x01',
     chainName: 'Ethereum',
     bip44: {
@@ -568,6 +572,16 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'usd-coin',
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: UsdcIcon
+      },
+      {
+        coinDenom: 'WETH',
+        coinMinimalDenom: 'erc20_eth',
+        contractAddress: WRAP_ETH_CONTRACT,
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'weth',
+        // prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: EthIcon
       }
     ]
   },
@@ -662,6 +676,16 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'milky-token',
         bridgeTo: ['Oraichain'],
         Icon: MilkyIcon
+      },
+      {
+        coinDenom: 'WBNB',
+        coinMinimalDenom: 'bep20_wbnb',
+        contractAddress: WRAP_BNB_CONTRACT,
+        coinDecimals: 18,
+        coinGeckoId: 'wbnb',
+        bridgeTo: ['Oraichain'],
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+        Icon: BnbIcon
       }
     ]
   },

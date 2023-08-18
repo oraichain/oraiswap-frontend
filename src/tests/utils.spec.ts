@@ -10,4 +10,12 @@ describe('test-utils-function', () => {
     const result = utils.toDisplay(amount, sourceDecimal, desDecimal);
     console.log({ result });
   });
+
+  it.each<[string, number]>([
+    ['0x38', 56],
+    ['foo', 0]
+  ])('test-convertChainIdFromHexToNumber', (chainId, expectedChainIdNumber) => {
+    const result = utils.convertChainIdFromHexToNumber(chainId);
+    expect(result).toEqual(expectedChainIdNumber);
+  });
 });

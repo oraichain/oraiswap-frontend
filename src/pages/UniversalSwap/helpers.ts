@@ -2,9 +2,9 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
-import { TokenItemType, UniversalSwapType, oraichainTokens } from 'config/bridgeTokens';
-import { NetworkChainId } from 'config/chainInfos';
-import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
+import { TokenItemType, UniversalSwapType, gravityContracts, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
@@ -13,9 +13,33 @@ import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'li
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import { findToToken, transferEvmToIBC } from 'pages/Balance/helpers';
-import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
+import { findToTokenOnOraiBridge, transferEvmToIBC } from 'pages/Balance/helpers';
+import {
+  SwapQuery,
+  Type,
+  generateContractMessages,
+  getSwapRoute,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm,
+  parseTokenInfo,
+  simulateSwap,
+  simulateSwapEvm
+} from 'rest/api';
 import { IBCInfo } from 'types/ibc';
+import { TokenInfo } from 'types/token';
+import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+
+export enum SwapDirection {
+  From,
+  To
+}
+
+export interface SwapData {
+  metamaskAddress?: string;
+  tronAddress?: string;
+}
 
 /**
  * Get transfer token fee when universal swap
@@ -36,16 +60,65 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
 export const calculateMinimum = (simulateAmount: number | string, userSlippage: number): bigint | string => {
   if (!simulateAmount) return '0';
   try {
-    return BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+    const result =
+      BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+    return result;
   } catch (error) {
     console.log({ error });
     return '0';
   }
 };
 
-export interface SwapData {
-  metamaskAddress?: string;
-  tronAddress?: string;
+export async function handleSimulateSwap(query: {
+  fromInfo: TokenInfo;
+  toInfo: TokenInfo;
+  originalFromInfo: TokenItemType;
+  originalToInfo: TokenItemType;
+  amount: string;
+}): Promise<SimulateSwapOperationsResponse> {
+  // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
+  // otherwise, simulate like normal
+  console.log(isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId));
+  if (
+    isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId) ||
+    isEvmSwappable({
+      fromChainId: query.originalFromInfo.chainId,
+      toChainId: query.originalToInfo.chainId,
+      fromContractAddr: query.originalFromInfo.contractAddress,
+      toContractAddr: query.originalToInfo.contractAddress
+    })
+  ) {
+    // reset previous amount calculation since now we need to deal with original from & to info, not oraichain token info
+    const originalAmount = toDisplay(query.amount, query.fromInfo.decimals);
+    return simulateSwapEvm({
+      fromInfo: query.originalFromInfo,
+      toInfo: query.originalToInfo,
+      amount: toAmount(originalAmount, query.originalFromInfo.decimals).toString()
+    });
+  }
+  return simulateSwap(query);
+}
+
+export function filterTokens(
+  chainId: string,
+  coingeckoId: CoinGeckoId,
+  denom: string,
+  searchTokenName: string,
+  direction: SwapDirection
+) {
+  // basic filter. Dont include itself & only collect tokens with searched letters
+  let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
+  // special case for tokens not having a pool on Oraichain
+  if (isSupportedNoPoolSwapEvm(coingeckoId)) {
+    const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
+    const filteredTokens = filteredToTokens.filter((token) => swappableTokens.includes(token.contractAddress));
+
+    // tokens that dont have a pool on Oraichain like WETH or WBNB cannot be swapped from a token on Oraichain
+    if (direction === SwapDirection.To)
+      return filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
+    filteredToTokens = filteredTokens;
+  }
+  return filteredToTokens;
 }
 
 export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: string, tronAddress?: string | boolean) => {
@@ -218,7 +291,7 @@ export class UniversalSwapHandler {
     }
 
     // then find new _toToken in Oraibridge that have same coingeckoId with originalToToken.
-    this._toToken = findToToken(this._toTokenInOrai, this._toToken.chainId);
+    this._toToken = findToTokenOnOraiBridge(this._toTokenInOrai, this._toToken.chainId);
 
     const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
@@ -273,6 +346,44 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
+    if (!metamaskAddress) throw Error('Cannot call evm swap if the metamask address is empty');
+
+    // normal case, we will transfer evm to ibc like normal when two tokens can not be swapped on evm
+    // first case: BNB (bsc) <-> USDT (bsc), then swappable
+    // 2nd case: BNB (bsc) -> USDT (oraichain), then find USDT on bsc. We have that and also have route => swappable
+    // 3rd case: USDT (bsc) -> ORAI (bsc / Oraichain), both have pools on Oraichain, but we currently dont have the pool route on evm => not swappable => transfer to cosmos like normal
+    let swappableData = {
+      fromChainId: this._fromToken.chainId,
+      toChainId: this._toToken.chainId,
+      fromContractAddr: this._fromToken.contractAddress,
+      toContractAddr: this._toToken.contractAddress
+    };
+    let evmSwapData = {
+      fromToken: this._fromToken,
+      toTokenContractAddr: this._toToken.contractAddress,
+      address: metamaskAddress,
+      fromAmount: this.fromAmount,
+      simulateAmount: this.simulateAmount,
+      slippage: this._userSlippage,
+      destination: '' // if to token already on same net with from token then no destination is needed
+    };
+
+    if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
+
+    const toTokenSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
+    if (toTokenSameFromChainId) {
+      swappableData.toChainId = toTokenSameFromChainId.chainId;
+      swappableData.toContractAddr = toTokenSameFromChainId.contractAddress;
+      evmSwapData.toTokenContractAddr = toTokenSameFromChainId.contractAddress;
+      // if to token already on same net with from token then no destination is needed
+      evmSwapData.destination = toTokenSameFromChainId.chainId === this._toToken.chainId ? '' : combinedReceiver;
+    }
+
+    // special case for tokens not having a pool on Oraichain. We need to swap on evm instead then transfer to Oraichain
+    // TODO: support tron here?
+    if (isEvmSwappable(swappableData) && isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
+      return window.Metamask.evmSwap(evmSwapData);
+    }
     return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
   }
 

@@ -98,14 +98,13 @@ const RequireAuthButton: React.FC<any> = () => {
     }
     const wallet = await collectWallet(network.chainId);
     window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-      prefix: network.prefix,
       gasPrice: GasPrice.fromString(`0.002${network.denom}`)
     });
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
     console.log('oraiAddress', oraiAddress);
     if (oraiAddress === address) {
-      setIsSameAddress(!isSameAddress)
+      setIsSameAddress(!isSameAddress);
     }
     loadTokenAmounts({ oraiAddress });
     setAddress(oraiAddress);

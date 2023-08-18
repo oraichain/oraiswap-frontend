@@ -22,10 +22,11 @@ import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getSubAmountDetails } from 'rest/api';
+import { getSubAmountDetails, isSupportedNoPoolSwapEvm } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
+  combineReceiver,
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
@@ -140,7 +141,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let result: DeliverTxResponse;
+      let result: DeliverTxResponse | any;
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
@@ -153,7 +154,14 @@ const Balance: React.FC<BalanceProps> = () => {
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
-      result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
+      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      const { combinedReceiver } = combineReceiver(latestOraiAddress, from);
+      result = await transferEvmToIBC(
+        from,
+        fromAmount,
+        { metamaskAddress, tronAddress, oraiAddress: latestOraiAddress },
+        combinedReceiver
+      );
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
@@ -169,6 +177,7 @@ const Balance: React.FC<BalanceProps> = () => {
         if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
           return false;
         }
+        if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
         return token.chainId == chainId;
       })
       .sort((a, b) => {

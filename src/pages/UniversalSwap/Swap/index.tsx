@@ -7,21 +7,27 @@ import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
+import { TokenItemType, evmTokens, tokenMap } from 'config/bridgeTokens';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, swapEvmRoutes } from 'config/constants';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDisplay, toSubAmount } from 'libs/utils';
+import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTokenInfos, getTokenOnOraichain } from 'rest/api';
+import {
+  fetchTokenInfos,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm
+} from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -49,8 +55,10 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
+  const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
+  const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
 
   const refreshBalances = async () => {
@@ -88,10 +96,22 @@ const SwapComponent: React.FC<{
   };
 
   // get token on oraichain to simulate swap amount.
-  const fromToken = getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId);
-  const toToken = getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId);
   const originalFromToken = tokenMap[fromTokenDenom];
   const originalToToken = tokenMap[toTokenDenom];
+  const isEvmSwap = isEvmSwappable({
+    fromChainId: originalFromToken.chainId,
+    toChainId: originalToToken.chainId,
+    fromContractAddr: originalFromToken.contractAddress,
+    toContractAddr: originalToToken.contractAddress
+  });
+
+  // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
+  const fromToken = isEvmSwap
+    ? tokenMap[fromTokenDenom]
+    : getTokenOnOraichain(tokenMap[fromTokenDenom].coinGeckoId) ?? tokenMap[fromTokenDenom];
+  const toToken = isEvmSwap
+    ? tokenMap[toTokenDenom]
+    : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
   const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
   const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
@@ -107,15 +127,65 @@ const SwapComponent: React.FC<{
     : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
-  const taxRate = useTaxRate()
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate('simulate-data', fromTokenInfoData, toTokenInfoData)
-  const { toAmountToken: averageRatio } = useSimulate('simulate-average-data', fromTokenInfoData, toTokenInfoData, 1)
+  // process filter from & to tokens
+  useEffect(() => {
+    const filteredToTokens = filterTokens(
+      fromToken.chainId,
+      fromToken.coinGeckoId,
+      fromTokenDenom,
+      searchTokenName,
+      SwapDirection.To
+    );
+    setFilteredToTokens(filteredToTokens);
+
+    const filteredFromTokens = filterTokens(
+      toToken.chainId,
+      toToken.coinGeckoId,
+      toTokenDenom,
+      searchTokenName,
+      SwapDirection.From
+    );
+    setFilteredFromTokens(filteredFromTokens);
+
+    // TODO: need to automatically update from / to token to the correct swappable one when clicking the swap button
+  }, [fromToken, toToken]);
+
+  const taxRate = useTaxRate();
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
+    'simulate-data',
+    fromTokenInfoData,
+    toTokenInfoData,
+    originalFromToken,
+    originalToToken
+  );
+  const { toAmountToken: averageRatio } = useSimulate(
+    'simulate-average-data',
+    fromTokenInfoData,
+    toTokenInfoData,
+    originalFromToken,
+    originalToToken,
+    1
+  );
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken])
+  }, [fromToken, toToken]);
+
+  useEffect(() => {
+    // special case for tokens having no pools on Oraichain. When original from token is not swappable, then we switch to an alternative token on the same chain as to token
+    if (isSupportedNoPoolSwapEvm(toToken.coinGeckoId) && !isSupportedNoPoolSwapEvm(fromToken.coinGeckoId)) {
+      const fromTokenSameToChainId = getTokenOnSpecificChainId(fromToken.coinGeckoId, toToken.chainId);
+      if (!fromTokenSameToChainId) {
+        const sameChainIdTokens = evmTokens.find((t) => t.chainId === toToken.chainId);
+        if (!sameChainIdTokens) throw Error('Impossible case!. An evm chain should at least have one token');
+        setSwapTokens([sameChainIdTokens.denom, toToken.denom]);
+        return;
+      }
+      setSwapTokens([fromTokenSameToChainId.denom, toToken.denom]);
+    }
+  }, [fromToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -167,18 +237,16 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  const filteredFromTokens = swapFromTokens.filter(
-    (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  );
+  // const filteredFromTokens = swapFromTokens.filter(
+  //   (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
+  // );
 
-  const filteredToTokens = swapToTokens.filter(
-    (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  );
+  // const filteredToTokens = swapToTokens.filter(
+  //   (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
+  // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount
-    ? calculateMinimum(simulateData.amount, userSlippage)
-    : '0';
+  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -311,11 +379,12 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: minimumReceive,
-                denom: toTokenInfoData?.symbol,
-                decimals: toTokenInfoData?.decimals
+                amount: toDisplay(minimumReceive, fromTokenInfoData?.decimals, toTokenInfoData?.decimals).toFixed(
+                  truncDecimals
+                ),
+                denom: toTokenInfoData?.symbol
               }}
-              decimalScale={6}
+              decimalScale={truncDecimals}
             />
           </div>
 

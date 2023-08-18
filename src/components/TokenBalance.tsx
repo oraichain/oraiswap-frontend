@@ -19,10 +19,7 @@ const parseBalance = (balance: BalanceProp): number => {
 };
 
 const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
-  const amount =
-    typeof balance === 'number'
-      ? balance
-      : parseBalance(balance ?? { amount: '0' });
+  const amount = typeof balance === 'number' ? balance : parseBalance(balance ?? { amount: '0' });
 
   return (
     <NumberFormat
@@ -35,9 +32,7 @@ const TokenBalance: React.FC<Props> = ({ balance, className, ...props }) => {
         ? { prefix: '$' }
         : {
             // fix display denom
-            suffix: balance?.denom
-              ? ` ${balance.denom.replace(/^u/, '').toUpperCase()}`
-              : ''
+            suffix: balance?.denom ? ` ${balance.denom.replace(/^u/, '').toUpperCase()}` : ''
           })}
       {...props}
     />

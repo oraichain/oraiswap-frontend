@@ -1,0 +1,39 @@
+diff --git a/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.d.ts b/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.d.ts
+index e0c0a30..3047021 100644
+--- a/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.d.ts
++++ b/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.d.ts
+@@ -87,11 +87,22 @@ export interface ExecuteResult {
+     readonly logs: readonly logs.Log[];
+     /** Block height in which the transaction is included */
+     readonly height: number;
++    /** The position of the transaction within the block. This is a 0-based index. */
++    readonly txIndex: number;
+     /** Transaction hash (might be used as transaction ID). Guaranteed to be non-empty upper-case hex */
+     readonly transactionHash: string;
+     readonly events: readonly Event[];
+     readonly gasWanted: number;
+     readonly gasUsed: number;
++    /**
++     * The message responses of the [TxMsgData](https://github.com/cosmos/cosmos-sdk/blob/v0.46.3/proto/cosmos/base/abci/v1beta1/abci.proto#L128-L140)
++     * as `Any`s.
++     * This field is an empty list for chains running Cosmos SDK < 0.46.
++     */
++    readonly msgResponses: Array<{
++        readonly typeUrl: string;
++        readonly value: Uint8Array;
++    }>;
+ }
+ export interface SigningCosmWasmClientOptions {
+     readonly registry?: Registry;
+diff --git a/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.js b/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.js
+index 2780b8c..f10eaf8 100644
+--- a/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.js
++++ b/node_modules/@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient.js
+@@ -271,6 +271,7 @@ class SigningCosmWasmClient extends cosmwasmclient_1.CosmWasmClient {
+             throw new Error(createDeliverTxResponseErrorMessage(result));
+         }
+         return {
++            ...result,
+             logs: stargate_1.logs.parseRawLog(result.rawLog),
+             height: result.height,
+             transactionHash: result.transactionHash,

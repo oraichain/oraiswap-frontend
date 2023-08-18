@@ -16,19 +16,29 @@ import {
   PairInfo,
   SwapOperation
 } from '@oraichain/oraidex-contracts-sdk';
-import { oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM } from 'config/constants';
+import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import {
+  KWT_DENOM,
+  MILKY_DENOM,
+  ORAI,
+  ORAI_INFO,
+  STABLE_DENOM,
+  proxyContractInfo,
+  swapEvmRoutes
+} from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
-import { CoinGeckoId } from 'config/chainInfos';
+import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp, isFactoryV1, parseAssetInfo } from 'helper';
+import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
+import { IUniswapV2Router02__factory } from 'types/typechain-types';
+import { ethers } from 'ethers';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -63,11 +73,19 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
     } as OraiswapTokenTypes.QueryMsg)
   }));
   const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.aggregate({
-    queries
-  });
-  let ind = 0;
-  return tokens.map((t) => toTokenInfo(t, t.contractAddress ? fromBinary(res.return_data[ind++].data) : undefined));
+  let tokenInfos = tokens.map((t) => toTokenInfo(t));
+  try {
+    const res = await multicall.tryAggregate({
+      queries
+    });
+    let ind = 0;
+    tokenInfos = tokens.map((t) =>
+      toTokenInfo(t, t.contractAddress && res.return_data[ind].success ? fromBinary(res.return_data[ind++].data) : t)
+    );
+  } catch (error) {
+    console.log('error fetching token infos: ', error);
+  }
+  return tokenInfos;
 }
 
 async function fetchAllRewardPerSecInfos(
@@ -366,6 +384,13 @@ const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
   return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
 };
 
+export function getTokenOnSpecificChainId(
+  coingeckoId: CoinGeckoId,
+  chainId: NetworkChainId
+): TokenItemType | undefined {
+  return flattenTokens.find((t) => t.coinGeckoId === coingeckoId && t.chainId === chainId);
+}
+
 const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
   let sent_funds = [];
   for (let fund of funds) {
@@ -440,11 +465,80 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
       offerAmount: amount.toString(),
       operations
     });
-    console.log('simulate swap data: ', data);
     return data;
   } catch (error) {
     throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
   }
+}
+
+export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
+  return `${fromContractAddr}-${toContractAddr}`;
+}
+
+export function getSwapRoute(chainId: string, fromContractAddr: string, toContractAddr: string): string[] | undefined {
+  const chainRoutes = swapEvmRoutes[chainId];
+  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromContractAddr, toContractAddr)];
+  if (route) return route;
+  // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
+  route = chainRoutes[buildSwapRouterKey(toContractAddr, fromContractAddr)];
+  if (route) {
+    return [].concat(route).reverse();
+  }
+  return undefined;
+}
+
+async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenItemType; amount: string }) {
+  const { amount, fromInfo, toInfo } = query;
+
+  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
+  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
+    return {
+      amount
+    };
+  }
+  try {
+    // get proxy contract object so that we can query the corresponding router address
+    const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
+    const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
+    const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
+    const route = getSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
+    console.log('route: ', route);
+    const outs = await swapRouterV2.getAmountsOut(amount, route);
+    console.log('out amount: ', outs.slice(-1)[0]);
+    return {
+      amount: outs.slice(-1)[0].toString() // get the final out amount, which is the token out amount we want
+    };
+  } catch (ex) {
+    console.log('error simulating evm: ', ex);
+  }
+}
+
+export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
+  switch (coingeckoId) {
+    case 'wbnb':
+    case 'weth':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function isEvmSwappable(data: {
+  fromChainId: string;
+  toChainId: string;
+  fromContractAddr?: string;
+  toContractAddr?: string;
+}): boolean {
+  const { fromChainId, fromContractAddr, toChainId, toContractAddr } = data;
+  // cant swap if they are not on the same evm chain
+  if (fromChainId !== toChainId) return false;
+  // cant swap on evm if chain id is not eth or bsc
+  if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
+  // if the tokens do not have contract addresses then we skip
+  if (!fromContractAddr || !toContractAddr) return false;
+  // only swappable if there's a route to swap from -> to
+  if (!getSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
+  return true;
 }
 
 export type SwapQuery = {
@@ -831,5 +925,6 @@ export {
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
   parseTokenInfoRawDenom,
-  getTokenOnOraichain
+  getTokenOnOraichain,
+  simulateSwapEvm
 };
