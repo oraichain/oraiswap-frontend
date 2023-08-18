@@ -18,7 +18,6 @@ import {
   SwapQuery,
   Type,
   generateContractMessages,
-  getSwapRoute,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
   isEvmSwappable,
@@ -78,7 +77,6 @@ export async function handleSimulateSwap(query: {
 }): Promise<SimulateSwapOperationsResponse> {
   // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
   // otherwise, simulate like normal
-  console.log(isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId));
   if (
     isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId) ||
     isEvmSwappable({
@@ -115,7 +113,7 @@ export function filterTokens(
 
     // tokens that dont have a pool on Oraichain like WETH or WBNB cannot be swapped from a token on Oraichain
     if (direction === SwapDirection.To)
-      return filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId)));
+      return [...new Set(filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId))))];
     filteredToTokens = filteredTokens;
   }
   return filteredToTokens;
@@ -223,9 +221,13 @@ export class UniversalSwapHandler {
   }
 
   async getUniversalSwapToAddress(toChainId: NetworkChainId): Promise<string> {
-    if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x2b6653dc' || toChainId === '0x38') {
+    // evm based
+    if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x38') {
       return await window.Metamask.getEthAddress();
     }
+    // tron
+    if (toChainId === '0x2b6653dc' && window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
+      return tronToEthAddress(window.tronWeb.defaultAddress.base58);
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
@@ -346,7 +348,7 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
-    if (!metamaskAddress) throw Error('Cannot call evm swap if the metamask address is empty');
+    if (!metamaskAddress && !tronAddress) throw Error('Cannot call evm swap if the evm address is empty');
 
     // normal case, we will transfer evm to ibc like normal when two tokens can not be swapped on evm
     // first case: BNB (bsc) <-> USDT (bsc), then swappable
@@ -361,7 +363,7 @@ export class UniversalSwapHandler {
     let evmSwapData = {
       fromToken: this._fromToken,
       toTokenContractAddr: this._toToken.contractAddress,
-      address: metamaskAddress,
+      address: { metamaskAddress, tronAddress },
       fromAmount: this.fromAmount,
       simulateAmount: this.simulateAmount,
       slippage: this._userSlippage,
@@ -380,7 +382,6 @@ export class UniversalSwapHandler {
     }
 
     // special case for tokens not having a pool on Oraichain. We need to swap on evm instead then transfer to Oraichain
-    // TODO: support tron here?
     if (isEvmSwappable(swappableData) && isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
       return window.Metamask.evmSwap(evmSwapData);
     }

@@ -1,5 +1,5 @@
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
-import { USDT_BSC_CONTRACT, USDT_TRON_CONTRACT, WRAP_BNB_CONTRACT } from 'config/constants';
+import { USDT_BSC_CONTRACT, USDT_TRON_CONTRACT, WRAP_BNB_CONTRACT, WRAP_TRON_TRX_CONTRACT } from 'config/constants';
 import { buildSwapRouterKey, getSwapRoute, getTokenOnSpecificChainId } from 'rest/api';
 
 describe('test-api', () => {
@@ -19,7 +19,8 @@ describe('test-api', () => {
   it.each<[string, string, string, string[]]>([
     ['0x38', USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT, [USDT_BSC_CONTRACT, WRAP_BNB_CONTRACT]],
     ['0x38', WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT, [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT]],
-    ['0x38', WRAP_BNB_CONTRACT, USDT_TRON_CONTRACT, undefined]
+    ['0x38', WRAP_BNB_CONTRACT, USDT_TRON_CONTRACT, [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT]],
+    ['0x38', WRAP_BNB_CONTRACT, WRAP_TRON_TRX_CONTRACT, undefined]
   ])('test-getSwapRoute', (chainId, fromContractAddr, toContractAddr, expectedRoute) => {
     const result = getSwapRoute(chainId, fromContractAddr, toContractAddr);
     expect(JSON.stringify(result)).toEqual(JSON.stringify(expectedRoute));

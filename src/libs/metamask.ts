@@ -1,5 +1,5 @@
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
+import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
 import { toAmount, toDisplay } from './utils';
 import { Bridge__factory, IERC20Upgradeable__factory } from 'types/typechain-types';
@@ -33,6 +33,14 @@ export default class Metamask {
 
   public isTron(chainId: string | number) {
     return Number(chainId) == Networks.tron;
+  }
+
+  public getFinalEvmAddress(
+    chainId: NetworkChainId,
+    address: { metamaskAddress?: string; tronAddress?: string }
+  ): string | undefined {
+    if (this.isTron(chainId)) return address.tronAddress;
+    return address.metamaskAddress;
   }
 
   public static checkTron() {
@@ -122,20 +130,29 @@ export default class Metamask {
     fromToken: TokenItemType;
     toTokenContractAddr: string;
     fromAmount: number;
-    address: string;
+    address: {
+      metamaskAddress?: string;
+      tronAddress?: string;
+    };
     simulateAmount: string;
     slippage?: number; // from 1 to 100
     destination?: string;
   }) {
     const { fromToken, toTokenContractAddr, address, fromAmount, simulateAmount, slippage, destination } = data;
+    const { metamaskAddress, tronAddress } = address;
+    const finalTransferAddress = window.Metamask.getFinalEvmAddress(fromToken.chainId, {
+      metamaskAddress,
+      tronAddress
+    });
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
-    const checkSumAddress = ethers.utils.getAddress(address);
+    const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
     await window.Metamask.checkOrIncreaseAllowance(
       fromToken,
       checkSumAddress,
       gravityContractAddr,
       fromAmount // increase allowance only take display form as input
     );
+    console.log('destination: ', destination);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const result = await gravityContract.bridgeFromERC20(
       ethers.utils.getAddress(fromToken.contractAddress),

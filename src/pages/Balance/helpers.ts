@@ -252,7 +252,10 @@ export const transferEvmToIBC = async (
   combinedReceiver: string
 ) => {
   const { metamaskAddress, tronAddress, oraiAddress } = address;
-  const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
+  const finalTransferAddress = window.Metamask.getFinalEvmAddress(from.chainId, {
+    metamaskAddress,
+    tronAddress
+  });
   const oraiAddr = oraiAddress ?? (await window.Keplr.getKeplrAddr());
   if (!finalTransferAddress || !oraiAddr) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[from!.chainId!];
