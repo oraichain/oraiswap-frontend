@@ -150,9 +150,13 @@ export class UniversalSwapHandler {
   }
 
   async getUniversalSwapToAddress(toChainId: NetworkChainId): Promise<string> {
-    if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x2b6653dc' || toChainId === '0x38') {
+    // evm based
+    if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x38') {
       return await window.Metamask.getEthAddress();
     }
+    // tron
+    if (toChainId === '0x2b6653dc' && window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
+      return tronToEthAddress(window.tronWeb.defaultAddress.base58);
     return await window.Keplr.getKeplrAddr(toChainId);
   }
 
