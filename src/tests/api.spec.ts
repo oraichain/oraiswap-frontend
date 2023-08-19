@@ -1,6 +1,6 @@
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { USDT_BSC_CONTRACT, USDT_TRON_CONTRACT, WRAP_BNB_CONTRACT, WRAP_TRON_TRX_CONTRACT } from 'config/constants';
-import { buildSwapRouterKey, getSwapRoute, getTokenOnSpecificChainId } from 'rest/api';
+import { buildSwapRouterKey, getEvmSwapRoute, getTokenOnSpecificChainId } from 'rest/api';
 
 describe('test-api', () => {
   it.each<[CoinGeckoId, NetworkChainId, boolean]>([
@@ -21,9 +21,9 @@ describe('test-api', () => {
     ['0x38', WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT, [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT]],
     ['0x38', WRAP_BNB_CONTRACT, USDT_TRON_CONTRACT, [WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT]],
     ['0x38', WRAP_BNB_CONTRACT, WRAP_TRON_TRX_CONTRACT, undefined]
-  ])('test-getSwapRoute', (chainId, fromContractAddr, toContractAddr, expectedRoute) => {
-    const result = getSwapRoute(chainId, fromContractAddr, toContractAddr);
+  ])('test-getEvmSwapRoute', (chainId, fromContractAddr, toContractAddr, expectedRoute) => {
+    const result = getEvmSwapRoute(chainId, fromContractAddr, toContractAddr);
     expect(JSON.stringify(result)).toEqual(JSON.stringify(expectedRoute));
-    // throw 'getSwapRoute error';
+    // throw 'getEvmSwapRoute error';
   });
 });

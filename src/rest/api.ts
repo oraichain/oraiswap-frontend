@@ -475,7 +475,11 @@ export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: str
   return `${fromContractAddr}-${toContractAddr}`;
 }
 
-export function getSwapRoute(chainId: string, fromContractAddr: string, toContractAddr: string): string[] | undefined {
+export function getEvmSwapRoute(
+  chainId: string,
+  fromContractAddr: string,
+  toContractAddr: string
+): string[] | undefined {
   const chainRoutes = swapEvmRoutes[chainId];
   let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromContractAddr, toContractAddr)];
   if (route) return route;
@@ -501,7 +505,7 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
     const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
-    const route = getSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
+    const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
     const outs = await swapRouterV2.getAmountsOut(amount, route);
     return {
       amount: outs.slice(-1)[0].toString() // get the final out amount, which is the token out amount we want
@@ -535,7 +539,7 @@ export function isEvmSwappable(data: {
   // if the tokens do not have contract addresses then we skip
   if (!fromContractAddr || !toContractAddr) return false;
   // only swappable if there's a route to swap from -> to
-  if (!getSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
+  if (!getEvmSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
   return true;
 }
 
