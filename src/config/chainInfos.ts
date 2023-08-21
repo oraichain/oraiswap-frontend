@@ -577,7 +577,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDenom: 'WETH',
         coinMinimalDenom: 'erc20_eth',
         contractAddress: WRAP_ETH_CONTRACT,
-        coinDecimals: 6,
+        coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'weth',
         // prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
