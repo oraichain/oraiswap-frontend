@@ -114,8 +114,16 @@ const SwapComponent: React.FC<{
     ? tokenMap[toTokenDenom]
     : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
-  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
+  const fromTokenFee = useTokenFee(
+    originalFromToken.prefix + originalFromToken.contractAddress,
+    fromToken.chainId,
+    toToken.chainId
+  );
+  const toTokenFee = useTokenFee(
+    originalToToken.prefix + originalToToken.contractAddress,
+    fromToken.chainId,
+    toToken.chainId
+  );
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
