@@ -18,6 +18,7 @@ import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress, senderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
 import { ORAI } from 'config/constants';
+import { toDisplay } from 'libs/utils';
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -142,6 +143,132 @@ describe.only('IBCModule', () => {
       remoteDecimals: 6,
       localChannelId: channel
     });
+  });
+
+  it('demo-getting-channel-state-ibc-wasm-should-increase-balances-and-total-sent', async () => {
+    // fixture. Setup everything from the ics 20 contract to ibc relayer
+    const oraiClient = new SimulateCosmWasmClient({
+      chainId: 'Oraichain',
+      bech32Prefix: ORAI,
+      metering: process.env.METERING === 'true'
+    });
+
+    const ics20Contract = await deployIcs20Token(oraiClient, { swap_router_contract: routerContractAddress });
+    const oraiPort = 'wasm.' + ics20Contract.contractAddress;
+    let newPacketData = {
+      src: {
+        port_id: cosmosPort,
+        channel_id: channel
+      },
+      dest: {
+        port_id: oraiPort,
+        channel_id: channel
+      },
+      sequence: 27,
+      timeout: {
+        block: {
+          revision: 1,
+          height: 12345678
+        }
+      }
+    };
+    newPacketData.dest.port_id = oraiPort;
+
+    // init cw20 AIRI token
+    const airiToken = await deployToken(oraiClient, {
+      decimals: 6,
+      symbol: 'AIRI',
+      name: 'Airight token',
+      initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }]
+    });
+
+    // init ibc channel between two chains
+    oraiClient.app.ibc.relay(channel, oraiPort, channel, cosmosPort, cosmosChain);
+    await cosmosChain.ibc.sendChannelOpen({
+      open_init: {
+        channel: {
+          counterparty_endpoint: {
+            port_id: oraiPort,
+            channel_id: channel
+          },
+          endpoint: {
+            port_id: cosmosPort,
+            channel_id: channel
+          },
+          order: IbcOrder.Unordered,
+          version: 'ics20-1',
+          connection_id: 'connection-0'
+        }
+      }
+    });
+
+    await cosmosChain.ibc.sendChannelConnect({
+      open_ack: {
+        channel: {
+          counterparty_endpoint: {
+            port_id: oraiPort,
+            channel_id: channel
+          },
+          endpoint: {
+            port_id: cosmosPort,
+            channel_id: channel
+          },
+          order: IbcOrder.Unordered,
+          version: 'ics20-1',
+          connection_id: 'connection-0'
+        },
+        counterparty_version: 'ics20-1'
+      }
+    });
+
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
+      const data = msg.data.packet as IbcPacket;
+      if (Number(data.timeout.timestamp) < cosmosChain.time) {
+        throw new GenericError('timeout at ' + data.timeout.timestamp);
+      }
+    });
+    // topup
+    await ics20Contract.updateMappingPair({
+      localAssetInfo: {
+        token: {
+          contract_addr: airiToken.contractAddress
+        }
+      },
+      localAssetInfoDecimals: 6,
+      denom: airiIbcDenom,
+      remoteDecimals: 6,
+      localChannelId: channel
+    });
+
+    const icsPackage: FungibleTokenPacketData = {
+      amount: ibcTransferAmount,
+      denom: airiIbcDenom,
+      receiver: bobAddress,
+      sender: cosmosSenderAddress,
+      memo: ''
+    };
+    // transfer from cosmos to oraichain, should pass. This should increase the balances & total sent
+    await cosmosChain.ibc.sendPacketReceive({
+      packet: {
+        data: toBinary(icsPackage),
+        ...newPacketData
+      },
+      relayer: cosmosSenderAddress
+    });
+
+    const { channels } = await ics20Contract.listChannels();
+    for (let channel of channels) {
+      const { balances } = await ics20Contract.channel({ forward: false, id: channel.id });
+      for (let balance of balances) {
+        if ('native' in balance) {
+          const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
+          const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
+          expect(trueBalance).toEqual(parseInt(ibcTransferAmount) / 10 ** pairMapping.pair_mapping.remote_decimals);
+        } else {
+          // do nothing because currently we dont have any cw20 balance in the channel
+        }
+      }
+    }
   });
 
   it.each([

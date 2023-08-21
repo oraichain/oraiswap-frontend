@@ -582,6 +582,16 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'weth',
         // prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: EthIcon
+      },
+      {
+        coinDenom: 'ETH',
+        coinMinimalDenom: 'eth',
+        contractAddress: '',
+        coinDecimals: 18,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'eth',
+        // prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: EthIcon
       }
     ]
   },
