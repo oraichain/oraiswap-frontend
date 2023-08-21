@@ -59,7 +59,7 @@ const BondingModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress();
 
-      const msgs = generateMiningMsgs({
+      const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
@@ -67,13 +67,12 @@ const BondingModal: FC<ModalProps> = ({
         assetToken
       });
 
-      const msg = msgs[0];
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
       console.log('result provide tx hash: ', result);
 

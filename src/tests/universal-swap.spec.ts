@@ -183,7 +183,7 @@ describe('universal-swap', () => {
     });
 
     function testMsgs(fromTokenInfoData: TokenItemType, toTokenInfoData: TokenItemType) {
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.SWAP,
         sender: senderAddress,
         amount: _fromAmount,
@@ -191,17 +191,17 @@ describe('universal-swap', () => {
         toInfo: toTokenInfoData,
         minimumReceive
       } as any);
-      const msg = msgs[0];
+      console.log('message: ', msg);
 
       // check if the contract address, msg and sender are correct
       if (fromTokenInfoData.contractAddress) {
-        expect(msg.contract).toEqual(fromTokenInfoData.contractAddress);
-        expect(JSON.parse(msg.msg.toString()).send.contract).toEqual(network.router);
-        expect(JSON.parse(msg.msg.toString()).send.amount).toEqual(_fromAmount);
+        expect(msg.contractAddress).toEqual(fromTokenInfoData.contractAddress);
+        expect(msg.msg.send.contract).toEqual(network.router);
+        expect(msg.msg.send.amount).toEqual(_fromAmount);
       } else {
-        expect(msg.contract).toEqual(network.router);
+        expect(msg.contractAddress).toEqual(network.router);
         // check swap operation msg when pair is false
-        expect(JSON.parse(msg.msg.toString())).toEqual({
+        expect(msg.msg).toEqual({
           execute_swap_operations: {
             operations: [
               {
@@ -237,8 +237,7 @@ describe('universal-swap', () => {
           }
         });
       }
-      expect(msg.sender).toEqual(senderAddress);
-      expect(msg.sent_funds).toBeDefined();
+      expect(msg.funds).toBeDefined();
     }
   });
 
@@ -638,8 +637,8 @@ describe('universal-swap', () => {
         universalSwap.toToken = flattenTokens.find((t) => t.coinGeckoId === toCoinGeckoId && t.chainId === toChainId);
         const swapMsg = universalSwap.generateMsgsSwap();
         expect(swapMsg[0].contractAddress).toEqual(expectedSwapContractAddr);
-        expect(swapMsg[0].handleMsg.toString()).toEqual(JSON.stringify(expectedSwapMsg));
-        expect(swapMsg[0].handleOptions).toEqual(expectedFunds);
+        expect(swapMsg[0].msg).toEqual(expectedSwapMsg);
+        expect(swapMsg[0].funds).toEqual(expectedFunds.funds);
       }
     );
 
@@ -739,8 +738,8 @@ describe('universal-swap', () => {
         const ibcMemo = '';
         const msg = universalSwap.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);
         expect(msg[0].contractAddress.toString()).toEqual(expectedContractAddr);
-        expect(msg[0].handleMsg.toString()).toEqual(JSON.stringify(expectedTransferMsg));
-        expect(msg[0].handleOptions).toEqual(expectedFunds);
+        expect(msg[0].msg).toEqual(expectedTransferMsg);
+        expect(msg[0].funds).toEqual(expectedFunds.funds);
       }
     );
 

@@ -76,7 +76,7 @@ describe('swap', () => {
     });
 
     function testMsgs(fromTokenInfoData: TokenItemType, toTokenInfoData: TokenItemType) {
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.SWAP,
         sender: senderAddress,
         amount: _fromAmount,
@@ -84,17 +84,16 @@ describe('swap', () => {
         toInfo: toTokenInfoData,
         minimumReceive
       } as any);
-      const msg = msgs[0];
 
       // check if the contract address, msg and sender are correct
       if (fromTokenInfoData.contractAddress) {
-        expect(msg.contract).toEqual(fromTokenInfoData.contractAddress);
-        expect(JSON.parse(msg.msg.toString()).send.contract).toEqual(network.router);
-        expect(JSON.parse(msg.msg.toString()).send.amount).toEqual(_fromAmount);
+        expect(msg.contractAddress).toEqual(fromTokenInfoData.contractAddress);
+        expect(msg.msg.send.contract).toEqual(network.router);
+        expect(msg.msg.send.amount).toEqual(_fromAmount);
       } else {
-        expect(msg.contract).toEqual(network.router);
+        expect(msg.contractAddress).toEqual(network.router);
         // check swap operation msg when pair is false
-        expect(JSON.parse(msg.msg.toString())).toEqual({
+        expect(msg.msg).toEqual({
           execute_swap_operations: {
             operations: [
               {
@@ -130,8 +129,7 @@ describe('swap', () => {
           }
         });
       }
-      expect(msg.sender).toEqual(senderAddress);
-      expect(msg.sent_funds).toBeDefined();
+      expect(msg.funds).toBeDefined();
 
       const multipleMsgs = generateMsgsSwap(
         fromTokenInfoData,

@@ -9,10 +9,10 @@ import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
 import { CwIcs20LatestQueryClient, Ratio, TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
-import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
+import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
+import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
 import { findToTokenOnOraiBridge, transferEvmToIBC } from 'pages/Balance/helpers';
 import {
   SwapQuery,
@@ -260,7 +260,7 @@ export class UniversalSwapHandler {
     // if not same coingeckoId, swap first then transfer token that have same coingeckoid.
     if (this._fromToken.coinGeckoId !== this._toToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      const msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
+      const msgExecuteSwap = getEncodedExecuteContractMsgs(this._sender, msgSwap);
       return [...msgExecuteSwap, msgTransfer];
     }
     return [msgTransfer];
@@ -292,7 +292,7 @@ export class UniversalSwapHandler {
     // if from and to dont't have same coingeckoId, create swap msg to combine with bridge msg
     if (this._fromToken.coinGeckoId !== this._toToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
+      msgExecuteSwap = getEncodedExecuteContractMsgs(this._sender, msgSwap);
     }
 
     // then find new _toToken in Oraibridge that have same coingeckoId with originalToToken.
@@ -307,7 +307,7 @@ export class UniversalSwapHandler {
 
     // create bridge msg
     const msgTransfer = this.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);
-    const msgExecuteTransfer = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgTransfer));
+    const msgExecuteTransfer = getEncodedExecuteContractMsgs(this._sender, msgTransfer);
     return [...msgExecuteSwap, ...msgExecuteTransfer];
   }
 
@@ -406,7 +406,7 @@ export class UniversalSwapHandler {
         this._userSlippage,
         this._fromToken.decimals
       );
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.SWAP,
         sender: this._sender,
         amount: _fromAmount,
@@ -414,10 +414,8 @@ export class UniversalSwapHandler {
         toInfo: this._toTokenInOrai ?? this._toToken,
         minimumReceive
       } as SwapQuery);
-      const msg = msgs[0];
 
-      const messages = buildMultipleMessages(msg);
-      return messages;
+      return buildMultipleExecuteMessages(msg);
     } catch (error) {
       throw new Error(`Error generateMsgsSwap: ${error}`);
     }
@@ -453,13 +451,12 @@ export class UniversalSwapHandler {
           transfer_to_remote: msg
         };
 
-        const msgs = {
-          contract: ibcWasmContractAddress,
-          msg: Buffer.from(JSON.stringify(executeMsgSend)),
-          sender: this._sender,
-          sent_funds: [{ amount: this._simulateAmount, denom: ORAI }]
+        const msgs: cosmwasm.ExecuteInstruction = {
+          contractAddress: ibcWasmContractAddress,
+          msg: executeMsgSend,
+          funds: [{ amount: this._simulateAmount, denom: ORAI }]
         };
-        return buildMultipleMessages(msgs);
+        return buildMultipleExecuteMessages(msgs);
       }
 
       const executeMsgSend = {
@@ -472,13 +469,12 @@ export class UniversalSwapHandler {
 
       // generate contract message for CW20 token in Oraichain.
       // Example: tranfer USDT/Oraichain -> AIRI/BSC. _toTokenInOrai is AIRI in Oraichain.
-      const msgs = {
-        contract: this._toTokenInOrai.contractAddress,
-        msg: Buffer.from(JSON.stringify(executeMsgSend)),
-        sender: this._sender,
-        sent_funds: []
+      const msgs: cosmwasm.ExecuteInstruction = {
+        contractAddress: this._toTokenInOrai.contractAddress,
+        msg: executeMsgSend,
+        funds: []
       };
-      return buildMultipleMessages(msgs);
+      return buildMultipleExecuteMessages(msgs);
     } catch (error) {
       console.log({ error });
     }

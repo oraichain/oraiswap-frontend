@@ -1,4 +1,4 @@
-import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import { createWasmAminoConverters, ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import {
@@ -18,11 +18,11 @@ import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
+import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs, HandleOptions } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
+import { generateError, toAmount } from 'libs/utils';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -171,9 +171,9 @@ export const transferIBCKwt = async (
   // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
   if (fromToken.evmDenoms) {
     const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, amount);
-    const executeContractMsgs = getExecuteContractMsgs(
+    const executeContractMsgs = getEncodedExecuteContractMsgs(
       fromAddress,
-      parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
+      buildMultipleExecuteMessages(undefined, ...msgConvertReverses)
     );
     customMessages = executeContractMsgs.map((msg) => ({
       message: msg.value,
@@ -315,10 +315,7 @@ export const transferTokenErc20Cw20Map = async ({
 
   const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
 
-  const executeContractMsgs = getExecuteContractMsgs(
-    fromAddress,
-    parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
-  );
+  const executeContractMsgs = buildMultipleExecuteMessages(undefined, ...msgConvertReverses);
   console.log({ executeContractMsgs });
   // note need refactor
   // get raw ibc tx
@@ -347,7 +344,11 @@ export const transferTokenErc20Cw20Map = async ({
     aminoTypes,
     gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
   });
-  const result = await client.signAndBroadcast(fromAddress, [...executeContractMsgs, msgTransfer], 'auto');
+  const result = await client.signAndBroadcast(
+    fromAddress,
+    [...getEncodedExecuteContractMsgs(fromAddress, executeContractMsgs), msgTransfer],
+    'auto'
+  );
   return result;
 };
 
@@ -527,16 +528,16 @@ export const broadcastConvertTokenTx = async (
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
-  let msgs: any;
+  let msg: ExecuteInstruction;
   if (type === 'nativeToCw20') {
-    msgs = generateConvertMsgs({
+    msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN,
       sender: oraiAddress,
       inputAmount: _fromAmount,
       inputToken: token
     });
   } else if (type === 'cw20ToNative') {
-    msgs = generateConvertMsgs({
+    msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN_REVERSE,
       sender: oraiAddress,
       inputAmount: _fromAmount,
@@ -544,14 +545,13 @@ export const broadcastConvertTokenTx = async (
       outputToken
     });
   }
-  const msg = msgs[0];
   const result = await CosmJs.execute({
     prefix: ORAI,
-    address: msg.contract,
+    address: msg.contractAddress,
     walletAddr: oraiAddress,
-    handleMsg: msg.msg.toString(),
+    handleMsg: msg.msg,
     gasAmount: { denom: ORAI, amount: '0' },
-    handleOptions: { funds: msg.sent_funds } as HandleOptions
+    funds: msg.funds
   });
   return result;
 };
