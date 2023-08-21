@@ -525,6 +525,16 @@ export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
   }
 }
 
+export function isEvmNetworkNativeSwapSupported(chainId: NetworkChainId) {
+  switch (chainId) {
+    case '0x01':
+    case '0x38':
+      return true;
+    default:
+      return false;
+  }
+}
+
 export function isEvmSwappable(data: {
   fromChainId: string;
   toChainId: string;

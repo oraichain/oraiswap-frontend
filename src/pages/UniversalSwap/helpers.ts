@@ -20,6 +20,7 @@ import {
   generateContractMessages,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
+  isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm,
   parseTokenInfo,
@@ -102,7 +103,7 @@ export function filterTokens(
   coingeckoId: CoinGeckoId,
   denom: string,
   searchTokenName: string,
-  direction: SwapDirection
+  direction: SwapDirection // direction = to means we are filtering to tokens
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
   let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
@@ -116,6 +117,19 @@ export function filterTokens(
       return [...new Set(filteredTokens.concat(filteredTokens.map((token) => getTokenOnOraichain(token.coinGeckoId))))];
     filteredToTokens = filteredTokens;
   }
+  // special case filter. Tokens on networks other than supported evm cannot swap to tokens
+  if (!isEvmNetworkNativeSwapSupported(chainId as NetworkChainId))
+    return filteredToTokens.filter((t) => {
+      // one-directional swap. non-pool tokens on Oraichain can swap be swapped with tokens on Oraichain, but not vice versa
+      if (direction === SwapDirection.To) return !isSupportedNoPoolSwapEvm(t.coinGeckoId);
+      if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) {
+        // if we cannot find any matched token then we dont include it in the list since it cannot be swapped
+        const sameChainId = getTokenOnSpecificChainId(coingeckoId, t.chainId as NetworkChainId);
+        if (!sameChainId) return false;
+        return true;
+      }
+      return true;
+    });
   return filteredToTokens;
 }
 

@@ -22,6 +22,7 @@ import {
   fetchTokenInfos,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
+  isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from 'rest/api';
@@ -146,8 +147,6 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-
-    // TODO: need to automatically update from / to token to the correct swappable one when clicking the swap button
   }, [fromToken, toToken]);
 
   const taxRate = useTaxRate();
@@ -172,20 +171,6 @@ const SwapComponent: React.FC<{
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
-
-  useEffect(() => {
-    // special case for tokens having no pools on Oraichain. When original from token is not swappable, then we switch to an alternative token on the same chain as to token
-    if (isSupportedNoPoolSwapEvm(toToken.coinGeckoId) && !isSupportedNoPoolSwapEvm(fromToken.coinGeckoId)) {
-      const fromTokenSameToChainId = getTokenOnSpecificChainId(fromToken.coinGeckoId, toToken.chainId);
-      if (!fromTokenSameToChainId) {
-        const sameChainIdTokens = evmTokens.find((t) => t.chainId === toToken.chainId);
-        if (!sameChainIdTokens) throw Error('Impossible case!. An evm chain should at least have one token');
-        setSwapTokens([sameChainIdTokens.denom, toToken.denom]);
-        return;
-      }
-      setSwapTokens([fromTokenSameToChainId.denom, toToken.denom]);
-    }
-  }, [fromToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -312,6 +297,10 @@ const SwapComponent: React.FC<{
           <img
             src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
             onClick={() => {
+              // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+              // because non-evm token cannot be swapped to evm token with no Oraichain pool
+              if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId))
+                return;
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
             }}
