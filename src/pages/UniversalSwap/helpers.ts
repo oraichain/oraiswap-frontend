@@ -132,7 +132,8 @@ export function filterNonPoolEvmTokens(
     });
   else {
     return filteredToTokens.filter((t) => {
-      // filter out to tokens that are on a different network & with no pool
+      // filter out to tokens that are on a different network & with no pool because we are not ready to support them yet
+      // TODO: support this
       if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
       return true;
     });
