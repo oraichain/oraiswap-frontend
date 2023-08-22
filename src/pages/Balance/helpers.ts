@@ -17,7 +17,11 @@ import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  OraiswapTokenClient,
+  OraiswapTokenQueryClient,
+  OraiswapTokenReadOnlyInterface
+} from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
@@ -236,18 +240,15 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
-const getBalanceIBCOraichain = async (to: TokenItemType) => {
+const getBalanceIBCOraichain = async (to: TokenItemType, tokenQueryClient?: OraiswapTokenReadOnlyInterface) => {
   if (!to) return { balance: 0 };
   if (to.contractAddress) {
-    const { balance } = await window.client.queryContractSmart(to.contractAddress, {
-      balance: {
-        address: process.env.REACT_APP_IBC_WASM_CONTRACT
-      }
-    });
-    return { balance: toDisplay(balance) };
+    const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, to.contractAddress);
+    const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
+    return { balance: toDisplay(balance, to.decimals) };
   }
   const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, to.denom);
-  return { balance: toDisplay(amount) };
+  return { balance: toDisplay(amount, to.decimals) };
 };
 
 export const transferEvmToIBC = async (
@@ -274,7 +275,9 @@ export const transferEvmToIBC = async (
   // check balance ibc wasm
   const { balance } = await getBalanceIBCOraichain(info.to);
   if (balance < fromAmount) {
-    throw generateError('Balance IBC Wasm not enough now');
+    throw generateError(
+      `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${fromAmount}, have ${balance}`
+    );
   }
 
   await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);

@@ -870,10 +870,10 @@ describe('universal-swap', () => {
           ibcMemo: 'oraib0x1234'
         }
       ]
-    ])('test-get-ibc-info-ibc-memo', async (_name: string, toCoingeckoId, toChainId, expectedTransferMsg) => {
+    ])('test-get-ibc-info-ibc-memo', (_name: string, toCoingeckoId, toChainId, expectedTransferMsg) => {
       universalSwap.toToken = flattenTokens.find((t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId);
       universalSwap.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === toCoingeckoId);
-      const msg = await universalSwap.getIbcInfoIbcMemo('0x1234', 'T1234');
+      const msg = universalSwap.getIbcInfoIbcMemo('0x1234', 'T1234');
       expect(msg).toEqual(expectedTransferMsg);
     });
   });

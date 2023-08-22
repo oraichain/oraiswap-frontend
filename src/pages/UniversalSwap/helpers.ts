@@ -8,7 +8,14 @@ import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
-import { CwIcs20LatestQueryClient, Ratio, TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
+import {
+  CwIcs20LatestInterface,
+  CwIcs20LatestQueryClient,
+  CwIcs20LatestReadOnlyInterface,
+  Ratio,
+  TransferBackMsg,
+  Uint128
+} from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
@@ -71,6 +78,7 @@ export class UniversalSwapHandler {
   private _fromAmount: number;
   private _simulateAmount: string;
   private _userSlippage?: number;
+  private _cwIcs20LatestClient: CwIcs20LatestInterface;
 
   constructor(
     sender?: string,
@@ -78,7 +86,8 @@ export class UniversalSwapHandler {
     toToken?: TokenItemType,
     fromAmount?: number,
     simulateAmount?: string,
-    userSlippage?: number
+    userSlippage?: number,
+    cwIcs20LatestClient?: CwIcs20LatestInterface
   ) {
     this._sender = sender;
     this._fromToken = fromToken;
@@ -86,6 +95,7 @@ export class UniversalSwapHandler {
     this._fromAmount = fromAmount;
     this._simulateAmount = simulateAmount;
     this._userSlippage = userSlippage;
+    this._cwIcs20LatestClient = cwIcs20LatestClient;
   }
 
   get fromToken() {
@@ -232,6 +242,7 @@ export class UniversalSwapHandler {
   }
 
   getIbcInfoIbcMemo(metamaskAddress: string, tronAddress: string) {
+    if (!ibcInfos[this._fromToken.chainId]) throw generateError('Cannot find ibc info');
     const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
     const ibcMemo = this.getIbcMemo(transferAddress);
@@ -242,7 +253,8 @@ export class UniversalSwapHandler {
   }
 
   async checkBalanceChannelIbc(metamaskAddress: string, tronAddress: string) {
-    const ics20Contract = new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
+    const ics20Contract =
+      this._cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
     const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
     const { balances } = await ics20Contract.channel({
       forward: false,
@@ -258,7 +270,7 @@ export class UniversalSwapHandler {
         const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
         const _toAmount = toDisplay(this._simulateAmount, this._toToken.decimals);
         if (trueBalance < _toAmount) {
-          throw new Error(`${ibcInfo.channel}/${this._toToken.denom} is not enough balance!`);
+          throw generateError(`${ibcInfo.channel}/${this._toToken.denom} is not enough balance!`);
         }
         return;
       } else {
