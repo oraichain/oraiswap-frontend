@@ -855,6 +855,27 @@ describe('universal-swap', () => {
         expect(error?.ex?.message).toEqual('Please login keplr!');
       }
     });
+
+    it.each([
+      [
+        'get-ibc-info-ibc-memo',
+        'airight',
+        'oraibridge-subnet-2',
+        {
+          ibcInfo: {
+            source: `wasm.${process.env.REACT_APP_IBC_WASM_CONTRACT}`,
+            channel: 'channel-29',
+            timeout: 3600
+          },
+          ibcMemo: 'oraib0x1234'
+        }
+      ]
+    ])('test-get-ibc-info-ibc-memo', async (_name: string, toCoingeckoId, toChainId, expectedTransferMsg) => {
+      universalSwap.toToken = flattenTokens.find((t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId);
+      universalSwap.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === toCoingeckoId);
+      const msg = await universalSwap.getIbcInfoIbcMemo('0x1234', 'T1234');
+      expect(msg).toEqual(expectedTransferMsg);
+    });
   });
 
   it.each([

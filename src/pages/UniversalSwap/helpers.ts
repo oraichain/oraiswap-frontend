@@ -220,17 +220,52 @@ export class UniversalSwapHandler {
     // then find new _toToken in Oraibridge that have same coingeckoId with originalToToken.
     this._toToken = findToToken(this._toTokenInOrai, this._toToken.chainId);
 
-    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
-    const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
-    const ibcMemo = this.getIbcMemo(transferAddress);
+    const { ibcInfo, ibcMemo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
 
     // create bridge msg
     const msgTransfer = this.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);
     const msgExecuteTransfer = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgTransfer));
     return [...msgExecuteSwap, ...msgExecuteTransfer];
+  }
+
+  getIbcInfoIbcMemo(metamaskAddress: string, tronAddress: string) {
+    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
+    const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
+    const ibcMemo = this.getIbcMemo(transferAddress);
+    return {
+      ibcInfo,
+      ibcMemo
+    };
+  }
+
+  async checkBalanceChannelIbc(metamaskAddress: string, tronAddress: string) {
+    const ics20Contract = new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
+    const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
+    const { balances } = await ics20Contract.channel({
+      forward: false,
+      id: ibcInfo.channel
+    });
+
+    for (let balance of balances) {
+      if (
+        'native' in balance &&
+        balance.native.denom === `${ibcInfo.source}/${ibcInfo.channel}/${this._toToken.denom}`
+      ) {
+        const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
+        const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
+        const _toAmount = toDisplay(this._simulateAmount, this._toToken.decimals);
+        if (trueBalance < _toAmount) {
+          throw new Error(`${ibcInfo.channel}/${this._toToken.denom} is not enough balance!`);
+        }
+        return;
+      } else {
+        // do nothing because currently we dont have any cw20 balance in the channel
+      }
+    }
+    return;
   }
 
   async swap(): Promise<any> {
@@ -256,6 +291,7 @@ export class UniversalSwapHandler {
     this._toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this._toToken.coinGeckoId);
 
     const combinedMsgs = await this.combineMsgs(metamaskAddress, tronAddress);
+    await this.checkBalanceChannelIbc(metamaskAddress, tronAddress);
 
     // handle sign and broadcast transactions
     const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
@@ -273,7 +309,12 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
-    return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
+    return transferEvmToIBC(
+      { from: this._fromToken, to: this._toToken },
+      this._fromAmount,
+      { metamaskAddress, tronAddress },
+      combinedReceiver
+    );
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {

@@ -1,6 +1,6 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
-import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient, StargateClient } from '@cosmjs/stargate';
 import {
   cosmosTokens,
   flattenTokens,
@@ -22,7 +22,7 @@ import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMult
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
+import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -236,8 +236,25 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
+const getBalanceIBCOraichain = async (to: TokenItemType) => {
+  if (!to) return { balance: 0 };
+  if (to.contractAddress) {
+    const { balance } = await window.client.queryContractSmart(to.contractAddress, {
+      balance: {
+        address: process.env.REACT_APP_IBC_WASM_CONTRACT
+      }
+    });
+    return { balance: toDisplay(balance) };
+  }
+  const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, to.denom);
+  return { balance: toDisplay(amount) };
+};
+
 export const transferEvmToIBC = async (
-  from: TokenItemType,
+  info: {
+    from: TokenItemType;
+    to: TokenItemType;
+  },
   fromAmount: number,
   address: {
     metamaskAddress?: string;
@@ -246,20 +263,26 @@ export const transferEvmToIBC = async (
   combinedReceiver?: string
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
-  const finalTransferAddress = window.Metamask.isTron(from.chainId) ? tronAddress : metamaskAddress;
+  const finalTransferAddress = window.Metamask.isTron(info.from.chainId) ? tronAddress : metamaskAddress;
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
-  const gravityContractAddr = gravityContracts[from!.chainId!];
-  if (!gravityContractAddr || !from) {
+  const gravityContractAddr = gravityContracts[info.from!.chainId!];
+  if (!gravityContractAddr || !info.from) {
     throw generateError('No gravity contract addr or no from token');
   }
 
-  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
+  // check balance ibc wasm
+  const { balance } = await getBalanceIBCOraichain(info.to);
+  if (balance < fromAmount) {
+    throw generateError('Balance IBC Wasm not enough now');
+  }
+
+  await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);
   const result = await window.Metamask.transferToGravity(
-    from,
+    info.from,
     fromAmount,
     finalTransferAddress,
-    combinedReceiver ?? combineReceiver(oraiAddress, from).combinedReceiver
+    combinedReceiver ?? combineReceiver(oraiAddress, info.from).combinedReceiver
   );
   return result;
 };

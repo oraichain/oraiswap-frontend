@@ -39,7 +39,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -153,7 +153,7 @@ const Balance: React.FC<BalanceProps> = () => {
         await handleTransferIBC(from, to, fromAmount);
         return;
       }
-      result = await transferEvmToIBC(from, fromAmount, { metamaskAddress, tronAddress });
+      result = await transferEvmToIBC({ from, to }, fromAmount, { metamaskAddress, tronAddress });
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
