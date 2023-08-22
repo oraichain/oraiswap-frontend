@@ -139,23 +139,23 @@ const SwapComponent: React.FC<{
   // process filter from & to tokens
   useEffect(() => {
     const filteredToTokens = filterTokens(
-      fromToken.chainId,
-      fromToken.coinGeckoId,
-      fromTokenDenom,
+      originalFromToken.chainId,
+      originalFromToken.coinGeckoId,
+      originalFromToken.denom,
       searchTokenName,
       SwapDirection.To
     );
     setFilteredToTokens(filteredToTokens);
 
     const filteredFromTokens = filterTokens(
-      toToken.chainId,
-      toToken.coinGeckoId,
-      toTokenDenom,
+      originalToToken.chainId,
+      originalToToken.coinGeckoId,
+      originalToToken.denom,
       searchTokenName,
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromToken, toToken]);
+  }, [fromTokenDenom, toTokenDenom]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(

@@ -69,7 +69,7 @@ export type CoinGeckoId =
   | 'osmosis'
   | 'cosmos'
   | 'ethereum'
-  | 'bnb'
+  | 'binancecoin'
   | 'airight'
   | 'oraidex'
   | 'tether'
@@ -581,17 +581,16 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'weth',
         Icon: EthIcon
+      },
+      {
+        coinDenom: 'ETH',
+        coinMinimalDenom: 'eth',
+        contractAddress: '',
+        coinDecimals: 18,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'ethereum',
+        Icon: EthIcon
       }
-      // {
-      //   coinDenom: 'ETH',
-      //   coinMinimalDenom: 'eth',
-      //   contractAddress: '',
-      //   coinDecimals: 18,
-      //   bridgeTo: ['Oraichain'],
-      //   coinGeckoId: 'eth',
-      //   // prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-      //   Icon: EthIcon
-      // }
     ]
   },
   {
@@ -693,7 +692,15 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'wbnb',
         bridgeTo: ['Oraichain'],
-        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
+        Icon: BnbIcon
+      },
+      {
+        coinDenom: 'BNB',
+        coinMinimalDenom: 'bnb',
+        contractAddress: '',
+        coinDecimals: 18,
+        coinGeckoId: 'binancecoin',
+        bridgeTo: ['Oraichain'],
         Icon: BnbIcon
       }
     ]

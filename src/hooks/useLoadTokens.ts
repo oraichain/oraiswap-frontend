@@ -9,13 +9,15 @@ import { handleCheckWallet, tronToEthAddress } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
-import { getEvmAddress } from '../libs/utils';
+import { generateError, getEvmAddress } from '../libs/utils';
 
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
 import { chainInfos, CustomChainInfo, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
+import { ethers } from 'ethers';
+import { EVM_BALANCE_RETRY_COUNT } from 'config/constants';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -104,36 +106,52 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
   dispatch(updateAmounts(amountDetails));
 }
 
+async function loadNativeEvmBalance(address: string) {
+  const client = new ethers.providers.Web3Provider(window.ethereum);
+  return client.getBalance(address);
+}
+
 async function loadEvmEntries(
   address: string,
   chain: CustomChainInfo,
-  multicallCustomContractAddress?: string
+  multicallCustomContractAddress?: string,
+  retryCount?: number
 ): Promise<[string, string][]> {
-  const tokens = evmTokens.filter((t) => t.chainId === chain.chainId);
-  if (!tokens.length) return [];
-  const multicall = new Multicall({
-    nodeUrl: chain.rpc,
-    multicallCustomContractAddress,
-    chainId: Number(chain.chainId)
-  });
-  const input = tokens.map((token) => ({
-    reference: token.denom,
-    contractAddress: token.contractAddress,
-    abi: tokenABI,
-    calls: [
-      {
-        reference: token.denom,
-        methodName: 'balanceOf(address)',
-        methodParameters: [address]
-      }
-    ]
-  }));
+  try {
+    const tokens = evmTokens.filter((t) => t.chainId === chain.chainId && t.contractAddress);
+    const nativeEvmToken = evmTokens.find((t) => !t.contractAddress);
+    if (!tokens.length) return [];
+    const multicall = new Multicall({
+      nodeUrl: chain.rpc,
+      multicallCustomContractAddress,
+      chainId: Number(chain.chainId)
+    });
+    const input = tokens.map((token) => ({
+      reference: token.denom,
+      contractAddress: token.contractAddress,
+      abi: tokenABI,
+      calls: [
+        {
+          reference: token.denom,
+          methodName: 'balanceOf(address)',
+          methodParameters: [address]
+        }
+      ]
+    }));
 
-  const results: ContractCallResults = await multicall.call(input);
-  return tokens.map((token) => {
-    const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-    return [token.denom, amount];
-  });
+    const results: ContractCallResults = await multicall.call(input);
+    const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address) : 0;
+    let entries: [string, string][] = tokens.map((token) => {
+      const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
+      return [token.denom, amount];
+    });
+    entries.push([nativeEvmToken.denom, nativeBalance.toString()]);
+    return entries;
+  } catch (error) {
+    if (!retryCount || retryCount >= EVM_BALANCE_RETRY_COUNT) throw generateError('Cannot query EVM balance');
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    loadEvmEntries(address, chain, multicallCustomContractAddress, retryCount + 1);
+  }
 }
 
 async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: CustomChainInfo[]) {

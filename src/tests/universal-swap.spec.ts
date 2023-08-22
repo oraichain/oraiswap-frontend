@@ -46,13 +46,14 @@ describe('universal-swap', () => {
 
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 5],
-    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 19],
+    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 20],
     ['Oraichain', 'oraichain-token', 'orai', '', SwapDirection.To, 18],
+    ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 20],
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 8],
     ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
   ])('test-filterTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
     const tokens = filterTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
-    console.log('filtered to tokens: ', tokens.length);
+    console.log('filtered to tokens: ', tokens);
     expect(tokens.length).toEqual(expectedLength);
   });
 
@@ -63,6 +64,8 @@ describe('universal-swap', () => {
   it.each([
     ['wbnb', true],
     ['weth', true],
+    ['binancecoin', true],
+    ['ethereum', true],
     ['bnb', false]
   ])('test-isSupportedNoPoolSwapEvm', (coingeckoId: CoinGeckoId, expectedResult: boolean) => {
     expect(restApi.isSupportedNoPoolSwapEvm(coingeckoId)).toEqual(expectedResult);
@@ -72,8 +75,8 @@ describe('universal-swap', () => {
     ['a', 'b', 'b', 'c', false],
     ['a', 'a', 'b', 'c', false],
     ['0x38', '0x38', USDT_TRON_CONTRACT, USDT_BSC_CONTRACT, false],
-    ['0x38', '0x38', undefined, USDT_BSC_CONTRACT, false],
-    ['0x38', '0x38', USDT_TRON_CONTRACT, undefined, false],
+    ['0x38', '0x38', undefined, USDT_BSC_CONTRACT, true],
+    ['0x38', '0x38', USDT_TRON_CONTRACT, undefined, true],
     ['0x38', '0x38', undefined, undefined, false],
     ['0x38', '0x38', WRAP_BNB_CONTRACT, USDT_BSC_CONTRACT, true]
   ])('test-isEvmSwappable', (fromChainId, toChainId, fromContractAddr, toContractAddr, expectedResult) => {

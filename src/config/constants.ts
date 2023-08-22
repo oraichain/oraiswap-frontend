@@ -64,6 +64,9 @@ export const MILKY_DENOM = ORAI_BRIDGE_EVM_DENOM_PREFIX + MILKY_BSC_CONTRACT;
 export const WEBSOCKET_RECONNECT_ATTEMPTS = 5;
 export const WEBSOCKET_RECONNECT_INTERVAL = 20000;
 
+export const UNISWAP_ROUTER_DEADLINE = 15000; // swap deadline in ms
+export const EVM_BALANCE_RETRY_COUNT = 5;
+
 // asset info token
 export const ORAI_INFO = {
   native_token: {

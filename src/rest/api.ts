@@ -29,7 +29,7 @@ import {
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
-import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import { CoinGeckoId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
@@ -477,14 +477,21 @@ export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: str
 
 export function getEvmSwapRoute(
   chainId: string,
-  fromContractAddr: string,
-  toContractAddr: string
+  fromContractAddr?: string,
+  toContractAddr?: string
 ): string[] | undefined {
+  if (!isEvmNetworkNativeSwapSupported(chainId as EvmChainId)) return undefined;
+  if (!fromContractAddr && !toContractAddr) return undefined;
   const chainRoutes = swapEvmRoutes[chainId];
-  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromContractAddr, toContractAddr)];
+  const fromAddr = fromContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
+  const toAddr = toContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
+
+  // in case from / to contract addr is empty aka native eth or bnb without contract addr then we fallback to swap route with wrapped token
+  // because uniswap & pancakeswap do not support simulating with native directly
+  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromAddr, toContractAddr)];
   if (route) return route;
   // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
-  route = chainRoutes[buildSwapRouterKey(toContractAddr, fromContractAddr)];
+  route = chainRoutes[buildSwapRouterKey(toAddr, fromContractAddr)];
   if (route) {
     return [].concat(route).reverse();
   }
@@ -519,6 +526,8 @@ export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
   switch (coingeckoId) {
     case 'wbnb':
     case 'weth':
+    case 'binancecoin':
+    case 'ethereum':
       return true;
     default:
       return false;
@@ -547,7 +556,7 @@ export function isEvmSwappable(data: {
   // cant swap on evm if chain id is not eth or bsc
   if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
   // if the tokens do not have contract addresses then we skip
-  if (!fromContractAddr || !toContractAddr) return false;
+  // if (!fromContractAddr || !toContractAddr) return false;
   // only swappable if there's a route to swap from -> to
   if (!getEvmSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
   return true;
