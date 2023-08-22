@@ -98,7 +98,7 @@ export async function handleSimulateSwap(query: {
   return simulateSwap(query);
 }
 
-export function filterTokens(
+export function filterNonPoolEvmTokens(
   chainId: string,
   coingeckoId: CoinGeckoId,
   denom: string,

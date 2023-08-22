@@ -24,7 +24,7 @@ import {
   UniversalSwapHandler,
   checkEvmAddress,
   calculateMinimum,
-  filterTokens,
+  filterNonPoolEvmTokens,
   SwapDirection,
   handleSimulateSwap
 } from 'pages/UniversalSwap/helpers';
@@ -51,8 +51,8 @@ describe('universal-swap', () => {
     ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 20],
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 8],
     ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
-  ])('test-filterTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
-    const tokens = filterTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
+  ])('test-filterNonPoolEvmTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
+    const tokens = filterNonPoolEvmTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
     console.log('filtered to tokens: ', tokens);
     expect(tokens.length).toEqual(expectedLength);
   });
