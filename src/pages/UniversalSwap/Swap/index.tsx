@@ -28,7 +28,13 @@ import {
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
+import {
+  UniversalSwapHandler,
+  checkEvmAddress,
+  calculateMinimum,
+  filterNonPoolEvmTokens,
+  SwapDirection
+} from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -138,24 +144,24 @@ const SwapComponent: React.FC<{
 
   // process filter from & to tokens
   useEffect(() => {
-    const filteredToTokens = filterTokens(
-      fromToken.chainId,
-      fromToken.coinGeckoId,
-      fromTokenDenom,
+    const filteredToTokens = filterNonPoolEvmTokens(
+      originalFromToken.chainId,
+      originalFromToken.coinGeckoId,
+      originalFromToken.denom,
       searchTokenName,
       SwapDirection.To
     );
     setFilteredToTokens(filteredToTokens);
 
-    const filteredFromTokens = filterTokens(
-      toToken.chainId,
-      toToken.coinGeckoId,
-      toTokenDenom,
+    const filteredFromTokens = filterNonPoolEvmTokens(
+      originalToToken.chainId,
+      originalToToken.coinGeckoId,
+      originalToToken.denom,
       searchTokenName,
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromToken, toToken]);
+  }, [fromTokenDenom, toTokenDenom]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
