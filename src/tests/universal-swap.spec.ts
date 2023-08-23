@@ -21,15 +21,134 @@ import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from 'pages/U
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
 import { IBCInfo } from 'types/ibc';
-import { senderAddress } from './common';
+import { client, deployIcs20Token, deployToken, senderAddress } from './common';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-simulate';
+import bech32 from 'bech32';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
-  beforeAll(() => {
+
+  let bobAddress = 'orai1ur2vsjrjarygawpdwtqteaazfchvw4fg6uql76';
+  let oraiAddress = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
+  let routerContractAddress = 'placeholder';
+  let ibcTransferAmount = '100000000';
+  let initialBalanceAmount = '10000000000000';
+  let channel = 'channel-29';
+  let airiIbcDenom: string = 'oraib0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
+  let cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiAddress).words);
+  let ics20Contract;
+  let oraiPort;
+  beforeAll(async () => {
     windowSpy = jest.spyOn(window, 'window', 'get');
+
+    ics20Contract = await deployIcs20Token(client, { swap_router_contract: routerContractAddress });
+    oraiPort = 'wasm.' + ics20Contract.contractAddress;
+    let cosmosPort: string = 'transfer';
+    let airiToken = await deployToken(client, {
+      decimals: 6,
+      symbol: 'AIRI',
+      name: 'Airight token',
+      initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }]
+    });
+    const cosmosChain = new CWSimulateApp({
+      chainId: 'cosmoshub-4',
+      bech32Prefix: 'cosmos'
+    });
+
+    let newPacketData = {
+      src: {
+        port_id: cosmosPort,
+        channel_id: channel
+      },
+      dest: {
+        port_id: oraiPort,
+        channel_id: channel
+      },
+      sequence: 27,
+      timeout: {
+        block: {
+          revision: 1,
+          height: 12345678
+        }
+      }
+    };
+    newPacketData.dest.port_id = oraiPort;
+
+    // init ibc channel between two chains
+    client.app.ibc.relay(channel, oraiPort, channel, cosmosPort, cosmosChain);
+    await cosmosChain.ibc.sendChannelOpen({
+      open_init: {
+        channel: {
+          counterparty_endpoint: {
+            port_id: oraiPort,
+            channel_id: channel
+          },
+          endpoint: {
+            port_id: cosmosPort,
+            channel_id: channel
+          },
+          order: IbcOrder.Unordered,
+          version: 'ics20-1',
+          connection_id: 'connection-38'
+        }
+      }
+    });
+    await cosmosChain.ibc.sendChannelConnect({
+      open_ack: {
+        channel: {
+          counterparty_endpoint: {
+            port_id: oraiPort,
+            channel_id: channel
+          },
+          endpoint: {
+            port_id: cosmosPort,
+            channel_id: channel
+          },
+          order: IbcOrder.Unordered,
+          version: 'ics20-1',
+          connection_id: 'connection-38'
+        },
+        counterparty_version: 'ics20-1'
+      }
+    });
+
+    cosmosChain.ibc.addMiddleWare((msg, app) => {
+      const data = msg.data.packet as IbcPacket;
+      if (Number(data.timeout.timestamp) < cosmosChain.time) {
+        throw new GenericError('timeout at ' + data.timeout.timestamp);
+      }
+    });
+
+    await ics20Contract.updateMappingPair({
+      localAssetInfo: {
+        token: {
+          contract_addr: airiToken.contractAddress
+        }
+      },
+      localAssetInfoDecimals: 6,
+      denom: airiIbcDenom,
+      remoteDecimals: 6,
+      localChannelId: channel
+    });
+
+    const icsPackage = {
+      amount: ibcTransferAmount,
+      denom: airiIbcDenom,
+      receiver: bobAddress,
+      sender: cosmosSenderAddress,
+      memo: ''
+    };
+    await cosmosChain.ibc.sendPacketReceive({
+      packet: {
+        data: toBinary(icsPackage),
+        ...newPacketData
+      },
+      relayer: cosmosSenderAddress
+    });
   });
+
   it('max amount', () => {
     const amount = 123456789n;
     const decimals = 6;
@@ -947,6 +1066,52 @@ describe('universal-swap', () => {
       universalSwap.toToken = toToken;
       const ibcMemo = universalSwap.getIbcMemo(transferAddress);
       expect(ibcMemo).toEqual(expectedIbcMemo);
+    }
+  );
+
+  it.each([
+    [
+      '1000000000000000000000000000000000000000',
+      flattenTokens.find((t) => t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === 'airight'),
+      channel,
+      true,
+      {
+        ex: {
+          message: `${channel}/${airiIbcDenom} is not enough balance!`
+        }
+      }
+    ],
+    [
+      '100000',
+      flattenTokens.find((t) => t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === 'airight'),
+      channel,
+      false,
+      {
+        ex: {
+          message: `${channel}/${airiIbcDenom} is not enough balance!`
+        }
+      }
+    ]
+  ])(
+    'test-universal-swap-check-balance-channel-ibc-%',
+    async (
+      amount: string,
+      toToken: TokenItemType,
+      channel: string,
+      expectedBalance: boolean,
+      expectedError: object
+    ) => {
+      const universalSwap = new UniversalSwapHandler('', oraichainTokens[0], toToken, 1, amount, 1, ics20Contract);
+      try {
+        const balance = await universalSwap.checkBalanceChannelIbc({
+          source: oraiPort,
+          channel: channel,
+          timeout: 3600
+        });
+        expect(balance).toEqual(expectedBalance);
+      } catch (error) {
+        expect(error).toEqual(expectedError);
+      }
     }
   );
 

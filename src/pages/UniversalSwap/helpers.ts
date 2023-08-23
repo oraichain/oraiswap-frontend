@@ -79,7 +79,7 @@ export class UniversalSwapHandler {
     public fromAmount: number,
     public simulateAmount: string,
     public userSlippage: number,
-    public cwIcs20LatestClient?: CwIcs20LatestInterface
+    public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface
   ) {}
 
   calculateMinReceive(simulateAmount: string, userSlippage: number, decimals: number): Uint128 {
@@ -181,14 +181,9 @@ export class UniversalSwapHandler {
     };
   }
 
-  async checkBalanceChannelIbc(
-    metamaskAddress: string,
-    tronAddress: string,
-    cwIcs20LatestClient?: CwIcs20LatestReadOnlyInterface
-  ) {
+  async checkBalanceChannelIbc(ibcInfo: IBCInfo) {
     const ics20Contract =
       this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
-    const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
     const { balances } = await ics20Contract.channel({
       forward: false,
       id: ibcInfo.channel
@@ -201,16 +196,15 @@ export class UniversalSwapHandler {
       ) {
         const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
         const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
-        const _toAmount = toDisplay(this.simulateAmount, this.toToken.decimals);
+        const _toAmount = toDisplay(this.simulateAmount);
         if (trueBalance < _toAmount) {
           throw generateError(`${ibcInfo.channel}/${this.toToken.denom} is not enough balance!`);
         }
-        return;
       } else {
         // do nothing because currently we dont have any cw20 balance in the channel
       }
     }
-    return;
+    return false;
   }
 
   async swap(): Promise<any> {
@@ -235,7 +229,8 @@ export class UniversalSwapHandler {
     this.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this.toToken.coinGeckoId);
 
     const combinedMsgs = await this.combineMsgs(metamaskAddress, tronAddress);
-    await this.checkBalanceChannelIbc(metamaskAddress, tronAddress);
+    const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
+    await this.checkBalanceChannelIbc(ibcInfo);
 
     // handle sign and broadcast transactions
     const offlineSigner = await window.Keplr.getOfflineSigner(this.fromToken.chainId);
@@ -257,7 +252,8 @@ export class UniversalSwapHandler {
       { from: this.fromToken, to: this.toToken },
       this.fromAmount,
       { metamaskAddress, tronAddress },
-      combinedReceiver
+      combinedReceiver,
+      this.simulateAmount
     );
   }
 

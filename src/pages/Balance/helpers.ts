@@ -6,6 +6,7 @@ import {
   flattenTokens,
   gravityContracts,
   kawaiiTokens,
+  oraichainTokens,
   TokenItemType,
   tokenMap,
   UniversalSwapType
@@ -240,17 +241,60 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
-const getBalanceIBCOraichain = async (to: TokenItemType, tokenQueryClient?: OraiswapTokenReadOnlyInterface) => {
-  if (!to) return { balance: 0 };
-  if (to.contractAddress) {
-    const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, to.contractAddress);
-    const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
-    return { balance: toDisplay(balance, to.decimals) };
+const getBalanceIBCOraichain = async (token: TokenItemType, tokenQueryClient?: OraiswapTokenReadOnlyInterface) => {
+  if (!token) return { balance: 0 };
+  try {
+    if (token.contractAddress) {
+      const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
+      const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
+      return { balance: toDisplay(balance, token.decimals) };
+    }
+    const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, token.denom);
+    return { balance: toDisplay(amount, token.decimals) };
+  } catch (error) {
+    console.log('error: ', error);
   }
-  const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, to.denom);
-  return { balance: toDisplay(amount, to.decimals) };
 };
 
+const checkBalanceIBCOraichain = async (
+  to: TokenItemType,
+  from: TokenItemType,
+  amount: {
+    toAmount: string;
+    fromAmount: number;
+  }
+) => {
+  let tokens;
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) -> ORAI (BSC)
+  if (to.coinGeckoId === from.coinGeckoId) {
+    tokens = oraichainTokens.find((t) => t.coinGeckoId === from.coinGeckoId);
+    if (!tokens) return 0;
+    const { balance } = await getBalanceIBCOraichain(tokens);
+    if (balance < amount.fromAmount) {
+      throw generateError(
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
+      );
+    }
+    return balance;
+  }
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) (fromAmount) -> check AIRI (ORAICHAIN) (toAmount) -> AIRI (BSC)
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) (fromAmount) -> check wTRX (ORAICHAIN) (toAmount) -> wTRX (TRON)
+  tokens = oraichainTokens.filter((t) => t.coinGeckoId === to.coinGeckoId || t.coinGeckoId === from.coinGeckoId);
+  for (const token of tokens) {
+    const { balance } = await getBalanceIBCOraichain(token);
+    if (token.coinGeckoId === to.coinGeckoId && balance < toDisplay(amount.toAmount, to.decimals)) {
+      throw generateError(
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.toAmount}, have ${balance}`
+      );
+    }
+    if (token.coinGeckoId === from.coinGeckoId && balance < amount.fromAmount) {
+      throw generateError(
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
+      );
+    }
+  }
+  return 0;
+};
 export const transferEvmToIBC = async (
   info: {
     from: TokenItemType;
@@ -261,7 +305,8 @@ export const transferEvmToIBC = async (
     metamaskAddress?: string;
     tronAddress?: string;
   },
-  combinedReceiver?: string
+  combinedReceiver?: string,
+  simulateAmount?: string
 ): Promise<any> => {
   const { metamaskAddress, tronAddress } = address;
   const finalTransferAddress = window.Metamask.isTron(info.from.chainId) ? tronAddress : metamaskAddress;
@@ -273,12 +318,11 @@ export const transferEvmToIBC = async (
   }
 
   // check balance ibc wasm
-  const { balance } = await getBalanceIBCOraichain(info.to);
-  if (balance < fromAmount) {
-    throw generateError(
-      `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${fromAmount}, have ${balance}`
-    );
-  }
+  simulateAmount &&
+    (await checkBalanceIBCOraichain(info.to, info.from, {
+      fromAmount,
+      toAmount: simulateAmount
+    }));
 
   await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);
   const result = await window.Metamask.transferToGravity(
