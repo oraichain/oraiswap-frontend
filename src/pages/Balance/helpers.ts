@@ -284,7 +284,10 @@ const checkBalanceIBCOraichain = async (
     const { balance } = await getBalanceIBCOraichain(token);
     if (token.coinGeckoId === to.coinGeckoId && balance < toDisplay(amount.toAmount, to.decimals)) {
       throw generateError(
-        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.toAmount}, have ${balance}`
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${toDisplay(
+          amount.toAmount,
+          to.decimals
+        )}, have ${balance}`
       );
     }
     if (token.coinGeckoId === from.coinGeckoId && balance < amount.fromAmount) {
@@ -318,11 +321,10 @@ export const transferEvmToIBC = async (
   }
 
   // check balance ibc wasm
-  simulateAmount &&
-    (await checkBalanceIBCOraichain(info.to, info.from, {
-      fromAmount,
-      toAmount: simulateAmount
-    }));
+  await checkBalanceIBCOraichain(info.to, info.from, {
+    fromAmount,
+    toAmount: simulateAmount
+  });
 
   await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);
   const result = await window.Metamask.transferToGravity(
