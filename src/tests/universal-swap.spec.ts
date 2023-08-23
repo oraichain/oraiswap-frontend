@@ -15,7 +15,7 @@ import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import Long from 'long';
-import { combineReceiver, findToToken, getDestination } from 'pages/Balance/helpers';
+import { combineReceiver, findToToken, getBalanceIBCOraichain, getDestination } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
 import { UniversalSwapHandler, checkEvmAddress, calculateMinimum } from 'pages/UniversalSwap/helpers';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
@@ -26,6 +26,7 @@ import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-simulate';
 import bech32 from 'bech32';
+import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -40,17 +41,22 @@ describe('universal-swap', () => {
   let cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiAddress).words);
   let ics20Contract;
   let oraiPort;
+  let airiToken;
+
   beforeAll(async () => {
     windowSpy = jest.spyOn(window, 'window', 'get');
 
     ics20Contract = await deployIcs20Token(client, { swap_router_contract: routerContractAddress });
     oraiPort = 'wasm.' + ics20Contract.contractAddress;
     let cosmosPort: string = 'transfer';
-    let airiToken = await deployToken(client, {
+    airiToken = await deployToken(client, {
       decimals: 6,
       symbol: 'AIRI',
       name: 'Airight token',
-      initial_balances: [{ address: ics20Contract.contractAddress, amount: initialBalanceAmount }]
+      initial_balances: [
+        { address: ics20Contract.contractAddress, amount: initialBalanceAmount },
+        { address: process.env.REACT_APP_IBC_WASM_CONTRACT, amount: initialBalanceAmount }
+      ]
     });
     const cosmosChain = new CWSimulateApp({
       chainId: 'cosmoshub-4',
@@ -1114,6 +1120,20 @@ describe('universal-swap', () => {
       }
     }
   );
+
+  it.each([
+    [oraichainTokens.find((t) => t.coinGeckoId === 'airight'), 10000000],
+    [oraichainTokens.find((t) => t.coinGeckoId === 'oraichain-token'), 0]
+  ])('test-universal-swap-check-balance-channel-ibc-%', async (token: TokenItemType, expectedBalance: number) => {
+    windowSpy.mockImplementation(() => ({
+      client: client
+    }));
+    const { balance } = await getBalanceIBCOraichain(
+      token,
+      new OraiswapTokenQueryClient(client, airiToken.contractAddress)
+    );
+    expect(balance).toEqual(expectedBalance);
+  });
 
   describe('checkEvmAddress', () => {
     const testCases = [

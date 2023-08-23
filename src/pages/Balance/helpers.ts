@@ -241,19 +241,18 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
-const getBalanceIBCOraichain = async (token: TokenItemType, tokenQueryClient?: OraiswapTokenReadOnlyInterface) => {
+export const getBalanceIBCOraichain = async (
+  token: TokenItemType,
+  tokenQueryClient?: OraiswapTokenReadOnlyInterface
+) => {
   if (!token) return { balance: 0 };
-  try {
-    if (token.contractAddress) {
-      const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
-      const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
-      return { balance: toDisplay(balance, token.decimals) };
-    }
-    const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, token.denom);
-    return { balance: toDisplay(amount, token.decimals) };
-  } catch (error) {
-    console.log('error: ', error);
+  if (token.contractAddress) {
+    const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
+    const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
+    return { balance: toDisplay(balance, token.decimals) };
   }
+  const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, token.denom);
+  return { balance: toDisplay(amount, token.decimals) };
 };
 
 const checkBalanceIBCOraichain = async (
