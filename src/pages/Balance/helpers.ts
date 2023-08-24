@@ -276,9 +276,9 @@ const checkBalanceIBCOraichain = async (
     }
     return balance;
   }
-  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) (fromAmount) -> check AIRI (ORAICHAIN) (toAmount) -> AIRI (BSC)
-  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) (fromAmount) -> check wTRX (ORAICHAIN) (toAmount) -> wTRX (TRON)
-  tokens = oraichainTokens.filter((t) => t.coinGeckoId === to.coinGeckoId || t.coinGeckoId === from.coinGeckoId);
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN - compare from amount with cw20 / native amount) (fromAmount) -> check AIRI - compare to amount with channel balance (ORAICHAIN) (toAmount) -> AIRI (BSC)
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) - compare from amount with cw20 / native amount) (fromAmount) -> check wTRX - compare to amount with channel balance (ORAICHAIN) (toAmount) -> wTRX (TRON)
+  tokens = oraichainTokens.filter((t) => t.coinGeckoId === from.coinGeckoId);
   for (const token of tokens) {
     const { balance } = await getBalanceIBCOraichain(token);
     if (token.coinGeckoId === to.coinGeckoId && balance < toDisplay(amount.toAmount, to.decimals)) {
