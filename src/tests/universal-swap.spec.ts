@@ -786,9 +786,7 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount }, //osmosis denom
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + IBC_TRANSFER_TIMEOUT)
-                .multiply(1000000000)
-                .toString(),
+              timeoutTimestamp: '0',
               memo: ''
             }
           }
@@ -849,10 +847,7 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount },
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) + IBC_TRANSFER_TIMEOUT)
-                .multiply(1000000000)
-                .toString(),
-              timeoutHeight: undefined,
+              timeoutTimestamp: '0',
               memo: ''
             }
           }
@@ -873,7 +868,7 @@ describe('universal-swap', () => {
           (t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId
         );
         universalSwap.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === toCoingeckoId);
-        const msg = await universalSwap.combineMsgCosmos();
+        const msg = await universalSwap.combineMsgCosmos('0');
         expect(msg).toEqual(expectedTransferMsg);
       }
     );
@@ -1089,45 +1084,27 @@ describe('universal-swap', () => {
   it.each([
     [
       '1000000000000000000000000000000000000000',
-      flattenTokens.find((t) => t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === 'airight'),
+      flattenTokens.find((t) => t.chainId === '0x38' && t.coinGeckoId === 'airight'),
       channel,
-      true,
-      {
-        ex: {
-          message: `${channel}/${airiIbcDenom} is not enough balance!`
-        }
-      }
+      true
     ],
-    [
-      '100000',
-      flattenTokens.find((t) => t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === 'airight'),
-      channel,
-      false,
-      {
-        ex: {
-          message: `${channel}/${airiIbcDenom} is not enough balance!`
-        }
-      }
-    ]
+    ['10', flattenTokens.find((t) => t.chainId === '0x38' && t.coinGeckoId === 'airight'), channel, false]
   ])(
-    'test-universal-swap-check-balance-channel-ibc-%',
-    async (
-      amount: string,
-      toToken: TokenItemType,
-      channel: string,
-      expectedBalance: boolean,
-      expectedError: object
-    ) => {
+    'test-universal-swap-checkBalanceChannelIbc-%',
+    async (amount: string, toToken: TokenItemType, channel: string, willThrow: boolean) => {
       const universalSwap = new UniversalSwapHandler('', oraichainTokens[0], toToken, 1, amount, 1, ics20Contract);
       try {
-        const balance = await universalSwap.checkBalanceChannelIbc({
-          source: oraiPort,
-          channel: channel,
-          timeout: 3600
-        });
-        expect(balance).toEqual(expectedBalance);
+        await universalSwap.checkBalanceChannelIbc(
+          {
+            source: oraiPort,
+            channel: channel,
+            timeout: 3600
+          },
+          toToken
+        );
+        expect(willThrow).toEqual(false);
       } catch (error) {
-        expect(error).toEqual(expectedError);
+        expect(willThrow).toEqual(true);
       }
     }
   );
@@ -1135,7 +1112,7 @@ describe('universal-swap', () => {
   it.each([
     [oraichainTokens.find((t) => t.coinGeckoId === 'airight'), 10000000],
     [oraichainTokens.find((t) => t.coinGeckoId === 'oraichain-token'), 0]
-  ])('test-universal-swap-check-balance-channel-ibc-%', async (token: TokenItemType, expectedBalance: number) => {
+  ])('test-universal-swap-getBalanceIBCOraichain-ibc-%', async (token: TokenItemType, expectedBalance: number) => {
     windowSpy.mockImplementation(() => ({
       client: client
     }));

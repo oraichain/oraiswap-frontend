@@ -255,48 +255,6 @@ export const getBalanceIBCOraichain = async (
   return { balance: toDisplay(amount, token.decimals) };
 };
 
-const checkBalanceIBCOraichain = async (
-  to: TokenItemType,
-  from: TokenItemType,
-  amount: {
-    toAmount: string;
-    fromAmount: number;
-  }
-) => {
-  let tokens;
-  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) -> ORAI (BSC)
-  if (to.coinGeckoId === from.coinGeckoId) {
-    tokens = oraichainTokens.find((t) => t.coinGeckoId === from.coinGeckoId);
-    if (!tokens) return 0;
-    const { balance } = await getBalanceIBCOraichain(tokens);
-    if (balance < amount.fromAmount) {
-      throw generateError(
-        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
-      );
-    }
-    return balance;
-  }
-  // ORAI ( ETH ) -> check ORAI (ORAICHAIN - compare from amount with cw20 / native amount) (fromAmount) -> check AIRI - compare to amount with channel balance (ORAICHAIN) (toAmount) -> AIRI (BSC)
-  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) - compare from amount with cw20 / native amount) (fromAmount) -> check wTRX - compare to amount with channel balance (ORAICHAIN) (toAmount) -> wTRX (TRON)
-  tokens = oraichainTokens.filter((t) => t.coinGeckoId === from.coinGeckoId);
-  for (const token of tokens) {
-    const { balance } = await getBalanceIBCOraichain(token);
-    if (token.coinGeckoId === to.coinGeckoId && balance < toDisplay(amount.toAmount, to.decimals)) {
-      throw generateError(
-        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${toDisplay(
-          amount.toAmount,
-          to.decimals
-        )}, have ${balance}`
-      );
-    }
-    if (token.coinGeckoId === from.coinGeckoId && balance < amount.fromAmount) {
-      throw generateError(
-        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
-      );
-    }
-  }
-  return 0;
-};
 export const transferEvmToIBC = async (
   info: {
     from: TokenItemType;
@@ -318,12 +276,6 @@ export const transferEvmToIBC = async (
   if (!gravityContractAddr || !info.from) {
     throw generateError('No gravity contract addr or no from token');
   }
-
-  // check balance ibc wasm
-  await checkBalanceIBCOraichain(info.to, info.from, {
-    fromAmount,
-    toAmount: simulateAmount
-  });
 
   await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);
   const result = await window.Metamask.transferToGravity(

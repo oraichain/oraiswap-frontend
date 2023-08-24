@@ -20,8 +20,8 @@ import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'li
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import { findToToken, transferEvmToIBC } from 'pages/Balance/helpers';
-import { SwapQuery, Type, generateContractMessages, parseTokenInfo } from 'rest/api';
+import { findToToken, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
+import { SwapQuery, Type, generateContractMessages, getTokenOnOraichain, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 
 /**
@@ -99,7 +99,7 @@ export class UniversalSwapHandler {
    * Combine messages for universal swap token from Oraichain to Cosmos networks(Osmosis | Cosmos-hub).
    * @returns combined messages
    */
-  async combineMsgCosmos(): Promise<EncodeObject[]> {
+  async combineMsgCosmos(timeoutTimestamp?: string): Promise<EncodeObject[]> {
     const ibcInfo: IBCInfo = ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this.originalToToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
@@ -114,7 +114,7 @@ export class UniversalSwapHandler {
         sender: this.sender,
         receiver: toAddress,
         memo: '',
-        timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout)
+        timeoutTimestamp: timeoutTimestamp ?? calculateTimeoutTimestamp(ibcInfo.timeout)
       })
     };
 
@@ -181,7 +181,11 @@ export class UniversalSwapHandler {
     };
   }
 
-  async checkBalanceChannelIbc(ibcInfo: IBCInfo) {
+  buildIbcWasmPairKey(ibcPort: string, ibcChannel: string, denom: string) {
+    return `${ibcPort}/${ibcChannel}/${denom}`;
+  }
+
+  async checkBalanceChannelIbc(ibcInfo: IBCInfo, toToken: TokenItemType) {
     const ics20Contract =
       this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
     const { balances } = await ics20Contract.channel({
@@ -190,21 +194,56 @@ export class UniversalSwapHandler {
     });
 
     for (let balance of balances) {
-      if (
-        'native' in balance &&
-        balance.native.denom === `${ibcInfo.source}/${ibcInfo.channel}/${this.originalToToken.denom}`
-      ) {
-        const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
+      if ('native' in balance) {
+        let pairKey = this.buildIbcWasmPairKey(ibcInfo.source, ibcInfo.channel, toToken.denom);
+        if (toToken.prefix && toToken.contractAddress) {
+          pairKey = this.buildIbcWasmPairKey(
+            ibcInfo.source,
+            ibcInfo.channel,
+            `${toToken.prefix}${toToken.contractAddress}`
+          );
+        }
+        if (pairKey !== balance.native.denom) continue;
+        const pairMapping = await ics20Contract.pairMapping({ key: pairKey });
         const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
-        const _toAmount = toDisplay(this.simulateAmount);
+        const _toAmount = toDisplay(this.simulateAmount, toToken.decimals);
         if (trueBalance < _toAmount) {
-          throw generateError(`${ibcInfo.channel}/${this.originalToToken.denom} is not enough balance!`);
+          throw generateError(`pair key is not enough balance!`);
         }
       } else {
         // do nothing because currently we dont have any cw20 balance in the channel
       }
     }
-    return false;
+  }
+
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN - compare from amount with cw20 / native amount) (fromAmount) -> check AIRI - compare to amount with channel balance (ORAICHAIN) (toAmount) -> AIRI (BSC)
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) - compare from amount with cw20 / native amount) (fromAmount) -> check wTRX - compare to amount with channel balance (ORAICHAIN) (toAmount) -> wTRX (TRON)
+  async checkBalanceIBCOraichain(
+    to: TokenItemType,
+    from: TokenItemType,
+    amount: {
+      toAmount: string;
+      fromAmount: number;
+    }
+  ) {
+    // ORAI ( ETH ) -> check ORAI (ORAICHAIN) -> ORAI (BSC)
+    // no need to check this case because users will swap directly. This case should be impossible because it is only called when transferring from evm to other networks
+    if (from.chainId === 'Oraichain' && to.chainId === from.chainId) return;
+    // always check from token in ibc wasm should have enough tokens to swap / send to destination
+    const token = getTokenOnOraichain(from.coinGeckoId);
+    if (!token) return;
+    const { balance } = await getBalanceIBCOraichain(token);
+    if (balance < amount.fromAmount) {
+      throw generateError(
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
+      );
+    }
+    // if to token is evm, then we need to evaluate channel state balance of ibc wasm
+    if (to.chainId === '0x01' || to.chainId === '0x38' || to.chainId === '0x2b6653dc') {
+      const ibcInfo: IBCInfo | undefined = ibcInfos[getTokenOnOraichain(from.coinGeckoId)?.chainId][to.chainId];
+      if (!ibcInfo) throw generateError('IBC Info error when checking ibc balance');
+      await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
+    }
   }
 
   async swap(): Promise<any> {
@@ -231,7 +270,7 @@ export class UniversalSwapHandler {
 
     const combinedMsgs = await this.combineMsgs(metamaskAddress, tronAddress);
     const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
-    await this.checkBalanceChannelIbc(ibcInfo);
+    await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
 
     // handle sign and broadcast transactions
     const offlineSigner = await window.Keplr.getOfflineSigner(this.originalFromToken.chainId);
@@ -249,6 +288,10 @@ export class UniversalSwapHandler {
   }
 
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
+    await this.checkBalanceIBCOraichain(this.originalToToken, this.originalFromToken, {
+      fromAmount: this.fromAmount,
+      toAmount: this.simulateAmount
+    });
     return transferEvmToIBC(
       { from: this.originalFromToken, to: this.originalToToken },
       this.fromAmount,
