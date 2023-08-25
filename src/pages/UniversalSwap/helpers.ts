@@ -23,6 +23,7 @@ import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } fro
 import { findToToken, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
 import { SwapQuery, Type, generateContractMessages, getTokenOnOraichain, parseTokenInfo } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
+import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 
 /**
  * Get transfer token fee when universal swap
@@ -224,7 +225,8 @@ export class UniversalSwapHandler {
     amount: {
       toAmount: string;
       fromAmount: number;
-    }
+    },
+    tokenQueryClient?: OraiswapTokenReadOnlyInterface
   ) {
     // ORAI ( ETH ) -> check ORAI (ORAICHAIN) -> ORAI (BSC)
     // no need to check this case because users will swap directly. This case should be impossible because it is only called when transferring from evm to other networks
@@ -232,7 +234,7 @@ export class UniversalSwapHandler {
     // always check from token in ibc wasm should have enough tokens to swap / send to destination
     const token = getTokenOnOraichain(from.coinGeckoId);
     if (!token) return;
-    const { balance } = await getBalanceIBCOraichain(token);
+    const { balance } = await getBalanceIBCOraichain(token, tokenQueryClient);
     if (balance < amount.fromAmount) {
       throw generateError(
         `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
@@ -240,7 +242,7 @@ export class UniversalSwapHandler {
     }
     // if to token is evm, then we need to evaluate channel state balance of ibc wasm
     if (to.chainId === '0x01' || to.chainId === '0x38' || to.chainId === '0x2b6653dc') {
-      const ibcInfo: IBCInfo | undefined = ibcInfos[getTokenOnOraichain(from.coinGeckoId)?.chainId][to.chainId];
+      const ibcInfo: IBCInfo | undefined = ibcInfos['Oraichain'][to.chainId];
       if (!ibcInfo) throw generateError('IBC Info error when checking ibc balance');
       await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
     }

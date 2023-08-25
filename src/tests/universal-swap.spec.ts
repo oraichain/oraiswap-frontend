@@ -1114,7 +1114,7 @@ describe('universal-swap', () => {
     [oraichainTokens.find((t) => t.coinGeckoId === 'oraichain-token'), 0]
   ])('test-universal-swap-getBalanceIBCOraichain-ibc-%', async (token: TokenItemType, expectedBalance: number) => {
     windowSpy.mockImplementation(() => ({
-      client: client
+      client
     }));
     const { balance } = await getBalanceIBCOraichain(
       token,
@@ -1122,6 +1122,52 @@ describe('universal-swap', () => {
     );
     expect(balance).toEqual(expectedBalance);
   });
+
+  it.each([
+    [
+      oraichainTokens.find((t) => t.coinGeckoId === 'oraichain-token'), // ORAI (ORAICHAIN)
+      oraichainTokens.find((t) => t.coinGeckoId === 'airight'), // AIRIGHT (ORAICHAIN)
+      0,
+      '0',
+      false
+    ],
+    [
+      flattenTokens.find((t) => t.coinGeckoId === 'oraichain-token' && t.chainId === '0x01'), // ORAI (ETH)
+      flattenTokens.find((t) => t.coinGeckoId === 'oraichain-token' && t.chainId === '0x38'), // ORAI (BSC)
+      10000000,
+      '10000000',
+      true
+    ],
+    [
+      flattenTokens.find((t) => t.coinGeckoId === 'oraichain-token' && t.chainId === '0x01'), // ORAI (ETH)
+      flattenTokens.find((t) => t.coinGeckoId === 'airight' && t.chainId === '0x38'), // AIRIGHT (BSC)
+      10000000,
+      '10000000',
+      false
+    ]
+  ])(
+    'test-universal-swap-checkBalanceIBCOraichain-ibc-%',
+    async (from: TokenItemType, to: TokenItemType, fromAmount: number, toAmount: string, willThrow: boolean) => {
+      windowSpy.mockImplementation(() => ({
+        client
+      }));
+      const universalSwap = new UniversalSwapHandler('', from, to, fromAmount, toAmount, 1, ics20Contract);
+      try {
+        await universalSwap.checkBalanceIBCOraichain(
+          from,
+          to,
+          {
+            toAmount: toAmount,
+            fromAmount: fromAmount
+          },
+          new OraiswapTokenQueryClient(client, airiToken.contractAddress)
+        );
+        expect(willThrow).toEqual(false);
+      } catch (error) {
+        expect(willThrow).toEqual(true);
+      }
+    }
+  );
 
   describe('checkEvmAddress', () => {
     const testCases = [
