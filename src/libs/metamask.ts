@@ -155,8 +155,21 @@ export default class Metamask {
       fromAmount // increase allowance only take display form as input
     );
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
+    const routerV2Addr = await gravityContract.swapRouter();
     let result: ethers.ContractTransaction;
-    // native bnb case when from token contract addr is empty, then we bridge from native
+
+    let fromTokenSpender = gravityContractAddr;
+    // in this case, we wont use proxy contract but uniswap router instead because our proxy does not support swap tokens to native ETH.
+    // approve uniswap router first before swapping because it will use transfer from to swap fromToken
+    if (fromToken.contractAddress && !toTokenContractAddr) fromTokenSpender = routerV2Addr;
+    await window.Metamask.checkOrIncreaseAllowance(
+      fromToken,
+      checkSumAddress,
+      fromTokenSpender,
+      fromAmount // increase allowance only take display form as input
+    );
+
+    // native bnb / eth case when from token contract addr is empty, then we bridge from native
     if (!fromToken.contractAddress) {
       result = await gravityContract.bridgeFromETH(
         ethers.utils.getAddress(toTokenContractAddr),
@@ -165,18 +178,9 @@ export default class Metamask {
         { value: toAmount(fromAmount, fromToken.decimals).toString() }
       );
     } else if (!toTokenContractAddr) {
-      const routerV2Addr = await gravityContract.swapRouter();
       const routerV2 = IUniswapV2Router02__factory.connect(routerV2Addr, this.getSigner());
       // the route is with weth or wbnb, then the uniswap router will automatically convert and transfer native eth / bnb back
       const evmRoute = getEvmSwapRoute(fromToken.chainId, fromToken.contractAddress, toTokenContractAddr);
-
-      // approve uniswap router first before swapping because it will use transfer from to swap fromToken
-      await window.Metamask.checkOrIncreaseAllowance(
-        fromToken,
-        checkSumAddress,
-        routerV2Addr,
-        fromAmount // increase allowance only take display form as input
-      );
 
       result = await routerV2.swapExactTokensForETH(
         toAmount(fromAmount, fromToken.decimals).toString(),

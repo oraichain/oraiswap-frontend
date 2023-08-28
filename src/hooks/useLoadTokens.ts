@@ -148,9 +148,7 @@ async function loadEvmEntries(
     entries.push([nativeEvmToken.denom, nativeBalance.toString()]);
     return entries;
   } catch (error) {
-    if (!retryCount || retryCount >= EVM_BALANCE_RETRY_COUNT) throw generateError('Cannot query EVM balance');
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return loadEvmEntries(address, chain, multicallCustomContractAddress, retryCount + 1);
+    throw generateError('Cannot query EVM balance');
   }
 }
 
