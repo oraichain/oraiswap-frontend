@@ -49,7 +49,7 @@ const SwapComponent: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [searchTokenName, setSearchTokenName] = useState('');
   const currentPair = useSelector(selectCurrentToken);
 
@@ -107,15 +107,19 @@ const SwapComponent: React.FC<{
     : BigInt(0);
   const toTokenBalance = originalToToken ? BigInt(amounts[originalToToken.denom] ?? '0') + subAmountTo : BigInt(0);
 
-  const taxRate = useTaxRate()
-  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate('simulate-data', fromTokenInfoData, toTokenInfoData)
-  const { toAmountToken: averageRatio } = useSimulate('simulate-average-data', fromTokenInfoData, toTokenInfoData, 1)
+  const taxRate = useTaxRate();
+  const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
+    'simulate-data',
+    fromTokenInfoData,
+    toTokenInfoData
+  );
+  const { toAmountToken: averageRatio } = useSimulate('simulate-average-data', fromTokenInfoData, toTokenInfoData, 1);
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken])
+  }, [fromToken, toToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -135,7 +139,11 @@ const SwapComponent: React.FC<{
         simulateData.amount,
         userSlippage
       );
-      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
+      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
+        metamaskAddress,
+        tronAddress,
+        oraiAddress
+      });
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,
         originalFromToken,
@@ -176,9 +184,7 @@ const SwapComponent: React.FC<{
   );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount
-    ? calculateMinimum(simulateData.amount, userSlippage)
-    : '0';
+  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>
