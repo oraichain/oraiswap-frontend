@@ -18,6 +18,7 @@ import { chainInfos, CustomChainInfo, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
 import { EVM_BALANCE_RETRY_COUNT } from 'config/constants';
+import { isEvmNetworkNativeSwapSupported } from 'rest/api';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -106,9 +107,16 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
   dispatch(updateAmounts(amountDetails));
 }
 
-async function loadNativeEvmBalance(address: string) {
-  const client = new ethers.providers.Web3Provider(window.ethereum);
-  return client.getBalance(address);
+async function loadNativeEvmBalance(address: string, chain: CustomChainInfo) {
+  try {
+    const client = new ethers.providers.StaticJsonRpcProvider(chain.rpc, Number(chain.chainId));
+    const network = await client.getNetwork();
+    const balance = await client.getBalance(address);
+    console.log('window ethereum network with balance: ', network.chainId, balance.toString());
+    return balance;
+  } catch (error) {
+    console.log('error load native evm balance: ', error);
+  }
 }
 
 async function loadEvmEntries(
@@ -119,7 +127,9 @@ async function loadEvmEntries(
 ): Promise<[string, string][]> {
   try {
     const tokens = evmTokens.filter((t) => t.chainId === chain.chainId && t.contractAddress);
-    const nativeEvmToken = evmTokens.find((t) => !t.contractAddress);
+    const nativeEvmToken = evmTokens.find(
+      (t) => !t.contractAddress && isEvmNetworkNativeSwapSupported(chain.chainId) && chain.chainId === t.chainId
+    );
     if (!tokens.length) return [];
     const multicall = new Multicall({
       nodeUrl: chain.rpc,
@@ -140,15 +150,19 @@ async function loadEvmEntries(
     }));
 
     const results: ContractCallResults = await multicall.call(input);
-    const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address) : 0;
+    const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address, chain) : 0;
     let entries: [string, string][] = tokens.map((token) => {
       const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
       return [token.denom, amount];
     });
-    entries.push([nativeEvmToken.denom, nativeBalance.toString()]);
+    if (nativeEvmToken) entries.push([nativeEvmToken.denom, nativeBalance.toString()]);
     return entries;
   } catch (error) {
-    throw generateError('Cannot query EVM balance');
+    console.log('error querying EVM balance: ', error);
+    let retry = retryCount ? retryCount + 1 : 1;
+    if (retry >= EVM_BALANCE_RETRY_COUNT) throw generateError(`Cannot query EVM balance with error: ${error}`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return loadEvmEntries(address, chain, multicallCustomContractAddress, retry);
   }
 }
 
