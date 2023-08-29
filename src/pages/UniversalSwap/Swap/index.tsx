@@ -386,7 +386,7 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: toDisplay(minimumReceive, fromTokenInfoData?.decimals, toTokenInfoData?.decimals).toFixed(
+                amount: toDisplay(minimumReceive, originalToToken?.decimals, toTokenInfoData?.decimals).toFixed(
                   truncDecimals
                 ),
                 denom: toTokenInfoData?.symbol
