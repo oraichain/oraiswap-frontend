@@ -29,7 +29,7 @@ import {
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
-import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import { CoinGeckoId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
 import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
@@ -479,14 +479,21 @@ export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: str
 
 export function getEvmSwapRoute(
   chainId: string,
-  fromContractAddr: string,
-  toContractAddr: string
+  fromContractAddr?: string,
+  toContractAddr?: string
 ): string[] | undefined {
+  if (!isEvmNetworkNativeSwapSupported(chainId as EvmChainId)) return undefined;
+  if (!fromContractAddr && !toContractAddr) return undefined;
   const chainRoutes = swapEvmRoutes[chainId];
-  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromContractAddr, toContractAddr)];
+  const fromAddr = fromContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
+  const toAddr = toContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
+
+  // in case from / to contract addr is empty aka native eth or bnb without contract addr then we fallback to swap route with wrapped token
+  // because uniswap & pancakeswap do not support simulating with native directly
+  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromAddr, toContractAddr)];
   if (route) return route;
   // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
-  route = chainRoutes[buildSwapRouterKey(toContractAddr, fromContractAddr)];
+  route = chainRoutes[buildSwapRouterKey(toAddr, fromContractAddr)];
   if (route) {
     return [].concat(route).reverse();
   }
@@ -509,8 +516,11 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
     const outs = await swapRouterV2.getAmountsOut(amount, route);
+    let simulateAmount = outs.slice(-1)[0].toString();
     return {
-      amount: outs.slice(-1)[0].toString() // get the final out amount, which is the token out amount we want
+      // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
+      // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
+      amount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
@@ -521,6 +531,18 @@ export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
   switch (coingeckoId) {
     case 'wbnb':
     case 'weth':
+    case 'binancecoin':
+    case 'ethereum':
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function isEvmNetworkNativeSwapSupported(chainId: NetworkChainId) {
+  switch (chainId) {
+    case '0x01':
+    case '0x38':
       return true;
     default:
       return false;
@@ -539,7 +561,7 @@ export function isEvmSwappable(data: {
   // cant swap on evm if chain id is not eth or bsc
   if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
   // if the tokens do not have contract addresses then we skip
-  if (!fromContractAddr || !toContractAddr) return false;
+  // if (!fromContractAddr || !toContractAddr) return false;
   // only swappable if there's a route to swap from -> to
   if (!getEvmSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
   return true;

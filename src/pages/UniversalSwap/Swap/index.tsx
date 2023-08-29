@@ -22,12 +22,19 @@ import {
   fetchTokenInfos,
   getTokenOnOraichain,
   getTokenOnSpecificChainId,
+  isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { UniversalSwapHandler, checkEvmAddress, calculateMinimum, filterTokens, SwapDirection } from '../helpers';
+import {
+  UniversalSwapHandler,
+  checkEvmAddress,
+  calculateMinimum,
+  filterNonPoolEvmTokens,
+  SwapDirection
+} from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -113,8 +120,16 @@ const SwapComponent: React.FC<{
     ? tokenMap[toTokenDenom]
     : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(originalFromToken.prefix + originalFromToken.contractAddress);
-  const toTokenFee = useTokenFee(originalToToken.prefix + originalToToken.contractAddress);
+  const fromTokenFee = useTokenFee(
+    originalFromToken.prefix + originalFromToken.contractAddress,
+    fromToken.chainId,
+    toToken.chainId
+  );
+  const toTokenFee = useTokenFee(
+    originalToToken.prefix + originalToToken.contractAddress,
+    fromToken.chainId,
+    toToken.chainId
+  );
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -129,26 +144,24 @@ const SwapComponent: React.FC<{
 
   // process filter from & to tokens
   useEffect(() => {
-    const filteredToTokens = filterTokens(
-      fromToken.chainId,
-      fromToken.coinGeckoId,
-      fromTokenDenom,
+    const filteredToTokens = filterNonPoolEvmTokens(
+      originalFromToken.chainId,
+      originalFromToken.coinGeckoId,
+      originalFromToken.denom,
       searchTokenName,
       SwapDirection.To
     );
     setFilteredToTokens(filteredToTokens);
 
-    const filteredFromTokens = filterTokens(
-      toToken.chainId,
-      toToken.coinGeckoId,
-      toTokenDenom,
+    const filteredFromTokens = filterNonPoolEvmTokens(
+      originalToToken.chainId,
+      originalToToken.coinGeckoId,
+      originalToToken.denom,
       searchTokenName,
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-
-    // TODO: need to automatically update from / to token to the correct swappable one when clicking the swap button
-  }, [fromToken, toToken]);
+  }, [fromTokenDenom, toTokenDenom]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
@@ -172,20 +185,6 @@ const SwapComponent: React.FC<{
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
-
-  useEffect(() => {
-    // special case for tokens having no pools on Oraichain. When original from token is not swappable, then we switch to an alternative token on the same chain as to token
-    if (isSupportedNoPoolSwapEvm(toToken.coinGeckoId) && !isSupportedNoPoolSwapEvm(fromToken.coinGeckoId)) {
-      const fromTokenSameToChainId = getTokenOnSpecificChainId(fromToken.coinGeckoId, toToken.chainId);
-      if (!fromTokenSameToChainId) {
-        const sameChainIdTokens = evmTokens.find((t) => t.chainId === toToken.chainId);
-        if (!sameChainIdTokens) throw Error('Impossible case!. An evm chain should at least have one token');
-        setSwapTokens([sameChainIdTokens.denom, toToken.denom]);
-        return;
-      }
-      setSwapTokens([fromTokenSameToChainId.denom, toToken.denom]);
-    }
-  }, [fromToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -312,6 +311,10 @@ const SwapComponent: React.FC<{
           <img
             src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
             onClick={() => {
+              // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+              // because non-evm token cannot be swapped to evm token with no Oraichain pool
+              if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId))
+                return;
               setSwapTokens([toTokenDenom, fromTokenDenom]);
               setSwapAmount([toAmountToken, fromAmountToken]);
             }}
@@ -379,7 +382,7 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: toDisplay(minimumReceive, fromTokenInfoData?.decimals, toTokenInfoData?.decimals).toFixed(
+                amount: toDisplay(minimumReceive, originalToToken?.decimals, toTokenInfoData?.decimals).toFixed(
                   truncDecimals
                 ),
                 denom: toTokenInfoData?.symbol

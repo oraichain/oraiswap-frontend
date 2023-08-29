@@ -2,9 +2,11 @@ import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
 import { toAmount, toDisplay } from './utils';
-import { Bridge__factory, IERC20Upgradeable__factory } from 'types/typechain-types';
+import { Bridge__factory, IERC20Upgradeable__factory, IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
+import { getEvmSwapRoute } from 'rest/api';
+import { UNISWAP_ROUTER_DEADLINE } from 'config/constants';
 
 type TransferToGravityResult = {
   transactionHash: string;
@@ -152,15 +154,50 @@ export default class Metamask {
       gravityContractAddr,
       fromAmount // increase allowance only take display form as input
     );
-    console.log('destination: ', destination);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
-    const result = await gravityContract.bridgeFromERC20(
-      ethers.utils.getAddress(fromToken.contractAddress),
-      ethers.utils.getAddress(toTokenContractAddr),
-      toAmount(fromAmount, fromToken.decimals).toString(),
-      this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
-      destination
+    const routerV2Addr = await gravityContract.swapRouter();
+    let result: ethers.ContractTransaction;
+
+    let fromTokenSpender = gravityContractAddr;
+    // in this case, we wont use proxy contract but uniswap router instead because our proxy does not support swap tokens to native ETH.
+    // approve uniswap router first before swapping because it will use transfer from to swap fromToken
+    if (fromToken.contractAddress && !toTokenContractAddr) fromTokenSpender = routerV2Addr;
+    await window.Metamask.checkOrIncreaseAllowance(
+      fromToken,
+      checkSumAddress,
+      fromTokenSpender,
+      fromAmount // increase allowance only take display form as input
     );
+
+    // native bnb / eth case when from token contract addr is empty, then we bridge from native
+    if (!fromToken.contractAddress) {
+      result = await gravityContract.bridgeFromETH(
+        ethers.utils.getAddress(toTokenContractAddr),
+        this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
+        destination,
+        { value: toAmount(fromAmount, fromToken.decimals).toString() }
+      );
+    } else if (!toTokenContractAddr) {
+      const routerV2 = IUniswapV2Router02__factory.connect(routerV2Addr, this.getSigner());
+      // the route is with weth or wbnb, then the uniswap router will automatically convert and transfer native eth / bnb back
+      const evmRoute = getEvmSwapRoute(fromToken.chainId, fromToken.contractAddress, toTokenContractAddr);
+
+      result = await routerV2.swapExactTokensForETH(
+        toAmount(fromAmount, fromToken.decimals).toString(),
+        this.calculateEvmSwapSlippage(simulateAmount, slippage),
+        evmRoute,
+        checkSumAddress,
+        new Date().getTime() + UNISWAP_ROUTER_DEADLINE
+      );
+    } else {
+      result = await gravityContract.bridgeFromERC20(
+        ethers.utils.getAddress(fromToken.contractAddress),
+        ethers.utils.getAddress(toTokenContractAddr),
+        toAmount(fromAmount, fromToken.decimals).toString(),
+        this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
+        destination
+      );
+    }
     await result.wait();
     return { transactionHash: result.hash };
   }
@@ -205,6 +242,7 @@ export default class Metamask {
     amount: number
   ): Promise<TransferToGravityResult> {
     // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
+    if (!token.contractAddress) return;
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
     const allowance = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm

@@ -96,7 +96,7 @@ declare global {
     ready: Bool; //Initialize to false, true after user authorization
     request: ({ method }: { method: 'tron_requestAccounts' }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
     sunWeb: sunWeb;
-    tronWeb: tronWeb;
+    tronWeb: _TronWeb;
   }
 
   declare class Wallet {
@@ -109,7 +109,7 @@ declare global {
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
-    tronWeb: TronWeb;
+    tronWeb: _TronWeb;
     tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;
     ethereumX: MetaMaskEthereumProvider;
