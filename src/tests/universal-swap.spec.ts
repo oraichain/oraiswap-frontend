@@ -461,12 +461,30 @@ describe('universal-swap', () => {
         }
       }
     }));
-    let result = await universalSwap.getUniversalSwapToAddress('0x01');
+    let result = await universalSwap.getUniversalSwapToAddress('0x01', {
+      metamaskAddress: undefined,
+      tronAddress: undefined,
+      oraiAddress: undefined
+    });
     expect(result).toEqual('0x1234');
-    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
+    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4', {
+      metamaskAddress: undefined,
+      tronAddress: undefined,
+      oraiAddress: undefined
+    });
     expect(result).toEqual('orai1234');
-    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
-    expect(result).toEqual('0x1234');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc', {
+      tronAddress: 'TPwTVfDDvmWSawsP7Ki1t3ecSBmaFeMMXc'
+    });
+    expect(result).toEqual('0x993d06fc97f45f16e4805883b98a6c20bab54964');
+    result = await universalSwap.getUniversalSwapToAddress('0x01', {
+      metamaskAddress: '0x993d06fc97f45f16e4805883b98a6c20bab54964'
+    });
+    expect(result).toEqual('0x993d06fc97f45f16e4805883b98a6c20bab54964');
+    result = await universalSwap.getUniversalSwapToAddress('Oraichain', {
+      oraiAddress: 'orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g'
+    });
+    expect(result).toEqual('orai1g4h64yjt0fvzv5v2j8tyfnpe5kmnetejvfgs7g');
     windowSpy.mockImplementation(() => ({
       Metamask: {
         getEthAddress: () => {
@@ -485,7 +503,11 @@ describe('universal-swap', () => {
       },
       tronLink: {}
     }));
-    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc', {
+      metamaskAddress: undefined,
+      tronAddress: undefined,
+      oraiAddress: undefined
+    });
     expect(result).toEqual('0x8754032ac7966a909e2e753308df56bb08dabd69');
   });
 
