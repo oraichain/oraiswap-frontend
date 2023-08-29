@@ -514,8 +514,11 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
     const outs = await swapRouterV2.getAmountsOut(amount, route);
+    let simulateAmount = outs.slice(-1)[0].toString();
     return {
-      amount: outs.slice(-1)[0].toString() // get the final out amount, which is the token out amount we want
+      // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
+      // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
+      amount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
