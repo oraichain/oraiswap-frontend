@@ -146,6 +146,7 @@ export default class Metamask {
       metamaskAddress,
       tronAddress
     });
+    const finalFromAmount = toAmount(fromAmount, fromToken.decimals).toString();
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
     const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
@@ -160,7 +161,7 @@ export default class Metamask {
       fromToken,
       checkSumAddress,
       fromTokenSpender,
-      fromAmount // increase allowance only take display form as input
+      finalFromAmount // increase allowance only take display form as input
     );
 
     // native bnb / eth case when from token contract addr is empty, then we bridge from native
@@ -169,7 +170,7 @@ export default class Metamask {
         ethers.utils.getAddress(toTokenContractAddr),
         this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
         destination,
-        { value: toAmount(fromAmount, fromToken.decimals).toString() }
+        { value: finalFromAmount }
       );
     } else if (!toTokenContractAddr) {
       const routerV2 = IUniswapV2Router02__factory.connect(routerV2Addr, this.getSigner());
@@ -177,7 +178,7 @@ export default class Metamask {
       const evmRoute = getEvmSwapRoute(fromToken.chainId, fromToken.contractAddress, toTokenContractAddr);
 
       result = await routerV2.swapExactTokensForETH(
-        toAmount(fromAmount, fromToken.decimals).toString(),
+        finalFromAmount,
         this.calculateEvmSwapSlippage(simulateAmount, slippage),
         evmRoute,
         checkSumAddress,
@@ -187,7 +188,7 @@ export default class Metamask {
       result = await gravityContract.bridgeFromERC20(
         ethers.utils.getAddress(fromToken.contractAddress),
         ethers.utils.getAddress(toTokenContractAddr),
-        toAmount(fromAmount, fromToken.decimals).toString(),
+        finalFromAmount,
         this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
         destination
       );
@@ -198,12 +199,11 @@ export default class Metamask {
 
   public async transferToGravity(
     token: TokenItemType,
-    amountVal: number,
+    amountVal: string,
     from: string | null,
     to: string
   ): Promise<TransferToGravityResult> {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
-    const balance = toAmount(amountVal, token.decimals);
     console.log('gravity tron address: ', gravityContractAddr);
 
     if (this.isTron(token.chainId)) {
@@ -215,7 +215,7 @@ export default class Metamask {
           [
             { type: 'address', value: token.contractAddress },
             { type: 'string', value: to },
-            { type: 'uint256', value: balance.toString() }
+            { type: 'uint256', value: amountVal.toString() }
           ],
           tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
@@ -223,7 +223,7 @@ export default class Metamask {
       await this.switchNetwork(token.chainId);
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
-      const result = await gravityContract.sendToCosmos(token.contractAddress, to, balance, { from });
+      const result = await gravityContract.sendToCosmos(token.contractAddress, to, amountVal, { from });
       await result.wait();
       return { transactionHash: result.hash };
     }
@@ -233,12 +233,11 @@ export default class Metamask {
     token: TokenItemType,
     owner: string,
     spender: string,
-    amount: number
+    amount: string
   ): Promise<TransferToGravityResult> {
     // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
     if (!token.contractAddress) return;
     const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
-    const allowance = toAmount(amount, token.decimals);
     // using static rpc for querying both tron and evm
     const tokenContract = IERC20Upgradeable__factory.connect(
       token.contractAddress,
@@ -246,7 +245,7 @@ export default class Metamask {
     );
     const currentAllowance = await tokenContract.allowance(ownerHex, spender);
 
-    if (currentAllowance.toBigInt() >= allowance) return;
+    if (currentAllowance.toString() >= amount) return;
 
     if (this.isTron(token.chainId)) {
       if (Metamask.checkTron())
@@ -256,7 +255,7 @@ export default class Metamask {
           {},
           [
             { type: 'address', value: spender },
-            { type: 'uint256', value: allowance.toString() }
+            { type: 'uint256', value: amount.toString() }
           ],
           ownerHex
         );
@@ -264,7 +263,7 @@ export default class Metamask {
       // using window.ethereum for signing
       await this.switchNetwork(token.chainId);
       const tokenContract = IERC20Upgradeable__factory.connect(token.contractAddress, this.getSigner());
-      const result = await tokenContract.approve(spender, allowance, { from: ownerHex });
+      const result = await tokenContract.approve(spender, amount, { from: ownerHex });
       await result.wait();
       return { transactionHash: result.hash };
     }

@@ -263,8 +263,9 @@ export const transferEvmToIBC = async (
     throw generateError('No gravity contract addr or no from token');
   }
 
-  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, fromAmount);
-  const result = await window.Metamask.transferToGravity(from, fromAmount, finalTransferAddress, combinedReceiver);
+  const finalFromAmount = toAmount(fromAmount, from.decimals).toString();
+  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, finalFromAmount);
+  const result = await window.Metamask.transferToGravity(from, finalFromAmount, finalTransferAddress, combinedReceiver);
   return result;
 };
 

@@ -376,6 +376,7 @@ export class UniversalSwapHandler {
     return result;
   }
 
+  // transfer evm to ibc
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     if (!metamaskAddress && !tronAddress) throw Error('Cannot call evm swap if the evm address is empty');
 
@@ -398,7 +399,7 @@ export class UniversalSwapHandler {
       slippage: this._userSlippage,
       destination: '' // if to token already on same net with from token then no destination is needed
     };
-
+    await window.Metamask.switchNetwork(this._fromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
