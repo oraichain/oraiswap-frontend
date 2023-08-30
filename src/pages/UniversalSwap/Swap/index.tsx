@@ -142,7 +142,6 @@ const SwapComponent: React.FC<{
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
         tronAddress,
-        oraiAddress
       });
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,

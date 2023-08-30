@@ -151,7 +151,7 @@ export class UniversalSwapHandler {
 
   async getUniversalSwapToAddress(
     toChainId: NetworkChainId,
-    address: { metamaskAddress?: string; tronAddress?: string; oraiAddress?: string }
+    address: { metamaskAddress?: string; tronAddress?: string }
   ): Promise<string> {
     // evm based
     if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x38') {
@@ -164,7 +164,7 @@ export class UniversalSwapHandler {
         return tronToEthAddress(window.tronWeb.defaultAddress.base58);
       throw 'Cannot find tron web to nor tron address to send to Tron network';
     }
-    return address.oraiAddress ?? (await window.Keplr.getKeplrAddr(toChainId));
+    return window.Keplr.getKeplrAddr(toChainId);
   }
 
   /**
