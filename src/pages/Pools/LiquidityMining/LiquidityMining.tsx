@@ -57,8 +57,6 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   apr,
   pairInfoData
 }) => {
-  console.log({ rewardInfoFirst, lpTokenInfoData, lpTokenBalance });
-
   const [actionLoading, setActionLoading] = useState(false);
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>();
   const [address] = useConfigReducer('address');
@@ -66,7 +64,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [cachedReward] = useConfigReducer('rewardPools');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-  const reward = cachedReward.find(e => e?.liquidity_token === pairInfoData?.liquidity_token)?.reward || ['ORAIX'];
+  const reward = cachedReward?.find(e => e?.liquidity_token === pairInfoData?.liquidity_token)?.reward || ['ORAIX'];
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
       // let interval = setInterval(() => setNewReward(), 1000);

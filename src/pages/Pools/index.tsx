@@ -70,7 +70,7 @@ const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amou
 const PairBox = memo<PairInfoData & { apr: number; theme?: string, cachedReward?: RewardPoolType[] }>(({ pair, amount, apr, theme, cachedReward }) => {
   const navigate = useNavigate();
   const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
-  const reward = cachedReward.find(e => e?.liquidity_token === pair?.liquidity_token)?.reward || ['ORAIX'];
+  const reward = cachedReward?.find(e => e?.liquidity_token === pair?.liquidity_token)?.reward || ['ORAIX'];
   if (!token1 || !token2) return null;
 
   return (

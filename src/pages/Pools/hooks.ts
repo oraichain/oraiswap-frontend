@@ -90,7 +90,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
     if (!cachedReward?.length || cachedReward?.length < pairs?.length) {
       fetchReward();
     }
-  }, []);
+  }, [pairs]);
 
   return [cachedReward];
 };
