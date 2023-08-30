@@ -399,6 +399,7 @@ export class UniversalSwapHandler {
       slippage: this._userSlippage,
       destination: '' // if to token already on same net with from token then no destination is needed
     };
+    // has to switch network to the correct chain id on evm since users can swap between network tokens
     await window.Metamask.switchNetwork(this._fromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 

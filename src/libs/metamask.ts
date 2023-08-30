@@ -25,7 +25,8 @@ export default class Metamask {
   }
 
   public getSigner() {
-    if (!this.provider) this.provider = new ethers.providers.Web3Provider(window.ethereum);
+    // used 'any' to fix the following bug: https://github.com/ethers-io/ethers.js/issues/1107 -> https://github.com/Geo-Web-Project/cadastre/pull/220/files
+    if (!this.provider) this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
     return this.provider.getSigner();
   }
 
@@ -220,7 +221,7 @@ export default class Metamask {
           tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
     } else if (Metamask.checkEthereum()) {
-      await this.switchNetwork(token.chainId);
+      // if you call this function on evm, you have to switch network before calling. Otherwise, unexpected errors may happen
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
       const result = await gravityContract.sendToCosmos(token.contractAddress, to, amountVal, { from });
@@ -261,7 +262,7 @@ export default class Metamask {
         );
     } else if (Metamask.checkEthereum()) {
       // using window.ethereum for signing
-      await this.switchNetwork(token.chainId);
+      // if you call this function on evm, you have to switch network before calling. Otherwise, unexpected errors may happen
       const tokenContract = IERC20Upgradeable__factory.connect(token.contractAddress, this.getSigner());
       const result = await tokenContract.approve(spender, amount, { from: ownerHex });
       await result.wait();
