@@ -216,7 +216,7 @@ export default class Metamask {
           [
             { type: 'address', value: token.contractAddress },
             { type: 'string', value: to },
-            { type: 'uint256', value: amountVal.toString() }
+            { type: 'uint256', value: amountVal }
           ],
           tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
@@ -256,7 +256,7 @@ export default class Metamask {
           {},
           [
             { type: 'address', value: spender },
-            { type: 'uint256', value: amount.toString() }
+            { type: 'uint256', value: amount }
           ],
           ownerHex
         );
