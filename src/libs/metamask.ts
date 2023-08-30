@@ -148,12 +148,6 @@ export default class Metamask {
     });
     const gravityContractAddr = ethers.utils.getAddress(gravityContracts[fromToken.chainId]);
     const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
-    await window.Metamask.checkOrIncreaseAllowance(
-      fromToken,
-      checkSumAddress,
-      gravityContractAddr,
-      fromAmount // increase allowance only take display form as input
-    );
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const routerV2Addr = await gravityContract.swapRouter();
     let result: ethers.ContractTransaction;
@@ -161,7 +155,7 @@ export default class Metamask {
     let fromTokenSpender = gravityContractAddr;
     // in this case, we wont use proxy contract but uniswap router instead because our proxy does not support swap tokens to native ETH.
     // approve uniswap router first before swapping because it will use transfer from to swap fromToken
-    if (fromToken.contractAddress && !toTokenContractAddr) fromTokenSpender = routerV2Addr;
+    if (!toTokenContractAddr) fromTokenSpender = routerV2Addr;
     await window.Metamask.checkOrIncreaseAllowance(
       fromToken,
       checkSumAddress,
