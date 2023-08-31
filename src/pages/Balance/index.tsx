@@ -159,7 +159,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // has to switch network to the correct chain id on evm since users can swap between network tokens
       await window.Metamask.switchNetwork(from.chainId);
       result = await transferEvmToIBC(
-        { from, to },
+        from,
         fromAmount,
         { metamaskAddress, tronAddress, oraiAddress: latestOraiAddress },
         combinedReceiver

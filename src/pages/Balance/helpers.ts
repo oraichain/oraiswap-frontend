@@ -261,10 +261,7 @@ export const getBalanceIBCOraichain = async (
 };
 
 export const transferEvmToIBC = async (
-  info: {
-    from: TokenItemType;
-    to: TokenItemType;
-  },
+  from: TokenItemType,
   fromAmount: number,
   address: {
     metamaskAddress?: string;
@@ -274,25 +271,20 @@ export const transferEvmToIBC = async (
   combinedReceiver: string
 ) => {
   const { metamaskAddress, tronAddress, oraiAddress } = address;
-  const finalTransferAddress = window.Metamask.getFinalEvmAddress(info.from.chainId, {
+  const finalTransferAddress = window.Metamask.getFinalEvmAddress(from.chainId, {
     metamaskAddress,
     tronAddress
   });
   const oraiAddr = oraiAddress ?? (await window.Keplr.getKeplrAddr());
   if (!finalTransferAddress || !oraiAddr) throw generateError('Please login both metamask or tronlink and keplr!');
-  const gravityContractAddr = gravityContracts[info.from!.chainId!];
-  if (!gravityContractAddr || !info.from) {
+  const gravityContractAddr = gravityContracts[from!.chainId!];
+  if (!gravityContractAddr || !from) {
     throw generateError('No gravity contract addr or no from token');
   }
 
-  const finalFromAmount = toAmount(fromAmount, info.from.decimals).toString();
-  await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, finalFromAmount);
-  const result = await window.Metamask.transferToGravity(
-    info.from,
-    finalFromAmount,
-    finalTransferAddress,
-    combinedReceiver
-  );
+  const finalFromAmount = toAmount(fromAmount, from.decimals).toString();
+  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, finalFromAmount);
+  const result = await window.Metamask.transferToGravity(from, finalFromAmount, finalTransferAddress, combinedReceiver);
   return result;
 };
 

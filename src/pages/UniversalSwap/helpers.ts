@@ -439,7 +439,7 @@ export class UniversalSwapHandler {
       return window.Metamask.evmSwap(evmSwapData);
     }
     return transferEvmToIBC(
-      { from: this.originalFromToken, to: this.originalToToken },
+      this.originalFromToken,
       this.fromAmount,
       { metamaskAddress, tronAddress },
       combinedReceiver
