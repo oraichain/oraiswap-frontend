@@ -29,8 +29,8 @@ const collectWallet = async (chainId?: string) => {
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
 };
 
-const getCosmWasmClient = async () => {
-  const wallet = await collectWallet();
+const getCosmWasmClient = async (chainId?: string) => {
+  const wallet = await collectWallet(chainId);
   const defaultAddress = (await wallet.getAccounts())[0];
   const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
     gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
@@ -74,6 +74,7 @@ class CosmJs {
     funds?: readonly Coin[] | undefined;
     gasAmount: Coin;
     gasLimits?: { exec: number };
+    memo?: string;
   }) {
     try {
       if (await window.Keplr.getKeplr()) {
@@ -83,7 +84,7 @@ class CosmJs {
           data.address,
           data.handleMsg,
           'auto',
-          '',
+          data.memo,
           data.funds
         );
         return result;
@@ -102,11 +103,12 @@ class CosmJs {
     msgs: cosmwasm.ExecuteInstruction[];
     gasAmount: Coin;
     gasLimits?: { exec: number };
+    memo?: string;
   }) {
     try {
       if (await window.Keplr.getKeplr()) {
         await window.Keplr.suggestChain(network.chainId);
-        const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto');
+        const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {
           logs: result?.logs,
           transactionHash: result.transactionHash
