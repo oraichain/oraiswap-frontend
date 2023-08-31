@@ -8,12 +8,21 @@ import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/c
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
-import { CwIcs20LatestQueryClient, Ratio, TransferBackMsg, Uint128 } from '@oraichain/common-contracts-sdk';
+import {
+  CwIcs20LatestInterface,
+  CwIcs20LatestQueryClient,
+  CwIcs20LatestReadOnlyInterface,
+  Ratio,
+  TransferBackMsg,
+  Uint128
+} from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import { findToTokenOnOraiBridge, transferEvmToIBC } from 'pages/Balance/helpers';
+import { getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
+import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
+import { findToTokenOnOraiBridge } from 'pages/Balance/helpers';
 import {
   SwapQuery,
   Type,
@@ -153,84 +162,16 @@ export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: strin
 };
 
 export class UniversalSwapHandler {
-  private _sender: string;
-  private _fromToken: TokenItemType;
-  private _toToken: TokenItemType;
-  private _toTokenInOrai: TokenItemType;
-  private _fromAmount: number;
-  private _simulateAmount: string;
-  private _userSlippage?: number;
-
+  public toTokenInOrai: TokenItemType;
   constructor(
-    sender?: string,
-    fromToken?: TokenItemType,
-    toToken?: TokenItemType,
-    fromAmount?: number,
-    simulateAmount?: string,
-    userSlippage?: number
-  ) {
-    this._sender = sender;
-    this._fromToken = fromToken;
-    this._toToken = toToken;
-    this._fromAmount = fromAmount;
-    this._simulateAmount = simulateAmount;
-    this._userSlippage = userSlippage;
-  }
-
-  get fromToken() {
-    return this._fromToken;
-  }
-
-  get toToken() {
-    return this._toToken;
-  }
-
-  get toTokenInOrai() {
-    return this._toTokenInOrai;
-  }
-
-  get sender() {
-    return this._sender;
-  }
-
-  get fromAmount() {
-    return this._fromAmount;
-  }
-
-  get simulateAmount() {
-    return this._simulateAmount;
-  }
-
-  get userSlippage() {
-    return this._userSlippage;
-  }
-
-  set fromToken(from: TokenItemType) {
-    this._fromToken = from;
-  }
-
-  set toToken(to: TokenItemType) {
-    this._toToken = to;
-  }
-
-  set toTokenInOrai(toTokenInOrai: TokenItemType) {
-    this._toTokenInOrai = toTokenInOrai;
-  }
-
-  set sender(sender: string) {
-    this._sender = sender;
-  }
-  set fromAmount(fromAmount: number) {
-    this._fromAmount = fromAmount;
-  }
-
-  set simulateAmount(simulateAmount: string) {
-    this._simulateAmount = simulateAmount;
-  }
-
-  set userSlippage(userSlippage: number) {
-    this._userSlippage = userSlippage;
-  }
+    public sender: string,
+    public originalFromToken: TokenItemType,
+    public originalToToken: TokenItemType,
+    public fromAmount: number,
+    public simulateAmount: string,
+    public userSlippage: number,
+    public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface
+  ) {}
 
   calculateMinReceive(simulateAmount: string, userSlippage: number, decimals: number): Uint128 {
     const amount = toDisplay(simulateAmount, decimals);
@@ -260,29 +201,29 @@ export class UniversalSwapHandler {
    * Combine messages for universal swap token from Oraichain to Cosmos networks(Osmosis | Cosmos-hub).
    * @returns combined messages
    */
-  async combineMsgCosmos(): Promise<EncodeObject[]> {
-    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
-    const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
+  async combineMsgCosmos(timeoutTimestamp?: string): Promise<EncodeObject[]> {
+    const ibcInfo: IBCInfo = ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
+    const toAddress = await window.Keplr.getKeplrAddr(this.originalToToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
-    const amount = coin(this._simulateAmount, this._toTokenInOrai.denom);
+    const amount = coin(this.simulateAmount, this.toTokenInOrai.denom);
     const msgTransfer = {
       typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
       value: MsgTransfer.fromPartial({
         sourcePort: ibcInfo.source,
         sourceChannel: ibcInfo.channel,
         token: amount,
-        sender: this._sender,
+        sender: this.sender,
         receiver: toAddress,
         memo: '',
-        timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout)
+        timeoutTimestamp: timeoutTimestamp ?? calculateTimeoutTimestamp(ibcInfo.timeout)
       })
     };
 
     // if not same coingeckoId, swap first then transfer token that have same coingeckoid.
-    if (this._fromToken.coinGeckoId !== this._toToken.coinGeckoId) {
+    if (this.originalFromToken.coinGeckoId !== this.originalToToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      const msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
+      const msgExecuteSwap = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgSwap));
       return [...msgExecuteSwap, msgTransfer];
     }
     return [msgTransfer];
@@ -291,18 +232,18 @@ export class UniversalSwapHandler {
   getTranferAddress(metamaskAddress: string, tronAddress: string, ibcInfo: IBCInfo) {
     let transferAddress = metamaskAddress;
     // check tron network and convert address
-    if (this._toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
+    if (this.originalToToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
       transferAddress = tronToEthAddress(tronAddress);
     }
     // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
-    if (!transferAddress && (this._toTokenInOrai.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
+    if (!transferAddress && (this.toTokenInOrai.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
       throw generateError('Please login metamask / tronlink!');
     }
     return transferAddress;
   }
 
   getIbcMemo(transferAddress: string) {
-    return this._toToken.chainId === 'oraibridge-subnet-2' ? this._toToken.prefix + transferAddress : '';
+    return this.originalToToken.chainId === 'oraibridge-subnet-2' ? this.originalToToken.prefix + transferAddress : '';
   }
 
   /**
@@ -312,25 +253,100 @@ export class UniversalSwapHandler {
   async combineMsgEvm(metamaskAddress: string, tronAddress: string) {
     let msgExecuteSwap: EncodeObject[] = [];
     // if from and to dont't have same coingeckoId, create swap msg to combine with bridge msg
-    if (this._fromToken.coinGeckoId !== this._toToken.coinGeckoId) {
+    if (this.originalFromToken.coinGeckoId !== this.originalToToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      msgExecuteSwap = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgSwap));
+      msgExecuteSwap = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgSwap));
     }
 
     // then find new _toToken in Oraibridge that have same coingeckoId with originalToToken.
-    this._toToken = findToTokenOnOraiBridge(this._toTokenInOrai, this._toToken.chainId);
+    this.originalToToken = findToTokenOnOraiBridge(this.toTokenInOrai, this.originalToToken.chainId);
 
-    const ibcInfo: IBCInfo = ibcInfos[this._fromToken.chainId][this._toToken.chainId];
-    const toAddress = await window.Keplr.getKeplrAddr(this._toToken.chainId);
+    const toAddress = await window.Keplr.getKeplrAddr(this.originalToToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
-    const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
-    const ibcMemo = this.getIbcMemo(transferAddress);
+    const { ibcInfo, ibcMemo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
 
     // create bridge msg
     const msgTransfer = this.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);
-    const msgExecuteTransfer = getExecuteContractMsgs(this._sender, parseExecuteContractMultiple(msgTransfer));
+    const msgExecuteTransfer = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgTransfer));
     return [...msgExecuteSwap, ...msgExecuteTransfer];
+  }
+
+  getIbcInfoIbcMemo(metamaskAddress: string, tronAddress: string) {
+    if (!ibcInfos[this.originalFromToken.chainId]) throw generateError('Cannot find ibc info');
+    const ibcInfo: IBCInfo = ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
+    const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
+    const ibcMemo = this.getIbcMemo(transferAddress);
+    return {
+      ibcInfo,
+      ibcMemo
+    };
+  }
+
+  buildIbcWasmPairKey(ibcPort: string, ibcChannel: string, denom: string) {
+    return `${ibcPort}/${ibcChannel}/${denom}`;
+  }
+
+  async checkBalanceChannelIbc(ibcInfo: IBCInfo, toToken: TokenItemType) {
+    const ics20Contract =
+      this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
+    const { balances } = await ics20Contract.channel({
+      forward: false,
+      id: ibcInfo.channel
+    });
+
+    for (let balance of balances) {
+      if ('native' in balance) {
+        let pairKey = this.buildIbcWasmPairKey(ibcInfo.source, ibcInfo.channel, toToken.denom);
+        if (toToken.prefix && toToken.contractAddress) {
+          pairKey = this.buildIbcWasmPairKey(
+            ibcInfo.source,
+            ibcInfo.channel,
+            `${toToken.prefix}${toToken.contractAddress}`
+          );
+        }
+        if (pairKey !== balance.native.denom) continue;
+        const pairMapping = await ics20Contract.pairMapping({ key: pairKey });
+        const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
+        const _toAmount = toDisplay(this.simulateAmount, toToken.decimals);
+        if (trueBalance < _toAmount) {
+          throw generateError(`pair key is not enough balance!`);
+        }
+      } else {
+        // do nothing because currently we dont have any cw20 balance in the channel
+      }
+    }
+  }
+
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN - compare from amount with cw20 / native amount) (fromAmount) -> check AIRI - compare to amount with channel balance (ORAICHAIN) (toAmount) -> AIRI (BSC)
+  // ORAI ( ETH ) -> check ORAI (ORAICHAIN) - compare from amount with cw20 / native amount) (fromAmount) -> check wTRX - compare to amount with channel balance (ORAICHAIN) (toAmount) -> wTRX (TRON)
+  async checkBalanceIBCOraichain(
+    to: TokenItemType,
+    from: TokenItemType,
+    amount: {
+      toAmount: string;
+      fromAmount: number;
+    },
+    tokenQueryClient?: OraiswapTokenReadOnlyInterface
+  ) {
+    // ORAI ( ETH ) -> check ORAI (ORAICHAIN) -> ORAI (BSC)
+    // no need to check this case because users will swap directly. This case should be impossible because it is only called when transferring from evm to other networks
+    if (from.chainId === 'Oraichain' && to.chainId === from.chainId) return;
+    // always check from token in ibc wasm should have enough tokens to swap / send to destination
+    const token = getTokenOnOraichain(from.coinGeckoId);
+    if (!token) return;
+    const { balance } = await getBalanceIBCOraichain(token, tokenQueryClient);
+    if (balance < amount.fromAmount) {
+      throw generateError(
+        `The bridge contract does not have enough balance to process this bridge transaction. Wanted ${amount.fromAmount}, have ${balance}`
+      );
+    }
+    // if to token is evm, then we need to evaluate channel state balance of ibc wasm
+    if (to.chainId === '0x01' || to.chainId === '0x38' || to.chainId === '0x2b6653dc') {
+      const ibcInfo: IBCInfo | undefined = ibcInfos['Oraichain'][to.chainId];
+      if (!ibcInfo) throw generateError('IBC Info error when checking ibc balance');
+      await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
+    }
   }
 
   async swap(): Promise<any> {
@@ -345,30 +361,32 @@ export class UniversalSwapHandler {
   }
 
   async combineMsgs(metamaskAddress: string, tronAddress: string): Promise<EncodeObject[]> {
-    if (this._toToken.chainId === 'cosmoshub-4' || this._toToken.chainId === 'osmosis-1')
+    if (this.originalToToken.chainId === 'cosmoshub-4' || this.originalToToken.chainId === 'osmosis-1')
       return this.combineMsgCosmos();
     return this.combineMsgEvm(metamaskAddress, tronAddress);
   }
 
   // Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.
   async swapAndTransfer({ metamaskAddress, tronAddress }: SwapData): Promise<any> {
-    // find to token in Oraichain to swap first and use this._toTokenInOrai as fromToken in bridge message.
-    this._toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this._toToken.coinGeckoId);
+    // find to token in Oraichain to swap first and use this.toTokenInOrai as originalFromToken in bridge message.
+    this.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this.originalToToken.coinGeckoId);
 
     const combinedMsgs = await this.combineMsgs(metamaskAddress, tronAddress);
+    const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
+    await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
 
     // handle sign and broadcast transactions
-    const offlineSigner = await window.Keplr.getOfflineSigner(this._fromToken.chainId);
+    const offlineSigner = await window.Keplr.getOfflineSigner(this.originalFromToken.chainId);
     const aminoTypes = new AminoTypes({
       ...createWasmAminoConverters(),
       ...customAminoTypes
     });
-    const client = await SigningStargateClient.connectWithSigner(this._fromToken.rpc, offlineSigner, {
+    const client = await SigningStargateClient.connectWithSigner(this.originalFromToken.rpc, offlineSigner, {
       registry: customRegistry,
       aminoTypes,
       gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
     });
-    const result = await client.signAndBroadcast(this._sender, combinedMsgs, 'auto');
+    const result = await client.signAndBroadcast(this.sender, combinedMsgs, 'auto');
     return result;
   }
 
@@ -376,43 +394,56 @@ export class UniversalSwapHandler {
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     if (!metamaskAddress && !tronAddress) throw Error('Cannot call evm swap if the evm address is empty');
 
+    await this.checkBalanceIBCOraichain(this.originalToToken, this.originalFromToken, {
+      fromAmount: this.fromAmount,
+      toAmount: this.simulateAmount
+    });
+
     // normal case, we will transfer evm to ibc like normal when two tokens can not be swapped on evm
     // first case: BNB (bsc) <-> USDT (bsc), then swappable
     // 2nd case: BNB (bsc) -> USDT (oraichain), then find USDT on bsc. We have that and also have route => swappable
     // 3rd case: USDT (bsc) -> ORAI (bsc / Oraichain), both have pools on Oraichain, but we currently dont have the pool route on evm => not swappable => transfer to cosmos like normal
     let swappableData = {
-      fromChainId: this._fromToken.chainId,
-      toChainId: this._toToken.chainId,
-      fromContractAddr: this._fromToken.contractAddress,
-      toContractAddr: this._toToken.contractAddress
+      fromChainId: this.originalFromToken.chainId,
+      toChainId: this.originalToToken.chainId,
+      fromContractAddr: this.originalFromToken.contractAddress,
+      toContractAddr: this.originalToToken.contractAddress
     };
     let evmSwapData = {
-      fromToken: this._fromToken,
-      toTokenContractAddr: this._toToken.contractAddress,
+      fromToken: this.originalFromToken,
+      toTokenContractAddr: this.originalToToken.contractAddress,
       address: { metamaskAddress, tronAddress },
       fromAmount: this.fromAmount,
       simulateAmount: this.simulateAmount,
-      slippage: this._userSlippage,
+      slippage: this.userSlippage,
       destination: '' // if to token already on same net with from token then no destination is needed
     };
     // has to switch network to the correct chain id on evm since users can swap between network tokens
-    await window.Metamask.switchNetwork(this._fromToken.chainId);
+    await window.Metamask.switchNetwork(this.originalFromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 
-    const toTokenSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
+    const toTokenSameFromChainId = getTokenOnSpecificChainId(
+      this.originalToToken.coinGeckoId,
+      this.originalFromToken.chainId
+    );
     if (toTokenSameFromChainId) {
       swappableData.toChainId = toTokenSameFromChainId.chainId;
       swappableData.toContractAddr = toTokenSameFromChainId.contractAddress;
       evmSwapData.toTokenContractAddr = toTokenSameFromChainId.contractAddress;
       // if to token already on same net with from token then no destination is needed
-      evmSwapData.destination = toTokenSameFromChainId.chainId === this._toToken.chainId ? '' : combinedReceiver;
+      evmSwapData.destination = toTokenSameFromChainId.chainId === this.originalToToken.chainId ? '' : combinedReceiver;
     }
 
     // special case for tokens not having a pool on Oraichain. We need to swap on evm instead then transfer to Oraichain
-    if (isEvmSwappable(swappableData) && isSupportedNoPoolSwapEvm(this._fromToken.coinGeckoId)) {
+    if (isEvmSwappable(swappableData) && isSupportedNoPoolSwapEvm(this.originalFromToken.coinGeckoId)) {
       return window.Metamask.evmSwap(evmSwapData);
     }
-    return transferEvmToIBC(this._fromToken, this._fromAmount, { metamaskAddress, tronAddress }, combinedReceiver);
+    return transferEvmToIBC(
+      this.originalFromToken,
+      this.fromAmount,
+      { metamaskAddress, tronAddress },
+      combinedReceiver
+    );
   }
 
   async processUniversalSwap(combinedReceiver: string, universalSwapType: UniversalSwapType, swapData: SwapData) {
@@ -423,19 +454,19 @@ export class UniversalSwapHandler {
 
   generateMsgsSwap() {
     try {
-      const _fromAmount = toAmount(this._fromAmount, this._fromToken.decimals).toString();
+      const _fromAmount = toAmount(this.fromAmount, this.originalFromToken.decimals).toString();
 
       const minimumReceive = this.calculateMinReceive(
-        this._simulateAmount,
-        this._userSlippage,
-        this._fromToken.decimals
+        this.simulateAmount,
+        this.userSlippage,
+        this.originalFromToken.decimals
       );
       const msgs = generateContractMessages({
         type: Type.SWAP,
-        sender: this._sender,
+        sender: this.sender,
         amount: _fromAmount,
-        fromInfo: this._fromToken!,
-        toInfo: this._toTokenInOrai ?? this._toToken,
+        fromInfo: this.originalFromToken!,
+        toInfo: this.toTokenInOrai ?? this.originalToToken,
         minimumReceive
       } as SwapQuery);
       const msg = msgs[0];
@@ -457,7 +488,7 @@ export class UniversalSwapHandler {
    */
   generateMsgsTransferOraiToEvm(ibcInfo: IBCInfo, toAddress: string, ibcMemo: string) {
     try {
-      const { info: assetInfo } = parseTokenInfo(this._toTokenInOrai);
+      const { info: assetInfo } = parseTokenInfo(this.toTokenInOrai);
 
       const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
       if (!ibcWasmContractAddress)
@@ -466,7 +497,7 @@ export class UniversalSwapHandler {
       const msg: TransferBackMsg = {
         local_channel_id: ibcInfo.channel,
         remote_address: toAddress,
-        remote_denom: this._toToken.denom,
+        remote_denom: this.originalToToken.denom,
         timeout: ibcInfo.timeout,
         memo: ibcMemo
       };
@@ -480,8 +511,8 @@ export class UniversalSwapHandler {
         const msgs = {
           contract: ibcWasmContractAddress,
           msg: Buffer.from(JSON.stringify(executeMsgSend)),
-          sender: this._sender,
-          sent_funds: [{ amount: this._simulateAmount, denom: ORAI }]
+          sender: this.sender,
+          sent_funds: [{ amount: this.simulateAmount, denom: ORAI }]
         };
         return buildMultipleMessages(msgs);
       }
@@ -489,7 +520,7 @@ export class UniversalSwapHandler {
       const executeMsgSend = {
         send: {
           contract: ibcWasmContractAddress,
-          amount: this._simulateAmount,
+          amount: this.simulateAmount,
           msg: cosmwasm.toBinary(msg)
         }
       };
@@ -497,9 +528,9 @@ export class UniversalSwapHandler {
       // generate contract message for CW20 token in Oraichain.
       // Example: tranfer USDT/Oraichain -> AIRI/BSC. _toTokenInOrai is AIRI in Oraichain.
       const msgs = {
-        contract: this._toTokenInOrai.contractAddress,
+        contract: this.toTokenInOrai.contractAddress,
         msg: Buffer.from(JSON.stringify(executeMsgSend)),
-        sender: this._sender,
+        sender: this.sender,
         sent_funds: []
       };
       return buildMultipleMessages(msgs);
