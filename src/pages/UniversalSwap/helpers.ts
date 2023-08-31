@@ -130,15 +130,11 @@ export function filterNonPoolEvmTokens(
       }
       return true;
     });
-  else {
-    return filteredToTokens.filter((t) => {
-      // filter out to tokens that are on a different network & with no pool because we are not ready to support them yet
-      // TODO: support this
-      if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
-      return true;
-    });
-  }
-  return filteredToTokens;
+  return filteredToTokens.filter((t) => {
+    // filter out to tokens that are on a different network & with no pool because we are not ready to support them yet. TODO: support
+    if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) return t.chainId === chainId;
+    return true;
+  });
 }
 
 export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: string, tronAddress?: string | boolean) => {
@@ -372,6 +368,7 @@ export class UniversalSwapHandler {
     return result;
   }
 
+  // transfer evm to ibc
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     if (!metamaskAddress && !tronAddress) throw Error('Cannot call evm swap if the evm address is empty');
 
@@ -394,7 +391,8 @@ export class UniversalSwapHandler {
       slippage: this._userSlippage,
       destination: '' // if to token already on same net with from token then no destination is needed
     };
-
+    // has to switch network to the correct chain id on evm since users can swap between network tokens
+    await window.Metamask.switchNetwork(this._fromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(this._toToken.coinGeckoId, this._fromToken.chainId);
