@@ -39,29 +39,38 @@ export const useCoinGeckoPrices = <T extends CoinGeckoId>(
     // make unique
     queryKey: ['coinGeckoPrices', ...tokens],
     queryFn: async ({ signal }) => {
-      const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
-
-      const prices = { ...cachePrices };
-
-      // by default not return data then use cached version
-      try {
-        const resp = await fetch(coingeckoPricesURL, { signal });
-        const rawData = (await resp.json()) as {
-          [C in T]?: {
-            usd: number;
-          };
-        };
-        // update cached
-        for (const key in rawData) {
-          prices[key] = rawData[key].usd;
-        }
-
-        setCachePrices(prices);
-      } catch {
-        // remain old cache
-      }
+      const prices = await getCoingeckoPrices(tokens, cachePrices, signal);
+      setCachePrices(prices);
 
       return Object.fromEntries(tokens.map((token) => [token, prices[token]])) as CoinGeckoPrices<T>;
     }
   });
+};
+
+export const getCoingeckoPrices = async <T extends CoinGeckoId>(
+  tokens: string[],
+  cachePrices?: CoinGeckoPrices<string>,
+  signal?: AbortSignal
+): Promise<CoinGeckoPrices<string>> => {
+  const coingeckoPricesURL = buildCoinGeckoPricesURL(tokens);
+
+  const prices = { ...cachePrices };
+
+  // by default not return data then use cached version
+  try {
+    const resp = await fetch(coingeckoPricesURL, { signal });
+    const rawData = (await resp.json()) as {
+      [C in T]?: {
+        usd: number;
+      };
+    };
+    // update cached
+    for (const key in rawData) {
+      prices[key] = rawData[key].usd;
+    }
+  } catch {
+    // remain old cache
+    console.log('error getting coingecko prices: ', prices);
+  }
+  return prices;
 };

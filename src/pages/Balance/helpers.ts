@@ -100,11 +100,16 @@ export const getDestination = (
   const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
   // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
   let receiverPrefix = '';
+  // TODO: no need to use to token on Oraichain. Can simply use the destination token directly. Fix this requires fixing the logic on ibc wasm as well
+  const toTokenOnOraichain = getTokenOnOraichain(toToken.coinGeckoId);
+  if (!toTokenOnOraichain)
+    return {
+      destination: '',
+      universalSwapType: 'other-networks-to-oraichain'
+    };
   if (window.Metamask.isEthAddress(destReceiver)) receiverPrefix = toToken.prefix;
   return {
-    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(
-      getTokenOnOraichain(toToken.coinGeckoId)
-    )}`,
+    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(toTokenOnOraichain)}`,
     universalSwapType: 'other-networks-to-oraichain'
   };
 };
@@ -264,25 +269,29 @@ export const transferEvmToIBC = async (
   address: {
     metamaskAddress?: string;
     tronAddress?: string;
+    oraiAddress?: string;
   },
-  combinedReceiver?: string,
-  simulateAmount?: string
-): Promise<any> => {
-  const { metamaskAddress, tronAddress } = address;
-  const finalTransferAddress = window.Metamask.isTron(info.from.chainId) ? tronAddress : metamaskAddress;
-  const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!finalTransferAddress || !oraiAddress) throw generateError('Please login both metamask or tronlink and keplr!');
+  combinedReceiver: string
+) => {
+  const { metamaskAddress, tronAddress, oraiAddress } = address;
+  const finalTransferAddress = window.Metamask.getFinalEvmAddress(info.from.chainId, {
+    metamaskAddress,
+    tronAddress
+  });
+  const oraiAddr = oraiAddress ?? (await window.Keplr.getKeplrAddr());
+  if (!finalTransferAddress || !oraiAddr) throw generateError('Please login both metamask or tronlink and keplr!');
   const gravityContractAddr = gravityContracts[info.from!.chainId!];
   if (!gravityContractAddr || !info.from) {
     throw generateError('No gravity contract addr or no from token');
   }
 
-  await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, fromAmount);
+  const finalFromAmount = toAmount(fromAmount, info.from.decimals).toString();
+  await window.Metamask.checkOrIncreaseAllowance(info.from, finalTransferAddress, gravityContractAddr, finalFromAmount);
   const result = await window.Metamask.transferToGravity(
     info.from,
-    fromAmount,
+    finalFromAmount,
     finalTransferAddress,
-    combinedReceiver ?? combineReceiver(oraiAddress, info.from).combinedReceiver
+    combinedReceiver
   );
   return result;
 };
@@ -592,7 +601,7 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   return result;
 };
 
-export const findToToken = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
+export const findToTokenOnOraiBridge = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
   const toToken = cosmosTokens.find((t) =>
     t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === fromToken.coinGeckoId && t?.bridgeNetworkIdentifier
       ? t.bridgeNetworkIdentifier === toNetwork

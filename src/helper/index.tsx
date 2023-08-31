@@ -71,7 +71,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -126,7 +126,8 @@ export const handleErrorTransaction = (error: any) => {
     finalError = error as string;
   } else {
     if (error?.ex?.message) finalError = String(error.ex.message);
-    else finalError = String(error);
+    else if (error?.message) finalError = String(error.message);
+    else finalError = JSON.stringify(error);
   }
   displayToast(TToastType.TX_FAILED, {
     message: finalError
@@ -162,9 +163,9 @@ export const floatToPercent = (value: number): number => {
 };
 
 /**
- * Get list contract_addr | denom that make a pair when combined with input 
- * @param contractAddress 
- * @returns 
+ * Get list contract_addr | denom that make a pair when combined with input
+ * @param contractAddress
+ * @returns
  */
 export const getPairSwapV2 = (contractAddress: string) => {
   let arr = [];
@@ -176,7 +177,7 @@ export const getPairSwapV2 = (contractAddress: string) => {
       (asset: {
         token: {
           contract_addr: string;
-        }
+        };
       }) => asset?.token?.contract_addr === contractAddress
     )
   );
