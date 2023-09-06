@@ -10,20 +10,15 @@
   &.light {
     background-color: #f4f4f4;
   }
-  flex: 1;
-  min-height: 100vh;
+
+  flex-grow: 1;
   height: auto;
   width: 100%;
+  padding-left: 120px;
+  padding-right: 120px;
+
   @include mobile {
     min-height: calc(100vh - 110px);
     padding: 90px 16px 20px 16px;
   }
 }
-
-// .light {
-//   filter: invert(100%);
-// }
-
-// .dark {
-//   filter: invert(0%);
-// }

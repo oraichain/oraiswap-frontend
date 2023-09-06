@@ -1,0 +1,17 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.button {
+    font-weight: 500;
+    font-size: 16px;
+    border-radius: 30px;
+}
+
+.primary {
+    background-color: #AEE67F;
+    color: #1E300A;
+    border: 1px;
+    padding: 14.5px 39px;
+}
+
+.secondary {}
