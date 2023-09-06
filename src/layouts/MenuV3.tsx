@@ -31,7 +31,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 <a
                     target="_blank"
                     href={to}
-                    className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+                    className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
                     onClick={() => {
                         setOpen(!open);
                         onClick(to);
@@ -48,7 +48,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     setOpen(!open);
                     onClick(to);
                 }}
-                className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+                className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
             >
                 <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
                     {title}
@@ -79,10 +79,9 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 )}
                 <div className={classNames(styles.menu_list)}>
                     {/* <RequireAuthButton /> */}
-                    {renderLink('/swap', 'Internal Swap', setLink)}
                     {renderLink(
                         '/universalswap',
-                        'Universal Swap',
+                        'Swap',
                         setLink,
                     )}
                     {renderLink('/pools', 'Pools', setLink)}

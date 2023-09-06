@@ -41,7 +41,9 @@ $themes: (
     'border-color-secondary': transparent,
     'placeholder-color': #46484E,
     'svg-fill-color': #BDC3D3,
-    'hr-color': 1px solid #2d2938),
+    'hr-color': 1px solid #2d2938,
+    'neutral-3': #979797,
+    'neutral-1': #1E300A),
   light: ('text-color': #272B30,
     'text-color-secondary': #A871DF,
     'text-color-third': #484D56,
@@ -73,5 +75,7 @@ $themes: (
     'border-color-secondary': #E6E6E6,
     'placeholder-color': #B9B9B9,
     'svg-fill-color': #777E90,
-    'hr-color': 1px solid #CCCDD0)
+    'hr-color': 1px solid #CCCDD0,
+    'neutral-3': #979797,
+    'neutral-1': #1E300A)
 );
