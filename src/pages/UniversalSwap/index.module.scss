@@ -3,18 +3,16 @@
 .swap-container {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -12px;
-  padding: 80px 32px 32px 32px;
+  padding: 50px 0;
+  justify-content: space-between;
 
   .swap-col {
-    padding: 0 12px;
-
     &.w60 {
       width: 60%;
     }
 
     &.w40 {
-      width: 40%;
+      width: 38%;
     }
   }
 }
