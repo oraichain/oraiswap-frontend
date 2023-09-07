@@ -21,6 +21,7 @@
 
   @include theme() {
     background-color: theme-get('bg-color');
+    border-bottom: 1px solid theme-get('neutron-5');
   }
 }
 
@@ -111,6 +112,12 @@
 
       @include theme() {
         color: theme-get('neutral-3');
+      }
+
+      &.active {
+        @include theme() {
+          color: theme-get('neutral-1');
+        }
       }
     }
   }
