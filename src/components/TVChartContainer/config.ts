@@ -71,7 +71,8 @@ const disabledFeatures = [
   'popup_hints',
   'header_in_fullscreen_mode',
   'right_bar_stays_on_scroll',
-  'symbol_info'
+  'symbol_info',
+  'volume_force_overlay'
 ];
 
 const enabledFeatures = [
