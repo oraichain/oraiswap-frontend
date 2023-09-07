@@ -6,6 +6,14 @@
   padding: 50px 0;
   justify-content: space-between;
 
+  .tv-chart {
+    height: 420px;
+    padding-top: 10px;
+    transition: all 1s ease;
+    &.hidden {
+      height: 0;
+    }
+  }
   .swap-col {
     &.w60 {
       width: 60%;
