@@ -518,7 +518,8 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     return {
       // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
       // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
-      amount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
+      amount: simulateAmount,
+      displayAmount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
