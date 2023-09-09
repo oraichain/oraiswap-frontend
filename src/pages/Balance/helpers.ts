@@ -1,11 +1,12 @@
 import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
-import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient, StargateClient } from '@cosmjs/stargate';
 import {
   cosmosTokens,
   flattenTokens,
   gravityContracts,
   kawaiiTokens,
+  oraichainTokens,
   TokenItemType,
   tokenMap,
   UniversalSwapType
@@ -17,12 +18,16 @@ import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  OraiswapTokenClient,
+  OraiswapTokenQueryClient,
+  OraiswapTokenReadOnlyInterface
+} from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, toAmount } from 'libs/utils';
+import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -239,6 +244,20 @@ export const convertTransferIBCErc20Kwt = async (
     contractAddr: fromToken?.contractAddress
   });
   return result;
+};
+
+export const getBalanceIBCOraichain = async (
+  token: TokenItemType,
+  tokenQueryClient?: OraiswapTokenReadOnlyInterface
+) => {
+  if (!token) return { balance: 0 };
+  if (token.contractAddress) {
+    const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
+    const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
+    return { balance: toDisplay(balance, token.decimals) };
+  }
+  const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, token.denom);
+  return { balance: toDisplay(amount, token.decimals) };
 };
 
 export const transferEvmToIBC = async (
