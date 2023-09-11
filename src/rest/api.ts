@@ -12,9 +12,7 @@ import {
   OraiswapRewarderTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes,
-  OraiswapOracleQueryClient,
-  PairInfo,
-  SwapOperation
+  OraiswapOracleQueryClient
 } from '@oraichain/oraidex-contracts-sdk';
 import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
@@ -39,6 +37,9 @@ import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapFactory.types';
+import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -435,11 +436,11 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
       ];
 };
 
-async function fetchTaxRate() {
+async function fetchTaxRate(): Promise<TaxRateResponse> {
   const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);
   try {
-    const data = await oracleContract.taxRate();
-    return data;
+    const data = await oracleContract.treasury({ tax_rate: {} });
+    return data as TaxRateResponse;
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
   }

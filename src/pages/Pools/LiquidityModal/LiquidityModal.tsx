@@ -11,7 +11,7 @@ import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import {
@@ -183,11 +183,11 @@ const LiquidityModal: FC<ModalProps> = ({
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  }
+  };
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll()
+    fetchCachedLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -382,7 +382,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>

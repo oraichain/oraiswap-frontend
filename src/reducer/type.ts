@@ -1,6 +1,6 @@
+import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapLimitOrder.types';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { OrderDirection } from '@oraichain/oraidex-contracts-sdk';
 
 export type ChainInfoType = {
   networkType?: string;
