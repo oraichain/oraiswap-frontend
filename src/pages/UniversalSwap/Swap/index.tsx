@@ -171,7 +171,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken
   );
-  const { toAmountToken: averageRatio } = useSimulate(
+  const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
     toTokenInfoData,
@@ -249,7 +249,7 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
+  const minimumReceive = simulateData?.displayAmount ? calculateMinimum(simulateData.displayAmount, userSlippage) : '0';
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -341,7 +341,9 @@ const SwapComponent: React.FC<{
             />
 
             <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
+              {`1 ${originalFromToken?.name} ≈ ${toDisplay(averageRatio?.displayAmount, originalToToken?.decimals)} ${
+                originalToToken?.name
+              }`}
             </span>
           </div>
           <div className={cx('input-wrapper')}>

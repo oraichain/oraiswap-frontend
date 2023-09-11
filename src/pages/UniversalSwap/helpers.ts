@@ -45,6 +45,11 @@ export enum SwapDirection {
   To
 }
 
+export interface SimulateResponse {
+  amount: Uint128;
+  displayAmount: Uint128;
+}
+
 export interface SwapData {
   metamaskAddress?: string;
   tronAddress?: string;
@@ -84,7 +89,7 @@ export async function handleSimulateSwap(query: {
   originalFromInfo: TokenItemType;
   originalToInfo: TokenItemType;
   amount: string;
-}): Promise<SimulateSwapOperationsResponse> {
+}): Promise<SimulateResponse> {
   // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
   // otherwise, simulate like normal
   if (
@@ -98,13 +103,15 @@ export async function handleSimulateSwap(query: {
   ) {
     // reset previous amount calculation since now we need to deal with original from & to info, not oraichain token info
     const originalAmount = toDisplay(query.amount, query.fromInfo.decimals);
-    return simulateSwapEvm({
+    const { amount, displayAmount } = await simulateSwapEvm({
       fromInfo: query.originalFromInfo,
       toInfo: query.originalToInfo,
       amount: toAmount(originalAmount, query.originalFromInfo.decimals).toString()
     });
+    return { amount, displayAmount };
   }
-  return simulateSwap(query);
+  const { amount } = await simulateSwap(query);
+  return { amount, displayAmount: amount };
 }
 
 export function filterNonPoolEvmTokens(
