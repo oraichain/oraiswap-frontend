@@ -5,14 +5,13 @@ import { Ok } from 'ts-results';
 import bech32 from 'bech32';
 import { readFileSync } from 'fs';
 import {
-  AssetInfo,
   OraiswapFactoryClient,
   OraiswapRouterClient,
   OraiswapTokenClient,
   OraiswapPairClient,
   OraiswapOracleClient
 } from '@oraichain/oraidex-contracts-sdk';
-import { CwIcs20LatestClient, TransferBackMsg, UpdatePairMsg } from '@oraichain/common-contracts-sdk';
+import { AssetInfo, CwIcs20LatestClient, TransferBackMsg, UpdatePairMsg } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress, senderAddress } from './common';

@@ -152,6 +152,7 @@ export default class Metamask {
     const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const routerV2Addr = await gravityContract.swapRouter();
+    const amountMinAfterSlippage = this.calculateEvmSwapSlippage(simulateAmount, slippage);
     let result: ethers.ContractTransaction;
 
     let fromTokenSpender = gravityContractAddr;
@@ -169,7 +170,7 @@ export default class Metamask {
     if (!fromToken.contractAddress) {
       result = await gravityContract.bridgeFromETH(
         ethers.utils.getAddress(toTokenContractAddr),
-        this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
+        amountMinAfterSlippage, // use
         destination,
         { value: finalFromAmount }
       );
@@ -180,7 +181,7 @@ export default class Metamask {
 
       result = await routerV2.swapExactTokensForETH(
         finalFromAmount,
-        this.calculateEvmSwapSlippage(simulateAmount, slippage),
+        amountMinAfterSlippage,
         evmRoute,
         checkSumAddress,
         new Date().getTime() + UNISWAP_ROUTER_DEADLINE
@@ -190,7 +191,7 @@ export default class Metamask {
         ethers.utils.getAddress(fromToken.contractAddress),
         ethers.utils.getAddress(toTokenContractAddr),
         finalFromAmount,
-        this.calculateEvmSwapSlippage(simulateAmount, slippage), // use
+        amountMinAfterSlippage, // use
         destination
       );
     }

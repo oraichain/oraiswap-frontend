@@ -1,5 +1,4 @@
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
@@ -21,6 +20,7 @@ import { PairInfoExtend } from 'types/token';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { fetchRewardPerSecInfo } from 'rest/api';
 import { RewardPoolType } from 'reducer/config';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {

@@ -1,6 +1,6 @@
 import { SimulateCosmWasmClient } from '@oraichain/cw-simulate';
-import { OraiswapTokenClient, Cw20Coin, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import { CwIcs20LatestTypes, CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
+import { CwIcs20LatestClient, Cw20Coin } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 import { readFileSync } from 'fs';

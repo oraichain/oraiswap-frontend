@@ -1,4 +1,4 @@
-import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { Bar as BarType } from 'charting_library';
 
 export type Bar = BarType & {

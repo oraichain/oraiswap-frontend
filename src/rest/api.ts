@@ -1,4 +1,4 @@
-import { ExecuteInstruction, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { AssetInfo, Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import {
@@ -12,9 +12,7 @@ import {
   OraiswapRewarderTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes,
-  OraiswapOracleQueryClient,
-  PairInfo,
-  SwapOperation
+  OraiswapOracleQueryClient
 } from '@oraichain/oraidex-contracts-sdk';
 import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
@@ -39,6 +37,9 @@ import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapFactory.types';
+import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -437,11 +438,11 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
       ];
 };
 
-async function fetchTaxRate() {
+async function fetchTaxRate(): Promise<TaxRateResponse> {
   const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);
   try {
-    const data = await oracleContract.taxRate();
-    return data;
+    const data = await oracleContract.treasury({ tax_rate: {} });
+    return data as TaxRateResponse;
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
   }
@@ -516,11 +517,13 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
     const outs = await swapRouterV2.getAmountsOut(amount, route);
+    if (outs.length === 0) throw new Error('There is no output amounts after simulating evm swap');
     let simulateAmount = outs.slice(-1)[0].toString();
     return {
       // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
       // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
-      amount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
+      amount: simulateAmount,
+      displayAmount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
@@ -738,7 +741,7 @@ function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity)
   let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input: any;
+  let input: JsonObject;
   switch (type) {
     case Type.BOND_LIQUIDITY: {
       const bondMsg = params as BondMining;

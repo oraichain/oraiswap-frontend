@@ -4,9 +4,9 @@ import { flatten, uniq } from 'lodash';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { MILKY, ORAI, STABLE_DENOM } from './constants';
 import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { network } from './networks';
 import { PairInfoExtend } from 'types/token';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];

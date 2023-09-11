@@ -8,7 +8,8 @@ import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { Asset, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
+import { PairInfo, Asset } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
@@ -64,7 +65,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
   const [cachedReward] = useConfigReducer('rewardPools');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
-  const reward = cachedReward?.find(e => e?.liquidity_token === pairInfoData?.liquidity_token)?.reward || ['ORAIX'];
+  const reward = cachedReward?.find((e) => e?.liquidity_token === pairInfoData?.liquidity_token)?.reward || ['ORAIX'];
   useEffect(() => {
     if (!!totalRewardInfoData && !!rewardPerSecInfoData) {
       // let interval = setInterval(() => setNewReward(), 1000);
@@ -122,20 +123,18 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = generateMiningMsgs({
+      const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
         assetToken: assetToken
       } as WithdrawMining);
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
       console.log('result provide tx hash: ', result);
 
@@ -162,7 +161,9 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
         <>
           <div className={cx('mining')}>
             <div className={cx('label--bold', theme)}>Liquidity Mining</div>
-            <div className={cx('label--sub')}>Bond liquidity to earn {reward.join(' / ')} liquidity reward and swap fees</div>
+            <div className={cx('label--sub')}>
+              Bond liquidity to earn {reward.join(' / ')} liquidity reward and swap fees
+            </div>
           </div>
           <div className={cx('earning')}>
             <button

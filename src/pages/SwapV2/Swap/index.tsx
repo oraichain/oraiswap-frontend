@@ -29,6 +29,7 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 
 const cx = cn.bind(styles);
 
@@ -50,7 +51,7 @@ const SwapComponent: React.FC<{
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const cachedPairs = useSelector((state: RootState) => state.pairInfos.pairInfos);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const currentPair = useSelector(selectCurrentToken);
 
   const loadTokenAmounts = useLoadTokens();
@@ -93,13 +94,12 @@ const SwapComponent: React.FC<{
 
   const queryTaxRate = async () => {
     const data = await fetchTaxRate();
-    setTaxRate(data?.rate)
-  }
+    setTaxRate(data.rate);
+  };
 
   useEffect(() => {
     queryTaxRate();
-  }, [])
-
+  }, []);
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -137,10 +137,10 @@ const SwapComponent: React.FC<{
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken])
+  }, [fromToken, toToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -319,8 +319,7 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{
-            taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+          <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
@@ -339,9 +338,9 @@ const SwapComponent: React.FC<{
           items={Pairs.getPoolTokens().filter((token) => {
             const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(toToken?.contractAddress);
             if (!arrLength || arrIncludesOrai) {
-              return token.denom !== toTokenDenom
+              return token.denom !== toTokenDenom;
             }
-            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom);
           })}
           amounts={amounts}
           setToken={(denom, contractAddress) => {
@@ -360,11 +359,11 @@ const SwapComponent: React.FC<{
           prices={prices}
           amounts={amounts}
           items={Pairs.getPoolTokens().filter((token) => {
-            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(fromToken?.contractAddress)
+            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(fromToken?.contractAddress);
             if (!arrLength || arrIncludesOrai) {
-              return token.denom !== fromTokenDenom
+              return token.denom !== fromTokenDenom;
             }
-            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom);
           })}
           setToken={(denom, contractAddress) => {
             const { arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
