@@ -10,7 +10,6 @@
     "@cosmjs/proto-signing": "^0.31.0",
     "@cosmjs/stargate": "^0.31.0",
     "@cosmjs/tendermint-rpc": "^0.31.0",
-    "@cosmsnap/snap": "^0.1.13",
     "@oraichain/common-contracts-sdk": "1.0.24",
     "@oraichain/kawaiiverse-txs": "0.0.2",
     "@oraichain/oraidex-contracts-sdk": "^1.0.20",
