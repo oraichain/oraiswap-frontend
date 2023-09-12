@@ -17,7 +17,8 @@ import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
-import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
+import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapTokenClient,
   OraiswapTokenQueryClient,

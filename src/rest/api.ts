@@ -1,6 +1,6 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { AssetInfo, Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapStakingQueryClient,
   OraiswapRewarderQueryClient,
@@ -37,7 +37,7 @@ import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapFactory.types';
+import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapFactory.types';
 import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 

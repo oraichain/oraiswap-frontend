@@ -6,9 +6,9 @@ import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
 import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {

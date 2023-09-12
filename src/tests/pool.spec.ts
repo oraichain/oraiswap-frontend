@@ -4,7 +4,7 @@ import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { client } from './common';
-import { AggregateResult, AssetInfo, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { buildMultipleMessages } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
@@ -39,7 +39,8 @@ import {
 } from './listing-simulate';
 import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 import { parseAssetInfo } from 'helper';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.

@@ -1,9 +1,10 @@
 import { SimulateCosmWasmClient } from '@oraichain/cw-simulate';
 import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
-import { CwIcs20LatestClient, Cw20Coin } from '@oraichain/common-contracts-sdk';
+import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
 import { readFileSync } from 'fs';
+import { Cw20Coin } from '@oraichain/common-contracts-sdk/build/Cw20Base.types';
 
 export const TOKEN1 = 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg';
 export const TOKEN2 = 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge';

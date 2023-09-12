@@ -12,8 +12,6 @@ import {
   CwIcs20LatestInterface,
   CwIcs20LatestQueryClient,
   CwIcs20LatestReadOnlyInterface,
-  Ratio,
-  TransferBackMsg,
   Uint128
 } from '@oraichain/common-contracts-sdk';
 import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
@@ -39,6 +37,7 @@ import {
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
 export enum SwapDirection {
   From,

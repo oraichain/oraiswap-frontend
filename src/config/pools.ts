@@ -3,7 +3,9 @@ import { parseAssetInfo } from 'helper';
 import { flatten, uniq } from 'lodash';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { MILKY, ORAI, STABLE_DENOM } from './constants';
-import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+
 import { network } from './networks';
 import { PairInfoExtend } from 'types/token';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';

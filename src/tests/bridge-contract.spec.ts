@@ -11,13 +11,14 @@ import {
   OraiswapPairClient,
   OraiswapOracleClient
 } from '@oraichain/oraidex-contracts-sdk';
-import { AssetInfo, CwIcs20LatestClient, TransferBackMsg, UpdatePairMsg } from '@oraichain/common-contracts-sdk';
+import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress, senderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
 import { ORAI } from 'config/constants';
 import { toDisplay } from 'libs/utils';
+import { AssetInfo, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
 let cosmosChain: CWSimulateApp;
 // oraichain support cosmwasm
@@ -955,9 +956,7 @@ describe.only('IBCModule', () => {
           },
           relayer: cosmosSenderAddress
         });
-
         const sendPacketEvent = result.events.find((event) => event.type === 'send_packet');
-        console.log('sendPacketEventhere');
         console.dir(result.events, { depth: null });
         expect(sendPacketEvent).not.toBeUndefined();
         const packetHex = sendPacketEvent.attributes.find((attr) => attr.key === 'packet_data_hex').value;
@@ -1290,10 +1289,22 @@ describe.only('IBCModule', () => {
         },
         relayer: cosmosSenderAddress
       });
-      expect(result.messages.length).toEqual(1);
-      expect((result.messages[0].msg as any).ibc.transfer.channel_id).toEqual(unknownChannel);
-      expect((result.messages[0].msg as any).ibc.transfer.to_address).toEqual(bobAddress);
-      expect((result.messages[0].msg as any).ibc.transfer.amount).toEqual({ denom: ORAI, amount: ibcTransferAmount });
+      console.dir(result.messages[0], { depth: null });
+      expect((result.messages[0].msg as any).wasm.execute.contract_addr).toEqual(ics20Contract.contractAddress);
+      expect(
+        JSON.parse(Buffer.from((result.messages[0].msg as any).wasm.execute.msg, 'base64').toString('utf8'))
+      ).toEqual({
+        increase_channel_balance_ibc_receive: {
+          dest_channel_id: channel,
+          ibc_denom: `wasm.${ics20Contract.contractAddress}/${channel}/${oraiIbcDenom}`,
+          amount: ibcTransferAmount,
+          local_receiver: bobAddress
+        }
+      });
+      expect(result.messages.length).toEqual(2);
+      expect((result.messages[1].msg as any).ibc.transfer.channel_id).toEqual(unknownChannel);
+      expect((result.messages[1].msg as any).ibc.transfer.to_address).toEqual(bobAddress);
+      expect((result.messages[1].msg as any).ibc.transfer.amount).toEqual({ denom: ORAI, amount: ibcTransferAmount });
     });
 
     it('cw-ics20-test-single-step-handle_ibc_packet_receive_native_remote_chain-has-relayer-fee-should-be-deducted', async () => {
