@@ -3,7 +3,8 @@ import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import { ThemeContext } from 'context/theme-context';
-
+import { ReactComponent as Dark } from 'assets/icons/dark.svg';
+import { ReactComponent as Light } from 'assets/icons/light.svg';
 import { isMobile } from '@walletconnect/browser-utils';
 import classNames from 'classnames';
 import React, { memo, useContext, useEffect, useState } from 'react';
@@ -91,6 +92,35 @@ const Menu: React.FC<{}> = React.memo((props) => {
                 </div>
                 <div className={classNames(styles.wallet)}>
                     <Button type='primary' onClick={() => console.log('ok')}>Connect Wallet</Button>
+                    {theme === 'dark' ? (
+                        <button
+                            style={{ paddingLeft: 20 }}
+                            className={classNames(styles.menu_theme, {
+                                [styles.active]: theme === 'dark'
+                            })}
+                            onClick={() => {
+                                setTheme('light');
+                            }}
+                        >
+                            <Light style={{ width: 14, height: 14 }} />
+                        </button>
+                    ) : (
+                        <button
+                            style={{ paddingLeft: 20 }}
+                            className={classNames(
+                                styles.menu_theme,
+                                {
+                                    [styles.active]: theme === 'light'
+                                },
+                                styles[theme]
+                            )}
+                            onClick={() => {
+                                setTheme('dark');
+                            }}
+                        >
+                            <Dark style={{ width: 14, height: 14 }} />
+                        </button>
+                    )}
                 </div>
             </div>
         </>
