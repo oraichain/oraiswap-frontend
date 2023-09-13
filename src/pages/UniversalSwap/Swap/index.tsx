@@ -204,11 +204,7 @@ const SwapComponent: React.FC<{
         simulateData.amount,
         userSlippage
       );
-      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
-        metamaskAddress,
-        tronAddress,
-        oraiAddress
-      });
+      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId);
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,
         originalFromToken,

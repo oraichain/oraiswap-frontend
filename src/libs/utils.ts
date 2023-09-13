@@ -1,4 +1,4 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
@@ -12,7 +12,7 @@ import { WalletType } from 'config/constants';
 import { network } from 'config/networks';
 import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { collectWallet } from 'libs/cosmjs';
+import { ExecuteMultipleMsg, collectWallet } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
 
 export const truncDecimals = 6;
@@ -173,23 +173,6 @@ export const toAssetInfo = (token: TokenInfo): AssetInfo => {
         }
       }
     : { native_token: { denom: token.denom } };
-};
-
-export const buildMultipleMessages = (mainMsg?: any, ...preMessages: any[]) => {
-  try {
-    var messages: any[] = mainMsg ? [mainMsg] : [];
-    messages.unshift(...preMessages.flat(1));
-    messages = messages.map((msg) => {
-      return {
-        contractAddress: msg.contract,
-        handleMsg: msg.msg,
-        handleOptions: { funds: msg.sent_funds }
-      };
-    });
-    return messages;
-  } catch (error) {
-    console.log('error in buildMultipleMessages', error);
-  }
 };
 
 export const formateNumberDecimals = (price, decimals = 2) => {

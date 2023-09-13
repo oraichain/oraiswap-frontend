@@ -122,20 +122,18 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = generateMiningMsgs({
+      const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
         assetToken: assetToken
       } as WithdrawMining);
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
       console.log('result provide tx hash: ', result);
 

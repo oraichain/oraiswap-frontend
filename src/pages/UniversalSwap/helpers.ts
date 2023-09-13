@@ -21,13 +21,11 @@ import {
   CwIcs20LatestReadOnlyInterface,
   Uint128
 } from '@oraichain/common-contracts-sdk';
-import CosmJs, { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
+import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
-import { atomic, buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
-import { getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
-import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
-import { findToTokenOnOraiBridge } from 'pages/Balance/helpers';
+import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
+import { findToTokenOnOraiBridge, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
 import {
   SwapQuery,
   Type,
@@ -43,7 +41,7 @@ import {
 } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
-import { SimulateSwapOperationsResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
+import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
 export enum SwapDirection {
@@ -194,22 +192,18 @@ export class UniversalSwapHandler {
     return toAmount(result, decimals).toString();
   }
 
-  async getUniversalSwapToAddress(
-    toChainId: NetworkChainId,
-    address: { metamaskAddress?: string; tronAddress?: string; oraiAddress?: string }
-  ): Promise<string> {
+  async getUniversalSwapToAddress(toChainId: NetworkChainId): Promise<string> {
     // evm based
     if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x38') {
-      return address.metamaskAddress ?? (await window.Metamask.getEthAddress());
+      return await window.Metamask.getEthAddress();
     }
     // tron
     if (toChainId === '0x2b6653dc') {
-      if (address.tronAddress) return tronToEthAddress(address.tronAddress);
       if (window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
         return tronToEthAddress(window.tronWeb.defaultAddress.base58);
-      throw 'Cannot find tron web to nor tron address to send to Tron network';
+      return await window.Metamask.getEthAddress();
     }
-    return address.oraiAddress ?? (await window.Keplr.getKeplrAddr(toChainId));
+    return await window.Keplr.getKeplrAddr(toChainId);
   }
 
   /**
@@ -238,7 +232,7 @@ export class UniversalSwapHandler {
     // if not same coingeckoId, swap first then transfer token that have same coingeckoid.
     if (this.originalFromToken.coinGeckoId !== this.originalToToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      const msgExecuteSwap = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgSwap));
+      const msgExecuteSwap = getEncodedExecuteContractMsgs(this.sender, msgSwap);
       return [...msgExecuteSwap, msgTransfer];
     }
     return [msgTransfer];
@@ -270,7 +264,7 @@ export class UniversalSwapHandler {
     // if from and to dont't have same coingeckoId, create swap msg to combine with bridge msg
     if (this.originalFromToken.coinGeckoId !== this.originalToToken.coinGeckoId) {
       const msgSwap = this.generateMsgsSwap();
-      msgExecuteSwap = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgSwap));
+      msgExecuteSwap = getEncodedExecuteContractMsgs(this.sender, msgSwap);
     }
 
     // then find new _toToken in Oraibridge that have same coingeckoId with originalToToken.
@@ -283,7 +277,7 @@ export class UniversalSwapHandler {
 
     // create bridge msg
     const msgTransfer = this.generateMsgsTransferOraiToEvm(ibcInfo, toAddress, ibcMemo);
-    const msgExecuteTransfer = getExecuteContractMsgs(this.sender, parseExecuteContractMultiple(msgTransfer));
+    const msgExecuteTransfer = getEncodedExecuteContractMsgs(this.sender, msgTransfer);
     return [...msgExecuteSwap, ...msgExecuteTransfer];
   }
 
@@ -482,7 +476,7 @@ export class UniversalSwapHandler {
         this.userSlippage,
         this.originalFromToken.decimals
       );
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.SWAP,
         sender: this.sender,
         amount: _fromAmount,
@@ -490,10 +484,8 @@ export class UniversalSwapHandler {
         toInfo: this.toTokenInOrai ?? this.originalToToken,
         minimumReceive
       } as SwapQuery);
-      const msg = msgs[0];
 
-      const messages = buildMultipleMessages(msg);
-      return messages;
+      return buildMultipleExecuteMessages(msg);
     } catch (error) {
       throw new Error(`Error generateMsgsSwap: ${error}`);
     }
@@ -529,13 +521,12 @@ export class UniversalSwapHandler {
           transfer_to_remote: msg
         };
 
-        const msgs = {
-          contract: ibcWasmContractAddress,
-          msg: Buffer.from(JSON.stringify(executeMsgSend)),
-          sender: this.sender,
-          sent_funds: [{ amount: this.simulateAmount, denom: ORAI }]
+        const msgs: cosmwasm.ExecuteInstruction = {
+          contractAddress: ibcWasmContractAddress,
+          msg: executeMsgSend,
+          funds: [{ amount: this.simulateAmount, denom: ORAI }]
         };
-        return buildMultipleMessages(msgs);
+        return buildMultipleExecuteMessages(msgs);
       }
 
       const executeMsgSend = {
@@ -548,13 +539,12 @@ export class UniversalSwapHandler {
 
       // generate contract message for CW20 token in Oraichain.
       // Example: tranfer USDT/Oraichain -> AIRI/BSC. _toTokenInOrai is AIRI in Oraichain.
-      const msgs = {
-        contract: this.toTokenInOrai.contractAddress,
-        msg: Buffer.from(JSON.stringify(executeMsgSend)),
-        sender: this.sender,
-        sent_funds: []
+      const msgs: cosmwasm.ExecuteInstruction = {
+        contractAddress: this.toTokenInOrai.contractAddress,
+        msg: executeMsgSend,
+        funds: []
       };
-      return buildMultipleMessages(msgs);
+      return buildMultipleExecuteMessages(msgs);
     } catch (error) {
       console.log({ error });
     }

@@ -1,4 +1,4 @@
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import {
@@ -300,8 +300,11 @@ async function fetchDistributionInfo(assetToken: TokenInfo): Promise<OraiswapRew
   return data;
 }
 
-function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: TokenItemType, sender: string) {
-  let msgConverts: any[] = [];
+function generateConvertErc20Cw20Message(
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType,
+  sender: string
+): ExecuteInstruction[] {
   if (!tokenInfo.evmDenoms) return [];
   const subAmounts = getSubAmountDetails(amounts, tokenInfo);
   // we convert all mapped tokens to cw20 to unify the token
@@ -310,16 +313,16 @@ function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: Toke
     // reset so we convert using native first
     const erc20TokenInfo = tokenMap[denom];
     if (balance > 0) {
-      const msgConvert = generateConvertMsgs({
+      const msgConvert: ExecuteInstruction = generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
         sender,
         inputAmount: balance.toString(),
         inputToken: erc20TokenInfo
-      })[0];
-      msgConverts.push(msgConvert);
+      });
+      return [msgConvert];
     }
   }
-  return msgConverts;
+  return [];
 }
 
 function generateConvertCw20Erc20Message(
@@ -327,8 +330,7 @@ function generateConvertCw20Erc20Message(
   tokenInfo: TokenItemType,
   sender: string,
   sendCoin: Coin
-) {
-  let msgConverts: any[] = [];
+): ExecuteInstruction[] {
   if (!tokenInfo.evmDenoms) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let denom of tokenInfo.evmDenoms) {
@@ -355,11 +357,11 @@ function generateConvertCw20Erc20Message(
         inputAmount: balance,
         inputToken: tokenInfo,
         outputToken
-      })[0];
-      msgConverts.push(msgConvert);
+      });
+      return [msgConvert];
     }
   }
-  return msgConverts;
+  return [];
 }
 
 function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
@@ -617,18 +619,18 @@ export type IncreaseAllowanceQuery = {
 
 function generateContractMessages(
   query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery | TransferQuery
-) {
+): ExecuteInstruction {
   const { type, sender, ...params } = query;
-  let sent_funds;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input;
+  let input: any;
   switch (type) {
     case Type.SWAP:
       const swapQuery = params as SwapQuery;
       const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(swapQuery.fromInfo, swapQuery.amount.toString());
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(swapQuery.toInfo);
-      sent_funds = handleSentFunds(offerSentFund, askSentFund);
+      funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs(offerInfo, askInfo),
@@ -653,7 +655,7 @@ function generateContractMessages(
       const provideQuery = params as ProvideQuery;
       const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(provideQuery.fromInfo, provideQuery.fromAmount);
       const { fund: toSentFund, info: toInfoData } = parseTokenInfo(provideQuery.toInfo, provideQuery.toAmount);
-      sent_funds = handleSentFunds(fromSentFund, toSentFund);
+      funds = handleSentFunds(fromSentFund, toSentFund);
       input = {
         provide_liquidity: {
           assets: [
@@ -705,16 +707,13 @@ function generateContractMessages(
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 export type BondMining = {
@@ -738,12 +737,12 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
-  const { type, sender, ...params } = msg;
-  let sent_funds;
+function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity): ExecuteInstruction {
+  const { type, sender, ...params } = data;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input;
+  let input: JsonObject;
   switch (type) {
     case Type.BOND_LIQUIDITY: {
       const bondMsg = params as BondMining;
@@ -785,16 +784,13 @@ function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) 
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 export type Convert = {
@@ -812,12 +808,12 @@ export type ConvertReverse = {
   outputToken: TokenItemType;
 };
 
-function generateConvertMsgs(msg: Convert | ConvertReverse) {
-  const { type, sender, inputToken, inputAmount } = msg;
-  let sent_funds;
+function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction {
+  const { type, sender, inputToken, inputAmount } = data;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.converter;
-  let input;
+  let input: any;
   switch (type) {
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
@@ -827,7 +823,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
         input = {
           convert: {}
         };
-        sent_funds = handleSentFunds(fund);
+        funds = handleSentFunds(fund);
       } else {
         // cw20 case
         input = {
@@ -844,7 +840,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
       break;
     }
     case Type.CONVERT_TOKEN_REVERSE: {
-      const { outputToken } = msg as ConvertReverse;
+      const { outputToken } = data as ConvertReverse;
 
       // currently only support cw20 token pool
       let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
@@ -856,7 +852,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
             from_asset: outputAssetInfo
           }
         };
-        sent_funds = handleSentFunds(fund);
+        funds = handleSentFunds(fund);
       } else {
         // cw20 case
         input = {
@@ -878,16 +874,13 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 export type Claim = {

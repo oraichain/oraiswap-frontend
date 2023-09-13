@@ -11,17 +11,9 @@ import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import CosmJs, { buildMultipleExecuteMessages, HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import {
-  buildMultipleMessages,
-  getSubAmountDetails,
-  getUsd,
-  toAmount,
-  toDecimal,
-  toDisplay,
-  toSumDisplay
-} from 'libs/utils';
+import { getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
@@ -192,7 +184,7 @@ const LiquidityModal: FC<ModalProps> = ({
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = generateContractMessages({
+    const msg = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -200,14 +192,12 @@ const LiquidityModal: FC<ModalProps> = ({
       token
     });
 
-    const msg = msgs[0];
-
     const result = await CosmJs.execute({
-      address: msg.contract,
+      address: msg.contractAddress,
       walletAddr,
-      handleMsg: msg.msg.toString(),
+      handleMsg: msg.msg,
       gasAmount: { denom: ORAI, amount: '0' },
-      handleOptions: { funds: msg.sent_funds } as HandleOptions
+      funds: msg.funds
     });
     console.log('result increase allowance tx hash: ', result);
 
@@ -240,7 +230,7 @@ const LiquidityModal: FC<ModalProps> = ({
       const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, oraiAddress);
       const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, oraiAddress);
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.PROVIDE,
         sender: oraiAddress,
         fromInfo: token1InfoData!,
@@ -251,9 +241,7 @@ const LiquidityModal: FC<ModalProps> = ({
         // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
       } as ProvideQuery);
 
-      const msg = msgs[0];
-
-      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
+      var messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -284,7 +272,7 @@ const LiquidityModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress();
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.WITHDRAW,
         sender: oraiAddress,
         lpAddr: lpTokenInfoData!.contractAddress!,
@@ -292,15 +280,13 @@ const LiquidityModal: FC<ModalProps> = ({
         pair: pairInfoData.contract_addr
       });
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
 
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
+        funds: msg.funds
       });
 
       console.log('result provide tx hash: ', result);

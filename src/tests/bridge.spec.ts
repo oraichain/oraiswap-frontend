@@ -16,8 +16,8 @@ import {
 import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
-import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
-import { buildMultipleMessages, toAmount } from 'libs/utils';
+import { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
+import { toAmount } from 'libs/utils';
 import Long from 'long';
 import { findDefaultToToken, getSourceReceiver } from 'pages/Balance/helpers';
 import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
@@ -75,17 +75,16 @@ describe('bridge', () => {
     it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
       // check if the sender and contract address are correct
       for (const msg of msgConvertReverses) {
-        expect(msg.contract).toBe(fromToken.contractAddress);
-        expect(msg.sender).toBe(keplrAddress);
+        expect(msg.contractAddress).toBe(fromToken.contractAddress);
       }
 
       expect(Array.isArray(msgConvertReverses)).toBe(true);
     });
 
     it('bridge-transfer-token-erc20-cw20-should-return-only-execute-convert-reverses', async () => {
-      const executeContractMsgs = getExecuteContractMsgs(
+      const executeContractMsgs = getEncodedExecuteContractMsgs(
         keplrAddress,
-        parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
+        buildMultipleExecuteMessages(undefined, ...msgConvertReverses)
       );
       expect(Array.isArray(executeContractMsgs)).toBe(true);
     });
