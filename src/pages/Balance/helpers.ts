@@ -23,7 +23,12 @@ import {
   OraiswapTokenQueryClient,
   OraiswapTokenReadOnlyInterface
 } from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs, HandleOptions } from 'libs/cosmjs';
+import CosmJs, {
+  buildMultipleExecuteMessages,
+  connectWithSigner,
+  getEncodedExecuteContractMsgs,
+  HandleOptions
+} from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
@@ -132,22 +137,25 @@ export const transferIBC = async (data: {
   toAddress: string;
   amount: Coin;
   ibcInfo: IBCInfo;
+  memo?: string;
 }): Promise<DeliverTxResponse> => {
-  const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
-  const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner);
-  const result = await client.sendIbcTokens(
+  const { fromToken, fromAddress, toAddress, amount, ibcInfo, memo } = data;
+  const transferMsg: MsgTransfer = {
+    sourcePort: ibcInfo.source,
+    sourceChannel: ibcInfo.channel,
+    token: amount,
+    sender: fromAddress,
+    receiver: toAddress,
+    memo,
+    timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
+    timeoutHeight: undefined
+  };
+  const result = await transferIBCMultiple(
     fromAddress,
-    toAddress,
-    amount,
-    ibcInfo.source,
-    ibcInfo.channel,
-    undefined,
-    parseInt(calculateTimeoutTimestamp(ibcInfo.timeout)),
-    {
-      gas: '200000',
-      amount: []
-    }
+    fromToken.chainId as CosmosChainId,
+    fromToken.rpc,
+    fromToken.denom,
+    [transferMsg]
   );
   return result;
 };
@@ -290,27 +298,27 @@ export const transferEvmToIBC = async (
 
 export const transferIBCMultiple = async (
   fromAddress: string,
-  chainId: CosmosChainId,
+  fromChainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
   messages: MsgTransfer[]
-) => {
+): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
     value: MsgTransfer.fromPartial(message)
   }));
-  const offlineSigner = await window.Keplr.getOfflineSigner(chainId);
+  const offlineSigner = await window.Keplr.getOfflineSigner(fromChainId);
   const aminoTypes = new AminoTypes({
     ...customAminoTypes
   });
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await SigningStargateClient.connectWithSigner(rpc, offlineSigner, {
+  const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'stargate', {
     registry: customRegistry,
     aminoTypes,
     gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${feeDenom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
-  return result;
+  return result as DeliverTxResponse;
 };
 
 export const transferTokenErc20Cw20Map = async ({

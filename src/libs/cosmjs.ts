@@ -1,9 +1,10 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
-import { EncodeObject } from '@cosmjs/proto-signing';
-import { Coin, GasPrice } from '@cosmjs/stargate';
+import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
+import { Coin, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
+import { InjectiveSigningStargateClient } from '@injectivelabs/sdk-ts/dist/esm/core/stargate';
 
 /**
  * The options of an .instantiate() call.
@@ -20,6 +21,8 @@ export interface ExecuteMultipleMsg {
   handleOptions?: HandleOptions;
 }
 
+export type clientType = 'stargate' | 'injective';
+
 const collectWallet = async (chainId?: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
@@ -27,6 +30,15 @@ const collectWallet = async (chainId?: string) => {
   }
   // use keplr instead
   return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
+};
+
+export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
+  switch (clientType) {
+    case 'stargate':
+      return SigningStargateClient.connectWithSigner(rpc, signer, options);
+    case 'injective':
+      return InjectiveSigningStargateClient.connectWithSigner(rpc, signer, options);
+  }
 };
 
 const getCosmWasmClient = async (chainId?: string) => {
