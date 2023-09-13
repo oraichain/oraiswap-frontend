@@ -2585,10 +2585,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.28.tgz#a8d7a368d3503f1cbed9e7f93f5c088f5ceecbc7"
   integrity sha512-zceqDRR14ZyrNEt4KuCcF14qE5pE++49oudjwlQkf1wF2bv32R8pKckAd4zZMcKEmkfQk6o7XEtDo3r4w/Gw3Q==
 
-"@oraichain/common-contracts-sdk@^1.0.29":
-  version "1.0.29"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.29.tgz#bdc0b735fcc7d38f9f9db782971aec80d3b88b83"
-  integrity sha512-2TWqd7dWtaOAa7Vbvt8wzUpg1EIyMI2Olm565COOb334sXuCElXnqj7+JhYbA6mucXNS45rUzf2VleH4Hl1t+w==
+"@oraichain/common-contracts-sdk@^1.0.30":
+  version "1.0.30"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.30.tgz#c932d05179c4051dc0cece6d285af2f5da7604b2"
+  integrity sha512-NsEEo8tNqe/xYb0uIi9X58PTZ/Y/agJmfQtOt5WAJZWoFLynNL1ntEET+bj1NMUtk3uZaSNFiz4BZrChAy+NTg==
 
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"

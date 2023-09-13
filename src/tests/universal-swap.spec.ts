@@ -177,7 +177,7 @@ describe('universal-swap', () => {
 
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 5],
-    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 20],
+    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 18],
     ['Oraichain', 'oraichain-token', 'orai', '', SwapDirection.To, 18],
     ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 20],
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 8],

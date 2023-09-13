@@ -211,15 +211,6 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: AtomIcon,
       IconLight: AtomLightIcon
     },
-    {
-      coinDenom: 'INJ',
-      coinGeckoId: 'injective-protocol',
-      coinMinimalDenom: process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM,
-      bridgeTo: ['injective-1'],
-      coinDecimals: 18,
-      Icon: InjIcon,
-      IconLight: InjIcon
-    },
     // {
     //   coinDenom: 'BEP20 AIRI',
     //   coinGeckoId: 'airight',
@@ -337,6 +328,15 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'scatom',
       coinDecimals: 6,
       Icon: ScAtomIcon
+    },
+    {
+      coinDenom: 'INJ',
+      coinGeckoId: 'injective-protocol',
+      coinMinimalDenom: process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM,
+      bridgeTo: ['injective-1'],
+      coinDecimals: 18,
+      Icon: InjIcon,
+      IconLight: InjIcon
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -539,7 +539,7 @@ export const chainInfos: CustomChainInfo[] = [
     chainName: 'Injective',
     networkType: 'cosmos',
     bip44: {
-      coinType: 118
+      coinType: 60
     },
     Icon: InjIcon,
     IconLight: InjIcon,

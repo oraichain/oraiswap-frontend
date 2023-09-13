@@ -8,7 +8,7 @@ import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.t
 
 import { network } from './networks';
 import { PairInfoExtend } from 'types/token';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];

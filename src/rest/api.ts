@@ -12,7 +12,9 @@ import {
   OraiswapRewarderTypes,
   OraiswapStakingTypes,
   OraiswapTokenTypes,
-  OraiswapOracleQueryClient
+  OraiswapOracleQueryClient,
+  AssetInfo,
+  PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
 import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
@@ -37,7 +39,6 @@ import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
-import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapFactory.types';
 import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 

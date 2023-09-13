@@ -11,7 +11,6 @@ import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
 import {
@@ -46,6 +45,7 @@ import { updateLpPools } from 'reducer/token';
 import { fetchCacheLpPools } from '../helpers';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { isBigIntZero } from '../helpers';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 

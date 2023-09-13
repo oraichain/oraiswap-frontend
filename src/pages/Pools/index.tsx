@@ -27,7 +27,7 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
 import { RewardPoolType } from 'reducer/config';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 interface PoolsProps {}
 

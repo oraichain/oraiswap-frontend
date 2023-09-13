@@ -1,7 +1,7 @@
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
-import { AssetInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';

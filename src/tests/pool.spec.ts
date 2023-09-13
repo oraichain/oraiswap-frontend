@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/proto-signing';
-import { assetInfoMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { assetInfoMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
@@ -39,7 +39,7 @@ import {
 } from './listing-simulate';
 import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 import { parseAssetInfo } from 'helper';
-import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 
 /**
@@ -138,9 +138,13 @@ describe('pool', () => {
     let allLpTokenInfos: TokenInfo[] = [];
     let allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[] = [];
 
-    const fromTokenInfo = flattenTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
-    const usdtTokenInfo = flattenTokens.find((t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain');
-    const airiTokenInfo = flattenTokens.find((t) => t.name === 'AIRI' && t.decimals === 6 && t.chainId === 'Oraichain');
+    const fromTokenInfo = oraichainTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
+    const usdtTokenInfo = oraichainTokens.find(
+      (t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
+    const airiTokenInfo = oraichainTokens.find(
+      (t) => t.name === 'AIRI' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
     usdtTokenInfo.contractAddress = usdtContractAddress;
     airiTokenInfo.contractAddress = airiContractAddress;
 

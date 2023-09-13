@@ -2,7 +2,14 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
-import { TokenItemType, UniversalSwapType, gravityContracts, oraichainTokens, swapToTokens } from 'config/bridgeTokens';
+import {
+  TokenItemType,
+  UniversalSwapType,
+  gravityContracts,
+  oraichainTokens,
+  swapFromTokens,
+  swapToTokens
+} from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
@@ -121,7 +128,8 @@ export function filterNonPoolEvmTokens(
   direction: SwapDirection // direction = to means we are filtering to tokens
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
-  let filteredToTokens = swapToTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
+  const listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
+  let filteredToTokens = listTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
   // special case for tokens not having a pool on Oraichain
   if (isSupportedNoPoolSwapEvm(coingeckoId)) {
     const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
@@ -136,8 +144,9 @@ export function filterNonPoolEvmTokens(
   if (!isEvmNetworkNativeSwapSupported(chainId as NetworkChainId))
     return filteredToTokens.filter((t) => {
       // one-directional swap. non-pool tokens of evm network can swap be swapped with tokens on Oraichain, but not vice versa
-      if (direction === SwapDirection.To) return !isSupportedNoPoolSwapEvm(t.coinGeckoId);
-      if (isSupportedNoPoolSwapEvm(t.coinGeckoId)) {
+      const isSupported = isSupportedNoPoolSwapEvm(t.coinGeckoId);
+      if (direction === SwapDirection.To) return !isSupported;
+      if (isSupported) {
         // if we cannot find any matched token then we dont include it in the list since it cannot be swapped
         const sameChainId = getTokenOnSpecificChainId(coingeckoId, t.chainId as NetworkChainId);
         if (!sameChainId) return false;

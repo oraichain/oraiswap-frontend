@@ -14,7 +14,7 @@ import {
 import { MulticallTypes } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 dotenv.config();
 

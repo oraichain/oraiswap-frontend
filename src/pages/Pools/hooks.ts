@@ -20,7 +20,7 @@ import { PairInfoExtend } from 'types/token';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { fetchRewardPerSecInfo } from 'rest/api';
 import { RewardPoolType } from 'reducer/config';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk/build/OraiswapPair.types';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
