@@ -295,7 +295,7 @@ const SwapComponent: React.FC<{
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
             />
-            {!isSelectFrom && (
+            {isSelectFrom && (
               <SelectTokenModalV2
                 close={() => setIsSelectFrom(false)}
                 prices={prices}

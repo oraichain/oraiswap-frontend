@@ -18,6 +18,7 @@
   left: 0;
   right: 0;
   z-index: 1;
+  font-weight: 600;
 
   .title {
     display: flex;
@@ -25,10 +26,22 @@
     gap: 5px;
     margin-bottom: 25px;
     font-style: normal;
-    font-weight: 600;
     font-size: 18px;
-    line-height: 100%;
     text-align: center;
+  }
+
+  .details {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    img {
+      cursor: pointer;
+    }
+    .network {
+      color: #1e300a;
+      text-align: center;
+      font-size: 16px;
+    }
   }
 
   .label {
@@ -39,9 +52,33 @@
       color: theme-get('neutral-1');
     }
     font-size: 16px;
-    font-weight: 600;
+    font-style: normal;
     padding-bottom: 12px;
-    .left {
+    .right {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .all-network {
+        display: flex;
+        flex-direction: column;
+        .detail {
+          text-align: center;
+          font-size: 14px;
+          font-weight: 500;
+          @include theme() {
+            color: theme-get('neutral-2');
+          }
+        }
+        .balance {
+          @include theme() {
+            color: theme-get('neutral-3');
+          }
+          font-size: 13px;
+          font-weight: 400;
+        }
+      }
     }
   }
 
