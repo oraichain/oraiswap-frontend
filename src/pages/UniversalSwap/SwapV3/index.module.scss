@@ -27,6 +27,48 @@
     backdrop-filter: none;
   }
 
+  .header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    padding: 10px 10px 16px;
+    .title {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 100%;
+      margin: 5.5px 0;
+      flex-grow: 1;
+
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+
+      @include theme() {
+        color: theme-get('text-color');
+      }
+    }
+
+    .btn {
+      cursor: pointer;
+      display: flex;
+      border-radius: 8px;
+      padding: 12px;
+
+      @include theme() {
+        background-color: theme-get('bg-color-secondary');
+      }
+
+      svg {
+        path {
+          @include theme() {
+            fill: theme-get('svg-fill-color');
+          }
+        }
+      }
+    }
+  }
+
   .from,
   .to {
     display: flex;
@@ -61,48 +103,6 @@
     }
 
     /* Inside auto layout */
-
-    .header {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      gap: 12px;
-
-      .title {
-        font-style: normal;
-        font-weight: 600;
-        font-size: 16px;
-        line-height: 100%;
-        margin: 5.5px 0;
-        flex-grow: 1;
-
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-
-        @include theme() {
-          color: theme-get('text-color');
-        }
-      }
-
-      .btn {
-        cursor: pointer;
-        display: flex;
-        border-radius: 8px;
-        padding: 12px;
-
-        @include theme() {
-          background-color: theme-get('bg-color-secondary');
-        }
-
-        svg {
-          path {
-            @include theme() {
-              fill: theme-get('svg-fill-color');
-            }
-          }
-        }
-      }
-    }
 
     .token-info {
       flex-grow: 1;
@@ -307,30 +307,53 @@
 
 .swap-icon {
   padding: 5px;
-
   @include theme() {
     background-color: theme-get('bg-btn-switch');
   }
-
-  img {
-    cursor: pointer;
-    height: 44px;
-    width: 44px;
+  .wrap-img {
     position: absolute;
     transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @include theme() {
+      background-color: theme-get('neutral-white');
+      border: 6px solid theme-get('neutral-white');
+    }
+    img {
+      border-radius: 50%;
+      background-color: #f7f7f7;
+      cursor: pointer;
+      height: 38px;
+      width: 38px;
+      // position: absolute;
+      // transform: translate(-50%, -50%);
+    }
   }
 }
 
 .swap-btn {
   width: 100%;
-  background: $blue-color;
+  // background: $blue-color;
+
+  @include theme() {
+    background-color: theme-get('primary-1');
+    color: #505665;
+  }
+  &.disable {
+    @include theme() {
+      background-color: theme-get('neutral-5');
+      color: theme-get('neutral-8');
+    }
+  }
   /* Inner/Button */
 
   @include theme() {
     box-shadow: theme-get('shadow-btn');
   }
 
-  border-radius: 8px;
+  border-radius: 20px;
 
   padding: 16px;
 
@@ -350,7 +373,7 @@
   color: #ffffff;
   cursor: pointer;
 
-  margin: 20px 0;
+  margin: 16px 0;
   height: 60px;
 
   svg {
@@ -359,13 +382,14 @@
 }
 
 .detail {
+  padding: 16px;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
-
+  border-radius: 8px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 14px;
   line-height: 150%;
   /* identical to box height, or 21px */
@@ -374,8 +398,10 @@
   font-feature-settings: 'ss03' on;
 
   /* aiRight/Gray 3 */
-
-  color: #777e90;
+  @include theme() {
+    background-color: theme-get('neutral-6');
+    color: theme-get('neutral-8');
+  }
 
   .row {
     display: flex;

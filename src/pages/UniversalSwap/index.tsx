@@ -21,6 +21,7 @@ const Swap: React.FC = () => {
               <TVChartContainer />
             </div>
             <RoutingSection />
+            <RoutingSection />
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>

@@ -51,6 +51,14 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
           }
         />
       </div>
+      <div className={cx('label')}>
+        <div className={cx('left')}>
+          Token List
+        </div>
+        <div className={cx('right')}>
+          All Networks
+        </div>
+      </div>
       <div className={cx('options')}>
         {items?.map((item: TokenItemType | CustomChainInfo) => {
           let key: string, title: string, balance: string, org: string;
