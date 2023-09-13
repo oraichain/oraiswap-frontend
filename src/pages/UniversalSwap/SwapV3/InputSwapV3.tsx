@@ -1,10 +1,12 @@
 import styles from './InputSwap.module.scss';
 import cn from 'classnames/bind';
 import NumberFormat from 'react-number-format';
-import { CoinIcon } from 'config/chainInfos';
+import { CoinGeckoId, CoinIcon } from 'config/chainInfos';
 import { TokenItemType } from 'config/bridgeTokens';
 import TokenBalance from 'components/TokenBalance';
 import ArrowImg from 'assets/icons/arrow_new.svg';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { TokenInfo } from 'types/token';
 
 const cx = cn.bind(styles);
 
@@ -13,12 +15,13 @@ interface InputSwapProps {
   setIsSelectFrom: (value: boolean) => void;
   token: TokenItemType;
   amount: number;
+  prices?: CoinGeckoPrices<CoinGeckoId>;
   tokenFee: number;
   onChangeAmount?: (amount: number | undefined) => void;
   balance: string | bigint;
   disable?: boolean;
-  tokenInfoData?: any;
-  originalToken?: any;
+  tokenInfoData?: TokenInfo;
+  originalToken?: TokenInfo;
 }
 
 export default function InputSwapV3({
@@ -31,6 +34,7 @@ export default function InputSwapV3({
   balance,
   disable,
   tokenInfoData,
+  prices,
   originalToken
 }: InputSwapProps) {
   return (
@@ -73,7 +77,7 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>$0.00</div>
+        <div>≈ ${amount && ((prices?.[tokenInfoData?.coinGeckoId] * amount) || 0).toFixed(6)}</div>
       </div>
       <div className={cx('input-swap-fee')}>
         <div>Fee: 0.1%</div>

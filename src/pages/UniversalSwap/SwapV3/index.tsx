@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import SwitchImg from 'assets/icons/switch.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
@@ -46,7 +47,7 @@ const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
   [0.5, '50%'],
   [0.75, '75%'],
-  [1, 'MAX']
+  [1, '100%']
 ];
 
 const cx = cn.bind(styles);
@@ -88,7 +89,11 @@ const SwapComponent: React.FC<{
   };
 
   const onChangeFromAmount = (amount: number | undefined) => {
-    if (!amount) return setSwapAmount([undefined, toAmountToken]);
+    if (!amount) {
+      setCoe(0);
+      setSwapAmount([undefined, toAmountToken]);
+      return;
+    }
     setSwapAmount([amount, toAmountToken]);
   };
 
@@ -263,25 +268,25 @@ const SwapComponent: React.FC<{
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>
+        <div className={cx('header')}>
+          <div className={cx('title')}>Universal Swap & Bridge</div>
+          <TooltipIcon
+            placement="bottom-end"
+            visible={visible}
+            setVisible={setVisible}
+            content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+          />
+          <button className={cx('btn')} onClick={refreshBalances}>
+            <RefreshImg />
+          </button>
+        </div>
         <div className={cx('from')}>
-          <div className={cx('header')}>
-            <div className={cx('title')}>Universal Swap & Bridge</div>
-            <TooltipIcon
-              placement="bottom-end"
-              visible={visible}
-              setVisible={setVisible}
-              content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
-            />
-            <button className={cx('btn')} onClick={refreshBalances}>
-              <RefreshImg />
-            </button>
-          </div>
-
           <div className={cx('input-wrapper')}>
             <InputSwap
               balance={fromTokenBalance}
               tokenInfoData={fromTokenInfoData}
               originalToken={originalFromToken}
+              prices={prices}
               ////////////
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
@@ -290,7 +295,7 @@ const SwapComponent: React.FC<{
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
             />
-            {isSelectFrom && (
+            {!isSelectFrom && (
               <SelectTokenModalV2
                 close={() => setIsSelectFrom(false)}
                 prices={prices}
@@ -305,31 +310,38 @@ const SwapComponent: React.FC<{
           </div>
         </div>
         <div className={cx('swap-icon')}>
-          <img
-            src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
-            onClick={() => {
-              // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
-              // because non-evm token cannot be swapped to evm token with no Oraichain pool
-              if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId))
-                return;
-              setSwapTokens([toTokenDenom, fromTokenDenom]);
-              setSwapAmount([toAmountToken, fromAmountToken]);
-            }}
-            alt="ant"
-          />
+          <div className={cx('wrap-img')}>
+            <img
+              // src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
+              src={theme === 'light' ? SwitchImg : SwitchImg}
+              onClick={() => {
+                // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+                // because non-evm token cannot be swapped to evm token with no Oraichain pool
+                if (
+                  isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
+                  !isEvmNetworkNativeSwapSupported(toToken.chainId)
+                )
+                  return;
+                setSwapTokens([toTokenDenom, fromTokenDenom]);
+                setSwapAmount([toAmountToken, fromAmountToken]);
+              }}
+              alt="ant"
+            />
+          </div>
         </div>
         <div className={cx('to')}>
-          <div className={cx('balance')}>
+          {/* <div className={cx('balance')}>
             <span style={{ flexGrow: 1, textAlign: 'right' }}>
               {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
             </span>
-          </div>
+          </div> */}
           <div className={cx('input-wrapper')}>
             <InputSwap
               balance={toTokenBalance}
               tokenInfoData={toTokenInfoData}
               originalToken={originalToToken}
               disable={true}
+              prices={prices}
               ////////////
               Icon={ToIcon}
               setIsSelectFrom={setIsSelectTo}
@@ -355,8 +367,8 @@ const SwapComponent: React.FC<{
           {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
             <button
               style={{
-                color: coe == coeff ? "black" : "inherit",
-                fontWeight: coe == coeff ? "600" : "inherit",
+                color: coe == coeff ? 'black' : 'inherit',
+                fontWeight: coe == coeff ? '600' : 'inherit'
               }}
               key={coeff}
               onClick={(event) => {
@@ -381,7 +393,7 @@ const SwapComponent: React.FC<{
             </button>
           ))}
         </div>
-        <button className={cx('swap-btn')} onClick={handleSubmit} disabled={isSwapBtn}>
+        <button className={cx('swap-btn', `${isSwapBtn ? "disable" : ""}`)} onClick={handleSubmit} disabled={isSwapBtn}>
           {swapLoading && <Loader width={40} height={40} />}
           {/* hardcode check minimum tron */}
           {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
