@@ -2585,6 +2585,11 @@
   resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.28.tgz#a8d7a368d3503f1cbed9e7f93f5c088f5ceecbc7"
   integrity sha512-zceqDRR14ZyrNEt4KuCcF14qE5pE++49oudjwlQkf1wF2bv32R8pKckAd4zZMcKEmkfQk6o7XEtDo3r4w/Gw3Q==
 
+"@oraichain/common-contracts-sdk@^1.0.29":
+  version "1.0.29"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.29.tgz#bdc0b735fcc7d38f9f9db782971aec80d3b88b83"
+  integrity sha512-2TWqd7dWtaOAa7Vbvt8wzUpg1EIyMI2Olm565COOb334sXuCElXnqj7+JhYbA6mucXNS45rUzf2VleH4Hl1t+w==
+
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
   resolved "https://registry.yarnpkg.com/@oraichain/cosmosjs/-/cosmosjs-0.0.94.tgz#35f1a045737b86015f728aa22b1a974058eb4104"
@@ -2664,10 +2669,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.19.tgz#bfee69c75e4a01c6d68931066d4f3fd8124a6883"
   integrity sha512-UhZXsFvUnJo47H9qaPTckYItzdFDalndcYdjveV3esD0wuj+9olq/Sfq5+CGw13txrYirx9yr5y5J4xR9V+kLA==
 
-"@oraichain/oraidex-contracts-sdk@^1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.20.tgz#700a13ffbfb21ac17146f87ca6ec4ddeaef3d4fa"
-  integrity sha512-HTbU5DnwgqbW1QWhGuZzFAHnr/4mqwq2ADf0WU4EhSar52hyOA0NFiEuRleCRiD6M3QIWG3JqlOV1SJCMTP7Ig==
+"@oraichain/oraidex-contracts-sdk@^1.0.21":
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.21.tgz#b9ed12c93bf187830684088954f46c3c9cdaaf74"
+  integrity sha512-HR8fj/a+er8VkU3TirzE6mpk+DwbFmWTuhV1JGa7ZUxIW5itn4k5SqvTINyuGq/yF47z/q/0hhTxiwm623FSiA==
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
