@@ -155,7 +155,8 @@ export const transferIBC = async (data: {
     fromToken.chainId as CosmosChainId,
     fromToken.rpc,
     fromToken.denom,
-    [transferMsg]
+    [transferMsg],
+    fromToken.prefix
   );
   return result;
 };
@@ -301,7 +302,8 @@ export const transferIBCMultiple = async (
   fromChainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
-  messages: MsgTransfer[]
+  messages: MsgTransfer[],
+  prefix?: string
 ): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -315,7 +317,7 @@ export const transferIBCMultiple = async (
   const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'stargate', {
     registry: customRegistry,
     aminoTypes,
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${feeDenom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
   return result as DeliverTxResponse;
