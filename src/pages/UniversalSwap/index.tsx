@@ -4,13 +4,15 @@ import Content from 'layouts/Content';
 import React, { useState } from 'react';
 import SwapComponent from './SwapV3';
 import styles from './index.module.scss';
-import { RoutingSection, HeaderTab } from './Component';
+import { RoutingSection, HeaderTab, TabsTxs, HistoryTab, AssetsTab } from './Component';
+import { TYPE } from './helpers';
 
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
   const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
   const [hideChart, setHideChart] = useState<boolean>(false);
+  const [type, setType] = useState<string>(TYPE.ASSETS);
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
@@ -21,7 +23,13 @@ const Swap: React.FC = () => {
               <TVChartContainer />
             </div>
             <RoutingSection />
-            <RoutingSection />
+            <TabsTxs type={type} setType={setType} />
+            {
+              type === TYPE.HISTORY && <HistoryTab />
+            }
+            {
+              type === TYPE.ASSETS && <AssetsTab />
+            }
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>

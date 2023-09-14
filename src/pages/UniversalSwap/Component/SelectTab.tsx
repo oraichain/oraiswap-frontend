@@ -1,4 +1,4 @@
-export const SelectTab = () => {
+export const SelectTab: React.FC<{}> = () => {
   return (
     <div>
       SelectTab

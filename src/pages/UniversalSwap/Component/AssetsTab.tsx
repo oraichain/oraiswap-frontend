@@ -1,9 +1,9 @@
-export const HistoryTab: React.FC<{}> = () => {
+export const AssetsTab: React.FC<{}> = () => {
   return (
     <div style={{
       height: 500
     }}>
-      HistoryTab
+      AssetsTab
     </div>
   );
 };

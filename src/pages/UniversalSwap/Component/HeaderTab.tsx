@@ -7,14 +7,17 @@ import cn from 'classnames/bind';
 import { useState } from 'react';
 
 const cx = cn.bind(styles);
+const arr: Array<string> = ['ORAI/USDT', 'USDT/ORAI', 'ORAI/USD', 'USD/ORAI'];
 
-const arr = ['ORAI/USDT', 'USDT/ORAI', 'ORAI/USD', 'USD/ORAI'];
-
-export const PoolSelect = ({ setIsOpen, setPool, pool }) => {
+export const PoolSelect: React.FC<{
+  pool: string;
+  setPool: (item: string) => void;
+  setIsOpen: (isOpen: boolean) => void;
+}> = ({ setIsOpen, setPool, pool }) => {
   return (
     <div className={cx('items')}>
       <ul>
-        {arr.map((item) => {
+        {arr.map((item: string) => {
           return (
             <li
               key={item}
@@ -34,11 +37,16 @@ export const PoolSelect = ({ setIsOpen, setPool, pool }) => {
   );
 };
 
-export const HeaderTab = ({ setHideChart, hideChart, balance = 0.0001, percent = '+5.55' }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [pool, setPool] = useState('ORAI/USDT');
+export const HeaderTab: React.FC<{
+  hideChart: boolean;
+  balance?: number;
+  percent?: string,
+  setHideChart: (isHideChart: boolean) => void;
+}> = ({ setHideChart, hideChart, balance = 0.0001, percent = '+5.55' }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [pool, setPool] = useState<string>('ORAI/USDT');
   return (
-    <div className={cx('headerTabs')}>
+    <div className={cx('headerTab')}>
       <div>
         <div className={cx('top')} onClick={() => setIsOpen(!isOpen)}>
           <span>{pool}</span>

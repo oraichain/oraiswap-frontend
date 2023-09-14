@@ -50,6 +50,11 @@ export interface SwapData {
   tronAddress?: string;
 }
 
+export const TYPE = {
+  ASSETS: 'assets',
+  HISTORY: 'history'
+};
+
 /**
  * Get transfer token fee when universal swap
  * @param param0
