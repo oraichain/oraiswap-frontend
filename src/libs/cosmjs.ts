@@ -5,6 +5,7 @@ import { Coin, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { Stargate } from '@injectivelabs/sdk-ts';
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 
 /**
  * The options of an .instantiate() call.
@@ -37,7 +38,8 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
     case 'stargate':
       return SigningStargateClient.connectWithSigner(rpc, signer, options);
     case 'injective':
-      return Stargate.InjectiveSigningStargateClient.connectWithSigner(rpc, signer, options);
+      const tmClient = await Tendermint37Client.connect(rpc);
+      return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
   }
 };
 
