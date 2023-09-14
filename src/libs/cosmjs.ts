@@ -4,7 +4,7 @@ import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-import { InjectiveSigningStargateClient } from '@injectivelabs/sdk-ts/dist/esm/core/stargate';
+import { Stargate } from '@injectivelabs/sdk-ts';
 
 /**
  * The options of an .instantiate() call.
@@ -37,7 +37,7 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
     case 'stargate':
       return SigningStargateClient.connectWithSigner(rpc, signer, options);
     case 'injective':
-      return InjectiveSigningStargateClient.connectWithSigner(rpc, signer, options);
+      return Stargate.InjectiveSigningStargateClient.connectWithSigner(rpc, signer, options);
   }
 };
 

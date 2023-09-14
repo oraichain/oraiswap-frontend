@@ -18,6 +18,7 @@ const fallback = {
   http: require.resolve('stream-http'),
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
+  buffer: require.resolve('buffer'),
   https: require.resolve('https-browserify')
 };
 

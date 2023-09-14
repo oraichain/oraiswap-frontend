@@ -2952,10 +2952,10 @@
     protobufjs "^6.10.2"
     secp256k1 "^4.0.2"
 
-"@oraichain/cosmwasm-vm-js@^0.2.72":
-  version "0.2.72"
-  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.72.tgz#1a6f78739ac2f8ffd1fcbdf6237b08c922845aa0"
-  integrity sha512-2/b+fEPo6xDI5Lt39EkO6Tv3ifWhaBQp+41wZlAPqVLxM83LRek2Jnw2bj/woyOU5mAARq48KPd4b1Mz6oOayw==
+"@oraichain/cosmwasm-vm-js@^0.2.76":
+  version "0.2.76"
+  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.76.tgz#11431450b75bba0c822be1403f0a2483c2fb1694"
+  integrity sha512-dJjFnH9pwI8ruuW3xR70eRdFY9aaJUMU6QPstox5M9O9XKmjHzKmQW9l+IIwKWb81rG1Z1C+RDdzD5bird9aCA==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/crypto" "^0.31.0"
@@ -2966,17 +2966,17 @@
     elliptic "^6.5.4"
     secp256k1 "^4.0.3"
 
-"@oraichain/cw-simulate@^2.8.55":
-  version "2.8.55"
-  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.55.tgz#8988a1f23f330e88aa8fb12db6e429995096646d"
-  integrity sha512-ZPdjrB2RqVtWLmEJfXs4kx76F25F6m7GmpnzwVr99iPvq/PgJLcG2oO9VDaTrSRqDe4TlHhfOlb0XE3EtXX3eg==
+"@oraichain/cw-simulate@^2.8.62":
+  version "2.8.62"
+  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.62.tgz#56f1bd3ca240b88b745c72d74b0e37ef52fc6a42"
+  integrity sha512-osQyKi0vJ/u4QhK3d3Kq5nRRby74cq8TDSBvHIIY5Ttic42b7VxLAW3vJ6lZbNH/h37o9IKp0OYe12AsdFAwbw==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
     "@cosmjs/crypto" "^0.31.0"
     "@cosmjs/encoding" "^0.31.0"
     "@kiruse/serde" "^0.8.0-rc.6"
-    "@oraichain/cosmwasm-vm-js" "^0.2.72"
+    "@oraichain/cosmwasm-vm-js" "^0.2.76"
     eventemitter3 "^5.0.0"
     protobufjs "^7.2.3"
     ts-results "^3.3.0"
