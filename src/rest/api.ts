@@ -28,7 +28,7 @@ import {
 } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
@@ -41,6 +41,7 @@ import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
+import { Long } from 'cosmjs-types/helpers';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -914,8 +915,7 @@ function generateMoveOraib2OraiMessages(
       sender: fromAddress,
       receiver: toAddress,
       memo: '',
-      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
-      timeoutHeight: { revisionNumber: '0', revisionHeight: '0' } // we dont need timeout height. We only use timeout timestamp
+      timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout))
     });
   }
   return transferMsgs;

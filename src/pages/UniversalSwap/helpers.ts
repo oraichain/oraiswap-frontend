@@ -22,7 +22,7 @@ import {
   Uint128
 } from '@oraichain/common-contracts-sdk';
 import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
-import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
 import { findToTokenOnOraiBridge, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';

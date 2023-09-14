@@ -30,7 +30,7 @@ import CosmJs, {
   HandleOptions
 } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
-import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import customRegistry, { customAminoTypes } from 'libs/registry';
 import { generateError, toAmount, toDisplay } from 'libs/utils';
 import {
@@ -44,6 +44,7 @@ import {
 } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
+import { Long } from 'cosmjs-types/helpers';
 
 /**
  * This function converts the destination address (from BSC / ETH -> Oraichain) to an appropriate format based on the BSC / ETH token contract address
@@ -147,7 +148,7 @@ export const transferIBC = async (data: {
     sender: fromAddress,
     receiver: toAddress,
     memo,
-    timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
+    timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
     timeoutHeight: undefined
   };
   const result = await transferIBCMultiple(

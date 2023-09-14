@@ -13,7 +13,7 @@ import {
 } from '@oraichain/oraidex-contracts-sdk';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
-import { FungibleTokenPacketData } from 'libs/proto/ibc/applications/transfer/v2/packet';
+import { FungibleTokenPacketData } from 'cosmjs-types/ibc/applications/transfer/v2/packet';
 import { deployIcs20Token, deployToken, senderAddress as oraiSenderAddress, senderAddress } from './common';
 import { oraib2oraichain } from 'config/ibcInfos';
 import { ORAI } from 'config/constants';

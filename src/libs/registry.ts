@@ -1,8 +1,8 @@
 import { Registry } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
 import { MsgSendToEth } from './proto/gravity/v1/msgs';
-import { MsgTransfer } from './proto/ibc/applications/transfer/v1/tx';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 
 const customRegistry = new Registry(defaultStargateTypes);
 customRegistry.register('/gravity.v1.MsgSendToEth', MsgSendToEth);
