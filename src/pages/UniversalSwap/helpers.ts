@@ -51,8 +51,8 @@ export interface SwapData {
 }
 
 export const TYPE = {
-  ASSETS: 'assets',
-  HISTORY: 'history'
+  ASSETS: 'Assets',
+  HISTORY: 'History'
 };
 
 /**
