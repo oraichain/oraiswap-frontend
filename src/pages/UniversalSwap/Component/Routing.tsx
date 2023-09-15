@@ -5,7 +5,7 @@ import styles from './Routing.module.scss';
 import cn from 'classnames/bind';
 
 const cx = cn.bind(styles);
-export const RoutingSection = () => {
+export const RoutingSection: React.FC<{}> = () => {
   return (
     <div className={cx('routings')}>
       <div className={cx('container')}>

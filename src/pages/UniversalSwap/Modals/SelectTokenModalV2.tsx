@@ -92,15 +92,20 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       )}
       <div className={cx('label')}>
         {!isNetwork && <div className={cx('left')}>Token List</div>}
-        <div className={cx('right')} onClick={() => {
-          if (isNetwork) {
-            setNetworkFilter("")
-          }
-          setIsNetwork(!isNetwork);
-        }}>
+        <div
+          className={cx('right')}
+          onClick={() => {
+            if (isNetwork) {
+              setNetworkFilter('');
+            }
+            setIsNetwork(!isNetwork);
+          }}
+        >
           <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
           <div className={cx('all-network')}>
-            <span className={cx(`${isNetwork ? 'detail' : ''}`)}> {networkFilter && !isNetwork ? networkFilter : "All Networks"}</span>
+            <span className={cx(`${isNetwork ? 'detail' : ''}`)}>
+              {networkFilter && !isNetwork ? networkFilter : 'All Networks'}
+            </span>
             {isNetwork && <span className={cx('balance')}>${totalBalance?.toFixed(2)}</span>}
           </div>
           {!isNetwork && <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />}

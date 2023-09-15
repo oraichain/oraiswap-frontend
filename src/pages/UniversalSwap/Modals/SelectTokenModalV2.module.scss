@@ -109,7 +109,7 @@
         color: $white-color;
 
         @include theme() {
-          background-color: theme-get('bg-hover-color');
+          background-color: theme-get('primary-1');
         }
       }
 
