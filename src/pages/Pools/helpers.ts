@@ -1,5 +1,3 @@
-import { Pairs } from 'config/pools';
-import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { AggregateResult, AssetInfo, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import {
@@ -10,9 +8,12 @@ import {
   OraiswapStakingTypes,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType, assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
-import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { TokenItemType, assetInfoMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { ORAI, ORAIXOCH_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
+import { Pairs } from 'config/pools';
+import { parseAssetInfo } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
@@ -26,10 +27,6 @@ import {
   parseTokenInfo
 } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-import { ListTokenMsg } from 'libs/contracts/OraidexListingContract.types';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { updateLpPools } from 'reducer/token';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -318,12 +315,17 @@ const isBigIntZero = (value: BigInt): boolean => {
   return false;
 };
 
+export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
+  if ('native_token' in assetInfo) return assetInfo.native_token.denom;
+  return assetInfo.token.contract_addr;
+};
+
 export {
   fetchAprResult,
-  fetchPoolListAndOraiPrice,
-  fetchPairsData,
-  fetchMyPairsData,
   fetchCacheLpPools,
+  fetchMyPairsData,
+  fetchPairsData,
+  fetchPoolListAndOraiPrice,
   generateMsgFrontierAddToken,
   getInfoLiquidityPool,
   isBigIntZero

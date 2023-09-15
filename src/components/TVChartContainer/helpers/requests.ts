@@ -1,8 +1,6 @@
 import { PeriodParams } from 'charting_library';
 import { Bar } from './types';
-import axios from 'rest/request';
-
-const withBaseApiUrl = (url: string) => process.env.REACT_APP_BASE_API_URL + url;
+import axios, { withBaseApiUrl } from 'rest/request';
 
 export const getTokenChartPrice = async (
   pair: string,

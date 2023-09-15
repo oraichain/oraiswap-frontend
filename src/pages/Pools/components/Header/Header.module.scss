@@ -1,0 +1,45 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.header {
+    &_data {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        &_item {
+            margin-right: 80px;
+
+            @media (max-width: 575px) {
+                margin: 0;
+                width: 100%;
+            }
+        }
+
+        &_name {
+            font-weight: 600;
+            font-size: 24px;
+            color: #777e90;
+
+            @media (max-width: 575px) {
+                font-size: 16px;
+            }
+        }
+
+        &_value {
+            font-weight: 600;
+            font-size: 24px;
+            margin-left: 10px;
+
+            @media (max-width: 575px) {
+                font-size: 20px;
+            }
+
+            @include theme() {
+                color: theme-get('text-color');
+            }
+        }
+    }
+}

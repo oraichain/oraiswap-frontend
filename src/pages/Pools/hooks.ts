@@ -21,6 +21,9 @@ import { PairInfoExtend } from 'types/token';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { fetchRewardPerSecInfo } from 'rest/api';
 import { RewardPoolType } from 'reducer/config';
+import { useQuery } from '@tanstack/react-query';
+import axios, { withBaseApiUrl } from 'rest/request';
+import { PoolInfoResponse } from 'types/pool';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -174,4 +177,23 @@ export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
   }, [cachedPairs, pairs]);
 
   return { pairInfos, oraiPrice };
+};
+
+export const useGetPools = () => {
+  const { data: pools } = useQuery(['pools'], () => getPools(), {
+    refetchOnWindowFocus: false
+  });
+
+  console.log({ pools });
+  return pools;
+};
+
+export const getPools = async (): Promise<PoolInfoResponse[]> => {
+  try {
+    const res = await axios.get(withBaseApiUrl('/v1/pools/'), {});
+    return res.data;
+  } catch (e) {
+    console.error('getPools', e);
+    return [];
+  }
 };
