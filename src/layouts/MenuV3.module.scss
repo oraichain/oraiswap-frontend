@@ -139,22 +139,23 @@
     border: 1px solid transparent;
   }
 
-  &:hover::before {
+  &:active::before {
     @include theme() {
       border-left-color: theme-get('neutral-1');
       border-right-color: theme-get('neutral-1');
       border-bottom-color: theme-get('neutral-1');
     }
 
-    transition: border-left-color 0.05s linear, border-right-color 0.05s linear 0.05s,
-      border-bottom-color 0.05s linear 0.05s;
+    transition: border-left-color 0.05s linear,
+    border-right-color 0.05s linear 0.05s,
+    border-bottom-color 0.05s linear 0.05s;
   }
 
   &::after {
     border: 0 solid transparent;
   }
 
-  &:hover::after {
+  &:active::after {
     border-bottom-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
