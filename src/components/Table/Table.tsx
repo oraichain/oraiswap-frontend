@@ -14,36 +14,37 @@ export type TableProps<T extends object> = {
 }
 
 const Table = <T extends object>({ headers, data }: TableProps<T>) => {
-    return (<table className={styles.table}>
-        <thead className={styles.tableHeader}>
-            <tr>
-                {Object.keys(headers).map((key, index) => {
+    return (
+        <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+                <tr>
+                    {Object.keys(headers).map((key, index) => {
+                        return (
+                            <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
+                                {headers[key].name}
+                            </th>
+                        );
+                    })}
+
+                </tr>
+            </thead>
+            <tbody className={styles.tableBody}>
+                {data.map((datum, index) => {
                     return (
-                        <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
-                            {headers[key].name}
-                        </th>
+                        <tr key={index}>
+                            {Object.keys(headers).map((key, index) => {
+                                return (
+                                    <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
+                                        {headers[key].accessor(datum)}
+                                    </td>
+                                )
+
+                            })}
+                        </tr>
                     );
                 })}
-
-            </tr>
-        </thead>
-        <tbody className={styles.tableBody}>
-            {data.map((datum, index) => {
-                return (
-                    <tr key={index}>
-                        {Object.keys(headers).map((key, index) => {
-                            return (
-                                <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
-                                    <span>{datum[key]}</span>
-                                </td>
-                            )
-
-                        })}
-                    </tr>
-                );
-            })}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     )
 }
 

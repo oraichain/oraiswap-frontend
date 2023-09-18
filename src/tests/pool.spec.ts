@@ -16,7 +16,9 @@ import {
   fetchPairInfoData,
   fetchPairsData,
   fetchPoolListAndOraiPrice,
+  formatDisplayUsdt,
   PairInfoData,
+  toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
 import {
@@ -487,6 +489,26 @@ describe('pool', () => {
         [ORAI, usdtContractAddress]
       ]);
       expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
+    });
+
+    it.each([
+      ['2', '$ 2'],
+      ['2.1', '$ 2.1'],
+      ['2.129', '$ 2.13'],
+      ['1234567', '$ 1,234,567'],
+      ['1234567.111', '$ 1,234,567.11']
+    ])('test formatDisplayUsdt should formats %s to %s', (input, expected) => {
+      expect(formatDisplayUsdt(input)).toBe(expected);
+    });
+
+    it.each([
+      ['2.12345', 2, 2.12],
+      ['2.1', 2, 2.1],
+      ['2', 2, 2],
+      ['2.12345', 1, 2.1],
+      ['2.129', 1, 2.1]
+    ])('test toFixedIfNecessary should rounds %s to %d decimal places as %f', (value, dp, expected) => {
+      expect(toFixedIfNecessary(value, dp)).toBeCloseTo(expected);
     });
   });
 });

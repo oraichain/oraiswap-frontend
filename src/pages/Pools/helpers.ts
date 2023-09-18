@@ -320,6 +320,16 @@ export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
   return assetInfo.token.contract_addr;
 };
 
+export const formatDisplayUsdt = (amount: number | string): string => {
+  return `$ ${toFixedIfNecessary(amount.toString(), 2)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+};
+
+export const toFixedIfNecessary = (value: string, dp: number): number => {
+  return +parseFloat(value).toFixed(dp);
+};
+
 export {
   fetchAprResult,
   fetchCacheLpPools,
