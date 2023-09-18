@@ -157,7 +157,9 @@ const Balance: React.FC<BalanceProps> = () => {
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
       const { combinedReceiver } = combineReceiver(latestOraiAddress, from);
       // has to switch network to the correct chain id on evm since users can swap between network tokens
-      await window.Metamask.switchNetwork(from.chainId);
+      if (!window.Metamask.isTron(from.chainId)) {
+        await window.Metamask.switchNetwork(from.chainId);
+      }
       result = await transferEvmToIBC(
         from,
         fromAmount,
