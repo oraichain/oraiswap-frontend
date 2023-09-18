@@ -10,8 +10,7 @@ $blue-color: #7e5cc5;
 
 // for dark-light mode
 $themes: (
-  dark: (
-    'text-color': white,
+  dark: ('text-color': white,
     'text-color-secondary': #fff,
     'text-color-third': #fff,
     'text-color-hover': black,
@@ -46,7 +45,7 @@ $themes: (
     'accent-1': #03a727,
     'neutral-8': #686868,
     'neutral-7': #fbfbfb,
-    'neutral-6': #f7f7f7,
+    'neutral-6': #232521,
     'neutral-5': #efefef,
     'neutral-4': #d1d0d0,
     'neutral-3': #979797,
@@ -57,10 +56,8 @@ $themes: (
     'sea-stone-800': #242b1b,
     'sea-stone-700': #4a4d46,
     'sea-stone-500': #979995,
-    'sea-stone-200': #efefef
-  ),
-  light: (
-    'text-color': #272b30,
+    'sea-stone-200': #efefef),
+  light: ('text-color': #272b30,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
     'text-color-hover': white,
@@ -106,6 +103,5 @@ $themes: (
     'sea-stone-800': #242b1b,
     'sea-stone-700': #4a4d46,
     'sea-stone-500': #979995,
-    'sea-stone-200': #efefef
-  )
+    'sea-stone-200': #efefef)
 );
