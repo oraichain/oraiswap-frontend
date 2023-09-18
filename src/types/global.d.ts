@@ -1,5 +1,5 @@
 import { Keplr as keplr } from '@keplr-wallet/types';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Network } from 'bip32';
 import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { AbstractProvider } from 'web3-core';
@@ -117,7 +117,7 @@ declare global {
     ReactNativeWebView?: {
       postMessage(msg: string): void;
     };
-    client: SigningCosmWasmClient;
+    client: SigningCosmWasmClient | CosmWasmClient;
     keplr: keplr;
     owallet: keplr;
     browser: Browser;
@@ -191,4 +191,4 @@ declare global {
   type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
-export {};
+export { };

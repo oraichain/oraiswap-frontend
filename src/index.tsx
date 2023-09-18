@@ -13,6 +13,8 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { network } from 'config/networks';
 
 const queryClient = new QueryClient();
 
@@ -36,7 +38,9 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
   });
 }
 
-initClient().then(() => {
+const initApp = async () => {
+  window.client = await SigningCosmWasmClient.connect(network.rpc);
+
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -53,4 +57,8 @@ initClient().then(() => {
       </PersistGate>
     </Provider>
   );
-});
+
+  await initClient();
+};
+
+initApp();
