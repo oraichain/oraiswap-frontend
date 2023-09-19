@@ -120,7 +120,13 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
           <span style={{ marginRight: 15 }}>
             {formatDisplayUsdt(toDisplay(parseInt(data.totalLiquidity.toString()).toString()))}
           </span>
-          <Button type='primary-sm' onClick={() => console.log('ok')}>
+          <Button
+            type="primary-sm"
+            onClick={(event) => {
+              event.stopPropagation();
+              console.log('ok');
+            }}
+          >
             Add
           </Button>
         </div>
@@ -128,7 +134,8 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     }
   };
 
-  const handleClickRow = (pool: PoolInfoResponse) => {
+  const handleClickRow = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, pool: PoolInfoResponse) => {
+    event.stopPropagation();
     const firstAssetInfo = JSON.parse(pool.firstAssetInfo);
     const secondAssetInfo = JSON.parse(pool.secondAssetInfo);
 
@@ -148,7 +155,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
           <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
         ) : (
           <div className={styles.no_data}>
-            <img src={theme === 'light' ? NoDataLightSvg : NoDataSvg} alt='nodata' />
+            <img src={theme === 'light' ? NoDataLightSvg : NoDataSvg} alt="nodata" />
             <span>No data</span>
           </div>
         )}
