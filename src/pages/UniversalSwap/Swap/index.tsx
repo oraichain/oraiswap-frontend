@@ -337,9 +337,8 @@ const SwapComponent: React.FC<{
             />
 
             <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${toDisplay(averageRatio?.displayAmount, originalToToken?.decimals)} ${
-                originalToToken?.name
-              }`}
+              {`1 ${originalFromToken?.name} ≈ ${toDisplay(averageRatio?.displayAmount, originalToToken?.decimals)} ${originalToToken?.name
+                }`}
             </span>
           </div>
           <div className={cx('input-wrapper')}>
@@ -362,6 +361,11 @@ const SwapComponent: React.FC<{
                 setSearchTokenName={setSearchTokenName}
               />
             )}
+          </div>
+          <div className={cx('warning-text')}>
+            <div>
+              <span> Current slippage exceed the configuration!</span>
+            </div>
           </div>
         </div>
         <button
