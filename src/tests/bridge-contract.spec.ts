@@ -29,6 +29,7 @@ const bobAddressEth = '0x8754032Ac7966A909e2E753308dF56bb08DabD69';
 const bridgeReceiver = 'tron-testnet0x3C5C6b570C1DA469E8B24A2E8Ed33c278bDA3222';
 const routerContractAddress = 'placeholder'; // we will update the contract config later when we need to deploy the actual router contract
 const cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiSenderAddress).words);
+const relayerAddress = 'orai1704r4dhuwdqvt7vs35m0360py6ep6cwwxeyfxn';
 const oraibridgeSenderAddress = bech32.encode('oraib', bech32.decode(oraiSenderAddress).words);
 console.log({ cosmosSenderAddress });
 const ibcTransferAmount = '100000000';
@@ -253,7 +254,7 @@ describe.only('IBCModule', () => {
         data: toBinary(icsPackage),
         ...newPacketData
       },
-      relayer: cosmosSenderAddress
+      relayer: relayerAddress
     });
 
     const { channels } = await ics20Contract.listChannels();
@@ -361,7 +362,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
 
       if (assetInfo && (assetInfo as any).token) {
@@ -390,7 +391,7 @@ describe.only('IBCModule', () => {
         data: toBinary(icsPackage),
         ...packetData
       },
-      relayer: cosmosSenderAddress
+      relayer: relayerAddress
     });
 
     // mint new cw20 token to bob
@@ -428,7 +429,7 @@ describe.only('IBCModule', () => {
         data: toBinary(icsPackage),
         ...packetData
       },
-      relayer: cosmosSenderAddress
+      relayer: relayerAddress
     });
 
     const transferBackMsg: TransferBackMsg = {
@@ -436,7 +437,6 @@ describe.only('IBCModule', () => {
       remote_address: cosmosSenderAddress,
       remote_denom: airiIbcDenom
     };
-    console.log({ transferBackMsg, ibcTransferAmount });
     airiToken.sender = bobAddress;
     await airiToken.send({
       amount: ibcTransferAmount,
@@ -478,7 +478,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       const ibcWasmAiriBalance = await airiToken.balance({ address: bobAddress });
       expect(ibcWasmAiriBalance.balance).toEqual(expectedAmount);
@@ -649,7 +649,6 @@ describe.only('IBCModule', () => {
       // query liquidity balance
       const lpToken = new OraiswapTokenClient(oraiClient, oraiSenderAddress, firstPairInfo.liquidity_token);
       const result = await lpToken.balance({ address: oraiSenderAddress });
-      console.log('result: ', result);
 
       // set tax rate
       await oracleContract.updateTaxRate({ rate: '0.003' });
@@ -681,7 +680,6 @@ describe.only('IBCModule', () => {
           }
         ]
       });
-      console.log({ simulateResult });
       expect(simulateResult.amount).toEqual('1');
     });
 
@@ -703,7 +701,7 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
 
         const bobBalance = oraiClient.app.bank.getBalance(expectedRecipient);
@@ -746,7 +744,7 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
 
         const token = new OraiswapTokenClient(oraiClient, oraiSenderAddress, destDenom);
@@ -765,7 +763,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       expect(result.attributes.find((attr) => attr.key === 'ibc_error_msg').value).toEqual(
         'Cannot simulate swap with ops: [OraiSwap { offer_asset_info: Token { contract_addr: Addr("orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu") }, ask_asset_info: NativeToken { denom: "orai" } }, OraiSwap { offer_asset_info: NativeToken { denom: "orai" }, ask_asset_info: NativeToken { denom: "foo" } }] with error: "Error parsing into type oraiswap::router::SimulateSwapOperationsResponse: unknown field `ok`, expected `amount`"'
@@ -782,7 +780,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       expect(findWasmEvent(result.events, 'action', 'native_receive_id')).not.toBeUndefined();
       // ack should be successful
@@ -805,7 +803,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).not.toBeUndefined();
       // ack should be successful
@@ -829,7 +827,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       // refunding also fails because of not enough balance to refund
       expect(findWasmEvent(result.events, 'action', 'ibc_transfer_native_error_id')).not.toBeUndefined();
@@ -864,9 +862,8 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
-      console.dir(result, { depth: null });
       expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).not.toBeUndefined();
       // ack should be successful
       expect(result.acknowledgement).toEqual(Buffer.from('{"result":"MQ=="}').toString('base64'));
@@ -889,7 +886,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       // all id types of reply id must not be called, especially swap_ops_failure_id
       expect(findWasmEvent(result.events, 'action', 'swap_ops_failure_id')).toBeUndefined();
@@ -929,14 +926,13 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
         const ibcEvent = result.events.find(
           (event) => event.type === 'transfer' && event.attributes.find((attr) => attr.key === 'channel')
         );
         // get swap operation event
         expect(ibcEvent).toBeUndefined();
-        console.log('result: ', result);
         const ibcErrorMsg = result.attributes.find(
           (attr) =>
             attr.key === 'ibc_error_msg' &&
@@ -960,10 +956,9 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
         const sendPacketEvent = result.events.find((event) => event.type === 'send_packet');
-        console.dir(result.events, { depth: null });
         expect(sendPacketEvent).not.toBeUndefined();
         const packetHex = sendPacketEvent.attributes.find((attr) => attr.key === 'packet_data_hex').value;
         expect(packetHex).not.toBeUndefined();
@@ -981,7 +976,7 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
         // expect(
         //   flatten(result.events.map((e) => e.attributes)).find((a) => a.key === 'error_follow_up_msgs').value
@@ -1032,7 +1027,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
 
       const swapEvent = result.events.find(
@@ -1090,7 +1085,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       const transferEvent = result.events.find((event) => event.type === 'transfer');
       expect(
@@ -1172,7 +1167,7 @@ describe.only('IBCModule', () => {
               data: toBinary(icsPackage),
               ...packetData
             },
-            relayer: cosmosSenderAddress
+            relayer: relayerAddress
           });
 
           const ibcEvent = result.events.find(
@@ -1232,7 +1227,7 @@ describe.only('IBCModule', () => {
             data: toBinary(icsPackage),
             ...packetData
           },
-          relayer: cosmosSenderAddress
+          relayer: relayerAddress
         });
         const transferEvent = result.events.find((event) => event.type === 'transfer');
         expect(
@@ -1293,9 +1288,8 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
-      console.dir(result.messages[0], { depth: null });
       expect((result.messages[0].msg as any).wasm.execute.contract_addr).toEqual(ics20Contract.contractAddress);
       expect(
         JSON.parse(Buffer.from((result.messages[0].msg as any).wasm.execute.msg, 'base64').toString('utf8'))
@@ -1331,12 +1325,12 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       const hasRelayerFee = result.events.find(
         (event) =>
           event.type === 'wasm' &&
-          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === relayerAddress) &&
           event.attributes.find((attr) => attr.key === 'amount' && attr.value === relayerFee)
       );
       expect(hasRelayerFee).not.toBeUndefined();
@@ -1367,7 +1361,7 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       const hasTokenFee = result.events.find(
         (event) =>
@@ -1403,12 +1397,12 @@ describe.only('IBCModule', () => {
           data: toBinary(icsPackage),
           ...packetData
         },
-        relayer: cosmosSenderAddress
+        relayer: relayerAddress
       });
       const hasRelayerFee = result.events.find(
         (event) =>
           event.type === 'wasm' &&
-          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+          event.attributes.find((attr) => attr.key === 'to' && attr.value === relayerAddress) &&
           event.attributes.find((attr) => attr.key === 'amount' && attr.value === relayerFee)
       );
       expect(hasRelayerFee).not.toBeUndefined();

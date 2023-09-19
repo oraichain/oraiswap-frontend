@@ -150,7 +150,6 @@ export class Pairs {
   ): Promise<PairInfoExtend[]> => {
     const firstVersionWhiteListPairs = this.pairs.filter((pair) => pair.factoryV1);
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
-    console.dir(secondVersionWhiteListPairs, { depth: null });
 
     const multicall = multicallClient ? multicallClient : new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([

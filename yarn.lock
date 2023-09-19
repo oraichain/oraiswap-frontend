@@ -2911,10 +2911,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.17.0.tgz#af10baa9f05ce1e64a14065fc138b5739bfb65f6"
   integrity sha512-+fguCd2d8d2qruk0H0DsCEy2CTK3t0Tugg7MhZ/UQMvmewbZLNnJ6heSYyzIZWG5IPfAXzoj4f4F/qpM7l4VBA==
 
-"@oraichain/common-contracts-build@1.0.29":
-  version "1.0.29"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.29.tgz#85b8db13df0fdabf2f14b41d479929c7afa7c3d7"
-  integrity sha512-Z+BDpJRwWmO5Iz7WyHl8gH6VmwEdkRnDLbTz6QFOTjNpFFNuPrVQGsm53JkVaomUfDLlWppbr63JbpjQyaT5+Q==
+"@oraichain/common-contracts-build@1.0.32":
+  version "1.0.32"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.32.tgz#6ba11a98eab1066ac42f290fbf7e877dc00b45a8"
+  integrity sha512-g9wk2oeTWPkOUDwvr19XkDDtH3OkXQGAQKEFlAVn8t4/8KvOC5Jo5XrQwqSd5O4tvfxW6vX+XVpbkhEDcsOkRw==
   dependencies:
     "@oraichain/common-contracts-sdk" "1.0.31"
 
