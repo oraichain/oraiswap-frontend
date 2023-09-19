@@ -186,7 +186,7 @@ export const useGetPools = () => {
   });
 
   console.log({ pools });
-  return pools;
+  return pools ?? [];
 };
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
