@@ -51,7 +51,7 @@ export enum SwapDirection {
 
 export interface SimulateResponse {
   amount: Uint128;
-  displayAmount: Uint128;
+  displayAmount: number;
 }
 
 export interface SwapData {
@@ -75,15 +75,16 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
   }
 };
 
-export const calculateMinimum = (simulateAmount: number | string, userSlippage: number): bigint | string => {
-  if (!simulateAmount) return '0';
+export const calculateMinimum = (simulateAmountDisplay: number | string, userSlippage: number): number => {
+  if (!simulateAmountDisplay) return 0;
   try {
     const result =
-      BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+      Number(simulateAmountDisplay) -
+      (Number(simulateAmountDisplay) * Number(userSlippage * atomic)) / (100 * Number(atomic));
     return result;
   } catch (error) {
     console.log({ error });
-    return '0';
+    return 0;
   }
 };
 
@@ -115,7 +116,10 @@ export async function handleSimulateSwap(query: {
     return { amount, displayAmount };
   }
   const { amount } = await simulateSwap(query);
-  return { amount, displayAmount: amount };
+  return {
+    amount,
+    displayAmount: toDisplay(amount, getTokenOnOraichain(query.toInfo.coinGeckoId)?.decimals)
+  };
 }
 
 export function filterNonPoolEvmTokens(
@@ -192,18 +196,22 @@ export class UniversalSwapHandler {
     return toAmount(result, decimals).toString();
   }
 
-  async getUniversalSwapToAddress(toChainId: NetworkChainId): Promise<string> {
+  async getUniversalSwapToAddress(
+    toChainId: NetworkChainId,
+    address: { metamaskAddress?: string; tronAddress?: string }
+  ): Promise<string> {
     // evm based
     if (toChainId === '0x01' || toChainId === '0x1ae6' || toChainId === '0x38') {
-      return await window.Metamask.getEthAddress();
+      return address.metamaskAddress ?? (await window.Metamask.getEthAddress());
     }
     // tron
     if (toChainId === '0x2b6653dc') {
+      if (address.tronAddress) return tronToEthAddress(address.tronAddress);
       if (window.tronLink && window.tronWeb && window.tronWeb.defaultAddress?.base58)
         return tronToEthAddress(window.tronWeb.defaultAddress.base58);
-      return await window.Metamask.getEthAddress();
+      throw 'Cannot find tron web to nor tron address to send to Tron network';
     }
-    return await window.Keplr.getKeplrAddr(toChainId);
+    return window.Keplr.getKeplrAddr(toChainId);
   }
 
   /**
@@ -302,7 +310,6 @@ export class UniversalSwapHandler {
 
     try {
       const { balances } = await ics20Contract.channel({
-        forward: false,
         id: ibcInfo.channel
       });
 
@@ -434,7 +441,8 @@ export class UniversalSwapHandler {
       destination: '' // if to token already on same net with from token then no destination is needed
     };
     // has to switch network to the correct chain id on evm since users can swap between network tokens
-    await window.Metamask.switchNetwork(this.originalFromToken.chainId);
+    if (!window.Metamask.isTron(this.originalFromToken.chainId))
+      await window.Metamask.switchNetwork(this.originalFromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(

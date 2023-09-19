@@ -40,8 +40,9 @@ import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
-import { TaxRateResponse, TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
+import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 import { Long } from 'cosmjs-types/helpers';
+import { SimulateResponse } from 'pages/UniversalSwap/helpers';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -503,13 +504,18 @@ export function getEvmSwapRoute(
   return undefined;
 }
 
-async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenItemType; amount: string }) {
+async function simulateSwapEvm(query: {
+  fromInfo: TokenItemType;
+  toInfo: TokenItemType;
+  amount: string;
+}): Promise<SimulateResponse> {
   const { amount, fromInfo, toInfo } = query;
 
   // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
   if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
     return {
-      amount
+      amount,
+      displayAmount: toDisplay(amount, toInfo.decimals)
     };
   }
   try {
@@ -525,7 +531,7 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
       // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
       // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
       amount: simulateAmount,
-      displayAmount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
+      displayAmount: toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals) // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
