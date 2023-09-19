@@ -13,6 +13,7 @@
     width: 185px;
     padding: 6px 12px;
     border-radius: 24px;
+    cursor: pointer;
     @include theme() {
       background-color: theme-get('neutral-5');
     }

@@ -13,7 +13,7 @@
   backdrop-filter: blur(5px);
   border-radius: 24px;
   @include theme() {
-    border: 1px solid theme-get('neutral-5');
+    border: 1px solid theme-get('neutral-6');
     background: theme-get('neutral-white');
     box-shadow: theme-get('shadow-swap-box');
   }
@@ -339,7 +339,7 @@
 
   @include theme() {
     background-color: theme-get('primary-1');
-    color: #505665;
+    color: theme-get('text-color-filter');
   }
   &.disable {
     @include theme() {
@@ -349,9 +349,9 @@
   }
   /* Inner/Button */
 
-  @include theme() {
-    box-shadow: theme-get('shadow-btn');
-  }
+  // @include theme() {
+  //   box-shadow: theme-get('shadow-btn');
+  // }
 
   border-radius: 20px;
 
