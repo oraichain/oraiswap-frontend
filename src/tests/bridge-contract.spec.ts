@@ -258,12 +258,18 @@ describe.only('IBCModule', () => {
 
     const { channels } = await ics20Contract.listChannels();
     for (let channel of channels) {
-      const { balances } = await ics20Contract.channel({ forward: false, id: channel.id });
+      const { balances } = await ics20Contract.channel({ id: channel.id });
       for (let balance of balances) {
         if ('native' in balance) {
           const pairMapping = await ics20Contract.pairMapping({ key: balance.native.denom });
-          const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
-          expect(trueBalance).toEqual(parseInt(ibcTransferAmount) / 10 ** pairMapping.pair_mapping.remote_decimals);
+          const { balance: channelBalance } = await ics20Contract.channelWithKey({
+            channelId: channel.id,
+            denom: balance.native.denom
+          });
+          if ('native' in channelBalance) {
+            const trueBalance = toDisplay(channelBalance.native.amount, pairMapping.pair_mapping.remote_decimals);
+            expect(trueBalance).toEqual(parseInt(ibcTransferAmount) / 10 ** pairMapping.pair_mapping.remote_decimals);
+          }
         } else {
           // do nothing because currently we dont have any cw20 balance in the channel
         }

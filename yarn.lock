@@ -2911,22 +2911,17 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.17.0.tgz#af10baa9f05ce1e64a14065fc138b5739bfb65f6"
   integrity sha512-+fguCd2d8d2qruk0H0DsCEy2CTK3t0Tugg7MhZ/UQMvmewbZLNnJ6heSYyzIZWG5IPfAXzoj4f4F/qpM7l4VBA==
 
-"@oraichain/common-contracts-build@1.0.27":
-  version "1.0.27"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.27.tgz#41c9b4ac00e689ee17bd14ea25f69c8b19af883a"
-  integrity sha512-/eUcGtI9SAwkQx+rC28zHHVw4UbAg50RPGstfiV1hmOwg0NZG/Xh0+yJkyIB8+dpTrD8uNc+noWaUoGtgOR51Q==
+"@oraichain/common-contracts-build@1.0.29":
+  version "1.0.29"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.29.tgz#85b8db13df0fdabf2f14b41d479929c7afa7c3d7"
+  integrity sha512-Z+BDpJRwWmO5Iz7WyHl8gH6VmwEdkRnDLbTz6QFOTjNpFFNuPrVQGsm53JkVaomUfDLlWppbr63JbpjQyaT5+Q==
   dependencies:
-    "@oraichain/common-contracts-sdk" "1.0.28"
+    "@oraichain/common-contracts-sdk" "1.0.31"
 
-"@oraichain/common-contracts-sdk@1.0.28":
-  version "1.0.28"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.28.tgz#a8d7a368d3503f1cbed9e7f93f5c088f5ceecbc7"
-  integrity sha512-zceqDRR14ZyrNEt4KuCcF14qE5pE++49oudjwlQkf1wF2bv32R8pKckAd4zZMcKEmkfQk6o7XEtDo3r4w/Gw3Q==
-
-"@oraichain/common-contracts-sdk@^1.0.30":
-  version "1.0.30"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.30.tgz#c932d05179c4051dc0cece6d285af2f5da7604b2"
-  integrity sha512-NsEEo8tNqe/xYb0uIi9X58PTZ/Y/agJmfQtOt5WAJZWoFLynNL1ntEET+bj1NMUtk3uZaSNFiz4BZrChAy+NTg==
+"@oraichain/common-contracts-sdk@1.0.31":
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-sdk/-/common-contracts-sdk-1.0.31.tgz#595f93b168438d69d64896909b37855c9afc92fb"
+  integrity sha512-s8H20RXy5gCnu3DnM7L5ClQyj2mdQpbSBpZrXCpIAX9qY0LKsDdZG3sYaDQ8+VN333jz9Pp/qGWdFSYD+6PBsg==
 
 "@oraichain/cosmosjs@^0.0.94":
   version "0.0.94"
