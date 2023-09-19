@@ -11,9 +11,10 @@ export type TableHeaderProps<T extends object> = Record<string, {
 export type TableProps<T extends object> = {
     headers: TableHeaderProps<T>
     data: T[]
+    handleClickRow: (record: T) => void
 }
 
-const Table = <T extends object>({ headers, data }: TableProps<T>) => {
+const Table = <T extends object>({ headers, data, handleClickRow }: TableProps<T>) => {
     return (
         <table className={styles.table}>
             <thead className={styles.tableHeader}>
@@ -31,7 +32,7 @@ const Table = <T extends object>({ headers, data }: TableProps<T>) => {
             <tbody className={styles.tableBody}>
                 {data.map((datum, index) => {
                     return (
-                        <tr key={index}>
+                        <tr key={index} onClick={() => handleClickRow(datum)}>
                             {Object.keys(headers).map((key, index) => {
                                 return (
                                     <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>

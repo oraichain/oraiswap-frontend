@@ -8,6 +8,7 @@ import { FC, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import styles from './style.module.scss';
+import { Button } from 'components/Button';
 
 export enum KeyFilterPool {
     my_pool = 'my_pool',
@@ -61,20 +62,25 @@ export const Filter: FC<FilterProps> = ({ pairInfos, setFilteredPairInfos }) => 
 
     return (
         <div className={styles.pool_filter}>
-            <div className={styles.pool_filter_list}>
-                {LIST_FILTER_POOL.map((item) => (
-                    <div
-                        key={item.key}
-                        className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
-                        onClick={() => setTypeFilter(item.key)}
-                    >
-                        {item.text}
-                    </div>
-                ))}
+            <div className={styles.pool_filter_left}>
+                <div className={styles.pool_filter_list}>
+                    {LIST_FILTER_POOL.map((item) => (
+                        <div
+                            key={item.key}
+                            className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
+                            onClick={() => setTypeFilter(item.key)}
+                        >
+                            {item.text}
+                        </div>
+                    ))}
+
+                </div>
+                <div className={styles.pool_search}>
+                    <SearchInput theme={theme} placeholder="Search by address or asset name" onSearch={handleSearchPair} />
+                </div>
             </div>
-            <div className={styles.pool_search}>
-                <SearchInput theme={theme} placeholder="Search by pools or tokens name" onSearch={handleSearchPair} />
-            </div>
+
+            {/* <Button type='primary-sm' onClick={() => console.log('ok')}>New Pool</Button> */}
         </div>
     );
 };

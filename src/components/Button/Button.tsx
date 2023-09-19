@@ -1,10 +1,9 @@
 import React from 'react'
 import styles from './Button.module.scss'
 import cn from 'classnames/bind';
-import { FC } from 'react';
 
 const cx = cn.bind(styles);
-type ButtonType = 'primary' | 'secondary'
+type ButtonType = 'primary' | 'secondary' | 'primary-sm'
 interface Props {
     type: ButtonType;
     onClick: () => void;
@@ -19,7 +18,6 @@ export const Button: React.FC<Props> = ({
     return (
         <button
             onClick={onClick}
-            // className={classNames(styles.button, type)}
             className={cx('button', type)}
         >
             {children}
