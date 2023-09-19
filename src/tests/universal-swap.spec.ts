@@ -184,7 +184,6 @@ describe('universal-swap', () => {
     ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
   ])('test-filterNonPoolEvmTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
     const tokens = filterNonPoolEvmTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
-    console.log('filtered to tokens: ', tokens);
     expect(tokens.length).toEqual(expectedLength);
   });
 
@@ -899,7 +898,8 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount }, //osmosis denom
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: '0',
+              timeoutHeight: undefined,
+              timeoutTimestamp: new Long(0),
               memo: ''
             }
           }
@@ -960,7 +960,8 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount },
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: '0',
+              timeoutHeight: undefined,
+              timeoutTimestamp: new Long(0),
               memo: ''
             }
           }

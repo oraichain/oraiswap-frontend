@@ -209,7 +209,6 @@ describe('bridge', () => {
       expect(msg).toHaveProperty('receiver');
       expect(msg).toHaveProperty('memo');
       expect(msg).toHaveProperty('timeoutTimestamp');
-      expect(msg).toHaveProperty('timeoutHeight');
     }
 
     // check if the sourcePort and sourceChannel values are correct
@@ -231,9 +230,7 @@ describe('bridge', () => {
 
     // check if the timeout timestamp is correct
     const currentTime = Math.floor(Date.now() / 1000);
-    const expectedTimeoutTimestamp = Long.fromNumber(currentTime + ibcInfo.timeout)
-      .multiply(1000000000)
-      .toString();
+    const expectedTimeoutTimestamp = Long.fromNumber(currentTime + ibcInfo.timeout).multiply(1000000000);
     expect(transferMsgs[0].timeoutTimestamp).toEqual(expectedTimeoutTimestamp);
   });
 

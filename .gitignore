@@ -34,3 +34,6 @@ yarn-error.log*
 .idea
 
 public/injected-provider.bundle.js
+
+# for Yarn 3
+.yarn
