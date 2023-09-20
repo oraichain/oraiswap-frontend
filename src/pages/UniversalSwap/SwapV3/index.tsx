@@ -368,7 +368,8 @@ const SwapComponent: React.FC<{
             <button
               style={{
                 color: coe == coeff ? 'black' : 'inherit',
-                fontWeight: coe == coeff ? '600' : 'inherit'
+                fontWeight: coe == coeff ? '600' : 'inherit',
+                border: coe == coeff ? '1px solid #232521' : 'none',
               }}
               key={coeff}
               onClick={(event) => {

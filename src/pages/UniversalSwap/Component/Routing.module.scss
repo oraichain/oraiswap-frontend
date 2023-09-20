@@ -3,17 +3,20 @@
 
 .routings {
   @include theme() {
-    background-color: theme-get('neutral-7');
+    background-color: theme-get('neutral-6');
   }
   display: flex;
   margin-top: 16px;
   padding: 24px;
   border-radius: 12px;
-  
+
   .container {
     width: 100%;
     .progresses {
-      border-bottom: 1px solid #EFEFEF;
+      @include theme() {
+        border-bottom: 1px solid theme-get('sea-stone-200');
+      }
+
       .label {
         text-align: center;
         font-size: 16px;
@@ -47,7 +50,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%,-50%);
+            transform: translate(-50%, -50%);
             border-radius: 8px;
             padding: 4px 8px;
             display: inline-flex;
@@ -75,7 +78,7 @@
       .pool {
         display: flex;
         .key {
-          width: 150px
+          width: 150px;
         }
         .value {
           padding-left: 6;

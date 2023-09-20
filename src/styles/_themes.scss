@@ -7,11 +7,12 @@ $blue-color: #a871df;
 $shadow-modal: 0px 4px 8px -4px rgba(0, 0, 0, 0.1), inset 0px -1px 1px rgba(0, 0, 0, 0.04);
 $shadow-btn: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
 $blue-color: #7e5cc5;
-$success-color: #00AD26;
-$error-color: #E01600;
+$success-color: #00ad26;
+$error-color: #e01600;
 // for dark-light mode
 $themes: (
-  dark: ('text-color': white,
+  dark: (
+    'text-color': white,
     'text-color-secondary': #fff,
     'text-color-third': #fff,
     'text-color-hover': black,
@@ -44,27 +45,23 @@ $themes: (
     'svg-fill-color': #bdc3d3,
     'hr-color': 1px solid #2d2938,
     'accent-1': #03a727,
-    'neutral-8': #686868,
+    'neutral-8': #979995,
     'neutral-7': #fbfbfb,
     'neutral-6': #232521,
-    'neutral-5': #efefef,
+    'neutral-5': #494949,
     'neutral-4': #d1d0d0,
     'neutral-3': #979797,
-    'neutral-2': #454847,
-    'neutral-1': #1e300a,
-    'neutral-white': #fff,
+    'neutral-2': #efefef,
+    'neutral-1': #f7f7f7,
+    'neutral-white': #121511,
     'primary-1': #aee67f,
-    'sea-stone-800': #242b1b,
+    'sea-stone-800': #f7f7f7,
     'sea-stone-700': #4a4d46,
-    'sea-stone-500': #232521,
-    'sea-stone-200': #efefef,
-    'neutral-text-body': #979995,
-    'neutral-border-border-default': #232521,
-    'neutral-surface-bg-section': #232521,
-    'neutral-text-title': #EFEFEF,
-    'neutral-surface-bg-btn-disabled': #232521,
-    'neutral-text-text-token-name': #F7F7F7),
-  light: ('text-color': #272b30,
+    'sea-stone-500': #979995,
+    'sea-stone-200': #232521
+  ),
+  light: (
+    'text-color': #272b30,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
     'text-color-hover': white,
@@ -112,9 +109,10 @@ $themes: (
     'sea-stone-500': #979995,
     'sea-stone-200': #efefef,
     'neutral-text-body': #979995,
-    'neutral-border-border-default': #EFEFEF,
-    'neutral-surface-bg-section': #F7F7F7,
-    'neutral-text-title': #4A4D46,
-    'neutral-surface-bg-btn-disabled': #EFEFEF,
-    'neutral-text-text-token-name': #232521)
+    'neutral-border-border-default': #efefef,
+    'neutral-surface-bg-section': #f7f7f7,
+    'neutral-text-title': #4a4d46,
+    'neutral-surface-bg-btn-disabled': #efefef,
+    'neutral-text-text-token-name': #232521
+  )
 );

@@ -13,14 +13,15 @@ export type TableHeaderProps<T extends object> = Record<
 export type TableProps<T extends object> = {
   headers: TableHeaderProps<T>;
   data: T[];
-  handleClickRow: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, record: T) => void;
+  stylesColumn: React.CSSProperties;
+  handleClickRow?: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, record: T) => void;
 };
 
-const Table = <T extends object>({ headers, data, handleClickRow }: TableProps<T>) => {
+const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }: TableProps<T>) => {
   return (
     <table className={styles.table}>
       <thead className={styles.tableHeader}>
-        <tr>
+        <tr style={stylesColumn}>
           {Object.keys(headers).map((key, index) => {
             return (
               <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
@@ -33,7 +34,7 @@ const Table = <T extends object>({ headers, data, handleClickRow }: TableProps<T
       <tbody className={styles.tableBody}>
         {data.map((datum, index) => {
           return (
-            <tr key={index} onClick={(event) => handleClickRow(event, datum)}>
+            <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow(event, datum)}>
               {Object.keys(headers).map((key, index) => {
                 return (
                   <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
