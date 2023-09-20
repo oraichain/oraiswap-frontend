@@ -11,13 +11,14 @@ export type TableHeaderProps<T extends object> = Record<string, {
 export type TableProps<T extends object> = {
     headers: TableHeaderProps<T>
     data: T[]
+    stylesColumn: Object
 }
 
-const Table = <T extends object>({ headers, data }: TableProps<T>) => {
+const Table = <T extends object>({ headers, data, stylesColumn }: TableProps<T>) => {
     return (
         <table className={styles.table}>
             <thead className={styles.tableHeader}>
-                <tr>
+                <tr style={stylesColumn}>
                     {Object.keys(headers).map((key, index) => {
                         return (
                             <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
@@ -25,20 +26,18 @@ const Table = <T extends object>({ headers, data }: TableProps<T>) => {
                             </th>
                         );
                     })}
-
                 </tr>
             </thead>
             <tbody className={styles.tableBody}>
                 {data.map((datum, index) => {
                     return (
-                        <tr key={index}>
+                        <tr key={index} style={stylesColumn}>
                             {Object.keys(headers).map((key, index) => {
                                 return (
                                     <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
                                         {headers[key].accessor(datum)}
                                     </td>
                                 )
-
                             })}
                         </tr>
                     );

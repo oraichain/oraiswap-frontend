@@ -2,53 +2,51 @@
 @import 'src/styles/mixins';
 
 .table {
-    overflow-y: auto;
-    padding-bottom: 29px;
-    width: 100%;
-    table-layout: fixed;
+  overflow-y: auto;
+  padding-bottom: 29px;
+  width: 100%;
+  table-layout: fixed;
 
-    td {
-        overflow-wrap: break-word;
+  td {
+    overflow-wrap: break-word;
+  }
+
+  thead {
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    tr {
+      @include theme() {
+        color: theme-get('sea-stone-500');
+        border-bottom: 1px solid theme-get('neutral-5');
+      }
+
+      display: flex;
+      align-items: center;
+      border-radius: 4px 4px 0 0;
+      padding: 24px 0;
+      font-weight: 500;
+      line-height: 18px;
+      font-size: 14px;
+      font-style: normal;
+      line-height: 150%;
     }
+  }
 
-    thead {
+  tbody {
+    tr {
+      display: flex;
+      align-items: center;
+      padding: 24px 0;
+      margin: 0;
+      cursor: pointer;
 
-        box-sizing: border-box;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-
-        tr {
-            @include theme() {
-                color: theme-get('sea-stone-500');
-                border-bottom: 1px solid theme-get('neutral-5');
-            }
-
-            display: flex;
-            align-items: center;
-            border-radius: 4px 4px 0 0;
-            padding: 24px 0;
-            font-weight: 500;
-            line-height: 18px;
-            font-size: 14px;
-            font-style: normal;
-            line-height: 150%;
-
-        }
+      @include theme() {
+        color: theme-get('sea-stone-500');
+        border-bottom: 1px solid theme-get('neutral-5');
+      }
     }
-
-    tbody {
-        tr {
-            display: flex;
-            align-items: center;
-            padding: 24px 0;
-            margin: 0;
-            cursor: pointer;
-
-            @include theme() {
-                color: theme-get('sea-stone-500');
-                border-bottom: 1px solid theme-get('neutral-5');
-            }
-        }
-    }
+  }
 }
