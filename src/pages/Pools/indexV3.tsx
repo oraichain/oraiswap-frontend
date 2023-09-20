@@ -1,5 +1,4 @@
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import useConfigReducer from 'hooks/useConfigReducer';
 import Content from 'layouts/Content';
 import sumBy from 'lodash/sumBy';
 import React, { useState } from 'react';
@@ -23,7 +22,6 @@ const Pools: React.FC<{}> = () => {
     const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
 
     const pairs = useFetchAllPairs();
-    const [theme] = useConfigReducer('theme');
     const { data: prices } = useCoinGeckoPrices();
     const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
     const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
@@ -38,7 +36,7 @@ const Pools: React.FC<{}> = () => {
     return (
         <Content nonBackground>
             <div className={styles.pools}>
-                <Header theme={theme} amount={totalAmount} oraiPrice={oraiPrice} />
+                <Header amount={totalAmount} oraiPrice={oraiPrice} />
                 <ListPools
                     pairInfos={pairInfos}
                     allPoolApr={cachedApr}

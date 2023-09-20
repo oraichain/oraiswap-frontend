@@ -11,48 +11,48 @@ const cx = cn.bind(styles);
 
 const data = [
   {
-    asset: "orai",
-    chain: "oraichain",
+    asset: 'orai',
+    chain: 'oraichain',
     price: 2.51,
     balance: 10432,
     denom: 'orai',
     value: 26080.13,
     coeff: 5.21,
-    coeffType: "increase"
+    coeffType: 'increase'
   }
-]
+];
 
 export const HistoryTab: React.FC<{}> = () => {
   const headers: TableHeaderProps<AssetInfoResponse> = {
-    'assets': {
-      name: "May 6, 2023",
-      accessor: (data) => <div className={styles.assets}>
-        <div className={styles.left}>
-          <img src={OraiIcon} width={26} height={26} alt="arrow" />
-        </div>
-        <div className={styles.right}>
-          <div className={styles.assetName}>
-            {data.asset}
+    assets: {
+      name: 'May 6, 2023',
+      accessor: (data) => (
+        <div className={styles.assets}>
+          <div className={styles.left}>
+            <img src={OraiIcon} width={26} height={26} alt="arrow" />
           </div>
-          <div className={styles.assetChain}>
-            {data.chain}
+          <div className={styles.right}>
+            <div className={styles.assetName}>{data.asset}</div>
+            <div className={styles.assetChain}>{data.chain}</div>
           </div>
         </div>
-      </div>,
-      width: "22%",
+      ),
+      width: '22%',
       align: 'center'
-    },
-  }
-
+    }
+  };
 
   return (
     <div className={cx('historyTab')}>
-      <div className={cx('info')}>
-      </div>
+      <div className={cx('info')}></div>
       <div>
-        <Table headers={headers} data={data} stylesColumn={{
-          padding: '16px 0'
-        }} />
+        <Table
+          headers={headers}
+          data={data}
+          stylesColumn={{
+            padding: '16px 0'
+          }}
+        />
       </div>
     </div>
   );

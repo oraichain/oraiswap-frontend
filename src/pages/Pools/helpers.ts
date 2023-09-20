@@ -321,7 +321,7 @@ export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
 };
 
 export const formatDisplayUsdt = (amount: number | string): string => {
-  return `$ ${toFixedIfNecessary(amount.toString(), 2)
+  return `$${toFixedIfNecessary(amount.toString(), 2)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 };

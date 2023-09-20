@@ -3,14 +3,14 @@
 .search {
   width: 420px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 24px;
   padding: 12px 16px;
   font-weight: 500;
   font-size: 16px;
 
   @include theme() {
-    background-color: theme-get('bg-color');
-    color: theme-get('text-color');
+    background-color: theme-get('neutral-surface-bg-section');
+    color: theme-get('neutral-text-body');
     border-color: theme-get('border-color');
   }
 

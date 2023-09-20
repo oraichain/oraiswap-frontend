@@ -105,4 +105,47 @@
 
 .symbols {
     display: flex;
+    align-items: center;
+
+    &_logo {
+        margin-right: 12px;
+
+        &_right {
+            position: relative;
+            left: 10px;
+        }
+    }
+
+    &_name {
+        font-weight: 500;
+        font-size: 16px;
+    }
+}
+
+.apr {
+    .apr_reward {
+        display: flex;
+        align-items: center;
+        margin-top: 6px;
+
+        span {
+
+            padding: 4px;
+            letter-spacing: 0.012px;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-right: 10px;
+
+            @include theme() {
+                background-color: theme-get('neutral-surface-bg-btn-disabled');
+                color: theme-get('neutral-text-title');
+            }
+        }
+    }
+}
+
+.liquidity {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }

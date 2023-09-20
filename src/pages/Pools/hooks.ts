@@ -24,6 +24,7 @@ import { RewardPoolType } from 'reducer/config';
 import { useQuery } from '@tanstack/react-query';
 import axios, { withBaseApiUrl } from 'rest/request';
 import { PoolInfoResponse } from 'types/pool';
+import { ORAI } from 'config/constants';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -67,7 +68,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
     let rewardAll: RewardPoolType[] = await Promise.all(
       pairs.map(async (p: PairInfoExtend) => {
         let denom = '';
-        if (p.asset_infos_raw?.[0] == 'orai') {
+        if (p.asset_infos_raw?.[0] === ORAI) {
           denom = p.asset_infos_raw?.[1];
         } else {
           denom = p.asset_infos_raw?.[0];
@@ -185,7 +186,7 @@ export const useGetPools = () => {
   });
 
   console.log({ pools });
-  return pools;
+  return pools ?? [];
 };
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {

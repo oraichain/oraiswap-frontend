@@ -1,28 +1,19 @@
-import React from 'react'
-import styles from './Button.module.scss'
+import React from 'react';
+import styles from './Button.module.scss';
 import cn from 'classnames/bind';
-import { FC } from 'react';
 
 const cx = cn.bind(styles);
-type ButtonType = 'primary' | 'secondary'
+type ButtonType = 'primary' | 'secondary' | 'primary-sm';
 interface Props {
-    type: ButtonType;
-    onClick: () => void;
-    children: React.ReactElement | React.ReactNode;
+  type: ButtonType;
+  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  children: React.ReactElement | React.ReactNode;
 }
 
-export const Button: React.FC<Props> = ({
-    children,
-    onClick,
-    type
-}) => {
-    return (
-        <button
-            onClick={onClick}
-            // className={classNames(styles.button, type)}
-            className={cx('button', type)}
-        >
-            {children}
-        </button>
-    );
-}
+export const Button: React.FC<Props> = ({ children, onClick, type }) => {
+  return (
+    <button onClick={(event) => onClick(event)} className={cx('button', type)}>
+      {children}
+    </button>
+  );
+};
