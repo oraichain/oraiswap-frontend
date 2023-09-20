@@ -206,7 +206,7 @@ const SwapComponent: React.FC<{
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
-        tronAddress,
+        tronAddress
       });
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,
@@ -248,7 +248,7 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.displayAmount ? calculateMinimum(simulateData.displayAmount, userSlippage) : '0';
+  const minimumReceive = simulateData?.displayAmount ? calculateMinimum(simulateData.displayAmount, userSlippage) : 0;
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -340,9 +340,7 @@ const SwapComponent: React.FC<{
             />
 
             <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${toDisplay(averageRatio?.displayAmount, originalToToken?.decimals)} ${
-                originalToToken?.name
-              }`}
+              {`1 ${originalFromToken?.name} ≈ ${averageRatio?.displayAmount} ${originalToToken?.name}`}
             </span>
           </div>
           <div className={cx('input-wrapper')}>
@@ -387,9 +385,7 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: toDisplay(minimumReceive, originalToToken?.decimals, toTokenInfoData?.decimals).toFixed(
-                  truncDecimals
-                ),
+                amount: minimumReceive.toFixed(truncDecimals),
                 denom: toTokenInfoData?.symbol
               }}
               decimalScale={truncDecimals}

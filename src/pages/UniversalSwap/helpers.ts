@@ -47,7 +47,7 @@ export enum SwapDirection {
 
 export interface SimulateResponse {
   amount: Uint128;
-  displayAmount: Uint128;
+  displayAmount: number;
 }
 
 export interface SwapData {
@@ -71,15 +71,16 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
   }
 };
 
-export const calculateMinimum = (simulateAmount: number | string, userSlippage: number): bigint | string => {
-  if (!simulateAmount) return '0';
+export const calculateMinimum = (simulateAmountDisplay: number | string, userSlippage: number): number => {
+  if (!simulateAmountDisplay) return 0;
   try {
     const result =
-      BigInt(simulateAmount) - (BigInt(simulateAmount) * BigInt(userSlippage * atomic)) / (100n * BigInt(atomic));
+      Number(simulateAmountDisplay) -
+      (Number(simulateAmountDisplay) * Number(userSlippage * atomic)) / (100 * Number(atomic));
     return result;
   } catch (error) {
     console.log({ error });
-    return '0';
+    return 0;
   }
 };
 
@@ -111,7 +112,10 @@ export async function handleSimulateSwap(query: {
     return { amount, displayAmount };
   }
   const { amount } = await simulateSwap(query);
-  return { amount, displayAmount: amount };
+  return {
+    amount,
+    displayAmount: toDisplay(amount, getTokenOnOraichain(query.toInfo.coinGeckoId)?.decimals)
+  };
 }
 
 export function filterNonPoolEvmTokens(

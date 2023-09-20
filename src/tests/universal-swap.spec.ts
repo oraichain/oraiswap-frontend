@@ -224,7 +224,7 @@ describe('universal-swap', () => {
     const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
     const simulateSwapEvmSpy = jest.spyOn(restApi, 'simulateSwapEvm');
     simulateSwapSpy.mockResolvedValue({ amount: '1' });
-    simulateSwapEvmSpy.mockResolvedValue({ amount: '2' });
+    simulateSwapEvmSpy.mockResolvedValue({ amount: '2', displayAmount: 2 });
     const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
     const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
     isSupportedNoPoolSwapEvmSpy.mockReturnValue(isSupportedNoPoolSwapEvmRes);
@@ -289,9 +289,9 @@ describe('universal-swap', () => {
 
   it('calculate minimum', async () => {
     const calculate = calculateMinimum('36363993', 2.5);
-    expect(calculate).toBe(35454894n);
+    expect(calculate).toBe(35454893.175);
     const errorCase = calculateMinimum(undefined, 2.5);
-    expect(errorCase).toEqual('0');
+    expect(errorCase).toEqual(0);
   });
 
   describe('generate msgs contract for swap action', () => {

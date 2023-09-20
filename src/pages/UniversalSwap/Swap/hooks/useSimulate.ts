@@ -37,10 +37,7 @@ export const useSimulate = (
   );
 
   useEffect(() => {
-    setSwapAmount([
-      fromAmountToken,
-      toDisplay(simulateData?.displayAmount, originalToTokenInfo?.decimals, toTokenInfoData?.decimals)
-    ]);
+    setSwapAmount([fromAmountToken, Number(simulateData?.displayAmount)]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };
