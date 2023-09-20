@@ -1,15 +1,7 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-import { createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
-import { AminoTypes, GasPrice, SigningStargateClient, coin } from '@cosmjs/stargate';
-import {
-  TokenItemType,
-  UniversalSwapType,
-  gravityContracts,
-  oraichainTokens,
-  swapFromTokens,
-  swapToTokens
-} from 'config/bridgeTokens';
+import { GasPrice, coin } from '@cosmjs/stargate';
+import { TokenItemType, UniversalSwapType, oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
@@ -21,9 +13,13 @@ import {
   CwIcs20LatestReadOnlyInterface,
   Uint128
 } from '@oraichain/common-contracts-sdk';
-import CosmJs, { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
+import CosmJs, {
+  buildMultipleExecuteMessages,
+  collectWallet,
+  getCosmWasmClient,
+  getEncodedExecuteContractMsgs
+} from 'libs/cosmjs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import customRegistry, { customAminoTypes } from 'libs/registry';
 import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
 import { findToTokenOnOraiBridge, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
 import {
@@ -398,16 +394,11 @@ export class UniversalSwapHandler {
     await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
 
     // handle sign and broadcast transactions
-    const offlineSigner = await window.Keplr.getOfflineSigner(this.originalFromToken.chainId);
-    const aminoTypes = new AminoTypes({
-      ...createWasmAminoConverters(),
-      ...customAminoTypes
-    });
-    const client = await SigningStargateClient.connectWithSigner(this.originalFromToken.rpc, offlineSigner, {
-      registry: customRegistry,
-      aminoTypes,
-      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
-    });
+    const wallet = await collectWallet(this.originalFromToken.chainId);
+    const { client } = await getCosmWasmClient(
+      { rpc: this.originalFromToken.rpc, signer: wallet },
+      { gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`) }
+    );
     const result = await client.signAndBroadcast(this.sender, combinedMsgs, 'auto');
     return result;
   }

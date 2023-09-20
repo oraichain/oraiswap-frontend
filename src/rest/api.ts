@@ -16,7 +16,7 @@ import {
   AssetInfo,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { flattenTokens, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
   KWT_DENOM,
   MILKY_DENOM,

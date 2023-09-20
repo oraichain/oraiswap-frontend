@@ -1,6 +1,6 @@
-import { createWasmAminoConverters, ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
-import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient, StargateClient } from '@cosmjs/stargate';
+import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
 import {
   cosmosTokens,
   flattenTokens,
@@ -25,13 +25,13 @@ import {
 } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs, {
   buildMultipleExecuteMessages,
+  collectWallet,
   connectWithSigner,
-  getEncodedExecuteContractMsgs,
-  HandleOptions
+  getCosmWasmClient,
+  getEncodedExecuteContractMsgs
 } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import customRegistry, { customAminoTypes } from 'libs/registry';
 import { generateError, toAmount, toDisplay } from 'libs/utils';
 import {
   generateConvertCw20Erc20Message,
@@ -310,14 +310,9 @@ export const transferIBCMultiple = async (
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
     value: MsgTransfer.fromPartial(message)
   }));
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromChainId);
-  const aminoTypes = new AminoTypes({
-    ...customAminoTypes
-  });
+  const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'stargate', {
-    registry: customRegistry,
-    aminoTypes,
+  const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
     gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
@@ -364,17 +359,13 @@ export const transferTokenErc20Cw20Map = async ({
   };
   console.log({ msgTransfer });
 
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
-  const aminoTypes = new AminoTypes({
-    ...createWasmAminoConverters(),
-    ...customAminoTypes
-  });
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner, {
-    registry: customRegistry,
-    aminoTypes,
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
-  });
+  const { client } = await getCosmWasmClient(
+    { rpc: fromToken.rpc, chainId: fromToken.chainId },
+    {
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+    }
+  );
   const result = await client.signAndBroadcast(
     fromAddress,
     [...getEncodedExecuteContractMsgs(fromAddress, executeContractMsgs), msgTransfer],

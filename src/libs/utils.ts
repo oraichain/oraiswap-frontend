@@ -1,6 +1,3 @@
-import { ExecuteInstruction, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
-import { OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -12,7 +9,7 @@ import { WalletType } from 'config/constants';
 import { network } from 'config/networks';
 import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { ExecuteMultipleMsg, collectWallet } from 'libs/cosmjs';
+import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
 
 export const truncDecimals = 6;
@@ -291,7 +288,6 @@ export const initEthereum = async () => {
 };
 
 export const initClient = async () => {
-  let wallet: OfflineAminoSigner | OfflineDirectSigner;
   try {
     switchWallet(getStorageKey() as WalletType);
     const keplr = await window.Keplr.getKeplr();
@@ -306,16 +302,13 @@ export const initClient = async () => {
           console.log({ error });
         }
       }
-      wallet = await collectWallet(network.chainId);
+      const { client } = await getCosmWasmClient({ chainId: network.chainId });
+      window.client = client;
     }
   } catch (ex) {
     console.log(ex);
+    throw new Error('Cannot initialize wallet client. Please notify the developers to fix this problem!');
   }
-
-  // finally assign it
-  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  });
 };
 
 export function convertChainIdFromHexToNumber(chainId: string): number {

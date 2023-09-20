@@ -92,7 +92,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
-    const { client, defaultAddress: address } = await getCosmWasmClient();
+    const { client, defaultAddress: address } = await getCosmWasmClient({});
     if (!address)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Wallet address does not exist!'
