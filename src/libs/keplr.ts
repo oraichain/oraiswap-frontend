@@ -21,10 +21,6 @@ export default class Keplr {
     return this.typeWallet === 'owallet' ? window.owallet : window.keplr;
   }
 
-  async getOfflineSigner(chainId: string): Promise<OfflineSigner | OfflineDirectSigner> {
-    return this.keplr.getOfflineSignerAuto(chainId);
-  }
-
   async getChainInfosWithoutEndpoints(): Promise<
     Array<{
       chainId: string;
