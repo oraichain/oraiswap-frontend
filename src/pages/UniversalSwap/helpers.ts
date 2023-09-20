@@ -436,7 +436,8 @@ export class UniversalSwapHandler {
       destination: '' // if to token already on same net with from token then no destination is needed
     };
     // has to switch network to the correct chain id on evm since users can swap between network tokens
-    await window.Metamask.switchNetwork(this.originalFromToken.chainId);
+    if (!window.Metamask.isTron(this.originalFromToken.chainId))
+      await window.Metamask.switchNetwork(this.originalFromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(

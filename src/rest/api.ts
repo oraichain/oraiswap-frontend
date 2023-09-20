@@ -462,11 +462,19 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
   const operations = generateSwapOperationMsgs(offerInfo, askInfo);
   try {
+    let finalAmount = amount;
+    let isSimulatingRatio = false;
+    // hard-code for tron because the WTRX/USDT pool is having a simulation problem (returning zero / error when simulating too small value of WTRX)
+    if (fromInfo.coinGeckoId === 'tron' && amount === toAmount(1, fromInfo.decimals).toString()) {
+      finalAmount = toAmount(10, fromInfo.decimals).toString();
+      isSimulatingRatio = true;
+    }
     const data = await routerContract.simulateSwapOperations({
-      offerAmount: amount.toString(),
+      offerAmount: finalAmount,
       operations
     });
-    return data;
+    if (!isSimulatingRatio) return data;
+    return { amount: data.amount.substring(0, data.amount.length - 1) };
   } catch (error) {
     throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
   }
