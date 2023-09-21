@@ -1,0 +1,18 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.overview {
+    display: flex;
+
+    .totalLiquidity {
+        width: 50%;
+    }
+
+    .volume {
+        width: 25%;
+    }
+
+    .apr {
+        width: 25%;
+    }
+}

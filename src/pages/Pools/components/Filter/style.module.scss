@@ -5,43 +5,44 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    .pool_filter_left {
+        display: flex;
+        align-items: center;
+    }
 }
 
 .pool_filter_list {
     display: flex;
     align-items: center;
+    padding: 4px;
+    border-radius: 8px;
+    margin-right: 24px;
+
+    @include theme() {
+        background-color: theme-get('neutral-border-border-default');
+    }
 
     .filter_item {
-        height: 48px;
-        padding: 8px 16px;
+        padding: 8px 20px;
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
-        margin-right: 15px;
-
-        @include theme() {
-            background-color: theme-get('bg-color');
-            color: theme-get('text-color-filter');
-        }
-
-        &:hover {
-            @include theme() {
-                background-color: theme-get('bg-hover-color');
-                color: $white-color;
-            }
-        }
-
         border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+
+        @include theme() {
+            color: theme-get('neutral-text-body');
+        }
     }
 
     .filter_active {
-        color: $blue-color !important;
+        background-color: $white-color;
 
-        &:hover {
-            color: $white-color !important;
+        @include theme() {
+            color: #163300;
         }
     }
 }
@@ -50,6 +51,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 18px;
 
     @media (max-width: 575px) {
         margin-top: 10px;
