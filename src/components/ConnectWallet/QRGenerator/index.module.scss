@@ -1,0 +1,75 @@
+.QR_generator_modal_container {
+    .QR_generator_modal_wrapper {
+        height:406px;
+        background: #EFEFEF;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        color: #232521;
+        border-radius: 12px;
+        padding: 24px;
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 600;
+
+            .close-icon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+            }
+        }
+
+        .info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #EFEFEF;
+
+            .icon {
+                display: flex;
+                align-items: center;
+                img {
+                    width: 24px;
+                    height: 24px;
+                } 
+            }
+            .name {
+                font-size: 16px;
+                margin-left: 5px;
+            }
+        }
+
+        img {
+            width: 152px;
+            height: 152px;
+            border-radius: 4px;
+        }
+
+        .address {
+            font-size: 16px;
+        }
+
+        .cancel-btn {
+            border-radius: 99px;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            height: 40px;
+            padding: 8px 16px;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #232521;
+            width: 100%;
+            cursor: pointer;
+        }
+    }
+}

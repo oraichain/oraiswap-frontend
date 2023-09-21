@@ -1,0 +1,153 @@
+.my_wallets_container {
+    height: 400px;
+    width: 292px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    border: 1px solid #DFE0DE; // TODO:
+    padding: 16px;
+    color: #232521; // TODO:
+    background-color: #fff; // TODO:
+    
+    .wallet_wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 360px;
+        overflow-y: auto;
+
+        .wallet_container {
+            .wallet_info {
+                padding: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                .logo {
+                    img {
+                        width: 24px;
+                        height: 24px;
+                    }
+
+                    .remove {
+                        display: none;
+                    }
+                }
+                .info {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    flex: 1;
+                    margin-left: 12px;
+
+                    .name {
+                        color: #686A66;
+                        font-size: 14px;
+                    }
+
+                    .money {
+                        color: #232521;
+                        font-size: 14px;
+                    }
+
+                    div {
+                        text-align: left;
+                    }
+                }
+
+                &:hover,
+                &.active {
+                    border-radius: 8px 8px 0px 0px;
+                    background: #DFE0DE;
+                    cursor: pointer;
+                }
+                &:hover {
+                    .logo { 
+                        display: flex;
+                        margin-left: 10px;
+                        .remove {
+                            margin-right: 10px;
+                            display: flex;
+                            align-items: center;
+                        }
+                    }
+                    
+                }
+            }
+
+            .networks_container {
+                display: flex;
+                flex-direction: column;
+                padding: 8px;
+                margin-top: 5px;
+                border-top: 1px solid #DFE0DE;
+
+
+                .network_container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .logo {
+                        img {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                    .info {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: flex-start;
+                        flex: 1;
+                        margin-left: 12px;
+
+                        .name {
+                            color: #686A66;
+                            font-size: 13px;
+                        }
+
+                        .address {
+                            color: #232521;
+                            font-size: 14px;
+                        }
+
+                        div {
+                            text-align: left;
+                        }
+                    }
+                    .actions {
+                        display: flex;
+
+                        .qr_code {
+                            margin-left: 10px;
+                        }
+                        div {
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .btn {
+        margin-top: 10px;
+        height: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #232521;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        padding: 8px 16px;
+        background: #AEE67F;
+        border-radius: 99px;
+        cursor: pointer;
+
+        .content {
+            margin-left: 10px;
+        }
+    }
+}
