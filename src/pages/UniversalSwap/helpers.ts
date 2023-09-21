@@ -127,7 +127,7 @@ export function filterNonPoolEvmTokens(
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
   const listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
-  let filteredToTokens = listTokens.filter((token) => token.denom !== denom && token.name.includes(searchTokenName));
+  let filteredToTokens = listTokens.filter((token) => token.denom !== denom && token.name.toUpperCase().includes(searchTokenName));
   // special case for tokens not having a pool on Oraichain
   if (isSupportedNoPoolSwapEvm(coingeckoId)) {
     const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);
