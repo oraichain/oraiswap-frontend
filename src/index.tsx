@@ -39,6 +39,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 }
 
 const initApp = async () => {
+  // @ts-ignore
   window.client = await SigningCosmWasmClient.connect(network.rpc);
 
   const root = createRoot(document.getElementById('oraiswap'));

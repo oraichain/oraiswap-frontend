@@ -117,7 +117,7 @@ declare global {
     ReactNativeWebView?: {
       postMessage(msg: string): void;
     };
-    client: SigningCosmWasmClient | CosmWasmClient;
+    client: SigningCosmWasmClient;
     keplr: keplr;
     owallet: keplr;
     browser: Browser;
@@ -191,4 +191,4 @@ declare global {
   type ReactChildren = React.ReactElement | React.ReactElement[] | React.ReactNode | React.ReactNode[];
 }
 
-export { };
+export {};
