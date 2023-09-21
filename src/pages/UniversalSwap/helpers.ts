@@ -99,7 +99,7 @@ export const calculateMinimumReceive = ({
 
 export const calculatePercentPriceImpact = (minimumReceive: number, simulatedAmount: number): number => {
   if (!simulatedAmount || !minimumReceive) return 0;
-  const percentImpact = 1 - simulatedAmount / minimumReceive;
+  const percentImpact = ((minimumReceive - simulatedAmount) / minimumReceive) * 100;
   return percentImpact;
 };
 

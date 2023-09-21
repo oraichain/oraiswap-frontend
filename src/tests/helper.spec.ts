@@ -237,7 +237,7 @@ describe('should utils functions in libs/utils run exactly', () => {
 
   it.each([
     [0, 0, 0],
-    [100000, 50000, 0.5]
+    [100000, 50000, 50]
   ])(
     'calculatePercentPriceImpact should return correctly percent price impact',
     (minimumReceive, simulatedAmount, expectedResult) => {

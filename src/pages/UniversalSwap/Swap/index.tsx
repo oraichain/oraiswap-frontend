@@ -406,7 +406,7 @@ const SwapComponent: React.FC<{
               <div className={cx('title')} >
                 <span>Price impact warning</span>
               </div>
-              <span style={{ color: "rgb(255, 171, 0)" }}>{floatToPercent(percentImpact).toFixed(2) + '%'}</span>
+              <span style={{ color: "rgb(255, 171, 0)" }}>{Math.round(percentImpact) === 100 ? '~100%' : percentImpact.toFixed(2) + '%'}</span>
             </div>
             {/* <div>The difference between the market price and the estimated price is due to your order volume.</div> */}
           </>

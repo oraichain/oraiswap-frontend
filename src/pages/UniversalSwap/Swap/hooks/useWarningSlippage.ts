@@ -1,7 +1,7 @@
 import { calculatePercentPriceImpact } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 
-const PRICE_IMPACT_WARNING_MILESTONE = 0.2; // 20%
+const PRICE_IMPACT_WARNING_MILESTONE = 20; // 20%
 
 type WarningSlippage = {
   minimumReceive: number;
