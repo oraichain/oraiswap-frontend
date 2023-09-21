@@ -1,25 +1,15 @@
-import { calculatePercentPriceImpact } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 
-const PRICE_IMPACT_WARNING_MILESTONE = 20; // 20%
-
 type WarningSlippage = {
-  minimumReceive: number;
-  simulatedAmount: number;
+  minimumReceive: string;
+  simulatedAmount: string;
 };
 export const useWarningSlippage = ({ minimumReceive, simulatedAmount }: WarningSlippage) => {
-  const [priceImpact, setPriceImpact] = useState({
-    isWarning: false,
-    percentImpact: 0
-  });
-
+  const [isWarningSlippage, setIsWarningSlippage] = useState(false);
+  console.log({ minimumReceive, simulatedAmount });
   useEffect(() => {
-    const percentImpact = calculatePercentPriceImpact(minimumReceive, simulatedAmount);
-    setPriceImpact({
-      isWarning: percentImpact >= PRICE_IMPACT_WARNING_MILESTONE,
-      percentImpact
-    });
+    setIsWarningSlippage(+minimumReceive >= +simulatedAmount);
   }, [minimumReceive, simulatedAmount]);
 
-  return priceImpact;
+  return isWarningSlippage;
 };

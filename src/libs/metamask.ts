@@ -124,7 +124,8 @@ export default class Metamask {
     }
   }
 
-  public calculateEvmSwapSlippage(amount: string, slippage: number): bigint {
+  public calculateEvmSwapSlippage(simulateAverage: string, fromAmount: string, slippage: number): bigint {
+    const amount = +simulateAverage * +fromAmount;
     return (BigInt(amount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n;
   }
 
@@ -140,8 +141,9 @@ export default class Metamask {
     simulateAmount: string;
     slippage?: number; // from 1 to 100
     destination?: string;
+    simulateAverage: string;
   }) {
-    const { fromToken, toTokenContractAddr, address, fromAmount, simulateAmount, slippage, destination } = data;
+    const { fromToken, toTokenContractAddr, address, fromAmount, simulateAverage, slippage, destination } = data;
     const { metamaskAddress, tronAddress } = address;
     const finalTransferAddress = window.Metamask.getFinalEvmAddress(fromToken.chainId, {
       metamaskAddress,
@@ -152,7 +154,7 @@ export default class Metamask {
     const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const routerV2Addr = await gravityContract.swapRouter();
-    const amountMinAfterSlippage = this.calculateEvmSwapSlippage(simulateAmount, slippage);
+    const amountMinAfterSlippage = this.calculateEvmSwapSlippage(simulateAverage, finalFromAmount, slippage);
     let result: ethers.ContractTransaction;
 
     let fromTokenSpender = gravityContractAddr;

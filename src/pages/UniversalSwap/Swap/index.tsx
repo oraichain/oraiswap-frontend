@@ -16,7 +16,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee from 'hooks/useTokenFee';
-import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
+import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,15 +30,10 @@ import {
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import {
-  SwapDirection,
-  UniversalSwapHandler,
-  calculateMinimumReceive,
-  checkEvmAddress,
-  filterNonPoolEvmTokens
-} from '../helpers';
+import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
 import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 const cx = cn.bind(styles);
 
@@ -200,7 +195,8 @@ const SwapComponent: React.FC<{
         originalToToken,
         fromAmountToken,
         simulateData.amount,
-        userSlippage
+        userSlippage,
+        averageRatio.displayAmount.toString()
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
@@ -246,8 +242,14 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.displayAmount ? calculateMinimumReceive({ averageRatio, fromAmountToken, userSlippage }) : 0;
-  const { isWarning, percentImpact } = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.displayAmount })
+  const minimumReceive = simulateData?.displayAmount
+    ? calculateMinReceive(
+        averageRatio.displayAmount.toString(),
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage
+      )
+    : '0';
+  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -362,6 +364,14 @@ const SwapComponent: React.FC<{
                 setSearchTokenName={setSearchTokenName}
               />
             )}
+            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              <div className={cx('impact-warning')}>
+                <div className={cx('title')}>
+                  <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <button
@@ -384,7 +394,8 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: minimumReceive.toFixed(truncDecimals),
+                amount: minimumReceive,
+                decimals: toTokenInfoData?.decimals,
                 denom: toTokenInfoData?.symbol
               }}
               decimalScale={truncDecimals}
@@ -399,18 +410,6 @@ const SwapComponent: React.FC<{
               <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
             </div>
           )}
-
-          {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-          {!fromTokenFee && !toTokenFee && isWarning && <>
-            <div className={cx('impact-warning')}>
-              <div className={cx('title')} >
-                <span>Price impact warning</span>
-              </div>
-              <span style={{ color: "rgb(255, 171, 0)" }}>{Math.round(percentImpact) === 100 ? '~100%' : percentImpact.toFixed(2) + '%'}</span>
-            </div>
-            {/* <div>The difference between the market price and the estimated price is due to your order volume.</div> */}
-          </>
-          }
         </div>
       </div>
     </LoadingBox>
