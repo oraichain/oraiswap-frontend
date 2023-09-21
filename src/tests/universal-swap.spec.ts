@@ -184,7 +184,6 @@ describe('universal-swap', () => {
     ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
   ])('test-filterNonPoolEvmTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
     const tokens = filterNonPoolEvmTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
-    console.log('filtered to tokens: ', tokens);
     expect(tokens.length).toEqual(expectedLength);
   });
 
@@ -224,7 +223,7 @@ describe('universal-swap', () => {
     const simulateSwapSpy = jest.spyOn(restApi, 'simulateSwap');
     const simulateSwapEvmSpy = jest.spyOn(restApi, 'simulateSwapEvm');
     simulateSwapSpy.mockResolvedValue({ amount: '1' });
-    simulateSwapEvmSpy.mockResolvedValue({ amount: '2' });
+    simulateSwapEvmSpy.mockResolvedValue({ amount: '2', displayAmount: 2 });
     const isSupportedNoPoolSwapEvmSpy = jest.spyOn(restApi, 'isSupportedNoPoolSwapEvm');
     const isEvmSwappableSpy = jest.spyOn(restApi, 'isEvmSwappable');
     isSupportedNoPoolSwapEvmSpy.mockReturnValue(isSupportedNoPoolSwapEvmRes);
@@ -289,9 +288,9 @@ describe('universal-swap', () => {
 
   it('calculate minimum', async () => {
     const calculate = calculateMinimum('36363993', 2.5);
-    expect(calculate).toBe(35454894n);
+    expect(calculate).toBe(35454893.175);
     const errorCase = calculateMinimum(undefined, 2.5);
-    expect(errorCase).toEqual('0');
+    expect(errorCase).toEqual(0);
   });
 
   describe('generate msgs contract for swap action', () => {
@@ -591,12 +590,24 @@ describe('universal-swap', () => {
         }
       }
     }));
-    let result = await universalSwap.getUniversalSwapToAddress('0x01');
+    let result = await universalSwap.getUniversalSwapToAddress('0x01', {
+      metamaskAddress: undefined,
+      tronAddress: undefined
+    });
     expect(result).toEqual('0x1234');
-    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4');
+    result = await universalSwap.getUniversalSwapToAddress('cosmoshub-4', {
+      metamaskAddress: undefined,
+      tronAddress: undefined
+    });
     expect(result).toEqual('orai1234');
-    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
-    expect(result).toEqual('0x1234');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc', {
+      tronAddress: 'TPwTVfDDvmWSawsP7Ki1t3ecSBmaFeMMXc'
+    });
+    expect(result).toEqual('0x993d06fc97f45f16e4805883b98a6c20bab54964');
+    result = await universalSwap.getUniversalSwapToAddress('0x01', {
+      metamaskAddress: '0x993d06fc97f45f16e4805883b98a6c20bab54964'
+    });
+    expect(result).toEqual('0x993d06fc97f45f16e4805883b98a6c20bab54964');
     windowSpy.mockImplementation(() => ({
       Metamask: {
         getEthAddress: () => {
@@ -615,7 +626,10 @@ describe('universal-swap', () => {
       },
       tronLink: {}
     }));
-    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc');
+    result = await universalSwap.getUniversalSwapToAddress('0x2b6653dc', {
+      metamaskAddress: undefined,
+      tronAddress: undefined
+    });
     expect(result).toEqual('0x8754032ac7966a909e2e753308df56bb08dabd69');
   });
 
@@ -899,7 +913,8 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount }, //osmosis denom
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: '0',
+              timeoutHeight: undefined,
+              timeoutTimestamp: new Long(0),
               memo: ''
             }
           }
@@ -960,7 +975,8 @@ describe('universal-swap', () => {
               token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM, amount: simulateAmount },
               sender: senderAddress,
               receiver: 'orai1234',
-              timeoutTimestamp: '0',
+              timeoutHeight: undefined,
+              timeoutTimestamp: new Long(0),
               memo: ''
             }
           }

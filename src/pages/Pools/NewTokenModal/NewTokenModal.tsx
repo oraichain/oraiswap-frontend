@@ -1,29 +1,28 @@
-import cn from 'classnames/bind';
-import Modal from 'components/Modal';
-import { FC, useState } from 'react';
-import styles from './NewTokenModal.module.scss';
-import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
-import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
-import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
-import Input from 'components/Input';
-import NumberFormat from 'react-number-format';
-import Loader from 'components/Loader';
-import { handleErrorTransaction } from 'helper';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import useClickOutside from 'hooks/useClickOutSide';
-import { Pairs } from 'config/pools';
-import { OraidexListingContractClient } from 'libs/contracts/OraidexListingContract.client';
-import CheckBox from 'components/CheckBox';
-import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
-import { ModalDelete, ModalListToken } from './ModalComponent';
-import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
-import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
+import { OraidexListingContractClient } from '@oraichain/oraidex-contracts-sdk';
+import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
+import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
+import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
+import cn from 'classnames/bind';
+import CheckBox from 'components/CheckBox';
+import Input from 'components/Input';
+import Loader from 'components/Loader';
+import Modal from 'components/Modal';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
+import useClickOutside from 'hooks/useClickOutSide';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import sumBy from 'lodash/sumBy';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
+import { InitBalancesItems, RewardItems } from './ItemsComponent';
+import { ModalDelete, ModalListToken } from './ModalComponent';
+import styles from './NewTokenModal.module.scss';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -92,7 +91,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
-    const { client, defaultAddress: address } = await getCosmWasmClient();
+    const { client, defaultAddress: address } = await getCosmWasmClient({});
     if (!address)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Wallet address does not exist!'

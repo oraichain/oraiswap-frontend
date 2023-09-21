@@ -1,7 +1,7 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
-import { Coin, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { Coin, GasPrice } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { Stargate } from '@injectivelabs/sdk-ts';
@@ -22,34 +22,43 @@ export interface ExecuteMultipleMsg {
   handleOptions?: HandleOptions;
 }
 
-export type clientType = 'stargate' | 'injective';
+export type clientType = 'cosmwasm' | 'injective';
 
-const collectWallet = async (chainId?: string) => {
+const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) {
     throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
   }
   // use keplr instead
-  return await keplr.getOfflineSignerAuto(chainId ?? network.chainId);
+  return await keplr.getOfflineSignerAuto(chainId);
+};
+
+const getCosmWasmClient = async (
+  config: { signer?: OfflineSigner; chainId?: string; rpc?: string },
+  options?: cosmwasm.SigningCosmWasmClientOptions
+) => {
+  const { chainId, rpc, signer } = config;
+  const wallet = signer ?? (await collectWallet(chainId));
+  const defaultAddress = (await wallet.getAccounts())[0];
+  const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
+    rpc ?? (network.rpc as string),
+    wallet,
+    options ?? {
+      gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
+    }
+  );
+  return { wallet, client, defaultAddress };
 };
 
 export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
   switch (clientType) {
-    case 'stargate':
-      return SigningStargateClient.connectWithSigner(rpc, signer, options);
+    case 'cosmwasm':
+      const { client } = await getCosmWasmClient({ signer, rpc });
+      return client;
     case 'injective':
       const tmClient = await Tendermint37Client.connect(rpc);
       return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
   }
-};
-
-const getCosmWasmClient = async (chainId?: string) => {
-  const wallet = await collectWallet(chainId);
-  const defaultAddress = (await wallet.getAccounts())[0];
-  const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(network.rpc as string, wallet, {
-    gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
-  });
-  return { wallet, client, defaultAddress };
 };
 
 const getEncodedExecuteContractMsgs = (senderAddress: string, msgs: cosmwasm.ExecuteInstruction[]): EncodeObject[] => {

@@ -1,5 +1,3 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
@@ -7,7 +5,7 @@ import { displayInstallWallet, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveConnect } from 'hooks/useMetamask';
-import { collectWallet } from 'libs/cosmjs';
+import { getCosmWasmClient } from 'libs/cosmjs';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
@@ -96,10 +94,8 @@ const RequireAuthButton: React.FC<any> = () => {
     if (!(await window.Keplr.getKeplr())) {
       return displayInstallWallet();
     }
-    const wallet = await collectWallet(network.chainId);
-    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-    });
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
     console.log('oraiAddress', oraiAddress);
