@@ -1,5 +1,8 @@
-import { CosmWasmClient, SigningCosmWasmClient, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
+import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-simulate';
+import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import bech32 from 'bech32';
 import { TokenItemType, UniversalSwapType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoId, CosmosChainId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import {
@@ -26,23 +29,17 @@ import {
 } from 'pages/Balance/helpers';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
 import {
-  UniversalSwapHandler,
-  checkEvmAddress,
-  calculateMinimum,
-  filterNonPoolEvmTokens,
   SwapDirection,
+  UniversalSwapHandler,
+  calculateMinimum,
+  checkEvmAddress,
+  filterNonPoolEvmTokens,
   handleSimulateSwap
 } from 'pages/UniversalSwap/helpers';
-import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import * as restApi from 'rest/api';
+import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { client, deployIcs20Token, deployToken, senderAddress } from './common';
-import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
-import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-simulate';
-import bech32 from 'bech32';
-import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import * as balanceHelpers from 'pages/Balance/helpers';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;

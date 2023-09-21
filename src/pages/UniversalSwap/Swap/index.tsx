@@ -1,46 +1,44 @@
 import { useQuery } from '@tanstack/react-query';
-import AntSwapImg from 'assets/images/ant_swap.svg';
 import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import AntSwapImg from 'assets/images/ant_swap.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
+import InputSwap from 'components/InputSwap/InputSwap';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, evmTokens, tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, swapEvmRoutes } from 'config/constants';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useTokenFee from 'hooks/useTokenFee';
 import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import {
   fetchTokenInfos,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from 'rest/api';
 import { RootState } from 'store/configure';
-import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
+import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
 import {
+  SwapDirection,
   UniversalSwapHandler,
+  calculateMinimumReceive,
   checkEvmAddress,
-  calculateMinimum,
-  filterNonPoolEvmTokens,
-  SwapDirection
+  filterNonPoolEvmTokens
 } from '../helpers';
+import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
-import useTokenFee from 'hooks/useTokenFee';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
-import InputSwap from 'components/InputSwap/InputSwap';
-import { useSimulate, useTaxRate } from './hooks';
 
 const cx = cn.bind(styles);
 
@@ -248,7 +246,8 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.displayAmount ? calculateMinimum(simulateData.displayAmount, userSlippage) : 0;
+  const minimumReceive = simulateData?.displayAmount ? calculateMinimumReceive({ averageRatio, fromAmountToken, userSlippage }) : 0;
+  const { isWarning, percentImpact } = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.displayAmount })
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -400,6 +399,18 @@ const SwapComponent: React.FC<{
               <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
             </div>
           )}
+
+          {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+          {!fromTokenFee && !toTokenFee && isWarning && <>
+            <div className={cx('impact-warning')}>
+              <div className={cx('title')} >
+                <span>Price impact warning</span>
+              </div>
+              <span style={{ color: "rgb(255, 171, 0)" }}>{floatToPercent(percentImpact).toFixed(2) + '%'}</span>
+            </div>
+            {/* <div>The difference between the market price and the estimated price is due to your order volume.</div> */}
+          </>
+          }
         </div>
       </div>
     </LoadingBox>

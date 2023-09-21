@@ -84,6 +84,25 @@ export const calculateMinimum = (simulateAmountDisplay: number | string, userSli
   }
 };
 
+export const calculateMinimumReceive = ({
+  averageRatio,
+  fromAmountToken,
+  userSlippage
+}: {
+  averageRatio: SimulateResponse;
+  fromAmountToken: number;
+  userSlippage: number;
+}): number => {
+  if (!averageRatio) return 0;
+  return (averageRatio.displayAmount * fromAmountToken * (100 - userSlippage)) / 100;
+};
+
+export const calculatePercentPriceImpact = (minimumReceive: number, simulatedAmount: number): number => {
+  if (!simulatedAmount || !minimumReceive) return 0;
+  const percentImpact = 1 - simulatedAmount / minimumReceive;
+  return percentImpact;
+};
+
 export async function handleSimulateSwap(query: {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;

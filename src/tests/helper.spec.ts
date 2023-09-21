@@ -9,6 +9,7 @@ import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
+import { calculateMinimumReceive, calculatePercentPriceImpact } from 'pages/UniversalSwap/helpers';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -207,6 +208,40 @@ describe('should utils functions in libs/utils run exactly', () => {
       const fromToken = oraichainTokens.find((t) => t.name === from);
       const toToken = oraichainTokens.find((t) => t.name === to);
       const result = generateNewSymbol(fromToken, toToken, currentPair);
+      expect(result).toEqual(expectedResult);
+    }
+  );
+
+  it.each([
+    [undefined, 2, 1, 0],
+    [
+      {
+        amount: '1800000',
+        displayAmount: 1.8
+      },
+      50000,
+      1,
+      89100
+    ]
+  ])(
+    'calculate minimum receive should return correctly minimum receive',
+    (averageRatio, fromAmountToken, userSlippage, expectedResult) => {
+      const result = calculateMinimumReceive({
+        averageRatio,
+        fromAmountToken,
+        userSlippage
+      });
+      expect(result).toEqual(expectedResult);
+    }
+  );
+
+  it.each([
+    [0, 0, 0],
+    [100000, 50000, 0.5]
+  ])(
+    'calculatePercentPriceImpact should return correctly percent price impact',
+    (minimumReceive, simulatedAmount, expectedResult) => {
+      const result = calculatePercentPriceImpact(minimumReceive, simulatedAmount);
       expect(result).toEqual(expectedResult);
     }
   );

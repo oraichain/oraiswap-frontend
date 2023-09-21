@@ -29,7 +29,6 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 
 const cx = cn.bind(styles);
 
