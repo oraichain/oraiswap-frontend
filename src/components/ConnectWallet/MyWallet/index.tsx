@@ -49,8 +49,8 @@ interface WalletItem {
 
 const MyWallets: React.FC<{
     setQRUrlInfo: (qRGeneratorInfo: QRGeneratorInfo) => void,
-    setIsShowConnectWallet: (isShow: boolean) => void
-}> = ({ setQRUrlInfo, setIsShowConnectWallet }) => {
+    setIsShowMyWallet: (isShow: boolean) => void
+}> = ({ setQRUrlInfo, setIsShowMyWallet }) => {
     const [, setIsInactiveMetamask] = useState(false);
     const [address, setAddress] = useConfigReducer('address');
     const [isSameAddress, setIsSameAddress] = useState(false);
@@ -162,7 +162,7 @@ const MyWallets: React.FC<{
         try {
             const url = await QRCode.toDataURL(address);
             setQRUrlInfo({ url, icon, name, address });
-            setIsShowConnectWallet(false);
+            setIsShowMyWallet(false);
         } catch (err) {
             console.error("ERROR getUrlQrCode:", err);
         }
@@ -287,7 +287,7 @@ const MyWallets: React.FC<{
                 {wallets.map((wallet, index) => {
                     return (
                         <div key={index} className={cx('wallet_container')}>
-                            <div className={cx('wallet_info', wallet.isOpen ? 'active' : '')} onClick={() => toggleShowNetworks(wallet.id)}>
+                            <div className={cx('wallet_info')} onClick={() => toggleShowNetworks(wallet.id)}>
                                 <div className={cx('logo')}>
                                     <div className={cx('remove')}><TrashIcon /></div>
                                     <img src={wallet.icon} alt='wallet icon' />
