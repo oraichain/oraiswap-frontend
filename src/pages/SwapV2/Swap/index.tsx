@@ -160,7 +160,7 @@ const SwapComponent: React.FC<{
         amounts,
         userSlippage,
         oraiAddress,
-        averageRatio
+        simulateAverageData?.amount
       );
 
       const result = await CosmJs.executeMultiple({
@@ -187,11 +187,14 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? fromToken?.IconLight || fromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? toToken?.IconLight || toToken?.Icon : toToken?.Icon;
 
-  const minimumReceive = calculateMinReceive(
-    averageRatio,
-    toAmount(fromAmountToken, fromTokenInfoData?.decimals).toString(),
-    userSlippage
-  );
+  const minimumReceive =
+    simulateAverageData?.amount &&
+    calculateMinReceive(
+      simulateAverageData.amount,
+      toAmount(fromAmountToken, fromTokenInfoData?.decimals).toString(),
+      userSlippage,
+      fromTokenInfoData?.decimals
+    );
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
   return (
     <div className={cx('swap-box')}>

@@ -57,17 +57,12 @@ describe('swap', () => {
     const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === 'Oraichain');
     const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === 'Oraichain');
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
-    const expectedMinimumReceive = '1980000';
     const amounts = {
       airi: '2000000'
     };
     const userSlippage = 1;
     const simulateAverage = '2';
-    const fromAmount = '1000000';
-    const minimumReceive = calculateMinReceive(simulateAverage, fromAmount, userSlippage);
-    it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe(expectedMinimumReceive);
-    });
+    const minimumReceive = '1000';
 
     it('return msgs generate contract', () => {
       testMsgs(fromTokenHaveContract, toTokenInfoData);
@@ -124,7 +119,7 @@ describe('swap', () => {
                 }
               }
             ],
-            minimum_receive: expectedMinimumReceive
+            minimum_receive: minimumReceive
           }
         });
       }

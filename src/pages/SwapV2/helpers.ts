@@ -1,14 +1,18 @@
 import { Uint128 } from '@oraichain/oraidex-contracts-sdk';
 import { TokenItemType } from 'config/bridgeTokens';
 import { buildMultipleExecuteMessages } from 'libs/cosmjs';
-import { toAmount } from 'libs/utils';
+import { toAmount, toDisplay } from 'libs/utils';
 import { generateContractMessages, generateConvertErc20Cw20Message, SwapQuery, Type } from 'rest/api';
 
-export function calculateMinReceive(simulateAverage: string, fromAmount: string, userSlippage: number): Uint128 {
-  const amount = +simulateAverage * +fromAmount;
-  const result = amount * (1 - userSlippage / 100);
-  return Math.round(result).toString();
-}
+export const calculateMinReceive = (
+  simulateAverage: string,
+  fromAmount: string,
+  userSlippage: number,
+  decimals: number
+): Uint128 => {
+  const amount = BigInt(simulateAverage) * BigInt(fromAmount);
+  return ((BigInt(Math.trunc(toDisplay(amount, decimals))) * (100n - BigInt(userSlippage))) / 100n).toString();
+};
 
 export function generateMsgsSwap(
   fromTokenInfoData: TokenItemType,
@@ -26,7 +30,7 @@ export function generateMsgsSwap(
     const msgConvertsFrom = generateConvertErc20Cw20Message(amounts, fromTokenInfoData, oraiAddress);
     const msgConvertTo = generateConvertErc20Cw20Message(amounts, toTokenInfoData, oraiAddress);
 
-    const minimumReceive = calculateMinReceive(simulateAverage, _fromAmount, userSlippage);
+    const minimumReceive = calculateMinReceive(simulateAverage, _fromAmount, userSlippage, fromTokenInfoData.decimals);
     const msg = generateContractMessages({
       type: Type.SWAP,
       sender: oraiAddress,

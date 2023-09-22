@@ -38,8 +38,8 @@ import * as restApi from 'rest/api';
 import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { client, deployIcs20Token, deployToken, senderAddress } from './common';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
+import * as helper from 'pages/SwapV2/helpers';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -291,15 +291,7 @@ describe('universal-swap', () => {
     const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === 'Oraichain');
     const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === 'Oraichain');
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
-    const expectedMinimumReceive = '1980000';
-    const userSlippage = 1;
-    const simulateAverage = '2';
-    const fromAmount = '1000000';
-    const minimumReceive = calculateMinReceive(simulateAverage, fromAmount, userSlippage);
-
-    it('return expected minimum receive', () => {
-      expect(minimumReceive).toBe(expectedMinimumReceive);
-    });
+    const minimumReceive = '1000';
 
     it('return msgs generate contract', () => {
       testMsgs(fromTokenHaveContract, toTokenInfoData);
@@ -357,7 +349,7 @@ describe('universal-swap', () => {
                 }
               }
             ],
-            minimum_receive: expectedMinimumReceive
+            minimum_receive: minimumReceive
           }
         });
       }
@@ -626,7 +618,8 @@ describe('universal-swap', () => {
     const universalSwap = new UniversalSwapHandler('', oraichainTokens[0], oraichainTokens[0], 1, '', 1, '2');
     const fromAmount = '100000';
     const simulateAmount = '100';
-    const userSlippage = 0.01;
+    const userSlippage = 1;
+    const minimumReceive = '10000';
     universalSwap.fromAmount = toDisplay(fromAmount);
     universalSwap.simulateAmount = simulateAmount;
     universalSwap.userSlippage = userSlippage;
@@ -722,7 +715,7 @@ describe('universal-swap', () => {
                 }
               }
             ],
-            minimum_receive: '199980'
+            minimum_receive: minimumReceive
           }
         },
         process.env.REACT_APP_ROUTER_V2_CONTRACT,
@@ -753,7 +746,7 @@ describe('universal-swap', () => {
                     }
                   }
                 ],
-                minimum_receive: '199980'
+                minimum_receive: minimumReceive
               }
             })
           }
@@ -772,11 +765,17 @@ describe('universal-swap', () => {
         expectedSwapContractAddr: string,
         expectedFunds: any
       ) => {
+        // setup
         universalSwap.originalFromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoinGeckoId);
         universalSwap.originalToToken = flattenTokens.find(
           (t) => t.coinGeckoId === toCoinGeckoId && t.chainId === toChainId
         );
+        jest.spyOn(helper, 'calculateMinReceive').mockReturnValue(minimumReceive);
+
+        // act
         const swapMsg = universalSwap.generateMsgsSwap();
+
+        // assertion
         expect(swapMsg[0].contractAddress).toEqual(expectedSwapContractAddr);
         expect(swapMsg[0].msg).toEqual(expectedSwapMsg);
         expect(swapMsg[0].funds).toEqual(expectedFunds.funds);
@@ -947,7 +946,7 @@ describe('universal-swap', () => {
                             }
                           }
                         ],
-                        minimum_receive: '199980'
+                        minimum_receive: minimumReceive
                       }
                     })
                   }
@@ -974,6 +973,7 @@ describe('universal-swap', () => {
     ])(
       'test-combineMsgCosmos-with-%s',
       async (_name: string, fromCoingeckoId, toCoingeckoId, toChainId, expectedTransferMsg) => {
+        //  setup mock
         windowSpy.mockImplementation(() => ({
           Keplr: {
             getKeplrAddr: async (_chainId: string) => {
@@ -981,6 +981,7 @@ describe('universal-swap', () => {
             }
           }
         }));
+        jest.spyOn(helper, 'calculateMinReceive').mockReturnValue(minimumReceive);
         universalSwap.originalFromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoingeckoId);
         universalSwap.originalToToken = flattenTokens.find(
           (t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId
@@ -1047,7 +1048,7 @@ describe('universal-swap', () => {
                         }
                       }
                     ],
-                    minimum_receive: calculateMinReceive('2', fromAmount, userSlippage)
+                    minimum_receive: minimumReceive
                   }
                 })
               ),
@@ -1087,6 +1088,7 @@ describe('universal-swap', () => {
     ])(
       'test-combineMsgEvm-with-%s',
       async (_name: string, fromCoingeckoId, toCoingeckoId, toChainId, expectedTransferMsg) => {
+        //  setup mock
         windowSpy.mockImplementation(() => ({
           Keplr: {
             getKeplrAddr: async (_chainId: string) => {
@@ -1094,6 +1096,9 @@ describe('universal-swap', () => {
             }
           }
         }));
+
+        jest.spyOn(helper, 'calculateMinReceive').mockReturnValue(minimumReceive);
+
         universalSwap.originalFromToken = oraichainTokens.find((t) => t.coinGeckoId === fromCoingeckoId);
         universalSwap.originalToToken = flattenTokens.find(
           (t) => t.coinGeckoId === toCoingeckoId && t.chainId === toChainId

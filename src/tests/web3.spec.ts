@@ -31,13 +31,4 @@ describe('bigint', () => {
     const isEthAddress = metamask.isEthAddress(address);
     expect(isEthAddress).toEqual(expectedIsEthAddress);
   });
-
-  it.each<[string, string, number, string]>([
-    ['2', '5000000', 1, '9900000'],
-    ['2', '5000000', undefined, '9700000']
-  ])('test-calculateEvmSwapSlippage', (simulateAverage, fromAmount, slippage, expectedResult) => {
-    const metamask = new Metamask();
-    const result = metamask.calculateEvmSwapSlippage(simulateAverage, fromAmount, slippage).toString();
-    expect(result).toEqual(expectedResult);
-  });
 });

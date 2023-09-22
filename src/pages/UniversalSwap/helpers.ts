@@ -73,25 +73,6 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
   }
 };
 
-export const calculateMinimumReceive = ({
-  averageRatio,
-  fromAmountToken,
-  userSlippage
-}: {
-  averageRatio: SimulateResponse;
-  fromAmountToken: number;
-  userSlippage: number;
-}): number => {
-  if (!averageRatio) return 0;
-  return (averageRatio.displayAmount * fromAmountToken * (100 - userSlippage)) / 100;
-};
-
-export const calculatePercentPriceImpact = (minimumReceive: number, simulatedAmount: number): number => {
-  if (!simulatedAmount || !minimumReceive) return 0;
-  const percentImpact = ((minimumReceive - simulatedAmount) / minimumReceive) * 100;
-  return percentImpact;
-};
-
 export async function handleSimulateSwap(query: {
   fromInfo: TokenInfo;
   toInfo: TokenInfo;
@@ -478,7 +459,12 @@ export class UniversalSwapHandler {
     try {
       const _fromAmount = toAmount(this.fromAmount, this.originalFromToken.decimals).toString();
 
-      const minimumReceive = calculateMinReceive(this.simulateAverage, _fromAmount, this.userSlippage);
+      const minimumReceive = calculateMinReceive(
+        this.simulateAverage,
+        _fromAmount,
+        this.userSlippage,
+        this.originalFromToken.decimals
+      );
       const msg = generateContractMessages({
         type: Type.SWAP,
         sender: this.sender,
