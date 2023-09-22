@@ -522,7 +522,7 @@ export class UniversalSwapHandler {
         const msgs: cosmwasm.ExecuteInstruction = {
           contractAddress: ibcWasmContractAddress,
           msg: executeMsgSend,
-          funds: [{ amount: this.simulateAmount, denom: ORAI }]
+          funds: [{ amount: this.simulateAmount, denom: assetInfo.native_token.denom }]
         };
         return buildMultipleExecuteMessages(msgs);
       }
