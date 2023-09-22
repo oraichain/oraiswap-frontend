@@ -21,7 +21,7 @@ import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCachedPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
-import { generateMsgsSwap } from '../helpers';
+import { calculateMinReceive, generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
@@ -29,7 +29,7 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { TreasuryResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
+import { useWarningSlippage } from 'pages/UniversalSwap/Swap/hooks';
 
 const cx = cn.bind(styles);
 
@@ -158,9 +158,9 @@ const SwapComponent: React.FC<{
         fromAmountToken,
         toTokenInfoData,
         amounts,
-        simulateData,
         userSlippage,
-        oraiAddress
+        oraiAddress,
+        averageRatio
       );
 
       const result = await CosmJs.executeMultiple({
@@ -187,6 +187,12 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? fromToken?.IconLight || fromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? toToken?.IconLight || toToken?.Icon : toToken?.Icon;
 
+  const minimumReceive = calculateMinReceive(
+    averageRatio,
+    toAmount(fromAmountToken, fromTokenInfoData?.decimals).toString(),
+    userSlippage
+  );
+  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
   return (
     <div className={cx('swap-box')}>
       <div className={cx('from')}>
@@ -281,6 +287,11 @@ const SwapComponent: React.FC<{
 
           <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
         </div>
+        {isWarningSlippage && (
+          <div className={cx('impact-warning')}>
+            <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+          </div>
+        )}
       </div>
       <button
         className={cx('swap-btn')}
@@ -302,9 +313,9 @@ const SwapComponent: React.FC<{
           </div>
           <TokenBalance
             balance={{
-              amount: simulateData?.amount,
-              denom: toTokenInfoData?.symbol,
-              decimals: toTokenInfoData?.decimals
+              amount: minimumReceive,
+              decimals: toTokenInfoData?.decimals,
+              denom: toTokenInfoData?.symbol
             }}
             decimalScale={6}
           />

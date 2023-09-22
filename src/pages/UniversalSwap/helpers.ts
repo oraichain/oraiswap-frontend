@@ -39,6 +39,7 @@ import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 export enum SwapDirection {
   From,
@@ -71,17 +72,23 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
   }
 };
 
-export const calculateMinimum = (simulateAmountDisplay: number | string, userSlippage: number): number => {
-  if (!simulateAmountDisplay) return 0;
-  try {
-    const result =
-      Number(simulateAmountDisplay) -
-      (Number(simulateAmountDisplay) * Number(userSlippage * atomic)) / (100 * Number(atomic));
-    return result;
-  } catch (error) {
-    console.log({ error });
-    return 0;
-  }
+export const calculateMinimumReceive = ({
+  averageRatio,
+  fromAmountToken,
+  userSlippage
+}: {
+  averageRatio: SimulateResponse;
+  fromAmountToken: number;
+  userSlippage: number;
+}): number => {
+  if (!averageRatio) return 0;
+  return (averageRatio.displayAmount * fromAmountToken * (100 - userSlippage)) / 100;
+};
+
+export const calculatePercentPriceImpact = (minimumReceive: number, simulatedAmount: number): number => {
+  if (!simulatedAmount || !minimumReceive) return 0;
+  const percentImpact = ((minimumReceive - simulatedAmount) / minimumReceive) * 100;
+  return percentImpact;
 };
 
 export async function handleSimulateSwap(query: {
@@ -183,14 +190,9 @@ export class UniversalSwapHandler {
     public fromAmount: number,
     public simulateAmount: string,
     public userSlippage: number,
+    public simulateAverage: string,
     public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface
   ) {}
-
-  calculateMinReceive(simulateAmount: string, userSlippage: number, decimals: number): Uint128 {
-    const amount = toDisplay(simulateAmount, decimals);
-    const result = amount * (1 - userSlippage / 100);
-    return toAmount(result, decimals).toString();
-  }
 
   async getUniversalSwapToAddress(
     toChainId: NetworkChainId,
@@ -429,7 +431,8 @@ export class UniversalSwapHandler {
       fromAmount: this.fromAmount,
       simulateAmount: this.simulateAmount,
       slippage: this.userSlippage,
-      destination: '' // if to token already on same net with from token then no destination is needed
+      destination: '', // if to token already on same net with from token then no destination is needed.
+      simulateAverage: this.simulateAverage
     };
     // has to switch network to the correct chain id on evm since users can swap between network tokens
     if (!window.Metamask.isTron(this.originalFromToken.chainId))
@@ -470,11 +473,7 @@ export class UniversalSwapHandler {
     try {
       const _fromAmount = toAmount(this.fromAmount, this.originalFromToken.decimals).toString();
 
-      const minimumReceive = this.calculateMinReceive(
-        this.simulateAmount,
-        this.userSlippage,
-        this.originalFromToken.decimals
-      );
+      const minimumReceive = calculateMinReceive(this.simulateAverage, _fromAmount, this.userSlippage);
       const msg = generateContractMessages({
         type: Type.SWAP,
         sender: this.sender,

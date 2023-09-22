@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { TokenItemType } from 'config/bridgeTokens';
-import { toAmount, toDisplay } from 'libs/utils';
+import { toAmount } from 'libs/utils';
 import { handleSimulateSwap } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';

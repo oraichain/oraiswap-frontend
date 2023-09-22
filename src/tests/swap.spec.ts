@@ -12,7 +12,6 @@ describe('swap', () => {
     const decimals = 6;
 
     const displayAmount = toDisplay(amount, decimals);
-    console.log({ displayAmount });
     expect(displayAmount).toBe(123.456789);
   });
 
@@ -58,14 +57,14 @@ describe('swap', () => {
     const fromTokenNoContract = cosmosTokens.find((item) => item.name === 'ATOM' && item.chainId === 'Oraichain');
     const toTokenInfoData = cosmosTokens.find((item) => item.name === 'ORAIX' && item.chainId === 'Oraichain');
     const _fromAmount = toAmount(fromAmountToken, fromTokenDecimals).toString();
-    const simulateData = { amount: '1000000' };
-    const expectedMinimumReceive = '990000';
+    const expectedMinimumReceive = '1980000';
     const amounts = {
       airi: '2000000'
     };
     const userSlippage = 1;
-    const minimumReceive = calculateMinReceive(simulateData.amount, userSlippage, 6);
-
+    const simulateAverage = '2';
+    const fromAmount = '1000000';
+    const minimumReceive = calculateMinReceive(simulateAverage, fromAmount, userSlippage);
     it('return expected minimum receive', () => {
       expect(minimumReceive).toBe(expectedMinimumReceive);
     });
@@ -136,9 +135,9 @@ describe('swap', () => {
         fromAmountToken,
         toTokenInfoData,
         amounts,
-        simulateData,
         userSlippage,
-        senderAddress
+        senderAddress,
+        simulateAverage
       );
       expect(Array.isArray(multipleMsgs)).toBe(true);
     }
