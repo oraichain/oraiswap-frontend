@@ -4,10 +4,11 @@ import { GasPrice, coin } from '@cosmjs/stargate';
 import { TokenItemType, UniversalSwapType, oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
-import { ibcInfos, oraichain2oraib } from 'config/ibcInfos';
+import { IBCInfoMap, ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
 import {
+  Amount,
   CwIcs20LatestInterface,
   CwIcs20LatestQueryClient,
   CwIcs20LatestReadOnlyInterface,
@@ -191,7 +192,8 @@ export class UniversalSwapHandler {
     public simulateAmount: string,
     public userSlippage: number,
     public simulateAverage: string,
-    public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface
+    public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface,
+    public _ibcInfos: IBCInfoMap = ibcInfos
   ) {}
 
   async getUniversalSwapToAddress(
@@ -217,7 +219,7 @@ export class UniversalSwapHandler {
    * @returns combined messages
    */
   async combineMsgCosmos(timeoutTimestamp?: string): Promise<EncodeObject[]> {
-    const ibcInfo: IBCInfo = ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
+    const ibcInfo: IBCInfo = this._ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
     const toAddress = await window.Keplr.getKeplrAddr(this.originalToToken.chainId);
     if (!toAddress) throw generateError('Please login keplr!');
 
@@ -288,8 +290,8 @@ export class UniversalSwapHandler {
   }
 
   getIbcInfoIbcMemo(metamaskAddress: string, tronAddress: string) {
-    if (!ibcInfos[this.originalFromToken.chainId]) throw generateError('Cannot find ibc info');
-    const ibcInfo: IBCInfo = ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
+    if (!this._ibcInfos[this.originalFromToken.chainId]) throw generateError('Cannot find ibc info');
+    const ibcInfo: IBCInfo = this._ibcInfos[this.originalFromToken.chainId][this.originalToToken.chainId];
     const transferAddress = this.getTranferAddress(metamaskAddress, tronAddress, ibcInfo);
     const ibcMemo = this.getIbcMemo(transferAddress);
     return {
@@ -315,10 +317,18 @@ export class UniversalSwapHandler {
           `${toToken.prefix}${toToken.contractAddress}`
         );
       }
-      const { balance } = await ics20Contract.channelWithKey({
-        channelId: ibcInfo.channel,
-        denom: pairKey
-      });
+      let balance: Amount;
+      try {
+        const { balance: channelBalance } = await ics20Contract.channelWithKey({
+          channelId: ibcInfo.channel,
+          denom: pairKey
+        });
+        balance = channelBalance;
+      } catch (error) {
+        // do nothing because the given channel and key doesnt exist
+        console.log('error querying channel with key: ', error);
+        return;
+      }
 
       if ('native' in balance) {
         const pairMapping = await ics20Contract.pairMapping({ key: pairKey });
@@ -330,7 +340,7 @@ export class UniversalSwapHandler {
       }
     } catch (error) {
       console.log({ CheckBalanceChannelIbcErrors: error });
-      return;
+      throw generateError(`Error in checking balance channel ibc: ${{ CheckBalanceChannelIbcErrors: error }}`);
     }
   }
 
@@ -359,7 +369,7 @@ export class UniversalSwapHandler {
     }
     // if to token is evm, then we need to evaluate channel state balance of ibc wasm
     if (to.chainId === '0x01' || to.chainId === '0x38' || to.chainId === '0x2b6653dc') {
-      const ibcInfo: IBCInfo | undefined = ibcInfos['Oraichain'][to.chainId];
+      const ibcInfo: IBCInfo | undefined = this._ibcInfos['Oraichain'][to.chainId];
       if (!ibcInfo) throw generateError('IBC Info error when checking ibc balance');
       await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
     }

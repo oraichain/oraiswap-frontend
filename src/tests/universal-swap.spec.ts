@@ -1,7 +1,7 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-simulate';
-import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapTokenClient, OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import bech32 from 'bech32';
 import { TokenItemType, UniversalSwapType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoId, CosmosChainId, EvmChainId, NetworkChainId } from 'config/chainInfos';
@@ -39,6 +39,7 @@ import { Type, generateContractMessages, simulateSwap } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { client, deployIcs20Token, deployToken, senderAddress } from './common';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 
 describe('universal-swap', () => {
   let windowSpy: jest.SpyInstance;
@@ -51,9 +52,9 @@ describe('universal-swap', () => {
   let channel = 'channel-29';
   let airiIbcDenom: string = 'oraib0x7e2A35C746F2f7C240B664F1Da4DD100141AE71F';
   let cosmosSenderAddress = bech32.encode('cosmos', bech32.decode(oraiAddress).words);
-  let ics20Contract;
-  let oraiPort;
-  let airiToken;
+  let ics20Contract: CwIcs20LatestClient;
+  let oraiPort: string;
+  let airiToken: OraiswapTokenClient;
 
   beforeAll(async () => {
     windowSpy = jest.spyOn(window, 'window', 'get');
@@ -1272,7 +1273,7 @@ describe('universal-swap', () => {
       windowSpy.mockImplementation(() => ({
         client
       }));
-      const universalSwap = new UniversalSwapHandler('', from, to, fromAmount, toAmount, 1, ics20Contract);
+      const universalSwap = new UniversalSwapHandler('', from, to, fromAmount, toAmount, 1, '1', ics20Contract);
       try {
         await universalSwap.checkBalanceIBCOraichain(
           from,
