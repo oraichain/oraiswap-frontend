@@ -138,8 +138,8 @@ export default class Metamask {
       metamaskAddress?: string;
       tronAddress?: string;
     };
-    slippage?: number; // from 1 to 100
-    destination?: string;
+    slippage: number; // from 1 to 100
+    destination: string;
     simulateAverage: string;
   }) {
     const { fromToken, toTokenContractAddr, address, fromAmount, simulateAverage, slippage, destination } = data;
