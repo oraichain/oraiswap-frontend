@@ -1,7 +1,8 @@
 import cn from 'classnames/bind';
+import Lottie from 'lottie-react';
 
 import useConfigReducer from 'hooks/useConfigReducer';
-import { ReactComponent as LoadingIcon } from 'assets/icons/loading.svg';
+import OraiDEXLoadingBlack from 'assets/lottie/oraiDEX_loading_black.json';
 
 import styles from './index.module.scss';
 
@@ -14,7 +15,7 @@ const ConnectProcessing: React.FC<{ walletName: string; close: () => void }> = (
     <div className={cx('connect_processing', theme)}>
       <div className={cx('loading_icon')}>
         <span>
-          <LoadingIcon />
+          <Lottie animationData={OraiDEXLoadingBlack} />
         </span>
       </div>
       <div className={cx('content')}>Connect {walletName} to OraiDEX to proceed</div>

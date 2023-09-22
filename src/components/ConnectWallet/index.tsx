@@ -17,7 +17,7 @@ interface ModalProps {}
 
 const ConnectWallet: FC<ModalProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
-  const [isShowConnectWallet, setIsShowConnectWallet] = useState(true);
+  const [isShowConnectWallet, setIsShowConnectWallet] = useState(false);
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
@@ -33,7 +33,16 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           placement="bottom-end"
           visible={isShowMyWallet}
           setVisible={setIsShowMyWallet}
-          content={<MyWallets setQRUrlInfo={setQRUrlInfo} setIsShowMyWallet={setIsShowMyWallet} />}
+          content={
+            <MyWallets
+              handleAddWallet={() => {
+                setIsShowChooseWallet(true);
+                setIsShowMyWallet(false);
+              }}
+              setQRUrlInfo={setQRUrlInfo}
+              setIsShowMyWallet={setIsShowMyWallet}
+            />
+          }
         >
           <Connected setIsShowMyWallet={() => setIsShowMyWallet(true)} />
         </TooltipContainer>

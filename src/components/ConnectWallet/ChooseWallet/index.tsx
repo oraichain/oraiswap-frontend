@@ -74,7 +74,7 @@ const ChooseWalletModal: React.FC<{
             close();
             setConnectStatus(CONNECT_STATUS.SELECTING);
           }}
-          walletName={walletSelected.name}
+          walletName={'walletSelected.name'}
         />
       );
     } else {

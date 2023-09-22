@@ -11,6 +11,14 @@
     align-items: center;
     justify-content: center;
     margin: 30px 0;
+
+    span {
+      width: 95px;
+      height: 95px;
+      background-color: #aee67f;
+      padding: 15px;
+      border-radius: 50%;
+    }
   }
 
   .content {

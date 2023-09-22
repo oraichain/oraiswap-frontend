@@ -26,6 +26,7 @@
         justify-content: space-between;
 
         .logo {
+          margin-left: 5px;
           img {
             width: 24px;
             height: 24px;
@@ -38,6 +39,7 @@
         .control {
           display: flex;
           align-items: center;
+          margin-right: 10px;
         }
         .info {
           display: flex;
@@ -90,6 +92,7 @@
           align-items: center;
 
           .logo {
+            margin-left: 10px;
             img {
               width: 24px;
               height: 24px;
@@ -118,6 +121,7 @@
           }
           .actions {
             display: flex;
+            margin-right: 5px;
 
             .qr_code {
               margin-left: 10px;
