@@ -1,12 +1,16 @@
 import cn from 'classnames/bind';
 
+import useConfigReducer from 'hooks/useConfigReducer';
+
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 
 const ConnectError: React.FC<{ close: () => void; handleTryAgain: () => void }> = ({ close, handleTryAgain }) => {
+  const [theme] = useConfigReducer('theme');
+
   return (
-    <div className={cx('connect_error')}>
+    <div className={cx('connect_error', theme)}>
       <div className={cx('content')}>
         <p>Unfortunately, we did not receive the confirmation.</p>
         <p>Please, try again.</p>

@@ -4,6 +4,7 @@ import Modal from 'components/Modal';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 
 import styles from './index.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export interface QRGeneratorInfo {
   url: string;
@@ -19,13 +20,15 @@ interface QRGeneratorProps {
 const cx = cn.bind(styles);
 
 const QRGeneratorModal: React.FC<QRGeneratorProps & QRGeneratorInfo> = ({ url, name, icon, address, close }) => {
+  const [theme] = useConfigReducer('theme');
+
   return (
     <Modal
       isOpen={!!url}
       close={close}
       open={() => {}}
       isCloseBtn={false}
-      className={cx('QR_generator_modal_container')}
+      className={cx('QR_generator_modal_container', theme)}
     >
       <div className={cx('QR_generator_modal_wrapper')}>
         <div className={cx('header')}>

@@ -2,9 +2,14 @@ import cn from 'classnames/bind';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import Modal from 'components/Modal';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
+import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
+import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
+import { ReactComponent as LedgerIcon } from 'assets/icons/ledger.svg';
+import { ReactComponent as PhantomIcon } from 'assets/icons/phantom.svg';
 
 import ConnectProcessing from './ConnectProcessing';
 import ConnectError from './ConnectError';
@@ -20,10 +25,10 @@ interface WalletItem {
 const WALLETS: WalletItem[] = [
   { name: 'Owallet', icon: OwalletIcon },
   { name: 'Metamask', icon: MetamaskIcon },
-  { name: 'TronLink', icon: OwalletIcon },
-  { name: 'Phantom', icon: OwalletIcon },
-  { name: 'Keplr', icon: OwalletIcon },
-  { name: 'Ledger', icon: OwalletIcon }
+  { name: 'TronLink', icon: TronIcon },
+  { name: 'Phantom', icon: PhantomIcon },
+  { name: 'Keplr', icon: KeplrIcon },
+  { name: 'Ledger', icon: LedgerIcon }
 ];
 
 enum CONNECT_STATUS {
@@ -35,6 +40,7 @@ enum CONNECT_STATUS {
 const ChooseWalletModal: React.FC<{
   close: () => void;
 }> = ({ close }) => {
+  const [theme] = useConfigReducer('theme');
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
 
@@ -90,7 +96,7 @@ const ChooseWalletModal: React.FC<{
       close={close}
       open={() => {}}
       isCloseBtn={false}
-      className={cx('choose_wallet_modal_container')}
+      className={cx('choose_wallet_modal_container', theme)}
     >
       <div className={cx('choose_wallet_modal_wrapper')}>
         <div className={cx('header')}>

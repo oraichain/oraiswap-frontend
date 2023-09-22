@@ -4,10 +4,10 @@
   display: flex;
   flex-direction: column;
   border-radius: 6px;
-  border: 1px solid #dfe0de; // TODO:
+  border: 1px solid #dfe0de;
   padding: 16px;
-  color: #232521; // TODO:
-  background-color: #fff; // TODO:
+  color: #232521;
+  background-color: #fff;
 
   .wallet_wrapper {
     display: flex;
@@ -16,6 +16,9 @@
     overflow-y: auto;
 
     .wallet_container {
+      margin-bottom: 10px;
+      border-radius: 8px;
+
       .wallet_info {
         padding: 5px;
         display: flex;
@@ -31,6 +34,10 @@
           .remove {
             display: none;
           }
+        }
+        .control {
+          display: flex;
+          align-items: center;
         }
         .info {
           display: flex;
@@ -54,9 +61,9 @@
           }
         }
         &:hover {
-          border-radius: 8px 8px 0px 0px;
           background: #dfe0de;
           cursor: pointer;
+          border-radius: 8px;
 
           .logo {
             display: flex;
@@ -75,7 +82,7 @@
         flex-direction: column;
         padding: 8px;
         margin-top: 5px;
-        border-top: 1px solid #dfe0de;
+        border-top: 0.7px solid #dfe0de;
 
         .network_container {
           display: flex;
@@ -143,6 +150,47 @@
 
     .content {
       margin-left: 10px;
+    }
+  }
+}
+
+.dark {
+  border-radius: 12px;
+  border: 1px solid #494949;
+  background: #121511;
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+
+  .wallet_wrapper {
+    .wallet_container {
+      background: #232521;
+
+      .wallet_info {
+        .info {
+          .name {
+            color: #979995;
+          }
+          .money {
+            color: #f7f7f7;
+          }
+        }
+        &:hover {
+          background: #494949;
+        }
+      }
+
+      .networks_container {
+        border-top: 0.7px solid #494949;
+        .network_container {
+          .info {
+            .name {
+              color: #979995;
+            }
+            .address {
+              color: #f7f7f7;
+            }
+          }
+        }
+      }
     }
   }
 }
