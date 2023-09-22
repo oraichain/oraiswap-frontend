@@ -307,29 +307,25 @@ export class UniversalSwapHandler {
       this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
 
     try {
-      const { balances } = await ics20Contract.channel({
-        id: ibcInfo.channel
+      let pairKey = this.buildIbcWasmPairKey(ibcInfo.source, ibcInfo.channel, toToken.denom);
+      if (toToken.prefix && toToken.contractAddress) {
+        pairKey = this.buildIbcWasmPairKey(
+          ibcInfo.source,
+          ibcInfo.channel,
+          `${toToken.prefix}${toToken.contractAddress}`
+        );
+      }
+      const { balance } = await ics20Contract.channelWithKey({
+        channelId: ibcInfo.channel,
+        denom: pairKey
       });
 
-      for (let balance of balances) {
-        if ('native' in balance) {
-          let pairKey = this.buildIbcWasmPairKey(ibcInfo.source, ibcInfo.channel, toToken.denom);
-          if (toToken.prefix && toToken.contractAddress) {
-            pairKey = this.buildIbcWasmPairKey(
-              ibcInfo.source,
-              ibcInfo.channel,
-              `${toToken.prefix}${toToken.contractAddress}`
-            );
-          }
-          if (pairKey !== balance.native.denom) continue;
-          const pairMapping = await ics20Contract.pairMapping({ key: pairKey });
-          const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
-          const _toAmount = toDisplay(this.simulateAmount, toToken.decimals);
-          if (trueBalance < _toAmount) {
-            throw generateError(`pair key is not enough balance!`);
-          }
-        } else {
-          // do nothing because currently we dont have any cw20 balance in the channel
+      if ('native' in balance) {
+        const pairMapping = await ics20Contract.pairMapping({ key: pairKey });
+        const trueBalance = toDisplay(balance.native.amount, pairMapping.pair_mapping.remote_decimals);
+        const _toAmount = toDisplay(this.simulateAmount, toToken.decimals);
+        if (trueBalance < _toAmount) {
+          throw generateError(`pair key is not enough balance!`);
         }
       }
     } catch (error) {
