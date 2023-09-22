@@ -42,7 +42,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
     return {
       ...pool,
-      reward: poolReward.reward,
+      reward: poolReward?.reward ?? [],
       myStakedLP: '2',
       earned: '1'
     };
@@ -74,7 +74,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     },
     apr: {
       name: 'APR',
-      width: '10%',
+      width: '12%',
       accessor: (data) => (
         <div className={styles.apr}>
           <div>{`${data.apr.toFixed(2)}%`}</div>
@@ -95,7 +95,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     },
     earned: {
       name: 'Earned',
-      width: '12%',
+      width: '10%',
       align: 'left',
       accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.earned))}</span>
     },

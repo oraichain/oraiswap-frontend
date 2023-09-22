@@ -3,7 +3,8 @@
 
 
 .pool_detail {
-  margin-top: 40px;
+  max-width: 90%;
+  margin: 40px auto 0;
 
   .back {
     cursor: pointer;
@@ -15,6 +16,14 @@
     line-height: 24px;
     border-bottom: 2px;
     margin-bottom: 16px;
+
+    .backIcon {
+      @include theme() {
+        path {
+          stroke: theme-get('neutral-text-text-token-name');
+        }
+      }
+    }
 
     span {
       margin-left: 5px;

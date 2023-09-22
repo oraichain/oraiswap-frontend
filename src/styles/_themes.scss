@@ -9,6 +9,7 @@ $shadow-btn: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
 $blue-color: #7e5cc5;
 $success-color: #00AD26;
 $error-color: #E01600;
+$primary-text-link: #78CA11;
 // for dark-light mode
 $themes: (
   dark: ('text-color': white,
@@ -63,7 +64,10 @@ $themes: (
     'neutral-surface-bg-section': #232521,
     'neutral-text-title': #EFEFEF,
     'neutral-surface-bg-btn-disabled': #232521,
-    'neutral-text-text-token-name': #F7F7F7),
+    'neutral-text-text-token-name': #F7F7F7,
+    'neutral-surface-bg-section-2': #31332E,
+    'neutral-border-border-bold': #494949,
+    'primary-surface-default': #92E54C),
   light: ('text-color': #272b30,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
@@ -116,5 +120,8 @@ $themes: (
     'neutral-surface-bg-section': #F7F7F7,
     'neutral-text-title': #4A4D46,
     'neutral-surface-bg-btn-disabled': #EFEFEF,
-    'neutral-text-text-token-name': #232521)
+    'neutral-text-text-token-name': #232521,
+    'neutral-surface-bg-section-2': #EFEFEF,
+    'neutral-border-border-bold': #DFE0DE,
+    'primary-surface-default': #2F5711)
 );

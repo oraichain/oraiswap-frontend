@@ -34,7 +34,8 @@ import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { updateLpPools } from 'reducer/token';
 import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import OverviewPool from './components/OverviewPool/OverviewPool';
+import { OverviewPool } from './components/OverviewPool';
+import { Earning } from './components/Earning';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
@@ -182,11 +183,11 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
             navigate(`/pools`);
           }}
         >
-          <BackIcon />
+          <BackIcon className={styles.backIcon} />
           <span>Back to all pools</span>
         </div>
         <OverviewPool />
-
+        <Earning />
         {!!pairInfoData ? <></> : <></>}
       </div>
     </Content>
