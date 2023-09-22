@@ -138,7 +138,6 @@ export default class Metamask {
       metamaskAddress?: string;
       tronAddress?: string;
     };
-    simulateAmount: string;
     slippage?: number; // from 1 to 100
     destination?: string;
     simulateAverage: string;

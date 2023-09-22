@@ -429,7 +429,6 @@ export class UniversalSwapHandler {
       toTokenContractAddr: this.originalToToken.contractAddress,
       address: { metamaskAddress, tronAddress },
       fromAmount: this.fromAmount,
-      simulateAmount: this.simulateAmount,
       slippage: this.userSlippage,
       destination: '', // if to token already on same net with from token then no destination is needed.
       simulateAverage: this.simulateAverage
