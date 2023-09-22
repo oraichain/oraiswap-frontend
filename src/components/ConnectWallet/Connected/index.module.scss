@@ -1,5 +1,5 @@
 .connected_container {
-  min-width: 190px;
+  min-width: 170px;
   height: 52px;
   display: flex;
   align-items: center;
@@ -35,6 +35,17 @@
       font-style: normal;
       font-weight: 600;
       color: #232521;
+    }
+  }
+}
+
+.dark {
+  .content {
+    .title {
+      color: #efefef;
+    }
+    .money {
+      color: #f7f7f7;
     }
   }
 }

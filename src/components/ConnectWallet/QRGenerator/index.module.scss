@@ -31,8 +31,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 30px;
       background: #efefef;
+      padding: 10px 18px;
 
       .icon {
         display: flex;
@@ -51,7 +52,7 @@
     img {
       width: 152px;
       height: 152px;
-      border-radius: 4px;
+      border-radius: 8px;
     }
 
     .address {
@@ -70,6 +71,20 @@
       border: 1px solid #232521;
       width: 100%;
       cursor: pointer;
+    }
+  }
+}
+
+.dark {
+  .QR_generator_modal_wrapper {
+    background: #121511;
+    color: #f7f7f7;
+
+    .info {
+      background: #31332e;
+    }
+    .cancel-btn {
+      border: 1px solid #f7f7f7;
     }
   }
 }

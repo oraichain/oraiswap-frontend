@@ -33,3 +33,11 @@
     cursor: pointer;
   }
 }
+
+.dark {
+  .cancel_btn {
+    background: #121511;
+    color: #f7f7f7;
+    border: 1px solid #f7f7f7;
+  }
+}
