@@ -12,6 +12,7 @@
     color: #1E300A;
     border: 1px;
     padding: 14.5px 39px;
+    border-radius: 99px;
 }
 
 .primary-sm {
@@ -22,4 +23,15 @@
     padding: 4px 16px;
 }
 
-.secondary {}
+.secondary {
+    background-color: transparent;
+    color: #1E300A;
+    border: 1px;
+    padding: 14.5px 39px;
+    border: 1px;
+    border-radius: 99px;
+
+    @include theme() {
+        border-color: theme-get('neutral-text-text-token-name');
+    }
+}
