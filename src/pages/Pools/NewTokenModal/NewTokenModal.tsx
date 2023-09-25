@@ -264,7 +264,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {!isMintNewToken && (
                 <div>
                   <div className={cx('row', 'pt-16')}>
-                    <div className={cx('label')}>Quote token</div>
+                    <div className={cx('label')}>Base token</div>
                     <div>
                       <CheckBox
                         radioBox
@@ -422,7 +422,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 </div>
               )}
               <div className={cx('row', 'pt-16')}>
-                <div className={cx('label')}>Base token</div>
+                <div className={cx('label')}>Quote token</div>
                 <div>
                   <CheckBox
                     radioBox
