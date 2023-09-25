@@ -6,18 +6,18 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
 
-import { reduceString } from 'libs/utils';
-import { WalletType } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
-import MetamaskImage from 'assets/images/metamask.png';
 import { displayInstallWallet, setStorageKey } from 'helper';
+import MetamaskImage from 'assets/images/metamask.png';
+import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveConnect } from 'hooks/useMetamask';
+import { WalletType } from 'config/constants';
 import { collectWallet } from 'libs/cosmjs';
-import Keplr from 'libs/keplr';
+import { reduceString } from 'libs/utils';
+import { network } from 'config/networks';
 import Metamask from 'libs/metamask';
+import Keplr from 'libs/keplr';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as QRCodeIcon } from 'assets/icons/qr-code.svg';
@@ -26,6 +26,7 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
+// TODO:
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
@@ -54,9 +55,7 @@ const MyWallets: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
   handleAddWallet: () => void;
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
-  const [, setIsInactiveMetamask] = useState(false);
   const [address, setAddress] = useConfigReducer('address');
-  const [isSameAddress, setIsSameAddress] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
@@ -66,8 +65,6 @@ const MyWallets: React.FC<{
 
   const connectMetamask = async () => {
     try {
-      setIsInactiveMetamask(false);
-
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
@@ -80,7 +77,6 @@ const MyWallets: React.FC<{
 
   const disconnectMetamask = async () => {
     try {
-      setIsInactiveMetamask(true);
       setMetamaskAddress(undefined);
     } catch (ex) {
       console.log(ex);
@@ -143,9 +139,6 @@ const MyWallets: React.FC<{
     });
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
-    if (oraiAddress === address) {
-      setIsSameAddress(!isSameAddress);
-    }
     loadTokenAmounts({ oraiAddress });
     setAddress(oraiAddress);
   };
