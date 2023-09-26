@@ -7,21 +7,6 @@ import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { Stargate } from '@injectivelabs/sdk-ts';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 
-/**
- * The options of an .instantiate() call.
- * All properties are optional.
- */
-export interface HandleOptions {
-  readonly memo?: string;
-  readonly funds?: readonly Coin[];
-}
-
-export interface ExecuteMultipleMsg {
-  contractAddress: string;
-  handleMsg: string;
-  handleOptions?: HandleOptions;
-}
-
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
