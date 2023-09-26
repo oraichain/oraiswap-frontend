@@ -40,23 +40,29 @@ export const PoolSelect: React.FC<{
 export const HeaderTab: React.FC<{
   hideChart: boolean;
   balance?: number;
-  percent?: string,
+  percent?: string;
   setHideChart: (isHideChart: boolean) => void;
-}> = ({ setHideChart, hideChart, balance = 0.0001, percent = '+5.55' }) => {
+}> = ({ setHideChart, hideChart, balance = 1, percent = '+0' }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [pool, setPool] = useState<string>('ORAI/USDT');
   return (
     <div className={cx('headerTab')}>
       <div>
-        <div className={cx('top')} onClick={() => setIsOpen(!isOpen)}>
-          <span>{pool}</span>
-          <img src={ArrowImg} alt="arrow" />
-        </div>
-        {isOpen && <PoolSelect setIsOpen={setIsOpen} pool={pool} setPool={setPool} />}
-        <div className={cx('bottom')}>
-          <span className={cx('balance')}>{balance}</span>
-          <span className={cx('percent')}>{percent}</span>
-        </div>
+        {!hideChart && (
+          <>
+            <div className={cx('top')} onClick={() => setIsOpen(!isOpen)}>
+              {/* <span>{pool}</span>
+              <img src={ArrowImg} alt="arrow" /> */}
+            </div>
+            {/* {isOpen && <PoolSelect setIsOpen={setIsOpen} pool={pool} setPool={setPool} />} */}
+            {!!balance && (
+              <div className={cx('bottom')}>
+                <span className={cx('balance')}>{balance}</span>
+                <span className={cx('percent')}>{percent}</span>
+              </div>
+            )}
+          </>
+        )}
       </div>
       <div>
         <div>

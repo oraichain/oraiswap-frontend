@@ -8,3 +8,13 @@ export type AssetInfoResponse = {
   coeff?: number;
   coeffType?: string;
 };
+
+export type HistoryInfoResponse = {
+  type: string;
+  time: string;
+  denom: string;
+  balance: string;
+  balanceType: string;
+  txHash: string;
+  usd?: string;
+};
