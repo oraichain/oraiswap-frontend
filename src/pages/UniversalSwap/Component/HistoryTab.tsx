@@ -51,6 +51,9 @@ const RowsComponent: React.FC<{
           <div className={styles.list}>
             <div className={styles.img}>
               <img src={OraiIcon} width={26} height={26} alt="filter" />
+              <div className={styles.imgChain}>
+                <img src={OraiIcon} width={14} height={14} alt="filter" />
+              </div>
             </div>
             <div className={styles.value}>
               <div
@@ -75,6 +78,9 @@ const RowsComponent: React.FC<{
             <div className={styles.list}>
               <div className={styles.img}>
                 <img src={OraiIcon} width={26} height={26} alt="filter" />
+                <div className={styles.imgChain}>
+                  <img src={OraiIcon} width={14} height={14} alt="filter" />
+                </div>
               </div>
               <div className={styles.value}>
                 <div

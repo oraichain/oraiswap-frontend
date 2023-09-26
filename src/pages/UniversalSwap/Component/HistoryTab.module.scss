@@ -48,9 +48,21 @@
       .img {
         display: flex;
         align-items: center;
+        position: relative;
+        .imgChain {
+          width: 14px;
+          height: 14px;
+          background-color: #efefef;
+          border-radius: 2px;
+          position: absolute;
+          top: 95%;
+          left: 115%;
+          transform: translate(-95%, -115%);
+          z-index: 1;
+        }
       }
       .value {
-        padding-left: 6px;
+        padding-left: 12px;
         .balance {
           font-size: 14px;
           .denom {
