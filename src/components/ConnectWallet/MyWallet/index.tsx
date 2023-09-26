@@ -6,18 +6,18 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
 
-import { reduceString } from 'libs/utils';
-import { WalletType } from 'config/constants';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
-import MetamaskImage from 'assets/images/metamask.png';
 import { displayInstallWallet, setStorageKey } from 'helper';
+import MetamaskImage from 'assets/images/metamask.png';
+import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveConnect } from 'hooks/useMetamask';
+import { WalletType } from 'config/constants';
 import { collectWallet } from 'libs/cosmjs';
-import Keplr from 'libs/keplr';
+import { reduceString } from 'libs/utils';
+import { network } from 'config/networks';
 import Metamask from 'libs/metamask';
+import Keplr from 'libs/keplr';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as QRCodeIcon } from 'assets/icons/qr-code.svg';
@@ -25,6 +25,8 @@ import { ReactComponent as TrashIcon } from 'assets/icons/trash_icon.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
+import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
+// TODO:
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
@@ -51,10 +53,9 @@ interface WalletItem {
 const MyWallets: React.FC<{
   setQRUrlInfo: (qRGeneratorInfo: QRGeneratorInfo) => void;
   setIsShowMyWallet: (isShow: boolean) => void;
-}> = ({ setQRUrlInfo, setIsShowMyWallet }) => {
-  const [, setIsInactiveMetamask] = useState(false);
+  handleAddWallet: () => void;
+}> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
   const [address, setAddress] = useConfigReducer('address');
-  const [isSameAddress, setIsSameAddress] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
@@ -64,8 +65,6 @@ const MyWallets: React.FC<{
 
   const connectMetamask = async () => {
     try {
-      setIsInactiveMetamask(false);
-
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
@@ -78,7 +77,6 @@ const MyWallets: React.FC<{
 
   const disconnectMetamask = async () => {
     try {
-      setIsInactiveMetamask(true);
       setMetamaskAddress(undefined);
     } catch (ex) {
       console.log(ex);
@@ -141,9 +139,6 @@ const MyWallets: React.FC<{
     });
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
-    if (oraiAddress === address) {
-      setIsSameAddress(!isSameAddress);
-    }
     loadTokenAmounts({ oraiAddress });
     setAddress(oraiAddress);
   };
@@ -183,13 +178,13 @@ const MyWallets: React.FC<{
       copy(address);
     }
 
-    const walletsModified = wallets.map((w) => {
-      const networksModified = w.networks.map((network) => {
-        network.copied = network.id === networkId && w.id === walletId;
+    const walletsModified = wallets.map((wallet) => {
+      const networksModified = wallet.networks.map((network) => {
+        network.copied = network.id === networkId && wallet.id === walletId;
         return network;
       });
-      w.networks = networksModified;
-      return w;
+      wallet.networks = networksModified;
+      return wallet;
     });
 
     setWallets(walletsModified);
@@ -299,7 +294,10 @@ const MyWallets: React.FC<{
                   <div className={cx('name')}>{wallet.name}</div>
                   <div className={cx('money')}>${wallet.totalUsd}</div>
                 </div>
-                <div className={cx('control')}>{wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}</div>
+                <div className={cx('control')}>
+                  {/* {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />} */}
+                  <UnavailableCloudIcon />
+                </div>
               </div>
               {wallet.isOpen ? (
                 <div className={cx('networks_container')}>
@@ -338,7 +336,7 @@ const MyWallets: React.FC<{
           );
         })}
       </div>
-      <div className={cx('btn')}>
+      <div className={cx('btn')} onClick={handleAddWallet}>
         <AddIcon />
         <div className={cx('content')}>Add Wallet</div>
       </div>
