@@ -5,7 +5,7 @@
   flex-direction: column;
   border-radius: 6px;
   border: 1px solid #dfe0de;
-  padding: 16px;
+  padding: 16px 13px 16px 16px;
   color: #232521;
   background-color: #fff;
 
@@ -13,7 +13,7 @@
     display: flex;
     flex-direction: column;
     height: 360px;
-    overflow-y: auto;
+    overflow-y: scroll;
 
     .wallet_container {
       margin-bottom: 10px;
@@ -93,9 +93,12 @@
 
           .logo {
             margin-left: 10px;
+            display: flex;
+            align-items: center;
             img {
               width: 24px;
               height: 24px;
+              border-radius: 5px;
             }
           }
           .info {

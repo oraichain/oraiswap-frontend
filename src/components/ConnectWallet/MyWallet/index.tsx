@@ -8,7 +8,6 @@ import copy from 'copy-to-clipboard';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { displayInstallWallet, setStorageKey } from 'helper';
-import MetamaskImage from 'assets/images/metamask.png';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -26,7 +25,8 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
-// TODO:
+import MetamaskImage from 'assets/images/metamask.png';
+import TronlinkImage from 'assets/images/tronlink.jpg';
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
@@ -37,7 +37,6 @@ interface NetworkItem {
   name: string;
   icon: string;
   id: number;
-  copied: boolean;
   address: string;
 }
 
@@ -55,13 +54,18 @@ const MyWallets: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
   handleAddWallet: () => void;
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
-  const [address, setAddress] = useConfigReducer('address');
+  const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [theme] = useConfigReducer('theme');
   const [wallets, setWallets] = useState<WalletItem[]>([]);
+  const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
+  const [copiedAddressCoordinates, setCopiedAddressCoordinates] = useState<{ networkId: number; walletId: number }>({
+    networkId: 0,
+    walletId: 0
+  });
 
   const connectMetamask = async () => {
     try {
@@ -140,13 +144,13 @@ const MyWallets: React.FC<{
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
     loadTokenAmounts({ oraiAddress });
-    setAddress(oraiAddress);
+    setOraiAddressWallet(oraiAddress);
   };
 
   const disconnectKeplr = async () => {
     try {
       window.Keplr.disconnect();
-      setAddress('');
+      setOraiAddressWallet('');
     } catch (ex) {
       console.log(ex);
     }
@@ -173,58 +177,58 @@ const MyWallets: React.FC<{
   };
 
   const copyWalletAddress = (e, address: string, walletId: number, networkId: number) => {
+    timeoutCopyId && clearTimeout(timeoutCopyId);
     if (address) {
       e.stopPropagation();
       copy(address);
+      setCopiedAddressCoordinates({ walletId, networkId });
     }
-
-    const walletsModified = wallets.map((wallet) => {
-      const networksModified = wallet.networks.map((network) => {
-        network.copied = network.id === networkId && wallet.id === walletId;
-        return network;
-      });
-      wallet.networks = networksModified;
-      return wallet;
-    });
-
-    setWallets(walletsModified);
   };
 
   useEffect(() => {
-    const initWallets = [
+    if (copiedAddressCoordinates.networkId && copiedAddressCoordinates.walletId) {
+      const TIMEOUT_COPY = 2000;
+      const timeoutId = setTimeout(() => {
+        setCopiedAddressCoordinates({ walletId: 0, networkId: 0 });
+      }, TIMEOUT_COPY);
+
+      setTimeoutCopyId(Number(timeoutId));
+      return () => clearTimeout(timeoutId);
+    }
+  }, [copiedAddressCoordinates]);
+
+  useEffect(() => {
+    setWallets([
       {
         id: 1,
-        name: 'Owallet',
+        name: 'Metamask',
         icon: MetamaskImage,
         totalUsd: 1,
         isOpen: false,
         networks: [
           {
             id: 1,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            name: 'Ethereum',
+            address: metamaskAddress,
+            icon: MetamaskImage
           },
           {
             id: 2,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            name: 'Binance',
+            address: metamaskAddress,
+            icon: MetamaskImage
           },
           {
             id: 3,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            name: 'Kawaiiverse',
+            address: metamaskAddress,
+            icon: MetamaskImage
           }
         ]
       },
       {
         id: 2,
-        name: 'Owallet 2',
+        name: 'Owallet',
         icon: MetamaskImage,
         totalUsd: 42342.342121221,
         isOpen: false,
@@ -232,50 +236,46 @@ const MyWallets: React.FC<{
           {
             id: 1,
             name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            address: oraiAddressWallet,
+            icon: MetamaskImage
           },
           {
             id: 2,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            name: 'Injective',
+            address: oraiAddressWallet,
+            icon: MetamaskImage
           },
           {
             id: 3,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
+            name: 'Cosmos Hub',
+            address: oraiAddressWallet,
+            icon: MetamaskImage
           },
           {
             id: 4,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            icon: MetamaskImage,
-            copied: false
-          },
+            name: 'Osmosis',
+            address: oraiAddressWallet,
+            icon: MetamaskImage
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: 'Tron Link',
+        icon: MetamaskImage,
+        totalUsd: 1,
+        isOpen: false,
+        networks: [
           {
-            id: 5,
-            name: 'Oraichain',
-            address: '0xf0592A133Fe439D281f42Dcb24E06C9d2De3c1B8',
-            icon: MetamaskImage,
-            copied: false
-          },
-          {
-            id: 6,
-            name: 'Oraichain',
-            address: '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1',
-            icon: MetamaskImage,
-            copied: false
+            id: 1,
+            name: 'Tron network',
+            address: tronAddress,
+            icon: TronlinkImage
           }
         ]
       }
-    ];
-    setWallets(initWallets);
-  }, []);
+    ]);
+  }, [tronAddress, metamaskAddress, oraiAddressWallet]);
 
   return (
     <div className={cx('my_wallets_container', theme)}>
@@ -295,8 +295,8 @@ const MyWallets: React.FC<{
                   <div className={cx('money')}>${wallet.totalUsd}</div>
                 </div>
                 <div className={cx('control')}>
-                  {/* {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />} */}
-                  <UnavailableCloudIcon />
+                  {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
+                  {/* <UnavailableCloudIcon /> */}
                 </div>
               </div>
               {wallet.isOpen ? (
@@ -316,7 +316,12 @@ const MyWallets: React.FC<{
                             className={cx('copy')}
                             onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.id)}
                           >
-                            {network.copied ? <SuccessIcon width={20} height={20} /> : <CopyIcon />}
+                            {copiedAddressCoordinates.networkId === network.id &&
+                            copiedAddressCoordinates.walletId === wallet.id ? (
+                              <SuccessIcon width={20} height={20} />
+                            ) : (
+                              <CopyIcon />
+                            )}
                           </div>
                           <div
                             className={cx('qr_code')}
