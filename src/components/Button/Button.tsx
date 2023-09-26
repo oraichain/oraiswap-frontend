@@ -8,13 +8,14 @@ interface Props {
   type: ButtonType;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   children: React.ReactElement | React.ReactNode;
+  disabled?: boolean;
   icon?: React.ReactElement | React.ReactNode;
 }
 
-export const Button: React.FC<Props> = ({ children, onClick, type, icon }) => {
+export const Button: React.FC<Props> = ({ children, onClick, type, icon, ...rest }) => {
   return (
-    <button onClick={(event) => onClick(event)} className={cx('button', type)}>
-      <span className={styles.icon}>{icon}</span>
+    <button onClick={(event) => onClick(event)} className={cx('button', type)} {...rest}>
+      {icon && <span className={styles.icon}>{icon}</span>}
       {children}
     </button>
   );

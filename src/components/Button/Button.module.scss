@@ -2,44 +2,49 @@
 @import 'src/styles/themes';
 
 .button {
-    font-weight: 500;
-    font-size: 16px;
-    border-radius: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  font-weight: 500;
+  font-size: 16px;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-    .icon {
-        margin-right: 5px;
-        width: 20px;
-        height: 20px;
-    }
+  .icon {
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
 .primary {
-    background-color: #AEE67F;
-    color: #1E300A;
-    border: 1px;
-    padding: 14.5px 39px;
-    border-radius: 99px;
+  background-color: #aee67f;
+  color: #1e300a;
+  border: 1px;
+  padding: 14.5px 39px;
+  border-radius: 99px;
 }
 
 .primary-sm {
-    background-color: #AEE67F;
-    font-weight: 400;
-    color: #1E300A;
-    border: 1px;
-    padding: 4px 16px;
+  background-color: #aee67f;
+  font-weight: 400;
+  color: #1e300a;
+  border: 1px;
+  padding: 4px 16px;
 }
 
 .secondary {
-    background-color: transparent;
-    border: 1px solid;
-    padding: 14.5px 39px;
-    border-radius: 99px;
+  background-color: transparent;
+  border: 1px solid;
+  padding: 14.5px 39px;
+  border-radius: 99px;
 
-    @include theme() {
-        border-color: theme-get('neutral-text-text-token-name');
-        color: theme-get('neutral-text-text-token-name');
-    }
+  @include theme() {
+    border-color: theme-get('neutral-text-text-token-name');
+    color: theme-get('neutral-text-text-token-name');
+  }
 }

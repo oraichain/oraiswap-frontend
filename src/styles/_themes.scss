@@ -7,12 +7,14 @@ $blue-color: #a871df;
 $shadow-modal: 0px 4px 8px -4px rgba(0, 0, 0, 0.1), inset 0px -1px 1px rgba(0, 0, 0, 0.04);
 $shadow-btn: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
 $blue-color: #7e5cc5;
-$success-color: #00AD26;
-$error-color: #E01600;
-$primary-text-link: #78CA11;
+$success-color: #00ad26;
+$error-color: #e01600;
+$primary-text-link: #78ca11;
+
 // for dark-light mode
 $themes: (
-  dark: ('text-color': white,
+  dark: (
+    'text-color': white,
     'text-color-secondary': #fff,
     'text-color-third': #fff,
     'text-color-hover': black,
@@ -62,14 +64,17 @@ $themes: (
     'neutral-text-body': #979995,
     'neutral-border-border-default': #232521,
     'neutral-surface-bg-section': #232521,
-    'neutral-text-title': #EFEFEF,
+    'neutral-text-title': #efefef,
     'neutral-surface-bg-btn-disabled': #232521,
-    'neutral-text-text-token-name': #F7F7F7,
-    'neutral-surface-bg-section-2': #31332E,
+    'neutral-text-text-token-name': #f7f7f7,
+    'neutral-surface-bg-section-2': #31332e,
     'neutral-border-border-bold': #494949,
-    'primary-surface-default': #92E54C,
-    "neutral-surface-bg": #121511),
-  light: ('text-color': #272b30,
+    'primary-surface-default': #92e54c,
+    'neutral-surface-bg': #121511,
+    'neutral-text-body-on-section': #979995
+  ),
+  light: (
+    'text-color': #272b30,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
     'text-color-hover': white,
@@ -117,13 +122,15 @@ $themes: (
     'sea-stone-500': #979995,
     'sea-stone-200': #efefef,
     'neutral-text-body': #979995,
-    'neutral-border-border-default': #EFEFEF,
-    'neutral-surface-bg-section': #F7F7F7,
-    'neutral-text-title': #4A4D46,
-    'neutral-surface-bg-btn-disabled': #EFEFEF,
+    'neutral-border-border-default': #efefef,
+    'neutral-surface-bg-section': #f7f7f7,
+    'neutral-text-title': #4a4d46,
+    'neutral-surface-bg-btn-disabled': #efefef,
     'neutral-text-text-token-name': #232521,
-    'neutral-surface-bg-section-2': #EFEFEF,
-    'neutral-border-border-bold': #DFE0DE,
-    'primary-surface-default': #2F5711,
-    "neutral-surface-bg": #FFF)
+    'neutral-surface-bg-section-2': #efefef,
+    'neutral-border-border-bold': #dfe0de,
+    'primary-surface-default': #2f5711,
+    'neutral-surface-bg': #fff,
+    'neutral-text-body-on-section': #686a66
+  )
 );

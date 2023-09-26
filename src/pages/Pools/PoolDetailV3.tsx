@@ -1,5 +1,4 @@
 import cn from 'classnames/bind';
-import Pie from 'components/Pie';
 import Content from 'layouts/Content';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -174,7 +173,6 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
     ? toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), lpTotalSupply) * (pairAmountInfoData?.tokenUsd ?? 0)
     : 0;
 
-  const ratio = pairAmountInfoData ? toDecimal(token1Amount, token2Amount) : 0;
   return (
     <Content nonBackground>
       <div className={styles.pool_detail}>
@@ -190,7 +188,6 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
         <OverviewPool />
         <Earning />
         <MyPoolInfo />
-        {!!pairInfoData ? <></> : <></>}
       </div>
     </Content>
   );

@@ -9,9 +9,12 @@ import img_coin from 'assets/images/img_coin.png';
 import { Button } from 'components/Button';
 import styles from './MyPoolInfo.module.scss';
 import useTheme from 'hooks/useTheme';
+import { useState } from 'react';
+import AddLiquidityModal from './AddLiquidityModal/AddLiquidityModal';
 
 export const MyPoolInfo = () => {
   const theme = useTheme();
+  const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
 
   return (
     <section className={styles.myPoolInfo}>
@@ -35,7 +38,7 @@ export const MyPoolInfo = () => {
           >
             Withdraw LP
           </Button>
-          <Button type="primary" onClick={() => console.log('ok')} icon={<DepositIcon />}>
+          <Button type="primary" onClick={() => setIsOpenDepositPool(true)} icon={<DepositIcon />}>
             Deposit
           </Button>
         </div>
@@ -65,6 +68,13 @@ export const MyPoolInfo = () => {
           </Button>
         </div>
       </div>
+      {isOpenDepositPool && (
+        <AddLiquidityModal
+          isOpen={isOpenDepositPool}
+          open={() => setIsOpenDepositPool(true)}
+          close={() => setIsOpenDepositPool(false)}
+        />
+      )}
     </section>
   );
 };
