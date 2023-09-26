@@ -34,7 +34,7 @@ const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }
       <tbody className={styles.tableBody}>
         {data.map((datum, index) => {
           return (
-            <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow(event, datum)}>
+            <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>
               {Object.keys(headers).map((key, index) => {
                 return (
                   <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>

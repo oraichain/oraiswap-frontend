@@ -10,61 +10,84 @@
   .info {
     display: flex;
     padding: 24px;
-    .total-info {
-      width: 50%;
+    color: #232521;
+    .filter {
+      cursor: pointer;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
-      .icon {
-        width: 40px;
-        height: 40px;
-        background-color: #efefef;
+      border-radius: 99px;
+      border: 1px solid #232521;
+      &:hover {
+        opacity: 0.6;
+      }
+      span {
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+      }
+    }
+    .search {
+      padding-left: 12px;
+    }
+  }
+}
+
+.history {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 400;
+  .from,
+  .to {
+    width: 25%;
+    .list {
+      display: flex;
+      .img {
         display: flex;
         align-items: center;
-        justify-content: center;
-        border-radius: 50%;
       }
-      .balance {
-        padding-left: 16px;
-        color: #979995;
-        .value {
-          color: #232521;
-          font-size: 18px;
-          font-weight: 600;
+      .value {
+        padding-left: 6px;
+        .balance {
+          font-size: 14px;
+          .denom {
+            padding-left: 4px;
+            text-transform: uppercase;
+          }
         }
       }
     }
   }
-}
-
-.assets {
-  display: flex;
-  justify-content: center;
-  color: #494949;
-  .left {
+  .icon {
+    width: 6%;
     display: flex;
     align-items: center;
   }
-  .right {
-    text-align: left;
-    padding-left: 8px;
-    .assetName {
-      color: #121212;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: uppercase;
-    }
-    .assetChain {
-      font-size: 13px;
-      font-weight: 400;
-      text-transform: capitalize;
-    }
-  }
-}
+  .time,
+  .txhash {
+    width: 20%;
+    z-index: 1;
 
-.valuesColumn {
-  display: flex;
-  justify-content: center;
-  .values {
-    text-align: left;
+    .type {
+      font-size: 14px;
+      text-transform: capitalize;
+      font-style: normal;
+      font-weight: 500;
+      color: #232521;
+    }
+    .link {
+      display: flex;
+      &:hover {
+        font-weight: 600;
+      }
+      .open_link {
+        padding-left: 4px;
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 }

@@ -81,7 +81,7 @@
 
     @include theme() {
       background: theme-get('neutral-6');
-      box-shadow: theme-get('shadow-swap-from-to');
+      // box-shadow: theme-get('shadow-swap-from-to');
     }
 
     border-radius: 16px;
@@ -323,7 +323,7 @@
     }
     img {
       border-radius: 50%;
-      background-color: #f7f7f7;
+      // background-color: #f7f7f7;
       cursor: pointer;
       height: 38px;
       width: 38px;
@@ -339,7 +339,7 @@
 
   @include theme() {
     background-color: theme-get('primary-1');
-    color: theme-get('text-color-filter');
+    color: #232521;
   }
   &.disable {
     @include theme() {
