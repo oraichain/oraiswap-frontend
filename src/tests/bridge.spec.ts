@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/stargate';
-import { cosmosTokens, flattenTokens, TokenItemType } from 'config/bridgeTokens';
+import { cosmosTokens, flattenTokens, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
   BSC_SCAN,
@@ -20,7 +20,12 @@ import { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'lib
 import { toAmount } from 'libs/utils';
 import Long from 'long';
 import { findDefaultToToken, getSourceReceiver } from 'pages/Balance/helpers';
-import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
+import {
+  generateConvertCw20Erc20Message,
+  generateConvertErc20Cw20Message,
+  generateMoveOraib2OraiMessages,
+  parseTokenInfo
+} from 'rest/api';
 
 // @ts-ignore
 window.Networks = require('libs/ethereum-multicall/enums').Networks;
@@ -64,6 +69,19 @@ describe('bridge', () => {
       [denom]: '9000000000000000000' // 9 * 10*18
     };
     const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, keplrAddress, evmAmount);
+
+    it.each<[string, AmountDetails, number]>([
+      ['scatom', {}, 0],
+      ['injective', { [`${process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM}`]: '10' }, 1],
+      ['injective', { injective: '10' }, 0]
+    ])(
+      'test-generateConvertErc20Cw20Message-should-return-correct-message-length',
+      (denom, amountDetails, expectedMessageLength) => {
+        const token = oraichainTokens.find((token) => token.denom === denom);
+        const result = generateConvertErc20Cw20Message(amountDetails, token, 'john doe');
+        expect(result.length).toEqual(expectedMessageLength);
+      }
+    );
 
     it('bridge-transfer-token-erc20-cw20-should-return-only-evm-amount', async () => {
       expect(evmAmount).toMatchObject({

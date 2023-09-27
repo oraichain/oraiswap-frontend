@@ -148,10 +148,6 @@ export const reduceString = (str: string, from: number, end: number) => {
   return str ? str.substring(0, from) + '...' + str.substring(str.length - end) : '-';
 };
 
-export const parseBep20Erc20Name = (name: string) => {
-  return name.replace(/(BEP20|ERC20)\s+/, '');
-};
-
 export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): TokenInfo => {
   const data = (info as any)?.token_info_response ?? info;
   return {

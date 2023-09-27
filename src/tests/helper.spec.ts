@@ -1,6 +1,6 @@
 import { TokenItemType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
+import { formateNumberDecimalsAuto, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
@@ -67,14 +67,6 @@ describe('should utils functions in libs/utils run exactly', () => {
       minPrice: 1
     });
     expect(priceFormated).toEqual(expectedFormat);
-  });
-
-  it.each([
-    ['BEP20 AIRI', 'AIRI'],
-    ['ERC20 AIRI', 'AIRI']
-  ])('should parse bep20 rrc20 name correctly', (evmName: string, expectedParse: string) => {
-    const name = parseBep20Erc20Name(evmName);
-    expect(name).toBe(expectedParse);
   });
 
   describe('reduceString function', () => {

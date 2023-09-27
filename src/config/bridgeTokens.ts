@@ -40,7 +40,8 @@ export type TokenItemType = {
 };
 const evmDenomsMap = {
   kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
-  milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]
+  milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM],
+  injective: [process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM]
 };
 const minAmountSwapMap = {
   trx: 10
