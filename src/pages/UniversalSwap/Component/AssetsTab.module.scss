@@ -1,2 +1,70 @@
 @import 'src/styles/themes';
 @import 'src/styles/mixins';
+
+.assetsTab {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+  border: 1px solid #efefef;
+  border-radius: 12px;
+  .info {
+    display: flex;
+    padding: 24px;
+    .total-info {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      .icon {
+        width: 40px;
+        height: 40px;
+        background-color: #efefef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+      .balance {
+        padding-left: 16px;
+        color: #979995;
+        .value {
+          color: #232521;
+          font-size: 18px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.assets {
+  display: flex;
+  justify-content: center;
+  color: #494949;
+  .left {
+    display: flex;
+    align-items: center;
+  }
+  .right {
+    text-align: left;
+    padding-left: 8px;
+    .assetName {
+      color: #121212;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+    .assetChain {
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: capitalize;
+    }
+  }
+}
+
+.valuesColumn {
+  display: flex;
+  justify-content: center;
+  .values {
+    text-align: left;
+  }
+}

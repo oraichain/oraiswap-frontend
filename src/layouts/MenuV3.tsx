@@ -10,9 +10,10 @@ import classNames from 'classnames';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MenuV3.module.scss';
-import { Button } from 'components/Button';
 
-const Menu: React.FC<{}> = React.memo((props) => {
+import ConnectWallet from 'components/ConnectWallet';
+
+const Menu: React.FC = React.memo(() => {
     const location = useLocation();
     const [link, setLink] = useState('/');
     const { theme, setTheme } = useContext(ThemeContext);
@@ -61,6 +62,7 @@ const Menu: React.FC<{}> = React.memo((props) => {
     const mobileMode = isMobile();
     const ToggleIcon = open ? CloseIcon : MenuIcon;
     const darkTheme = theme === 'dark';
+
     return (
         <>
             {mobileMode && (
@@ -79,48 +81,23 @@ const Menu: React.FC<{}> = React.memo((props) => {
                     </Link>
                 )}
                 <div className={classNames(styles.menu_list)}>
-                    {/* <RequireAuthButton /> */}
-                    {renderLink(
-                        '/universalswap',
-                        'Swap',
-                        setLink,
-                    )}
+                    {renderLink('/universalswap', 'Swap', setLink)}
                     {renderLink('/pools', 'Pools', setLink)}
                     {renderLink('https://orderbook.oraidex.io/spot', 'Order Book', () => { }, true)}
                     {renderLink('https://orderbook.oraidex.io/future', 'Future', () => { }, true)}
                     {renderLink('https://payment.orai.io/', 'Buy ORAI', () => { }, true)}
                 </div>
-                <div className={classNames(styles.wallet)}>
-                    <Button type='primary' onClick={() => console.log('ok')}>Connect Wallet</Button>
-                    {theme === 'dark' ? (
-                        <button
-                            style={{ paddingLeft: 20 }}
-                            className={classNames(styles.menu_theme, {
-                                [styles.active]: theme === 'dark'
-                            })}
-                            onClick={() => {
-                                setTheme('light');
-                            }}
-                        >
-                            <Light style={{ width: 14, height: 14 }} />
-                        </button>
-                    ) : (
-                        <button
-                            style={{ paddingLeft: 20 }}
-                            className={classNames(
-                                styles.menu_theme,
-                                {
-                                    [styles.active]: theme === 'light'
-                                },
-                                styles[theme]
-                            )}
-                            onClick={() => {
-                                setTheme('dark');
-                            }}
-                        >
-                            <Dark style={{ width: 14, height: 14 }} />
-                        </button>
-                    )}
+                <div className={classNames(styles.connect_wallet_wrapper)}>
+                    <button
+                        className={classNames(styles.menu_theme, styles.active, styles[theme])}
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    >
+                        {theme === 'dark' ? <Light /> : <Dark />}
+                    </button>
+
+                    <span>
+                        <ConnectWallet />
+                    </span>
                 </div>
             </div>
         </>

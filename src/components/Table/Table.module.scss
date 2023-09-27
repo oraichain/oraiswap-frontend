@@ -2,76 +2,75 @@
 @import 'src/styles/mixins';
 
 .table {
-    overflow-y: auto;
-    padding-bottom: 29px;
-    width: 100%;
-    table-layout: fixed;
+  overflow-y: auto;
+  padding-bottom: 29px;
+  width: 100%;
+  table-layout: fixed;
 
-    td {
-        overflow-wrap: break-word;
+  td {
+    overflow-wrap: break-word;
+  }
+
+  thead {
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    tr {
+      @include theme() {
+        color: theme-get('neutral-text-body');
+        border-bottom: 1px solid theme-get('neutral-border-border-default');
+      }
+
+      display: flex;
+      align-items: center;
+      border-radius: 4px 4px 0 0;
+      padding: 24px 0;
+      font-weight: 500;
+      line-height: 18px;
+      font-size: 14px;
+      font-style: normal;
+      line-height: 150%;
+
+      th:first-child {
+        padding-left: 10px;
+      }
+
+      th:last-child {
+        padding-right: 10px;
+      }
     }
+  }
 
-    thead {
+  tbody {
+    tr {
+      display: flex;
+      align-items: center;
+      padding: 24px 0;
+      margin: 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 400;
 
-        box-sizing: border-box;
-        position: sticky;
-        top: 0;
-        z-index: 1;
+      @include theme() {
+        color: theme-get('neutral-text-title');
+        border-bottom: 1px solid theme-get('neutral-border-border-default');
+      }
 
-        tr {
-            @include theme() {
-                color: theme-get('neutral-text-body');
-                border-bottom: 1px solid theme-get('neutral-border-border-default');
-            }
-
-            display: flex;
-            align-items: center;
-            border-radius: 4px 4px 0 0;
-            padding: 24px 0;
-            font-weight: 500;
-            line-height: 18px;
-            font-size: 14px;
-            font-style: normal;
-            line-height: 150%;
-
-            th:first-child {
-                padding-left: 10px;
-            }
-
-            th:last-child {
-                padding-right: 10px;
-            }
+      &:hover {
+        @include theme() {
+          background-color: theme-get('neutral-border-border-default');
         }
+      }
+
+      td:first-child {
+        padding-left: 10px;
+      }
+
+      td:last-child {
+        padding-right: 10px;
+      }
     }
-
-    tbody {
-        tr {
-            display: flex;
-            align-items: center;
-            padding: 24px 0;
-            margin: 0;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 400;
-
-            @include theme() {
-                color: theme-get('neutral-text-title');
-                border-bottom: 1px solid theme-get('neutral-border-border-default');
-            }
-
-            &:hover {
-                @include theme() {
-                    background-color: theme-get('neutral-border-border-default');
-                }
-            }
-
-            td:first-child {
-                padding-left: 10px;
-            }
-
-            td:last-child {
-                padding-right: 10px;
-            }
-        }
-    }
+  }
 }

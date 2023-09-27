@@ -1,0 +1,203 @@
+.my_wallets_container {
+  height: 400px;
+  width: 292px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  border: 1px solid #dfe0de;
+  padding: 16px 13px 16px 16px;
+  color: #232521;
+  background-color: #fff;
+
+  .wallet_wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 360px;
+    overflow-y: scroll;
+
+    .wallet_container {
+      margin-bottom: 10px;
+      border-radius: 8px;
+
+      .wallet_info {
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .logo {
+          margin-left: 5px;
+          img {
+            width: 24px;
+            height: 24px;
+          }
+
+          .remove {
+            display: none;
+          }
+        }
+        .control {
+          display: flex;
+          align-items: center;
+          margin-right: 10px;
+        }
+        .info {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          flex: 1;
+          margin-left: 12px;
+
+          .name {
+            color: #686a66;
+            font-size: 14px;
+          }
+
+          .money {
+            color: #232521;
+            font-size: 14px;
+          }
+
+          div {
+            text-align: left;
+          }
+        }
+        &:hover {
+          background: #dfe0de;
+          cursor: pointer;
+          border-radius: 8px;
+
+          .logo {
+            display: flex;
+            margin-left: 10px;
+            .remove {
+              margin-right: 10px;
+              display: flex;
+              align-items: center;
+            }
+          }
+        }
+      }
+
+      .networks_container {
+        display: flex;
+        flex-direction: column;
+        padding: 8px;
+        margin-top: 5px;
+        border-top: 0.7px solid #dfe0de;
+
+        .network_container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .logo {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            img {
+              width: 24px;
+              height: 24px;
+              border-radius: 5px;
+            }
+          }
+          .info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            flex: 1;
+            margin-left: 12px;
+
+            .name {
+              color: #686a66;
+              font-size: 13px;
+            }
+
+            .address {
+              color: #232521;
+              font-size: 14px;
+            }
+
+            div {
+              text-align: left;
+            }
+          }
+          .actions {
+            display: flex;
+            margin-right: 5px;
+
+            .qr_code {
+              margin-left: 10px;
+            }
+            div {
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .btn {
+    margin-top: 10px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #232521;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: #aee67f;
+    border-radius: 99px;
+    cursor: pointer;
+
+    .content {
+      margin-left: 10px;
+    }
+  }
+}
+
+.dark {
+  border-radius: 12px;
+  border: 1px solid #494949;
+  background: #121511;
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+
+  .wallet_wrapper {
+    .wallet_container {
+      background: #232521;
+
+      .wallet_info {
+        .info {
+          .name {
+            color: #979995;
+          }
+          .money {
+            color: #f7f7f7;
+          }
+        }
+        &:hover {
+          background: #494949;
+        }
+      }
+
+      .networks_container {
+        border-top: 0.7px solid #494949;
+        .network_container {
+          .info {
+            .name {
+              color: #979995;
+            }
+            .address {
+              color: #f7f7f7;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -15,7 +15,8 @@
     gap: 8px;
     border-radius: 18px;
     @include theme() {
-      background: theme-get('neutral-5');
+      // background: theme-get('neutral-5');
+      background: transparent;
     }
     cursor: pointer;
     span {

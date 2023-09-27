@@ -13,7 +13,7 @@
   backdrop-filter: blur(5px);
   border-radius: 24px;
   @include theme() {
-    border: 1px solid theme-get('neutral-5');
+    border: 1px solid theme-get('neutral-6');
     background: theme-get('neutral-white');
     box-shadow: theme-get('shadow-swap-box');
   }
@@ -81,7 +81,7 @@
 
     @include theme() {
       background: theme-get('neutral-6');
-      box-shadow: theme-get('shadow-swap-from-to');
+      // box-shadow: theme-get('shadow-swap-from-to');
     }
 
     border-radius: 16px;
@@ -323,7 +323,7 @@
     }
     img {
       border-radius: 50%;
-      background-color: #f7f7f7;
+      // background-color: #f7f7f7;
       cursor: pointer;
       height: 38px;
       width: 38px;
@@ -339,7 +339,7 @@
 
   @include theme() {
     background-color: theme-get('primary-1');
-    color: #505665;
+    color: #232521;
   }
   &.disable {
     @include theme() {
@@ -349,9 +349,9 @@
   }
   /* Inner/Button */
 
-  @include theme() {
-    box-shadow: theme-get('shadow-btn');
-  }
+  // @include theme() {
+  //   box-shadow: theme-get('shadow-btn');
+  // }
 
   border-radius: 20px;
 

@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import AntSwapImg from 'assets/images/ant_swap.svg';
 import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
-import SwitchImg from 'assets/icons/switch.svg';
+import SwitchDarkImg from 'assets/icons/switch.svg';
+import SwitchLightImg from 'assets/icons/switch_light.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
@@ -312,8 +313,10 @@ const SwapComponent: React.FC<{
         <div className={cx('swap-icon')}>
           <div className={cx('wrap-img')}>
             <img
-              // src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
-              src={theme === 'light' ? SwitchImg : SwitchImg}
+              style={{
+                backgroundColor: theme === 'light' ? '#f7f7f7' : '#232521'
+              }}
+              src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
               onClick={() => {
                 // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
                 // because non-evm token cannot be swapped to evm token with no Oraichain pool
@@ -368,7 +371,8 @@ const SwapComponent: React.FC<{
             <button
               style={{
                 color: coe == coeff ? 'black' : 'inherit',
-                fontWeight: coe == coeff ? '600' : 'inherit'
+                fontWeight: coe == coeff ? '600' : 'inherit',
+                border: coe == coeff ? '1px solid #232521' : 'none'
               }}
               key={coeff}
               onClick={(event) => {
@@ -393,7 +397,7 @@ const SwapComponent: React.FC<{
             </button>
           ))}
         </div>
-        <button className={cx('swap-btn', `${isSwapBtn ? "disable" : ""}`)} onClick={handleSubmit} disabled={isSwapBtn}>
+        <button className={cx('swap-btn', `${isSwapBtn ? 'disable' : ''}`)} onClick={handleSubmit} disabled={isSwapBtn}>
           {swapLoading && <Loader width={40} height={40} />}
           {/* hardcode check minimum tron */}
           {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
