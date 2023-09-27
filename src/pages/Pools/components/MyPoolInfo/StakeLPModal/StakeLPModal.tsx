@@ -1,5 +1,4 @@
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -24,34 +23,20 @@ import { useParams } from 'react-router-dom';
 import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
-import styles from './WithdrawLiquidityModal.module.scss';
-import { useGetLpTokenInfo, useGetPairAmountInfoData, useGetPairInfo } from './useGetPairInfo';
-import { useTokenAllowance } from './useTokenAllowance';
 import { ModalProps } from '../type';
+import styles from './StakeLPModal.module.scss';
+import { useGetPairInfo } from './useGetPairInfo';
+import { useTokenAllowance } from './useTokenAllowance';
 
 const cx = cn.bind(styles);
 
-const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
+const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
-  const pairInfo = useGetPairInfo(poolUrl);
-  const { token1, token2, info: pairInfoData } = pairInfo;
-  const lpTokenInfoData = useGetLpTokenInfo(pairInfo);
-  const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
-
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
-
-  const { pairAmountInfoData, refetchPairAmountInfo } = useGetPairAmountInfoData(pairInfo);
-
-  const pairs = useFetchAllPairs();
-
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
+  const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const dispatch = useDispatch();
-  const { data: prices } = useCoinGeckoPrices();
 
   const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
   const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
@@ -62,6 +47,20 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+
+  const { pairInfo, isLoading, isError, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } =
+    useGetPairInfo(poolUrl);
+
+  // if (isLoading) return <Loader />;
+  // if (isError) return <h3>Something wrong!</h3>;
+
+  const { token1, token2, info: pairInfoData } = pairInfo;
+  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
+
+  const pairs = useFetchAllPairs();
+
+  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
+  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
@@ -106,10 +105,6 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     setRecentInput(2);
     setAmountToken2(value);
     if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
-  };
-
-  const onChangeWithdrawPercent = (option: number) => {
-    setLpAmountBurn((toAmount(option, 6) * lpTokenBalance) / BigInt(100000000));
   };
 
   const fetchCachedLpTokenAll = async () => {
@@ -213,32 +208,40 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     }
   };
 
-  const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
         <div className={cx('header')}>
-          <div className={cx('title', theme)}>Withdraw LP</div>
+          <div className={cx('title', theme)}>Stake LP</div>
           <div className={cx('btn-group')}>
             <div className={cx('btn-close')} onClick={close}>
               <CloseIcon />
             </div>
           </div>
         </div>
+        <div className={cx('apr')}>Current APR: 20%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
             <div className={cx('amount')}>
               <TokenBalance
                 balance={{
-                  amount: token1Balance.toString(),
-                  denom: token1?.name ?? '',
-                  decimals: token1?.decimals
+                  amount: token2Balance.toString(),
+                  denom: token2?.name ?? '',
+                  decimals: token2?.decimals
                 }}
-                prefix="LP Token Balance: "
+                prefix="Balance: "
                 decimalScale={6}
               />
+            </div>
+            <div className={cx('btn-group')}>
+              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
+                Max
+              </Button>
+              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
+                Half
+              </Button>
             </div>
           </div>
           <div className={cx('input')}>
@@ -248,96 +251,14 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
                 allowNegative={false}
-                onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))}
+                value={toDisplay(amountToken2, token2.decimals)}
+                onChange={(e: any) => {
+                  onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+                }}
               />
-              {/* TODO: update this balance correctly */}
               <div className={cx('amount-usd')}>
-                <TokenBalance balance={getUsd(amountToken1, token1, prices)} decimalScale={2} />
-              </div>
-            </div>
-          </div>
-          <div className={cx('options')}>
-            {[25, 50, 75, 100].map((option, idx) => (
-              <div
-                className={cx('item', theme, {
-                  isChosen: chosenWithdrawPercent === idx
-                })}
-                key={idx}
-                onClick={() => {
-                  onChangeWithdrawPercent(option);
-                  setChosenWithdrawPercent(idx);
-                }}
-              >
-                {option}%
-              </div>
-            ))}
-            <div
-              className={cx('item', theme, 'border', {
-                isChosen: chosenWithdrawPercent === 4
-              })}
-              onClick={() => setChosenWithdrawPercent(4)}
-            >
-              <input
-                placeholder="0.00"
-                type={'number'}
-                className={cx('input', theme)}
-                onChange={(event) => {
-                  onChangeWithdrawPercent(+event.target.value);
-                }}
-              />
-              %
-            </div>
-          </div>
-        </div>
-
-        <div className={cx('detail')}>
-          <div className={cx('arrow-down', theme)}>
-            <div className={cx('inner-arrow', theme)}>
-              <ArrowDownIcon />
-            </div>
-          </div>
-          <div className={cx('row', theme)}>
-            <div className={cx('row-title')}>
-              <span>Received</span>
-            </div>
-            <div className={cx('row-amount')}>
-              <div className={cx('token')}>
-                {Token1Icon && <Token1Icon className={cx('logo')} />}
-                <div className={cx('title', theme)}>
-                  <div>{token1?.name}</div>
-                  <div className={cx('des')}>Oraichain</div>
-                </div>
-              </div>
-              <div className={cx('input-amount')}>
-                <TokenBalance
-                  balance={{
-                    amount: lpTokenBalance,
-                    denom: lpTokenInfoData?.symbol,
-                    decimals: lpTokenInfoData?.decimals
-                  }}
-                  decimalScale={6}
-                />
-              </div>
-            </div>
-            <div className={cx('row-amount')}>
-              <div className={cx('token')}>
-                {Token2Icon && <Token2Icon className={cx('logo')} />}
-                <div className={cx('title', theme)}>
-                  <div>{token2?.name}</div>
-                  <div className={cx('des')}>Oraichain</div>
-                </div>
-              </div>
-              <div className={cx('input-amount')}>
-                <TokenBalance
-                  balance={{
-                    amount: lpTokenBalance,
-                    denom: lpTokenInfoData?.symbol,
-                    decimals: lpTokenInfoData?.decimals
-                  }}
-                  decimalScale={6}
-                />
+                <TokenBalance balance={getUsd(amountToken2, token2, prices)} decimalScale={2} />
               </div>
             </div>
           </div>
@@ -360,7 +281,7 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('btn-confirm')}>
               <Button onClick={() => handleAddLiquidity(amountToken1, amountToken2)} type="primary" disabled={disabled}>
                 {actionLoading && <Loader width={30} height={30} />}
-                {disableMsg || 'Confirm'}
+                {disableMsg || 'Stake'}
               </Button>
             </div>
           );
@@ -370,4 +291,4 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   );
 };
 
-export default WithdrawLiquidityModal;
+export default StakeLPModal;

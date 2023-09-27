@@ -10,11 +10,17 @@ import { Button } from 'components/Button';
 import styles from './MyPoolInfo.module.scss';
 import useTheme from 'hooks/useTheme';
 import { useState } from 'react';
-import AddLiquidityModal from './AddLiquidityModal/AddLiquidityModal';
+import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
+import WithdrawLiquidityModal from './WithdrawLiquidityModal/WithdrawLiquidityModal';
+import StakeLPModal from './StakeLPModal/StakeLPModal';
+import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
 
 export const MyPoolInfo = () => {
   const theme = useTheme();
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
+  const [isOpenWithdrawPool, setIsOpenWithdrawPool] = useState(false);
+  const [isOpenStakeLP, setIsOpenStakeLP] = useState(false);
+  const [isOpenUnstakeLP, setIsOpenUnstakeLP] = useState(false);
 
   return (
     <section className={styles.myPoolInfo}>
@@ -33,7 +39,7 @@ export const MyPoolInfo = () => {
         <div className={styles.cta}>
           <Button
             type="secondary"
-            onClick={() => console.log('ok')}
+            onClick={() => setIsOpenWithdrawPool(true)}
             icon={theme === 'dark' ? <WithdrawIcon /> : <WithdrawLightIcon />}
           >
             Withdraw LP
@@ -58,14 +64,14 @@ export const MyPoolInfo = () => {
         <div className={styles.cta}>
           <Button
             type="secondary"
-            onClick={() => console.log('ok')}
+            onClick={() => setIsOpenUnstakeLP(true)}
             icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
           >
             Unstake LP
           </Button>
-          <Button type="primary" onClick={() => console.log('ok')} icon={<StakingIcon />}>
+          <Button type="primary" onClick={() => setIsOpenStakeLP(true)} icon={<StakingIcon />}>
             Stake LP
-          </Button>
+          </Button>{' '}
         </div>
       </div>
       {isOpenDepositPool && (
@@ -73,6 +79,28 @@ export const MyPoolInfo = () => {
           isOpen={isOpenDepositPool}
           open={() => setIsOpenDepositPool(true)}
           close={() => setIsOpenDepositPool(false)}
+        />
+      )}
+      {isOpenWithdrawPool && (
+        <WithdrawLiquidityModal
+          isOpen={isOpenWithdrawPool}
+          open={() => setIsOpenWithdrawPool(true)}
+          close={() => setIsOpenWithdrawPool(false)}
+        />
+      )}
+
+      {isOpenStakeLP && (
+        <StakeLPModal
+          isOpen={isOpenStakeLP}
+          open={() => setIsOpenStakeLP(true)}
+          close={() => setIsOpenStakeLP(false)}
+        />
+      )}
+      {isOpenUnstakeLP && (
+        <UnstakeLPModal
+          isOpen={isOpenUnstakeLP}
+          open={() => setIsOpenUnstakeLP(true)}
+          close={() => setIsOpenUnstakeLP(false)}
         />
       )}
     </section>

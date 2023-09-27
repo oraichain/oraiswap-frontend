@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
+import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 
 type ListPoolsProps = {
   pairInfos: PairInfoData[];
@@ -29,6 +30,8 @@ type PoolTableData = PoolInfoResponse & {
 
 export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
+  const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
+
   const [cachedReward] = useConfigReducer('rewardPools');
   console.log({ cachedReward });
   const theme = useTheme();
@@ -124,7 +127,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
             type="primary-sm"
             onClick={(event) => {
               event.stopPropagation();
-              console.log('ok');
+              setIsOpenDepositPool(true);
             }}
           >
             Add
@@ -160,6 +163,13 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
           </div>
         )}
       </div>
+      {isOpenDepositPool && (
+        <AddLiquidityModal
+          isOpen={isOpenDepositPool}
+          open={() => setIsOpenDepositPool(true)}
+          close={() => setIsOpenDepositPool(false)}
+        />
+      )}
     </div>
   );
 });

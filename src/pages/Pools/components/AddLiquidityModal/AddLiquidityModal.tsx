@@ -27,7 +27,7 @@ import { RootState } from 'store/configure';
 import styles from './AddLiquidityModal.module.scss';
 import { useGetPairInfo } from './useGetPairInfo';
 import { useTokenAllowance } from './useTokenAllowance';
-import { ModalProps } from '../type';
+import { ModalProps } from '../MyPoolInfo/type';
 
 const cx = cn.bind(styles);
 
