@@ -180,7 +180,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // if users use their existing tokens to list, then we allow them to
       console.log('msg: ', msg);
 
-      const result = await oraidexListing.listToken(msg as any);
+      const result = await oraidexListing.listToken(msg);
       if (result) {
         const wasmAttributes = result.logs?.[0]?.events.filter((e) => e.type === 'wasm').flatMap((e) => e.attributes);
         const cw20Address = wasmAttributes?.find((w) => w.key === 'cw20_address')?.value;
