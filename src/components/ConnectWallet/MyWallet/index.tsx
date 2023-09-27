@@ -26,7 +26,16 @@ import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import MetamaskImage from 'assets/images/metamask.png';
-import TronlinkImage from 'assets/images/tronlink.jpg';
+import EthereumImage from 'assets/images/ethereum-logo.png';
+import TronlinkWalletImage from 'assets/images/tronlink.jpg';
+import TronlinkImage from 'assets/images/tron-link-logo.png';
+import InjectiveImage from 'assets/images/injective-logo.png';
+import OraichainImage from 'assets/images/oraichain-logo.png';
+import OwalletImage from 'assets/images/owallet-logo.png';
+import OsmosImage from 'assets/images/osmos-logo.png';
+import KawwaiImage from 'assets/images/Kawwai-logo.png';
+import CosmosImage from 'assets/images/cosmos-logo.png';
+import BinanceImage from 'assets/images/binance-logo.png';
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
@@ -210,26 +219,26 @@ const MyWallets: React.FC<{
             id: 1,
             name: 'Ethereum',
             address: metamaskAddress,
-            icon: MetamaskImage
+            icon: EthereumImage
           },
           {
             id: 2,
             name: 'Binance',
             address: metamaskAddress,
-            icon: MetamaskImage
+            icon: BinanceImage
           },
           {
             id: 3,
             name: 'Kawaiiverse',
             address: metamaskAddress,
-            icon: MetamaskImage
+            icon: KawwaiImage
           }
         ]
       },
       {
         id: 2,
         name: 'Owallet',
-        icon: MetamaskImage,
+        icon: OwalletImage,
         totalUsd: 42342.342121221,
         isOpen: false,
         networks: [
@@ -237,32 +246,32 @@ const MyWallets: React.FC<{
             id: 1,
             name: 'Oraichain',
             address: oraiAddressWallet,
-            icon: MetamaskImage
+            icon: OraichainImage
           },
           {
             id: 2,
             name: 'Injective',
             address: oraiAddressWallet,
-            icon: MetamaskImage
+            icon: InjectiveImage
           },
           {
             id: 3,
             name: 'Cosmos Hub',
             address: oraiAddressWallet,
-            icon: MetamaskImage
+            icon: CosmosImage
           },
           {
             id: 4,
             name: 'Osmosis',
             address: oraiAddressWallet,
-            icon: MetamaskImage
+            icon: OsmosImage
           }
         ]
       },
       {
         id: 3,
         name: 'Tron Link',
-        icon: MetamaskImage,
+        icon: TronlinkWalletImage,
         totalUsd: 1,
         isOpen: false,
         networks: [
