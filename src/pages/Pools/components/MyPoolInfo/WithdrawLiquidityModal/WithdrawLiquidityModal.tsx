@@ -25,19 +25,31 @@ import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './AddLiquidityModal.module.scss';
-import { useGetPairInfo } from './useGetPairInfo';
+import { useGetLpTokenInfo, useGetPairAmountInfoData, useGetPairInfo } from './useGetPairInfo';
 import { useTokenAllowance } from './useTokenAllowance';
 import { ModalProps } from '../type';
 
 const cx = cn.bind(styles);
 
-const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
+const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
+  const pairInfo = useGetPairInfo(poolUrl);
+  const { token1, token2, info: pairInfoData } = pairInfo;
+  const lpTokenInfoData = useGetLpTokenInfo(pairInfo);
+
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const { data: prices } = useCoinGeckoPrices();
+  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
+
+  const { pairAmountInfoData, refetchPairAmountInfo } = useGetPairAmountInfoData(pairInfo);
+
+  const pairs = useFetchAllPairs();
+
+  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
+  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const dispatch = useDispatch();
+  const { data: prices } = useCoinGeckoPrices();
 
   const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
   const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
@@ -48,20 +60,6 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
-
-  const { pairInfo, isLoading, isError, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } =
-    useGetPairInfo(poolUrl);
-
-  // if (isLoading) return <Loader />;
-  // if (isError) return <h3>Something wrong!</h3>;
-
-  const { token1, token2, info: pairInfoData } = pairInfo;
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
-
-  const pairs = useFetchAllPairs();
-
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
@@ -370,4 +368,4 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   );
 };
 
-export default AddLiquidityModal;
+export default WithdrawLiquidityModal;

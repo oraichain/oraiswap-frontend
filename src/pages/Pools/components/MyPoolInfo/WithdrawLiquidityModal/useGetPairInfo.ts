@@ -32,37 +32,40 @@ export const useGetPairInfo = (poolUrl: string) => {
       apr: 1
     };
   };
-  const {
-    data: pairInfo,
-    isLoading,
-    isError
-  } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
+  const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
     refetchOnWindowFocus: false
   });
 
+  return pairInfoData;
+};
+
+export const useGetLpTokenInfo = (pairInfoData: PairInfoData) => {
   const { data: lpTokenInfoData } = useQuery(
-    ['token-info', pairInfo],
+    ['token-info', pairInfoData],
     () =>
       fetchTokenInfo({
-        contractAddress: pairInfo.info.liquidity_token
+        contractAddress: pairInfoData?.info.liquidity_token
       } as TokenItemType),
     {
-      enabled: !!pairInfo,
+      enabled: !!pairInfoData,
       refetchOnWindowFocus: false
     }
   );
 
-  const { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
-    ['pair-amount-info', pairInfo],
+  return lpTokenInfoData;
+};
+
+export const useGetPairAmountInfoData = (pairInfoData: PairInfoData) => {
+  let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
+    ['pair-amount-info', pairInfoData],
     () => {
-      return getPairAmountInfo(pairInfo.token1, pairInfo.token2);
+      return getPairAmountInfo(pairInfoData.token1, pairInfoData.token2);
     },
     {
-      enabled: !!pairInfo,
+      enabled: !!pairInfoData,
       refetchOnWindowFocus: false,
       refetchInterval: 15000
     }
   );
-
-  return { pairInfo, isLoading, isError, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo };
+  return { pairAmountInfoData, refetchPairAmountInfo };
 };

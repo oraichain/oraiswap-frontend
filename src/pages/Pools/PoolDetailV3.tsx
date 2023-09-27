@@ -35,7 +35,7 @@ import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { OverviewPool } from './components/OverviewPool';
 import { Earning } from './components/Earning';
-import { MyPoolInfo } from './components/MyPoolInfo';
+import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}
@@ -194,3 +194,10 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
 };
 
 export default PoolDetailV3;
+
+/**
+ * fetch LP balance
+ * earning: orai, oraix
+ * my staked (usd, lp)
+ * my liquidity (usd, lp)
+ */
