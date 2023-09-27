@@ -91,7 +91,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
-    const { client, defaultAddress: address } = await getCosmWasmClient({});
+    const { client, defaultAddress: address } = await getCosmWasmClient({
+      chainId: network.chainId
+    });
     if (!address)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Wallet address does not exist!'
@@ -146,9 +148,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-            minter,
-            cap: !!cap ? cap.toString() : null
-          }
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
         : undefined;
 
       const initialBalances = isInitBalances
@@ -172,9 +174,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         pairAssetInfo,
         targetedAssetInfo: targetedAssetInfo
           ? getInfoLiquidityPool({
-              contract_addr: !targetedAssetType && targetedAssetInfo,
-              denom: targetedAssetType && targetedAssetInfo
-            })
+            contract_addr: !targetedAssetType && targetedAssetInfo,
+            denom: targetedAssetType && targetedAssetInfo
+          })
           : undefined
       });
       // if users use their existing tokens to list, then we allow them to
@@ -190,15 +192,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           TToastType.TX_SUCCESSFUL,
           cw20Address
             ? {
-                customLink: `${network.explorer}/txs/${result.transactionHash}`,
-                linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
-                cw20Address: `${cw20Address}`
-              }
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+              cw20Address: `${cw20Address}`
+            }
             : {
-                customLink: `${network.explorer}/txs/${result.transactionHash}`,
-                linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
-                linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
-              },
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
+              linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
+            },
           {
             autoClose: 100000000
           }
