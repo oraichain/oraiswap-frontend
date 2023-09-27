@@ -329,12 +329,23 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 6,
       Icon: ScAtomIcon
     },
+    // {
+    //   coinDenom: 'INJ',
+    //   coinGeckoId: 'injective-protocol',
+    //   coinMinimalDenom: process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM,
+    //   bridgeTo: ['injective-1'],
+    //   coinDecimals: 18,
+    //   Icon: InjIcon,
+    //   IconLight: InjIcon
+    // },
     {
       coinDenom: 'INJ',
       coinGeckoId: 'injective-protocol',
-      coinMinimalDenom: process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM,
+      coinMinimalDenom: 'injective',
+      contractAddress: process.env.REACT_APP_INJECTIVE_CONTRACT,
       bridgeTo: ['injective-1'],
-      coinDecimals: 18,
+      type: 'cw20',
+      coinDecimals: 6,
       Icon: InjIcon,
       IconLight: InjIcon
     }
