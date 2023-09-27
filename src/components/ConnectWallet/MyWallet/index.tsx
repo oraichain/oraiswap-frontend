@@ -27,7 +27,7 @@ import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg'
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import MetamaskImage from 'assets/images/metamask.png';
 import EthereumImage from 'assets/images/ethereum-logo.png';
-import TronlinkWalletImage from 'assets/images/tronlink.jpg';
+import TronWalletImage from 'assets/images/tronlink.jpg';
 import TronlinkImage from 'assets/images/tron-link-logo.png';
 import InjectiveImage from 'assets/images/injective-logo.png';
 import OraichainImage from 'assets/images/oraichain-logo.png';
@@ -42,6 +42,13 @@ import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 
+enum WALLET_TYPES {
+  METAMASK = 'METAMASK',
+  KPLER = 'KPLER',
+  OWALLET = 'OWALLET',
+  TRON = 'TRON'
+}
+
 interface NetworkItem {
   name: string;
   icon: string;
@@ -52,6 +59,7 @@ interface NetworkItem {
 interface WalletItem {
   id: number;
   name: string;
+  code: WALLET_TYPES;
   icon: string;
   totalUsd: number;
   isOpen: boolean;
@@ -165,7 +173,41 @@ const MyWallets: React.FC<{
     }
   };
 
-  const switchHandleWallets = () => {};
+  const handleLoginWallets = (walletType) => {
+    switch (walletType) {
+      case WALLET_TYPES.METAMASK:
+        connectMetamask();
+        break;
+      case WALLET_TYPES.OWALLET:
+        connectKeplr('owallet');
+        break;
+      case WALLET_TYPES.KPLER:
+        connectKeplr('keplr');
+        break;
+      case WALLET_TYPES.TRON:
+        connectTronLink();
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleLogoutWallets = (walletType) => {
+    switch (walletType) {
+      case WALLET_TYPES.METAMASK:
+        disconnectMetamask();
+        break;
+      case WALLET_TYPES.OWALLET:
+      case WALLET_TYPES.KPLER:
+        disconnectKeplr();
+        break;
+      case WALLET_TYPES.TRON:
+        disconnectTronLink();
+        break;
+      default:
+        break;
+    }
+  };
 
   const getUrlQrCode = async ({ address, icon, name }) => {
     try {
@@ -211,6 +253,7 @@ const MyWallets: React.FC<{
       {
         id: 1,
         name: 'Metamask',
+        code: WALLET_TYPES.METAMASK,
         icon: MetamaskImage,
         totalUsd: 1,
         isOpen: false,
@@ -238,6 +281,7 @@ const MyWallets: React.FC<{
       {
         id: 2,
         name: 'Owallet',
+        code: WALLET_TYPES.OWALLET,
         icon: OwalletImage,
         totalUsd: 42342.342121221,
         isOpen: false,
@@ -270,8 +314,9 @@ const MyWallets: React.FC<{
       },
       {
         id: 3,
-        name: 'Tron Link',
-        icon: TronlinkWalletImage,
+        name: 'TronLink',
+        code: WALLET_TYPES.TRON,
+        icon: TronWalletImage,
         totalUsd: 1,
         isOpen: false,
         networks: [
@@ -294,7 +339,7 @@ const MyWallets: React.FC<{
             <div key={index} className={cx('wallet_container')}>
               <div className={cx('wallet_info')} onClick={() => toggleShowNetworks(wallet.id)}>
                 <div className={cx('logo')}>
-                  <div className={cx('remove')}>
+                  <div className={cx('remove')} onClick={() => handleLogoutWallets(wallet.code)}>
                     <TrashIcon />
                   </div>
                   <img src={wallet.icon} alt="wallet icon" />
@@ -303,10 +348,7 @@ const MyWallets: React.FC<{
                   <div className={cx('name')}>{wallet.name}</div>
                   <div className={cx('money')}>${wallet.totalUsd}</div>
                 </div>
-                <div className={cx('control')}>
-                  {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
-                  {/* <UnavailableCloudIcon /> */}
-                </div>
+                <div className={cx('control')}>{wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}</div>
               </div>
               {wallet.isOpen ? (
                 <div className={cx('networks_container')}>
@@ -318,28 +360,38 @@ const MyWallets: React.FC<{
                         </div>
                         <div className={cx('info')}>
                           <div className={cx('name')}>{network.name}</div>
-                          <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
+                          {network.address ? (
+                            <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
+                          ) : null}
                         </div>
                         <div className={cx('actions')}>
-                          <div
-                            className={cx('copy')}
-                            onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.id)}
-                          >
-                            {copiedAddressCoordinates.networkId === network.id &&
-                            copiedAddressCoordinates.walletId === wallet.id ? (
-                              <SuccessIcon width={20} height={20} />
-                            ) : (
-                              <CopyIcon />
-                            )}
-                          </div>
-                          <div
-                            className={cx('qr_code')}
-                            onClick={() =>
-                              getUrlQrCode({ address: network.address, name: network.name, icon: network.icon })
-                            }
-                          >
-                            <QRCodeIcon />
-                          </div>
+                          {network.address ? (
+                            <>
+                              <div
+                                className={cx('copy')}
+                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.id)}
+                              >
+                                {copiedAddressCoordinates.networkId === network.id &&
+                                copiedAddressCoordinates.walletId === wallet.id ? (
+                                  <SuccessIcon width={20} height={20} />
+                                ) : (
+                                  <CopyIcon />
+                                )}
+                              </div>
+                              <div
+                                className={cx('qr_code')}
+                                onClick={() =>
+                                  getUrlQrCode({ address: network.address, name: network.name, icon: network.icon })
+                                }
+                              >
+                                <QRCodeIcon />
+                              </div>
+                            </>
+                          ) : (
+                            <div>
+                              <UnavailableCloudIcon />
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

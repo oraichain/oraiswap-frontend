@@ -30,6 +30,7 @@
           img {
             width: 24px;
             height: 24px;
+            border-radius: 5px;
           }
 
           .remove {
@@ -90,6 +91,7 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin: 3px 0px;
 
           .logo {
             margin-left: 10px;
