@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
+import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 
 type ListPoolsProps = {
   pairInfos: PairInfoData[];
@@ -29,6 +30,8 @@ type PoolTableData = PoolInfoResponse & {
 
 export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
+  const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
+
   const [cachedReward] = useConfigReducer('rewardPools');
   console.log({ cachedReward });
   const theme = useTheme();
@@ -42,7 +45,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
     return {
       ...pool,
-      reward: poolReward.reward,
+      reward: poolReward?.reward ?? [],
       myStakedLP: '2',
       earned: '1'
     };
@@ -74,7 +77,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     },
     apr: {
       name: 'APR',
-      width: '10%',
+      width: '12%',
       accessor: (data) => (
         <div className={styles.apr}>
           <div>{`${data.apr.toFixed(2)}%`}</div>
@@ -95,7 +98,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
     },
     earned: {
       name: 'Earned',
-      width: '12%',
+      width: '10%',
       align: 'left',
       accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.earned))}</span>
     },
@@ -124,7 +127,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
             type="primary-sm"
             onClick={(event) => {
               event.stopPropagation();
-              console.log('ok');
+              setIsOpenDepositPool(true);
             }}
           >
             Add
@@ -160,6 +163,13 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
           </div>
         )}
       </div>
+      {isOpenDepositPool && (
+        <AddLiquidityModal
+          isOpen={isOpenDepositPool}
+          open={() => setIsOpenDepositPool(true)}
+          close={() => setIsOpenDepositPool(false)}
+        />
+      )}
     </div>
   );
 });

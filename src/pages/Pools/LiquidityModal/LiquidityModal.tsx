@@ -183,11 +183,11 @@ const LiquidityModal: FC<ModalProps> = ({
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  }
+  };
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll()
+    fetchCachedLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -382,7 +382,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>
@@ -563,11 +563,6 @@ const LiquidityModal: FC<ModalProps> = ({
               placeholder="0.00"
               type={'number'}
               className={cx('input', theme)}
-              // value={
-              //   chosenWithdrawPercent === 4 && !!withdrawPercent
-              //     ? withdrawPercent
-              //     : ''
-              // }
               onChange={(event) => {
                 onChangeWithdrawPercent(+event.target.value);
               }}
