@@ -13,7 +13,7 @@ export type TableHeaderProps<T extends object> = Record<
 export type TableProps<T extends object> = {
   headers: TableHeaderProps<T>;
   data: T[];
-  stylesColumn: React.CSSProperties;
+  stylesColumn?: React.CSSProperties;
   handleClickRow?: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, record: T) => void;
 };
 

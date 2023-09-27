@@ -302,6 +302,38 @@ const calculateLpPools = (pairs: PairInfo[], res: AggregateResult) => {
   return lpTokenData;
 };
 
+export const calculateLpPoolsV3 = (lpAddresses: string[], res: AggregateResult) => {
+  const lpTokenData = Object.fromEntries(
+    lpAddresses.map((lpAddress, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [lpAddress, {}];
+      }
+      return [lpAddress, fromBinary(data.data)];
+    })
+  );
+  return lpTokenData;
+};
+
+export const fetchCacheLpPoolsV3 = async (
+  lpAddresses: string[],
+  userAddress: string,
+  multicall: MulticallReadOnlyInterface
+) => {
+  const queries = lpAddresses.map((lpAddress) => ({
+    address: lpAddress,
+    data: toBinary({
+      balance: {
+        address: userAddress
+      }
+    })
+  }));
+  const res = await multicall.aggregate({
+    queries
+  });
+  return calculateLpPoolsV3(lpAddresses, res);
+};
+
 const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
   const queries = generateLpPoolsInfoQueries(pairs, address);
   const res = await multicall.aggregate({

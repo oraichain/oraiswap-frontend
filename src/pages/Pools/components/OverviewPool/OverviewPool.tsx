@@ -3,8 +3,37 @@ import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
 import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
+import TokenBalance from 'components/TokenBalance';
+import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
+import { useQuery } from '@tanstack/react-query';
+import { PoolDetail } from 'types/pool';
+import { TokenItemType } from 'config/bridgeTokens';
+import { CW20_DECIMALS } from 'config/constants';
 
-export const OverviewPool = () => {
+export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
+  let { data: pairAmountInfoData } = useQuery(
+    ['pair-amount-info', poolDetailData],
+    () => {
+      return getPairAmountInfo(poolDetailData.token1, poolDetailData.token2);
+    },
+    {
+      enabled: !!poolDetailData,
+      refetchOnWindowFocus: false,
+      refetchInterval: 1000 * 15 // 15 second interval
+    }
+  );
+
+  const { data: lpTokenInfoData } = useQuery(
+    ['lp-info', poolDetailData],
+    () =>
+      fetchTokenInfo({
+        contractAddress: poolDetailData?.info.liquidityAddr
+      } as TokenItemType),
+    {
+      enabled: !!poolDetailData,
+      refetchOnWindowFocus: false
+    }
+  );
   return (
     <section className={styles.overview}>
       <div className={styles.totalLiquidity}>
@@ -15,21 +44,50 @@ export const OverviewPool = () => {
             <OraiIcon className={styles.logo2} />
           </div>
           <div className={styles.pairAmount}>
-            <div className={styles.amountUsdt}>$12,435,6000</div>
-            <div className={styles.amountLp}>98.28 LP</div>
+            <TokenBalance
+              balance={{
+                amount: BigInt(Math.trunc(poolDetailData?.info?.totalLiquidity)) || 0n,
+                decimals: CW20_DECIMALS
+              }}
+              className={styles.amountUsdt}
+              decimalScale={2}
+              prefix="$"
+            />
+            <br />
+            <TokenBalance
+              balance={{
+                amount: lpTokenInfoData?.total_supply,
+                decimals: lpTokenInfoData?.decimals
+              }}
+              className={styles.amountLp}
+              decimalScale={6}
+              suffix=" LP"
+            />
           </div>
         </div>
         <div className={styles.amountToken}>
           <div className={styles.percent}>
-            <span>ORAI: 50%</span>
+            <span>{poolDetailData.token1.name}: 50%</span>
             <div className={styles.bar}>
               <div className={styles.barActive}></div>
             </div>
-            <span>ATOM: 50%</span>
+            <span>{poolDetailData.token2.name}: 50%</span>
           </div>
           <div className={styles.amount}>
-            <span>274,996.5</span>
-            <span>274,996.5</span>
+            <TokenBalance
+              balance={{
+                amount: pairAmountInfoData?.token1Amount || '0',
+                decimals: poolDetailData.token1.decimals
+              }}
+              decimalScale={6}
+            />
+            <TokenBalance
+              balance={{
+                amount: pairAmountInfoData?.token2Amount || '0',
+                decimals: poolDetailData.token2.decimals
+              }}
+              decimalScale={6}
+            />
           </div>
         </div>
       </div>

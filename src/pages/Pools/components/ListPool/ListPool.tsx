@@ -33,7 +33,6 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
 
   const [cachedReward] = useConfigReducer('rewardPools');
-  console.log({ cachedReward });
   const theme = useTheme();
   const navigate = useNavigate();
 

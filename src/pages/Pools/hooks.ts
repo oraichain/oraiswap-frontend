@@ -4,7 +4,7 @@ import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateLpPools, updatePairs } from 'reducer/token';
 import { RootState } from 'store/configure';
@@ -14,16 +14,17 @@ import {
   fetchMyPairsData,
   fetchPairsData,
   fetchPoolListAndOraiPrice,
-  fetchCacheLpPools
+  fetchCacheLpPools,
+  parseAssetOnlyDenom
 } from './helpers';
 import { updatePairInfos } from 'reducer/pairs';
 import { PairInfoExtend } from 'types/token';
-import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { TokenItemType, cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { fetchRewardPerSecInfo } from 'rest/api';
 import { RewardPoolType } from 'reducer/config';
 import { useQuery } from '@tanstack/react-query';
 import axios, { withBaseApiUrl } from 'rest/request';
-import { PoolInfoResponse } from 'types/pool';
+import { PoolDetail, PoolInfoResponse } from 'types/pool';
 import { ORAI } from 'config/constants';
 
 // Fetch my pair data
@@ -181,8 +182,10 @@ export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
 };
 
 export const useGetPools = () => {
-  const { data: pools } = useQuery(['pools'], () => getPools(), {
-    refetchOnWindowFocus: false
+  const { data: pools } = useQuery(['pools'], getPools, {
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 5
   });
 
   console.log({ pools });
@@ -197,4 +200,38 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
     console.error('getPools', e);
     return [];
   }
+};
+
+// TODO: get api detail pool instead get from pools list,
+export const useGetPoolDetail = (poolUrl: string) => {
+  const pools = useGetPools();
+  console.log({ pools });
+  const poolDetail = useMemo(() => {
+    if (!poolUrl || pools.length === 0) return;
+    const pairRawData = poolUrl.split('_');
+    const tokenTypes = pairRawData.map((raw) =>
+      oraichainTokens.find((token) => token.denom === raw || token.contractAddress === raw)
+    );
+    let isPairExist = true;
+    let info: PoolInfoResponse;
+    try {
+      info = pools.find((pool) => {
+        return (
+          pairRawData.some((denom) => denom === parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo))) &&
+          pairRawData.some((denom) => denom === parseAssetOnlyDenom(JSON.parse(pool.secondAssetInfo)))
+        );
+      });
+    } catch (error) {
+      console.log('error getting pair info in pool details: ', error);
+      isPairExist = false;
+    }
+    if (!isPairExist) return;
+    return {
+      info,
+      token1: tokenTypes[0],
+      token2: tokenTypes[1]
+    };
+  }, [pools, poolUrl]);
+
+  return poolDetail;
 };
