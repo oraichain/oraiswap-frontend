@@ -177,6 +177,13 @@ export const pairs: PairMapping[] = [
       { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } }
     ],
     symbols: ['scATOM', 'ATOM']
+  },
+  {
+    asset_infos: [
+      { token: { contract_addr: process.env.REACT_APP_INJECTIVE_CONTRACT } },
+      { native_token: { denom: ORAI } }
+    ],
+    symbols: ['INJ', 'ORAI']
   }
 ];
 
