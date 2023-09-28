@@ -131,7 +131,7 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
       const result = await CosmJs.execute({
         address: msg.contractAddress,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
         funds: msg.funds
       });

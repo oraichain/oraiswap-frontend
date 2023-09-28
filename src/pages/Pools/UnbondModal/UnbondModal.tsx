@@ -64,7 +64,7 @@ const UnbondModal: FC<ModalProps> = ({
       const result = await CosmJs.execute({
         address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
         funds: msg.funds
       });
