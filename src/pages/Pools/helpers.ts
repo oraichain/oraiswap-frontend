@@ -1,10 +1,11 @@
 import { Pairs } from 'config/pools';
 import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { AggregateResult, AssetInfo, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import {
-  Asset,
   Cw20Coin,
+  Asset,
+  AssetInfo,
   InstantiateMarketingInfo,
   OraiswapPairTypes,
   OraiswapStakingTypes,
@@ -27,9 +28,7 @@ import {
 } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-import { ListTokenMsg } from 'libs/contracts/OraidexListingContract.types';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { updateLpPools } from 'reducer/token';
+import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 
 export type PairInfoData = {
   pair: PairInfoExtend;

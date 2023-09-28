@@ -1,5 +1,5 @@
 import { Keplr as keplr } from '@keplr-wallet/types';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { CosmWasmClient, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { Network } from 'bip32';
 import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { AbstractProvider } from 'web3-core';
@@ -153,6 +153,8 @@ declare global {
       REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
       REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
       REACT_APP_KWT_SUB_NETWORK_DENOM: string;
+      REACT_APP_INJECTIVE_ORAICHAIN_DENOM: string;
+      REACT_APP_ORAIIBC_INJECTIVE_DENOM: string;
 
       // config for oraichain token
       REACT_APP_AIRI_CONTRACT: string;

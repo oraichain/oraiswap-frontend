@@ -1,29 +1,28 @@
-import cn from 'classnames/bind';
-import Modal from 'components/Modal';
-import { FC, useState } from 'react';
-import styles from './NewTokenModal.module.scss';
-import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
-import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
-import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
-import Input from 'components/Input';
-import NumberFormat from 'react-number-format';
-import Loader from 'components/Loader';
-import { handleErrorTransaction } from 'helper';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import useClickOutside from 'hooks/useClickOutSide';
-import { Pairs } from 'config/pools';
-import { OraidexListingContractClient } from 'libs/contracts/OraidexListingContract.client';
-import CheckBox from 'components/CheckBox';
-import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
-import { ModalDelete, ModalListToken } from './ModalComponent';
-import { InitBalancesItems, RewardItems } from './ItemsComponent';
-import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
-import sumBy from 'lodash/sumBy';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
+import { OraidexListingContractClient } from '@oraichain/oraidex-contracts-sdk';
+import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
+import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
+import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
+import cn from 'classnames/bind';
+import CheckBox from 'components/CheckBox';
+import Input from 'components/Input';
+import Loader from 'components/Loader';
+import Modal from 'components/Modal';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
+import useClickOutside from 'hooks/useClickOutSide';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import sumBy from 'lodash/sumBy';
+import { FC, useState } from 'react';
+import NumberFormat from 'react-number-format';
+import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
+import { InitBalancesItems, RewardItems } from './ItemsComponent';
+import { ModalDelete, ModalListToken } from './ModalComponent';
+import styles from './NewTokenModal.module.scss';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -92,7 +91,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       return displayToast(TToastType.TX_FAILED, {
         message: 'Token name is required and must be letter (3 to 12 characters)'
       });
-    const { client, defaultAddress: address } = await getCosmWasmClient();
+    const { client, defaultAddress: address } = await getCosmWasmClient({
+      chainId: network.chainId
+    });
     if (!address)
       return displayToast(TToastType.TX_FAILED, {
         message: 'Wallet address does not exist!'
@@ -147,9 +148,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-            minter,
-            cap: !!cap ? cap.toString() : null
-          }
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
         : undefined;
 
       const initialBalances = isInitBalances
@@ -173,15 +174,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         pairAssetInfo,
         targetedAssetInfo: targetedAssetInfo
           ? getInfoLiquidityPool({
-              contract_addr: !targetedAssetType && targetedAssetInfo,
-              denom: targetedAssetType && targetedAssetInfo
-            })
+            contract_addr: !targetedAssetType && targetedAssetInfo,
+            denom: targetedAssetType && targetedAssetInfo
+          })
           : undefined
       });
       // if users use their existing tokens to list, then we allow them to
       console.log('msg: ', msg);
 
-      const result = await oraidexListing.listToken(msg as any);
+      const result = await oraidexListing.listToken(msg);
       if (result) {
         const wasmAttributes = result.logs?.[0]?.events.filter((e) => e.type === 'wasm').flatMap((e) => e.attributes);
         const cw20Address = wasmAttributes?.find((w) => w.key === 'cw20_address')?.value;
@@ -191,15 +192,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           TToastType.TX_SUCCESSFUL,
           cw20Address
             ? {
-                customLink: `${network.explorer}/txs/${result.transactionHash}`,
-                linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
-                cw20Address: `${cw20Address}`
-              }
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+              cw20Address: `${cw20Address}`
+            }
             : {
-                customLink: `${network.explorer}/txs/${result.transactionHash}`,
-                linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
-                linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
-              },
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
+              linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
+            },
           {
             autoClose: 100000000
           }
@@ -265,7 +266,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               {!isMintNewToken && (
                 <div>
                   <div className={cx('row', 'pt-16')}>
-                    <div className={cx('label')}>Targeted token</div>
+                    <div className={cx('label')}>Base token</div>
                     <div>
                       <CheckBox
                         radioBox
@@ -423,7 +424,7 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 </div>
               )}
               <div className={cx('row', 'pt-16')}>
-                <div className={cx('label')}>Pair token</div>
+                <div className={cx('label')}>Quote token</div>
                 <div>
                   <CheckBox
                     radioBox

@@ -3,10 +3,12 @@ import { parseAssetInfo } from 'helper';
 import { flatten, uniq } from 'lodash';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { MILKY, ORAI, STABLE_DENOM } from './constants';
-import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+
 import { network } from './networks';
 import { PairInfoExtend } from 'types/token';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -86,6 +88,12 @@ export class Pairs {
         { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } },
         { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } }
       ]
+    },
+    {
+      asset_infos: [
+        { native_token: { denom: ORAI } },
+        { token: { contract_addr: process.env.REACT_APP_INJECTIVE_CONTRACT } }
+      ]
     }
     // {
     //   asset_infos: [
@@ -148,7 +156,6 @@ export class Pairs {
   ): Promise<PairInfoExtend[]> => {
     const firstVersionWhiteListPairs = this.pairs.filter((pair) => pair.factoryV1);
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
-    console.dir(secondVersionWhiteListPairs, { depth: null });
 
     const multicall = multicallClient ? multicallClient : new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([

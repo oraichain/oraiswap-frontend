@@ -29,15 +29,15 @@ import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { useFetchAllPairs } from './hooks';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { updateLpPools } from 'reducer/token';
 
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();
@@ -85,7 +85,7 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  }
+  };
 
   const onBondingAction = () => {
     refetchRewardInfo();

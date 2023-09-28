@@ -7,6 +7,7 @@ import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
 import { getEvmSwapRoute } from 'rest/api';
 import { UNISWAP_ROUTER_DEADLINE } from 'config/constants';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 type TransferToGravityResult = {
   transactionHash: string;
@@ -124,10 +125,6 @@ export default class Metamask {
     }
   }
 
-  public calculateEvmSwapSlippage(amount: string, slippage: number): bigint {
-    return (BigInt(amount) * (slippage ? 100n - BigInt(slippage) : 97n)) / 100n;
-  }
-
   // TODO: add test cased & add case where from token is native evm
   public async evmSwap(data: {
     fromToken: TokenItemType;
@@ -137,11 +134,11 @@ export default class Metamask {
       metamaskAddress?: string;
       tronAddress?: string;
     };
-    simulateAmount: string;
-    slippage?: number; // from 1 to 100
-    destination?: string;
+    slippage: number; // from 1 to 100
+    destination: string;
+    simulateAverage: string;
   }) {
-    const { fromToken, toTokenContractAddr, address, fromAmount, simulateAmount, slippage, destination } = data;
+    const { fromToken, toTokenContractAddr, address, fromAmount, simulateAverage, slippage, destination } = data;
     const { metamaskAddress, tronAddress } = address;
     const finalTransferAddress = window.Metamask.getFinalEvmAddress(fromToken.chainId, {
       metamaskAddress,
@@ -152,9 +149,8 @@ export default class Metamask {
     const checkSumAddress = ethers.utils.getAddress(finalTransferAddress);
     const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
     const routerV2Addr = await gravityContract.swapRouter();
-    const amountMinAfterSlippage = this.calculateEvmSwapSlippage(simulateAmount, slippage);
+    const minimumReceive = BigInt(calculateMinReceive(simulateAverage, finalFromAmount, slippage, fromToken.decimals));
     let result: ethers.ContractTransaction;
-
     let fromTokenSpender = gravityContractAddr;
     // in this case, we wont use proxy contract but uniswap router instead because our proxy does not support swap tokens to native ETH.
     // approve uniswap router first before swapping because it will use transfer from to swap fromToken
@@ -170,7 +166,7 @@ export default class Metamask {
     if (!fromToken.contractAddress) {
       result = await gravityContract.bridgeFromETH(
         ethers.utils.getAddress(toTokenContractAddr),
-        amountMinAfterSlippage, // use
+        minimumReceive, // use
         destination,
         { value: finalFromAmount }
       );
@@ -181,7 +177,7 @@ export default class Metamask {
 
       result = await routerV2.swapExactTokensForETH(
         finalFromAmount,
-        amountMinAfterSlippage,
+        minimumReceive,
         evmRoute,
         checkSumAddress,
         new Date().getTime() + UNISWAP_ROUTER_DEADLINE
@@ -191,7 +187,7 @@ export default class Metamask {
         ethers.utils.getAddress(fromToken.contractAddress),
         ethers.utils.getAddress(toTokenContractAddr),
         finalFromAmount,
-        amountMinAfterSlippage, // use
+        minimumReceive, // use
         destination
       );
     }

@@ -16,7 +16,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
 import { ethers } from 'ethers';
 import Long from 'long';
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { Pairs } from 'config/pools';
 import Keplr from 'libs/keplr';
 

@@ -51,7 +51,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
   await Promise.all(
     [
-      oraiAddress && loadTokensCosmos(dispatch, oraiAddress),
+      oraiAddress && loadTokensCosmos(dispatch),
       oraiAddress && loadCw20Balance(dispatch, oraiAddress),
       // different cointype but also require keplr connected by checking oraiAddress
       oraiAddress && loadKawaiiSubnetAmount(dispatch),
@@ -66,13 +66,13 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
   );
 }
 
-async function loadTokensCosmos(dispatch: Dispatch, address: string) {
+async function loadTokensCosmos(dispatch: Dispatch) {
   await handleCheckWallet();
-  const { words, prefix } = bech32.decode(address);
-  const cosmosInfos = chainInfos.filter((chainInfo) => chainInfo.bip44.coinType === 118);
+  const cosmosInfos = chainInfos.filter(
+    (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
+  );
   for (const chainInfo of cosmosInfos) {
-    const networkPrefix = chainInfo.bech32Config.bech32PrefixAccAddr;
-    const cosmosAddress = networkPrefix === prefix ? address : bech32.encode(networkPrefix, words);
+    const cosmosAddress = await window.Keplr.getKeplrAddr(chainInfo.chainId);
     loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
@@ -110,9 +110,7 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
 async function loadNativeEvmBalance(address: string, chain: CustomChainInfo) {
   try {
     const client = new ethers.providers.StaticJsonRpcProvider(chain.rpc, Number(chain.chainId));
-    const network = await client.getNetwork();
     const balance = await client.getBalance(address);
-    console.log('window ethereum network with balance: ', network.chainId, balance.toString());
     return balance;
   } catch (error) {
     console.log('error load native evm balance: ', error);

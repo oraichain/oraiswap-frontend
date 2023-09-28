@@ -2,15 +2,12 @@
   Oraidex's Frontend
 </h2>
 
-# Oraichain
-
-![Banner!](./doc/logo-full-h-light.png#gh-light-mode-only)
-![Banner!](./doc/logo-full-h-dark.png#gh-dark-mode-only)
-
 ## Overview
+
 This repository provides frontend code for Oraidex of [Oraichain](https://orai.io).
 
 ## Prerequisite
+
 - A working contract described [here](https://github.com/oraichain/oraiswap)
 - NodeJS 10+
 
@@ -26,9 +23,10 @@ git clone https://github.com/oraichain/oraiswap-frontend.git
 
 ```shell
 yarn install
-```  
+```
 
 3. Dev it or build it
+
 ```shell
 yarn start
 yarn build
@@ -45,6 +43,7 @@ or add this into package.json
 ```
 
 ## Contributing
+
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## License
