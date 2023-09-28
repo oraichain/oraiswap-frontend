@@ -29,7 +29,7 @@ import classNames from 'classnames';
 import { RewardPoolType } from 'reducer/config';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -166,8 +166,10 @@ const ListPools = memo<{
       if (!text) {
         return setFilteredPairInfos(listPairs);
       }
-      const ret = listPairs.filter((pairInfo) =>
-        pairInfo.pair.asset_infos.some((info) => cosmosTokens.find((token) => parseTokenInfo(token).info === info))
+      const ret = listPairs.filter(
+        (pairInfo) =>
+          pairInfo.fromToken.name.toLowerCase().includes(text.toLowerCase()) ||
+          pairInfo.toToken.name.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredPairInfos(ret);
     },
