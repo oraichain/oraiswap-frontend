@@ -18,7 +18,6 @@ import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 
 type ListPoolsProps = {
   pairInfos: PairInfoData[];
-  allPoolApr: { [key: string]: number };
   pools: PoolInfoResponse[];
 };
 

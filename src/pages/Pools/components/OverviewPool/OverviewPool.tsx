@@ -1,17 +1,18 @@
-import styles from './OverviewPool.module.scss';
-import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
-import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
-import TokenBalance from 'components/TokenBalance';
-import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
 import { useQuery } from '@tanstack/react-query';
-import { PoolDetail } from 'types/pool';
+import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
+import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
+import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
+import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import { CW20_DECIMALS } from 'config/constants';
+import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
+import { PoolDetail } from 'types/pool';
+import styles from './OverviewPool.module.scss';
+import { toDisplay } from 'libs/utils';
 
-export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
-  let { data: pairAmountInfoData } = useQuery(
+const useGetPairAmountInfo = (poolDetailData: PoolDetail) => {
+  const { data: pairAmountInfoData } = useQuery(
     ['pair-amount-info', poolDetailData],
     () => {
       return getPairAmountInfo(poolDetailData.token1, poolDetailData.token2);
@@ -23,6 +24,10 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
     }
   );
 
+  return pairAmountInfoData;
+};
+
+const useGetLpAmount = (poolDetailData: PoolDetail) => {
   const { data: lpTokenInfoData } = useQuery(
     ['lp-info', poolDetailData],
     () =>
@@ -34,6 +39,14 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
       refetchOnWindowFocus: false
     }
   );
+
+  return lpTokenInfoData;
+};
+
+export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
+  const pairAmountInfoData = useGetPairAmountInfo(poolDetailData);
+  const lpTokenInfoData = useGetLpAmount(poolDetailData);
+
   return (
     <section className={styles.overview}>
       <div className={styles.totalLiquidity}>
@@ -96,7 +109,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <VolumeIcon />
         </div>
         <div className={styles.title}>Volume (24H)</div>
-        <div className={styles.volumeAmount}>$735,195</div>
+        <div className={styles.volumeAmount}>${toDisplay(poolDetailData.info.volume24Hour)}</div>
         <div className={styles.positivePercent}>+0.2%</div>
       </div>
       <div className={styles.apr}>
@@ -104,8 +117,8 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <AprIcon />
         </div>
         <div className={styles.title}>APR</div>
-        <div className={styles.volumeAmount}>76.20%</div>
-        {/* <div className={styles.positivePercent}>6.35%</div> */}
+        <div className={styles.volumeAmount}>{poolDetailData.info.apr.toFixed(2)}%</div>
+        <div className={styles.positivePercent}>6.35%</div>
       </div>
     </section>
   );

@@ -9,13 +9,17 @@ import img_coin from 'assets/images/img_coin.png';
 import { Button } from 'components/Button';
 import styles from './MyPoolInfo.module.scss';
 import useTheme from 'hooks/useTheme';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 import WithdrawLiquidityModal from './WithdrawLiquidityModal/WithdrawLiquidityModal';
 import StakeLPModal from './StakeLPModal/StakeLPModal';
 import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
 
-export const MyPoolInfo = () => {
+type Props = {
+  myLpBalance: bigint;
+};
+
+export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
   const theme = useTheme();
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
   const [isOpenWithdrawPool, setIsOpenWithdrawPool] = useState(false);
@@ -34,7 +38,7 @@ export const MyPoolInfo = () => {
         </div>
         <div className={styles.amount}>
           <div className={styles.amountUsdt}>$0</div>
-          <div className={styles.amountLp}>0.00 LP</div>
+          <div className={styles.amountLp}>{myLpBalance.toString()} LP</div>
         </div>
         <div className={styles.cta}>
           <Button

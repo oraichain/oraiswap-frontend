@@ -20,7 +20,8 @@ import { RootState } from 'store/configure';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
-import { useGetPoolDetail } from './hooks';
+import { useGetPoolDetail, useGetPools } from './hooks';
+import { useFetchLpPoolsV3 } from './hookV3';
 
 interface PoolDetailProps {}
 
@@ -31,6 +32,10 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
   const [assetToken, setAssetToken] = useState<TokenItemType>();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const poolDetailData = useGetPoolDetail(poolUrl);
+
+  const pools = useGetPools();
+  const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+  useFetchLpPoolsV3(lpAddresses);
 
   let { data: pairAmountInfoData } = useQuery(
     ['pair-amount-info', poolDetailData],
@@ -87,9 +92,6 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
     }
   }, [poolDetailData]);
 
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
-
   const lpTotalSupply = BigInt(lpTokenInfoData?.total_supply ?? 0);
 
   const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
@@ -112,7 +114,7 @@ const PoolDetailV3: React.FC<PoolDetailProps> = () => {
         </div>
         <OverviewPool poolDetailData={poolDetailData} />
         <Earning />
-        <MyPoolInfo />
+        <MyPoolInfo myLpBalance={lpTokenBalance} />
       </div>
     </Content>
   );
