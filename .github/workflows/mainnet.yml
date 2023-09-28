@@ -53,3 +53,10 @@ jobs:
           CI: false
       - name: Deploy to firebase
         run: yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }} -m '${{ github.event.head_commit.message }}'
+      - name: Send discord message
+        uses: appleboy/discord-action@master
+        with:
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          username: "GitBot [oraiswap-frontend]"
+          message: "Repo oraiswap-frontend has just published by ${{ github.event.head_commit.author.name }}"
