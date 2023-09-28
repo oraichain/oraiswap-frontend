@@ -27,20 +27,25 @@
 
         .logo {
           margin-left: 5px;
+          display: flex;
+          align-items: center;
           img {
             width: 24px;
             height: 24px;
             border-radius: 5px;
           }
 
-          .remove {
+          .remove,
+          .add {
             display: none;
+            cursor: pointer;
           }
         }
         .control {
           display: flex;
           align-items: center;
           margin-right: 10px;
+          cursor: pointer;
         }
         .info {
           display: flex;
@@ -65,13 +70,13 @@
         }
         &:hover {
           background: #dfe0de;
-          cursor: pointer;
           border-radius: 8px;
 
           .logo {
             display: flex;
             margin-left: 10px;
-            .remove {
+            .remove,
+            .add {
               margin-right: 10px;
               display: flex;
               align-items: center;
@@ -91,7 +96,7 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin: 3px 0px;
+          margin: 5px 0px;
 
           .logo {
             margin-left: 10px;
