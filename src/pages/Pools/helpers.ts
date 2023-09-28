@@ -343,8 +343,7 @@ const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: 
 };
 
 const isBigIntZero = (value: BigInt): boolean => {
-  if (value === BigInt(0)) return true;
-  return false;
+  return value === BigInt(0);
 };
 
 export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
