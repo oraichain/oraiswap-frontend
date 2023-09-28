@@ -93,7 +93,7 @@ export const ibcInfos: IBCInfoMap = {
   }
 };
 
-export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4' | 'injective-1'> = {
+export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4'> = {
   Oraichain: {
     'oraibridge-subnet-2': {
       source: 'transfer',
@@ -103,6 +103,11 @@ export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4' | 'inject
     'kawaii_6886-1': {
       source: 'transfer',
       channel: oraichain2kwt,
+      timeout: IBC_TRANSFER_TIMEOUT
+    },
+    'injective-1': {
+      source: 'transfer',
+      channel: oraichain2inj,
       timeout: IBC_TRANSFER_TIMEOUT
     }
   },
@@ -117,6 +122,13 @@ export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4' | 'inject
     Oraichain: {
       source: 'transfer',
       channel: kwt2oraichain,
+      timeout: IBC_TRANSFER_TIMEOUT
+    }
+  },
+  'injective-1': {
+    Oraichain: {
+      source: 'transfer',
+      channel: inj2oraichain,
       timeout: IBC_TRANSFER_TIMEOUT
     }
   }
