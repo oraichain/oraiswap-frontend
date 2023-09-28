@@ -6,6 +6,15 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
 
+import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
+import { ReactComponent as AddWalletIcon } from 'assets/icons/Add.svg';
+import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
+import { ReactComponent as QRCodeIcon } from 'assets/icons/qr-code.svg';
+import { ReactComponent as TrashIcon } from 'assets/icons/trash_icon.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
+import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
+import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { displayInstallWallet, setStorageKey } from 'helper';
 import { useInactiveConnect } from 'hooks/useMetamask';
@@ -17,14 +26,6 @@ import { reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import Metamask from 'libs/metamask';
 import Keplr from 'libs/keplr';
-import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
-import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
-import { ReactComponent as QRCodeIcon } from 'assets/icons/qr-code.svg';
-import { ReactComponent as TrashIcon } from 'assets/icons/trash_icon.svg';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
-import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
-import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import MetamaskImage from 'assets/images/metamask.png';
 import EthereumImage from 'assets/images/ethereum-logo.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
@@ -63,6 +64,7 @@ interface WalletItem {
   icon: string;
   totalUsd: number;
   isOpen: boolean;
+  isConnect: boolean;
   networks: NetworkItem[];
 }
 
@@ -85,6 +87,8 @@ const MyWallets: React.FC<{
   });
 
   const connectMetamask = async () => {
+    console.log('connectMetamask', metamaskAddress);
+
     try {
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
@@ -173,40 +177,56 @@ const MyWallets: React.FC<{
     }
   };
 
-  const handleLoginWallets = (walletType) => {
+  const handleLoginWallets = async (walletType) => {
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
-        connectMetamask();
+        await connectMetamask();
         break;
       case WALLET_TYPES.OWALLET:
-        connectKeplr('owallet');
+        await connectKeplr('owallet');
         break;
       case WALLET_TYPES.KPLER:
-        connectKeplr('keplr');
+        await connectKeplr('keplr');
         break;
       case WALLET_TYPES.TRON:
-        connectTronLink();
+        await connectTronLink();
         break;
       default:
         break;
     }
+    const walletsModified = wallets.map((w) => {
+      if (w.code === walletType) {
+        w.isConnect = true;
+        w.isOpen = true;
+      }
+      return w;
+    });
+    setWallets(walletsModified);
   };
 
-  const handleLogoutWallets = (walletType) => {
+  const handleLogoutWallets = async (walletType) => {
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
-        disconnectMetamask();
+        await disconnectMetamask();
         break;
       case WALLET_TYPES.OWALLET:
       case WALLET_TYPES.KPLER:
-        disconnectKeplr();
+        await disconnectKeplr();
         break;
       case WALLET_TYPES.TRON:
-        disconnectTronLink();
+        await disconnectTronLink();
         break;
       default:
         break;
     }
+    const walletsModified = wallets.map((w) => {
+      if (w.code === walletType) {
+        w.isConnect = false;
+        w.isOpen = true;
+      }
+      return w;
+    });
+    setWallets(walletsModified);
   };
 
   const getUrlQrCode = async ({ address, icon, name }) => {
@@ -257,6 +277,7 @@ const MyWallets: React.FC<{
         icon: MetamaskImage,
         totalUsd: 1,
         isOpen: false,
+        isConnect: !!metamaskAddress,
         networks: [
           {
             id: 1,
@@ -285,6 +306,7 @@ const MyWallets: React.FC<{
         icon: OwalletImage,
         totalUsd: 42342.342121221,
         isOpen: false,
+        isConnect: !!oraiAddressWallet,
         networks: [
           {
             id: 1,
@@ -319,6 +341,7 @@ const MyWallets: React.FC<{
         icon: TronWalletImage,
         totalUsd: 1,
         isOpen: false,
+        isConnect: !!tronAddress,
         networks: [
           {
             id: 1,
@@ -337,18 +360,26 @@ const MyWallets: React.FC<{
         {wallets.map((wallet, index) => {
           return (
             <div key={index} className={cx('wallet_container')}>
-              <div className={cx('wallet_info')} onClick={() => toggleShowNetworks(wallet.id)}>
+              <div className={cx('wallet_info')}>
                 <div className={cx('logo')}>
-                  <div className={cx('remove')} onClick={() => handleLogoutWallets(wallet.code)}>
-                    <TrashIcon />
-                  </div>
+                  {wallet.isConnect ? (
+                    <div className={cx('remove')} onClick={() => handleLogoutWallets(wallet.code)}>
+                      <TrashIcon />
+                    </div>
+                  ) : (
+                    <div className={cx('add')} onClick={() => handleLoginWallets(wallet.code)}>
+                      <AddWalletIcon />
+                    </div>
+                  )}
                   <img src={wallet.icon} alt="wallet icon" />
                 </div>
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
                   <div className={cx('money')}>${wallet.totalUsd}</div>
                 </div>
-                <div className={cx('control')}>{wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}</div>
+                <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
+                  {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
+                </div>
               </div>
               {wallet.isOpen ? (
                 <div className={cx('networks_container')}>
