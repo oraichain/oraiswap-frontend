@@ -32,6 +32,9 @@ declare global {
       balance: string;
     };
   };
+  type BondLpPoolDetails = {
+    [key: string]: string;
+  };
   type MetaMaskEthereumProvider = AbstractProvider & {
     chainId: string;
     isMetaMask?: boolean;
