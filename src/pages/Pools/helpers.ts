@@ -304,19 +304,17 @@ const calculateLpPools = (pairs: PairInfo[], res: AggregateResult) => {
   return lpTokenData;
 };
 
-const generateBondLpPoolsInfoQueries = (pairs: PairInfo[], address: string) => {
-  const queries = pairs.map((pair) => {
-    let assetInfo;
-    if (parseAssetInfo(pair.asset_infos?.[0]) === 'orai') {
-      assetInfo = pair.asset_infos?.[1];
-    } else {
-      assetInfo = pair.asset_infos?.[0];
-    }
+export const getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
+  return parseAssetInfo(assetInfos[0]) === ORAI ? assetInfos[1] : assetInfos[0];
+};
+
+const generateBondLpPoolsInfoQueries = (stakingAssets: AssetInfo[], address: string) => {
+  const queries = stakingAssets.map((stakingAsset) => {
     return {
       address: network.staking,
       data: toBinary({
         reward_info: {
-          asset_info: assetInfo,
+          asset_info: stakingAsset,
           staker_addr: address
         }
       })
@@ -339,7 +337,8 @@ const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) => {
 };
 
 const fetchCacheBondLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
-  const queries = generateBondLpPoolsInfoQueries(pairs, address);
+  const stakingAssets = pairs.map((pair) => getStakingAssetInfo(pair.asset_infos));
+  const queries = generateBondLpPoolsInfoQueries(stakingAssets, address);
   const res = await multicall.aggregate({
     queries
   });
