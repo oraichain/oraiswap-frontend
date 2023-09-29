@@ -151,7 +151,7 @@ export const aggregateResultData = [
         }
       ]
     },
-    expectMyReward: [{}, {}]
+    expectMyReward: [false, false]
   },
   {
     res: {

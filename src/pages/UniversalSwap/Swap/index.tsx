@@ -154,7 +154,7 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom]);
+  }, [fromTokenDenom, toTokenDenom, searchTokenName]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(

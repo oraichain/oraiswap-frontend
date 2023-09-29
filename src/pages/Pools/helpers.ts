@@ -186,7 +186,7 @@ export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
     pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
-        return [pair.contract_addr, {}];
+        return [pair.contract_addr, false];
       }
       const value = fromBinary(data.data);
       const bondPools = sumBy(Object.values(value.reward_infos));
