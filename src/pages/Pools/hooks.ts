@@ -13,8 +13,7 @@ import {
   fetchMyPairsData,
   fetchPairsData,
   fetchPoolListAndOraiPrice,
-  fetchCacheLpPools,
-  fetchCacheBondLpPools
+  fetchCacheLpPools
 } from './helpers';
 import { updatePairInfos } from 'reducer/pairs';
 import { PairInfoExtend } from 'types/token';
@@ -97,13 +96,13 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
 };
 
 // Fetch all bond lp pools
-export const useFetchCacheBondLpPools = (pairs: PairInfo[], bondLpPools: BondLpPoolDetails) => {
+export const useFetchCacheBondLpPools = (pairs: PairInfoExtend[], bondLpPools: BondLpPoolDetails) => {
   const dispatch = useDispatch();
   const [address] = useConfigReducer('address');
   const setCachedBondLpPools = (payload: BondLpPoolDetails) => dispatch(updateBondLpPools(payload));
 
   const fetchCachedBondLpPool = async () => {
-    const bondLpTokenData = await fetchCacheBondLpPools(
+    const bondLpTokenData = await fetchMyPairsData(
       pairs,
       address,
       new MulticallQueryClient(window.client, network.multicall)
@@ -112,7 +111,7 @@ export const useFetchCacheBondLpPools = (pairs: PairInfo[], bondLpPools: BondLpP
   };
 
   useEffect(() => {
-    if (pairs.length > 0 && address && (!bondLpPools || !Object.keys(bondLpPools).length)) fetchCachedBondLpPool();
+    if (pairs.length > 0 && address && (!bondLpPools || !Object.keys(bondLpPools)?.length)) fetchCachedBondLpPool();
   }, [pairs]);
 };
 

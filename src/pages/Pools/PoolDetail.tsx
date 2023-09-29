@@ -23,7 +23,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCacheBondLpPools, fetchCacheLpPools } from './helpers';
+import { fetchCacheLpPools, fetchMyPairsData } from './helpers';
 import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
@@ -90,12 +90,12 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   };
 
   const fetchCachedBondLpTokenAll = async () => {
-    const lpTokenData = await fetchCacheBondLpPools(
+    const bonLpTokenData = await fetchMyPairsData(
       pairs,
       address,
       new MulticallQueryClient(window.client, network.multicall)
     );
-    setCachedBondLpPools(lpTokenData);
+    setCachedBondLpPools(bonLpTokenData);
   };
 
   const onBondingAction = () => {

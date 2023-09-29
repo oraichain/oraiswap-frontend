@@ -186,7 +186,7 @@ export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
     pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
-        return [pair.contract_addr, {}];
+        return [pair.contract_addr, false];
       }
       const value = fromBinary(data.data);
       const bondPools = sumBy(Object.values(value.reward_infos));
@@ -304,47 +304,6 @@ const calculateLpPools = (pairs: PairInfo[], res: AggregateResult) => {
   return lpTokenData;
 };
 
-export const getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
-  return parseAssetInfo(assetInfos[0]) === ORAI ? assetInfos[1] : assetInfos[0];
-};
-
-const generateBondLpPoolsInfoQueries = (stakingAssets: AssetInfo[], address: string) => {
-  const queries = stakingAssets.map((stakingAsset) => {
-    return {
-      address: network.staking,
-      data: toBinary({
-        reward_info: {
-          asset_info: stakingAsset,
-          staker_addr: address
-        }
-      })
-    };
-  });
-  return queries;
-};
-
-const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) => {
-  const bondLpTokenData = Object.fromEntries(
-    pairs.map((pair, ind) => {
-      const data = res.return_data[ind];
-      if (!data.success) {
-        return [pair.liquidity_token, {}];
-      }
-      return [pair.liquidity_token, fromBinary(data.data)?.reward_infos?.[0]?.bond_amount || '0'];
-    })
-  );
-  return bondLpTokenData;
-};
-
-const fetchCacheBondLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
-  const stakingAssets = pairs.map((pair) => getStakingAssetInfo(pair.asset_infos));
-  const queries = generateBondLpPoolsInfoQueries(stakingAssets, address);
-  const res = await multicall.aggregate({
-    queries
-  });
-  return calculateBondLpPools(pairs, res);
-};
-
 const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
   const queries = generateLpPoolsInfoQueries(pairs, address);
   const res = await multicall.aggregate({
@@ -364,7 +323,6 @@ export {
   fetchPairsData,
   fetchMyPairsData,
   fetchCacheLpPools,
-  fetchCacheBondLpPools,
   generateMsgFrontierAddToken,
   getInfoLiquidityPool,
   isBigIntZero
