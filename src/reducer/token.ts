@@ -5,12 +5,14 @@ export interface TokenState {
   amounts: AmountDetails;
   pairs: PairDetails;
   lpPools: LpPoolDetails;
+  bondLpPools: BondLpPoolDetails;
 }
 
 const initialState: TokenState = {
   amounts: {},
   pairs: {},
-  lpPools: {}
+  lpPools: {},
+  bondLpPools: {}
 };
 
 export const tokenSlice = createSlice({
@@ -33,10 +35,17 @@ export const tokenSlice = createSlice({
       state.amounts = {};
       state.pairs = {};
       state.lpPools = {};
+      state.bondLpPools = {};
     },
     updateLpPools: (state, action: PayloadAction<LpPoolDetails>) => {
       state.lpPools = {
         ...state.lpPools,
+        ...action.payload
+      };
+    },
+    updateBondLpPools: (state, action: PayloadAction<BondLpPoolDetails>) => {
+      state.bondLpPools = {
+        ...state.bondLpPools,
         ...action.payload
       };
     }
@@ -44,6 +53,6 @@ export const tokenSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { updateAmounts, updatePairs, removeToken, updateLpPools } = tokenSlice.actions;
+export const { updateAmounts, updatePairs, removeToken, updateLpPools, updateBondLpPools } = tokenSlice.actions;
 
 export default tokenSlice.reducer;

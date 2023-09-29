@@ -18,7 +18,8 @@ import {
   useFetchCachePairs,
   useFetchMyPairs,
   useFetchPairInfoDataList,
-  useFetchCacheReward
+  useFetchCacheReward,
+  useFetchCacheBondLpPools
 } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
@@ -29,7 +30,7 @@ import classNames from 'classnames';
 import { RewardPoolType } from 'reducer/config';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
-interface PoolsProps {}
+interface PoolsProps { }
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -139,6 +140,7 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const bondLpPools = useSelector((state: RootState) => state.token.bondLpPools);
   const [cachedReward] = useConfigReducer('rewardPools');
   useEffect(() => {
     if (!!!typeFilter) {
@@ -147,7 +149,7 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance));
+    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || parseInt(bondLpPools[pairInfo?.pair?.liquidity_token]));
   }, [pairInfos]);
 
   useEffect(() => {
@@ -237,12 +239,16 @@ const Pools: React.FC<PoolsProps> = () => {
 
   const pairs = useFetchAllPairs();
   const [theme] = useConfigReducer('theme');
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const bondLpPools = useSelector((state: RootState) => state.token.bondLpPools);
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
-  useFetchCacheLpPools(pairs);
+
+  useFetchCacheLpPools(pairs, lpPools);
+  useFetchCacheBondLpPools(pairs, bondLpPools);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
   return (
