@@ -186,11 +186,24 @@ export const calculateReward = (pairs: PairInfo[], res: AggregateResult) => {
     pairs.map((pair, ind) => {
       const data = res.return_data[ind];
       if (!data.success) {
-        return [pair.contract_addr, {}];
+        return [pair.contract_addr, false];
       }
       const value = fromBinary(data.data);
       const bondPools = sumBy(Object.values(value.reward_infos));
       return [pair.contract_addr, !!bondPools];
+    })
+  );
+  return myPairData;
+};
+
+export const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) => {
+  const myPairData = Object.fromEntries(
+    pairs.map((pair, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [pair.contract_addr, false];
+      }
+      return [pair.contract_addr, fromBinary(data.data)?.reward_infos?.[0]?.bond_amount || '0'];
     })
   );
   return myPairData;
@@ -220,12 +233,14 @@ const generateRewardInfoQueries = (pairs: PairInfoExtend[], stakerAddress: strin
 const fetchMyPairsData = async (
   pairs: PairInfoExtend[],
   stakerAddress: string,
-  multicall: MulticallReadOnlyInterface
+  multicall: MulticallReadOnlyInterface,
+  typeReward?: string
 ) => {
   const queries = generateRewardInfoQueries(pairs, stakerAddress);
   const res = await multicall.aggregate({
     queries
   });
+  if (typeReward === 'bond') return calculateBondLpPools(pairs, res);
   return calculateReward(pairs, res);
 };
 

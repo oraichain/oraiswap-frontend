@@ -16,7 +16,7 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import { getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { isMobile } from '@walletconnect/browser-utils';
 import { PairInfoExtend } from 'types/token';
 import {
@@ -33,9 +33,6 @@ import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { TooltipIcon } from 'components/Modals/SettingTooltip';
 import SlippageModal from 'components/Modals/SlippageModal';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { updateLpPools } from 'reducer/token';
-import { fetchCacheLpPools } from '../helpers';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { isBigIntZero } from '../helpers';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
@@ -55,6 +52,8 @@ interface ModalProps {
   refetchPairAmountInfo: Function;
   pairInfoData: PairInfo;
   pairs?: PairInfoExtend[];
+  fetchCachedLpTokenAll: () => void;
+  fetchCachedBondLpTokenAll: () => void
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -68,7 +67,8 @@ const LiquidityModal: FC<ModalProps> = ({
   pairAmountInfoData,
   refetchPairAmountInfo,
   pairInfoData,
-  pairs
+  fetchCachedLpTokenAll,
+  fetchCachedBondLpTokenAll
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
@@ -77,7 +77,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-  const dispatch = useDispatch();
   const { data: prices } = useCoinGeckoPrices();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -94,7 +93,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
@@ -168,18 +166,10 @@ const LiquidityModal: FC<ModalProps> = ({
     setEstimatedLP(estimatedLP);
   };
 
-  const fetchCachedLpTokenAll = async () => {
-    const lpTokenData = await fetchCacheLpPools(
-      pairs,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  };
-
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
+    fetchCachedBondLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -368,7 +358,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => {}} />
+        <img src={FluentAddImg} onClick={() => { }} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>

@@ -49,6 +49,7 @@ jobs:
         run: yarn build
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          RELEASE: '1.0.9'
           REACT_APP_SENTRY_ENVIRONMENT: production
           CI: false
       - name: Deploy to firebase
@@ -58,5 +59,5 @@ jobs:
         with:
           webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
           webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-          username: "GitBot [oraiswap-frontend]"
-          message: "Repo oraiswap-frontend has just published by ${{ github.event.head_commit.author.name }}"
+          username: 'GitBot [oraiswap-frontend]'
+          message: 'Repo oraiswap-frontend has just published by ${{ github.event.head_commit.author.name }}'
