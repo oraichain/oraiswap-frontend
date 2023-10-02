@@ -49,7 +49,6 @@ jobs:
         run: yarn build
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          RELEASE: '1.0.9'
           REACT_APP_SENTRY_ENVIRONMENT: production
           CI: false
       - name: Deploy to firebase
