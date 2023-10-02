@@ -105,7 +105,8 @@ export const useFetchCacheBondLpPools = (pairs: PairInfoExtend[]) => {
     const bondLpTokenData = await fetchMyPairsData(
       pairs,
       address,
-      new MulticallQueryClient(window.client, network.multicall)
+      new MulticallQueryClient(window.client, network.multicall),
+      'bond'
     );
     setCachedBondLpPools(bondLpTokenData);
   };

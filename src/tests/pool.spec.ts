@@ -10,6 +10,7 @@ import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  calculateBondLpPools,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
@@ -36,7 +37,7 @@ import {
   getPairs,
   instantiateCw20Token
 } from './listing-simulate';
-import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
+import { testCaculateBondLpData, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 import { parseAssetInfo } from 'helper';
 import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
@@ -186,8 +187,10 @@ describe('pool', () => {
       expect(pairsData[pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
-    it('should fetch my pairs data correctly', async () => {
-      // keep contractAddress of asset token.
+    it.each([
+      ['reward', true],
+      ['bond', '999999']
+    ])('should fetch my pairs data and bond lp correctly', async (typeReward, expectedResult) => {
       pairs.forEach((pair, index) => {
         const assetToken = tokenMap[index === 0 ? 'airi' : 'usdt'];
         assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
@@ -196,9 +199,9 @@ describe('pool', () => {
       assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
       assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
       const multicall = new MulticallQueryClient(client, network.multicall);
-      const myPairs = await fetchMyPairsData(pairs, devAddress, multicall);
-      expect(myPairs[pairs[0].contract_addr]).toBe(true);
-      expect(myPairs[pairs[1].contract_addr]).toBe(true);
+      const myPairs = await fetchMyPairsData(pairs, devAddress, multicall, typeReward);
+      expect(myPairs[pairs[0].contract_addr]).toBe(expectedResult);
+      expect(myPairs[pairs[1].contract_addr]).toBe(expectedResult);
     });
 
     it.each(testCaculateRewardData)(
@@ -206,6 +209,14 @@ describe('pool', () => {
       (aggregateRes: AggregateResult, expectedRewardInfo) => {
         const rewardInfo = calculateReward(pairs, aggregateRes);
         expect(Object.values(rewardInfo)).toEqual(expectedRewardInfo);
+      }
+    );
+
+    it.each(testCaculateBondLpData)(
+      'should caculate my reward info',
+      (aggregateRes: AggregateResult, _, expectBondLpPools) => {
+        const bondLpPools = calculateBondLpPools(pairs, aggregateRes);
+        expect(Object.values(bondLpPools)).toEqual(expectBondLpPools);
       }
     );
 

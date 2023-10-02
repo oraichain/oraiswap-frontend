@@ -149,7 +149,7 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || bondLpPools[pairInfo?.pair?.contract_addr]);
+    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || parseInt(bondLpPools[pairInfo?.pair?.contract_addr]));
   }, [pairInfos]);
 
   useEffect(() => {
