@@ -8,15 +8,16 @@ import { Web3Provider } from '@ethersproject/providers';
 import { getEvmSwapRoute } from 'rest/api';
 import { UNISWAP_ROUTER_DEADLINE } from 'config/constants';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import { EvmWallet } from '@oraichain/oraidex-common';
 
 type TransferToGravityResult = {
   transactionHash: string;
 };
 
-export default class Metamask {
+export default class Metamask extends EvmWallet {
   private provider: Web3Provider;
 
-  public static checkEthereum() {
+  public checkEthereum() {
     if (window.ethereum) {
       return true;
     }
@@ -47,7 +48,7 @@ export default class Metamask {
     return address.metamaskAddress;
   }
 
-  public static checkTron() {
+  public checkTron() {
     if (window.tronWeb && window.tronLink) {
       return true;
     }
@@ -69,45 +70,8 @@ export default class Metamask {
     return ethers.utils.getAddress(address);
   }
 
-  private async submitTronSmartContract(
-    address: string,
-    functionSelector: string,
-    options: { feeLimit?: number } = { feeLimit: 40 * 1e6 }, // submitToCosmos costs about 40 TRX
-    parameters = [],
-    issuerAddress: string
-  ): Promise<TransferToGravityResult> {
-    const tronRpc = chainInfos.find((c) => c.chainId == '0x2b6653dc').rpc;
-    const tronUrl = tronRpc.replace('/jsonrpc', '');
-    const tronWeb = new TronWeb(tronUrl, tronUrl);
-
-    try {
-      console.log('before building tx: ', issuerAddress);
-      const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
-        address,
-        functionSelector,
-        options,
-        parameters,
-        ethToTronAddress(issuerAddress)
-      );
-      console.log('transaction builder: ', transaction);
-
-      if (!transaction.result || !transaction.result.result) {
-        throw new Error('Unknown trigger error: ' + JSON.stringify(transaction.transaction));
-      }
-      console.log('before signing');
-
-      // sign from inject tronWeb
-      const singedTransaction = await window.tronWeb.trx.sign(transaction.transaction);
-      console.log('signed tx: ', singedTransaction);
-      const result = await tronWeb.trx.sendRawTransaction(singedTransaction);
-      return { transactionHash: result.txid };
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-
   public async switchNetwork(chainId: string | number) {
-    if (Metamask.checkEthereum()) {
+    if (this.checkEthereum()) {
       await window.ethereum.request!({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x' + Number(chainId).toString(16) }]
@@ -116,7 +80,7 @@ export default class Metamask {
   }
 
   public async getEthAddress() {
-    if (Metamask.checkEthereum()) {
+    if (this.checkEthereum()) {
       const [address] = await window.ethereum.request({
         method: 'eth_requestAccounts',
         params: []
@@ -200,12 +164,12 @@ export default class Metamask {
     amountVal: string,
     from: string | null,
     to: string
-  ): Promise<TransferToGravityResult> {
+  ): Promise<string> {
     const gravityContractAddr = gravityContracts[token.chainId] as string;
     console.log('gravity tron address: ', gravityContractAddr);
 
     if (this.isTron(token.chainId)) {
-      if (Metamask.checkTron())
+      if (this.checkTron())
         return await this.submitTronSmartContract(
           ethToTronAddress(gravityContractAddr),
           'sendToCosmos(address,string,uint256)',
@@ -217,53 +181,13 @@ export default class Metamask {
           ],
           tronToEthAddress(from) // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
         );
-    } else if (Metamask.checkEthereum()) {
+    } else if (this.checkEthereum()) {
       // if you call this function on evm, you have to switch network before calling. Otherwise, unexpected errors may happen
       if (!gravityContractAddr || !from || !to) return;
       const gravityContract = Bridge__factory.connect(gravityContractAddr, this.getSigner());
       const result = await gravityContract.sendToCosmos(token.contractAddress, to, amountVal, { from });
       await result.wait();
-      return { transactionHash: result.hash };
-    }
-  }
-
-  public async checkOrIncreaseAllowance(
-    token: TokenItemType,
-    owner: string,
-    spender: string,
-    amount: string
-  ): Promise<TransferToGravityResult> {
-    // we store the tron address in base58 form, so we need to convert to hex if its tron because the contracts are using the hex form as parameters
-    if (!token.contractAddress) return;
-    const ownerHex = this.isTron(token.chainId) ? tronToEthAddress(owner) : owner;
-    // using static rpc for querying both tron and evm
-    const tokenContract = IERC20Upgradeable__factory.connect(
-      token.contractAddress,
-      new ethers.providers.JsonRpcProvider(token.rpc)
-    );
-    const currentAllowance = await tokenContract.allowance(ownerHex, spender);
-
-    if (currentAllowance.toString() >= amount) return;
-
-    if (this.isTron(token.chainId)) {
-      if (Metamask.checkTron())
-        return this.submitTronSmartContract(
-          ethToTronAddress(token.contractAddress),
-          'approve(address,uint256)',
-          {},
-          [
-            { type: 'address', value: spender },
-            { type: 'uint256', value: amount }
-          ],
-          ownerHex
-        );
-    } else if (Metamask.checkEthereum()) {
-      // using window.ethereum for signing
-      // if you call this function on evm, you have to switch network before calling. Otherwise, unexpected errors may happen
-      const tokenContract = IERC20Upgradeable__factory.connect(token.contractAddress, this.getSigner());
-      const result = await tokenContract.approve(spender, amount, { from: ownerHex });
-      await result.wait();
-      return { transactionHash: result.hash };
+      return result.hash;
     }
   }
 }

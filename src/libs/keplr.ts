@@ -6,9 +6,22 @@ import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
 import { WalletType } from 'config/constants';
 import { network } from 'config/networks';
-export default class Keplr {
+
+import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
+
+export default class Keplr extends CosmosWallet {
+  async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
+    const keplr = await window.Keplr.getKeplr();
+    if (!keplr) {
+      throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
+    }
+    // use keplr instead
+    return await keplr.getOfflineSignerAuto(chainId);
+  }
+
   typeWallet: WalletType;
   constructor(type: WalletType = 'keplr') {
+    super();
     this.typeWallet = type;
   }
 
