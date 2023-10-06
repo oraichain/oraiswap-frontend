@@ -146,7 +146,6 @@ export const parseAssetInfo = (assetInfo: AssetInfo): string => {
 };
 
 export const isFactoryV1 = (assetInfos: [AssetInfo, AssetInfo]): boolean => {
-  console.dir(Pairs.pairs, { depth: null });
   const pair = Pairs.pairs.find(
     (pair) =>
       pair.asset_infos.find((info) => parseAssetInfo(info) === parseAssetInfo(assetInfos[0])) &&

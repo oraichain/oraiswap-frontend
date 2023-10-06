@@ -1,12 +1,12 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { parseAssetInfo } from 'helper';
-import { flatten, uniq } from 'lodash';
-import { TokenItemType, assetInfoMap } from './bridgeTokens';
-import { MILKY, ORAI, STABLE_DENOM } from './constants';
 import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { network } from './networks';
+import { parseAssetInfo } from 'helper';
+import { flatten, uniq } from 'lodash';
 import { PairInfoExtend } from 'types/token';
+import { TokenItemType, assetInfoMap } from './bridgeTokens';
+import { ORAI } from './constants';
+import { network } from './networks';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -148,7 +148,6 @@ export class Pairs {
   ): Promise<PairInfoExtend[]> => {
     const firstVersionWhiteListPairs = this.pairs.filter((pair) => pair.factoryV1);
     const secondVersionWhiteListPairs = this.pairs.filter((pair) => !firstVersionWhiteListPairs.includes(pair));
-    console.dir(secondVersionWhiteListPairs, { depth: null });
 
     const multicall = multicallClient ? multicallClient : new MulticallQueryClient(window.client, network.multicall);
     const [firstVersionAllPairs, secondVersionAllPairs] = await Promise.all([
