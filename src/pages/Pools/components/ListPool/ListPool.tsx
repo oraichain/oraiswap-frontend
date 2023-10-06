@@ -5,29 +5,33 @@ import NoDataSvg from 'assets/images/NoDataPool.svg';
 import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import { Button } from 'components/Button';
 import Table, { TableHeaderProps } from 'components/Table/Table';
+import { CW20_DECIMALS } from 'config/constants';
+import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
 import { PairInfoData, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { StakeByUserResponse } from 'pages/Pools/hookV3';
 import { memo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
+import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
-import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 
 type ListPoolsProps = {
   pairInfos: PairInfoData[];
   pools: PoolInfoResponse[];
+  myStakes: StakeByUserResponse[];
 };
 
 type PoolTableData = PoolInfoResponse & {
   reward: string[];
-  myStakedLP: string;
-  earned: string;
+  myStakedLP: number;
+  earned: number;
 };
 
-export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
+export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools, myStakes }) => {
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
 
@@ -41,11 +45,22 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
 
   const poolTableData: PoolTableData[] = pools.map((pool) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
+    const stakingAssetInfo = Pairs.getStakingAssetInfo([
+      JSON.parse(pool.firstAssetInfo),
+      JSON.parse(pool.secondAssetInfo)
+    ]);
+    const myStakedLP = stakingAssetInfo
+      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.stakingAmountInUsdt
+      : 0;
+
+    const earned = stakingAssetInfo
+      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt
+      : 0;
     return {
       ...pool,
       reward: poolReward?.reward ?? [],
-      myStakedLP: '2',
-      earned: '1'
+      myStakedLP: toDisplay(BigInt(Math.trunc(myStakedLP)), CW20_DECIMALS),
+      earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS)
     };
   });
 
@@ -92,13 +107,13 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
       name: 'My Staked LP',
       width: '12%',
       align: 'left',
-      accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.myStakedLP))}</span>
+      accessor: (data) => <span>{formatDisplayUsdt(data.myStakedLP)}</span>
     },
     earned: {
       name: 'Earned',
       width: '10%',
       align: 'left',
-      accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.earned))}</span>
+      accessor: (data) => <span>{formatDisplayUsdt(data.earned)}</span>
     },
     fee7Days: {
       name: 'Fee (7D)',
@@ -137,8 +152,7 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools }) => {
 
   const handleClickRow = (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, pool: PoolInfoResponse) => {
     event.stopPropagation();
-    const firstAssetInfo = JSON.parse(pool.firstAssetInfo);
-    const secondAssetInfo = JSON.parse(pool.secondAssetInfo);
+    const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
 
     navigate(
       `/pool/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(

@@ -315,7 +315,7 @@ const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('btn-confirm')}>
               <Button onClick={() => handleAddLiquidity(amountToken1, amountToken2)} type="primary" disabled={disabled}>
                 {actionLoading && <Loader width={30} height={30} />}
-                {disableMsg || 'Unsake'}
+                {disableMsg || 'Unstake'}
               </Button>
             </div>
           );

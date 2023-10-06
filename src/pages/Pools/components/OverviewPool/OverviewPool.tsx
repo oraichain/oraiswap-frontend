@@ -6,10 +6,10 @@ import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from 'config/bridgeTokens';
 import { CW20_DECIMALS } from 'config/constants';
+import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
-import { toDisplay } from 'libs/utils';
 
 const useGetPairAmountInfo = (poolDetailData: PoolDetail) => {
   const { data: pairAmountInfoData } = useQuery(
@@ -59,7 +59,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <div className={styles.pairAmount}>
             <TokenBalance
               balance={{
-                amount: BigInt(Math.trunc(poolDetailData?.info?.totalLiquidity)) || 0n,
+                amount: BigInt(Math.trunc(poolDetailData?.info?.totalLiquidity || 0)),
                 decimals: CW20_DECIMALS
               }}
               className={styles.amountUsdt}
@@ -109,16 +109,26 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <VolumeIcon />
         </div>
         <div className={styles.title}>Volume (24H)</div>
-        <div className={styles.volumeAmount}>${toDisplay(poolDetailData.info.volume24Hour)}</div>
-        <div className={styles.positivePercent}>+0.2%</div>
+        <TokenBalance
+          balance={{
+            amount: BigInt(poolDetailData.info?.volume24Hour || 0),
+            decimals: CW20_DECIMALS
+          }}
+          className={styles.volumeAmount}
+          decimalScale={2}
+          prefix="$"
+        />
+        <div className={styles.positivePercent}>
+          <span>{+poolDetailData.info?.volume24hChange > 0 && '+'}</span>
+          {toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2)}%
+        </div>
       </div>
       <div className={styles.apr}>
         <div className={styles.icon}>
           <AprIcon />
         </div>
         <div className={styles.title}>APR</div>
-        <div className={styles.volumeAmount}>{poolDetailData.info.apr.toFixed(2)}%</div>
-        <div className={styles.positivePercent}>6.35%</div>
+        <div className={styles.volumeAmount}>{poolDetailData.info?.apr.toFixed(2)}%</div>
       </div>
     </section>
   );
