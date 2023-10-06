@@ -351,8 +351,12 @@ export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
   return assetInfo.token.contract_addr;
 };
 
-export const formatDisplayUsdt = (amount: number | string): string => {
-  return `$${toFixedIfNecessary(amount.toString(), 2)
+export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
+  const validatedAmount = validateNumber(amount);
+  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+
+  // add `,` when split thounsand value.
+  return `$${toFixedIfNecessary(amount.toString(), dp)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 };

@@ -1,39 +1,37 @@
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import Content from 'layouts/Content';
-import sumBy from 'lodash/sumBy';
 import React, { useState } from 'react';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool/ListPool';
-import {
-  useFetchAllPairs,
-  useFetchApr,
-  useFetchCachePairs,
-  useFetchCacheReward,
-  useFetchPairInfoDataList,
-  useGetPools
-} from './hooks';
+import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward, useFetchPairInfoDataList } from './hooks';
+
+import useConfigReducer from 'hooks/useConfigReducer';
+import { useFetchLpPoolsV3, useGetMyStake, useGetPools } from './hookV3';
 import styles from './indexV3.module.scss';
 
 const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
-
+  const [address] = useConfigReducer('address');
   const pairs = useFetchAllPairs();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
 
-  const totalAmount = sumBy(pairInfos, (c) => c.amount);
-
   const pools = useGetPools();
+  const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+  useFetchLpPoolsV3(lpAddresses);
+
+  const { myStakes } = useGetMyStake({
+    stakerAddress: address
+  });
 
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header amount={totalAmount} oraiPrice={oraiPrice} />
-        <ListPools pairInfos={pairInfos} pools={pools} />
+        <Header oraiPrice={oraiPrice} />
+        <ListPools pairInfos={pairInfos} pools={pools} myStakes={myStakes} />
 
         <NewPoolModal
           isOpen={isOpenNewPoolModal}
