@@ -9,30 +9,33 @@ describe('bigint', () => {
     });
 
     it.each([
-      [6000, 18, "6000000000000000000000"],
-      [2000000, 18, "2000000000000000000000000"],
-      [6000.5043177, 6, "6000504317"],
-      [6000.504317725654, 6, "6000504317"],
-      [0.0006863532, 6, "686"],
-
-    ])("toAmount number %.7f with decimal %d should return %s", (amount: number, decimal: number, expectedAmount: string) => {
-      const res = toAmount(amount, decimal).toString();
-      expect(res).toBe(expectedAmount);
-    });
+      [6000, 18, '6000000000000000000000'],
+      [2000000, 18, '2000000000000000000000000'],
+      [6000.5043177, 6, '6000504317'],
+      [6000.504317725654, 6, '6000504317'],
+      [0.0006863532, 6, '686']
+    ])(
+      'toAmount number %.7f with decimal %d should return %s',
+      (amount: number, decimal: number, expectedAmount: string) => {
+        const res = toAmount(amount, decimal).toString();
+        expect(res).toBe(expectedAmount);
+      }
+    );
   });
 
   describe('toDisplay', () => {
-
     it.each([
-      ['1000', 6, "0.001", 6],
-      ['454136345353413531', 15, "454.136345", 6],
-      ['454136345353413531', 15, "454.13", 2],
-      ['100000000000000', 18, "0.0001", 6],
-
-    ])("toDisplay number %d with decimal %d should return %s", (amount: string, decimal: number, expectedAmount: string, desDecimal: number) => {
-      const res = toDisplay(amount, decimal, desDecimal).toString();
-      expect(res).toBe(expectedAmount);
-    });
+      ['1000', 6, '0.001', 6],
+      ['454136345353413531', 15, '454.136345', 6],
+      ['454136345353413531', 15, '454.13', 2],
+      ['100000000000000', 18, '0.0001', 6]
+    ])(
+      'toDisplay number %d with decimal %d should return %s',
+      (amount: string, decimal: number, expectedAmount: string, desDecimal: number) => {
+        const res = toDisplay(amount, decimal, desDecimal).toString();
+        expect(res).toBe(expectedAmount);
+      }
+    );
   });
 
   describe('toDecimal', () => {
