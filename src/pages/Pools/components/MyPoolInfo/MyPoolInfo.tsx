@@ -24,18 +24,13 @@ import StakeLPModal from './StakeLPModal/StakeLPModal';
 import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
 import WithdrawLiquidityModal from './WithdrawLiquidityModal/WithdrawLiquidityModal';
 
-type Props = {
-  myLpBalance: bigint;
-};
-
+type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
+type Props = { myLpBalance: bigint };
 export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
   const theme = useTheme();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
-  const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
-  const [isOpenWithdrawPool, setIsOpenWithdrawPool] = useState(false);
-  const [isOpenStakeLP, setIsOpenStakeLP] = useState(false);
-  const [isOpenUnstakeLP, setIsOpenUnstakeLP] = useState(false);
+  const [modal, setModal] = useState<ModalPool>();
   const [lpBalance, setLpBalance] = useState({
     myStakeInLp: 0n,
     myLiquidityInUsdt: 0n
@@ -91,12 +86,12 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
         <div className={styles.cta}>
           <Button
             type="secondary"
-            onClick={() => setIsOpenWithdrawPool(true)}
+            onClick={() => setModal('withdraw')}
             icon={theme === 'dark' ? <WithdrawIcon /> : <WithdrawLightIcon />}
           >
             Withdraw LP
           </Button>
-          <Button type="primary" onClick={() => setIsOpenDepositPool(true)} icon={<DepositIcon />}>
+          <Button type="primary" onClick={() => setModal('deposit')} icon={<DepositIcon />}>
             Deposit
           </Button>
         </div>
@@ -134,43 +129,39 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
         <div className={styles.cta}>
           <Button
             type="secondary"
-            onClick={() => setIsOpenUnstakeLP(true)}
+            onClick={() => setModal('unstake')}
             icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
           >
             Unstake LP
           </Button>
-          <Button type="primary" onClick={() => setIsOpenStakeLP(true)} icon={<StakingIcon />}>
+          <Button type="primary" onClick={() => setModal('stake')} icon={<StakingIcon />}>
             Stake LP
           </Button>{' '}
         </div>
       </div>
-      {isOpenDepositPool && (
-        <AddLiquidityModal
-          isOpen={isOpenDepositPool}
-          open={() => setIsOpenDepositPool(true)}
-          close={() => setIsOpenDepositPool(false)}
-        />
-      )}
-      {isOpenWithdrawPool && (
-        <WithdrawLiquidityModal
-          isOpen={isOpenWithdrawPool}
-          open={() => setIsOpenWithdrawPool(true)}
-          close={() => setIsOpenWithdrawPool(false)}
-        />
-      )}
 
-      {isOpenStakeLP && (
-        <StakeLPModal
-          isOpen={isOpenStakeLP}
-          open={() => setIsOpenStakeLP(true)}
-          close={() => setIsOpenStakeLP(false)}
+      {modal === 'deposit' && (
+        <AddLiquidityModal
+          isOpen={modal === 'deposit'}
+          open={() => setModal('deposit')}
+          close={() => setModal(undefined)}
         />
       )}
-      {isOpenUnstakeLP && (
+      {modal === 'withdraw' && (
+        <WithdrawLiquidityModal
+          isOpen={modal === 'withdraw'}
+          open={() => setModal('withdraw')}
+          close={() => setModal(undefined)}
+        />
+      )}
+      {modal === 'stake' && (
+        <StakeLPModal isOpen={modal === 'stake'} open={() => setModal('stake')} close={() => setModal(undefined)} />
+      )}
+      {modal === 'unstake' && (
         <UnstakeLPModal
-          isOpen={isOpenUnstakeLP}
-          open={() => setIsOpenUnstakeLP(true)}
-          close={() => setIsOpenUnstakeLP(false)}
+          isOpen={modal === 'unstake'}
+          open={() => setModal('unstake')}
+          close={() => setModal(undefined)}
         />
       )}
     </section>
