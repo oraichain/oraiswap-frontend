@@ -149,7 +149,7 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || bondLpPools[pairInfo?.pair?.liquidity_token]);
+    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || parseInt(bondLpPools[pairInfo?.pair?.contract_addr]));
   }, [pairInfos]);
 
   useEffect(() => {
@@ -239,16 +239,14 @@ const Pools: React.FC<PoolsProps> = () => {
 
   const pairs = useFetchAllPairs();
   const [theme] = useConfigReducer('theme');
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const bondLpPools = useSelector((state: RootState) => state.token.bondLpPools);
   const { data: prices } = useCoinGeckoPrices();
   const { pairInfos, oraiPrice } = useFetchPairInfoDataList(pairs);
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
 
-  useFetchCacheLpPools(pairs, lpPools);
-  useFetchCacheBondLpPools(pairs, bondLpPools);
+  useFetchCacheLpPools(pairs);
+  useFetchCacheBondLpPools(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
   return (

@@ -93,7 +93,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
     const bonLpTokenData = await fetchMyPairsData(
       pairs,
       address,
-      new MulticallQueryClient(window.client, network.multicall)
+      new MulticallQueryClient(window.client, network.multicall),
+      'bond'
     );
     setCachedBondLpPools(bonLpTokenData);
   };
