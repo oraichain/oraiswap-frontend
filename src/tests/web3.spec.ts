@@ -1,6 +1,6 @@
 import { USDT_TRON_CONTRACT } from '@oraichain/oraidex-common';
 import { chainInfos } from 'config/chainInfos';
-import { IERC20Upgradeable__factory } from 'types/typechain-types';
+import { IERC20Upgradeable__factory } from '@oraichain/oraidex-common';
 import { ethers } from 'ethers';
 import { ethToTronAddress } from '@oraichain/oraidex-common';
 import Metamask from 'libs/metamask';

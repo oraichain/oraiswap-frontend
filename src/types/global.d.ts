@@ -5,7 +5,7 @@ import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
-import { TronWeb as _TronWeb } from './tronweb';
+import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
 import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 
 declare global {

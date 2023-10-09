@@ -17,25 +17,19 @@ import {
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
 import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
-import { KWT_DENOM, MILKY_DENOM, ORAI, STABLE_DENOM, TokenItemType } from '@oraichain/oraidex-common';
+import { IBCInfo, KWT_DENOM, MILKY_DENOM, ORAI, STABLE_DENOM, TokenItemType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import { ibcInfos, ibcInfosOld } from '@oraichain/oraidex-common';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
-import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import { IUniswapV2Router02__factory } from 'types/typechain-types';
-import { ethers } from 'ethers';
-import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 import { Long } from 'cosmjs-types/helpers';
-import { SimulateResponse } from 'pages/UniversalSwap/helpers';
 import {
   calculateTimeoutTimestamp,
   getSubAmountDetails,
-  getTokenOnSpecificChainId,
   handleSentFunds,
   isFactoryV1,
   parseTokenInfo,
@@ -45,7 +39,7 @@ import {
   toDisplay,
   toTokenInfo
 } from '@oraichain/oraidex-common';
-import { generateSwapOperationMsgs, getEvmSwapRoute, simulateSwap } from '@oraichain/oraidex-universal-swap';
+import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
 
 export enum Type {
   'TRANSFER' = 'Transfer',

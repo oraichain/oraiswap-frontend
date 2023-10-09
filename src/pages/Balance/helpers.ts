@@ -5,16 +5,15 @@ import { cosmosTokens, flattenTokens, kawaiiTokens, tokenMap } from 'config/brid
 import { chainInfos } from 'config/chainInfos';
 import {
   CosmosChainId,
+  IBCInfo,
   IBC_WASM_CONTRACT,
   KWT,
-  KWT_BSC_CONTRACT,
-  MILKY_BSC_CONTRACT,
   NetworkChainId,
   ORAI,
   TokenItemType,
   gravityContracts
 } from '@oraichain/oraidex-common';
-import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from '@oraichain/oraidex-common';
+import { ibcInfos, ibcInfosOld, oraichain2oraib } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';
 
@@ -30,7 +29,6 @@ import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import { generateError } from 'libs/utils';
 import { generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages, Type } from 'rest/api';
-import { IBCInfo } from 'types/ibc';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 import { Long } from 'cosmjs-types/helpers';
 import {

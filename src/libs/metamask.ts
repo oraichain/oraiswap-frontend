@@ -1,6 +1,6 @@
 import { gravityContracts, TokenItemType, NetworkChainId } from '@oraichain/oraidex-common';
 import { displayInstallWallet } from 'helper';
-import { Bridge__factory, IERC20Upgradeable__factory, IUniswapV2Router02__factory } from 'types/typechain-types';
+import { Bridge__factory, IERC20Upgradeable__factory, IUniswapV2Router02__factory } from '@oraichain/oraidex-common';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
 import { UNISWAP_ROUTER_DEADLINE } from '@oraichain/oraidex-common';
