@@ -1,4 +1,4 @@
-import { ORAI } from '@oraichain/oraidex-common';
+import { AIRI_CONTRACT, MILKY_CONTRACT, ORAI } from '@oraichain/oraidex-common';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from 'pages/Pools/helpers';
 
 describe('frontier-cw20-token', () => {
@@ -22,7 +22,7 @@ describe('frontier-cw20-token', () => {
       name: 'milky',
       denom: 'milky',
       value: BigInt(1e6),
-      contract_addr: process.env.REACT_APP_MILKY_CONTRACT
+      contract_addr: MILKY_CONTRACT
     }
   ];
 
@@ -45,7 +45,7 @@ describe('frontier-cw20-token', () => {
     { denom: ORAI, contract_addr: '' },
     {
       denom: 'milky',
-      contract_addr: process.env.REACT_APP_AIRI_CONTRACT
+      contract_addr: AIRI_CONTRACT
     }
   ])('get-info-native-cw20-token-liquidity-pool', (item) => {
     const tokenInfo = getInfoLiquidityPool(item);
@@ -94,7 +94,7 @@ describe('frontier-cw20-token', () => {
       if (liquidity.info.token) {
         expect(liquidity.info).toEqual({
           token: {
-            contract_addr: process.env.REACT_APP_MILKY_CONTRACT
+            contract_addr: MILKY_CONTRACT
           }
         });
       }

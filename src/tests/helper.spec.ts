@@ -4,13 +4,14 @@ import { formateNumberDecimalsAuto, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { MILKYBSC_ORAICHAIN_DENOM, USDT_CONTRACT } from '@oraichain/oraidex-common';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
     usdt: '1000000', // 1
     orai: '1000000', // 1
     milky: '1000000', // 1
-    [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]: '1000000000000000000' // 1
+    [MILKYBSC_ORAICHAIN_DENOM]: '1000000000000000000' // 1
   };
 
   const prices: CoinGeckoPrices<string> = {
@@ -94,7 +95,7 @@ describe('should utils functions in libs/utils run exactly', () => {
       },
       {
         symbol: 'ORAI/USDT',
-        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+        info: `orai-${USDT_CONTRACT}`
       }
     ],
     [
@@ -103,7 +104,7 @@ describe('should utils functions in libs/utils run exactly', () => {
       'ORAI',
       {
         symbol: 'ORAI/USDT',
-        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+        info: `orai-${USDT_CONTRACT}`
       },
       null
     ]

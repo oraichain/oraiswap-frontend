@@ -1,5 +1,10 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from '@oraichain/oraidex-common';
+import {
+  IBC_WASM_CONTRACT,
+  WalletType,
+  WEBSOCKET_RECONNECT_ATTEMPTS,
+  WEBSOCKET_RECONNECT_INTERVAL
+} from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
 import {
@@ -58,7 +63,7 @@ const App = () => {
         // subscribe to IBC Wasm case
         sendJsonMessage(
           buildWebsocketSendMessage(
-            `wasm._contract_address = '${process.env.REACT_APP_IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`
+            `wasm._contract_address = '${IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`
           ),
           true
         );

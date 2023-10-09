@@ -3,7 +3,7 @@ import { CWSimulateApp, GenericError, IbcOrder, IbcPacket } from '@oraichain/cw-
 import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
 import bech32 from 'bech32';
 import { cosmosTokens } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
+import { CoinGeckoId, IBC_WASM_CONTRACT, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import { ORAI } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens } from 'pages/UniversalSwap/helpers';
@@ -39,7 +39,7 @@ describe('universal-swap', () => {
       name: 'Airight token',
       initial_balances: [
         { address: ics20Contract.contractAddress, amount: initialBalanceAmount },
-        { address: process.env.REACT_APP_IBC_WASM_CONTRACT, amount: initialBalanceAmount }
+        { address: IBC_WASM_CONTRACT, amount: initialBalanceAmount }
       ]
     });
     const cosmosChain = new CWSimulateApp({

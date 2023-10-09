@@ -5,6 +5,7 @@ import { cosmosTokens, flattenTokens, kawaiiTokens, tokenMap } from 'config/brid
 import { chainInfos } from 'config/chainInfos';
 import {
   CosmosChainId,
+  IBC_WASM_CONTRACT,
   KWT,
   KWT_BSC_CONTRACT,
   MILKY_BSC_CONTRACT,
@@ -172,10 +173,10 @@ export const getBalanceIBCOraichain = async (
   if (!token) return { balance: 0 };
   if (token.contractAddress) {
     const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
-    const { balance } = await cw20Token.balance({ address: process.env.REACT_APP_IBC_WASM_CONTRACT });
+    const { balance } = await cw20Token.balance({ address: IBC_WASM_CONTRACT });
     return { balance: toDisplay(balance, token.decimals) };
   }
-  const { amount } = await window.client.getBalance(process.env.REACT_APP_IBC_WASM_CONTRACT, token.denom);
+  const { amount } = await window.client.getBalance(IBC_WASM_CONTRACT, token.denom);
   return { balance: toDisplay(amount, token.decimals) };
 };
 

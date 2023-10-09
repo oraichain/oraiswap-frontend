@@ -1,6 +1,20 @@
 import { FAVORITES_INTERVAL } from 'components/TVChartContainer/helpers/constants';
 import { PairMapping } from './helpers/types';
-import { ORAI } from '@oraichain/oraidex-common';
+import {
+  AIRI_CONTRACT,
+  ATOM_ORAICHAIN_DENOM,
+  INJECTIVE_CONTRACT,
+  KWT_CONTRACT,
+  MILKY_CONTRACT,
+  ORAI,
+  ORAIX_CONTRACT,
+  OSMOSIS_ORAICHAIN_DENOM,
+  SCATOM_CONTRACT,
+  SCORAI_CONTRACT,
+  TRX_CONTRACT,
+  USDC_CONTRACT,
+  USDT_CONTRACT
+} from '@oraichain/oraidex-common';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -114,75 +128,57 @@ export const defaultChartProps = {
 // the orders are important! Do not change the order of the asset_infos.
 export const pairs: PairMapping[] = [
   {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }],
+    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: USDT_CONTRACT } }],
     symbols: ['ORAI', 'USDT']
   },
   {
-    asset_infos: [{ token: { contract_addr: process.env.REACT_APP_AIRI_CONTRACT } }, { native_token: { denom: ORAI } }],
+    asset_infos: [{ token: { contract_addr: AIRI_CONTRACT } }, { native_token: { denom: ORAI } }],
     symbols: ['AIRI', 'ORAI']
   },
   {
-    asset_infos: [
-      { token: { contract_addr: process.env.REACT_APP_ORAIX_CONTRACT } },
-      { native_token: { denom: ORAI } }
-    ],
+    asset_infos: [{ token: { contract_addr: ORAIX_CONTRACT } }, { native_token: { denom: ORAI } }],
     symbols: ['ORAIX', 'ORAI']
   },
   {
-    asset_infos: [
-      { token: { contract_addr: process.env.REACT_APP_SCORAI_CONTRACT } },
-      { native_token: { denom: ORAI } }
-    ],
+    asset_infos: [{ token: { contract_addr: SCORAI_CONTRACT } }, { native_token: { denom: ORAI } }],
     symbols: ['scORAI', 'ORAI']
   },
   {
-    asset_infos: [
-      { native_token: { denom: ORAI } },
-      { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } }
-    ],
+    asset_infos: [{ native_token: { denom: ORAI } }, { native_token: { denom: ATOM_ORAICHAIN_DENOM } }],
     symbols: ['ORAI', 'ATOM']
   },
 
   {
-    asset_infos: [{ token: { contract_addr: process.env.REACT_APP_KWT_CONTRACT } }, { native_token: { denom: ORAI } }],
+    asset_infos: [{ token: { contract_addr: KWT_CONTRACT } }, { native_token: { denom: ORAI } }],
     symbols: ['KWT', 'ORAI']
   },
   {
     asset_infos: [
       { native_token: { denom: ORAI } },
       {
-        native_token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM }
+        native_token: { denom: OSMOSIS_ORAICHAIN_DENOM }
       }
     ],
     symbols: ['ORAI', 'OSMO']
   },
   {
-    asset_infos: [
-      { token: { contract_addr: process.env.REACT_APP_MILKY_CONTRACT } },
-      { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }
-    ],
+    asset_infos: [{ token: { contract_addr: MILKY_CONTRACT } }, { token: { contract_addr: USDT_CONTRACT } }],
     symbols: ['MILKY', 'USDT']
   },
   {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_USDC_CONTRACT } }],
+    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: USDC_CONTRACT } }],
     symbols: ['ORAI', 'USDC']
   },
   {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }],
+    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: TRX_CONTRACT } }],
     symbols: ['ORAI', 'wTRX']
   },
   {
-    asset_infos: [
-      { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } },
-      { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } }
-    ],
+    asset_infos: [{ token: { contract_addr: SCATOM_CONTRACT } }, { native_token: { denom: ATOM_ORAICHAIN_DENOM } }],
     symbols: ['scATOM', 'ATOM']
   },
   {
-    asset_infos: [
-      { token: { contract_addr: process.env.REACT_APP_INJECTIVE_CONTRACT } },
-      { native_token: { denom: ORAI } }
-    ],
+    asset_infos: [{ token: { contract_addr: INJECTIVE_CONTRACT } }, { native_token: { denom: ORAI } }],
     symbols: ['INJ', 'ORAI']
   }
 ];

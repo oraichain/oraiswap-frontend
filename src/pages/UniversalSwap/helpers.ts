@@ -2,7 +2,7 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { GasPrice, coin } from '@cosmjs/stargate';
 import { oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
+import { CoinGeckoId, IBC_WASM_CONTRACT, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from '@oraichain/oraidex-common';
 import { IBCInfoMap, ibcInfos, oraichain2oraib } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
@@ -65,7 +65,7 @@ export interface SwapData {
  */
 export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio | undefined> => {
   try {
-    const ibcWasmContractAddress = process.env.REACT_APP_IBC_WASM_CONTRACT;
+    const ibcWasmContractAddress = IBC_WASM_CONTRACT;
     const ibcWasmContract = new CwIcs20LatestQueryClient(window.client, ibcWasmContractAddress);
     const ratio = await ibcWasmContract.getTransferTokenFee({ remoteTokenDenom });
     return ratio;
@@ -255,8 +255,7 @@ export class UniversalSwapHandler {
   }
 
   async checkBalanceChannelIbc(ibcInfo: IBCInfo, toToken: TokenItemType) {
-    const ics20Contract =
-      this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
+    const ics20Contract = this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, IBC_WASM_CONTRACT);
 
     try {
       let pairKey = this.buildIbcWasmPairKey(ibcInfo.source, ibcInfo.channel, toToken.denom);

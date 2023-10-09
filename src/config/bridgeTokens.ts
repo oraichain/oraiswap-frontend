@@ -1,12 +1,18 @@
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
 import { chainInfos, oraichainNetwork } from './chainInfos';
-import { CustomChainInfo, TokenItemType } from '@oraichain/oraidex-common';
+import {
+  CustomChainInfo,
+  INJECTIVE_ORAICHAIN_DENOM,
+  KWTBSC_ORAICHAIN_DENOM,
+  MILKYBSC_ORAICHAIN_DENOM,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 
 const evmDenomsMap = {
-  kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
-  milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM],
-  injective: [process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM]
+  kwt: [KWTBSC_ORAICHAIN_DENOM],
+  milky: [MILKYBSC_ORAICHAIN_DENOM],
+  injective: [INJECTIVE_ORAICHAIN_DENOM]
 };
 const minAmountSwapMap = {
   trx: 10

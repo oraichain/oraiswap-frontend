@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { flatten, uniq } from 'lodash';
 import { assetInfoMap } from './bridgeTokens';
-import { ORAI, PAIRS, TokenItemType } from '@oraichain/oraidex-common';
+import { ORAI, PAIRS, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
@@ -55,7 +55,7 @@ export class Pairs {
       let firstInfoIndex = 0;
       let secondInfoIndex = 1;
       // we reverse the pair because the main asset info is not USDT, but the other token
-      if (parseAssetInfo(pair.asset_infos[0]) === process.env.REACT_APP_USDT_CONTRACT) {
+      if (parseAssetInfo(pair.asset_infos[0]) === USDT_CONTRACT) {
         firstInfoIndex = 1;
         secondInfoIndex = 0;
       }

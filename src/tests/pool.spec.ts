@@ -1,6 +1,6 @@
 import { coin } from '@cosmjs/proto-signing';
 import { assetInfoMap, flattenTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { ORAI, TokenItemType } from '@oraichain/oraidex-common';
+import { AIRI_CONTRACT, ORAI, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { client } from './common';
@@ -195,8 +195,8 @@ describe('pool', () => {
         assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
       });
 
-      assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
-      assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
+      assetInfoMap[airiContractAddress] = assetInfoMap[AIRI_CONTRACT];
+      assetInfoMap[usdtContractAddress] = assetInfoMap[USDT_CONTRACT];
       const multicall = new MulticallQueryClient(client, network.multicall);
       const myPairs = await fetchMyPairsData(pairs, devAddress, multicall, typeReward);
       expect(myPairs[pairs[0].contract_addr]).toBe(expectedResult);
@@ -404,7 +404,7 @@ describe('pool', () => {
             asset_infos: [
               {
                 token: {
-                  contract_addr: process.env.REACT_APP_USDT_CONTRACT
+                  contract_addr: USDT_CONTRACT
                 }
               },
               {
@@ -427,7 +427,7 @@ describe('pool', () => {
           },
           {
             token: {
-              contract_addr: process.env.REACT_APP_USDT_CONTRACT
+              contract_addr: USDT_CONTRACT
             }
           }
         ] as AssetInfo[]
