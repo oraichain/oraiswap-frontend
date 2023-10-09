@@ -1,18 +1,19 @@
 import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
 import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
+import { cosmosTokens, flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
+import { chainInfos } from 'config/chainInfos';
 import {
-  cosmosTokens,
-  flattenTokens,
-  gravityContracts,
-  kawaiiTokens,
+  CosmosChainId,
+  KWT,
+  KWT_BSC_CONTRACT,
+  MILKY_BSC_CONTRACT,
+  NetworkChainId,
+  ORAI,
   TokenItemType,
-  tokenMap,
-  UniversalSwapType
-} from 'config/bridgeTokens';
-import { chainInfos, CosmosChainId, NetworkChainId } from 'config/chainInfos';
-import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
-import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
+  gravityContracts
+} from '@oraichain/oraidex-common';
+import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';
 

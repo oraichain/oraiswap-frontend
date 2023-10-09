@@ -7,9 +7,15 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CustomChainInfo, evmChains, NetworkChainId } from 'config/chainInfos';
-import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
+import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
+import { evmChains } from 'config/chainInfos';
+import {
+  CustomChainInfo,
+  GAS_ESTIMATION_BRIDGE_DEFAULT,
+  NetworkChainId,
+  ORAI,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';

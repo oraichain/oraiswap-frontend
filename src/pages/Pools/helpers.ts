@@ -10,8 +10,8 @@ import {
   OraiswapStakingTypes,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType, assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
-import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
+import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import isEqual from 'lodash/isEqual';
@@ -26,7 +26,14 @@ import {
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { atomic, parseAssetInfo, parseTokenInfo, toDecimal, validateNumber } from '@oraichain/oraidex-common';
+import {
+  atomic,
+  parseAssetInfo,
+  parseTokenInfo,
+  toDecimal,
+  validateNumber,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 
 export type PairInfoData = {
   pair: PairInfoExtend;

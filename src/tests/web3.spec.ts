@@ -1,4 +1,4 @@
-import { USDT_TRON_CONTRACT } from 'config/constants';
+import { USDT_TRON_CONTRACT } from '@oraichain/oraidex-common';
 import { chainInfos } from 'config/chainInfos';
 import { IERC20Upgradeable__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';

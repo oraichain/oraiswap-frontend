@@ -1,8 +1,15 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
+import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { checkVersionWallet, displayInstallWallet, getNetworkGasPrice, getStorageKey, setStorageKey, switchWallet } from 'helper';
+import {
+  checkVersionWallet,
+  displayInstallWallet,
+  getNetworkGasPrice,
+  getStorageKey,
+  setStorageKey,
+  switchWallet
+} from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -162,7 +169,6 @@ const App = () => {
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       setAddress(oraiAddress);
-
     } catch (error) {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);

@@ -1,14 +1,13 @@
 import cn from 'classnames/bind';
 import SearchInput from 'components/SearchInput';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CustomChainInfo } from 'config/chainInfos';
+import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC, useRef } from 'react';
 import styles from './SelectTokenModalV2.module.scss';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
+import { CustomChainInfo, TokenItemType, getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 

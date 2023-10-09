@@ -1,5 +1,5 @@
 import { buildMultipleExecuteMessages, calculateMinReceive, toAmount } from '@oraichain/oraidex-common';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { generateContractMessages, generateConvertErc20Cw20Message, SwapQuery, Type } from 'rest/api';
 
 export function generateMsgsSwap(

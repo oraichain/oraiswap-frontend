@@ -7,17 +7,13 @@ import {
   ORAI,
   TRON_SCAN,
   WalletType
-} from 'config/constants';
+} from '@oraichain/oraidex-common';
 
-import { EvmDenom, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
-import { ethers } from 'ethers';
-import Long from 'long';
-import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import { Pairs } from 'config/pools';
+import { chainInfos } from 'config/chainInfos';
+import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 
 export interface Tokens {

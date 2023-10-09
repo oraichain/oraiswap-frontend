@@ -9,8 +9,14 @@ import LoadingBox from 'components/LoadingBox';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
+import { tokenMap } from 'config/bridgeTokens';
+import {
+  DEFAULT_SLIPPAGE,
+  GAS_ESTIMATION_SWAP_DEFAULT,
+  ORAI,
+  TRON_DENOM,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';

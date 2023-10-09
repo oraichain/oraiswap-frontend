@@ -2990,10 +2990,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.5.tgz#f76748e91242dd7f0973bd9c89a4d945061356ac"
-  integrity sha512-DR6y/JiBtEKi0HxbfBKR5Q9v+JPvzlgw9JXHyesYCXsd8xFJ+paXOeEfkcB75Y93ONzztr95MCZglc+t4T/Umw==
+"@oraichain/oraidex-common@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.6.tgz#2ffebfc6b40b93c397e31751c0b8d3d90ab04bef"
+  integrity sha512-k3CTYTrR5mo7y8qnFswQhRkvqw9rr8yN4ghIJVyzpaFhVYdyzxMtoKH1n/I+FqrSQpGp1GQ7qkcyR1lw1YloEw==
 
 "@oraichain/oraidex-contracts-build@^1.0.20":
   version "1.0.20"

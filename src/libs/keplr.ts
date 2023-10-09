@@ -2,9 +2,9 @@ import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
 import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
-import { chainInfos, NetworkChainId } from 'config/chainInfos';
-import { WalletType } from 'config/constants';
+import { cosmosTokens } from 'config/bridgeTokens';
+import { chainInfos } from 'config/chainInfos';
+import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';

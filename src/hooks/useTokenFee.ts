@@ -1,5 +1,5 @@
 import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
-import { NetworkChainId } from 'config/chainInfos';
+import { NetworkChainId } from '@oraichain/oraidex-common';
 import { getTransferTokenFee } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 

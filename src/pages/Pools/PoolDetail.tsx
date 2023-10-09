@@ -18,7 +18,7 @@ import styles from './PoolDetail.module.scss';
 
 import { useQuery } from '@tanstack/react-query';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokens } from 'config/bridgeTokens';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd } from 'libs/utils';
@@ -35,7 +35,7 @@ import { updateBondLpPools, updateLpPools } from 'reducer/token';
 
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { toDecimal } from '@oraichain/oraidex-common';
+import { TokenItemType, toDecimal } from '@oraichain/oraidex-common';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps {}

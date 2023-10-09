@@ -1,4 +1,4 @@
-import { ORAI } from 'config/constants';
+import { ORAI } from '@oraichain/oraidex-common';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from 'pages/Pools/helpers';
 
 describe('frontier-cw20-token', () => {

@@ -16,12 +16,12 @@ import {
   AssetInfo,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM, proxyContractInfo } from 'config/constants';
+import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
+import { KWT_DENOM, MILKY_DENOM, ORAI, STABLE_DENOM, TokenItemType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
+import { ibcInfos, ibcInfosOld } from '@oraichain/oraidex-common';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
@@ -45,7 +45,7 @@ import {
   toDisplay,
   toTokenInfo
 } from '@oraichain/oraidex-common';
-import { getEvmSwapRoute, simulateSwap } from '@oraichain/oraidex-universal-swap';
+import { generateSwapOperationMsgs, getEvmSwapRoute, simulateSwap } from '@oraichain/oraidex-universal-swap';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -345,40 +345,6 @@ function generateConvertCw20Erc20Message(
   }
   return [];
 }
-
-const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): SwapOperation[] => {
-  const pairExist = Pairs.pairs.some((pair) => {
-    let assetInfos = pair.asset_infos;
-    return (
-      (isEqual(assetInfos[0], offerInfo) && isEqual(assetInfos[1], askInfo)) ||
-      (isEqual(assetInfos[1], offerInfo) && isEqual(assetInfos[0], askInfo))
-    );
-  });
-
-  return pairExist
-    ? [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: askInfo
-          }
-        }
-      ]
-    : [
-        {
-          orai_swap: {
-            offer_asset_info: offerInfo,
-            ask_asset_info: ORAI_INFO
-          }
-        },
-        {
-          orai_swap: {
-            offer_asset_info: ORAI_INFO,
-            ask_asset_info: askInfo
-          }
-        }
-      ];
-};
 
 async function fetchTaxRate(): Promise<TaxRateResponse> {
   const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);

@@ -1,6 +1,6 @@
 import { coin } from '@cosmjs/proto-signing';
-import { assetInfoMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { assetInfoMap, flattenTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { ORAI, TokenItemType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { client } from './common';

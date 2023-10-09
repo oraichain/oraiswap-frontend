@@ -1,10 +1,10 @@
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { EncodeObject } from '@cosmjs/proto-signing';
 import { GasPrice, coin } from '@cosmjs/stargate';
-import { TokenItemType, UniversalSwapType, oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
-import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
-import { IBCInfoMap, ibcInfos, oraichain2oraib } from 'config/ibcInfos';
+import { oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { CoinGeckoId, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
+import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from '@oraichain/oraidex-common';
+import { IBCInfoMap, ibcInfos, oraichain2oraib } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';
 import {
@@ -24,9 +24,11 @@ import { TokenInfo } from 'types/token';
 import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
+  UniversalSwapType,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
-  isSupportedNoPoolSwapEvm
+  isSupportedNoPoolSwapEvm,
+  swapEvmRoutes
 } from '@oraichain/oraidex-universal-swap';
 import {
   buildMultipleExecuteMessages,

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
 import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';

@@ -1,13 +1,14 @@
 import { coin } from '@cosmjs/stargate';
 import {
+  TokenItemType,
   buildMultipleExecuteMessages,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
   toAmount
 } from '@oraichain/oraidex-common';
 import { getSourceReceiver } from '@oraichain/oraidex-universal-swap';
-import { cosmosTokens, flattenTokens, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import { cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
+import { CoinGeckoId, NetworkChainId } from '@oraichain/oraidex-common';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
@@ -19,8 +20,8 @@ import {
   ORAI_BSC_CONTRACT,
   ORAI_INFO,
   TRON_SCAN
-} from 'config/constants';
-import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
+} from '@oraichain/oraidex-common';
+import { ibcInfos, ibcInfosOld, oraib2oraichain } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
 import Long from 'long';

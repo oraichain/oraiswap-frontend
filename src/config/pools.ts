@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { flatten, uniq } from 'lodash';
-import { TokenItemType, assetInfoMap } from './bridgeTokens';
-import { MILKY, ORAI, STABLE_DENOM } from './constants';
+import { assetInfoMap } from './bridgeTokens';
+import { ORAI, PAIRS, TokenItemType } from '@oraichain/oraidex-common';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
@@ -18,90 +18,7 @@ export type PairMapping = {
 export type TokensSwap = { [key: string]: TokenItemType };
 
 export class Pairs {
-  public static pairs: PairMapping[] = [
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_AIRI_CONTRACT } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_ORAIX_CONTRACT } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_SCORAI_CONTRACT } }
-      ]
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_KWT_CONTRACT } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { native_token: { denom: process.env.REACT_APP_OSMOSIS_ORAICHAIN_DENOM } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { token: { contract_addr: process.env.REACT_APP_MILKY_CONTRACT } },
-        { token: { contract_addr: process.env.REACT_APP_USDT_CONTRACT } }
-      ],
-      factoryV1: true
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_USDC_CONTRACT } }
-      ]
-    },
-    {
-      asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: process.env.REACT_APP_TRX_CONTRACT } }]
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } },
-        { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } }
-      ]
-    },
-    {
-      asset_infos: [
-        { native_token: { denom: ORAI } },
-        { token: { contract_addr: process.env.REACT_APP_INJECTIVE_CONTRACT } }
-      ]
-    }
-    // {
-    //   asset_infos: [
-    //     { native_token: { denom: ORAI } }, // or your ibc native / cw20 token pair
-    //     { token: { contract_addr: 'orai17l2zk3arrx0a0fyuneyx8raln68622a2lrsz8ph75u7gw9tgz3esayqryf' } }
-    //   ]
-    // }
-  ];
+  public static pairs: PairMapping[] = PAIRS;
 
   public static getPoolTokens(): TokenItemType[] {
     return uniq(flatten(this.pairs.map((pair) => pair.asset_infos)).map((info) => assetInfoMap[parseAssetInfo(info)]));

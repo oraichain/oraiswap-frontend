@@ -1,6 +1,6 @@
-import { toAmount } from '@oraichain/oraidex-common';
-import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
-import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
+import { TokenItemType, toAmount } from '@oraichain/oraidex-common';
+import { cosmosTokens } from 'config/bridgeTokens';
+import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
 import { generateMsgsSwap } from 'pages/SwapV2/helpers';

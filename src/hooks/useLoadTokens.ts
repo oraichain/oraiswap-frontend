@@ -14,10 +14,10 @@ import { generateError } from '../libs/utils';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import { chainInfos, CustomChainInfo, evmChains } from 'config/chainInfos';
+import { chainInfos, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
-import { EVM_BALANCE_RETRY_COUNT } from 'config/constants';
+import { CustomChainInfo, EVM_BALANCE_RETRY_COUNT } from '@oraichain/oraidex-common';
 import { getEvmAddress, tronToEthAddress } from '@oraichain/oraidex-common';
 import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 

@@ -1,10 +1,10 @@
-import { getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { NetworkChainId, TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
-import { cosmosTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { chainInfos, NetworkChainId } from 'config/chainInfos';
-import { WalletType } from 'config/constants';
+import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
+import { chainInfos } from 'config/chainInfos';
+import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';

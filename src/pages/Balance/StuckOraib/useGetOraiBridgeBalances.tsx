@@ -1,6 +1,6 @@
 import { Coin } from '@cosmjs/stargate';
-import { cosmosTokens, TokenItemType, tokens } from 'config/bridgeTokens';
-import { ORAI_BRIDGE_UDENOM } from 'config/constants';
+import { cosmosTokens, tokens } from 'config/bridgeTokens';
+import { ORAI_BRIDGE_UDENOM, TokenItemType } from '@oraichain/oraidex-common';
 import { toDisplay } from '@oraichain/oraidex-common';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useState } from 'react';

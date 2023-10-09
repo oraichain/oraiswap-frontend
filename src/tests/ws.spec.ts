@@ -1,4 +1,4 @@
-import { AIRI_BSC_CONTRACT, ORAI_BRIDGE_EVM_DENOM_PREFIX, ORAI_BSC_CONTRACT } from 'config/constants';
+import { AIRI_BSC_CONTRACT, ORAI_BRIDGE_EVM_DENOM_PREFIX, ORAI_BSC_CONTRACT } from '@oraichain/oraidex-common';
 import { processWsResponseMsg } from 'libs/utils';
 
 describe('bigint', () => {

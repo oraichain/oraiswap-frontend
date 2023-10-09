@@ -1,43 +1,8 @@
 import flatten from 'lodash/flatten';
 import uniqBy from 'lodash/uniqBy';
-import {
-  CustomChainInfo,
-  CoinGeckoId,
-  CoinIcon,
-  chainInfos,
-  EvmChainId,
-  NetworkChainId,
-  NetworkName,
-  oraichainNetwork
-} from './chainInfos';
+import { chainInfos, oraichainNetwork } from './chainInfos';
+import { CustomChainInfo, TokenItemType } from '@oraichain/oraidex-common';
 
-export type EvmDenom = 'bep20_orai' | 'bep20_airi' | 'erc20_orai' | 'kawaii_orai';
-
-export type UniversalSwapType =
-  | 'other-networks-to-oraichain'
-  | 'oraichain-to-oraichain'
-  | 'oraichain-to-other-networks';
-
-export type TokenItemType = {
-  name: string;
-  org: NetworkName;
-  denom: string;
-  prefix?: string;
-  contractAddress?: string;
-  evmDenoms?: string[];
-  bridgeNetworkIdentifier?: NetworkChainId;
-  bridgeTo?: NetworkChainId[];
-  Icon: CoinIcon;
-  IconLight?: CoinIcon;
-  chainId: NetworkChainId;
-  coinType?: number;
-  rpc: string;
-  decimals: number;
-  maxGas?: number;
-  coinGeckoId: CoinGeckoId;
-  cosmosBased: Boolean;
-  minAmountSwap?: number;
-};
 const evmDenomsMap = {
   kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
   milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM],
@@ -115,12 +80,6 @@ export const kawaiiTokens = uniqBy(
   cosmosTokens.filter((token) => token.chainId === 'kawaii_6886-1'),
   (c) => c.denom
 );
-
-export const gravityContracts: Omit<Record<EvmChainId, string>, '0x1ae6'> = {
-  '0x38': process.env.REACT_APP_GRAVITY_EVM_CONTRACT,
-  '0x01': process.env.REACT_APP_GRAVITY_EVM_CONTRACT,
-  '0x2b6653dc': process.env.REACT_APP_GRAVITY_TRON_CONTRACT
-};
 
 // universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
 export const swapFromTokens = flattenTokens.filter(

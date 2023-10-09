@@ -8,7 +8,7 @@ import OWalletImage from 'assets/images/orai_wallet_logo.png';
 import { isMobile, isAndroid } from '@walletconnect/browser-utils';
 import ConnectWalletModalCosmos from './ConnectWalletModal';
 import { getStorageKey, keplrCheck, owalletCheck } from 'helper';
-import { WalletType } from 'config/constants';
+import { WalletType } from '@oraichain/oraidex-common';
 interface ConnectWalletModalProps {
   address: string;
   metamaskAddress: string | null;

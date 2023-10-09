@@ -1,5 +1,6 @@
 import { NetworkConfig } from 'types/network';
-import { CustomChainInfo, oraichainNetwork } from './chainInfos';
+import { oraichainNetwork } from './chainInfos';
+import { CustomChainInfo } from '@oraichain/oraidex-common';
 
 export const network: CustomChainInfo & NetworkConfig = {
   ...oraichainNetwork,

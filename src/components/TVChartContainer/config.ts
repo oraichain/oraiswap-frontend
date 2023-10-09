@@ -1,6 +1,6 @@
 import { FAVORITES_INTERVAL } from 'components/TVChartContainer/helpers/constants';
 import { PairMapping } from './helpers/types';
-import { ORAI } from 'config/constants';
+import { ORAI } from '@oraichain/oraidex-common';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',

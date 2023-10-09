@@ -10,7 +10,7 @@ import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
-import { WalletType } from 'config/constants';
+import { WalletType } from '@oraichain/oraidex-common';
 
 const RequireAuthButton: React.FC<any> = () => {
   const [, setIsInactiveMetamask] = useState(false);
