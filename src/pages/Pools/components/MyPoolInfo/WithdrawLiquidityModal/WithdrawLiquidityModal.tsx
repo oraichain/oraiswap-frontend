@@ -25,29 +25,31 @@ import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './WithdrawLiquidityModal.module.scss';
-import { useGetLpTokenInfo, useGetPairAmountInfoData, useGetPairInfo } from './useGetPairInfo';
-import { useTokenAllowance } from './useTokenAllowance';
 import { ModalProps } from '../type';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
 
 const cx = cn.bind(styles);
 
 const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
-  const pairInfo = useGetPairInfo(poolUrl);
-  const { token1, token2, info: pairInfoData } = pairInfo;
-  const lpTokenInfoData = useGetLpTokenInfo(pairInfo);
+  const {
+    pairInfo: pairInfoData,
+    lpTokenInfoData,
+    pairAmountInfoData,
+    refetchPairAmountInfo
+  } = useGetPairInfo(poolUrl);
+
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
   const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
 
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
-
-  const { pairAmountInfoData, refetchPairAmountInfo } = useGetPairAmountInfoData(pairInfo);
+  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData?.info?.liquidity_token]?.balance ?? '0' : 0);
 
   const pairs = useFetchAllPairs();
 
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
+  const token1Amount = BigInt(0);
+  const token2Amount = BigInt(0);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const dispatch = useDispatch();
@@ -96,17 +98,6 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     } else if (recentInput === 2 && amountToken2 > BigInt(0))
       setAmountToken1((amountToken2 * token1Amount) / token2Amount);
   }, [pairAmountInfoData]);
-
-  const onChangeAmount1 = (value: bigint) => {
-    setRecentInput(1);
-    setAmountToken1(value);
-    if (token1Amount > 0) setAmountToken2((value * token2Amount) / token1Amount);
-  };
-  const onChangeAmount2 = (value: bigint) => {
-    setRecentInput(2);
-    setAmountToken2(value);
-    if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
-  };
 
   const onChangeWithdrawPercent = (option: number) => {
     setLpAmountBurn((toAmount(option, 6) * lpTokenBalance) / BigInt(100000000));

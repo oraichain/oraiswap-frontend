@@ -4,7 +4,7 @@ import ArrowImg from 'assets/icons/arrow_right.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
 import cn from 'classnames/bind';
 import { TableHeaderProps } from 'components/Table';
-import Table from 'components/Table/Table';
+import { Table } from 'components/Table';
 import { HistoryInfoResponse } from 'types/swap';
 import OraiIcon from 'assets/icons/oraichain_light.svg';
 import SearchInput from 'components/SearchInput';

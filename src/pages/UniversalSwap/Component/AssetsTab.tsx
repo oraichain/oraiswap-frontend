@@ -2,8 +2,7 @@ import WalletIcon from 'assets/icons/wallet-v3.svg';
 import StakeIcon from 'assets/icons/stake.svg';
 import styles from './AssetsTab.module.scss';
 import cn from 'classnames/bind';
-import { TableHeaderProps } from 'components/Table';
-import Table from 'components/Table/Table';
+import { TableHeaderProps, Table } from 'components/Table';
 import { AssetInfoResponse } from 'types/swap';
 import OraiIcon from 'assets/icons/oraichain_light.svg';
 
@@ -11,96 +10,99 @@ const cx = cn.bind(styles);
 
 const data = [
   {
-    asset: "orai",
-    chain: "oraichain",
+    asset: 'orai',
+    chain: 'oraichain',
     price: 2.51,
     balance: 10432,
     denom: 'orai',
     value: 26080.13,
     coeff: 5.21,
-    coeffType: "increase"
+    coeffType: 'increase'
   },
   {
-    asset: "orai",
-    chain: "oraichain",
+    asset: 'orai',
+    chain: 'oraichain',
     price: 2.51,
     balance: 10432,
     denom: 'orai',
     value: 26080.13,
     coeff: 5.21,
-    coeffType: "decrease"
+    coeffType: 'decrease'
   },
   {
-    asset: "orai",
-    chain: "oraichain",
+    asset: 'orai',
+    chain: 'oraichain',
     price: 2.51,
     balance: 10432,
     denom: 'orai',
     value: 26080.13,
     coeff: 5.21,
-    coeffType: "decrease"
+    coeffType: 'decrease'
   }
-]
+];
 
 export const AssetsTab: React.FC<{}> = () => {
   const headers: TableHeaderProps<AssetInfoResponse> = {
-    'assets': {
-      name: "ASSET",
-      accessor: (data) => <div className={styles.assets}>
-        <div className={styles.left}>
-          <img src={OraiIcon} width={26} height={26} alt="arrow" />
-        </div>
-        <div className={styles.right}>
-          <div className={styles.assetName}>
-            {data.asset}
+    assets: {
+      name: 'ASSET',
+      accessor: (data) => (
+        <div className={styles.assets}>
+          <div className={styles.left}>
+            <img src={OraiIcon} width={26} height={26} alt="arrow" />
           </div>
-          <div className={styles.assetChain}>
-            {data.chain}
+          <div className={styles.right}>
+            <div className={styles.assetName}>{data.asset}</div>
+            <div className={styles.assetChain}>{data.chain}</div>
           </div>
         </div>
-      </div>,
-      width: "22%",
+      ),
+      width: '22%',
       align: 'center'
     },
-    'price': {
-      name: "PRICE",
-      width: "22%",
+    price: {
+      name: 'PRICE',
+      width: '22%',
       accessor: (data) => <span>${data.price}</span>,
       align: 'center'
     },
-    'balance': {
-      name: "BALANCE",
-      width: "22%",
+    balance: {
+      name: 'BALANCE',
+      width: '22%',
       align: 'center',
-      accessor: (data) => <span>${data.balance}</span>,
+      accessor: (data) => <span>${data.balance}</span>
     },
-    'value': {
-      name: "VALUE",
-      width: "22%",
+    value: {
+      name: 'VALUE',
+      width: '22%',
       align: 'center',
       accessor: (data) => {
-        const checkCoeffType = data.coeffType === "increase";
-        const coeffTypeValue = checkCoeffType ? "+" : "-";
+        const checkCoeffType = data.coeffType === 'increase';
+        const coeffTypeValue = checkCoeffType ? '+' : '-';
         return (
           <div className={styles.valuesColumn}>
             <div className={styles.values}>
               <div className={styles.value}>${data.value}</div>
-              <div style={{
-                color: checkCoeffType ? "#00AD26" : "#E01600"
-              }} className={styles.coeff}>{coeffTypeValue}{data.coeff}%</div>
+              <div
+                style={{
+                  color: checkCoeffType ? '#00AD26' : '#E01600'
+                }}
+                className={styles.coeff}
+              >
+                {coeffTypeValue}
+                {data.coeff}%
+              </div>
             </div>
           </div>
-        )
+        );
       }
     },
-    'filter': {
-      name: "FILTER",
-      width: "12%",
+    filter: {
+      name: 'FILTER',
+      width: '12%',
       align: 'center',
       accessor: () => <span></span>
-    },
-  }
-
+    }
+  };
 
   return (
     <div className={cx('assetsTab')}>
@@ -131,9 +133,13 @@ export const AssetsTab: React.FC<{}> = () => {
         })}
       </div>
       <div>
-        <Table headers={headers} data={data} stylesColumn={{
-          padding: '16px 0'
-        }} />
+        <Table
+          headers={headers}
+          data={data}
+          stylesColumn={{
+            padding: '16px 0'
+          }}
+        />
       </div>
     </div>
   );

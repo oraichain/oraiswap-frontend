@@ -4,7 +4,7 @@ import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.sv
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import { Button } from 'components/Button';
-import Table, { TableHeaderProps } from 'components/Table/Table';
+import { TableHeaderProps, Table } from 'components/Table';
 import { CW20_DECIMALS } from 'config/constants';
 import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -28,12 +28,10 @@ type PoolTableData = PoolInfoResponse & {
 export const ListPools = memo(() => {
   const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
-
   const [cachedReward] = useConfigReducer('rewardPools');
   const [address] = useConfigReducer('address');
   const theme = useTheme();
   const navigate = useNavigate();
-
   const pools = useGetPools();
   const { myStakes } = useGetMyStake({
     stakerAddress: address
@@ -50,11 +48,11 @@ export const ListPools = memo(() => {
       JSON.parse(pool.secondAssetInfo)
     ]);
     const myStakedLP = stakingAssetInfo
-      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.stakingAmountInUsdt
+      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))
+          ?.stakingAmountInUsdt || 0
       : 0;
-
     const earned = stakingAssetInfo
-      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt
+      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt || 0
       : 0;
     return {
       ...pool,

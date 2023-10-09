@@ -17,6 +17,8 @@ import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
 import { fetchCacheLpPools } from 'pages/Pools/helpers';
 import { useFetchAllPairs } from 'pages/Pools/hooks';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,10 +26,8 @@ import { useParams } from 'react-router-dom';
 import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
-import styles from './AddLiquidityModal.module.scss';
-import { useGetPairInfo } from './useGetPairInfo';
-import { useTokenAllowance } from './useTokenAllowance';
 import { ModalProps } from '../MyPoolInfo/type';
+import styles from './AddLiquidityModal.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -49,11 +49,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
-  const { pairInfo, isLoading, isError, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } =
-    useGetPairInfo(poolUrl);
-
-  // if (isLoading) return <Loader />;
-  // if (isError) return <h3>Something wrong!</h3>;
+  const { pairInfo, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } = useGetPairInfo(poolUrl);
 
   const { token1, token2, info: pairInfoData } = pairInfo;
   const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
@@ -83,12 +79,12 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token1AllowanceToPair,
     isLoading: isToken1AllowanceToPairLoading,
     refetch: refetchToken1Allowance
-  } = useTokenAllowance(pairInfoData, token1);
+  } = useTokenAllowance(pairInfoData?.contract_addr, token1);
   const {
     data: token2AllowanceToPair,
     isLoading: isToken2AllowanceToPairLoading,
     refetch: refetchToken2Allowance
-  } = useTokenAllowance(pairInfoData, token2);
+  } = useTokenAllowance(pairInfoData?.contract_addr, token2);
 
   useEffect(() => {
     if (recentInput === 1 && amountToken1 > 0) {

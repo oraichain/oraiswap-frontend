@@ -25,14 +25,13 @@ import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery
 import { RootState } from 'store/configure';
 import { ModalProps } from '../type';
 import styles from './StakeLPModal.module.scss';
-import { useGetPairInfo } from './useGetPairInfo';
-import { useTokenAllowance } from './useTokenAllowance';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
 
 const cx = cn.bind(styles);
 
 const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
@@ -48,14 +47,9 @@ const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
-  const { pairInfo, isLoading, isError, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } =
-    useGetPairInfo(poolUrl);
-
-  // if (isLoading) return <Loader />;
-  // if (isError) return <h3>Something wrong!</h3>;
+  const { pairInfo, pairAmountInfoData, refetchPairAmountInfo } = useGetPairInfo(poolUrl);
 
   const { token1, token2, info: pairInfoData } = pairInfo;
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
 
   const pairs = useFetchAllPairs();
 
@@ -82,12 +76,12 @@ const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token1AllowanceToPair,
     isLoading: isToken1AllowanceToPairLoading,
     refetch: refetchToken1Allowance
-  } = useTokenAllowance(pairInfoData, token1);
+  } = useTokenAllowance(pairInfoData?.contract_addr, token1);
   const {
     data: token2AllowanceToPair,
     isLoading: isToken2AllowanceToPairLoading,
     refetch: refetchToken2Allowance
-  } = useTokenAllowance(pairInfoData, token2);
+  } = useTokenAllowance(pairInfoData?.contract_addr, token2);
 
   useEffect(() => {
     if (recentInput === 1 && amountToken1 > 0) {
@@ -96,11 +90,6 @@ const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       setAmountToken1((amountToken2 * token1Amount) / token2Amount);
   }, [pairAmountInfoData]);
 
-  const onChangeAmount1 = (value: bigint) => {
-    setRecentInput(1);
-    setAmountToken1(value);
-    if (token1Amount > 0) setAmountToken2((value * token2Amount) / token1Amount);
-  };
   const onChangeAmount2 = (value: bigint) => {
     setRecentInput(2);
     setAmountToken2(value);
@@ -207,8 +196,6 @@ const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       setActionLoading(false);
     }
   };
-
-  const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
