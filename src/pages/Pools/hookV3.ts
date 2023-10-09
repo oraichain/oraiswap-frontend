@@ -209,8 +209,6 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
     enabled: !!pairDenoms
   });
 
-  console.log({ poolDetail, pairDenoms });
-
   const pairRawData = pairDenoms.split('_');
   const tokenTypes = pairRawData.map((raw) =>
     oraichainTokens.find((token) => token.denom === raw || token.contractAddress === raw)

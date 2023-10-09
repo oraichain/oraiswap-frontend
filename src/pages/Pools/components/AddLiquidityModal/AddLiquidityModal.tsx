@@ -1,4 +1,3 @@
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
@@ -15,15 +14,13 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
-import { fetchCacheLpPools } from 'pages/Pools/helpers';
-import { useFetchAllPairs } from 'pages/Pools/hooks';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
+import { useGetPoolDetail } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -33,29 +30,24 @@ const cx = cn.bind(styles);
 
 const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-  const dispatch = useDispatch();
+  const loadTokenAmounts = useLoadTokens();
 
   const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
   const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
 
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
 
-  const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const { token1, token2, info: pairInfoData } = poolDetail;
+  const { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } = useGetPairInfo(poolDetail);
 
-  const { pairInfo, lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } = useGetPairInfo(poolUrl);
-
-  const { token1, token2, info: pairInfoData } = pairInfo;
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidity_token]?.balance ?? '0' : 0);
-
-  const pairs = useFetchAllPairs();
-
+  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidityAddr]?.balance ?? '0' : 0);
   const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
   const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
@@ -79,12 +71,12 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     data: token1AllowanceToPair,
     isLoading: isToken1AllowanceToPairLoading,
     refetch: refetchToken1Allowance
-  } = useTokenAllowance(pairInfoData?.contract_addr, token1);
+  } = useTokenAllowance(pairInfoData?.pairAddr, token1);
   const {
     data: token2AllowanceToPair,
     isLoading: isToken2AllowanceToPairLoading,
     refetch: refetchToken2Allowance
-  } = useTokenAllowance(pairInfoData?.contract_addr, token2);
+  } = useTokenAllowance(pairInfoData?.pairAddr, token2);
 
   useEffect(() => {
     if (recentInput === 1 && amountToken1 > 0) {
@@ -104,18 +96,8 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
   };
 
-  const fetchCachedLpTokenAll = async () => {
-    const lpTokenData = await fetchCacheLpPools(
-      pairs,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  };
-
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
-    fetchCachedLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -124,7 +106,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
-      spender: pairInfoData!.contract_addr,
+      spender: pairInfoData.pairAddr,
       token
     });
 
@@ -175,7 +157,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         toInfo: token2!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.contract_addr
+        pair: pairInfoData.pairAddr
         // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
       } as ProvideQuery);
 

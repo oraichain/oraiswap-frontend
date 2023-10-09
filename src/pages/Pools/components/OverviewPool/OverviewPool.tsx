@@ -1,51 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
 import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
 import { CW20_DECIMALS } from 'config/constants';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
-import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
 
-const useGetPairAmountInfo = (poolDetailData: PoolDetail) => {
-  const { data: pairAmountInfoData } = useQuery(
-    ['pair-amount-info', poolDetailData],
-    () => {
-      return getPairAmountInfo(poolDetailData.token1, poolDetailData.token2);
-    },
-    {
-      enabled: !!poolDetailData,
-      refetchOnWindowFocus: false,
-      refetchInterval: 1000 * 15 // 15 second interval
-    }
-  );
-
-  return pairAmountInfoData;
-};
-
-const useGetLpAmount = (poolDetailData: PoolDetail) => {
-  const { data: lpTokenInfoData } = useQuery(
-    ['lp-info', poolDetailData],
-    () =>
-      fetchTokenInfo({
-        contractAddress: poolDetailData?.info.liquidityAddr
-      } as TokenItemType),
-    {
-      enabled: !!poolDetailData,
-      refetchOnWindowFocus: false
-    }
-  );
-
-  return lpTokenInfoData;
-};
-
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
-  const pairAmountInfoData = useGetPairAmountInfo(poolDetailData);
-  const lpTokenInfoData = useGetLpAmount(poolDetailData);
+  const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
 
   return (
     <section className={styles.overview}>
