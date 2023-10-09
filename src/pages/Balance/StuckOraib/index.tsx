@@ -4,7 +4,7 @@ import styles from './style.module.scss';
 import loadingGif from 'assets/gif/loading.gif';
 import { RemainingOraibTokenItem } from './useGetOraiBridgeBalances';
 import { TooltipIcon } from './TooltipBridgeToken';
-import { toDisplay } from 'libs/utils';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 interface Props {
   handleMove: () => Promise<void>;

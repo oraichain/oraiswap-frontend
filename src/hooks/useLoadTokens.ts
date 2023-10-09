@@ -5,11 +5,11 @@ import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import bech32 from 'bech32';
 import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { handleCheckWallet, tronToEthAddress } from 'helper';
+import { handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
-import { generateError, getEvmAddress } from '../libs/utils';
+import { generateError } from '../libs/utils';
 
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
@@ -18,7 +18,8 @@ import { chainInfos, CustomChainInfo, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
 import { EVM_BALANCE_RETRY_COUNT } from 'config/constants';
-import { isEvmNetworkNativeSwapSupported } from 'rest/api';
+import { getEvmAddress, tronToEthAddress } from '@oraichain/oraidex-common';
+import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 
 export type LoadTokenParams = {
   refresh?: boolean;

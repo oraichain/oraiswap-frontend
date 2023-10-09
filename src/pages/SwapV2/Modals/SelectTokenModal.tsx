@@ -3,10 +3,11 @@ import Modal from 'components/Modal';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo } from 'config/chainInfos';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
+import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC } from 'react';
 import styles from './SelectTokenModal.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 
@@ -79,7 +80,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 onClick={() => {
                   setToken(key, type === 'token' && (item as TokenItemType).contractAddress);
                   if (setSymbol) {
-                    setSymbol(title)
+                    setSymbol(title);
                   }
                   close();
                 }}

@@ -6,7 +6,7 @@ import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import { ORAI, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, swapEvmRoutes } from 'config/constants';
 import { IBCInfoMap, ibcInfos, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { calculateTimeoutTimestamp, getNetworkGasPrice, tronToEthAddress } from 'helper';
+import { getNetworkGasPrice } from 'helper';
 import {
   Amount,
   CwIcs20LatestInterface,
@@ -14,33 +14,32 @@ import {
   CwIcs20LatestReadOnlyInterface,
   Uint128
 } from '@oraichain/common-contracts-sdk';
-import CosmJs, {
-  buildMultipleExecuteMessages,
-  collectWallet,
-  getCosmWasmClient,
-  getEncodedExecuteContractMsgs
-} from 'libs/cosmjs';
+import CosmJs, { collectWallet, getCosmWasmClient } from 'libs/cosmjs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
+import { generateError } from 'libs/utils';
 import { findToTokenOnOraiBridge, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
-import {
-  SwapQuery,
-  Type,
-  generateContractMessages,
-  getTokenOnOraichain,
-  getTokenOnSpecificChainId,
-  isEvmNetworkNativeSwapSupported,
-  isEvmSwappable,
-  isSupportedNoPoolSwapEvm,
-  parseTokenInfo,
-  simulateSwap,
-  simulateSwapEvm
-} from 'rest/api';
+import { SwapQuery, Type, generateContractMessages } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { TokenInfo } from 'types/token';
 import { OraiswapTokenReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import {
+  isEvmNetworkNativeSwapSupported,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm
+} from '@oraichain/oraidex-universal-swap';
+import {
+  buildMultipleExecuteMessages,
+  calculateMinReceive,
+  calculateTimeoutTimestamp,
+  getEncodedExecuteContractMsgs,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId,
+  parseTokenInfo,
+  toAmount,
+  toDisplay,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
 
 export enum SwapDirection {
   From,
@@ -72,40 +71,6 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
     console.log({ error });
   }
 };
-
-export async function handleSimulateSwap(query: {
-  fromInfo: TokenInfo;
-  toInfo: TokenInfo;
-  originalFromInfo: TokenItemType;
-  originalToInfo: TokenItemType;
-  amount: string;
-}): Promise<SimulateResponse> {
-  // if the from token info is on bsc or eth, then we simulate using uniswap / pancake router
-  // otherwise, simulate like normal
-  if (
-    isSupportedNoPoolSwapEvm(query.originalFromInfo.coinGeckoId) ||
-    isEvmSwappable({
-      fromChainId: query.originalFromInfo.chainId,
-      toChainId: query.originalToInfo.chainId,
-      fromContractAddr: query.originalFromInfo.contractAddress,
-      toContractAddr: query.originalToInfo.contractAddress
-    })
-  ) {
-    // reset previous amount calculation since now we need to deal with original from & to info, not oraichain token info
-    const originalAmount = toDisplay(query.amount, query.fromInfo.decimals);
-    const { amount, displayAmount } = await simulateSwapEvm({
-      fromInfo: query.originalFromInfo,
-      toInfo: query.originalToInfo,
-      amount: toAmount(originalAmount, query.originalFromInfo.decimals).toString()
-    });
-    return { amount, displayAmount };
-  }
-  const { amount } = await simulateSwap(query);
-  return {
-    amount,
-    displayAmount: toDisplay(amount, getTokenOnOraichain(query.toInfo.coinGeckoId)?.decimals)
-  };
-}
 
 export function filterNonPoolEvmTokens(
   chainId: string,
@@ -358,7 +323,7 @@ export class UniversalSwapHandler {
     }
   }
 
-  async swap(): Promise<any> {
+  async swap(): Promise<string> {
     const messages = this.generateMsgsSwap();
     const result = await CosmJs.executeMultiple({
       prefix: ORAI,
@@ -366,7 +331,7 @@ export class UniversalSwapHandler {
       msgs: messages,
       gasAmount: { denom: ORAI, amount: '0' }
     });
-    return result;
+    return result.transactionHash;
   }
 
   async combineMsgs(metamaskAddress: string, tronAddress: string): Promise<EncodeObject[]> {
@@ -376,7 +341,7 @@ export class UniversalSwapHandler {
   }
 
   // Universal swap from Oraichain to cosmos-hub | osmosis | EVM networks.
-  async swapAndTransfer({ metamaskAddress, tronAddress }: SwapData): Promise<any> {
+  async swapAndTransfer({ metamaskAddress, tronAddress }: SwapData): Promise<string> {
     // find to token in Oraichain to swap first and use this.toTokenInOrai as originalFromToken in bridge message.
     this.toTokenInOrai = oraichainTokens.find((t) => t.coinGeckoId === this.originalToToken.coinGeckoId);
 
@@ -391,7 +356,7 @@ export class UniversalSwapHandler {
       { gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`) }
     );
     const result = await client.signAndBroadcast(this.sender, combinedMsgs, 'auto');
-    return result;
+    return result.transactionHash;
   }
 
   // transfer evm to ibc
@@ -507,7 +472,7 @@ export class UniversalSwapHandler {
       };
 
       // if asset info is native => send native way, else send cw20 way
-      if (assetInfo.native_token) {
+      if ('native_token' in assetInfo) {
         const executeMsgSend = {
           transfer_to_remote: msg
         };

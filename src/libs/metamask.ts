@@ -1,18 +1,18 @@
 import { gravityContracts, TokenItemType } from 'config/bridgeTokens';
 import { chainInfos, NetworkChainId } from 'config/chainInfos';
-import { displayInstallWallet, ethToTronAddress, tronToEthAddress } from 'helper';
-import { toAmount, toDisplay } from './utils';
+import { displayInstallWallet } from 'helper';
 import { Bridge__factory, IERC20Upgradeable__factory, IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
-import { getEvmSwapRoute } from 'rest/api';
 import { UNISWAP_ROUTER_DEADLINE } from 'config/constants';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
-import { EvmWallet } from '@oraichain/oraidex-common';
-
-type TransferToGravityResult = {
-  transactionHash: string;
-};
+import {
+  calculateMinReceive,
+  ethToTronAddress,
+  EvmWallet,
+  toAmount,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
+import { getEvmSwapRoute } from '@oraichain/oraidex-universal-swap';
 
 export default class Metamask extends EvmWallet {
   private provider: Web3Provider;

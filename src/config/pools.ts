@@ -1,5 +1,4 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { parseAssetInfo } from 'helper';
 import { flatten, uniq } from 'lodash';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
 import { MILKY, ORAI, STABLE_DENOM } from './constants';
@@ -9,6 +8,7 @@ import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.t
 import { network } from './networks';
 import { PairInfoExtend } from 'types/token';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { parseAssetInfo } from '@oraichain/oraidex-common';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];

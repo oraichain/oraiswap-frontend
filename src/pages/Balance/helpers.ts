@@ -14,7 +14,7 @@ import { chainInfos, CosmosChainId, NetworkChainId } from 'config/chainInfos';
 import { KWT, KWT_BSC_CONTRACT, MILKY_BSC_CONTRACT, ORAI } from 'config/constants';
 import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/ibcInfos';
 import { network } from 'config/networks';
-import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
+import { getNetworkGasPrice } from 'helper';
 
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
@@ -23,114 +23,22 @@ import {
   OraiswapTokenQueryClient,
   OraiswapTokenReadOnlyInterface
 } from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, {
-  buildMultipleExecuteMessages,
-  collectWallet,
-  connectWithSigner,
-  getCosmWasmClient,
-  getEncodedExecuteContractMsgs
-} from 'libs/cosmjs';
+import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { generateError, toAmount, toDisplay } from 'libs/utils';
-import {
-  generateConvertCw20Erc20Message,
-  generateConvertMsgs,
-  generateMoveOraib2OraiMessages,
-  getTokenOnOraichain,
-  parseTokenInfo,
-  parseTokenInfoRawDenom,
-  Type
-} from 'rest/api';
+import { generateError } from 'libs/utils';
+import { generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages, Type } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 import { Long } from 'cosmjs-types/helpers';
-
-/**
- * This function converts the destination address (from BSC / ETH -> Oraichain) to an appropriate format based on the BSC / ETH token contract address
- * @param keplrAddress - receiver address on Oraichain
- * @param contractAddress - BSC / ETH token contract address
- * @returns converted receiver address
- */
-export const getSourceReceiver = (keplrAddress: string, contractAddress?: string): string => {
-  let oneStepKeplrAddr = `${oraib2oraichain}/${keplrAddress}`;
-  // we only support the old oraibridge ibc channel <--> Oraichain for MILKY & KWT
-  if (contractAddress === KWT_BSC_CONTRACT || contractAddress === MILKY_BSC_CONTRACT) {
-    oneStepKeplrAddr = keplrAddress;
-  }
-  return oneStepKeplrAddr;
-};
-
-/**
- * This function receives fromToken and toToken as parameters to generate the destination memo for the receiver address
- * @param from - from token
- * @param to - to token
- * @param destReceiver - destination destReceiver
- * @returns destination in the format <dest-channel>/<dest-destReceiver>:<dest-denom>
- */
-export const getDestination = (
-  fromToken?: TokenItemType,
-  toToken?: TokenItemType,
-  destReceiver?: string
-): { destination: string; universalSwapType: UniversalSwapType } => {
-  if (!fromToken || !toToken || !destReceiver)
-    return { destination: '', universalSwapType: 'other-networks-to-oraichain' };
-  // this is the simplest case. Both tokens on the same Oraichain network => simple swap with to token denom
-  if (fromToken.chainId === 'Oraichain' && toToken.chainId === 'Oraichain') {
-    return { destination: '', universalSwapType: 'oraichain-to-oraichain' };
-  }
-  // we dont need to have any destination for this case
-  if (fromToken.chainId === 'Oraichain') {
-    return { destination: '', universalSwapType: 'oraichain-to-other-networks' };
-  }
-  if (
-    fromToken.chainId === 'cosmoshub-4' ||
-    fromToken.chainId === 'osmosis-1' ||
-    fromToken.chainId === 'kawaii_6886-1' ||
-    fromToken.chainId === '0x1ae6'
-  ) {
-    throw new Error(`chain id ${fromToken.chainId} is currently not supported in universal swap`);
-  }
-  // if to token chain id is Oraichain, then we dont need to care about ibc msg case
-  if (toToken.chainId === 'Oraichain') {
-    // first case, two tokens are the same, only different in network => simple swap
-    if (fromToken.coinGeckoId === toToken.coinGeckoId)
-      return { destination: destReceiver, universalSwapType: 'other-networks-to-oraichain' };
-    // if they are not the same then we set dest denom
-    return {
-      destination: `${destReceiver}:${parseTokenInfoRawDenom(toToken)}`,
-      universalSwapType: 'other-networks-to-oraichain'
-    };
-  }
-  // the remaining cases where we have to process ibc msg
-  const ibcInfo: IBCInfo = ibcInfos['Oraichain'][toToken.chainId]; // we get ibc channel that transfers toToken from Oraichain to the toToken chain
-  // getTokenOnOraichain is called to get the ibc denom / cw20 denom on Oraichain so that we can create an ibc msg using it
-  let receiverPrefix = '';
-  // TODO: no need to use to token on Oraichain. Can simply use the destination token directly. Fix this requires fixing the logic on ibc wasm as well
-  const toTokenOnOraichain = getTokenOnOraichain(toToken.coinGeckoId);
-  if (!toTokenOnOraichain)
-    return {
-      destination: '',
-      universalSwapType: 'other-networks-to-oraichain'
-    };
-  if (window.Metamask.isEthAddress(destReceiver)) receiverPrefix = toToken.prefix;
-  return {
-    destination: `${ibcInfo.channel}/${receiverPrefix}${destReceiver}:${parseTokenInfoRawDenom(toTokenOnOraichain)}`,
-    universalSwapType: 'other-networks-to-oraichain'
-  };
-};
-
-export const combineReceiver = (
-  sourceReceiver: string,
-  fromToken?: TokenItemType,
-  toToken?: TokenItemType,
-  destReceiver?: string
-): { combinedReceiver: string; universalSwapType: UniversalSwapType } => {
-  const source = getSourceReceiver(sourceReceiver, fromToken?.contractAddress);
-  const { destination, universalSwapType } = getDestination(fromToken, toToken, destReceiver);
-  if (destination.length > 0) return { combinedReceiver: `${source}:${destination}`, universalSwapType };
-  return { combinedReceiver: source, universalSwapType };
-};
+import {
+  buildMultipleExecuteMessages,
+  calculateTimeoutTimestamp,
+  getEncodedExecuteContractMsgs,
+  parseTokenInfo,
+  toAmount,
+  toDisplay
+} from '@oraichain/oraidex-common';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -407,7 +315,7 @@ export const transferToRemoteChainIbcWasm = async (
   };
   let result: ExecuteResult;
   console.log({ amount });
-  if (assetInfo.native_token) {
+  if ('native_token' in assetInfo) {
     console.log({ msg, amount: { amount, denom: fromToken.denom } });
     result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
   } else {

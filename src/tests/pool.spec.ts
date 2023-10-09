@@ -38,10 +38,9 @@ import {
   instantiateCw20Token
 } from './listing-simulate';
 import { testCaculateBondLpData, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
-import { parseAssetInfo } from 'helper';
 import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { buildMultipleExecuteMessages } from 'libs/cosmjs';
+import { buildMultipleExecuteMessages, parseAssetInfo } from '@oraichain/oraidex-common';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.

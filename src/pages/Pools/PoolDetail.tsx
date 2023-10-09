@@ -21,7 +21,7 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, oraichainTokens } from 'config/bridgeTokens';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { getUsd, toDecimal } from 'libs/utils';
+import { getUsd } from 'libs/utils';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCacheLpPools, fetchMyPairsData } from './helpers';
 import { RootState } from 'store/configure';
@@ -35,9 +35,10 @@ import { updateBondLpPools, updateLpPools } from 'reducer/token';
 
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { toDecimal } from '@oraichain/oraidex-common';
 const cx = cn.bind(styles);
 
-interface PoolDetailProps { }
+interface PoolDetailProps {}
 
 const PoolDetail: React.FC<PoolDetailProps> = () => {
   let { poolUrl } = useParams();

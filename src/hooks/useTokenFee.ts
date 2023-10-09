@@ -1,7 +1,7 @@
+import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { NetworkChainId } from 'config/chainInfos';
 import { getTransferTokenFee } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
-import { isEvmNetworkNativeSwapSupported } from 'rest/api';
 
 export default function useTokenFee(
   remoteTokenDenom: string,

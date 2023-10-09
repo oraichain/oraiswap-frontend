@@ -11,22 +11,21 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX } from 'config/constants';
-import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks, tronToEthAddress } from 'helper';
+import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
-import { getTotalUsd, getUsd, initEthereum, toAmount, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getSubAmountDetails, isSupportedNoPoolSwapEvm } from 'rest/api';
+import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
 import {
-  combineReceiver,
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
@@ -39,8 +38,10 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
+import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
+import { combineReceiver, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -141,7 +142,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      let result: DeliverTxResponse | any;
+      let result: DeliverTxResponse | string | any;
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
@@ -167,7 +168,7 @@ const Balance: React.FC<BalanceProps> = () => {
         combinedReceiver
       );
       console.log('result on click transfer: ', result);
-      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result));
     } catch (ex) {
       handleErrorTransaction(ex);
     }

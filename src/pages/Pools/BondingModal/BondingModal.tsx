@@ -9,7 +9,7 @@ import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
-import { toAmount, toDisplay } from 'libs/utils';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { generateMiningMsgs, Type } from 'rest/api';

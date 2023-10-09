@@ -15,7 +15,7 @@ import { handleErrorTransaction } from 'helper';
 import useClickOutside from 'hooks/useClickOutSide';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { checkRegex, toAmount, toDisplay, validateAddressCosmos } from 'libs/utils';
+import { checkRegex, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
@@ -23,6 +23,7 @@ import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
 import { ModalDelete, ModalListToken } from './ModalComponent';
 import styles from './NewTokenModal.module.scss';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 const cx = cn.bind(styles);
 
 interface ModalProps {
@@ -148,9 +149,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
       // TODO: add more options for users like name, marketing, additional token rewards
       const mint = isMinter
         ? {
-          minter,
-          cap: !!cap ? cap.toString() : null
-        }
+            minter,
+            cap: !!cap ? cap.toString() : null
+          }
         : undefined;
 
       const initialBalances = isInitBalances
@@ -174,9 +175,9 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         pairAssetInfo,
         targetedAssetInfo: targetedAssetInfo
           ? getInfoLiquidityPool({
-            contract_addr: !targetedAssetType && targetedAssetInfo,
-            denom: targetedAssetType && targetedAssetInfo
-          })
+              contract_addr: !targetedAssetType && targetedAssetInfo,
+              denom: targetedAssetType && targetedAssetInfo
+            })
           : undefined
       });
       // if users use their existing tokens to list, then we allow them to
@@ -192,15 +193,15 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           TToastType.TX_SUCCESSFUL,
           cw20Address
             ? {
-              customLink: `${network.explorer}/txs/${result.transactionHash}`,
-              linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
-              cw20Address: `${cw20Address}`
-            }
+                customLink: `${network.explorer}/txs/${result.transactionHash}`,
+                linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+                cw20Address: `${cw20Address}`
+              }
             : {
-              customLink: `${network.explorer}/txs/${result.transactionHash}`,
-              linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
-              linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
-            },
+                customLink: `${network.explorer}/txs/${result.transactionHash}`,
+                linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
+                linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
+              },
           {
             autoClose: 100000000
           }

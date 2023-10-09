@@ -1,5 +1,4 @@
-import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
-import { TokenInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
@@ -12,19 +11,9 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
 
-export const truncDecimals = 6;
-export const atomic = 10 ** truncDecimals;
-
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
   return re.test(str);
-};
-
-export const getEvmAddress = (bech32Address: string) => {
-  if (!bech32Address) return;
-  const decoded = bech32.decode(bech32Address);
-  const evmAddress = '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex');
-  return evmAddress;
 };
 
 export const validateAddressCosmos = (bech32Address: string, prefix?: string): boolean => {
@@ -34,48 +23,6 @@ export const validateAddressCosmos = (bech32Address: string, prefix?: string): b
   } catch (error) {
     return false;
   }
-};
-
-export const validateNumber = (amount: number | string): number => {
-  if (typeof amount === 'string') return validateNumber(Number(amount));
-  if (Number.isNaN(amount) || !Number.isFinite(amount)) return 0;
-  return amount;
-};
-
-// decimals always >= 6
-export const toAmount = (amount: number | string, decimals = 6): bigint => {
-  const validatedAmount = validateNumber(amount);
-  return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
-};
-
-/**
- * Converts a fraction to its equivalent decimal value as a number.
- *
- * @param {bigint} numerator - The numerator of the fraction
- * @param {bigint} denominator - The denominator of the fraction
- * @return {number} - The decimal value equivalent to the input fraction, returned as a number.
- */
-export const toDecimal = (numerator: bigint, denominator: bigint): number => {
-  if (denominator === BigInt(0)) return 0;
-  return toDisplay((numerator * BigInt(10 ** 6)) / denominator, 6);
-};
-
-/**
- * Convert the amount to be displayed on the user interface.
- *
- * @param {string|bigint} amount - The amount to be converted.
- * @param {number} sourceDecimals - The number of decimal places in the original `amount`.
- * @param {number} desDecimals - The number of decimal places in the `amount` after conversion.
- * @return {number} The value of `amount` after conversion.
- */
-export const toDisplay = (amount: string | bigint, sourceDecimals = 6, desDecimals = 6): number => {
-  if (!amount) return 0;
-  // guarding conditions to prevent crashing
-  const validatedAmount = typeof amount === 'string' ? BigInt(amount || '0') : amount;
-  const displayDecimals = Math.min(truncDecimals, desDecimals);
-  const returnAmount = validatedAmount / BigInt(10 ** (sourceDecimals - displayDecimals));
-  // save calculation by using cached atomic
-  return Number(returnAmount) / (displayDecimals === truncDecimals ? atomic : 10 ** displayDecimals);
 };
 
 export const getUsd = (
@@ -99,15 +46,6 @@ export const getTotalUsd = (amounts: AmountDetails, prices: CoinGeckoPrices<stri
     usd += amount * (prices[tokenInfo.coinGeckoId] ?? 0);
   }
   return usd;
-};
-
-export const getSubAmountDetails = (amounts: AmountDetails, tokenInfo: TokenItemType): AmountDetails => {
-  if (!tokenInfo.evmDenoms) return {};
-  return Object.fromEntries(
-    tokenInfo.evmDenoms.map((denom) => {
-      return [denom, amounts[denom]];
-    })
-  );
 };
 
 export const toSubDisplay = (amounts: AmountDetails, tokenInfo: TokenItemType): number => {
@@ -146,26 +84,6 @@ export const toSumDisplay = (amounts: AmountDetails): number => {
  */
 export const reduceString = (str: string, from: number, end: number) => {
   return str ? str.substring(0, from) + '...' + str.substring(str.length - end) : '-';
-};
-
-export const toTokenInfo = (token: TokenItemType, info?: TokenInfoResponse): TokenInfo => {
-  const data = (info as any)?.token_info_response ?? info;
-  return {
-    ...token,
-    symbol: token.name,
-    verified: !token.contractAddress,
-    ...data
-  };
-};
-
-export const toAssetInfo = (token: TokenInfo): AssetInfo => {
-  return token.contractAddress
-    ? {
-        token: {
-          contract_addr: token.contractAddress
-        }
-      }
-    : { native_token: { denom: token.denom } };
 };
 
 export const formateNumberDecimals = (price, decimals = 2) => {
@@ -306,9 +224,3 @@ export const initClient = async () => {
     throw new Error('Cannot initialize wallet client. Please notify the developers to fix this problem!');
   }
 };
-
-export function convertChainIdFromHexToNumber(chainId: string): number {
-  const regex = /^0x[0-9A-Fa-f]+$/g;
-  if (!chainId.match(regex)) return 0;
-  return parseInt(chainId);
-}

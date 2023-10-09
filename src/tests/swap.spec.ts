@@ -1,54 +1,12 @@
+import { toAmount } from '@oraichain/oraidex-common';
 import { cosmosTokens, TokenItemType } from 'config/bridgeTokens';
 import { GAS_ESTIMATION_SWAP_DEFAULT, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { feeEstimate } from 'helper';
-import { toAmount, toDisplay } from 'libs/utils';
-import { calculateMinReceive, generateMsgsSwap } from 'pages/SwapV2/helpers';
+import { generateMsgsSwap } from 'pages/SwapV2/helpers';
 import { generateContractMessages, Type } from 'rest/api';
 
 describe('swap', () => {
-  it('max amount', () => {
-    const amount = 123456789n;
-    const decimals = 6;
-
-    const displayAmount = toDisplay(amount, decimals);
-    expect(displayAmount).toBe(123.456789);
-  });
-
-  it('max amount with denom orai', () => {
-    const amount = 999999n;
-    const decimals = 6;
-    const oraiDecimals = { decimals };
-
-    const displayAmount = toDisplay(amount, decimals);
-    //@ts-ignore: need only orai decimals to test
-    const useFeeEstimate = feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
-
-    let finalAmount = useFeeEstimate > displayAmount ? 0 : displayAmount - useFeeEstimate;
-    expect(finalAmount).toBe(0.993503);
-  });
-
-  it('half amount', () => {
-    const amount = 123456789n;
-    const decimals = 6;
-    const displayAmount = toDisplay(amount / BigInt(2), decimals);
-    expect(displayAmount).toBe(61.728394);
-  });
-
-  it('half amount with denom orai', () => {
-    const amount = 999999n;
-    const decimals = 6;
-    const oraiDecimals = { decimals: 6 };
-
-    const displayAmount = toDisplay(amount / BigInt(2), decimals);
-    //@ts-ignore: need only orai decimals to test
-    const useFeeEstimate = feeEstimate(oraiDecimals, GAS_ESTIMATION_SWAP_DEFAULT);
-    const fromTokenBalanceDisplay = toDisplay(amount, oraiDecimals.decimals);
-
-    let finalAmount = useFeeEstimate > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-    expect(finalAmount).toBe(0.499999);
-  });
-
   describe('generate msgs contract for swap action', () => {
     const senderAddress = 'orai12zyu8w93h0q2lcnt50g3fn0w3yqnhy4fvawaqz';
     const fromAmountToken = 10;

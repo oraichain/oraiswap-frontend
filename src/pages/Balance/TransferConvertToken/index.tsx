@@ -13,7 +13,7 @@ import { GAS_ESTIMATION_BRIDGE_DEFAULT, ORAI } from 'config/constants';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { reduceString, toDisplay } from 'libs/utils';
+import { reduceString } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
@@ -21,6 +21,7 @@ import { findToTokenOnOraiBridge } from '../helpers';
 import copy from 'copy-to-clipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import useTokenFee from 'hooks/useTokenFee';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],

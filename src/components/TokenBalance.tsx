@@ -1,6 +1,6 @@
 import React from 'react';
 import NumberFormat, { NumberFormatProps } from 'react-number-format';
-import { toDisplay } from 'libs/utils';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 type BalanceProp = {
   amount: string | bigint;

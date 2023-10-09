@@ -11,13 +11,14 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { Asset, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { getUsd, toDecimal } from 'libs/utils';
+import { getUsd } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { fetchTokenInfo, generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityMining.module.scss';
 import { handleErrorTransaction } from 'helper';
+import { toDecimal } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 

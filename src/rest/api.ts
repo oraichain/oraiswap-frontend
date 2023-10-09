@@ -16,23 +16,12 @@ import {
   AssetInfo,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { flattenTokens, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
-import {
-  KWT_DENOM,
-  MILKY_DENOM,
-  ORAI,
-  ORAI_INFO,
-  STABLE_DENOM,
-  proxyContractInfo,
-  swapEvmRoutes
-} from 'config/constants';
+import { oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { KWT_DENOM, MILKY_DENOM, ORAI, ORAI_INFO, STABLE_DENOM, proxyContractInfo } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { CoinGeckoId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
-import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
-import { getSubAmountDetails, toAmount, toAssetInfo, toDecimal, toDisplay, toTokenInfo } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
 import { IBCInfo } from 'types/ibc';
@@ -43,6 +32,20 @@ import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRo
 import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 import { Long } from 'cosmjs-types/helpers';
 import { SimulateResponse } from 'pages/UniversalSwap/helpers';
+import {
+  calculateTimeoutTimestamp,
+  getSubAmountDetails,
+  getTokenOnSpecificChainId,
+  handleSentFunds,
+  isFactoryV1,
+  parseTokenInfo,
+  toAmount,
+  toAssetInfo,
+  toDecimal,
+  toDisplay,
+  toTokenInfo
+} from '@oraichain/oraidex-common';
+import { getEvmSwapRoute, simulateSwap } from '@oraichain/oraidex-universal-swap';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -138,47 +141,24 @@ function parsePoolAmount(poolInfo: OraiswapPairTypes.PoolResponse, trueAsset: As
   return BigInt(poolInfo.assets.find((asset) => isEqual(asset.info, trueAsset))?.amount || '0');
 }
 
-async function getPairAmountInfo(
-  fromToken: TokenItemType,
-  toToken: TokenItemType,
-  cachedPairs?: PairDetails,
-  poolInfo?: PoolInfo,
-  oraiUsdtPoolInfo?: PoolInfo
-): Promise<PairAmountInfo> {
-  const poolData = poolInfo ?? (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
-  // default is usdt
-  let tokenPrice = 0;
-
-  if (fromToken.denom === ORAI) {
-    const poolOraiUsdData =
-      oraiUsdtPoolInfo ?? (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
-    // orai price
-    tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
-  } else {
-    // must be stable coin for ask pool amount
-    const poolUsdData = await fetchPairPriceWithStablecoin(fromToken, toToken);
-    tokenPrice = toDisplay(poolUsdData, toToken.decimals);
-  }
-
-  return {
-    token1Amount: poolData.offerPoolAmount.toString(),
-    token2Amount: poolData.askPoolAmount.toString(),
-    tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
-  };
-}
-
 // fetch price of a pair using simulate swap with amount = 1 so we know the ratio of the token and USDT
-async function fetchPairPriceWithStablecoin(fromTokenInfo: TokenItemType, toTokenInfo: TokenItemType): Promise<string> {
+export async function fetchPairPriceWithStablecoin(
+  fromTokenInfo: TokenItemType,
+  toTokenInfo: TokenItemType
+): Promise<string> {
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const result = await Promise.allSettled([
     simulateSwap({
       fromInfo: fromTokenInfo,
       toInfo: tokenMap[STABLE_DENOM],
-      amount: toAmount(1, fromTokenInfo!.decimals).toString()
+      amount: toAmount(1, fromTokenInfo!.decimals).toString(),
+      routerClient
     }),
     simulateSwap({
       fromInfo: toTokenInfo,
       toInfo: tokenMap[STABLE_DENOM],
-      amount: toAmount(1, toTokenInfo!.decimals).toString()
+      amount: toAmount(1, toTokenInfo!.decimals).toString(),
+      routerClient
     })
   ]).then((results) => {
     for (let res of results) {
@@ -366,47 +346,6 @@ function generateConvertCw20Erc20Message(
   return [];
 }
 
-function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
-  if (!tokenInfo?.contractAddress) {
-    if (amount)
-      return {
-        fund: { denom: tokenInfo.denom, amount: amount.toString() },
-        info: { native_token: { denom: tokenInfo.denom } }
-      };
-    return { info: { native_token: { denom: tokenInfo.denom } } };
-  }
-  return { info: { token: { contract_addr: tokenInfo?.contractAddress } } };
-}
-
-const parseTokenInfoRawDenom = (tokenInfo: TokenItemType) => {
-  if (tokenInfo.contractAddress) return tokenInfo.contractAddress;
-  return tokenInfo.denom;
-};
-
-const getTokenOnOraichain = (coingeckoId: CoinGeckoId) => {
-  if (coingeckoId === 'kawaii-islands' || coingeckoId === 'milky-token') {
-    throw new Error('KWT and MILKY not supported in this function');
-  }
-  return oraichainTokens.find((token) => token.coinGeckoId === coingeckoId);
-};
-
-export function getTokenOnSpecificChainId(
-  coingeckoId: CoinGeckoId,
-  chainId: NetworkChainId
-): TokenItemType | undefined {
-  return flattenTokens.find((t) => t.coinGeckoId === coingeckoId && t.chainId === chainId);
-}
-
-const handleSentFunds = (...funds: (Coin | undefined)[]): Coin[] | null => {
-  let sent_funds = [];
-  for (let fund of funds) {
-    if (fund) sent_funds.push(fund);
-  }
-  if (sent_funds.length === 0) return null;
-  sent_funds.sort((a, b) => a.denom.localeCompare(b.denom));
-  return sent_funds;
-};
-
 const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): SwapOperation[] => {
   const pairExist = Pairs.pairs.some((pair) => {
     let assetInfos = pair.asset_infos;
@@ -449,141 +388,6 @@ async function fetchTaxRate(): Promise<TaxRateResponse> {
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
   }
-}
-
-async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amount: string }) {
-  const { amount, fromInfo, toInfo } = query;
-
-  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
-  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
-    return {
-      amount
-    };
-  }
-
-  // check if they have pairs. If not then we go through ORAI
-  const { info: offerInfo } = parseTokenInfo(fromInfo, amount.toString());
-  const { info: askInfo } = parseTokenInfo(toInfo);
-  const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
-  const operations = generateSwapOperationMsgs(offerInfo, askInfo);
-  try {
-    let finalAmount = amount;
-    let isSimulatingRatio = false;
-    // hard-code for tron because the WTRX/USDT pool is having a simulation problem (returning zero / error when simulating too small value of WTRX)
-    if (fromInfo.coinGeckoId === 'tron' && amount === toAmount(1, fromInfo.decimals).toString()) {
-      finalAmount = toAmount(10, fromInfo.decimals).toString();
-      isSimulatingRatio = true;
-    }
-    const data = await routerContract.simulateSwapOperations({
-      offerAmount: finalAmount,
-      operations
-    });
-    if (!isSimulatingRatio) return data;
-    return { amount: data.amount.substring(0, data.amount.length - 1) };
-  } catch (error) {
-    throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
-  }
-}
-
-export function buildSwapRouterKey(fromContractAddr: string, toContractAddr: string) {
-  return `${fromContractAddr}-${toContractAddr}`;
-}
-
-export function getEvmSwapRoute(
-  chainId: string,
-  fromContractAddr?: string,
-  toContractAddr?: string
-): string[] | undefined {
-  if (!isEvmNetworkNativeSwapSupported(chainId as EvmChainId)) return undefined;
-  if (!fromContractAddr && !toContractAddr) return undefined;
-  const chainRoutes = swapEvmRoutes[chainId];
-  const fromAddr = fromContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
-  const toAddr = toContractAddr || proxyContractInfo[chainId].wrapNativeAddr;
-
-  // in case from / to contract addr is empty aka native eth or bnb without contract addr then we fallback to swap route with wrapped token
-  // because uniswap & pancakeswap do not support simulating with native directly
-  let route: string[] | undefined = chainRoutes[buildSwapRouterKey(fromAddr, toContractAddr)];
-  if (route) return route;
-  // because the route can go both ways. Eg: WBNB->AIRI, if we want to swap AIRI->WBNB, then first we find route WBNB->AIRI, then we reverse the route
-  route = chainRoutes[buildSwapRouterKey(toAddr, fromContractAddr)];
-  if (route) {
-    return [].concat(route).reverse();
-  }
-  return undefined;
-}
-
-async function simulateSwapEvm(query: {
-  fromInfo: TokenItemType;
-  toInfo: TokenItemType;
-  amount: string;
-}): Promise<SimulateResponse> {
-  const { amount, fromInfo, toInfo } = query;
-
-  // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
-  if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
-    return {
-      amount,
-      displayAmount: toDisplay(amount, toInfo.decimals)
-    };
-  }
-  try {
-    // get proxy contract object so that we can query the corresponding router address
-    const provider = new ethers.providers.JsonRpcProvider(fromInfo.rpc);
-    const toTokenInfoOnSameChainId = getTokenOnSpecificChainId(toInfo.coinGeckoId, fromInfo.chainId);
-    const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
-    const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
-    const outs = await swapRouterV2.getAmountsOut(amount, route);
-    if (outs.length === 0) throw new Error('There is no output amounts after simulating evm swap');
-    let simulateAmount = outs.slice(-1)[0].toString();
-    return {
-      // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
-      // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
-      amount: simulateAmount,
-      displayAmount: toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals) // get the final out amount, which is the token out amount we want
-    };
-  } catch (ex) {
-    console.log('error simulating evm: ', ex);
-  }
-}
-
-export function isSupportedNoPoolSwapEvm(coingeckoId: CoinGeckoId) {
-  switch (coingeckoId) {
-    case 'wbnb':
-    case 'weth':
-    case 'binancecoin':
-    case 'ethereum':
-      return true;
-    default:
-      return false;
-  }
-}
-
-export function isEvmNetworkNativeSwapSupported(chainId: NetworkChainId) {
-  switch (chainId) {
-    case '0x01':
-    case '0x38':
-      return true;
-    default:
-      return false;
-  }
-}
-
-export function isEvmSwappable(data: {
-  fromChainId: string;
-  toChainId: string;
-  fromContractAddr?: string;
-  toContractAddr?: string;
-}): boolean {
-  const { fromChainId, fromContractAddr, toChainId, toContractAddr } = data;
-  // cant swap if they are not on the same evm chain
-  if (fromChainId !== toChainId) return false;
-  // cant swap on evm if chain id is not eth or bsc
-  if (fromChainId !== '0x01' && fromChainId !== '0x38') return false;
-  // if the tokens do not have contract addresses then we skip
-  // if (!fromContractAddr || !toContractAddr) return false;
-  // only swappable if there's a route to swap from -> to
-  if (!getEvmSwapRoute(fromChainId, fromContractAddr, toContractAddr)) return false;
-  return true;
 }
 
 export type SwapQuery = {
@@ -668,8 +472,14 @@ function generateContractMessages(
       break;
     case Type.PROVIDE:
       const provideQuery = params as ProvideQuery;
-      const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(provideQuery.fromInfo, provideQuery.fromAmount);
-      const { fund: toSentFund, info: toInfoData } = parseTokenInfo(provideQuery.toInfo, provideQuery.toAmount);
+      const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(
+        provideQuery.fromInfo,
+        provideQuery.fromAmount as string
+      );
+      const { fund: toSentFund, info: toInfoData } = parseTokenInfo(
+        provideQuery.toInfo,
+        provideQuery.toAmount as string
+      );
       funds = handleSentFunds(fromSentFund, toSentFund);
       input = {
         provide_liquidity: {
@@ -834,7 +644,7 @@ function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction
       // currently only support cw20 token pool
       let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       // native case
-      if (assetInfo.native_token) {
+      if ('native_token' in assetInfo) {
         input = {
           convert: {}
         };
@@ -861,7 +671,7 @@ function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction
       let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
       let { info: outputAssetInfo } = parseTokenInfo(outputToken, '0');
       // native case
-      if (assetInfo.native_token) {
+      if ('native_token' in assetInfo) {
         input = {
           convert_reverse: {
             from_asset: outputAssetInfo
@@ -935,13 +745,41 @@ function generateMoveOraib2OraiMessages(
   return transferMsgs;
 }
 
+async function getPairAmountInfo(
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  cachedPairs?: PairDetails,
+  poolInfo?: PoolInfo,
+  oraiUsdtPoolInfo?: PoolInfo
+): Promise<PairAmountInfo> {
+  const poolData = poolInfo ?? (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
+  // default is usdt
+  let tokenPrice = 0;
+
+  if (fromToken.denom === ORAI) {
+    const poolOraiUsdData =
+      oraiUsdtPoolInfo ?? (await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs));
+    // orai price
+    tokenPrice = toDecimal(poolOraiUsdData.askPoolAmount, poolOraiUsdData.offerPoolAmount);
+  } else {
+    // must be stable coin for ask pool amount
+    const poolUsdData = await fetchPairPriceWithStablecoin(fromToken, toToken);
+    tokenPrice = toDisplay(poolUsdData, toToken.decimals);
+  }
+
+  return {
+    token1Amount: poolData.offerPoolAmount.toString(),
+    token2Amount: poolData.askPoolAmount.toString(),
+    tokenUsd: 2 * toDisplay(poolData.offerPoolAmount, fromToken.decimals) * tokenPrice
+  };
+}
+
 export {
   fetchPairInfo,
   fetchCachedPairInfo,
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,
-  simulateSwap,
   fetchPoolInfoAmount,
   fetchTokenAllowance,
   generateMiningMsgs,
@@ -951,15 +789,11 @@ export {
   fetchStakingPoolInfo,
   fetchDistributionInfo,
   fetchTaxRate,
-  getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
-  parseTokenInfo,
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
-  parseTokenInfoRawDenom,
-  getTokenOnOraichain,
-  simulateSwapEvm
+  getPairAmountInfo
 };

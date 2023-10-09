@@ -1,7 +1,7 @@
 import { Coin } from '@cosmjs/stargate';
 import { cosmosTokens, TokenItemType, tokens } from 'config/bridgeTokens';
 import { ORAI_BRIDGE_UDENOM } from 'config/constants';
-import { toDisplay } from 'libs/utils';
+import { toDisplay } from '@oraichain/oraidex-common';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -22,11 +22,11 @@ export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean)
       }
 
       const data: readonly Coin[] = uniqBy(
-        cosmosTokens.filter(token => !token.contractAddress && token.chainId === 'oraibridge-subnet-2'),
-        c => c.denom
+        cosmosTokens.filter((token) => !token.contractAddress && token.chainId === 'oraibridge-subnet-2'),
+        (c) => c.denom
       )
-        .map(token => ({ denom: token.denom, amount: amounts[token.denom] }))
-        .filter(coin => Number(coin.amount) > 0);
+        .map((token) => ({ denom: token.denom, amount: amounts[token.denom] }))
+        .filter((coin) => Number(coin.amount) > 0);
 
       const remainingOraib = data
         .reduce((acc, item) => {

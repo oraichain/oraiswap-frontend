@@ -1,5 +1,4 @@
 import { Pairs } from 'config/pools';
-import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import {
@@ -15,7 +14,6 @@ import { TokenItemType, assetInfoMap, tokenMap, oraichainTokens } from 'config/b
 import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import {
@@ -23,12 +21,12 @@ import {
   fetchAllTokenAssetPools,
   fetchPoolInfoAmount,
   fetchTokenInfos,
-  getPairAmountInfo,
-  parseTokenInfo
+  getPairAmountInfo
 } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
+import { atomic, parseAssetInfo, parseTokenInfo, toDecimal, validateNumber } from '@oraichain/oraidex-common';
 
 export type PairInfoData = {
   pair: PairInfoExtend;

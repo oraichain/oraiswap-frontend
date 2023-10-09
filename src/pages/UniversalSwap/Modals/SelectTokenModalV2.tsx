@@ -3,11 +3,12 @@ import SearchInput from 'components/SearchInput';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { CustomChainInfo } from 'config/chainInfos';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
+import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC, useRef } from 'react';
 import styles from './SelectTokenModalV2.module.scss';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 
@@ -30,14 +31,14 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  setSearchTokenName,
+  setSearchTokenName
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
 
   useOnClickOutside(ref, () => {
-    setSearchTokenName('')
-    close()
+    setSearchTokenName('');
+    close();
   });
 
   return (
@@ -46,9 +47,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
         <SearchInput
           isBorder
           placeholder="Search Token"
-          onSearch={(tokenName) =>
-            setSearchTokenName(tokenName.toUpperCase())
-          }
+          onSearch={(tokenName) => setSearchTokenName(tokenName.toUpperCase())}
         />
       </div>
       <div className={cx('options')}>
@@ -88,14 +87,19 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
               key={key}
               onClick={() => {
                 setToken(key);
-                setSearchTokenName('')
+                setSearchTokenName('');
                 close();
               }}
             >
-              {theme === 'light'
-                ? item.IconLight ? <item.IconLight className={cx('logo')} /> : <item.Icon className={cx('logo')} />
-                : <item.Icon className={cx('logo')} />
-              }
+              {theme === 'light' ? (
+                item.IconLight ? (
+                  <item.IconLight className={cx('logo')} />
+                ) : (
+                  <item.Icon className={cx('logo')} />
+                )
+              ) : (
+                <item.Icon className={cx('logo')} />
+              )}
               <div className={cx('grow')}>
                 <div>{title}</div>
                 <div className={cx('org')}>{org}</div>

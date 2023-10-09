@@ -1,9 +1,9 @@
 import { USDT_TRON_CONTRACT } from 'config/constants';
-import { ethToTronAddress } from 'helper';
 import { chainInfos } from 'config/chainInfos';
-import Metamask from 'libs/metamask';
 import { IERC20Upgradeable__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
+import { ethToTronAddress } from '@oraichain/oraidex-common';
+import Metamask from 'libs/metamask';
 
 describe('bigint', () => {
   it('web3-tron-happy-path', async () => {

@@ -16,24 +16,31 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee from 'hooks/useTokenFee';
-import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
-import { combineReceiver } from 'pages/Balance/helpers';
+import { toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import {
-  fetchTokenInfos,
-  getTokenOnOraichain,
-  isEvmNetworkNativeSwapSupported,
-  isEvmSwappable,
-  isSupportedNoPoolSwapEvm
-} from 'rest/api';
+import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
 import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
 import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import {
+  calculateMinReceive,
+  getTokenOnOraichain,
+  network,
+  toAmount,
+  toDisplay,
+  truncDecimals
+} from '@oraichain/oraidex-common';
+import {
+  combineReceiver,
+  isEvmNetworkNativeSwapSupported,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm
+} from '@oraichain/oraidex-universal-swap';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 
@@ -157,12 +164,14 @@ const SwapComponent: React.FC<{
   }, [fromTokenDenom, toTokenDenom, searchTokenName]);
 
   const taxRate = useTaxRate();
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
     toTokenInfoData,
     originalFromToken,
-    originalToToken
+    originalToToken,
+    routerClient
   );
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -170,6 +179,7 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
+    routerClient,
     1
   );
 
@@ -211,13 +221,13 @@ const SwapComponent: React.FC<{
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress);
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
+      const transactionHash = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
         metamaskAddress: checksumMetamaskAddress,
         tronAddress
       });
-      if (result) {
+      if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
+          customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
@@ -230,7 +240,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
+  const FromIcon =
+    theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   // const filteredFromTokens = swapFromTokens.filter(

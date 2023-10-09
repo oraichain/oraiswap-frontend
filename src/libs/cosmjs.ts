@@ -46,33 +46,6 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
   }
 };
 
-const getEncodedExecuteContractMsgs = (senderAddress: string, msgs: cosmwasm.ExecuteInstruction[]): EncodeObject[] => {
-  return msgs.map(({ msg, funds, contractAddress }) => {
-    return {
-      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-      value: MsgExecuteContract.fromPartial({
-        sender: senderAddress,
-        contract: contractAddress,
-        msg: toUtf8(JSON.stringify(msg)),
-        funds: funds ? (funds as Coin[]) : []
-      })
-    };
-  });
-};
-
-const buildMultipleExecuteMessages = (
-  mainMsg?: cosmwasm.ExecuteInstruction,
-  ...preMessages: cosmwasm.ExecuteInstruction[]
-): cosmwasm.ExecuteInstruction[] => {
-  try {
-    var messages: cosmwasm.ExecuteInstruction[] = mainMsg ? [mainMsg] : [];
-    messages.unshift(...preMessages.flat(1));
-    return messages;
-  } catch (error) {
-    console.log('error in buildMultipleExecuteMessages', error);
-  }
-};
-
 class CosmJs {
   static async execute(data: {
     prefix?: string;
@@ -131,6 +104,6 @@ class CosmJs {
   }
 }
 
-export { getCosmWasmClient, collectWallet, getEncodedExecuteContractMsgs, buildMultipleExecuteMessages };
+export { getCosmWasmClient, collectWallet };
 
 export default CosmJs;
