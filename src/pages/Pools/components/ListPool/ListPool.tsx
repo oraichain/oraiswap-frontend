@@ -10,8 +10,8 @@ import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
-import { PairInfoData, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { StakeByUserResponse } from 'pages/Pools/hookV3';
+import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { useGetMyStake, useGetPools } from 'pages/Pools/hookV3';
 import { memo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
@@ -19,31 +19,31 @@ import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
 
-type ListPoolsProps = {
-  pairInfos: PairInfoData[];
-  pools: PoolInfoResponse[];
-  myStakes: StakeByUserResponse[];
-};
-
 type PoolTableData = PoolInfoResponse & {
   reward: string[];
   myStakedLP: number;
   earned: number;
 };
 
-export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools, myStakes }) => {
-  const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
+export const ListPools = memo(() => {
+  const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
   const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
 
   const [cachedReward] = useConfigReducer('rewardPools');
+  const [address] = useConfigReducer('address');
   const theme = useTheme();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setFilteredPairInfos(pairInfos);
-  }, [pairInfos]);
+  const pools = useGetPools();
+  const { myStakes } = useGetMyStake({
+    stakerAddress: address
+  });
 
-  const poolTableData: PoolTableData[] = pools.map((pool) => {
+  useEffect(() => {
+    setFilteredPools(pools);
+  }, [pools]);
+
+  const poolTableData: PoolTableData[] = filteredPools.map((pool) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
     const stakingAssetInfo = Pairs.getStakingAssetInfo([
       JSON.parse(pool.firstAssetInfo),
@@ -163,10 +163,10 @@ export const ListPools = memo<ListPoolsProps>(({ pairInfos, pools, myStakes }) =
 
   return (
     <div className={styles.listpools}>
-      <Filter setFilteredPairInfos={setFilteredPairInfos} pairInfos={pairInfos} />
+      <Filter setFilteredPools={setFilteredPools} filteredPools={filteredPools} />
 
       <div className={styles.listpools_list}>
-        {filteredPairInfos.length > 0 ? (
+        {filteredPools.length > 0 ? (
           <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
         ) : (
           <div className={styles.no_data}>

@@ -107,9 +107,7 @@ export const useFetchLpPoolsV3 = (lpAddresses: string[]) => {
 
   useEffect(() => {
     if (lpAddresses.length > 0 && address) {
-      console.log(lpAddresses, address);
-      console.log('refetch');
-      // fetchLpPool();
+      fetchLpPool();
     }
   }, [lpAddresses, address]);
 };
