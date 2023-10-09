@@ -5,7 +5,13 @@ import {
   MulticallQueryClient,
   MulticallReadOnlyInterface
 } from '@oraichain/common-contracts-sdk';
-import { OraiswapStakingQueryClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import {
+  OraiswapStakingQueryClient,
+  OraiswapStakingTypes,
+  OraiswapTokenQueryClient,
+  OraiswapTokenTypes,
+  PairInfo
+} from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
@@ -224,4 +230,23 @@ export const fetchRewardInfoV3 = async (
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
   const data = await stakingContract.rewardInfo({ assetInfo, stakerAddr });
   return data;
+};
+
+async function fetchTokenInfo(tokenContractAddress: string): Promise<OraiswapTokenTypes.TokenInfoResponse> {
+  if (!tokenContractAddress) return;
+  const tokenContract = new OraiswapTokenQueryClient(window.client, tokenContractAddress);
+  return await tokenContract.tokenInfo();
+}
+
+export const useGetLpPoolAmount = (tokenContractAddress: string) => {
+  const { data: lpTokenInfoData } = useQuery(
+    ['lp-info', tokenContractAddress],
+    () => fetchTokenInfo(tokenContractAddress),
+    {
+      enabled: !!tokenContractAddress,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  return { lpTokenInfoData };
 };
