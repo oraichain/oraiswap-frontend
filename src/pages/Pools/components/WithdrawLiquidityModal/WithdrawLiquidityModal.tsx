@@ -25,7 +25,14 @@ import styles from './WithdrawLiquidityModal.module.scss';
 
 const cx = cn.bind(styles);
 
-const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityChange, myLpUsdt, myLpBalance }) => {
+export const WithdrawLiquidityModal: FC<ModalProps> = ({
+  isOpen,
+  close,
+  open,
+  onLiquidityChange,
+  myLpUsdt,
+  myLpBalance
+}) => {
   const [theme] = useConfigReducer('theme');
   let { poolUrl } = useParams();
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
@@ -71,7 +78,7 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidi
         handleOptions: { funds: msg.sent_funds } as HandleOptions
       });
 
-      console.log('result provide tx hash: ', result);
+      console.log('result withdraw tx hash: ', result);
 
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
@@ -247,5 +254,3 @@ const WithdrawLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidi
     </Modal>
   );
 };
-
-export default WithdrawLiquidityModal;

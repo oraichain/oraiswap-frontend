@@ -1,4 +1,3 @@
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as ArrowRightIcon } from 'assets/icons/ic_arrow_right.svg';
 import { ReactComponent as DepositIcon } from 'assets/icons/ic_deposit.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_stake.svg';
@@ -10,28 +9,23 @@ import img_coin from 'assets/images/img_coin.png';
 import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
 import { CW20_DECIMALS } from 'config/constants';
-import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
-import { fetchLpPoolsFromContract, useGetMyStake, useGetPoolDetail, useGetPools } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetPoolDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { FC, useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { updateLpPools } from 'reducer/token';
-import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
-import WithdrawLiquidityModal from '../WithdrawLiquidityModal/WithdrawLiquidityModal';
-import styles from './MyPoolInfo.module.scss';
+import { AddLiquidityModal } from '../AddLiquidityModal';
 import { StakeLPModal } from '../StakeLPModal';
 import { UnstakeLPModal } from '../UnstakeLPModal/';
+import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
+import styles from './MyPoolInfo.module.scss';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
-type Props = { myLpBalance: bigint };
-export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
+type Props = { myLpBalance: bigint; handleLiquidityChange: () => void };
+export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) => {
   const theme = useTheme();
-  const dispatch = useDispatch();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
   const [modal, setModal] = useState<ModalPool>();
@@ -39,17 +33,13 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
     myStakeInLp: 0n,
     myLiquidityInUsdt: 0n
   });
-  const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
-  const pools = useGetPools();
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { totalStaked } = useGetMyStake({
     stakerAddress: address,
     pairDenoms: poolUrl
   });
-
-  const { lpTokenInfoData, refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
+  const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
   useEffect(() => {
     if (!poolDetail.info) return;
@@ -66,24 +56,6 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
       myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt))
     });
   }, [lpTokenInfoData, myLpBalance, poolDetail.info, totalStaked]);
-
-  const refetchAllLpPools = useCallback(async () => {
-    if (pools.length === 0) return;
-    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
-    const lpTokenData = await fetchLpPoolsFromContract(
-      lpAddresses,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  }, [pools]);
-
-  const handleLiquidityChange = useCallback(() => {
-    refetchPairAmountInfo();
-    refetchLpTokenInfoData();
-    refetchAllLpPools();
-    loadTokenAmounts({ oraiAddress: address });
-  }, [address, pools]);
 
   return (
     <section className={styles.myPoolInfo}>
@@ -162,6 +134,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
           onLiquidityChange={handleLiquidityChange}
+          pairDenoms={poolUrl}
         />
       )}
       {modal === 'withdraw' && (

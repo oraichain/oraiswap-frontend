@@ -20,7 +20,6 @@ import { useGetPoolDetail } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -28,8 +27,7 @@ import styles from './AddLiquidityModal.module.scss';
 
 const cx = cn.bind(styles);
 
-const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityChange }) => {
-  let { poolUrl } = useParams();
+export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityChange, pairDenoms }) => {
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
 
@@ -40,7 +38,8 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityCha
   const [estimatedShare, setEstimatedShare] = useState(0);
 
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
+
+  const poolDetail = useGetPoolDetail({ pairDenoms });
   const { token1, token2, info: pairInfoData } = poolDetail;
   const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
 
@@ -195,7 +194,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityCha
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
   return (
-    <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
+    <Modal isOpen={isOpen} close={close} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
         <div className={cx('header')}>
           <div className={cx('title', theme)}>Deposit</div>
@@ -351,5 +350,3 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityCha
     </Modal>
   );
 };
-
-export default AddLiquidityModal;

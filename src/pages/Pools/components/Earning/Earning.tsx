@@ -1,21 +1,20 @@
-import { useQuery } from '@tanstack/react-query';
+import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as DownIcon } from 'assets/icons/ic_down.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, cw20TokenMap, tokenMap } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { ORAI, xOCH_PRICE } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
-import { fetchRewardInfoV3, useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
@@ -25,16 +24,17 @@ type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
   pendingWithdraw: bigint;
 };
-export const Earning = () => {
+export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }) => {
   let { poolUrl } = useParams();
   const theme = useTheme();
   const [address] = useConfigReducer('address');
   const [cachePrices] = useConfigReducer('coingecko');
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>([]);
   const [stakingToken, setStakingToken] = useState<TokenItemType>();
+  const [stakingAssetInfo, setStakingAssetInfo] = useState<AssetInfo>();
   const [actionLoading, setActionLoading] = useState(false);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
-  const loadTokenAmounts = useLoadTokens();
+  const { info } = poolDetailData;
 
   useEffect(() => {
     if (poolDetailData?.token1?.name === ORAI) {
@@ -44,28 +44,29 @@ export const Earning = () => {
     }
   }, [poolDetailData]);
 
-  const stakingAssetInfo =
-    poolDetailData.info &&
-    Pairs.getStakingAssetInfo([
-      JSON.parse(poolDetailData.info.firstAssetInfo),
-      JSON.parse(poolDetailData.info.secondAssetInfo)
+  useEffect(() => {
+    if (!info) return;
+    const stakingAssetInfo = Pairs.getStakingAssetInfo([
+      JSON.parse(info.firstAssetInfo),
+      JSON.parse(info.secondAssetInfo)
     ]);
+    setStakingAssetInfo(stakingAssetInfo);
+  }, [info]);
 
-  const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', address, stakingAssetInfo],
-    () => fetchRewardInfoV3(address, stakingAssetInfo!),
-    { enabled: !!address && !!stakingAssetInfo, refetchOnWindowFocus: false }
-  );
+  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
+    address,
+    stakingAssetInfo
+  });
 
   useEffect(() => {
-    if (totalRewardInfoData && poolDetailData) {
+    if (totalRewardInfoData && info) {
       setNewReward();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalRewardInfoData, poolDetailData]);
+  }, [totalRewardInfoData, info]);
 
   const setNewReward = async () => {
-    const rewardPerSecInfoData = JSON.parse(poolDetailData.info.rewardPerSec);
+    const rewardPerSecInfoData = JSON.parse(info.rewardPerSec);
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
 
     const totalRewardPerSec = rewardPerSecInfoData.assets
@@ -114,8 +115,8 @@ export const Earning = () => {
 
   const onBondingAction = () => {
     refetchRewardInfo();
-    loadTokenAmounts({ oraiAddress: address });
     setPendingRewards([]);
+    onLiquidityChange();
   };
 
   const handleClaimReward = async () => {
@@ -137,13 +138,11 @@ export const Earning = () => {
         gasAmount: { denom: ORAI, amount: '0' },
         handleOptions: { funds: msg.sent_funds }
       });
-      console.log('result provide tx hash: ', result);
 
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        setActionLoading(false);
         onBondingAction();
       }
     } catch (error) {
@@ -158,39 +157,43 @@ export const Earning = () => {
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
         {pendingRewards.length > 0 &&
-          pendingRewards.map((pendingReward, idx) => (
-            <div className={styles.assetEarning} key={idx}>
-              <div className={styles.title}>
-                {theme === 'dark' ? (
-                  <pendingReward.Icon style={{ width: 18, marginRight: 6 }} />
-                ) : (
-                  <pendingReward.IconLight style={{ width: 18, marginRight: 6 }} />
-                )}
-                <span>{pendingReward.name} Earning</span>
+          pendingRewards.map((pendingReward, idx) => {
+            return (
+              <div className={styles.assetEarning} key={idx}>
+                <div className={styles.title}>
+                  {pendingReward.Icon ? (
+                    theme === 'dark' ? (
+                      <pendingReward.Icon style={{ width: 18, marginRight: 6 }} />
+                    ) : (
+                      <pendingReward.IconLight style={{ width: 18, marginRight: 6 }} />
+                    )
+                  ) : null}
+                  <span>{pendingReward.denom.toUpperCase()} Earning</span>
+                </div>
+                <div className={styles.amount}>
+                  <TokenBalance
+                    balance={{
+                      amount: pendingReward.amount,
+                      denom: pendingReward?.denom.toUpperCase(),
+                      decimals: 6
+                    }}
+                    decimalScale={6}
+                  />
+                </div>
+                <div className={styles.amountOrai}>
+                  <TokenBalance
+                    balance={getUsd(
+                      pendingReward.amount,
+                      pendingReward,
+                      cachePrices,
+                      pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
+                    )}
+                    decimalScale={4}
+                  />
+                </div>
               </div>
-              <div className={styles.amount}>
-                <TokenBalance
-                  balance={{
-                    amount: pendingReward.amount,
-                    denom: pendingReward?.denom.toUpperCase(),
-                    decimals: 6
-                  }}
-                  decimalScale={6}
-                />
-              </div>
-              <div className={styles.amountOrai}>
-                <TokenBalance
-                  balance={getUsd(
-                    pendingReward.amount,
-                    pendingReward,
-                    cachePrices,
-                    pendingReward.coinGeckoId === 'scatom' && 0.4
-                  )}
-                  decimalScale={4}
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
 
       <div className={styles.claim}>

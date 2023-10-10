@@ -26,10 +26,9 @@ const LIST_FILTER_POOL = [
 ];
 
 type FilterProps = {
-  filteredPools: PoolInfoResponse[];
   setFilteredPools: React.Dispatch<React.SetStateAction<PoolInfoResponse[]>>;
 };
-export const Filter: FC<FilterProps> = ({ filteredPools, setFilteredPools }) => {
+export const Filter: FC<FilterProps> = ({ setFilteredPools }) => {
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const [searchValue, setSearchValue] = useState('');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);

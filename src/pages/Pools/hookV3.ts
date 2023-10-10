@@ -5,13 +5,7 @@ import {
   MulticallQueryClient,
   MulticallReadOnlyInterface
 } from '@oraichain/common-contracts-sdk';
-import {
-  OraiswapStakingQueryClient,
-  OraiswapStakingTypes,
-  OraiswapTokenQueryClient,
-  OraiswapTokenTypes,
-  PairInfo
-} from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapStakingQueryClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
@@ -124,17 +118,15 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
     return res.data;
   } catch (e) {
     console.error('getPools', e);
-    return [];
   }
 };
 export const useGetPools = () => {
   const { data: pools } = useQuery(['pools'], getPools, {
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 5
+    initialData: []
   });
 
-  return pools ?? [];
+  return pools;
 };
 
 export type GetStakedByUserQuery = {
@@ -149,24 +141,21 @@ export type StakeByUserResponse = {
   stakingAmountInUsdt: number;
 };
 
+const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {
+  try {
+    const res = await axios.get(withBaseApiUrl('/v1/my-staking/'), { params: queries });
+    return res.data;
+  } catch (e) {
+    console.error('getMyStake', e);
+  }
+};
 export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUserQuery) => {
-  const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {
-    try {
-      const res = await axios.get(withBaseApiUrl('/v1/my-staking/'), { params: queries });
-      return res.data;
-    } catch (e) {
-      console.error('getMyStake', e);
-      return [];
-    }
-  };
-
   const { data: myStakes } = useQuery(
     ['myStakes', stakerAddress, pairDenoms, tf],
     () => getMyStake({ stakerAddress, pairDenoms, tf }),
     {
+      initialData: [],
       refetchOnWindowFocus: true,
-      staleTime: 1000 * 60 * 5,
-      cacheTime: 1000 * 60 * 5,
       enabled: !!stakerAddress
     }
   );
@@ -188,7 +177,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
   return {
     totalStaked,
     totalEarned,
-    myStakes: myStakes || []
+    myStakes
   };
 };
 
@@ -230,21 +219,12 @@ export const fetchRewardInfoV3 = async (
   return data;
 };
 
-async function fetchTokenInfo(tokenContractAddress: string): Promise<OraiswapTokenTypes.TokenInfoResponse> {
-  if (!tokenContractAddress) return;
-  const tokenContract = new OraiswapTokenQueryClient(window.client, tokenContractAddress);
-  return await tokenContract.tokenInfo();
-}
-
-export const useGetLpPoolAmount = (tokenContractAddress: string) => {
-  const { data: lpTokenInfoData } = useQuery(
-    ['lp-info', tokenContractAddress],
-    () => fetchTokenInfo(tokenContractAddress),
-    {
-      enabled: !!tokenContractAddress,
-      refetchOnWindowFocus: false
-    }
+export const useGetRewardInfo = ({ address, stakingAssetInfo }: { address: string; stakingAssetInfo: AssetInfo }) => {
+  const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
+    ['reward-info', address, stakingAssetInfo],
+    () => fetchRewardInfoV3(address, stakingAssetInfo!),
+    { enabled: !!address && !!stakingAssetInfo, refetchOnWindowFocus: false }
   );
 
-  return { lpTokenInfoData };
+  return { totalRewardInfoData, refetchRewardInfo };
 };
