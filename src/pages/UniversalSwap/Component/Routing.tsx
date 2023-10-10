@@ -2,7 +2,9 @@ import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.sv
 import { ReactComponent as LineIcon } from 'assets/icons/line.svg';
 import OraiIcon from 'assets/icons/oraichain_light.svg';
 import styles from './Routing.module.scss';
+
 import cn from 'classnames/bind';
+import { StepByStep } from './StepByStep';
 
 const cx = cn.bind(styles);
 export const RoutingSection: React.FC<{}> = () => {
@@ -12,33 +14,10 @@ export const RoutingSection: React.FC<{}> = () => {
         <div className={cx('progresses')}>
           <div className={cx('label')}>Order Routing</div>
           <div className={cx('progress')}>
-            <div className={cx('point')}>
-              <img src={OraiIcon} width={20} height={20} alt="arrow" />
-              <p>0.00 ORAI</p>
-            </div>
-            <div>
-              <div className={cx('line')}>
-                <LineIcon />
-                <span>Active</span>
-              </div>
-            </div>
-            <div className={cx('point')}>
-              <img src={OraiIcon} width={20} height={20} alt="arrow" />
-              <p>0.00 ORAI</p>
-            </div>
-            <div>
-              <div className={cx('line')}>
-                <LineIcon />
-                <span>Active</span>
-              </div>
-            </div>
-            <div className={cx('point')}>
-              <img src={OraiIcon} width={20} height={20} alt="arrow" />
-              <p>0.00 ORAI</p>
-            </div>
+            <StepByStep />
           </div>
         </div>
-        <div className={cx('info')}>
+        <div className={cx('info-progress')}>
           <div>
             <div className={cx('pool')}>
               <div className={cx('key')}>Oraichain Pool: </div>
