@@ -4,7 +4,7 @@ import { fetchTokenInfo, getPairAmountInfo } from 'rest/api';
 import { PoolDetail } from 'types/pool';
 
 export const useGetPairInfo = ({ token1, token2, info: pairInfoData }: PoolDetail) => {
-  const { data: lpTokenInfoData } = useQuery(
+  const { data: lpTokenInfoData, refetch: refetchLpTokenInfoData } = useQuery(
     ['token-info', pairInfoData],
     () =>
       fetchTokenInfo({
@@ -28,5 +28,5 @@ export const useGetPairInfo = ({ token1, token2, info: pairInfoData }: PoolDetai
     }
   );
 
-  return { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo };
+  return { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo, refetchLpTokenInfoData };
 };

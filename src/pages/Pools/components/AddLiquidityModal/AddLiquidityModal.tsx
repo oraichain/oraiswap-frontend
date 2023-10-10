@@ -1,3 +1,4 @@
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
@@ -14,13 +15,15 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
+import { estimateShare } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -30,26 +33,28 @@ const cx = cn.bind(styles);
 
 const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   let { poolUrl } = useParams();
+  const dispatch = useDispatch();
   const { data: prices } = useCoinGeckoPrices();
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const pools = useGetPools();
 
-  const [amountToken1, setAmountToken1] = useState<bigint>(BigInt(0));
-  const [amountToken2, setAmountToken2] = useState<bigint>(BigInt(0));
+  const [baseAmount, setBaseAmount] = useState<bigint>(BigInt(0));
+  const [quoteAmount, setQuoteAmount] = useState<bigint>(BigInt(0));
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
+  const [estimatedShare, setEstimatedShare] = useState(0);
 
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
-
   const { token1, token2, info: pairInfoData } = poolDetail;
-  const { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo } = useGetPairInfo(poolDetail);
+  const { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo, refetchLpTokenInfoData } =
+    useGetPairInfo(poolDetail);
 
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.liquidityAddr]?.balance ?? '0' : 0);
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
+  const totalBaseAmount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
+  const totalQuoteAmount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
@@ -79,25 +84,50 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   } = useTokenAllowance(pairInfoData?.pairAddr, token2);
 
   useEffect(() => {
-    if (recentInput === 1 && amountToken1 > 0) {
-      setAmountToken2((amountToken1 * token2Amount) / token1Amount);
-    } else if (recentInput === 2 && amountToken2 > BigInt(0))
-      setAmountToken1((amountToken2 * token1Amount) / token2Amount);
+    if (baseAmount === 0n || quoteAmount === 0n) return;
+
+    const share = estimateShare({
+      baseAmount: Number(baseAmount),
+      quoteAmount: Number(quoteAmount),
+      totalShare: Number(lpTokenInfoData?.total_supply),
+      totalBaseAmount: Number(totalBaseAmount),
+      totalQuoteAmount: Number(totalQuoteAmount)
+    });
+    setEstimatedShare(Math.trunc(share));
+  }, [baseAmount, quoteAmount, lpTokenInfoData, totalBaseAmount, totalQuoteAmount]);
+
+  useEffect(() => {
+    if (recentInput === 1 && baseAmount > 0) {
+      setQuoteAmount((baseAmount * totalQuoteAmount) / totalBaseAmount);
+    } else if (recentInput === 2 && quoteAmount > BigInt(0))
+      setBaseAmount((quoteAmount * totalBaseAmount) / totalQuoteAmount);
   }, [pairAmountInfoData]);
 
   const onChangeAmount1 = (value: bigint) => {
     setRecentInput(1);
-    setAmountToken1(value);
-    if (token1Amount > 0) setAmountToken2((value * token2Amount) / token1Amount);
+    setBaseAmount(value);
+    if (totalBaseAmount > 0) setQuoteAmount((value * totalQuoteAmount) / totalBaseAmount);
   };
   const onChangeAmount2 = (value: bigint) => {
     setRecentInput(2);
-    setAmountToken2(value);
-    if (token2Amount > 0) setAmountToken1((value * token1Amount) / token2Amount);
+    setQuoteAmount(value);
+    if (totalQuoteAmount > 0) setBaseAmount((value * totalBaseAmount) / totalQuoteAmount);
+  };
+
+  const refetchAllLpPools = async () => {
+    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+    const lpTokenData = await fetchLpPoolsFromContract(
+      lpAddresses,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
+    setCachedLpPools(lpTokenData);
   };
 
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
+    refetchLpTokenInfoData();
+    refetchAllLpPools();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -237,14 +267,14 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(amountToken1, token1.decimals)}
+                value={toDisplay(baseAmount, token1.decimals)}
                 allowNegative={false}
                 onChange={(e: any) => {
                   onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
                 }}
               />
               <div className={cx('amount-usd')}>
-                <TokenBalance balance={getUsd(amountToken1, token1, prices)} decimalScale={2} />
+                <TokenBalance balance={getUsd(baseAmount, token1, prices)} decimalScale={2} />
               </div>
             </div>
           </div>
@@ -287,13 +317,13 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
                 decimalScale={6}
                 placeholder={'0'}
                 allowNegative={false}
-                value={toDisplay(amountToken2, token2.decimals)}
+                value={toDisplay(quoteAmount, token2.decimals)}
                 onChange={(e: any) => {
                   onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
                 }}
               />
               <div className={cx('amount-usd')}>
-                <TokenBalance balance={getUsd(amountToken2, token2, prices)} decimalScale={2} />
+                <TokenBalance balance={getUsd(quoteAmount, token2, prices)} decimalScale={2} />
               </div>
             </div>
           </div>
@@ -306,12 +336,12 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
           </div>
           <div className={cx('row', theme)}>
             <div className={cx('row-title')}>
-              <span>Received</span>
+              <span>Receive</span>
             </div>
             <div className={cx('row-amount')}>
               <TokenBalance
                 balance={{
-                  amount: lpTokenBalance,
+                  amount: estimatedShare.toString(),
                   denom: lpTokenInfoData?.symbol,
                   decimals: lpTokenInfoData?.decimals
                 }}
@@ -322,9 +352,9 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         </div>
         {(() => {
           let disableMsg: string;
-          if (amountToken1 <= 0 || amountToken2 <= 0) disableMsg = 'Enter an amount';
-          if (amountToken1 > token1Balance) disableMsg = `Insufficient ${token1?.name} balance`;
-          else if (amountToken2 > token2Balance) disableMsg = `Insufficient ${token2?.name} balance`;
+          if (baseAmount <= 0 || quoteAmount <= 0) disableMsg = 'Enter an amount';
+          if (baseAmount > token1Balance) disableMsg = `Insufficient ${token1?.name} balance`;
+          else if (quoteAmount > token2Balance) disableMsg = `Insufficient ${token2?.name} balance`;
 
           const disabled =
             actionLoading ||
@@ -336,7 +366,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             !!disableMsg;
           return (
             <div className={cx('btn-confirm')}>
-              <Button onClick={() => handleAddLiquidity(amountToken1, amountToken2)} type="primary" disabled={disabled}>
+              <Button onClick={() => handleAddLiquidity(baseAmount, quoteAmount)} type="primary" disabled={disabled}>
                 {actionLoading && <Loader width={30} height={30} />}
                 {disableMsg || 'Confirm'}
               </Button>

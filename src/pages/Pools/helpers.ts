@@ -365,6 +365,41 @@ export const toFixedIfNecessary = (value: string, dp: number): number => {
   return +parseFloat(value).toFixed(dp);
 };
 
+/**
+ * Estmate LP share when provide liquidity pool
+ * @param baseAmount input base amount
+ * @param quoteAmount input quote amount
+ * @param totalShare total LP share of pool
+ * @param totalBaseAmount total base amount in pool
+ * @param totalQuoteAmount total quote amount in pool
+ * @returns // min(1, 2)
+  // 1. sqrt(deposit_0 * exchange_rate_0_to_1 * deposit_0) * (total_share / sqrt(pool_0 * pool_1))
+  // == deposit_0 * total_share / pool_0
+  // 2. sqrt(deposit_1 * exchange_rate_1_to_0 * deposit_1) * (total_share / sqrt(pool_1 * pool_1))
+  // == deposit_1 * total_share / pool_1
+ */
+export const estimateShare = ({
+  baseAmount,
+  quoteAmount,
+  totalShare,
+  totalBaseAmount,
+  totalQuoteAmount
+}: {
+  baseAmount: number;
+  quoteAmount: number;
+  totalShare: number;
+  totalBaseAmount: number;
+  totalQuoteAmount: number;
+}): number => {
+  if (totalBaseAmount === 0 || totalQuoteAmount === 0) return 0;
+
+  const share = Math.min(
+    Number((baseAmount * totalShare) / totalBaseAmount),
+    Number((quoteAmount * totalShare) / totalQuoteAmount)
+  );
+  return share;
+};
+
 export {
   fetchAprResult,
   fetchCacheLpPools,
