@@ -1142,9 +1142,11 @@ describe.only('IBCModule', () => {
         });
 
         cosmosChain.ibc.addMiddleWare((msg, app) => {
-          const data = msg.data.packet as IbcPacket;
-          if (Number(data.timeout.timestamp) < cosmosChain.time) {
-            throw new GenericError('timeout at ' + data.timeout.timestamp);
+          if ('packet' in msg.data) {
+            const data = msg.data.packet as IbcPacket;
+            if (Number(data.timeout.timestamp) < cosmosChain.time) {
+              throw new GenericError('timeout at ' + data.timeout.timestamp);
+            }
           }
         });
       });
