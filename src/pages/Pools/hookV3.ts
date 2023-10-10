@@ -188,7 +188,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
   return {
     totalStaked,
     totalEarned,
-    myStakes
+    myStakes: myStakes || []
   };
 };
 

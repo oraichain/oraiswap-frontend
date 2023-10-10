@@ -24,7 +24,7 @@ import { updateLpPools } from 'reducer/token';
 import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 import WithdrawLiquidityModal from '../WithdrawLiquidityModal/WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
-import StakeLPModal from './StakeLPModal/StakeLPModal';
+import { StakeLPModal } from '../StakeLPModal';
 import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
@@ -175,13 +175,23 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
         />
       )}
       {modal === 'stake' && (
-        <StakeLPModal isOpen={modal === 'stake'} open={() => setModal('stake')} close={() => setModal(undefined)} />
+        <StakeLPModal
+          isOpen={modal === 'stake'}
+          open={() => setModal('stake')}
+          close={() => setModal(undefined)}
+          onLiquidityChange={handleLiquidityChange}
+          myLpUsdt={lpBalance.myLiquidityInUsdt}
+          myLpBalance={myLpBalance}
+        />
       )}
       {modal === 'unstake' && (
         <UnstakeLPModal
           isOpen={modal === 'unstake'}
           open={() => setModal('unstake')}
           close={() => setModal(undefined)}
+          onLiquidityChange={handleLiquidityChange}
+          myLpUsdt={lpBalance.myLiquidityInUsdt}
+          myLpBalance={myLpBalance}
         />
       )}
     </section>
