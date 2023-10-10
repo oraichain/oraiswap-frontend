@@ -1,4 +1,3 @@
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
@@ -12,18 +11,16 @@ import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs, { HandleOptions } from 'libs/cosmjs';
 import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
 import { estimateShare } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
-import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from 'pages/Pools/hookV3';
+import { useGetPoolDetail } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { updateLpPools } from 'reducer/token';
 import { generateContractMessages, generateConvertErc20Cw20Message, ProvideQuery, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -31,15 +28,10 @@ import styles from './AddLiquidityModal.module.scss';
 
 const cx = cn.bind(styles);
 
-const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
+const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityChange }) => {
   let { poolUrl } = useParams();
-  const dispatch = useDispatch();
   const { data: prices } = useCoinGeckoPrices();
-  const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-  const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
-  const pools = useGetPools();
 
   const [baseAmount, setBaseAmount] = useState<bigint>(BigInt(0));
   const [quoteAmount, setQuoteAmount] = useState<bigint>(BigInt(0));
@@ -50,8 +42,7 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { token1, token2, info: pairInfoData } = poolDetail;
-  const { lpTokenInfoData, pairAmountInfoData, refetchPairAmountInfo, refetchLpTokenInfoData } =
-    useGetPairInfo(poolDetail);
+  const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
 
   const totalBaseAmount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
   const totalQuoteAmount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
@@ -112,23 +103,6 @@ const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     setRecentInput(2);
     setQuoteAmount(value);
     if (totalQuoteAmount > 0) setBaseAmount((value * totalBaseAmount) / totalQuoteAmount);
-  };
-
-  const refetchAllLpPools = async () => {
-    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
-    const lpTokenData = await fetchLpPoolsFromContract(
-      lpAddresses,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  };
-
-  const onLiquidityChange = () => {
-    refetchPairAmountInfo();
-    refetchLpTokenInfoData();
-    refetchAllLpPools();
-    loadTokenAmounts({ oraiAddress: address });
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {

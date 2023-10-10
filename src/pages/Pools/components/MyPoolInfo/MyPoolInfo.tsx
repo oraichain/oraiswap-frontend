@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as ArrowRightIcon } from 'assets/icons/ic_arrow_right.svg';
 import { ReactComponent as DepositIcon } from 'assets/icons/ic_deposit.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_stake.svg';
@@ -9,25 +9,29 @@ import { ReactComponent as WithdrawLightIcon } from 'assets/icons/ic_withdraw_li
 import img_coin from 'assets/images/img_coin.png';
 import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
 import { CW20_DECIMALS } from 'config/constants';
+import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
-import { useGetMyStake, useGetPoolDetail } from 'pages/Pools/hookV3';
-import { FC, useEffect, useState } from 'react';
+import { fetchLpPoolsFromContract, useGetMyStake, useGetPoolDetail, useGetPools } from 'pages/Pools/hookV3';
+import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { fetchTokenInfo } from 'rest/api';
+import { updateLpPools } from 'reducer/token';
 import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
+import WithdrawLiquidityModal from '../WithdrawLiquidityModal/WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
 import StakeLPModal from './StakeLPModal/StakeLPModal';
 import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
-import WithdrawLiquidityModal from './WithdrawLiquidityModal/WithdrawLiquidityModal';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint };
 export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
   const [modal, setModal] = useState<ModalPool>();
@@ -35,30 +39,24 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
     myStakeInLp: 0n,
     myLiquidityInUsdt: 0n
   });
-  const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
+  const loadTokenAmounts = useLoadTokens();
+  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+
+  const pools = useGetPools();
+  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { totalStaked } = useGetMyStake({
     stakerAddress: address,
     pairDenoms: poolUrl
   });
 
-  const { data: lpTokenInfoData } = useQuery(
-    ['token-info'],
-    () =>
-      fetchTokenInfo({
-        contractAddress: poolDetailData?.info.liquidityAddr
-      } as TokenItemType),
-    {
-      enabled: !!poolDetailData,
-      refetchOnWindowFocus: false
-    }
-  );
+  const { lpTokenInfoData, refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
 
   useEffect(() => {
-    if (!poolDetailData.info) return;
+    if (!poolDetail.info) return;
     const totalSupply = lpTokenInfoData?.total_supply;
     if (!totalSupply) return;
 
-    const lpPrice = poolDetailData.info.totalLiquidity / Number(totalSupply);
+    const lpPrice = poolDetail.info.totalLiquidity / Number(totalSupply);
     if (!lpPrice) return;
 
     const myStake = totalStaked / lpPrice;
@@ -67,7 +65,25 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
       myStakeInLp: BigInt(Math.trunc(myStake)),
       myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt))
     });
-  }, [lpTokenInfoData, myLpBalance, poolDetailData.info, totalStaked]);
+  }, [lpTokenInfoData, myLpBalance, poolDetail.info, totalStaked]);
+
+  const refetchAllLpPools = useCallback(async () => {
+    if (pools.length === 0) return;
+    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+    const lpTokenData = await fetchLpPoolsFromContract(
+      lpAddresses,
+      address,
+      new MulticallQueryClient(window.client, network.multicall)
+    );
+    setCachedLpPools(lpTokenData);
+  }, [pools]);
+
+  const handleLiquidityChange = useCallback(() => {
+    refetchPairAmountInfo();
+    refetchLpTokenInfoData();
+    refetchAllLpPools();
+    loadTokenAmounts({ oraiAddress: address });
+  }, [address, pools]);
 
   return (
     <section className={styles.myPoolInfo}>
@@ -145,6 +161,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
           isOpen={modal === 'deposit'}
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
+          onLiquidityChange={handleLiquidityChange}
         />
       )}
       {modal === 'withdraw' && (
@@ -152,6 +169,9 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance }) => {
           isOpen={modal === 'withdraw'}
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
+          onLiquidityChange={handleLiquidityChange}
+          myLpUsdt={lpBalance.myLiquidityInUsdt}
+          myLpBalance={myLpBalance}
         />
       )}
       {modal === 'stake' && (

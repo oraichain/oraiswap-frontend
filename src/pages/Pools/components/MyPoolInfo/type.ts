@@ -4,4 +4,7 @@ export interface ModalProps {
   open: () => void;
   close: () => void;
   isCloseBtn?: boolean;
+  onLiquidityChange?: () => void;
+  myLpUsdt?: bigint;
+  myLpBalance?: bigint;
 }
