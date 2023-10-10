@@ -112,7 +112,14 @@
 
         &_right {
             position: relative;
-            left: 10px;
+            right: 10px;
+            width: 44px;
+            height: 44px;
+        }
+
+        &_left {
+            width: 44px;
+            height: 44px;
         }
     }
 

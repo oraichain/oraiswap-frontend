@@ -11,6 +11,7 @@ import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  estimateShare,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
@@ -492,6 +493,7 @@ describe('pool', () => {
     });
 
     it.each([
+      ['0.001234', '$0.0012'],
       ['2', '$2'],
       ['2.1', '$2.1'],
       ['2.129', '$2.13'],
@@ -509,6 +511,27 @@ describe('pool', () => {
       ['2.129', 1, 2.1]
     ])('test toFixedIfNecessary should rounds %s to %d decimal places as %f', (value, dp, expected) => {
       expect(toFixedIfNecessary(value, dp)).toBeCloseTo(expected);
+    });
+
+    it.each<[number, number, number]>([
+      [0, 1, 0],
+      [1, 0, 0],
+      [100, 500, 0.02]
+    ])('test-estimateShare-should-return-correctly-share', (totalBaseAmount, totalQuoteAmount, expectedResult) => {
+      // setup
+      const payload = {
+        baseAmount: 1,
+        quoteAmount: 2,
+        totalShare: 5,
+        totalBaseAmount,
+        totalQuoteAmount
+      };
+
+      // act
+      const result = estimateShare(payload);
+
+      // assertion
+      expect(result).toEqual(expectedResult);
     });
   });
 });

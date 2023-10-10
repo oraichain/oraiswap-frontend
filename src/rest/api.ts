@@ -39,6 +39,7 @@ import { IBCInfo } from 'types/ibc';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
+import { BondLP, MiningLP, UnbondLP } from 'types/pool';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -793,6 +794,61 @@ function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) 
   return msgs;
 }
 
+function generateMiningMsgsV3(msg: MiningLP) {
+  const { type, sender, ...params } = msg;
+  let sent_funds;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = network.router;
+  let input;
+  switch (type) {
+    case Type.BOND_LIQUIDITY: {
+      const bondMsg = params as BondLP;
+      // currently only support cw20 token pool
+      input = {
+        send: {
+          contract: network.staking,
+          amount: bondMsg.amount.toString(),
+          msg: toBinary({
+            bond: {
+              asset_info: params.assetInfo
+            }
+          })
+        }
+      };
+      contractAddr = bondMsg.lpAddress;
+      break;
+    }
+    case Type.WITHDRAW_LIQUIDITY_MINING: {
+      input = { withdraw: { asset_info: params.assetInfo } };
+      contractAddr = network.staking;
+      break;
+    }
+    case Type.UNBOND_LIQUIDITY:
+      const unbondMsg = params as UnbondLP;
+      input = {
+        unbond: {
+          asset_info: unbondMsg.assetInfo,
+          amount: unbondMsg.amount.toString()
+        }
+      };
+      contractAddr = network.staking;
+      break;
+    default:
+      break;
+  }
+
+  const msgs = [
+    {
+      contract: contractAddr,
+      msg: Buffer.from(JSON.stringify(input)),
+      sender,
+      sent_funds
+    }
+  ];
+
+  return msgs;
+}
+
 export type Convert = {
   type: Type.CONVERT_TOKEN;
   sender: string;
@@ -950,5 +1006,6 @@ export {
   generateMoveOraib2OraiMessages,
   parseTokenInfoRawDenom,
   getTokenOnOraichain,
-  simulateSwapEvm
+  simulateSwapEvm,
+  generateMiningMsgsV3
 };

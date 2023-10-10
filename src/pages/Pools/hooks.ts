@@ -1,30 +1,29 @@
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { RewardPoolType } from 'reducer/config';
+import { updatePairInfos } from 'reducer/pairs';
 import { updateLpPools, updatePairs } from 'reducer/token';
+import { fetchRewardPerSecInfo } from 'rest/api';
+import axios, { withBaseApiUrl } from 'rest/request';
 import { RootState } from 'store/configure';
+import { PoolInfoResponse } from 'types/pool';
+import { PairInfoExtend } from 'types/token';
 import {
   PairInfoData,
   fetchAprResult,
+  fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairsData,
-  fetchPoolListAndOraiPrice,
-  fetchCacheLpPools
+  fetchPoolListAndOraiPrice
 } from './helpers';
-import { updatePairInfos } from 'reducer/pairs';
-import { PairInfoExtend } from 'types/token';
-import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { fetchRewardPerSecInfo } from 'rest/api';
-import { RewardPoolType } from 'reducer/config';
-import { useQuery } from '@tanstack/react-query';
-import axios, { withBaseApiUrl } from 'rest/request';
-import { PoolInfoResponse } from 'types/pool';
-import { ORAI } from 'config/constants';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -178,15 +177,6 @@ export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
   }, [cachedPairs, pairs]);
 
   return { pairInfos, oraiPrice };
-};
-
-export const useGetPools = () => {
-  const { data: pools } = useQuery(['pools'], () => getPools(), {
-    refetchOnWindowFocus: false
-  });
-
-  console.log({ pools });
-  return pools ?? [];
 };
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
