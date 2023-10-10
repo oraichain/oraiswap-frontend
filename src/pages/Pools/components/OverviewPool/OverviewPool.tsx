@@ -12,9 +12,9 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   const theme = useTheme();
   const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
   const { token1, token2 } = poolDetailData;
+
   const BaseTokenIcon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const QuoteTokenIcon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
-
   return (
     <section className={styles.overview}>
       <div className={styles.totalLiquidity}>

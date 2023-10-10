@@ -153,6 +153,22 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     }
   };
 
+  const generateIcon = (pendingReward: TokenItemTypeExtended) => {
+    return pendingReward.Icon ? (
+      theme === 'light' ? (
+        pendingReward.IconLight ? (
+          <pendingReward.IconLight style={{ width: 18, marginRight: 6 }} />
+        ) : (
+          <pendingReward.Icon style={{ width: 18, marginRight: 6 }} />
+        )
+      ) : (
+        <pendingReward.Icon style={{ width: 18, marginRight: 6 }} />
+      )
+    ) : (
+      <></>
+    );
+  };
+
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
@@ -161,13 +177,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
             return (
               <div className={styles.assetEarning} key={idx}>
                 <div className={styles.title}>
-                  {pendingReward.Icon ? (
-                    theme === 'dark' ? (
-                      <pendingReward.Icon style={{ width: 18, marginRight: 6 }} />
-                    ) : (
-                      <pendingReward.IconLight style={{ width: 18, marginRight: 6 }} />
-                    )
-                  ) : null}
+                  {generateIcon(pendingReward)}
                   <span>{pendingReward.denom.toUpperCase()} Earning</span>
                 </div>
                 <div className={styles.amount}>
