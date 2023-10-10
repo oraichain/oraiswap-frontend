@@ -1,16 +1,19 @@
-import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
 import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import TokenBalance from 'components/TokenBalance';
 import { CW20_DECIMALS } from 'config/constants';
+import useTheme from 'hooks/useTheme';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
+  const theme = useTheme();
   const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
+  const { token1, token2 } = poolDetailData;
+  const BaseTokenIcon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
+  const QuoteTokenIcon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
   return (
     <section className={styles.overview}>
@@ -18,8 +21,8 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         <h3 className={styles.title}>Total Liquidity</h3>
         <div className={styles.totalTop}>
           <div className={styles.pairLogos}>
-            <AiriIcon className={styles.logo1} />
-            <OraiIcon className={styles.logo2} />
+            <BaseTokenIcon className={styles.logo1} />
+            <QuoteTokenIcon className={styles.logo2} />
           </div>
           <div className={styles.pairAmount}>
             <TokenBalance
@@ -34,7 +37,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
             <br />
             <TokenBalance
               balance={{
-                amount: lpTokenInfoData?.total_supply,
+                amount: lpTokenInfoData?.total_supply || '0',
                 decimals: lpTokenInfoData?.decimals
               }}
               className={styles.amountLp}

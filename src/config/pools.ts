@@ -86,6 +86,12 @@ export class Pairs {
         { native_token: { denom: process.env.REACT_APP_ATOM_ORAICHAIN_DENOM } },
         { token: { contract_addr: process.env.REACT_APP_SCATOM_CONTRACT } }
       ]
+    },
+    {
+      asset_infos: [
+        { token: { contract_addr: process.env.REACT_APP_INJECTIVE_CONTRACT } },
+        { native_token: { denom: ORAI } }
+      ]
     }
     // {
     //   asset_infos: [
@@ -130,7 +136,10 @@ export class Pairs {
       let firstInfoIndex = 0;
       let secondInfoIndex = 1;
       // we reverse the pair because the main asset info is not USDT, but the other token
-      if (parseAssetInfo(pair.asset_infos[0]) === process.env.REACT_APP_USDT_CONTRACT) {
+      if (
+        parseAssetInfo(pair.asset_infos[0]) === process.env.REACT_APP_USDT_CONTRACT ||
+        parseAssetInfo(pair.asset_infos[1]) === process.env.REACT_APP_INJECTIVE_CONTRACT
+      ) {
         firstInfoIndex = 1;
         secondInfoIndex = 0;
       }

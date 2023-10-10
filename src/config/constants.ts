@@ -86,6 +86,8 @@ export const ORAIXOCH_INFO = {
   }
 };
 
+export const xOCH_PRICE = 0.4;
+
 // slippage swap
 export const OPTIONS_SLIPPAGE = [1, 3, 5];
 export const DEFAULT_SLIPPAGE = OPTIONS_SLIPPAGE[0];

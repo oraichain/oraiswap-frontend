@@ -1,21 +1,19 @@
-import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import { Button } from 'components/Button';
-import { TableHeaderProps, Table } from 'components/Table';
+import { Table, TableHeaderProps } from 'components/Table';
+import { TokenItemType, oraichainTokens } from 'config/bridgeTokens';
 import { CW20_DECIMALS } from 'config/constants';
 import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
 import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { useGetMyStake, useGetPools } from 'pages/Pools/hookV3';
-import { memo, useEffect, useState } from 'react';
+import { useGetMyStake } from 'pages/Pools/hookV3';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
-import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
+import { AddLiquidityModal } from '../AddLiquidityModal';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
 
@@ -23,23 +21,20 @@ type PoolTableData = PoolInfoResponse & {
   reward: string[];
   myStakedLP: number;
   earned: number;
+  baseToken: TokenItemType;
+  quoteToken: TokenItemType;
 };
 
-export const ListPools = memo(() => {
+export const ListPools: React.FC = () => {
   const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
-  const [isOpenDepositPool, setIsOpenDepositPool] = useState(false);
+  const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
   const [cachedReward] = useConfigReducer('rewardPools');
   const [address] = useConfigReducer('address');
   const theme = useTheme();
   const navigate = useNavigate();
-  const pools = useGetPools();
   const { myStakes } = useGetMyStake({
     stakerAddress: address
   });
-
-  useEffect(() => {
-    setFilteredPools(pools);
-  }, [pools]);
 
   const poolTableData: PoolTableData[] = filteredPools.map((pool) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
@@ -54,32 +49,41 @@ export const ListPools = memo(() => {
     const earned = stakingAssetInfo
       ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt || 0
       : 0;
+
+    const [baseDenom, quoteDenom] = [
+      parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo)),
+      parseAssetOnlyDenom(JSON.parse(pool.secondAssetInfo))
+    ];
+    const [baseToken, quoteToken] = [baseDenom, quoteDenom].map((denom) =>
+      oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom)
+    );
     return {
       ...pool,
       reward: poolReward?.reward ?? [],
       myStakedLP: toDisplay(BigInt(Math.trunc(myStakedLP)), CW20_DECIMALS),
-      earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS)
+      earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS),
+      baseToken,
+      quoteToken
     };
   });
+
+  const generateIcon = (baseToken: TokenItemType, quoteToken: TokenItemType) => {
+    const BaseTokenIcon = theme === 'light' ? baseToken?.IconLight || baseToken?.Icon : baseToken?.Icon;
+    const QuoteTokenIcon = theme === 'light' ? quoteToken?.IconLight || quoteToken?.Icon : quoteToken?.Icon;
+    return (
+      <>
+        <BaseTokenIcon className={styles.symbols_logo_left} />
+        <QuoteTokenIcon className={styles.symbols_logo_right} />
+      </>
+    );
+  };
 
   const headers: TableHeaderProps<PoolTableData> = {
     symbols: {
       name: 'Pool Name',
       accessor: (data) => (
         <div className={styles.symbols}>
-          <div className={styles.symbols_logo}>
-            {theme === 'light' ? (
-              <OraiLightIcon className={styles.symbols_logo_left} />
-            ) : (
-              <OraiIcon className={styles.symbols_logo_right} />
-            )}
-
-            {theme === 'light' ? (
-              <AiriIcon className={styles.pairbox_logo2} />
-            ) : (
-              <AiriIcon className={styles.pairbox_logo2} />
-            )}
-          </div>
+          <div className={styles.symbols_logo}>{generateIcon(data.baseToken, data.quoteToken)}</div>
           <span className={styles.symbols_name}>{data.symbols}</span>
         </div>
       ),
@@ -138,7 +142,11 @@ export const ListPools = memo(() => {
             type="primary-sm"
             onClick={(event) => {
               event.stopPropagation();
-              setIsOpenDepositPool(true);
+              setPairDenomsDeposit(
+                `${parseAssetOnlyDenom(JSON.parse(data.firstAssetInfo))}_${parseAssetOnlyDenom(
+                  JSON.parse(data.secondAssetInfo)
+                )}`
+              );
             }}
           >
             Add
@@ -161,7 +169,7 @@ export const ListPools = memo(() => {
 
   return (
     <div className={styles.listpools}>
-      <Filter setFilteredPools={setFilteredPools} filteredPools={filteredPools} />
+      <Filter setFilteredPools={setFilteredPools} />
 
       <div className={styles.listpools_list}>
         {filteredPools.length > 0 ? (
@@ -173,13 +181,13 @@ export const ListPools = memo(() => {
           </div>
         )}
       </div>
-      {isOpenDepositPool && (
+      {pairDenomsDeposit && (
         <AddLiquidityModal
-          isOpen={isOpenDepositPool}
-          open={() => setIsOpenDepositPool(true)}
-          close={() => setIsOpenDepositPool(false)}
+          isOpen={!!pairDenomsDeposit}
+          close={() => setPairDenomsDeposit('')}
+          pairDenoms={pairDenomsDeposit}
         />
       )}
     </div>
   );
-});
+};
