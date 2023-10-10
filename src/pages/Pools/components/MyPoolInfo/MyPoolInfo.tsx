@@ -25,7 +25,7 @@ import AddLiquidityModal from '../AddLiquidityModal/AddLiquidityModal';
 import WithdrawLiquidityModal from '../WithdrawLiquidityModal/WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
 import { StakeLPModal } from '../StakeLPModal';
-import UnstakeLPModal from './UnstakeLPModal/UnstakeLPModal';
+import { UnstakeLPModal } from '../UnstakeLPModal/';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint };
