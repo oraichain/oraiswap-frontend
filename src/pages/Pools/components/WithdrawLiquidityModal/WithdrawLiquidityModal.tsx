@@ -100,7 +100,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
   const totalSupply = BigInt(lpTokenInfoData?.total_supply || 0);
   const lp1BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
   const lp2BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
-  const lpAmountBurnUsdt = (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt);
+  const lpAmountBurnUsdt = (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt) || 0;
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
