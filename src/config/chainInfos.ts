@@ -17,6 +17,7 @@ import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
+import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -47,13 +48,15 @@ export type NetworkName =
   | 'Ethereum'
   | 'Kawaiiverse'
   | 'Kawaiiverse EVM'
-  | 'Tron Network';
+  | 'Tron Network'
+  | 'Injective';
 
 export type CosmosChainId =
   | 'Oraichain' // oraichain
   | 'oraibridge-subnet-2' // oraibridge
   | 'osmosis-1' // osmosis
   | 'cosmoshub-4' // cosmos hub
+  | 'injective-1' // injective network
   | 'kawaii_6886-1'; // kawaii subnetwork
 
 export type EvmChainId =
@@ -81,7 +84,8 @@ export type CoinGeckoId =
   | 'tron'
   | 'weth'
   | 'wbnb'
-  | 'scatom';
+  | 'scatom'
+  | 'injective-protocol';
 
 export type NetworkType = 'cosmos' | 'evm';
 export type CoinIcon = React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
@@ -148,7 +152,7 @@ export const OraiToken: BridgeAppCurrency = {
   coinGeckoId: 'oraichain-token',
   Icon: OraiIcon,
   IconLight: OraiLightIcon,
-  bridgeTo: ['0x38', '0x01'],
+  bridgeTo: ['0x38', '0x01', 'injective-1'],
   gasPriceStep: {
     low: 0.003,
     average: 0.005,
@@ -324,6 +328,25 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'scatom',
       coinDecimals: 6,
       Icon: ScAtomIcon
+    },
+    {
+      coinDenom: 'IBC INJ',
+      coinGeckoId: 'injective-protocol',
+      coinMinimalDenom: process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM,
+      coinDecimals: 18,
+      Icon: InjIcon,
+      IconLight: InjIcon
+    },
+    {
+      coinDenom: 'INJ',
+      coinGeckoId: 'injective-protocol',
+      coinMinimalDenom: 'injective',
+      contractAddress: process.env.REACT_APP_INJECTIVE_CONTRACT,
+      bridgeTo: ['injective-1'],
+      type: 'cw20',
+      coinDecimals: 6,
+      Icon: InjIcon,
+      IconLight: InjIcon
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -515,6 +538,40 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         Icon: OsmoIcon,
         IconLight: OsmoLightIcon
+      }
+    ]
+  },
+  /// popular networks already included
+  {
+    rpc: 'https://injective-rpc.polkachu.com',
+    rest: 'https://injective-lcd.quickapi.com',
+    chainId: 'injective-1',
+    chainName: 'Injective',
+    networkType: 'cosmos',
+    bip44: {
+      coinType: 60
+    },
+    Icon: InjIcon,
+    IconLight: InjIcon,
+    bech32Config: defaultBech32Config('inj'),
+    currencies: [
+      {
+        coinDenom: 'INJ',
+        coinMinimalDenom: 'inj',
+        coinDecimals: 18,
+        coinGeckoId: 'injective-protocol',
+        bridgeTo: ['Oraichain'],
+        Icon: InjIcon,
+        IconLight: InjIcon
+      },
+      {
+        coinDenom: 'ORAI',
+        coinMinimalDenom: process.env.REACT_APP_ORAIIBC_INJECTIVE_DENOM,
+        coinDecimals: 6,
+        coinGeckoId: 'oraichain-token',
+        bridgeTo: ['Oraichain'],
+        Icon: OraiIcon,
+        IconLight: OraiLightIcon
       }
     ]
   },

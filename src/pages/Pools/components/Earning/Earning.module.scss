@@ -23,12 +23,14 @@
                     color: theme-get('primary-surface-default');
                 }
 
+                height: 44px;
                 display: flex;
                 align-items: center;
                 font-size: 14px;
                 font-style: normal;
                 font-weight: 400;
                 line-height: 150%;
+
             }
 
             .amount {

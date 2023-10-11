@@ -13,11 +13,11 @@ export type TableHeaderProps<T extends object> = Record<
 export type TableProps<T extends object> = {
   headers: TableHeaderProps<T>;
   data: T[];
-  stylesColumn: React.CSSProperties;
+  stylesColumn?: React.CSSProperties;
   handleClickRow?: (event: React.MouseEvent<HTMLTableRowElement, MouseEvent>, record: T) => void;
 };
 
-const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }: TableProps<T>) => {
+export const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }: TableProps<T>) => {
   return (
     <table className={styles.table}>
       <thead className={styles.tableHeader}>
@@ -49,5 +49,3 @@ const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }
     </table>
   );
 };
-
-export default Table;
