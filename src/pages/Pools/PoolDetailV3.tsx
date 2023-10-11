@@ -17,6 +17,7 @@ import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
+import { recalculateApr } from './helpers';
 
 const PoolDetailV3: React.FC = () => {
   let { poolUrl } = useParams();
@@ -55,9 +56,17 @@ const PoolDetailV3: React.FC = () => {
       const queryKey = ['pool-detail', poolUrl];
       queryClient.setQueryData(queryKey, (oldPoolDetail: PoolInfoResponse) => {
         const updatedTotalLiquidity = oldPoolDetail.totalLiquidity + amountLpInUsdt;
+        const updatedVolume24h = +oldPoolDetail.volume24Hour + Math.trunc(Math.abs(amountLpInUsdt));
+        const updatedApr = recalculateApr({
+          current24hChange: +oldPoolDetail.volume24hChange,
+          currentVolume: +oldPoolDetail.volume24Hour,
+          amountUsdt: amountLpInUsdt
+        });
         return {
           ...oldPoolDetail,
-          totalLiquidity: updatedTotalLiquidity
+          totalLiquidity: updatedTotalLiquidity,
+          volume24Hour: updatedVolume24h.toString(),
+          volume24hChange: updatedApr.toString()
         };
       });
     },
