@@ -84,7 +84,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        onLiquidityChange();
+        onLiquidityChange(-lpAmountBurnUsdt);
       }
     } catch (error) {
       console.log('error in Withdraw Liquidity: ', error);

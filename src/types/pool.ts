@@ -29,6 +29,7 @@ export type PoolDetail = {
   info: PoolInfoResponse;
   token1: TokenItemType;
   token2: TokenItemType;
+  isLoading: boolean;
 };
 
 export type BaseMining = {
