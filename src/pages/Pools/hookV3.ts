@@ -123,7 +123,8 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
 export const useGetPools = () => {
   const { data: pools } = useQuery(['pools'], getPools, {
     refetchOnWindowFocus: true,
-    initialData: []
+    placeholderData: [],
+    staleTime: 5 * 60 * 1000
   });
 
   return pools;
@@ -154,9 +155,10 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
     ['myStakes', stakerAddress, pairDenoms, tf],
     () => getMyStake({ stakerAddress, pairDenoms, tf }),
     {
-      initialData: [],
+      placeholderData: [],
       refetchOnWindowFocus: true,
-      enabled: !!stakerAddress
+      enabled: !!stakerAddress,
+      staleTime: 5 * 60 * 1000
     }
   );
 

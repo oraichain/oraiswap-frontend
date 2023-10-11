@@ -74,6 +74,12 @@ export const ORAI_INFO = {
   }
 };
 
+export const USDT_CW20_INFO = {
+  token: {
+    contract_addr: process.env.REACT_APP_USDT_CONTRACT
+  }
+};
+
 export const ORAIX_INFO = {
   token: {
     contract_addr: process.env.REACT_APP_ORAIX_CONTRACT

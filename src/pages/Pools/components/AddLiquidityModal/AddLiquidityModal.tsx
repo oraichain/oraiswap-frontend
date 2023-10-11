@@ -315,9 +315,9 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               <TokenBalance
                 balance={{
                   amount: estimatedShare.toString(),
-                  denom: lpTokenInfoData?.symbol,
                   decimals: lpTokenInfoData?.decimals
                 }}
+                suffix=" LP"
                 decimalScale={6}
               />
             </div>

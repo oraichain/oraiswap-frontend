@@ -21,6 +21,8 @@ export type PoolInfoResponse = PairInfoData & {
   volume24hChange: string;
   fee7Days: string;
   rewardPerSec: string;
+  offerPoolAmount: number;
+  askPoolAmount: number;
 };
 
 export type PoolDetail = {

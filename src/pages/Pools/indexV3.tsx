@@ -4,7 +4,7 @@ import NewPoolModal from './NewPoolModal/NewPoolModal';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool/ListPool';
-import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward, useFetchPairInfoDataList } from './hooks';
+import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward } from './hooks';
 
 import { useFetchLpPoolsV3, useGetPools } from './hookV3';
 import styles from './indexV3.module.scss';
@@ -13,7 +13,6 @@ const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
   const pairs = useFetchAllPairs();
-  const { oraiPrice } = useFetchPairInfoDataList(pairs);
   useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
 
@@ -24,7 +23,7 @@ const Pools: React.FC<{}> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header oraiPrice={oraiPrice} />
+        <Header />
         <ListPools />
 
         <NewPoolModal
