@@ -30,7 +30,6 @@ import {
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
   moveOraibToOraichain,
-  transferEvmToIBC,
   transferIbcCustom,
   transferIBCKwt
 } from './helpers';
@@ -39,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
-import { combineReceiver, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHandler, combineReceiver, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
 interface BalanceProps {}
 
@@ -161,14 +160,17 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!window.Metamask.isTron(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
-      result = await transferEvmToIBC(
-        from,
-        fromAmount,
-        { metamaskAddress, tronAddress, oraiAddress: latestOraiAddress },
-        combinedReceiver
-      );
+      result = await new UniversalSwapHandler(
+        {
+          sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
+          originalFromToken: from,
+          originalToToken: from,
+          fromAmount
+        },
+        { evmWallet: window.Metamask }
+      ).transferEvmToIBC(combinedReceiver);
       console.log('result on click transfer: ', result);
-      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result));
+      processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex);
     }

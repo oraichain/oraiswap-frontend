@@ -31,7 +31,7 @@ import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { useWarningSlippage } from 'pages/UniversalSwap/Swap/hooks';
 import { calculateMinReceive, getPairSwapV2, toAmount, toDisplay } from '@oraichain/oraidex-common';
-import { simulateSwap, UniversalSwapHandler } from '@oraichain/oraidex-universal-swap';
+import { simulateSwap } from '@oraichain/oraidex-universal-swap';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);

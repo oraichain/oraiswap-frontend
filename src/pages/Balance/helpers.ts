@@ -164,48 +164,6 @@ export const convertTransferIBCErc20Kwt = async (
   return result;
 };
 
-export const getBalanceIBCOraichain = async (
-  token: TokenItemType,
-  tokenQueryClient?: OraiswapTokenReadOnlyInterface
-) => {
-  if (!token) return { balance: 0 };
-  if (token.contractAddress) {
-    const cw20Token = tokenQueryClient ?? new OraiswapTokenQueryClient(window.client, token.contractAddress);
-    const { balance } = await cw20Token.balance({ address: IBC_WASM_CONTRACT });
-    return { balance: toDisplay(balance, token.decimals) };
-  }
-  const { amount } = await window.client.getBalance(IBC_WASM_CONTRACT, token.denom);
-  return { balance: toDisplay(amount, token.decimals) };
-};
-
-export const transferEvmToIBC = async (
-  from: TokenItemType,
-  fromAmount: number,
-  address: {
-    metamaskAddress?: string;
-    tronAddress?: string;
-    oraiAddress?: string;
-  },
-  combinedReceiver: string
-) => {
-  const { metamaskAddress, tronAddress, oraiAddress } = address;
-  const finalTransferAddress = window.Metamask.getFinalEvmAddress(from.chainId, {
-    metamaskAddress,
-    tronAddress
-  });
-  const oraiAddr = oraiAddress ?? (await window.Keplr.getKeplrAddr());
-  if (!finalTransferAddress || !oraiAddr) throw generateError('Please login both metamask or tronlink and keplr!');
-  const gravityContractAddr = gravityContracts[from!.chainId!];
-  if (!gravityContractAddr || !from) {
-    throw generateError('No gravity contract addr or no from token');
-  }
-
-  const finalFromAmount = toAmount(fromAmount, from.decimals).toString();
-  await window.Metamask.checkOrIncreaseAllowance(from, finalTransferAddress, gravityContractAddr, finalFromAmount);
-  const result = await window.Metamask.transferToGravity(from, finalFromAmount, finalTransferAddress, combinedReceiver);
-  return result;
-};
-
 export const transferIBCMultiple = async (
   fromAddress: string,
   fromChainId: CosmosChainId,
@@ -501,13 +459,4 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
     transferMsgs
   );
   return result;
-};
-
-export const findToTokenOnOraiBridge = (fromToken: TokenItemType, toNetwork: NetworkChainId) => {
-  const toToken = cosmosTokens.find((t) =>
-    t.chainId === 'oraibridge-subnet-2' && t.coinGeckoId === fromToken.coinGeckoId && t?.bridgeNetworkIdentifier
-      ? t.bridgeNetworkIdentifier === toNetwork
-      : t.chainId === toNetwork
-  );
-  return toToken;
 };

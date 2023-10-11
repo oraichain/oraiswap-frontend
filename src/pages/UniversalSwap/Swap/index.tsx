@@ -29,7 +29,7 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
 import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
 import {
@@ -41,12 +41,14 @@ import {
   truncDecimals
 } from '@oraichain/oraidex-common';
 import {
+  UniversalSwapHandler,
   combineReceiver,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ethers } from 'ethers';
 
 const cx = cn.bind(styles);
 
@@ -205,32 +207,22 @@ const SwapComponent: React.FC<{
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
+      const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
       const univeralSwapHandler = new UniversalSwapHandler(
-        oraiAddress,
-        originalFromToken,
-        originalToToken,
-        fromAmountToken,
-        simulateData.amount,
-        userSlippage,
-        averageRatio.amount
-      );
-      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
-        metamaskAddress,
-        tronAddress
-      });
-      const { combinedReceiver, universalSwapType } = combineReceiver(
-        oraiAddress,
-        originalFromToken,
-        originalToToken,
-        toAddress
+        {
+          sender: { cosmos: oraiAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+          originalFromToken,
+          originalToToken,
+          fromAmount: fromAmountToken,
+          simulateAmount: simulateData.amount,
+          userSlippage,
+          simulateAverage: averageRatio.amount
+        },
+        { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress);
-      const transactionHash = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
-        metamaskAddress: checksumMetamaskAddress,
-        tronAddress
-      });
+      const transactionHash = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)

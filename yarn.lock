@@ -2990,10 +2990,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.6.tgz#2ffebfc6b40b93c397e31751c0b8d3d90ab04bef"
-  integrity sha512-k3CTYTrR5mo7y8qnFswQhRkvqw9rr8yN4ghIJVyzpaFhVYdyzxMtoKH1n/I+FqrSQpGp1GQ7qkcyR1lw1YloEw==
+"@oraichain/oraidex-common@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.7.tgz#73046f5a0879f172312ebcbfc4d4d8432e1ab555"
+  integrity sha512-G2DsHlgngzUMtLSooKB6YA9M6ZiU9LuaGANA6Oo//mIe9HuY59tYuRmbSm3W3SWHnxRjfgoIeuPWLxZ8hoiRtA==
 
 "@oraichain/oraidex-contracts-build@^1.0.20":
   version "1.0.20"
@@ -3005,10 +3005,8 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.24.tgz#6662b3e916bfe9bd256de0f4c463bd2630b9fae3"
   integrity sha512-FUzGli0ueR7VwD1oJPn0z1zZ0uSrBmuQS77Tkd3OasUvHoptCYkuY1CeeiFw7woQxHWhHpeS9RjH9K7JLLGhmQ==
 
-"@oraichain/oraidex-universal-swap@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.7.tgz#030a89ab9665e3c9ae84c53f0d8ff9322dee2cc9"
-  integrity sha512-FHBjQ+T9nvBuQmqWz+KnkIe27OHZPJtQISbyx5SsWKNU3XqlSPvKKnEJliGUuczdQPZOBeLxKnYKU8RwlER5yg==
+"@oraichain/oraidex-universal-swap@../oraidex-sdk/packages/universal-swap":
+  version "1.0.8"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
