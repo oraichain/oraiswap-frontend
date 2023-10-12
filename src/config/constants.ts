@@ -130,3 +130,9 @@ export const swapEvmRoutes: {
     [`${WRAP_ETH_CONTRACT}-${ORAI_ETH_CONTRACT}`]: [WRAP_ETH_CONTRACT, ORAI_ETH_CONTRACT]
   }
 };
+
+export const relayerFeeInfo = {
+  [ORAI_BRIDGE_EVM_DENOM_PREFIX]: 6,
+  [ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX]: 6,
+  [ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX]: 6
+};

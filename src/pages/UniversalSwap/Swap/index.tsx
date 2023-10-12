@@ -10,7 +10,7 @@ import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, relayerFeeInfo } from 'config/constants';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -34,6 +34,7 @@ import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmT
 import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
 import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import { useRelayerFee } from './hooks/useRelayerFee';
 
 const cx = cn.bind(styles);
 
@@ -172,6 +173,12 @@ const SwapComponent: React.FC<{
     originalToToken,
     1
   );
+  const relayerFee = useRelayerFee();
+
+  const relayerFeeToken = React.useMemo(
+    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
+    [originalFromToken]
+  );
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -244,11 +251,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -402,6 +409,21 @@ const SwapComponent: React.FC<{
               decimalScale={truncDecimals}
             />
           </div>
+          {relayerFeeToken && (
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Relayer Fee</span>
+              </div>
+              <TokenBalance
+                balance={{
+                  amount: relayerFeeToken.amount,
+                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  denom: relayerFeeToken.prefix
+                }}
+                decimalScale={truncDecimals}
+              />
+            </div>
+          )}
 
           {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>

@@ -1,6 +1,6 @@
 import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { Uint128, MulticallQueryClient, CwIcs20LatestQueryClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapStakingQueryClient,
   OraiswapRewarderQueryClient,
@@ -448,6 +448,16 @@ async function fetchTaxRate(): Promise<TaxRateResponse> {
     return data as TaxRateResponse;
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
+  }
+}
+
+async function fetchRelayerFee(): Promise<any> {
+  const ics20Contract = new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
+  try {
+    const { relayer_fees } = await ics20Contract.config();
+    return relayer_fees;
+  } catch (error) {
+    throw new Error(`Error when query Relayer Fee using oracle: ${error}`);
   }
 }
 
@@ -951,6 +961,7 @@ export {
   fetchStakingPoolInfo,
   fetchDistributionInfo,
   fetchTaxRate,
+  fetchRelayerFee,
   getPairAmountInfo,
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
