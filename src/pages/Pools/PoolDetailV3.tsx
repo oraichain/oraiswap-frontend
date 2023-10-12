@@ -1,20 +1,23 @@
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { useQueryClient } from '@tanstack/react-query';
 import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
+import { network } from 'config/networks';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
+import { updateLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
+import { PoolInfoResponse } from 'types/pool';
 import styles from './PoolDetailV3.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { network } from 'config/networks';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import useLoadTokens from 'hooks/useLoadTokens';
-import { updateLpPools } from 'reducer/token';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
+import { recalculateApr } from './helpers';
 
 const PoolDetailV3: React.FC = () => {
   let { poolUrl } = useParams();
@@ -29,6 +32,7 @@ const PoolDetailV3: React.FC = () => {
   const pools = useGetPools();
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
+  const queryClient = useQueryClient();
 
   const refetchAllLpPools = useCallback(async () => {
     if (pools.length === 0) return;
@@ -41,12 +45,33 @@ const PoolDetailV3: React.FC = () => {
     setCachedLpPools(lpTokenData);
   }, [pools]);
 
-  const handleLiquidityChange = useCallback(() => {
-    refetchPairAmountInfo();
-    refetchLpTokenInfoData();
-    refetchAllLpPools();
-    loadTokenAmounts({ oraiAddress: address });
-  }, [address, pools]);
+  const handleLiquidityChange = useCallback(
+    (amountLpInUsdt = 0) => {
+      refetchPairAmountInfo();
+      refetchLpTokenInfoData();
+      refetchAllLpPools();
+      loadTokenAmounts({ oraiAddress: address });
+
+      // Update in an immutable way.
+      const queryKey = ['pool-detail', poolUrl];
+      queryClient.setQueryData(queryKey, (oldPoolDetail: PoolInfoResponse) => {
+        const updatedTotalLiquidity = oldPoolDetail.totalLiquidity + amountLpInUsdt;
+        const updatedVolume24h = +oldPoolDetail.volume24Hour + Math.trunc(Math.abs(amountLpInUsdt));
+        const updatedApr = recalculateApr({
+          current24hChange: +oldPoolDetail.volume24hChange,
+          currentVolume: +oldPoolDetail.volume24Hour,
+          amountUsdt: amountLpInUsdt
+        });
+        return {
+          ...oldPoolDetail,
+          totalLiquidity: updatedTotalLiquidity,
+          volume24Hour: updatedVolume24h.toString(),
+          volume24hChange: updatedApr.toString()
+        };
+      });
+    },
+    [address, pools]
+  );
 
   return (
     <Content nonBackground>

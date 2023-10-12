@@ -19,6 +19,7 @@ import {
   fetchPoolListAndOraiPrice,
   formatDisplayUsdt,
   PairInfoData,
+  recalculateApr,
   toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
@@ -491,47 +492,74 @@ describe('pool', () => {
       ]);
       expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
     });
+  });
 
+  it.each([
+    ['0.001234', '$0.0012'],
+    ['2', '$2'],
+    ['2.1', '$2.1'],
+    ['2.129', '$2.13'],
+    ['1234567', '$1,234,567'],
+    ['1234567.111', '$1,234,567.11']
+  ])('test formatDisplayUsdt should formats %s to %s', (input, expected) => {
+    expect(formatDisplayUsdt(input)).toBe(expected);
+  });
+
+  it.each([
+    ['2.12345', 2, 2.12],
+    ['2.1', 2, 2.1],
+    ['2', 2, 2],
+    ['2.12345', 1, 2.1],
+    ['2.129', 1, 2.1]
+  ])('test toFixedIfNecessary should rounds %s to %d decimal places as %f', (value, dp, expected) => {
+    expect(toFixedIfNecessary(value, dp)).toBeCloseTo(expected);
+  });
+
+  it.each<[number, number, number]>([
+    [0, 1, 0],
+    [1, 0, 0],
+    [100, 500, 0.02]
+  ])('test-estimateShare-should-return-correctly-share', (totalBaseAmount, totalQuoteAmount, expectedResult) => {
+    // setup
+    const payload = {
+      baseAmount: 1,
+      quoteAmount: 2,
+      totalShare: 5,
+      totalBaseAmount,
+      totalQuoteAmount
+    };
+
+    // act
+    const result = estimateShare(payload);
+
+    // assertion
+    expect(result).toEqual(expectedResult);
+  });
+
+  describe('recalculateApr', () => {
     it.each([
-      ['0.001234', '$0.0012'],
-      ['2', '$2'],
-      ['2.1', '$2.1'],
-      ['2.129', '$2.13'],
-      ['1234567', '$1,234,567'],
-      ['1234567.111', '$1,234,567.11']
-    ])('test formatDisplayUsdt should formats %s to %s', (input, expected) => {
-      expect(formatDisplayUsdt(input)).toBe(expected);
+      [0.1, 1000, 100, 0.20999999999999988],
+      [0.2, 500, 50, 0.32000000000000006],
+      [0.5, 2000, 150, 0.6125]
+    ])('calculates new APR correctly', (current24hChange, currentVolume, amountUsdt, expectedApr) => {
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBeCloseTo(expectedApr, 6);
     });
 
-    it.each([
-      ['2.12345', 2, 2.12],
-      ['2.1', 2, 2.1],
-      ['2', 2, 2],
-      ['2.12345', 1, 2.1],
-      ['2.129', 1, 2.1]
-    ])('test toFixedIfNecessary should rounds %s to %d decimal places as %f', (value, dp, expected) => {
-      expect(toFixedIfNecessary(value, dp)).toBeCloseTo(expected);
+    it('handles edge case when currentVolume is 0 should return current24hChange value', () => {
+      const current24hChange = 0.1;
+      const currentVolume = 0;
+      const amountUsdt = 100;
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBe(current24hChange);
     });
 
-    it.each<[number, number, number]>([
-      [0, 1, 0],
-      [1, 0, 0],
-      [100, 500, 0.02]
-    ])('test-estimateShare-should-return-correctly-share', (totalBaseAmount, totalQuoteAmount, expectedResult) => {
-      // setup
-      const payload = {
-        baseAmount: 1,
-        quoteAmount: 2,
-        totalShare: 5,
-        totalBaseAmount,
-        totalQuoteAmount
-      };
-
-      // act
-      const result = estimateShare(payload);
-
-      // assertion
-      expect(result).toEqual(expectedResult);
+    it('handles edge case when current24hChange is 0', () => {
+      const current24hChange = 0;
+      const currentVolume = 1000;
+      const amountUsdt = 100;
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBe(0);
     });
   });
 });

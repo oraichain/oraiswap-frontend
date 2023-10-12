@@ -12,7 +12,8 @@ export const useGetPairInfo = ({ token1, token2, info: pairInfoData }: PoolDetai
       } as TokenItemType),
     {
       enabled: !!pairInfoData,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
+      keepPreviousData: true
     }
   );
 
