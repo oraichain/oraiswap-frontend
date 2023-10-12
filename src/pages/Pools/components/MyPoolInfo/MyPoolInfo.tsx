@@ -23,8 +23,8 @@ import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
-type Props = { myLpBalance: bigint; handleLiquidityChange: () => void };
-export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) => {
+type Props = { myLpBalance: bigint; onLiquidityChange: () => void };
+export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const theme = useTheme();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
@@ -133,7 +133,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) =>
           isOpen={modal === 'deposit'}
           open={() => setModal('deposit')}
           close={() => setModal(undefined)}
-          onLiquidityChange={handleLiquidityChange}
+          onLiquidityChange={onLiquidityChange}
           pairDenoms={poolUrl}
         />
       )}
@@ -142,7 +142,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) =>
           isOpen={modal === 'withdraw'}
           open={() => setModal('withdraw')}
           close={() => setModal(undefined)}
-          onLiquidityChange={handleLiquidityChange}
+          onLiquidityChange={onLiquidityChange}
           myLpUsdt={lpBalance.myLiquidityInUsdt}
           myLpBalance={myLpBalance}
         />
@@ -152,7 +152,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) =>
           isOpen={modal === 'stake'}
           open={() => setModal('stake')}
           close={() => setModal(undefined)}
-          onLiquidityChange={handleLiquidityChange}
+          onLiquidityChange={onLiquidityChange}
           myLpUsdt={lpBalance.myLiquidityInUsdt}
           myLpBalance={myLpBalance}
         />
@@ -162,7 +162,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, handleLiquidityChange }) =>
           isOpen={modal === 'unstake'}
           open={() => setModal('unstake')}
           close={() => setModal(undefined)}
-          onLiquidityChange={handleLiquidityChange}
+          onLiquidityChange={onLiquidityChange}
           myLpUsdt={lpBalance.myLiquidityInUsdt}
           myLpBalance={myLpBalance}
         />

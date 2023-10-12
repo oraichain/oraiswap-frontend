@@ -212,20 +212,28 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
   };
 };
 
+export type RewardInfoQueryType = {
+  stakerAddr: string;
+  assetInfo?: AssetInfo;
+};
 export const fetchRewardInfoV3 = async (
   stakerAddr: string,
-  assetInfo: AssetInfo
+  assetInfo?: AssetInfo
 ): Promise<OraiswapStakingTypes.RewardInfoResponse> => {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.rewardInfo({ assetInfo, stakerAddr });
+  let payload: RewardInfoQueryType = {
+    stakerAddr
+  };
+  if (assetInfo) payload.assetInfo = assetInfo;
+  const data = await stakingContract.rewardInfo(payload);
   return data;
 };
 
-export const useGetRewardInfo = ({ address, stakingAssetInfo }: { address: string; stakingAssetInfo: AssetInfo }) => {
+export const useGetRewardInfo = ({ stakerAddr, assetInfo: stakingAssetInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', address, stakingAssetInfo],
-    () => fetchRewardInfoV3(address, stakingAssetInfo!),
-    { enabled: !!address && !!stakingAssetInfo, refetchOnWindowFocus: false }
+    ['reward-info', stakerAddr, stakingAssetInfo],
+    () => fetchRewardInfoV3(stakerAddr, stakingAssetInfo),
+    { enabled: !!stakerAddr, refetchOnWindowFocus: true }
   );
 
   return { totalRewardInfoData, refetchRewardInfo };

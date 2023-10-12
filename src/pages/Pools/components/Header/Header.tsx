@@ -1,12 +1,17 @@
 import bg_claim_btn from 'assets/images/bg_claim_btn.png';
 import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { Button } from 'components/Button';
+import Loader from 'components/Loader';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { CW20_DECIMALS, ORAI_INFO, USDT_CW20_INFO } from 'config/constants';
+import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CW20_INFO } from 'config/constants';
+import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
+import CosmJs from 'libs/cosmjs';
 import { toDecimal, toDisplay } from 'libs/utils';
-import { useGetMyStake, useGetPools } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 
@@ -35,7 +40,46 @@ export const Header: FC = () => {
     stakerAddress: address
   });
   const oraiPrice = useGetOraiPrice();
+  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({ stakerAddr: address });
 
+  const [claimLoading, setClaimLoading] = useState(false);
+
+  const handleClaimAllRewards = async () => {
+    setClaimLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      const msgs = totalRewardInfoData.reward_infos
+        .map((rewardInfo) => {
+          if (rewardInfo.pending_reward === '0') return null;
+          return {
+            contractAddress: network.staking,
+            handleMsg: Buffer.from(JSON.stringify({ withdraw: { asset_info: rewardInfo.asset_info } })),
+            handleOptions: { funds: null }
+          };
+        })
+        .filter(Boolean);
+
+      const result = await CosmJs.executeMultiple({
+        msgs,
+        walletAddr: address,
+        gasAmount: { denom: ORAI, amount: '0' }
+      });
+
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+        refetchRewardInfo();
+      }
+    } catch (error) {
+      console.log('error when claim all reward: ', error);
+      handleErrorTransaction(error);
+    } finally {
+      setClaimLoading(false);
+    }
+  };
+
+  const disabledClaimBtn = !totalRewardInfoData?.reward_infos?.some((info) => +info.pending_reward > 0) || claimLoading;
   return (
     <div className={styles.header}>
       <div className={styles.header_data}>
@@ -71,7 +115,12 @@ export const Header: FC = () => {
         <div className={styles.claim_reward_bg}>
           <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
         </div>
-        <Button type="primary-sm" onClick={() => console.log('ok')}>
+        <Button
+          type="primary-sm"
+          disabled={disabledClaimBtn}
+          onClick={() => handleClaimAllRewards()}
+          icon={claimLoading ? <Loader width={20} height={20} /> : null}
+        >
           Claim All Rewards
         </Button>
       </div>

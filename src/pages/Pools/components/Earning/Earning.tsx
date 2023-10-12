@@ -54,8 +54,8 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   }, [info]);
 
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
-    address,
-    stakingAssetInfo
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
   });
 
   useEffect(() => {
