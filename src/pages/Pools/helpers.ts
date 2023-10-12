@@ -400,6 +400,32 @@ export const estimateShare = ({
   return share;
 };
 
+/**
+ * Re-calculate APR after provide/withdraw LP to optimistic update UI.
+ * @param currentApr
+ * @param currentVolume
+ * @param amountUsdt - amount volume to add
+ * @returns new APR
+ */
+export const recalculateApr = ({
+  current24hChange,
+  currentVolume,
+  amountUsdt
+}: {
+  current24hChange: number;
+  currentVolume: number;
+  amountUsdt: number;
+}) => {
+  // guard to avoid crash
+  if (currentVolume === 0) return current24hChange;
+  const volume24hAgo = currentVolume / (current24hChange + 1);
+
+  // guard to avoid crash
+  if (currentVolume === volume24hAgo) return current24hChange;
+  const newApr = current24hChange * (1 + amountUsdt / (currentVolume - volume24hAgo));
+  return newApr;
+};
+
 export {
   fetchAprResult,
   fetchCacheLpPools,

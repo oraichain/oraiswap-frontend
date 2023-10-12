@@ -6,7 +6,7 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'config/constants';
+import { CW20_DECIMALS, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -42,7 +42,6 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   const poolDetail = useGetPoolDetail({ pairDenoms });
   const { token1, token2, info: pairInfoData } = poolDetail;
   const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
-
   const totalBaseAmount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
   const totalQuoteAmount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
 
@@ -180,7 +179,9 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        onLiquidityChange();
+
+        const amountUsdt = Number(toAmount(getUsd(baseAmount, token1, prices) * 2));
+        onLiquidityChange(amountUsdt);
       }
     } catch (error) {
       console.log('error in providing liquidity: ', error);
@@ -315,9 +316,9 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               <TokenBalance
                 balance={{
                   amount: estimatedShare.toString(),
-                  denom: lpTokenInfoData?.symbol,
                   decimals: lpTokenInfoData?.decimals
                 }}
+                suffix=" LP"
                 decimalScale={6}
               />
             </div>

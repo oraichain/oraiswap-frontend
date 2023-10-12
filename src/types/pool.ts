@@ -21,12 +21,15 @@ export type PoolInfoResponse = PairInfoData & {
   volume24hChange: string;
   fee7Days: string;
   rewardPerSec: string;
+  offerPoolAmount: number;
+  askPoolAmount: number;
 };
 
 export type PoolDetail = {
   info: PoolInfoResponse;
   token1: TokenItemType;
   token2: TokenItemType;
+  isLoading: boolean;
 };
 
 export type BaseMining = {

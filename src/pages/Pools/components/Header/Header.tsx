@@ -2,20 +2,39 @@ import bg_claim_btn from 'assets/images/bg_claim_btn.png';
 import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
-import { CW20_DECIMALS } from 'config/constants';
+import { CW20_DECIMALS, ORAI_INFO, USDT_CW20_INFO } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { toDisplay } from 'libs/utils';
-import { useGetMyStake } from 'pages/Pools/hookV3';
-import { FC } from 'react';
+import { toDecimal, toDisplay } from 'libs/utils';
+import { useGetMyStake, useGetPools } from 'pages/Pools/hookV3';
+import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 
-export const Header: FC<{ oraiPrice: number }> = ({ oraiPrice }) => {
+export const useGetOraiPrice = () => {
+  const pools = useGetPools();
+  const [oraiPrice, setOraiPrice] = useState(0);
+
+  useEffect(() => {
+    if (pools.length === 0) return;
+    const oraiUsdtPool = pools.find(
+      (pool) =>
+        pool.firstAssetInfo === JSON.stringify(ORAI_INFO) && pool.secondAssetInfo === JSON.stringify(USDT_CW20_INFO)
+    );
+    if (!oraiUsdtPool) return;
+    const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
+    setOraiPrice(oraiPrice);
+  }, [pools]);
+
+  return oraiPrice;
+};
+
+export const Header: FC = () => {
   const theme = useTheme();
   const [address] = useConfigReducer('address');
   const { totalStaked, totalEarned } = useGetMyStake({
     stakerAddress: address
   });
+  const oraiPrice = useGetOraiPrice();
 
   return (
     <div className={styles.header}>

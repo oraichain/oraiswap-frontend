@@ -96,7 +96,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <AprIcon />
         </div>
         <div className={styles.title}>APR</div>
-        <div className={styles.volumeAmount}>{poolDetailData.info?.apr.toFixed(2)}%</div>
+        <div className={styles.volumeAmount}>{poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0}%</div>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ export interface ModalProps {
   isOpen: boolean;
   close: () => void;
   isCloseBtn?: boolean;
-  onLiquidityChange?: () => void;
+  onLiquidityChange?: (amountLpInUsdt?: number) => void;
   myLpUsdt?: bigint;
   myLpBalance?: bigint;
   pairDenoms?: string;
