@@ -1,0 +1,116 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.instruct {
+  position: fixed;
+  bottom: 43px;
+  right: 43px;
+  .question {
+    width: 40px;
+    height: 40px;
+    background-color: #2f5711;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+}
+
+.helper-modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 960px;
+  border-radius: 12px;
+}
+
+.helper-center {
+  display: flex;
+  background-color: #efefef;
+  width: 100%;
+  .topic {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 31.25%;
+    padding: 24px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: #ffffff;
+    color: #494949;
+    .title {
+      font-size: 20px;
+    }
+    .what-news {
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      &-items {
+        padding-top: 16px;
+      }
+      &-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #979995;
+        cursor: pointer;
+        &:hover {
+          background-color: #979995;
+        }
+      }
+    }
+    .ask {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ai {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+  .content {
+    width: 68.75%;
+    background-color: #efefef;
+    .info {
+      padding: 24px;
+      .title {
+        color: #494949;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .describe {
+        padding-top: 24px;
+        color: #686a66;
+        font-size: 14px;
+        font-weight: 400;
+      }
+      .contact {
+        display: flex;
+        align-items: center;
+        padding-top: 40px;
+        gap: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        font-variant-numeric: 'lining-nums tabular-nums';
+        justify-content: flex-end;
+        color: #232521;
+        text-decoration-line: underline;
+        div {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+.active {
+  background-color: #efefef;
+}

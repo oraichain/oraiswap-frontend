@@ -27,6 +27,7 @@ import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
 import { pairsChart } from 'components/TVChartContainer/config';
 import MenuV3 from './MenuV3';
+import Instruct from './Instruct';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -187,6 +188,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <MenuV3 />
         {routes()}
+        <Instruct />
       </div>
     </ThemeProvider>
   );
