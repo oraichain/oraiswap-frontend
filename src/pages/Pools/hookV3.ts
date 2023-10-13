@@ -10,7 +10,9 @@ import { useQuery } from '@tanstack/react-query';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
+import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
+import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
@@ -151,6 +153,9 @@ const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserRes
   }
 };
 export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUserQuery) => {
+  const { totalRewardInfoData } = useGetRewardInfo({ stakerAddr: stakerAddress });
+  const pools = useGetPools();
+
   const { data: myStakes } = useQuery(
     ['myStakes', stakerAddress, pairDenoms, tf],
     () => getMyStake({ stakerAddress, pairDenoms, tf }),
@@ -162,12 +167,20 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
     }
   );
 
-  const totalStaked = myStakes
-    ? myStakes.reduce((total, current) => {
-        total += current.stakingAmountInUsdt;
-        return total;
-      }, 0)
-    : 0;
+  // calculate total staked of all pool
+  const totalStaked = pools.reduce((accumulator, pool) => {
+    const { totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
+    const stakingAssetInfo = Pairs.getStakingAssetInfo([JSON.parse(firstAssetInfo), JSON.parse(secondAssetInfo)]);
+    const myStakedLP = stakingAssetInfo
+      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
+      : 0;
+
+    const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
+    const myStakeLPInUsdt = +myStakedLP * lpPrice;
+    accumulator += myStakeLPInUsdt;
+    return accumulator;
+  }, 0);
+
   const totalEarned = myStakes
     ? myStakes.reduce((total, current) => {
         total += current.earnAmountInUsdt;
