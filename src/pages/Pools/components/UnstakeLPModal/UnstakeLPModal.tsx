@@ -154,8 +154,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(unbondAmountInUsdt)),
-                    denom: lpTokenInfoData?.symbol,
-                    decimals: lpTokenInfoData?.decimals
+                    decimals: CW20_DECIMALS
                   }}
                   prefix="~$"
                   decimalScale={4}

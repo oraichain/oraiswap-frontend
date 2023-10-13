@@ -35,9 +35,10 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const { info } = poolDetailData;
 
   useEffect(() => {
-    if (poolDetailData?.token1?.name === ORAI) {
+    if (!poolDetailData) return;
+    if (poolDetailData?.token1?.name === 'ORAI') {
       setStakingToken(poolDetailData.token2);
-    } else if (!!poolDetailData) {
+    } else {
       setStakingToken(poolDetailData.token1);
     }
   }, [poolDetailData]);
@@ -157,8 +158,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
       <></>
     );
   };
-
-  const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.pendingWithdraw !== 0n);
+  const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.amount !== 0n);
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>

@@ -12,8 +12,9 @@ import { CW20_DECIMALS } from 'config/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
-import { useGetMyStake, useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AddLiquidityModal } from '../AddLiquidityModal';
@@ -28,20 +29,22 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const theme = useTheme();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
+
+  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
+  const { lpTokenInfoData } = useGetPairInfo(poolDetail);
+  const stakingAssetInfo = useGetStakingAssetInfo();
+  const { totalRewardInfoData } = useGetRewardInfo({
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
+  });
+
   const [modal, setModal] = useState<ModalPool>();
   const [lpBalance, setLpBalance] = useState({
-    myStakeInLp: 0n,
     myLiquidityInUsdt: 0n,
     lpPrice: 0
   });
 
-  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
-  const { totalStaked } = useGetMyStake({
-    stakerAddress: address,
-    pairDenoms: poolUrl
-  });
-  const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-
+  // calculate LP price, my LP balance in usdt
   useEffect(() => {
     if (!poolDetail.info) return;
     const totalSupply = lpTokenInfoData?.total_supply;
@@ -50,15 +53,15 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
     const lpPrice = poolDetail.info.totalLiquidity / Number(totalSupply);
     if (!lpPrice) return;
 
-    const myStake = totalStaked / lpPrice;
     const myLiquidityInUsdt = Number(myLpBalance) * lpPrice;
     setLpBalance({
-      myStakeInLp: BigInt(Math.trunc(myStake)),
       myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt)),
       lpPrice
     });
-  }, [lpTokenInfoData, myLpBalance, poolDetail.info, totalStaked]);
+  }, [lpTokenInfoData, myLpBalance, poolDetail.info]);
 
+  const totalBondAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.bond_amount || '0');
+  const totalBondAmountInUsdt = BigInt(Math.trunc(lpBalance.lpPrice ? Number(totalBondAmount) * lpBalance.lpPrice : 0));
   return (
     <section className={styles.myPoolInfo}>
       <div className={styles.liquidity}>
@@ -98,7 +101,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           <div className={styles.amountUsdt}>
             <TokenBalance
               balance={{
-                amount: BigInt(Math.trunc(totalStaked)),
+                amount: totalBondAmountInUsdt,
                 decimals: CW20_DECIMALS
               }}
               prefix="$"
@@ -108,7 +111,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           <div className={styles.amountLp}>
             <TokenBalance
               balance={{
-                amount: lpBalance.myStakeInLp,
+                amount: totalBondAmount,
                 decimals: CW20_DECIMALS
               }}
               suffix=" LP"

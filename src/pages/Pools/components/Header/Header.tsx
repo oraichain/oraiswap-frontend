@@ -58,7 +58,6 @@ export const Header: FC = () => {
           };
         })
         .filter(Boolean);
-
       const result = await CosmJs.executeMultiple({
         msgs,
         walletAddr: address,
