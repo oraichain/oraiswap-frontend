@@ -14,13 +14,12 @@ import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay } from 'libs/utils';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
+import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { generateMiningMsgsV3, Type } from 'rest/api';
-import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './UnstakeLPModal.module.scss';
 
@@ -33,11 +32,12 @@ export const UnstakeLPModal: FC<ModalProps> = ({
   myLpBalance,
   myLpUsdt,
   onLiquidityChange,
-  assetToken
+  assetToken,
+  lpPrice
 }) => {
   let { poolUrl } = useParams();
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
+  const [address] = useConfigReducer('address');
 
   const [actionLoading, setActionLoading] = useState(false);
   const [chosenOption, setChosenOption] = useState(-1);
@@ -47,18 +47,31 @@ export const UnstakeLPModal: FC<ModalProps> = ({
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData?.liquidityAddr]?.balance ?? '0' : 0);
+
+  const stakingAssetInfo = useGetStakingAssetInfo();
+  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
+  });
+
+  const totalBondAmount = BigInt(totalRewardInfoData.reward_infos[0].bond_amount || '0');
 
   // handle update unbond amount in usdt
   useEffect(() => {
-    if (!myLpBalance) return;
-    const unbondAmountInUsdt = (Number(unbondAmount) / Number(myLpBalance)) * Number(myLpUsdt);
+    if (!totalBondAmount) return;
+    const unbondAmountInUsdt = Number(unbondAmount) * Number(lpPrice);
+    console.log({ unbondAmountInUsdt });
     setUnBondAmountInUsdt(unbondAmountInUsdt);
-  }, [unbondAmount, myLpBalance, myLpUsdt]);
+  }, [unbondAmount, totalBondAmount, lpPrice]);
 
   const onChangeUnbondPercent = (percent: number) => {
     const HUNDRED_PERCENT_IN_CW20_DECIMALS = 100000000;
-    setUnbondAmount((toAmount(percent, CW20_DECIMALS) * lpTokenBalance) / BigInt(HUNDRED_PERCENT_IN_CW20_DECIMALS));
+    setUnbondAmount((toAmount(percent, CW20_DECIMALS) * totalBondAmount) / BigInt(HUNDRED_PERCENT_IN_CW20_DECIMALS));
+  };
+
+  const onUnbonedSuccess = () => {
+    onLiquidityChange();
+    refetchRewardInfo();
   };
 
   const handleUnbond = async (parsedAmount: bigint) => {
@@ -86,7 +99,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        onLiquidityChange();
+        onUnbonedSuccess();
       }
     } catch (error) {
       console.log('error in unbond: ', error);
@@ -113,7 +126,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({
             <div className={cx('amount')}>
               <TokenBalance
                 balance={{
-                  amount: lpTokenBalance,
+                  amount: totalBondAmount,
                   denom: lpTokenInfoData?.symbol,
                   decimals: lpTokenInfoData?.decimals
                 }}
@@ -122,10 +135,10 @@ export const UnstakeLPModal: FC<ModalProps> = ({
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setUnbondAmount(myLpBalance)}>
+              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount)}>
                 Max
               </Button>
-              <Button type="primary-sm" onClick={() => setUnbondAmount(myLpBalance / BigInt(2))}>
+              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount / BigInt(2))}>
                 Half
               </Button>
             </div>
@@ -146,10 +159,10 @@ export const UnstakeLPModal: FC<ModalProps> = ({
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(unbondAmountInUsdt)),
-                    decimals: lpTokenInfoData?.decimals
+                    decimals: CW20_DECIMALS
                   }}
                   prefix="~$"
-                  decimalScale={2}
+                  decimalScale={4}
                 />
               </div>
             </div>
@@ -162,7 +175,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({
                 })}
                 key={idx}
                 onClick={() => {
-                  setUnbondAmount((BigInt(option) * myLpBalance) / BigInt(100));
+                  setUnbondAmount((BigInt(option) * totalBondAmount) / BigInt(100));
                   setChosenOption(idx);
                 }}
               >
@@ -190,8 +203,8 @@ export const UnstakeLPModal: FC<ModalProps> = ({
         {(() => {
           let disableMsg: string;
           if (unbondAmount <= 0) disableMsg = 'Enter an amount';
-          if (unbondAmount > lpTokenBalance) disableMsg = `Insufficient LP token balance`;
-          const disabled = actionLoading || unbondAmount <= 0 || unbondAmount > lpTokenBalance || !pairInfoData;
+          if (unbondAmount > totalBondAmount) disableMsg = `Insufficient LP token balance`;
+          const disabled = actionLoading || unbondAmount <= 0 || unbondAmount > totalBondAmount || !pairInfoData;
 
           return (
             <div className={cx('btn-confirm')}>

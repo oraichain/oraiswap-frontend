@@ -11,4 +11,5 @@ export interface ModalProps {
   pairDenoms?: string;
   open?: () => void;
   assetToken?: TokenItemType | any;
+  lpPrice?: number;
 }

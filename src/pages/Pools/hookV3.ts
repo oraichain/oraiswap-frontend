@@ -11,7 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
+import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
+import isEqual from 'lodash/isEqual';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
@@ -121,13 +123,13 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
     console.error('getPools', e);
   }
 };
+
 export const useGetPools = () => {
   const { data: pools } = useQuery(['pools'], getPools, {
     refetchOnWindowFocus: true,
     placeholderData: [],
     staleTime: 5 * 60 * 1000
   });
-
   return pools;
 };
 
@@ -152,6 +154,9 @@ const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserRes
   }
 };
 export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUserQuery) => {
+  const { totalRewardInfoData } = useGetRewardInfo({ stakerAddr: stakerAddress });
+  const pools = useGetPools();
+
   const { data: myStakes } = useQuery(
     ['myStakes', stakerAddress, pairDenoms, tf],
     () => getMyStake({ stakerAddress, pairDenoms, tf }),
@@ -163,12 +168,19 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
     }
   );
 
-  const totalStaked = myStakes
-    ? myStakes.reduce((total, current) => {
-        total += current.stakingAmountInUsdt;
-        return total;
-      }, 0)
-    : 0;
+  // calculate total staked of all pool
+  const totalStaked = pools.reduce((accumulator, pool) => {
+    const { totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
+    const stakingAssetInfo = Pairs.getStakingAssetInfo([JSON.parse(firstAssetInfo), JSON.parse(secondAssetInfo)]);
+    const myStakedLP = stakingAssetInfo
+      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
+      : 0;
+
+    const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
+    const myStakeLPInUsdt = +myStakedLP * lpPrice;
+    accumulator += myStakeLPInUsdt;
+    return accumulator;
+  }, 0);
 
   const totalEarned = myStakes
     ? myStakes.reduce((total, current) => {
@@ -213,20 +225,28 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
   };
 };
 
+export type RewardInfoQueryType = {
+  stakerAddr: string;
+  assetInfo?: AssetInfo;
+};
 export const fetchRewardInfoV3 = async (
   stakerAddr: string,
-  assetInfo: AssetInfo
+  assetInfo?: AssetInfo
 ): Promise<OraiswapStakingTypes.RewardInfoResponse> => {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.rewardInfo({ assetInfo, stakerAddr });
+  let payload: RewardInfoQueryType = {
+    stakerAddr
+  };
+  if (assetInfo) payload.assetInfo = assetInfo;
+  const data = await stakingContract.rewardInfo(payload);
   return data;
 };
 
-export const useGetRewardInfo = ({ address, stakingAssetInfo }: { address: string; stakingAssetInfo: AssetInfo }) => {
+export const useGetRewardInfo = ({ stakerAddr, assetInfo: stakingAssetInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', address, stakingAssetInfo],
-    () => fetchRewardInfoV3(address, stakingAssetInfo!),
-    { enabled: !!address && !!stakingAssetInfo, refetchOnWindowFocus: false }
+    ['reward-info', stakerAddr, stakingAssetInfo],
+    () => fetchRewardInfoV3(stakerAddr, stakingAssetInfo),
+    { enabled: !!stakerAddr, refetchOnWindowFocus: true }
   );
 
   return { totalRewardInfoData, refetchRewardInfo };
