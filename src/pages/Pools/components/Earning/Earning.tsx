@@ -1,4 +1,3 @@
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as DownIcon } from 'assets/icons/ic_down.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -19,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import styles from './Earning.module.scss';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 
 type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
@@ -136,7 +136,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
         walletAddr: address,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
 
       if (result) {

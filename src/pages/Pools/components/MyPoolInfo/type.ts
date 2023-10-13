@@ -1,3 +1,5 @@
+import { TokenItemType } from 'config/bridgeTokens';
+
 export interface ModalProps {
   className?: string;
   isOpen: boolean;
@@ -8,4 +10,5 @@ export interface ModalProps {
   myLpBalance?: bigint;
   pairDenoms?: string;
   open?: () => void;
+  assetToken?: TokenItemType | any;
 }

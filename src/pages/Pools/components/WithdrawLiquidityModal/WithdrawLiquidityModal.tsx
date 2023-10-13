@@ -10,7 +10,7 @@ import { CW20_DECIMALS, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import CosmJs from 'libs/cosmjs';
 import { toAmount, toDisplay } from 'libs/utils';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useGetPoolDetail } from 'pages/Pools/hookV3';
@@ -75,7 +75,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
 
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
+        funds: msg.funds
       });
 
       console.log('result withdraw tx hash: ', result);

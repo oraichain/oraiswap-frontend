@@ -26,7 +26,15 @@ import styles from './UnstakeLPModal.module.scss';
 
 const cx = cn.bind(styles);
 
-export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance, myLpUsdt, onLiquidityChange }) => {
+export const UnstakeLPModal: FC<ModalProps> = ({
+  isOpen,
+  close,
+  open,
+  myLpBalance,
+  myLpUsdt,
+  onLiquidityChange,
+  assetToken
+}) => {
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
@@ -63,21 +71,17 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalanc
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        assetToken
       });
-      const msg = msgs[0];
 
+      const msg = msgs[0];
       const result = await CosmJs.execute({
         address: msg.contract,
         walletAddr: oraiAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
-
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
