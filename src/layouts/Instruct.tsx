@@ -5,58 +5,90 @@ import IconoirGift from 'assets/icons/iconoir_gift.svg';
 import MediaVideo from 'assets/icons/media-video.svg';
 import GroupImg from 'assets/icons/group.svg';
 import GraduationImg from 'assets/icons/graduation.svg';
-import UniversalSwap from 'assets/icons/universal-swap.svg';
+import UniversalWallet from 'assets/icons/universal_wallet.svg';
+import UniversalSwapBridge from 'assets/icons/universwap_bridge.svg';
 import ChatBubbleQuestion from 'assets/icons/chat-bubble-question.svg';
+import TrackingTransaction from 'assets/icons/tracking_transaction.svg';
+import TrackingHistory from 'assets/icons/tracking_history.svg';
 import styles from './Instruct.module.scss';
 import cn from 'classnames/bind';
 import Modal from 'components/Modal';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import SearchInput from 'components/SearchInput';
 
 const cx = cn.bind(styles);
 
 interface InstructProps {}
 
+const WhatsNewItems = [
+  {
+    label: 'Universal Swap & Bridge',
+    icon: true,
+    img: UniversalWallet
+  },
+  {
+    label: 'Universal Wallet',
+    img: UniversalSwapBridge
+  },
+  {
+    label: 'Tracking Transaction status',
+    img: TrackingTransaction
+  },
+  {
+    label: 'Transaction History',
+    img: TrackingHistory
+  },
+
+  {
+    label: 'Improved Pool Interface',
+    icon: true,
+    img: TrackingHistory
+  }
+];
+
 const Instruct: React.FC<InstructProps> = () => {
   const theme = useTheme();
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [activeInd, setActiveInd] = React.useState(0);
   return (
     <div className={cx('instruct')}>
       <div className={cx('question')} onClick={() => setIsOpen(!isOpen)}>
         <img src={QuestionImg} alt="question" />
       </div>
-
-      <Modal
-        className={cx('helper-modal')}
-        isOpen={isOpen}
-        close={() => setIsOpen(false)}
-        isCloseBtn={false}
-        open={() => {}}
-      >
+      <Modal className={cx('helper-modal')} isOpen={isOpen} close={() => setIsOpen(false)} isCloseBtn={true}>
         <div className={cx('helper-center')}>
           <div className={cx('topic')}>
             <div className={cx('title')}>Help Center</div>
-            <div>Search for tutorials, help...</div>
-            {/* <SearchInput placeholder="Search Token" onSearch={() => {}} theme={theme} /> */}
+            <SearchInput
+              placeholder="Search for tutorials, help..."
+              onSearch={() => {}}
+              theme={theme}
+              isBorder
+              style={{
+                fontSize: 14,
+                color: '#979995',
+                backgroundColor: '#F7F7F7',
+                borderRadius: 99,
+                border: 'none'
+              }}
+            />
             <div className={cx('what-news')}>
               <div className={cx('label')}>
                 <img src={IconoirGift} alt="gift" width={20} height={20} />
                 <div>What’s new</div>
               </div>
               <div className={cx('what-news-items')}>
-                <div className={cx('what-news-item')}>
-                  <div>Universal Swap & Bridge</div>
-                  <img src={MediaVideo} alt="media-video" width={14} height={14} />
-                </div>
-                <div className={cx('what-news-item', 'active')}>
-                  <div>Universal Wallet</div>
-                </div>
-                <div className={cx('what-news-item')}>
-                  <div>Tracking Transaction status</div>
-                </div>
-                <div className={cx('what-news-item')}>
-                  <div>Improved Pool Interface</div>
-                </div>
+                {WhatsNewItems.map((whatsNew, ind) => {
+                  return (
+                    <div
+                      onClick={() => ind !== activeInd && setActiveInd(ind)}
+                      key={ind}
+                      className={cx('what-news-item', `${activeInd === ind && 'active'}`)}
+                    >
+                      <div>{whatsNew.label}</div>
+                      {whatsNew.icon && <img src={MediaVideo} alt="media-video" width={14} height={14} />}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className={cx('ask')}>
@@ -69,7 +101,7 @@ const Instruct: React.FC<InstructProps> = () => {
             </div>
           </div>
           <div className={cx('content')}>
-            <img src={UniversalSwap} alt="universal-swap" />
+            <img src={WhatsNewItems[activeInd].img} alt="universal-swap" />
             <div className={cx('info')}>
               <div className={cx('title')}>Universal Wallet</div>
               <div className={cx('describe')}>

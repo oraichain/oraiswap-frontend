@@ -23,11 +23,13 @@
   align-items: center;
   min-width: 960px;
   border-radius: 12px;
+  margin-top: 26px;
 }
 
 .helper-center {
   display: flex;
   background-color: #efefef;
+  border-radius: 12px;
   width: 100%;
   .topic {
     display: flex;
@@ -39,6 +41,8 @@
     font-weight: 600;
     background-color: #ffffff;
     color: #494949;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
     .title {
       font-size: 20px;
     }
@@ -47,6 +51,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        cursor: pointer;
       }
       &-items {
         padding-top: 16px;
@@ -61,7 +66,7 @@
         color: #979995;
         cursor: pointer;
         &:hover {
-          background-color: #979995;
+          color: #232521;
         }
       }
     }
@@ -69,16 +74,23 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
     }
     .ai {
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
     }
   }
   .content {
     width: 68.75%;
     background-color: #efefef;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    img {
+      border-top-right-radius: 12px;
+    }
     .info {
       padding: 24px;
       .title {
