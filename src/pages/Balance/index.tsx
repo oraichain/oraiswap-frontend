@@ -38,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
-import { UniversalSwapHandler, combineReceiver, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
 interface BalanceProps {}
 
@@ -155,7 +155,6 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
-      const { combinedReceiver } = combineReceiver(latestOraiAddress, from);
       // has to switch network to the correct chain id on evm since users can swap between network tokens
       if (!window.Metamask.isTron(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
@@ -168,7 +167,7 @@ const Balance: React.FC<BalanceProps> = () => {
           fromAmount
         },
         { evmWallet: window.Metamask }
-      ).transferEvmToIBC(combinedReceiver);
+      ).processUniversalSwap();
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {

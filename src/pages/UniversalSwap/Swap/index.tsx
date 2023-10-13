@@ -42,7 +42,6 @@ import {
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
-  combineReceiver,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
@@ -216,13 +215,13 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          simulateAverage: averageRatio.amount
+          simulatePrice: averageRatio.amount
         },
         { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const transactionHash = await univeralSwapHandler.processUniversalSwap();
+      const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
