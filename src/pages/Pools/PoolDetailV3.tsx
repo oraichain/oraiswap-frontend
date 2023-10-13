@@ -15,9 +15,9 @@ import styles from './PoolDetailV3.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
+import { recalculateApr } from './helpers';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
-import { recalculateApr } from './helpers';
 
 const PoolDetailV3: React.FC = () => {
   let { poolUrl } = useParams();
@@ -45,7 +45,7 @@ const PoolDetailV3: React.FC = () => {
     setCachedLpPools(lpTokenData);
   }, [pools]);
 
-  const handleLiquidityChange = useCallback(
+  const onLiquidityChange = useCallback(
     (amountLpInUsdt = 0) => {
       refetchPairAmountInfo();
       refetchLpTokenInfoData();
@@ -86,8 +86,8 @@ const PoolDetailV3: React.FC = () => {
           <span>Back to all pools</span>
         </div>
         <OverviewPool poolDetailData={poolDetailData} />
-        <Earning onLiquidityChange={handleLiquidityChange} />
-        <MyPoolInfo myLpBalance={lpTokenBalance} handleLiquidityChange={handleLiquidityChange} />
+        <Earning onLiquidityChange={onLiquidityChange} />
+        <MyPoolInfo myLpBalance={lpTokenBalance} onLiquidityChange={onLiquidityChange} />
       </div>
     </Content>
   );

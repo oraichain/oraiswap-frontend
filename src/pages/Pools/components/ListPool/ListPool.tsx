@@ -9,13 +9,14 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { toDisplay } from 'libs/utils';
 import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { useGetMyStake } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
+import isEqual from 'lodash/isEqual';
 
 type PoolTableData = PoolInfoResponse & {
   reward: string[];
@@ -36,16 +37,25 @@ export const ListPools: React.FC = () => {
     stakerAddress: address
   });
 
+  const { totalRewardInfoData } = useGetRewardInfo({
+    stakerAddr: address
+  });
+
   const poolTableData: PoolTableData[] = filteredPools.map((pool) => {
     const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
     const stakingAssetInfo = Pairs.getStakingAssetInfo([
       JSON.parse(pool.firstAssetInfo),
       JSON.parse(pool.secondAssetInfo)
     ]);
+
+    // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
     const myStakedLP = stakingAssetInfo
-      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))
-          ?.stakingAmountInUsdt || 0
+      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
       : 0;
+    const totalSupply = pool.totalSupply;
+    const lpPrice = pool.totalSupply ? pool.totalLiquidity / Number(totalSupply) : 0;
+    const myStakeLPInUsdt = +myStakedLP * lpPrice;
+
     const earned = stakingAssetInfo
       ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt || 0
       : 0;
@@ -60,7 +70,7 @@ export const ListPools: React.FC = () => {
     return {
       ...pool,
       reward: poolReward?.reward ?? [],
-      myStakedLP: toDisplay(BigInt(Math.trunc(myStakedLP)), CW20_DECIMALS),
+      myStakedLP: toDisplay(BigInt(Math.trunc(myStakeLPInUsdt)), CW20_DECIMALS),
       earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS),
       baseToken,
       quoteToken

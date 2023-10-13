@@ -1,4 +1,3 @@
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { ReactComponent as DownIcon } from 'assets/icons/ic_down.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -7,7 +6,6 @@ import TokenBalance from 'components/TokenBalance';
 import { TokenItemType, cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import { ORAI, xOCH_PRICE } from 'config/constants';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
@@ -15,6 +13,7 @@ import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
@@ -31,31 +30,23 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const [cachePrices] = useConfigReducer('coingecko');
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>([]);
   const [stakingToken, setStakingToken] = useState<TokenItemType>();
-  const [stakingAssetInfo, setStakingAssetInfo] = useState<AssetInfo>();
   const [actionLoading, setActionLoading] = useState(false);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
   const { info } = poolDetailData;
 
   useEffect(() => {
-    if (poolDetailData?.token1?.name === ORAI) {
+    if (!poolDetailData) return;
+    if (poolDetailData?.token1?.name === 'ORAI') {
       setStakingToken(poolDetailData.token2);
-    } else if (!!poolDetailData) {
+    } else {
       setStakingToken(poolDetailData.token1);
     }
   }, [poolDetailData]);
 
-  useEffect(() => {
-    if (!info) return;
-    const stakingAssetInfo = Pairs.getStakingAssetInfo([
-      JSON.parse(info.firstAssetInfo),
-      JSON.parse(info.secondAssetInfo)
-    ]);
-    setStakingAssetInfo(stakingAssetInfo);
-  }, [info]);
-
+  const stakingAssetInfo = useGetStakingAssetInfo();
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
-    address,
-    stakingAssetInfo
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
   });
 
   useEffect(() => {
@@ -115,7 +106,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
 
   const onBondingAction = () => {
     refetchRewardInfo();
-    setPendingRewards([]);
     onLiquidityChange();
   };
 
@@ -168,7 +158,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
       <></>
     );
   };
-
+  const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.amount !== 0n);
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
@@ -198,6 +188,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
                       cachePrices,
                       pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
                     )}
+                    prefix="~$"
                     decimalScale={4}
                   />
                 </div>
@@ -210,7 +201,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
         <Button
           type="primary"
           onClick={() => handleClaimReward()}
-          disabled={actionLoading || pendingRewards.length === 0}
+          disabled={disabledClaim}
           icon={actionLoading ? <Loader width={20} height={20} /> : null}
         >
           Claim Your Earned

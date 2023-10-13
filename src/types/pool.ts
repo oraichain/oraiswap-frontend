@@ -23,6 +23,7 @@ export type PoolInfoResponse = PairInfoData & {
   rewardPerSec: string;
   offerPoolAmount: number;
   askPoolAmount: number;
+  totalSupply: number;
 };
 
 export type PoolDetail = {

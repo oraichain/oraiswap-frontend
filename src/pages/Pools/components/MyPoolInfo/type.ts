@@ -8,4 +8,5 @@ export interface ModalProps {
   myLpBalance?: bigint;
   pairDenoms?: string;
   open?: () => void;
+  lpPrice?: number;
 }
