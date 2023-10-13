@@ -16,7 +16,7 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
+import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,19 +30,15 @@ import {
 } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import {
-  UniversalSwapHandler,
-  checkEvmAddress,
-  calculateMinimum,
-  filterNonPoolEvmTokens,
-  SwapDirection
-} from '../helpers';
+import { UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens, SwapDirection } from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import InputSwap from './InputSwapV3';
 import { useSimulate, useTaxRate } from './hooks';
+import { useWarningSlippage } from '../Swap/hooks';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
   [0.25, '25%'],
@@ -185,7 +181,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken
   );
-  const { toAmountToken: averageRatio } = useSimulate(
+  const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
     toTokenInfoData,
@@ -199,6 +195,16 @@ const SwapComponent: React.FC<{
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  const minimumReceive = averageRatio?.amount
+    ? calculateMinReceive(
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
+    : '0';
+  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -216,12 +222,12 @@ const SwapComponent: React.FC<{
         originalToToken,
         fromAmountToken,
         simulateData.amount,
-        userSlippage
+        userSlippage,
+        averageRatio.amount
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
-        tronAddress,
-        oraiAddress
+        tronAddress
       });
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,
@@ -264,8 +270,6 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
-
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>

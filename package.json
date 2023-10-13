@@ -1,17 +1,19 @@
 {
-  "name": "oraiswap-webapp",
+  "name": "oraidex-web-app",
   "version": "1.0.0",
   "homepage": "https://oraidex.orai.io",
   "repository": "https://github.com/oraichain/oraiswap-frontend.git",
-  "author": "Thanh Tu <tu@orai.io>",
+  "author": "Oraichain Labs",
   "license": "Apache-2.0",
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.31.0",
     "@cosmjs/proto-signing": "^0.31.0",
     "@cosmjs/stargate": "^0.31.0",
-    "@oraichain/common-contracts-sdk": "1.0.24",
+    "@cosmjs/tendermint-rpc": "^0.31.0",
+    "@injectivelabs/sdk-ts": "^1.12.1",
+    "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/kawaiiverse-txs": "0.0.2",
-    "@oraichain/oraidex-contracts-sdk": "^1.0.19",
+    "@oraichain/oraidex-contracts-sdk": "^1.0.24",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.47.0",
     "@tanstack/react-query": "^4.32.6",
@@ -45,9 +47,9 @@
     "@ethersproject/providers": "^5.0.10",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/types": "^0.11.38",
-    "@oraichain/common-contracts-build": "^1.0.26",
-    "@oraichain/cw-simulate": "^2.8.55",
-    "@oraichain/oraidex-contracts-build": "1.0.13",
+    "@oraichain/common-contracts-build": "1.0.32",
+    "@oraichain/cw-simulate": "^2.8.71",
+    "@oraichain/oraidex-contracts-build": "^1.0.20",
     "@sentry/webpack-plugin": "^1.20.0",
     "@types/classnames": "^2.2.10",
     "@types/jest": "^26.0.14",
@@ -61,6 +63,7 @@
     "esbuild-loader": "^3.1.0",
     "firebase-tools": "^10.2.2",
     "https-browserify": "^1.0.0",
+    "husky": "^8.0.3",
     "patch-package": "^6.5.1",
     "react-app-rewired": "^2.2.1",
     "react-scripts": "^5.0.1",
@@ -72,8 +75,11 @@
   "scripts": {
     "start": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false react-app-rewired start",
     "build": "cross-env IMAGE_INLINE_SIZE_LIMIT=1000 GENERATE_SOURCEMAP=false DISABLE_ESLINT_PLUGIN=true react-app-rewired build",
-    "test": "react-app-rewired test",
-    "postinstall": "patch-package"
+    "test": "react-app-rewired test --watchAll",
+    "test:ci": "react-app-rewired test --watchAll=false",
+    "ts-check": "tsc --noEmit",
+    "postinstall": "patch-package",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": "react-app"

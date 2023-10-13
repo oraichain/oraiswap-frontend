@@ -1,5 +1,5 @@
 import { coin } from '@cosmjs/stargate';
-import { cosmosTokens, flattenTokens, TokenItemType } from 'config/bridgeTokens';
+import { cosmosTokens, flattenTokens, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
 import {
   BSC_SCAN,
@@ -16,11 +16,16 @@ import {
 import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
 import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
-import { getExecuteContractMsgs, parseExecuteContractMultiple } from 'libs/cosmjs';
-import { buildMultipleMessages, toAmount } from 'libs/utils';
+import { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
+import { toAmount } from 'libs/utils';
 import Long from 'long';
 import { findDefaultToToken, getSourceReceiver } from 'pages/Balance/helpers';
-import { generateConvertCw20Erc20Message, generateMoveOraib2OraiMessages, parseTokenInfo } from 'rest/api';
+import {
+  generateConvertCw20Erc20Message,
+  generateConvertErc20Cw20Message,
+  generateMoveOraib2OraiMessages,
+  parseTokenInfo
+} from 'rest/api';
 
 // @ts-ignore
 window.Networks = require('libs/ethereum-multicall/enums').Networks;
@@ -65,6 +70,19 @@ describe('bridge', () => {
     };
     const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, keplrAddress, evmAmount);
 
+    it.each<[string, AmountDetails, number]>([
+      ['scatom', {}, 0],
+      ['injective', { [`${process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM}`]: '10' }, 1],
+      ['injective', { injective: '10' }, 0]
+    ])(
+      'test-generateConvertErc20Cw20Message-should-return-correct-message-length',
+      (denom, amountDetails, expectedMessageLength) => {
+        const token = oraichainTokens.find((token) => token.denom === denom);
+        const result = generateConvertErc20Cw20Message(amountDetails, token, 'john doe');
+        expect(result.length).toEqual(expectedMessageLength);
+      }
+    );
+
     it('bridge-transfer-token-erc20-cw20-should-return-only-evm-amount', async () => {
       expect(evmAmount).toMatchObject({
         amount: '10000000000000000000', // 10 * 10**18
@@ -75,17 +93,16 @@ describe('bridge', () => {
     it('bridge-transfer-token-erc20-cw20-should-return-only-msg-convert-reverses', async () => {
       // check if the sender and contract address are correct
       for (const msg of msgConvertReverses) {
-        expect(msg.contract).toBe(fromToken.contractAddress);
-        expect(msg.sender).toBe(keplrAddress);
+        expect(msg.contractAddress).toBe(fromToken.contractAddress);
       }
 
       expect(Array.isArray(msgConvertReverses)).toBe(true);
     });
 
     it('bridge-transfer-token-erc20-cw20-should-return-only-execute-convert-reverses', async () => {
-      const executeContractMsgs = getExecuteContractMsgs(
+      const executeContractMsgs = getEncodedExecuteContractMsgs(
         keplrAddress,
-        parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
+        buildMultipleExecuteMessages(undefined, ...msgConvertReverses)
       );
       expect(Array.isArray(executeContractMsgs)).toBe(true);
     });
@@ -210,7 +227,6 @@ describe('bridge', () => {
       expect(msg).toHaveProperty('receiver');
       expect(msg).toHaveProperty('memo');
       expect(msg).toHaveProperty('timeoutTimestamp');
-      expect(msg).toHaveProperty('timeoutHeight');
     }
 
     // check if the sourcePort and sourceChannel values are correct
@@ -232,15 +248,16 @@ describe('bridge', () => {
 
     // check if the timeout timestamp is correct
     const currentTime = Math.floor(Date.now() / 1000);
-    const expectedTimeoutTimestamp = Long.fromNumber(currentTime + ibcInfo.timeout)
-      .multiply(1000000000)
-      .toString();
+    const expectedTimeoutTimestamp = Long.fromNumber(currentTime + ibcInfo.timeout).multiply(1000000000);
     expect(transferMsgs[0].timeoutTimestamp).toEqual(expectedTimeoutTimestamp);
   });
 
   describe('helper function', () => {
     it.each<[Tokens, NetworkChainId[]]>([
-      [flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'), ['0x01', '0x38']],
+      [
+        flattenTokens.find((i) => i.coinGeckoId === 'oraichain-token' && i.chainId === 'Oraichain'),
+        ['injective-1', '0x01', '0x38']
+      ],
       [flattenTokens.find((i) => i.name === 'MILKY' && i.chainId === 'Oraichain'), ['kawaii_6886-1', '0x38']]
     ])('should filter chain bridge run exactly', async (token: Tokens, expectedBridgeNetwork: NetworkChainId[]) => {
       const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));

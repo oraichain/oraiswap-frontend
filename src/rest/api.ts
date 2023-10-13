@@ -1,6 +1,6 @@
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { AssetInfo, Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapStakingQueryClient,
   OraiswapRewarderQueryClient,
@@ -13,10 +13,10 @@ import {
   OraiswapStakingTypes,
   OraiswapTokenTypes,
   OraiswapOracleQueryClient,
-  PairInfo,
-  SwapOperation
+  AssetInfo,
+  PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { flattenTokens, gravityContracts, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
+import { flattenTokens, oraichainTokens, TokenItemType, tokenMap, tokens } from 'config/bridgeTokens';
 import {
   KWT_DENOM,
   MILKY_DENOM,
@@ -28,7 +28,7 @@ import {
 } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { MsgTransfer } from './../libs/proto/ibc/applications/transfer/v1/tx';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import { CoinGeckoId, EvmChainId, NetworkChainId } from 'config/chainInfos';
 import { ibcInfos, ibcInfosOld } from 'config/ibcInfos';
 import { calculateTimeoutTimestamp, isFactoryV1 } from 'helper';
@@ -40,6 +40,10 @@ import { PairInfoExtend, TokenInfo } from 'types/token';
 import { IUniswapV2Router02__factory } from 'types/typechain-types';
 import { ethers } from 'ethers';
 import { BondLP, MiningLP, UnbondLP } from 'types/pool';
+import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
+import { Long } from 'cosmjs-types/helpers';
+import { SimulateResponse } from 'pages/UniversalSwap/helpers';
+import { SwapOperation } from '@oraichain/oraidex-contracts-sdk/build/OraiswapRouter.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -299,8 +303,11 @@ async function fetchDistributionInfo(assetToken: TokenInfo): Promise<OraiswapRew
   return data;
 }
 
-function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: TokenItemType, sender: string) {
-  let msgConverts: any[] = [];
+function generateConvertErc20Cw20Message(
+  amounts: AmountDetails,
+  tokenInfo: TokenItemType,
+  sender: string
+): ExecuteInstruction[] {
   if (!tokenInfo.evmDenoms) return [];
   const subAmounts = getSubAmountDetails(amounts, tokenInfo);
   // we convert all mapped tokens to cw20 to unify the token
@@ -309,16 +316,16 @@ function generateConvertErc20Cw20Message(amounts: AmountDetails, tokenInfo: Toke
     // reset so we convert using native first
     const erc20TokenInfo = tokenMap[denom];
     if (balance > 0) {
-      const msgConvert = generateConvertMsgs({
+      const msgConvert: ExecuteInstruction = generateConvertMsgs({
         type: Type.CONVERT_TOKEN,
         sender,
         inputAmount: balance.toString(),
         inputToken: erc20TokenInfo
-      })[0];
-      msgConverts.push(msgConvert);
+      });
+      return [msgConvert];
     }
   }
-  return msgConverts;
+  return [];
 }
 
 function generateConvertCw20Erc20Message(
@@ -326,8 +333,7 @@ function generateConvertCw20Erc20Message(
   tokenInfo: TokenItemType,
   sender: string,
   sendCoin: Coin
-) {
-  let msgConverts: any[] = [];
+): ExecuteInstruction[] {
   if (!tokenInfo.evmDenoms) return [];
   // we convert all mapped tokens to cw20 to unify the token
   for (let denom of tokenInfo.evmDenoms) {
@@ -354,11 +360,11 @@ function generateConvertCw20Erc20Message(
         inputAmount: balance,
         inputToken: tokenInfo,
         outputToken
-      })[0];
-      msgConverts.push(msgConvert);
+      });
+      return [msgConvert];
     }
   }
-  return msgConverts;
+  return [];
 }
 
 function parseTokenInfo(tokenInfo: TokenItemType, amount?: string | number) {
@@ -436,11 +442,11 @@ const generateSwapOperationMsgs = (offerInfo: AssetInfo, askInfo: AssetInfo): Sw
       ];
 };
 
-async function fetchTaxRate() {
+async function fetchTaxRate(): Promise<TaxRateResponse> {
   const oracleContract = new OraiswapOracleQueryClient(window.client, network.oracle);
   try {
-    const data = await oracleContract.taxRate();
-    return data;
+    const data = await oracleContract.treasury({ tax_rate: {} });
+    return data as TaxRateResponse;
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
   }
@@ -462,11 +468,19 @@ async function simulateSwap(query: { fromInfo: TokenInfo; toInfo: TokenInfo; amo
   const routerContract = new OraiswapRouterQueryClient(window.client, network.router);
   const operations = generateSwapOperationMsgs(offerInfo, askInfo);
   try {
+    let finalAmount = amount;
+    let isSimulatingRatio = false;
+    // hard-code for tron because the WTRX/USDT pool is having a simulation problem (returning zero / error when simulating too small value of WTRX)
+    if (fromInfo.coinGeckoId === 'tron' && amount === toAmount(1, fromInfo.decimals).toString()) {
+      finalAmount = toAmount(10, fromInfo.decimals).toString();
+      isSimulatingRatio = true;
+    }
     const data = await routerContract.simulateSwapOperations({
-      offerAmount: amount.toString(),
+      offerAmount: finalAmount,
       operations
     });
-    return data;
+    if (!isSimulatingRatio) return data;
+    return { amount: data.amount.substring(0, data.amount.length - 1) };
   } catch (error) {
     throw new Error(`Error when trying to simulate swap using router v2: ${error}`);
   }
@@ -499,13 +513,18 @@ export function getEvmSwapRoute(
   return undefined;
 }
 
-async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenItemType; amount: string }) {
+async function simulateSwapEvm(query: {
+  fromInfo: TokenItemType;
+  toInfo: TokenItemType;
+  amount: string;
+}): Promise<SimulateResponse> {
   const { amount, fromInfo, toInfo } = query;
 
   // check for universal-swap 2 tokens that have same coingeckoId, should return simulate data with average ratio 1-1.
   if (fromInfo.coinGeckoId === toInfo.coinGeckoId) {
     return {
-      amount
+      amount,
+      displayAmount: toDisplay(amount, toInfo.decimals)
     };
   }
   try {
@@ -515,11 +534,13 @@ async function simulateSwapEvm(query: { fromInfo: TokenItemType; toInfo: TokenIt
     const swapRouterV2 = IUniswapV2Router02__factory.connect(proxyContractInfo[fromInfo.chainId].routerAddr, provider);
     const route = getEvmSwapRoute(fromInfo.chainId, fromInfo.contractAddress, toTokenInfoOnSameChainId.contractAddress);
     const outs = await swapRouterV2.getAmountsOut(amount, route);
+    if (outs.length === 0) throw new Error('There is no output amounts after simulating evm swap');
     let simulateAmount = outs.slice(-1)[0].toString();
     return {
       // to display to reset the simulate amount to correct display type (swap simulate from -> same chain id to, so we use same chain id toToken decimals)
       // then toAmount with actual toInfo decimals so that it has the same decimals as other tokens displayed
-      amount: toAmount(toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals), toInfo.decimals).toString() // get the final out amount, which is the token out amount we want
+      amount: simulateAmount,
+      displayAmount: toDisplay(simulateAmount, toTokenInfoOnSameChainId.decimals) // get the final out amount, which is the token out amount we want
     };
   } catch (ex) {
     console.log('error simulating evm: ', ex);
@@ -614,18 +635,18 @@ export type IncreaseAllowanceQuery = {
 
 function generateContractMessages(
   query: SwapQuery | ProvideQuery | WithdrawQuery | IncreaseAllowanceQuery | TransferQuery
-) {
+): ExecuteInstruction {
   const { type, sender, ...params } = query;
-  let sent_funds;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input;
+  let input: any;
   switch (type) {
     case Type.SWAP:
       const swapQuery = params as SwapQuery;
       const { fund: offerSentFund, info: offerInfo } = parseTokenInfo(swapQuery.fromInfo, swapQuery.amount.toString());
       const { fund: askSentFund, info: askInfo } = parseTokenInfo(swapQuery.toInfo);
-      sent_funds = handleSentFunds(offerSentFund, askSentFund);
+      funds = handleSentFunds(offerSentFund, askSentFund);
       let inputTemp = {
         execute_swap_operations: {
           operations: generateSwapOperationMsgs(offerInfo, askInfo),
@@ -650,7 +671,7 @@ function generateContractMessages(
       const provideQuery = params as ProvideQuery;
       const { fund: fromSentFund, info: fromInfoData } = parseTokenInfo(provideQuery.fromInfo, provideQuery.fromAmount);
       const { fund: toSentFund, info: toInfoData } = parseTokenInfo(provideQuery.toInfo, provideQuery.toAmount);
-      sent_funds = handleSentFunds(fromSentFund, toSentFund);
+      funds = handleSentFunds(fromSentFund, toSentFund);
       input = {
         provide_liquidity: {
           assets: [
@@ -702,16 +723,13 @@ function generateContractMessages(
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 export type BondMining = {
@@ -735,12 +753,12 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) {
-  const { type, sender, ...params } = msg;
-  let sent_funds;
+function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity): ExecuteInstruction {
+  const { type, sender, ...params } = data;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.router;
-  let input;
+  let input: JsonObject;
   switch (type) {
     case Type.BOND_LIQUIDITY: {
       const bondMsg = params as BondMining;
@@ -782,16 +800,13 @@ function generateMiningMsgs(msg: BondMining | WithdrawMining | UnbondLiquidity) 
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 function generateMiningMsgsV3(msg: MiningLP) {
@@ -864,12 +879,12 @@ export type ConvertReverse = {
   outputToken: TokenItemType;
 };
 
-function generateConvertMsgs(msg: Convert | ConvertReverse) {
-  const { type, sender, inputToken, inputAmount } = msg;
-  let sent_funds;
+function generateConvertMsgs(data: Convert | ConvertReverse): ExecuteInstruction {
+  const { type, sender, inputToken, inputAmount } = data;
+  let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
   let contractAddr = network.converter;
-  let input;
+  let input: any;
   switch (type) {
     case Type.CONVERT_TOKEN: {
       // currently only support cw20 token pool
@@ -879,7 +894,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
         input = {
           convert: {}
         };
-        sent_funds = handleSentFunds(fund);
+        funds = handleSentFunds(fund);
       } else {
         // cw20 case
         input = {
@@ -896,7 +911,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
       break;
     }
     case Type.CONVERT_TOKEN_REVERSE: {
-      const { outputToken } = msg as ConvertReverse;
+      const { outputToken } = data as ConvertReverse;
 
       // currently only support cw20 token pool
       let { info: assetInfo, fund } = parseTokenInfo(inputToken, inputAmount);
@@ -908,7 +923,7 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
             from_asset: outputAssetInfo
           }
         };
-        sent_funds = handleSentFunds(fund);
+        funds = handleSentFunds(fund);
       } else {
         // cw20 case
         input = {
@@ -930,16 +945,13 @@ function generateConvertMsgs(msg: Convert | ConvertReverse) {
       break;
   }
 
-  const msgs = [
-    {
-      contract: contractAddr,
-      msg: Buffer.from(JSON.stringify(input)),
-      sender,
-      sent_funds
-    }
-  ];
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
 
-  return msgs;
+  return msg;
 }
 
 export type Claim = {
@@ -973,8 +985,7 @@ function generateMoveOraib2OraiMessages(
       sender: fromAddress,
       receiver: toAddress,
       memo: '',
-      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
-      timeoutHeight: { revisionNumber: '0', revisionHeight: '0' } // we dont need timeout height. We only use timeout timestamp
+      timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout))
     });
   }
   return transferMsgs;

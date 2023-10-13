@@ -19,6 +19,7 @@ import {
   useFetchMyPairs,
   useFetchPairInfoDataList,
   useFetchCacheReward,
+  useFetchCacheBondLpPools
 } from './hooks';
 import styles from './index.module.scss';
 import NewPoolModal from './NewPoolModal/NewPoolModal';
@@ -26,8 +27,8 @@ import { RootState } from 'store/configure';
 import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { parseTokenInfo, parseTokenInfoRawDenom } from 'rest/api';
 import classNames from 'classnames';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { RewardPoolType } from 'reducer/config';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 interface PoolsProps { }
 
@@ -67,65 +68,67 @@ const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amou
   );
 };
 
-const PairBox = memo<PairInfoData & { apr: number; theme?: string, cachedReward?: RewardPoolType[] }>(({ pair, amount, apr, theme, cachedReward }) => {
-  const navigate = useNavigate();
-  const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
-  const reward = cachedReward?.find(e => e?.liquidity_token === pair?.liquidity_token)?.reward || ['ORAIX'];
-  if (!token1 || !token2) return null;
+const PairBox = memo<PairInfoData & { apr: number; theme?: string; cachedReward?: RewardPoolType[] }>(
+  ({ pair, amount, apr, theme, cachedReward }) => {
+    const navigate = useNavigate();
+    const [token1, token2] = pair.asset_infos_raw.map((info) => assetInfoMap[info]);
+    const reward = cachedReward?.find((e) => e?.liquidity_token === pair?.liquidity_token)?.reward || ['ORAIX'];
+    if (!token1 || !token2) return null;
 
-  return (
-    <div
-      className={classNames(styles.pairbox)}
-      onClick={() =>
-        navigate(
-          `/pool/${encodeURIComponent(parseTokenInfoRawDenom(token1))}_${encodeURIComponent(
-            parseTokenInfoRawDenom(token2)
-          )}`
-          // { replace: true }
-        )
-      }
-    >
-      <div className={styles.pairbox_header}>
-        <div className={styles.pairbox_logos}>
-          {theme === 'light' && token1?.IconLight ? (
-            <token1.IconLight className={styles.pairbox_logo1} />
-          ) : (
-            <token1.Icon className={styles.pairbox_logo1} />
-          )}
+    return (
+      <div
+        className={classNames(styles.pairbox)}
+        onClick={() =>
+          navigate(
+            `/pool/${encodeURIComponent(parseTokenInfoRawDenom(token1))}_${encodeURIComponent(
+              parseTokenInfoRawDenom(token2)
+            )}`
+            // { replace: true }
+          )
+        }
+      >
+        <div className={styles.pairbox_header}>
+          <div className={styles.pairbox_logos}>
+            {theme === 'light' && token1?.IconLight ? (
+              <token1.IconLight className={styles.pairbox_logo1} />
+            ) : (
+              <token1.Icon className={styles.pairbox_logo1} />
+            )}
 
-          {theme === 'light' && token2?.IconLight ? (
-            <token2.IconLight className={styles.pairbox_logo2} />
-          ) : (
-            <token2.Icon className={styles.pairbox_logo2} />
-          )}
-        </div>
-        <div className={styles.pairbox_pair}>
-          <div className={styles.pairbox_pair_name}>
-            {token1.name}/{token2.name}
+            {theme === 'light' && token2?.IconLight ? (
+              <token2.IconLight className={styles.pairbox_logo2} />
+            ) : (
+              <token2.Icon className={styles.pairbox_logo2} />
+            )}
           </div>
-          <div className={styles.pairbox_pair_rate}>{/* {token1.name} (50%)/{token2.name} (50%) */}</div>
-          <span className={styles.pairbox_pair_apr}>{reward.join(' / ')} Bonus</span>
+          <div className={styles.pairbox_pair}>
+            <div className={styles.pairbox_pair_name}>
+              {token1.name}/{token2.name}
+            </div>
+            <div className={styles.pairbox_pair_rate}>{/* {token1.name} (50%)/{token2.name} (50%) */}</div>
+            <span className={styles.pairbox_pair_apr}>{reward.join(' / ')} Bonus</span>
+          </div>
         </div>
-      </div>
-      <div className={styles.pairbox_content}>
-        {!!apr && (
+        <div className={styles.pairbox_content}>
+          {!!apr && (
+            <div className={styles.pairbox_data}>
+              <span className={styles.pairbox_data_name}>APR</span>
+              <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
+            </div>
+          )}
           <div className={styles.pairbox_data}>
-            <span className={styles.pairbox_data_name}>APR</span>
-            <span className={styles.pairbox_data_value}>{apr.toFixed(2)}%</span>
+            <span className={styles.pairbox_data_name}>Swap Fee</span>
+            <span className={styles.pairbox_data_value}>{100 * parseFloat(pair.commission_rate)}%</span>
           </div>
-        )}
-        <div className={styles.pairbox_data}>
-          <span className={styles.pairbox_data_name}>Swap Fee</span>
-          <span className={styles.pairbox_data_value}>{100 * parseFloat(pair.commission_rate)}%</span>
-        </div>
-        <div className={styles.pairbox_data}>
-          <span className={styles.pairbox_data_name}>Liquidity</span>
-          <TokenBalance balance={amount} className={styles.pairbox_data_value} decimalScale={2} />
+          <div className={styles.pairbox_data}>
+            <span className={styles.pairbox_data_name}>Liquidity</span>
+            <TokenBalance balance={amount} className={styles.pairbox_data_value} decimalScale={2} />
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 const ListPools = memo<{
   pairInfos: PairInfoData[];
@@ -137,6 +140,7 @@ const ListPools = memo<{
   const [filteredPairInfos, setFilteredPairInfos] = useState<PairInfoData[]>([]);
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const bondLpPools = useSelector((state: RootState) => state.token.bondLpPools);
   const [cachedReward] = useConfigReducer('rewardPools');
   useEffect(() => {
     if (!!!typeFilter) {
@@ -145,7 +149,7 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance));
+    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || parseInt(bondLpPools[pairInfo?.pair?.contract_addr]));
   }, [pairInfos]);
 
   useEffect(() => {
@@ -164,8 +168,10 @@ const ListPools = memo<{
       if (!text) {
         return setFilteredPairInfos(listPairs);
       }
-      const ret = listPairs.filter((pairInfo) =>
-        pairInfo.pair.asset_infos.some((info) => cosmosTokens.find((token) => parseTokenInfo(token).info === info))
+      const ret = listPairs.filter(
+        (pairInfo) =>
+          pairInfo.fromToken.name.toLowerCase().includes(text.toLowerCase()) ||
+          pairInfo.toToken.name.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredPairInfos(ret);
     },
@@ -238,7 +244,9 @@ const Pools: React.FC<PoolsProps> = () => {
   const [cachedApr] = useFetchApr(pairs, pairInfos, prices);
   useFetchCacheReward(pairs);
   useFetchCachePairs(pairs);
+
   useFetchCacheLpPools(pairs);
+  useFetchCacheBondLpPools(pairs);
 
   const totalAmount = sumBy(pairInfos, (c) => c.amount);
   return (

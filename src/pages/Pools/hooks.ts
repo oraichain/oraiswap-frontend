@@ -10,9 +10,9 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
 import { updatePairInfos } from 'reducer/pairs';
-import { updateLpPools, updatePairs } from 'reducer/token';
 import { fetchRewardPerSecInfo } from 'rest/api';
 import axios, { withBaseApiUrl } from 'rest/request';
+import { updateLpPools, updatePairs, updateBondLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
@@ -96,6 +96,27 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
   }, [pairs]);
 
   return [cachedReward];
+};
+
+// Fetch all bond lp pools
+export const useFetchCacheBondLpPools = (pairs: PairInfoExtend[]) => {
+  const dispatch = useDispatch();
+  const [address] = useConfigReducer('address');
+  const setCachedBondLpPools = (payload: BondLpPoolDetails) => dispatch(updateBondLpPools(payload));
+
+  const fetchCachedBondLpPool = async () => {
+    const bondLpTokenData = await fetchMyPairsData(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall),
+      'bond'
+    );
+    setCachedBondLpPools(bondLpTokenData);
+  };
+
+  useEffect(() => {
+    if (pairs.length > 0 && address) fetchCachedBondLpPool();
+  }, [pairs]);
 };
 
 // Fetch all lp pools

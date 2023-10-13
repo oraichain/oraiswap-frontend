@@ -11,8 +11,8 @@ import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
-import { buildMultipleMessages, getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
+import CosmJs, { buildMultipleExecuteMessages } from 'libs/cosmjs';
+import { getSubAmountDetails, getUsd, toAmount, toDisplay, toSumDisplay } from 'libs/utils';
 import { estimateShare } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
@@ -119,7 +119,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       walletAddr,
       handleMsg: msg.msg.toString(),
       gasAmount: { denom: ORAI, amount: '0' },
-      handleOptions: { funds: msg.sent_funds } as HandleOptions
+      funds: msg.funds
     });
     console.log('result increase allowance tx hash: ', result);
 
@@ -165,7 +165,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
 
       const msg = msgs[0];
 
-      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
+      var messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,

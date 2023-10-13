@@ -1,46 +1,39 @@
 import { useQuery } from '@tanstack/react-query';
-import AntSwapImg from 'assets/images/ant_swap.svg';
 import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
+import AntSwapImg from 'assets/images/ant_swap.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
+import InputSwap from 'components/InputSwap/InputSwap';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, evmTokens, tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM, swapEvmRoutes } from 'config/constants';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
+import useTokenFee from 'hooks/useTokenFee';
+import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import {
   fetchTokenInfos,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from 'rest/api';
 import { RootState } from 'store/configure';
-import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import {
-  UniversalSwapHandler,
-  checkEvmAddress,
-  calculateMinimum,
-  filterNonPoolEvmTokens,
-  SwapDirection
-} from '../helpers';
+import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
+import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
-import useTokenFee from 'hooks/useTokenFee';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
-import InputSwap from 'components/InputSwap/InputSwap';
-import { useSimulate, useTaxRate } from './hooks';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 const cx = cn.bind(styles);
 
@@ -161,7 +154,7 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom]);
+  }, [fromTokenDenom, toTokenDenom, searchTokenName]);
 
   const taxRate = useTaxRate();
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
@@ -171,7 +164,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken
   );
-  const { toAmountToken: averageRatio } = useSimulate(
+  const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
     toTokenInfoData,
@@ -202,12 +195,12 @@ const SwapComponent: React.FC<{
         originalToToken,
         fromAmountToken,
         simulateData.amount,
-        userSlippage
+        userSlippage,
+        averageRatio.amount
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
-        tronAddress,
-        oraiAddress
+        tronAddress
       });
       const { combinedReceiver, universalSwapType } = combineReceiver(
         oraiAddress,
@@ -249,7 +242,15 @@ const SwapComponent: React.FC<{
   // );
 
   // minimum receive after slippage
-  const minimumReceive = simulateData?.amount ? calculateMinimum(simulateData.amount, userSlippage) : '0';
+  const minimumReceive = averageRatio?.amount
+    ? calculateMinReceive(
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
+    : '0';
+  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -341,7 +342,7 @@ const SwapComponent: React.FC<{
             />
 
             <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
+              {`1 ${originalFromToken?.name} ≈ ${averageRatio?.displayAmount} ${originalToToken?.name}`}
             </span>
           </div>
           <div className={cx('input-wrapper')}>
@@ -363,6 +364,14 @@ const SwapComponent: React.FC<{
                 }}
                 setSearchTokenName={setSearchTokenName}
               />
+            )}
+            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              <div className={cx('impact-warning')}>
+                <div className={cx('title')}>
+                  <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -386,9 +395,8 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: toDisplay(minimumReceive, originalToToken?.decimals, toTokenInfoData?.decimals).toFixed(
-                  truncDecimals
-                ),
+                amount: minimumReceive,
+                decimals: originalFromToken?.decimals,
                 denom: toTokenInfoData?.symbol
               }}
               decimalScale={truncDecimals}

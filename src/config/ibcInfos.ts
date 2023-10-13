@@ -3,6 +3,7 @@ import { CosmosChainId, NetworkChainId } from './chainInfos';
 import { IBC_TRANSFER_TIMEOUT } from './constants';
 
 export const [atom2oraichain, oraichain2atom] = process.env.REACT_APP_ATOM_ORAICHAIN_CHANNELS.split(/\s+/);
+export const [inj2oraichain, oraichain2inj] = process.env.REACT_APP_INJECTIVE_ORAICHAIN_CHANNELS.split(/\s+/);
 export const [osmosis2oraichain, oraichain2osmosis] = process.env.REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS.split(/\s+/);
 export const [oraib2oraichain, oraichain2oraib] = process.env.REACT_APP_ORAIB_ORAICHAIN_CHANNELS.split(/\s+/);
 // export const [oraib2oraichain, oraichain2oraib] = ["channel-5", "channel-64"];
@@ -17,6 +18,13 @@ export const ibcInfos: IBCInfoMap = {
     Oraichain: {
       source: 'transfer',
       channel: atom2oraichain,
+      timeout: IBC_TRANSFER_TIMEOUT
+    }
+  },
+  'injective-1': {
+    Oraichain: {
+      source: 'transfer',
+      channel: inj2oraichain,
       timeout: IBC_TRANSFER_TIMEOUT
     }
   },
@@ -38,6 +46,11 @@ export const ibcInfos: IBCInfoMap = {
     'cosmoshub-4': {
       source: 'transfer',
       channel: oraichain2atom,
+      timeout: IBC_TRANSFER_TIMEOUT
+    },
+    'injective-1': {
+      source: 'transfer',
+      channel: oraichain2inj,
       timeout: IBC_TRANSFER_TIMEOUT
     },
     'osmosis-1': {
@@ -91,6 +104,11 @@ export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4'> = {
       source: 'transfer',
       channel: oraichain2kwt,
       timeout: IBC_TRANSFER_TIMEOUT
+    },
+    'injective-1': {
+      source: 'transfer',
+      channel: oraichain2inj,
+      timeout: IBC_TRANSFER_TIMEOUT
     }
   },
   'oraibridge-subnet-2': {
@@ -104,6 +122,13 @@ export const ibcInfosOld: Omit<IBCInfoMap, 'osmosis-1' | 'cosmoshub-4'> = {
     Oraichain: {
       source: 'transfer',
       channel: kwt2oraichain,
+      timeout: IBC_TRANSFER_TIMEOUT
+    }
+  },
+  'injective-1': {
+    Oraichain: {
+      source: 'transfer',
+      channel: inj2oraichain,
       timeout: IBC_TRANSFER_TIMEOUT
     }
   }

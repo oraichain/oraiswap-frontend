@@ -23,18 +23,18 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { getUsd, toDecimal } from 'libs/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCacheLpPools } from './helpers';
+import { fetchCacheLpPools, fetchMyPairsData } from './helpers';
 import { RootState } from 'store/configure';
 import LiquidityMining from './LiquidityMining/LiquidityMining';
 import UnbondModal from './UnbondModal/UnbondModal';
 import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
 import { network } from 'config/networks';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { useFetchAllPairs } from './hooks';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { updateLpPools } from 'reducer/token';
+import { updateBondLpPools, updateLpPools } from 'reducer/token';
 
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 const cx = cn.bind(styles);
 
 interface PoolDetailProps { }
@@ -55,6 +55,8 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
   const dispatch = useDispatch();
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
+  const setCachedBondLpPools = (payload: BondLpPoolDetails) => dispatch(updateBondLpPools(payload));
+
   const getPairInfo = async () => {
     if (!poolUrl) return;
     const pairRawData = poolUrl.split('_');
@@ -85,12 +87,23 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  }
+  };
+
+  const fetchCachedBondLpTokenAll = async () => {
+    const bonLpTokenData = await fetchMyPairsData(
+      pairs,
+      address,
+      new MulticallQueryClient(window.client, network.multicall),
+      'bond'
+    );
+    setCachedBondLpPools(bonLpTokenData);
+  };
 
   const onBondingAction = () => {
     refetchRewardInfo();
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
+    fetchCachedBondLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
@@ -389,8 +402,9 @@ const PoolDetail: React.FC<PoolDetailProps> = () => {
                 lpTokenBalance={lpTokenBalance.toString()}
                 pairAmountInfoData={pairAmountInfoData}
                 refetchPairAmountInfo={refetchPairAmountInfo}
+                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
+                fetchCachedBondLpTokenAll={fetchCachedBondLpTokenAll}
                 pairInfoData={pairInfoData.info}
-                pairs={pairs}
               />
             )}
           {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (

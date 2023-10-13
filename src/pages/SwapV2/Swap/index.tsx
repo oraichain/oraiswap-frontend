@@ -21,7 +21,7 @@ import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCachedPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
 import { RootState } from 'store/configure';
-import { generateMsgsSwap } from '../helpers';
+import { calculateMinReceive, generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
@@ -29,6 +29,7 @@ import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { useWarningSlippage } from 'pages/UniversalSwap/Swap/hooks';
 
 const cx = cn.bind(styles);
 
@@ -50,7 +51,7 @@ const SwapComponent: React.FC<{
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const cachedPairs = useSelector((state: RootState) => state.pairInfos.pairInfos);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const currentPair = useSelector(selectCurrentToken);
 
   const loadTokenAmounts = useLoadTokens();
@@ -93,13 +94,12 @@ const SwapComponent: React.FC<{
 
   const queryTaxRate = async () => {
     const data = await fetchTaxRate();
-    setTaxRate(data?.rate)
-  }
+    setTaxRate(data.rate);
+  };
 
   useEffect(() => {
     queryTaxRate();
-  }, [])
-
+  }, []);
 
   const subAmountFrom = toSubAmount(amounts, fromToken);
   const subAmountTo = toSubAmount(amounts, toToken);
@@ -137,10 +137,10 @@ const SwapComponent: React.FC<{
   }, [simulateData, fromAmountToken, toTokenInfoData]);
 
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair)
+    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromToken, toToken])
+  }, [fromToken, toToken]);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -158,9 +158,9 @@ const SwapComponent: React.FC<{
         fromAmountToken,
         toTokenInfoData,
         amounts,
-        simulateData,
         userSlippage,
-        oraiAddress
+        oraiAddress,
+        simulateAverageData?.amount
       );
 
       const result = await CosmJs.executeMultiple({
@@ -187,6 +187,15 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? fromToken?.IconLight || fromToken?.Icon : fromToken?.Icon;
   const ToIcon = theme === 'light' ? toToken?.IconLight || toToken?.Icon : toToken?.Icon;
 
+  const minimumReceive =
+    simulateAverageData?.amount &&
+    calculateMinReceive(
+      simulateAverageData.amount,
+      toAmount(fromAmountToken, fromTokenInfoData?.decimals).toString(),
+      userSlippage,
+      fromTokenInfoData?.decimals
+    );
+  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
   return (
     <div className={cx('swap-box')}>
       <div className={cx('from')}>
@@ -281,6 +290,11 @@ const SwapComponent: React.FC<{
 
           <NumberFormat className={cx('amount')} thousandSeparator decimalScale={6} type="text" value={toAmountToken} />
         </div>
+        {isWarningSlippage && (
+          <div className={cx('impact-warning')}>
+            <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+          </div>
+        )}
       </div>
       <button
         className={cx('swap-btn')}
@@ -302,9 +316,9 @@ const SwapComponent: React.FC<{
           </div>
           <TokenBalance
             balance={{
-              amount: simulateData?.amount,
-              denom: toTokenInfoData?.symbol,
-              decimals: toTokenInfoData?.decimals
+              amount: minimumReceive,
+              decimals: toTokenInfoData?.decimals,
+              denom: toTokenInfoData?.symbol
             }}
             decimalScale={6}
           />
@@ -319,8 +333,7 @@ const SwapComponent: React.FC<{
           <div className={cx('title')}>
             <span>Tax rate</span>
           </div>
-          <span>{
-            taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+          <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
         </div>
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
@@ -339,9 +352,9 @@ const SwapComponent: React.FC<{
           items={Pairs.getPoolTokens().filter((token) => {
             const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(toToken?.contractAddress);
             if (!arrLength || arrIncludesOrai) {
-              return token.denom !== toTokenDenom
+              return token.denom !== toTokenDenom;
             }
-            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom);
           })}
           amounts={amounts}
           setToken={(denom, contractAddress) => {
@@ -360,11 +373,11 @@ const SwapComponent: React.FC<{
           prices={prices}
           amounts={amounts}
           items={Pairs.getPoolTokens().filter((token) => {
-            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(fromToken?.contractAddress)
+            const { arr, arrLength, arrIncludesOrai } = getPairSwapV2(fromToken?.contractAddress);
             if (!arrLength || arrIncludesOrai) {
-              return token.denom !== fromTokenDenom
+              return token.denom !== fromTokenDenom;
             }
-            return arr.includes(token?.contractAddress) || arr.includes(token?.denom)
+            return arr.includes(token?.contractAddress) || arr.includes(token?.denom);
           })}
           setToken={(denom, contractAddress) => {
             const { arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
