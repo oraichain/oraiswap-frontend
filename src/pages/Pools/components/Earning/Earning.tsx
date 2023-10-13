@@ -115,7 +115,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
 
   const onBondingAction = () => {
     refetchRewardInfo();
-    setPendingRewards([]);
     onLiquidityChange();
   };
 
@@ -169,6 +168,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     );
   };
 
+  const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.pendingWithdraw !== 0n);
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
@@ -210,7 +210,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
         <Button
           type="primary"
           onClick={() => handleClaimReward()}
-          disabled={actionLoading || pendingRewards.length === 0}
+          disabled={disabledClaim}
           icon={actionLoading ? <Loader width={20} height={20} /> : null}
         >
           Claim Your Earned
