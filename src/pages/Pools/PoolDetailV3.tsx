@@ -15,9 +15,9 @@ import styles from './PoolDetailV3.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
+import { recalculateApr } from './helpers';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
-import { recalculateApr } from './helpers';
 
 const PoolDetailV3: React.FC = () => {
   let { poolUrl } = useParams();

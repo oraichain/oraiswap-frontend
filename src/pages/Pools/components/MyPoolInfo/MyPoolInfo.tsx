@@ -31,7 +31,8 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const [modal, setModal] = useState<ModalPool>();
   const [lpBalance, setLpBalance] = useState({
     myStakeInLp: 0n,
-    myLiquidityInUsdt: 0n
+    myLiquidityInUsdt: 0n,
+    lpPrice: 0
   });
 
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
@@ -53,7 +54,8 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
     const myLiquidityInUsdt = Number(myLpBalance) * lpPrice;
     setLpBalance({
       myStakeInLp: BigInt(Math.trunc(myStake)),
-      myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt))
+      myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt)),
+      lpPrice
     });
   }, [lpTokenInfoData, myLpBalance, poolDetail.info, totalStaked]);
 
@@ -163,8 +165,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           open={() => setModal('unstake')}
           close={() => setModal(undefined)}
           onLiquidityChange={onLiquidityChange}
-          myLpUsdt={lpBalance.myLiquidityInUsdt}
-          myLpBalance={myLpBalance}
+          lpPrice={lpBalance.lpPrice}
         />
       )}
     </section>

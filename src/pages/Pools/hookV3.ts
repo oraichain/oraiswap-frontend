@@ -120,13 +120,13 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
     console.error('getPools', e);
   }
 };
+
 export const useGetPools = () => {
   const { data: pools } = useQuery(['pools'], getPools, {
     refetchOnWindowFocus: true,
     placeholderData: [],
     staleTime: 5 * 60 * 1000
   });
-
   return pools;
 };
 
@@ -168,7 +168,6 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
         return total;
       }, 0)
     : 0;
-
   const totalEarned = myStakes
     ? myStakes.reduce((total, current) => {
         total += current.earnAmountInUsdt;
