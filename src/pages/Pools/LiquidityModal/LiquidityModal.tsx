@@ -11,21 +11,12 @@ import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, { HandleOptions } from 'libs/cosmjs';
+import CosmJs, { buildMultipleExecuteMessages } from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import {
-  buildMultipleMessages,
-  getSubAmountDetails,
-  getUsd,
-  toAmount,
-  toDecimal,
-  toDisplay,
-  toSumDisplay
-} from 'libs/utils';
+import { getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { isMobile } from '@walletconnect/browser-utils';
 import { PairInfoExtend } from 'types/token';
 import {
@@ -42,10 +33,8 @@ import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { TooltipIcon } from 'components/Modals/SettingTooltip';
 import SlippageModal from 'components/Modals/SlippageModal';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { updateLpPools } from 'reducer/token';
-import { fetchCacheLpPools } from '../helpers';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { isBigIntZero } from '../helpers';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 
@@ -63,6 +52,8 @@ interface ModalProps {
   refetchPairAmountInfo: Function;
   pairInfoData: PairInfo;
   pairs?: PairInfoExtend[];
+  fetchCachedLpTokenAll: () => void;
+  fetchCachedBondLpTokenAll: () => void;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -76,7 +67,8 @@ const LiquidityModal: FC<ModalProps> = ({
   pairAmountInfoData,
   refetchPairAmountInfo,
   pairInfoData,
-  pairs
+  fetchCachedLpTokenAll,
+  fetchCachedBondLpTokenAll
 }) => {
   const token1 = token1InfoData;
   const token2 = token2InfoData;
@@ -85,7 +77,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const lpTokenBalance = BigInt(lpTokenBalanceValue);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-  const dispatch = useDispatch();
   const { data: prices } = useCoinGeckoPrices();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -102,7 +93,6 @@ const LiquidityModal: FC<ModalProps> = ({
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
 
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
@@ -176,23 +166,15 @@ const LiquidityModal: FC<ModalProps> = ({
     setEstimatedLP(estimatedLP);
   };
 
-  const fetchCachedLpTokenAll = async () => {
-    const lpTokenData = await fetchCacheLpPools(
-      pairs,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  };
-
   const onLiquidityChange = () => {
     refetchPairAmountInfo();
     fetchCachedLpTokenAll();
+    fetchCachedBondLpTokenAll();
     loadTokenAmounts({ oraiAddress: address });
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = generateContractMessages({
+    const msg = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -200,14 +182,12 @@ const LiquidityModal: FC<ModalProps> = ({
       token
     });
 
-    const msg = msgs[0];
-
     const result = await CosmJs.execute({
-      address: msg.contract,
+      address: msg.contractAddress,
       walletAddr,
-      handleMsg: msg.msg.toString(),
+      handleMsg: msg.msg,
       gasAmount: { denom: ORAI, amount: '0' },
-      handleOptions: { funds: msg.sent_funds } as HandleOptions
+      funds: msg.funds
     });
     console.log('result increase allowance tx hash: ', result);
 
@@ -240,7 +220,7 @@ const LiquidityModal: FC<ModalProps> = ({
       const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, oraiAddress);
       const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, oraiAddress);
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.PROVIDE,
         sender: oraiAddress,
         fromInfo: token1InfoData!,
@@ -251,9 +231,7 @@ const LiquidityModal: FC<ModalProps> = ({
         // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
       } as ProvideQuery);
 
-      const msg = msgs[0];
-
-      var messages = buildMultipleMessages(msg, firstTokenConverts, secTokenConverts);
+      var messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
@@ -284,7 +262,7 @@ const LiquidityModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress();
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.WITHDRAW,
         sender: oraiAddress,
         lpAddr: lpTokenInfoData!.contractAddress!,
@@ -292,15 +270,13 @@ const LiquidityModal: FC<ModalProps> = ({
         pair: pairInfoData.contract_addr
       });
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
 
-        handleOptions: { funds: msg.sent_funds } as HandleOptions
+        funds: msg.funds
       });
 
       console.log('result provide tx hash: ', result);

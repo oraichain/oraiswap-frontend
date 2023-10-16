@@ -1,12 +1,11 @@
-import { createWasmAminoConverters, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/proto-signing';
-import { AminoTypes, DeliverTxResponse, GasPrice, SigningStargateClient, StargateClient } from '@cosmjs/stargate';
+import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
 import {
   cosmosTokens,
   flattenTokens,
   gravityContracts,
   kawaiiTokens,
-  oraichainTokens,
   TokenItemType,
   tokenMap,
   UniversalSwapType
@@ -17,17 +16,23 @@ import { ibcInfos, ibcInfosOld, oraib2oraichain, oraichain2oraib } from 'config/
 import { network } from 'config/networks';
 import { calculateTimeoutTimestamp, getNetworkGasPrice } from 'helper';
 
-import { CwIcs20LatestClient, TransferBackMsg } from '@oraichain/common-contracts-sdk';
+import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapTokenClient,
   OraiswapTokenQueryClient,
   OraiswapTokenReadOnlyInterface
 } from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, { getExecuteContractMsgs, HandleOptions, parseExecuteContractMultiple } from 'libs/cosmjs';
+import CosmJs, {
+  buildMultipleExecuteMessages,
+  collectWallet,
+  connectWithSigner,
+  getCosmWasmClient,
+  getEncodedExecuteContractMsgs
+} from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
-import { MsgTransfer } from 'libs/proto/ibc/applications/transfer/v1/tx';
-import customRegistry, { customAminoTypes } from 'libs/registry';
-import { buildMultipleMessages, generateError, toAmount, toDisplay } from 'libs/utils';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import { generateError, toAmount, toDisplay } from 'libs/utils';
 import {
   generateConvertCw20Erc20Message,
   generateConvertMsgs,
@@ -39,6 +44,7 @@ import {
 } from 'rest/api';
 import { IBCInfo } from 'types/ibc';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
+import { Long } from 'cosmjs-types/helpers';
 
 /**
  * This function converts the destination address (from BSC / ETH -> Oraichain) to an appropriate format based on the BSC / ETH token contract address
@@ -132,22 +138,26 @@ export const transferIBC = async (data: {
   toAddress: string;
   amount: Coin;
   ibcInfo: IBCInfo;
+  memo?: string;
 }): Promise<DeliverTxResponse> => {
-  const { fromToken, fromAddress, toAddress, amount, ibcInfo } = data;
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
-  const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner);
-  const result = await client.sendIbcTokens(
+  const { fromToken, fromAddress, toAddress, amount, ibcInfo, memo } = data;
+  const transferMsg: MsgTransfer = {
+    sourcePort: ibcInfo.source,
+    sourceChannel: ibcInfo.channel,
+    token: amount,
+    sender: fromAddress,
+    receiver: toAddress,
+    memo,
+    timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
+    timeoutHeight: undefined
+  };
+  const result = await transferIBCMultiple(
     fromAddress,
-    toAddress,
-    amount,
-    ibcInfo.source,
-    ibcInfo.channel,
-    undefined,
-    parseInt(calculateTimeoutTimestamp(ibcInfo.timeout)),
-    {
-      gas: '200000',
-      amount: []
-    }
+    fromToken.chainId as CosmosChainId,
+    fromToken.rpc,
+    fromToken.denom,
+    [transferMsg],
+    fromToken.prefix
   );
   return result;
 };
@@ -176,9 +186,9 @@ export const transferIBCKwt = async (
   // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
   if (fromToken.evmDenoms) {
     const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, amount);
-    const executeContractMsgs = getExecuteContractMsgs(
+    const executeContractMsgs = getEncodedExecuteContractMsgs(
       fromAddress,
-      parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
+      buildMultipleExecuteMessages(undefined, ...msgConvertReverses)
     );
     customMessages = executeContractMsgs.map((msg) => ({
       message: msg.value,
@@ -290,27 +300,23 @@ export const transferEvmToIBC = async (
 
 export const transferIBCMultiple = async (
   fromAddress: string,
-  chainId: CosmosChainId,
+  fromChainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
-  messages: MsgTransfer[]
-) => {
+  messages: MsgTransfer[],
+  prefix?: string
+): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
     value: MsgTransfer.fromPartial(message)
   }));
-  const offlineSigner = await window.Keplr.getOfflineSigner(chainId);
-  const aminoTypes = new AminoTypes({
-    ...customAminoTypes
-  });
+  const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await SigningStargateClient.connectWithSigner(rpc, offlineSigner, {
-    registry: customRegistry,
-    aminoTypes,
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${feeDenom}`)
+  const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
   });
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
-  return result;
+  return result as DeliverTxResponse;
 };
 
 export const transferTokenErc20Cw20Map = async ({
@@ -335,10 +341,7 @@ export const transferTokenErc20Cw20Map = async ({
 
   const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
 
-  const executeContractMsgs = getExecuteContractMsgs(
-    fromAddress,
-    parseExecuteContractMultiple(buildMultipleMessages(undefined, msgConvertReverses))
-  );
+  const executeContractMsgs = buildMultipleExecuteMessages(undefined, ...msgConvertReverses);
   console.log({ executeContractMsgs });
   // note need refactor
   // get raw ibc tx
@@ -356,18 +359,18 @@ export const transferTokenErc20Cw20Map = async ({
   };
   console.log({ msgTransfer });
 
-  const offlineSigner = await window.Keplr.getOfflineSigner(fromToken.chainId);
-  const aminoTypes = new AminoTypes({
-    ...createWasmAminoConverters(),
-    ...customAminoTypes
-  });
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await SigningStargateClient.connectWithSigner(fromToken.rpc, offlineSigner, {
-    registry: customRegistry,
-    aminoTypes,
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
-  });
-  const result = await client.signAndBroadcast(fromAddress, [...executeContractMsgs, msgTransfer], 'auto');
+  const { client } = await getCosmWasmClient(
+    { rpc: fromToken.rpc, chainId: fromToken.chainId },
+    {
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+    }
+  );
+  const result = await client.signAndBroadcast(
+    fromAddress,
+    [...getEncodedExecuteContractMsgs(fromAddress, executeContractMsgs), msgTransfer],
+    'auto'
+  );
   return result;
 };
 
@@ -547,16 +550,16 @@ export const broadcastConvertTokenTx = async (
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
   if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
-  let msgs: any;
+  let msg: ExecuteInstruction;
   if (type === 'nativeToCw20') {
-    msgs = generateConvertMsgs({
+    msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN,
       sender: oraiAddress,
       inputAmount: _fromAmount,
       inputToken: token
     });
   } else if (type === 'cw20ToNative') {
-    msgs = generateConvertMsgs({
+    msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN_REVERSE,
       sender: oraiAddress,
       inputAmount: _fromAmount,
@@ -564,14 +567,13 @@ export const broadcastConvertTokenTx = async (
       outputToken
     });
   }
-  const msg = msgs[0];
   const result = await CosmJs.execute({
     prefix: ORAI,
-    address: msg.contract,
+    address: msg.contractAddress,
     walletAddr: oraiAddress,
-    handleMsg: msg.msg.toString(),
+    handleMsg: msg.msg,
     gasAmount: { denom: ORAI, amount: '0' },
-    handleOptions: { funds: msg.sent_funds } as HandleOptions
+    funds: msg.funds
   });
   return result;
 };

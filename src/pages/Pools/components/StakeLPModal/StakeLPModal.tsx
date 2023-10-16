@@ -26,7 +26,15 @@ import styles from './StakeLPModal.module.scss';
 
 const cx = cn.bind(styles);
 
-export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance, myLpUsdt, onLiquidityChange }) => {
+export const StakeLPModal: FC<ModalProps> = ({
+  isOpen,
+  close,
+  open,
+  myLpBalance,
+  myLpUsdt,
+  onLiquidityChange,
+  assetToken
+}) => {
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
@@ -52,17 +60,13 @@ export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance,
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress();
-
       // generate bonding msg
       const msgs = generateMiningMsgsV3({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpAddress: lpTokenInfoData.contractAddress!,
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpToken: lpTokenInfoData.contractAddress!,
+        assetToken
       });
 
       // execute msg
@@ -72,9 +76,8 @@ export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance,
         walletAddr: oraiAddress,
         handleMsg: msg.msg.toString(),
         gasAmount: { denom: ORAI, amount: '0' },
-        handleOptions: { funds: msg.sent_funds }
+        funds: msg.funds
       });
-
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`

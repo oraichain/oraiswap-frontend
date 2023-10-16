@@ -1,8 +1,8 @@
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { useEffect, useState } from 'react';
 import { useGetPoolDetail } from '../hookV3';
 import { useParams } from 'react-router-dom';
 import { Pairs } from 'config/pools';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 
 export const useGetStakingAssetInfo = () => {
   let { poolUrl } = useParams();

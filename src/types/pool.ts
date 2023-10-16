@@ -1,4 +1,4 @@
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { TokenItemType } from 'config/bridgeTokens';
 import { Type } from 'rest/api';
 

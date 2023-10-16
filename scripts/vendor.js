@@ -33,6 +33,16 @@ const config = {
   entry: {
     vendor: Object.keys(package.dependencies).filter((dep) => !ignores.includes(dep))
   },
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false // disable the behaviour
+        }
+      }
+    ]
+  },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     fallback
@@ -44,6 +54,12 @@ const config = {
   },
   plugins: [
     new webpack.ProgressPlugin(),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
+    }),
+    // new webpack.ProvidePlugin({
+    //   process: 'process/browser'
+    // }),
     new webpack.DllPlugin({
       name: 'vendor_lib',
       path: path.join(vendorPath, `manifest.${vendorHash}.json`)

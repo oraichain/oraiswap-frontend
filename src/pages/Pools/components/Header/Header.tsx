@@ -59,7 +59,8 @@ export const Header: FC = () => {
         })
         .filter(Boolean);
       const result = await CosmJs.executeMultiple({
-        msgs,
+        // TODO: fix later
+        msgs: msgs as any,
         walletAddr: address,
         gasAmount: { denom: ORAI, amount: '0' }
       });

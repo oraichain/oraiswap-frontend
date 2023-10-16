@@ -1,11 +1,11 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { AssetInfo, MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { parseAssetInfo } from 'helper';
 import { flatten, uniq } from 'lodash';
 import { PairInfoExtend } from 'types/token';
 import { TokenItemType, assetInfoMap } from './bridgeTokens';
-import { ORAI } from './constants';
+import { MILKY, ORAI, STABLE_DENOM } from './constants';
 import { network } from './networks';
 
 export type PairMapping = {

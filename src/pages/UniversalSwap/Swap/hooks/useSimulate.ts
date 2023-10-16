@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { TokenItemType } from 'config/bridgeTokens';
-import { toAmount, toDisplay } from 'libs/utils';
+import { toAmount } from 'libs/utils';
 import { handleSimulateSwap } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
@@ -37,10 +37,7 @@ export const useSimulate = (
   );
 
   useEffect(() => {
-    setSwapAmount([
-      fromAmountToken,
-      toDisplay(simulateData?.amount, originalToTokenInfo?.decimals, toTokenInfoData?.decimals)
-    ]);
+    setSwapAmount([fromAmountToken, Number(simulateData?.displayAmount)]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };

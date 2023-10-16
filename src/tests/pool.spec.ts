@@ -1,17 +1,17 @@
 import { coin } from '@cosmjs/proto-signing';
-import { assetInfoMap, flattenTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
+import { assetInfoMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
 import { ORAI } from 'config/constants';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { client } from './common';
-import { AggregateResult, AssetInfo, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { buildMultipleMessages } from 'libs/utils';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
   estimateShare,
+  calculateBondLpPools,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
@@ -41,8 +41,11 @@ import {
   getPairs,
   instantiateCw20Token
 } from './listing-simulate';
-import { testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
+import { testCaculateBondLpData, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
 import { parseAssetInfo } from 'helper';
+import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
+import { buildMultipleExecuteMessages } from 'libs/cosmjs';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
@@ -140,9 +143,13 @@ describe('pool', () => {
     let allLpTokenInfos: TokenInfo[] = [];
     let allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[] = [];
 
-    const fromTokenInfo = flattenTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
-    const usdtTokenInfo = flattenTokens.find((t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain');
-    const airiTokenInfo = flattenTokens.find((t) => t.name === 'AIRI' && t.decimals === 6 && t.chainId === 'Oraichain');
+    const fromTokenInfo = oraichainTokens.find((t) => t.name === 'ORAI' && t.decimals === 6);
+    const usdtTokenInfo = oraichainTokens.find(
+      (t) => t.name === 'USDT' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
+    const airiTokenInfo = oraichainTokens.find(
+      (t) => t.name === 'AIRI' && t.decimals === 6 && t.chainId === 'Oraichain'
+    );
     usdtTokenInfo.contractAddress = usdtContractAddress;
     airiTokenInfo.contractAddress = airiContractAddress;
 
@@ -184,8 +191,10 @@ describe('pool', () => {
       expect(pairsData[pairs[1].contract_addr].total_share).toBe(constants.amountProvideLiquidity);
     });
 
-    it('should fetch my pairs data correctly', async () => {
-      // keep contractAddress of asset token.
+    it.each([
+      ['reward', true],
+      ['bond', '999999']
+    ])('should fetch my pairs data and bond lp correctly', async (typeReward, expectedResult) => {
       pairs.forEach((pair, index) => {
         const assetToken = tokenMap[index === 0 ? 'airi' : 'usdt'];
         assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
@@ -194,9 +203,9 @@ describe('pool', () => {
       assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
       assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
       const multicall = new MulticallQueryClient(client, network.multicall);
-      const myPairs = await fetchMyPairsData(pairs, devAddress, multicall);
-      expect(myPairs[pairs[0].contract_addr]).toBe(true);
-      expect(myPairs[pairs[1].contract_addr]).toBe(true);
+      const myPairs = await fetchMyPairsData(pairs, devAddress, multicall, typeReward);
+      expect(myPairs[pairs[0].contract_addr]).toBe(expectedResult);
+      expect(myPairs[pairs[1].contract_addr]).toBe(expectedResult);
     });
 
     it.each(testCaculateRewardData)(
@@ -204,6 +213,14 @@ describe('pool', () => {
       (aggregateRes: AggregateResult, expectedRewardInfo) => {
         const rewardInfo = calculateReward(pairs, aggregateRes);
         expect(Object.values(rewardInfo)).toEqual(expectedRewardInfo);
+      }
+    );
+
+    it.each(testCaculateBondLpData)(
+      'should caculate my reward info',
+      (aggregateRes: AggregateResult, _, expectBondLpPools) => {
+        const bondLpPools = calculateBondLpPools(pairs, aggregateRes);
+        expect(Object.values(bondLpPools)).toEqual(expectBondLpPools);
       }
     );
 
@@ -320,7 +337,7 @@ describe('pool', () => {
         flattenTokens.find((t) => t.name === 'ORAI' && t.chainId === 'Oraichain'),
         flattenTokens.find((t) => t.name === 'USDT' && t.chainId === 'Oraichain')
       ];
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.PROVIDE,
         sender: devAddress,
         fromInfo: token1InfoData!,
@@ -330,19 +347,17 @@ describe('pool', () => {
         pair: pairs[0].contract_addr
       } as ProvideQuery);
 
-      const msg = msgs[0];
       // check if the contract address, sent_funds and sender are correct
-      expect(msg.contract).toEqual(pairs[0].contract_addr);
-      expect(msg.sender).toEqual(devAddress);
-      expect(msg.sent_funds).toEqual([{ amount: '100', denom: ORAI }]);
+      expect(msg.contractAddress).toEqual(pairs[0].contract_addr);
+      expect(msg.funds).toEqual([{ amount: '100', denom: ORAI }]);
       expect(msg).toHaveProperty('msg');
 
-      const messages = buildMultipleMessages(msg, [], []);
+      const messages = buildMultipleExecuteMessages(msg);
       // check if the contract address, sent_funds and sender are correct
       expect(messages[0].contractAddress).toEqual(pairs[0].contract_addr);
-      expect(messages[0]).toHaveProperty('handleOptions');
+      expect(messages[0]).toHaveProperty('funds');
 
-      expect(JSON.parse(messages[0].handleMsg)).toEqual({
+      expect(messages[0].msg).toEqual({
         provide_liquidity: {
           assets: [
             { info: { token: { contract_addr: token2InfoData.contractAddress } }, amount: '100' },

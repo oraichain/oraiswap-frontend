@@ -19,7 +19,7 @@ import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import { StakeLPModal } from '../StakeLPModal';
-import { UnstakeLPModal } from '../UnstakeLPModal/';
+import { UnstakeLPModal } from '../UnstakeLPModal';
 import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
 
@@ -140,6 +140,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           close={() => setModal(undefined)}
           onLiquidityChange={onLiquidityChange}
           pairDenoms={poolUrl}
+          assetToken={undefined}
         />
       )}
       {modal === 'withdraw' && (
@@ -150,6 +151,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           onLiquidityChange={onLiquidityChange}
           myLpUsdt={lpBalance.myLiquidityInUsdt}
           myLpBalance={myLpBalance}
+          assetToken={undefined}
         />
       )}
       {modal === 'stake' && (
@@ -160,6 +162,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           onLiquidityChange={onLiquidityChange}
           myLpUsdt={lpBalance.myLiquidityInUsdt}
           myLpBalance={myLpBalance}
+          assetToken={undefined}
         />
       )}
       {modal === 'unstake' && (
@@ -168,6 +171,9 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           open={() => setModal('unstake')}
           close={() => setModal(undefined)}
           onLiquidityChange={onLiquidityChange}
+          myLpUsdt={lpBalance.myLiquidityInUsdt}
+          myLpBalance={myLpBalance}
+          assetToken={undefined}
           lpPrice={lpBalance.lpPrice}
         />
       )}

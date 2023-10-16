@@ -129,7 +129,8 @@ export const aggregateResultData = [
         }
       ]
     },
-    expectMyReward: [true, true]
+    expectMyReward: [true, true],
+    expectMyBondLp: ['1000000', '1000000']
   },
 
   {
@@ -151,7 +152,7 @@ export const aggregateResultData = [
         }
       ]
     },
-    expectMyReward: [{}, {}]
+    expectMyReward: [false, false]
   },
   {
     res: {
@@ -257,6 +258,11 @@ export const aggregateResultData = [
 export const testCaculateRewardData = aggregateResultData.map((data) => {
   return [data.res, data.expectMyReward];
 });
+
+export const testCaculateBondLpData = [
+  [aggregateResultData[0].res, aggregateResultData[0].expectMyReward, aggregateResultData[0].expectMyBondLp]
+];
+
 export const testConverToPairsDetailData = aggregateResultData.map((data, index) => {
   return [
     data.res,

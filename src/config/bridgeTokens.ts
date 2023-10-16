@@ -40,7 +40,8 @@ export type TokenItemType = {
 };
 const evmDenomsMap = {
   kwt: [process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM],
-  milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]
+  milky: [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM],
+  injective: [process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM]
 };
 const minAmountSwapMap = {
   trx: 10
@@ -129,12 +130,16 @@ export const swapFromTokens = flattenTokens.filter(
     token.chainId !== 'oraibridge-subnet-2' &&
     token.chainId !== 'cosmoshub-4' &&
     token.chainId !== 'osmosis-1' &&
-    token.chainId !== 'kawaii_6886-1'
+    token.chainId !== 'kawaii_6886-1' &&
+    token.coinGeckoId !== 'injective-protocol' &&
+    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
 );
-// universal swap. We dont support kwt & milky for simplicity. We also skip OraiBridge tokens because users dont care about them
+// universal swap. We dont support kwt & milky & injective for simplicity. We also skip OraiBridge tokens because users dont care about them
 export const swapToTokens = flattenTokens.filter(
   (token) =>
     token.coinGeckoId !== 'kawaii-islands' &&
     token.coinGeckoId !== 'milky-token' &&
-    token.chainId !== 'oraibridge-subnet-2'
+    token.chainId !== 'oraibridge-subnet-2' &&
+    token.coinGeckoId !== 'injective-protocol' &&
+    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
 );

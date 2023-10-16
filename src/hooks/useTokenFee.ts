@@ -3,7 +3,11 @@ import { getTransferTokenFee } from 'pages/UniversalSwap/helpers';
 import { useEffect, useState } from 'react';
 import { isEvmNetworkNativeSwapSupported } from 'rest/api';
 
-export default function useTokenFee(remoteTokenDenom: string, fromChainId: NetworkChainId, toChainId: NetworkChainId) {
+export default function useTokenFee(
+  remoteTokenDenom: string,
+  fromChainId?: NetworkChainId,
+  toChainId?: NetworkChainId
+) {
   const [tokenFee, setTokenFee] = useState<number>(0);
 
   useEffect(() => {

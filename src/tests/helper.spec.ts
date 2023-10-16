@@ -1,14 +1,15 @@
 import { TokenItemType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formateNumberDecimalsAuto, parseBep20Erc20Name, toSubAmount, toSumDisplay } from 'libs/utils';
+import { formateNumberDecimalsAuto, toSubAmount, toSumDisplay } from 'libs/utils';
 import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
 import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
 import { CoinGeckoId } from 'config/chainInfos';
 import { ORAI } from 'config/constants';
 import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
-import { AssetInfo } from '@oraichain/common-contracts-sdk';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
+import { calculateMinReceive } from 'pages/SwapV2/helpers';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -66,14 +67,6 @@ describe('should utils functions in libs/utils run exactly', () => {
       minPrice: 1
     });
     expect(priceFormated).toEqual(expectedFormat);
-  });
-
-  it.each([
-    ['BEP20 AIRI', 'AIRI'],
-    ['ERC20 AIRI', 'AIRI']
-  ])('should parse bep20 rrc20 name correctly', (evmName: string, expectedParse: string) => {
-    const name = parseBep20Erc20Name(evmName);
-    expect(name).toBe(expectedParse);
   });
 
   describe('reduceString function', () => {
@@ -207,6 +200,18 @@ describe('should utils functions in libs/utils run exactly', () => {
       const fromToken = oraichainTokens.find((t) => t.name === from);
       const toToken = oraichainTokens.find((t) => t.name === to);
       const result = generateNewSymbol(fromToken, toToken, currentPair);
+      expect(result).toEqual(expectedResult);
+    }
+  );
+
+  it.each([
+    ['1000000', '1000000', 1, 6, '990000'],
+    ['1800000', '100000', 1, 6, '178200'],
+    ['1000000000000000000', '1000000000000000000', 1, 18, '990000000000000000']
+  ])(
+    'calculateMinReceive should return correctly minimum receive',
+    (simulateAverage: string, fromAmount: string, userSlippage: number, decimals: number, expectedResult) => {
+      const result = calculateMinReceive(simulateAverage, fromAmount, userSlippage, decimals);
       expect(result).toEqual(expectedResult);
     }
   );

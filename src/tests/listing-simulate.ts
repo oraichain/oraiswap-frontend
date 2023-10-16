@@ -4,7 +4,6 @@ import { client } from './common';
 import * as dotenv from 'dotenv'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 import { readFileSync } from 'fs';
 import {
-  PairInfo,
   OraiswapFactoryClient,
   OraiswapStakingClient,
   OraiswapPairClient,
@@ -15,6 +14,7 @@ import {
 import { MulticallTypes } from '@oraichain/common-contracts-sdk';
 import * as oraidexArtifacts from '@oraichain/oraidex-contracts-build';
 import * as commonArtifacts from '@oraichain/common-contracts-build';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
 dotenv.config();
 
