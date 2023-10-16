@@ -13,4 +13,6 @@ const axios = Axios.create({
   )
 });
 
+export const withBaseApiUrl = (url: string) => process.env.REACT_APP_BASE_API_URL + url;
+
 export default axios;

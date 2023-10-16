@@ -1,0 +1,42 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.pools {
+    padding: 34px;
+    margin: 0 auto;
+    height: 100%;
+    max-width: 90%;
+
+    @media (max-width: 575px) {
+        padding: 0;
+    }
+}
+
+.listpoolsToken {
+    &_create {
+        display: flex;
+        align-items: center;
+
+        @media (max-width: 930px) {
+            padding-top: 10px;
+        }
+
+        .create_item {
+            height: 48px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 15px;
+            background: #1e1e21;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background: #804af2 !important;
+            }
+        }
+    }
+}

@@ -1,23 +1,24 @@
-@import "src/styles/mixins";
-@import "src/styles/themes";
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
 
 .select {
   @include theme() {
     background-color: theme-get('bg-color');
     box-shadow: theme-get('shadow-modal-token');
-    border-color: theme-get('border-color-secondary')
+    border-color: theme-get('border-color-secondary');
   }
 
   border: 1px solid;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 24px;
   max-height: 500px;
   overflow-y: auto;
   position: absolute;
-  top: 70px;
+  top: 62px;
   left: 0;
   right: 0;
   z-index: 1;
+  font-weight: 600;
 
   .title {
     display: flex;
@@ -25,22 +26,71 @@
     gap: 5px;
     margin-bottom: 25px;
     font-style: normal;
-    font-weight: 600;
     font-size: 18px;
-    line-height: 100%;
     text-align: center;
+  }
+
+  .details {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 24px;
+    img {
+      cursor: pointer;
+    }
+    .network {
+      color: #1e300a;
+      text-align: center;
+      font-size: 16px;
+    }
+  }
+
+  .label {
+    display: flex;
+    justify-content: space-between;
+    @include theme() {
+      border-bottom: 0.5px solid theme-get('neutral-4');
+      color: theme-get('neutral-1');
+    }
+    font-size: 16px;
+    font-style: normal;
+    padding-bottom: 12px;
+    .right {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .all-network {
+        display: flex;
+        flex-direction: column;
+        .detail {
+          text-align: center;
+          font-size: 14px;
+          font-weight: 500;
+          @include theme() {
+            color: theme-get('neutral-2');
+          }
+        }
+        .balance {
+          @include theme() {
+            color: theme-get('neutral-3');
+          }
+          font-size: 13px;
+          font-weight: 400;
+        }
+      }
+    }
   }
 
   .options {
     display: flex;
     flex-direction: column;
     gap: 10px;
-
+    padding-top: 12px;
     .item {
       @include theme() {
         background-color: theme-get('bg-color');
         color: theme-get('text-color');
-
       }
 
       border-radius: 8px;
@@ -59,7 +109,7 @@
         color: $white-color;
 
         @include theme() {
-          background-color: theme-get('bg-hover-color');
+          background-color: theme-get('primary-1');
         }
       }
 

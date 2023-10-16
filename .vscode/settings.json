@@ -1,7 +1,12 @@
 {
-    "prettier.singleQuote": true,
-    "prettier.trailingComma": "none",
-    "prettier.jsxSingleQuote": false,
-    "prettier.printWidth": 120,
-    "typescript.tsdk": "node_modules/typescript/lib"
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "none",
+  "prettier.jsxSingleQuote": false,
+  "prettier.printWidth": 120,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

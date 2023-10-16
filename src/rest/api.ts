@@ -596,6 +596,62 @@ function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity)
   return msg;
 }
 
+function generateMiningMsgsV3(data: BondMining | WithdrawMining | UnbondLiquidity): ExecuteInstruction {
+  const { type, sender, ...params } = data;
+  let funds: Coin[] | null;
+  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
+  let contractAddr = network.router;
+  let input: JsonObject;
+  switch (type) {
+    case Type.BOND_LIQUIDITY: {
+      const bondMsg = params as BondMining;
+      // currently only support cw20 token pool
+      let { info: asset_info } = parseTokenInfo(bondMsg.assetToken);
+      input = {
+        send: {
+          contract: network.staking,
+          amount: bondMsg.amount.toString(),
+          msg: toBinary({
+            bond: {
+              asset_info
+            }
+          }) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+        }
+      };
+      contractAddr = bondMsg.lpToken;
+      break;
+    }
+    case Type.WITHDRAW_LIQUIDITY_MINING: {
+      const msg = params as WithdrawMining;
+      let { info: asset_info } = parseTokenInfo(msg.assetToken);
+      input = { withdraw: { asset_info } };
+      contractAddr = network.staking;
+      break;
+    }
+    case Type.UNBOND_LIQUIDITY:
+      const unbondMsg = params as UnbondLiquidity;
+      let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
+      input = {
+        unbond: {
+          asset_info: unbond_asset,
+          amount: unbondMsg.amount.toString()
+        }
+      };
+      contractAddr = network.staking;
+      break;
+    default:
+      break;
+  }
+
+  const msg: ExecuteInstruction = {
+    contractAddress: contractAddr,
+    msg: input,
+    funds
+  };
+
+  return msg;
+}
+
 export type Convert = {
   type: Type.CONVERT_TOKEN;
   sender: string;
@@ -774,5 +830,6 @@ export {
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
   getPairAmountInfo,
-  fetchRelayerFee
+  fetchRelayerFee,
+  generateMiningMsgsV3
 };

@@ -4,10 +4,10 @@
 @import 'src/styles/reboot';
 @import 'src/styles/utils';
 
-.app
-{
+.app {
   font-size: $font-size;
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   width: 100%;
 }

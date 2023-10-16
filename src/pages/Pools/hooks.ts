@@ -1,26 +1,29 @@
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { RewardPoolType } from 'reducer/config';
+import { updatePairInfos } from 'reducer/pairs';
+import { fetchRewardPerSecInfo } from 'rest/api';
+import axios, { withBaseApiUrl } from 'rest/request';
 import { updateLpPools, updatePairs, updateBondLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
+import { PoolInfoResponse } from 'types/pool';
+import { PairInfoExtend } from 'types/token';
 import {
   PairInfoData,
   fetchAprResult,
+  fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairsData,
-  fetchPoolListAndOraiPrice,
-  fetchCacheLpPools
+  fetchPoolListAndOraiPrice
 } from './helpers';
-import { updatePairInfos } from 'reducer/pairs';
-import { PairInfoExtend } from 'types/token';
-import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { fetchRewardPerSecInfo } from 'rest/api';
-import { RewardPoolType } from 'reducer/config';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { ORAI } from '@oraichain/oraidex-common';
 
 // Fetch my pair data
 export const useFetchAllPairs = () => {
@@ -64,7 +67,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
     let rewardAll: RewardPoolType[] = await Promise.all(
       pairs.map(async (p: PairInfoExtend) => {
         let denom = '';
-        if (p.asset_infos_raw?.[0] == 'orai') {
+        if (p.asset_infos_raw?.[0] === ORAI) {
           denom = p.asset_infos_raw?.[1];
         } else {
           denom = p.asset_infos_raw?.[0];
@@ -195,4 +198,14 @@ export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
   }, [cachedPairs, pairs]);
 
   return { pairInfos, oraiPrice };
+};
+
+export const getPools = async (): Promise<PoolInfoResponse[]> => {
+  try {
+    const res = await axios.get(withBaseApiUrl('/v1/pools/'), {});
+    return res.data;
+  } catch (e) {
+    console.error('getPools', e);
+    return [];
+  }
 };

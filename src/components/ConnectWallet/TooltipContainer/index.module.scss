@@ -1,0 +1,40 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+@import 'src/styles/variables';
+
+.tooltip {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+  text-align: center;
+  color: #ffffff;
+  border-radius: 8px;
+
+  article:not(:first-child) {
+    margin-top: 1em;
+  }
+
+  :global {
+    .tippy-content {
+      padding: 0;
+    }
+
+    .tippy-arrow {
+      display: none;
+    }
+  }
+}
+
+.button {
+  @include flex;
+  cursor: pointer;
+  justify-content: flex-start;
+}
+
+/* with tooltip */
+.flex {
+  @include flex(flex-start);
+  display: inline-flex;
+}

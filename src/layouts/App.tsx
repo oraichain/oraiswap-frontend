@@ -24,7 +24,6 @@ import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import './index.scss';
-import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import GlobalStyles from 'styles/global';
@@ -32,6 +31,8 @@ import './index.scss';
 import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
 import { pairsChart } from 'components/TVChartContainer/config';
+import MenuV3 from './MenuV3';
+import Instruct from './Instruct';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -166,6 +167,8 @@ const App = () => {
             method: 'eth_requestAccounts',
             params: []
           });
+          console.log('window.ethereum', window.ethereum);
+          console.log('address ===> ', address);
           setMetamaskAddress(ethers.utils.getAddress(address));
         }
       }
@@ -188,8 +191,9 @@ const App = () => {
     <ThemeProvider>
       <GlobalStyles />
       <div className={`app ${theme}`}>
-        <Menu />
+        <MenuV3 />
         {routes()}
+        <Instruct />
       </div>
     </ThemeProvider>
   );

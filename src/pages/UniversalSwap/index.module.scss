@@ -3,18 +3,25 @@
 .swap-container {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -12px;
-  padding: 80px 32px 32px 32px;
+  padding-top: 32px;
+  justify-content: space-between;
 
+  .tv-chart {
+    position: relative;
+    height: 420px;
+    padding-top: 10px;
+    transition: all 1s ease;
+    &.hidden {
+      height: 0;
+    }
+  }
   .swap-col {
-    padding: 0 12px;
-
     &.w60 {
       width: 60%;
     }
 
     &.w40 {
-      width: 40%;
+      width: 38%;
     }
   }
 }
