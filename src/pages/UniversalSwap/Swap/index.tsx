@@ -29,7 +29,7 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, relayerFeeInfo } from '../helpers';
 import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
 import styles from './index.module.scss';
 import {
@@ -40,14 +40,15 @@ import {
   toDisplay,
   truncDecimals
 } from '@oraichain/oraidex-common';
+import { useRelayerFee } from './hooks/useRelayerFee';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ethers } from 'ethers';
 import {
   UniversalSwapHandler,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { ethers } from 'ethers';
 
 const cx = cn.bind(styles);
 
@@ -188,6 +189,12 @@ const SwapComponent: React.FC<{
     originalToToken,
     routerClient,
     1
+  );
+  const relayerFee = useRelayerFee();
+
+  const relayerFeeToken = React.useMemo(
+    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
+    [originalFromToken]
   );
 
   useEffect(() => {
@@ -410,6 +417,21 @@ const SwapComponent: React.FC<{
               decimalScale={truncDecimals}
             />
           </div>
+          {relayerFeeToken && (
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Relayer Fee</span>
+              </div>
+              <TokenBalance
+                balance={{
+                  amount: relayerFeeToken.amount,
+                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  denom: relayerFeeToken.prefix
+                }}
+                decimalScale={truncDecimals}
+              />
+            </div>
+          )}
 
           {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>

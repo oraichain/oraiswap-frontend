@@ -1,5 +1,12 @@
 import { oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
-import { CoinGeckoId, IBC_WASM_CONTRACT, NetworkChainId } from '@oraichain/oraidex-common';
+import {
+  CoinGeckoId,
+  IBC_WASM_CONTRACT,
+  NetworkChainId,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX
+} from '@oraichain/oraidex-common';
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
 import { generateError } from 'libs/utils';
 import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
@@ -97,4 +104,10 @@ export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: strin
         throw generateError('Please login Tron wallet!');
       }
   }
+};
+
+export const relayerFeeInfo = {
+  [ORAI_BRIDGE_EVM_DENOM_PREFIX]: 6,
+  [ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX]: 6,
+  [ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX]: 6
 };

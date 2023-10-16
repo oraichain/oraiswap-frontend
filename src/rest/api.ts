@@ -1,6 +1,6 @@
 import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
-import { Uint128, MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { Uint128, MulticallQueryClient, CwIcs20LatestQueryClient } from '@oraichain/common-contracts-sdk';
 import {
   OraiswapStakingQueryClient,
   OraiswapRewarderQueryClient,
@@ -17,7 +17,15 @@ import {
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
 import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
-import { IBCInfo, KWT_DENOM, MILKY_DENOM, ORAI, STABLE_DENOM, TokenItemType } from '@oraichain/oraidex-common';
+import {
+  IBCInfo,
+  IBC_WASM_CONTRACT,
+  KWT_DENOM,
+  MILKY_DENOM,
+  ORAI,
+  STABLE_DENOM,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
@@ -347,6 +355,16 @@ async function fetchTaxRate(): Promise<TaxRateResponse> {
     return data as TaxRateResponse;
   } catch (error) {
     throw new Error(`Error when query TaxRate using oracle: ${error}`);
+  }
+}
+
+async function fetchRelayerFee(): Promise<any> {
+  const ics20Contract = new CwIcs20LatestQueryClient(window.client, IBC_WASM_CONTRACT);
+  try {
+    const { relayer_fees } = await ics20Contract.config();
+    return relayer_fees;
+  } catch (error) {
+    throw new Error(`Error when query Relayer Fee using oracle: ${error}`);
   }
 }
 
@@ -755,5 +773,6 @@ export {
   fetchAllTokenAssetPools,
   fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
-  getPairAmountInfo
+  getPairAmountInfo,
+  fetchRelayerFee
 };
