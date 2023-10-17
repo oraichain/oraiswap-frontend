@@ -25,7 +25,7 @@ import { reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import Keplr from 'libs/keplr';
 import MetamaskImage from 'assets/images/metamask.png';
-import EthereumImage from 'assets/images/ethereum-logo.png';
+import EvmIcon from 'assets/icons/icon_evm.svg';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 import TronlinkImage from 'assets/images/tron-link-logo.png';
 import InjectiveImage from 'assets/images/injective-logo.png';
@@ -34,7 +34,6 @@ import OwalletImage from 'assets/images/owallet-logo.png';
 import OsmosImage from 'assets/images/osmos-logo.png';
 import KawwaiImage from 'assets/images/Kawwai-logo.png';
 import CosmosImage from 'assets/images/cosmos-logo.png';
-import BinanceImage from 'assets/images/binance-logo.png';
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
@@ -65,6 +64,7 @@ interface WalletItem {
   isOpen: boolean;
   isConnect: boolean;
   networks: NetworkItem[];
+  address?: string;
 }
 
 const MyWallets: React.FC<{
@@ -74,6 +74,7 @@ const MyWallets: React.FC<{
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
@@ -87,7 +88,6 @@ const MyWallets: React.FC<{
 
   const connectMetamask = async () => {
     console.log('connectMetamask', metamaskAddress);
-
     try {
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
@@ -267,90 +267,81 @@ const MyWallets: React.FC<{
     }
   }, [copiedAddressCoordinates]);
 
-  useEffect(() => {
-    setWallets([
+  const MetamaskInfo = {
+    id: 1,
+    name: 'Metamask',
+    code: WALLET_TYPES.METAMASK,
+    icon: MetamaskImage,
+    totalUsd: 0,
+    isOpen: false,
+    isConnect: !!metamaskAddress,
+    networks: [
       {
         id: 1,
-        name: 'Metamask',
-        code: WALLET_TYPES.METAMASK,
-        icon: MetamaskImage,
-        totalUsd: 1,
-        isOpen: false,
-        isConnect: !!metamaskAddress,
-        networks: [
-          {
-            id: 1,
-            name: 'Ethereum',
-            address: metamaskAddress,
-            icon: EthereumImage
-          },
-          {
-            id: 2,
-            name: 'Binance',
-            address: metamaskAddress,
-            icon: BinanceImage
-          },
-          {
-            id: 3,
-            name: 'Kawaiiverse',
-            address: metamaskAddress,
-            icon: KawwaiImage
-          }
-        ]
+        name: 'Ethereum, BNB Chain',
+        address: metamaskAddress,
+        icon: EvmIcon
+      }
+    ]
+  };
+
+  const OwalletInfo = {
+    id: 2,
+    name: 'Owallet',
+    code: WALLET_TYPES.OWALLET,
+    icon: OwalletImage,
+    totalUsd: 0,
+    isOpen: false,
+    isConnect: !!oraiAddressWallet,
+    networks: [
+      {
+        id: 1,
+        name: 'Oraichain',
+        address: cosmosAddress['Oraichain'],
+        icon: OraichainImage
       },
       {
         id: 2,
-        name: 'Owallet',
-        code: WALLET_TYPES.OWALLET,
-        icon: OwalletImage,
-        totalUsd: 42342.342121221,
-        isOpen: false,
-        isConnect: !!oraiAddressWallet,
-        networks: [
-          {
-            id: 1,
-            name: 'Oraichain',
-            address: oraiAddressWallet,
-            icon: OraichainImage
-          },
-          {
-            id: 2,
-            name: 'Injective',
-            address: oraiAddressWallet,
-            icon: InjectiveImage
-          },
-          {
-            id: 3,
-            name: 'Cosmos Hub',
-            address: oraiAddressWallet,
-            icon: CosmosImage
-          },
-          {
-            id: 4,
-            name: 'Osmosis',
-            address: oraiAddressWallet,
-            icon: OsmosImage
-          }
-        ]
+        name: 'Injective',
+        address: cosmosAddress['injective-1'],
+        icon: InjectiveImage
       },
       {
         id: 3,
-        name: 'TronLink',
-        code: WALLET_TYPES.TRON,
-        icon: TronWalletImage,
-        totalUsd: 1,
-        isOpen: false,
-        isConnect: !!tronAddress,
-        networks: [
-          {
-            id: 1,
-            name: 'Tron network',
-            address: tronAddress,
-            icon: TronlinkImage
-          }
-        ]
+        name: 'Cosmos Hub',
+        address: cosmosAddress['cosmoshub-4'],
+        icon: CosmosImage
+      },
+      {
+        id: 4,
+        name: 'Osmosis',
+        address: cosmosAddress['osmosis-1'],
+        icon: OsmosImage
       }
-    ]);
+    ]
+  };
+
+  const TronInfo = {
+    id: 3,
+    name: 'TronLink',
+    code: WALLET_TYPES.TRON,
+    icon: TronWalletImage,
+    totalUsd: 0,
+    isOpen: false,
+    isConnect: !!tronAddress,
+    networks: [
+      {
+        id: 1,
+        name: 'Tron network',
+        address: tronAddress,
+        icon: TronlinkImage
+      }
+    ]
+  };
+
+  useEffect(() => {
+    const infoWallet = [MetamaskInfo, OwalletInfo, TronInfo];
+    setWallets(infoWallet);
   }, [tronAddress, metamaskAddress, oraiAddressWallet]);
 
   return (
@@ -374,7 +365,6 @@ const MyWallets: React.FC<{
                 </div>
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
-                  <div className={cx('money')}>${wallet.totalUsd}</div>
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}

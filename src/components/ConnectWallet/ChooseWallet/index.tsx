@@ -10,6 +10,9 @@ import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as LedgerIcon } from 'assets/icons/ledger.svg';
 import { ReactComponent as PhantomIcon } from 'assets/icons/phantom.svg';
+import { ReactComponent as GoogleIcon } from 'assets/icons/google_icon.svg';
+import { ReactComponent as AppleIcon } from 'assets/icons/apple_wallet.svg';
+import { ReactComponent as PhoneIcon } from 'assets/icons/phone_wallet.svg';
 
 import ConnectProcessing from './ConnectProcessing';
 import ConnectError from './ConnectError';
@@ -20,15 +23,19 @@ const cx = cn.bind(styles);
 interface WalletItem {
   name: string;
   icon: FunctionComponent;
+  isActive?: boolean;
 }
 
 const WALLETS: WalletItem[] = [
-  { name: 'Owallet', icon: OwalletIcon },
-  { name: 'Metamask', icon: MetamaskIcon },
-  { name: 'TronLink', icon: TronIcon },
+  { name: 'Owallet', icon: OwalletIcon, isActive: true },
+  { name: 'Metamask', icon: MetamaskIcon, isActive: true },
+  { name: 'TronLink', icon: TronIcon, isActive: true },
   { name: 'Phantom', icon: PhantomIcon },
-  { name: 'Keplr', icon: KeplrIcon },
-  { name: 'Ledger', icon: LedgerIcon }
+  { name: 'Keplr', icon: KeplrIcon, isActive: true },
+  { name: 'Ledger', icon: LedgerIcon },
+  { name: 'Connect with Google', icon: GoogleIcon },
+  { name: 'Connect with Apple', icon: AppleIcon },
+  { name: 'Use phone number', icon: PhoneIcon }
 ];
 
 enum CONNECT_STATUS {
@@ -43,6 +50,10 @@ const ChooseWalletModal: React.FC<{
   const [theme] = useConfigReducer('theme');
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
+  const [oraiAddressWallet] = useConfigReducer('address');
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [cosmosAddress] = useConfigReducer('cosmosAddress');
+  const [tronAddress] = useConfigReducer('tronAddress');
 
   const content = useMemo(() => {
     if (connectStatus === CONNECT_STATUS.SELECTING) {
@@ -52,10 +63,12 @@ const ChooseWalletModal: React.FC<{
             return (
               <div
                 key={index}
-                className={cx('wallet_item')}
+                className={cx('wallet_item', `${!wallet.isActive && 'not-active'}`)}
                 onClick={() => {
-                  setWalletSelected(wallet);
-                  setConnectStatus(CONNECT_STATUS.PROCESSING);
+                  if (wallet.isActive) {
+                    setWalletSelected(wallet);
+                    setConnectStatus(CONNECT_STATUS.PROCESSING);
+                  }
                 }}
               >
                 <div className={cx('wallet_icon')}>
@@ -105,7 +118,6 @@ const ChooseWalletModal: React.FC<{
             <CloseIcon />
           </div>
         </div>
-
         {content}
       </div>
     </Modal>
