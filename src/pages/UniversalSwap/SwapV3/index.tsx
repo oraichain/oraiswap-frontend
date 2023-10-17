@@ -49,11 +49,11 @@ import {
 } from '@oraichain/oraidex-universal-swap';
 import { ethers } from 'ethers';
 
-const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
-  [0.25, '25%'],
-  [0.5, '50%'],
-  [0.75, '75%'],
-  [1, '100%']
+const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
+  [0.25, '25%', 'one-quarter'],
+  [0.5, '50%', 'half'],
+  [0.75, '75%', 'three-quarters'],
+  [1, '100%', 'max']
 ];
 
 const cx = cn.bind(styles);
@@ -103,21 +103,20 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = (amount: bigint, type: 'max' | 'half') => {
+  const onMaxFromAmount = (amount: bigint, type) => {
     const displayAmount = toDisplay(amount, originalFromToken?.decimals);
     let finalAmount = displayAmount;
-
-    // hardcode fee when swap token orai
-    if (fromTokenDenom === ORAI) {
-      const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
-      if (type === 'max') {
-        finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
-      }
-      if (type === 'half') {
-        finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-      }
-    }
+    //TODO: need check again - hardcode fee when swap token orai
+    // if (fromTokenDenom === ORAI) {
+    //   const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
+    //   const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
+    //   if (type === 'max') {
+    //     finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
+    //   }
+    //   if (type === 'half') {
+    //     finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
+    //   }
+    // }
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
@@ -368,7 +367,7 @@ const SwapComponent: React.FC<{
           </div>
         </div>
         <div className={cx('coeff')}>
-          {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
+          {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
             <button
               style={{
                 color: coe == coeff ? 'black' : 'inherit',
@@ -379,19 +378,12 @@ const SwapComponent: React.FC<{
               onClick={(event) => {
                 event.stopPropagation();
                 setCoe(coeff);
-                onChangeFromAmount(toDisplay(fromTokenBalance) * coeff);
-                // hardcode estimate fee oraichain
-                // let finalAmount = maxAmount;
-                // if (token?.denom === ORAI) {
-                //   const useFeeEstimate = feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
-                //   if (coeff === 1) {
-                //     finalAmount = useFeeEstimate > finalAmount ? 0 : finalAmount - useFeeEstimate;
-                //   } else {
-                //     finalAmount = useFeeEstimate > maxAmount - finalAmount * coeff ? 0 : finalAmount;
-                //   }
-                // }
-
-                // setConvertAmount([finalAmount * coeff, amountDetail.usd * coeff]);
+                if (coeff === coe) return setSwapAmount([0, 0]);
+                if (type === 'max') {
+                  onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), type);
+                } else {
+                  onMaxFromAmount((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6), type);
+                }
               }}
             >
               {text}

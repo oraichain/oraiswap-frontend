@@ -22,6 +22,7 @@ export interface ConfigState {
   address: string;
   metamaskAddress: string | null;
   tronAddress: string | null;
+  cosmosAddress: { [key: string]: string };
   chainId: string;
   chainInfo: ChainInfoType;
   infoEvm: ChainInfoType;
@@ -44,6 +45,7 @@ const initialState: ConfigState = {
   address: '',
   metamaskAddress: '',
   tronAddress: '',
+  cosmosAddress: {},
   chainId: 'Oraichain',
   filterNetwork: 'Oraichain',
   chainInfo: {},

@@ -5,6 +5,10 @@ import cn from 'classnames/bind';
 import { TableHeaderProps, Table } from 'components/Table';
 import { AssetInfoResponse } from 'types/swap';
 import OraiIcon from 'assets/icons/oraichain_light.svg';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { getTotalUsd } from 'libs/utils';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
 
 const cx = cn.bind(styles);
 
@@ -42,6 +46,9 @@ const data = [
 ];
 
 export const AssetsTab: React.FC<{}> = () => {
+  const { data: prices } = useCoinGeckoPrices();
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const totalUsd = getTotalUsd(amounts, prices);
   const headers: TableHeaderProps<AssetInfoResponse> = {
     assets: {
       name: 'ASSET',
@@ -111,7 +118,7 @@ export const AssetsTab: React.FC<{}> = () => {
           {
             src: WalletIcon,
             label: 'Total balance',
-            balance: '30,756.21'
+            balance: totalUsd.toFixed(6)
           },
           {
             src: StakeIcon,

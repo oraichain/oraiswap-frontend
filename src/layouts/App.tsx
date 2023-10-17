@@ -1,6 +1,7 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import {
   IBC_WASM_CONTRACT,
+  NetworkChainId,
   WalletType,
   WEBSOCKET_RECONNECT_ATTEMPTS,
   WEBSOCKET_RECONNECT_INTERVAL
@@ -34,10 +35,12 @@ import { pairsChart } from 'components/TVChartContainer/config';
 import MenuV3 from './MenuV3';
 import Instruct from './Instruct';
 
+const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1'];
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [_, setCosmosAddress] = useConfigReducer('cosmosAddress');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -183,6 +186,24 @@ const App = () => {
       displayToast(TToastType.TX_INFO, {
         message: `There is an unexpected error with Keplr wallet. Please try again!`
       });
+    } finally {
+      await getListAddressCosmos();
+    }
+  };
+
+  const getListAddressCosmos = async () => {
+    try {
+      let listAddressCosmos = {};
+      for (const chainId of listChainId) {
+        const address = await window.Keplr.getKeplrAddr(chainId as NetworkChainId);
+        listAddressCosmos = {
+          ...listAddressCosmos,
+          [chainId]: address
+        };
+      }
+      setCosmosAddress(listAddressCosmos);
+    } catch (error) {
+      console.log({ error });
     }
   };
 

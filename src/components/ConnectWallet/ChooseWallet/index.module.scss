@@ -1,7 +1,7 @@
 .choose_wallet_modal_container {
   .choose_wallet_modal_wrapper {
     width: 520px;
-    background: #efefef;
+    background: #fff;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -32,25 +32,27 @@
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
+      gap: 10px;
       margin-top: 30px;
-
+      .not-active {
+        opacity: 0.5;
+      }
       .wallet_item {
-        padding: 10px;
-        margin: 5px;
+        padding: 16px 0px 8px 0px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-direction: column;
         width: 140px;
-        height: 140px;
         border-radius: 5px;
-
+        min-height: 140px;
         .wallet_name {
-          margin-top: 20px;
+          margin-top: 16px;
+          text-align: center;
         }
 
         &:hover {
-          background: #ffecec7a;
+          background: #efefef;
           cursor: pointer;
         }
       }
