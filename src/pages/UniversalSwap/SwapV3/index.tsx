@@ -288,7 +288,6 @@ const SwapComponent: React.FC<{
           <div className={cx('input-wrapper')}>
             <InputSwap
               balance={fromTokenBalance}
-              tokenInfoData={fromTokenInfoData}
               originalToken={originalFromToken}
               prices={prices}
               ////////////
@@ -344,7 +343,6 @@ const SwapComponent: React.FC<{
           <div className={cx('input-wrapper')}>
             <InputSwap
               balance={toTokenBalance}
-              tokenInfoData={toTokenInfoData}
               originalToken={originalToToken}
               disable={true}
               prices={prices}
