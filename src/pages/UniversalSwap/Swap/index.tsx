@@ -251,11 +251,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -418,7 +418,7 @@ const SwapComponent: React.FC<{
                 balance={{
                   amount: relayerFeeToken.amount,
                   decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                  denom: relayerFeeToken.prefix
+                  denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
                 }}
                 decimalScale={truncDecimals}
               />

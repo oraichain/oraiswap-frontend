@@ -398,11 +398,6 @@ export class UniversalSwapHandler {
   async transferAndSwap(combinedReceiver: string, metamaskAddress?: string, tronAddress?: string): Promise<any> {
     if (!metamaskAddress && !tronAddress) throw Error('Cannot call evm swap if the evm address is empty');
 
-    await this.checkBalanceIBCOraichain(this.originalToToken, this.originalFromToken, {
-      fromAmount: this.fromAmount,
-      toAmount: this.simulateAmount
-    });
-
     // normal case, we will transfer evm to ibc like normal when two tokens can not be swapped on evm
     // first case: BNB (bsc) <-> USDT (bsc), then swappable
     // 2nd case: BNB (bsc) -> USDT (oraichain), then find USDT on bsc. We have that and also have route => swappable
@@ -426,6 +421,12 @@ export class UniversalSwapHandler {
     if (!window.Metamask.isTron(this.originalFromToken.chainId))
       await window.Metamask.switchNetwork(this.originalFromToken.chainId);
     if (isEvmSwappable(swappableData)) return window.Metamask.evmSwap(evmSwapData);
+
+    // we dont check ibc channel balance on Oraichain for same evm swap case because it is not related
+    await this.checkBalanceIBCOraichain(this.originalToToken, this.originalFromToken, {
+      fromAmount: this.fromAmount,
+      toAmount: this.simulateAmount
+    });
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(
       this.originalToToken.coinGeckoId,
