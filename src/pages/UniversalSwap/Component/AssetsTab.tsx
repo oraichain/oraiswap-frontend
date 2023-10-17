@@ -8,7 +8,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { TokenItemType, getSubAmountDetails, toAmount } from '@oraichain/oraidex-common';
+import { TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import React from 'react';
 import { tokens } from 'config/bridgeTokens';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
@@ -52,7 +52,7 @@ export const AssetsTab: React.FC<{}> = () => {
         icon: t.Icon,
         iconLight: t?.IconLight,
         price: prices[t.coinGeckoId],
-        balance: amount,
+        balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
         value: 0,
         coeff: 0,
