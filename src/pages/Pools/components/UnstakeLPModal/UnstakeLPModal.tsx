@@ -20,6 +20,7 @@ import { generateMiningMsgsV3, Type } from 'rest/api';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './UnstakeLPModal.module.scss';
 import { toAmount, CW20_DECIMALS, ORAI, toDisplay } from '@oraichain/oraidex-common';
+import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 
@@ -78,18 +79,20 @@ export const UnstakeLPModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = generateMiningMsgsV3({
+      const msg = generateMiningMsgsV3({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        assetToken
+        assetInfo: Pairs.getStakingAssetInfo([
+          JSON.parse(pairInfoData.firstAssetInfo),
+          JSON.parse(pairInfoData.secondAssetInfo)
+        ])
       });
 
-      const msg = msgs[0];
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
         funds: msg.funds
       });

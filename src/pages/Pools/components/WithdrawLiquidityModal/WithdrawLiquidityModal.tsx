@@ -58,7 +58,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress();
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.WITHDRAW,
         sender: oraiAddress,
         lpAddr: lpTokenInfoData!.contractAddress!,
@@ -66,18 +66,13 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         pair: pairInfoData.pairAddr
       });
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
-
         funds: msg.funds
       });
-
-      console.log('result withdraw tx hash: ', result);
 
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {

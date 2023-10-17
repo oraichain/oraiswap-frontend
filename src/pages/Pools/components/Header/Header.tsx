@@ -13,6 +13,7 @@ import { useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 import { ORAI_INFO, toDecimal, ORAI, toDisplay, CW20_DECIMALS, USDT_CONTRACT } from '@oraichain/oraidex-common';
+import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -58,14 +59,14 @@ export const Header: FC = () => {
           if (rewardInfo.pending_reward === '0') return null;
           return {
             contractAddress: network.staking,
-            handleMsg: Buffer.from(JSON.stringify({ withdraw: { asset_info: rewardInfo.asset_info } })),
-            handleOptions: { funds: null }
-          };
+            msg: { withdraw: { asset_info: rewardInfo.asset_info } },
+            funds: null
+          } as ExecuteInstruction;
         })
         .filter(Boolean);
+
       const result = await CosmJs.executeMultiple({
-        // TODO: fix later
-        msgs: msgs as any,
+        msgs,
         walletAddr: address,
         gasAmount: { denom: ORAI, amount: '0' }
       });

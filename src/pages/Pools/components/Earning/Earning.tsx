@@ -114,18 +114,16 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msgs = generateMiningMsgs({
+      const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
         assetToken: stakingToken
       } as WithdrawMining);
 
-      const msg = msgs[0];
-
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: address,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
         funds: msg.funds
       });

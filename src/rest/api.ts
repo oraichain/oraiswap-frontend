@@ -1,3 +1,4 @@
+import { BondLP, MiningLP, UnbondLP, WithdrawLP } from 'types/pool';
 import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { coin, Coin } from '@cosmjs/stargate';
 import { Uint128, MulticallQueryClient, CwIcs20LatestQueryClient } from '@oraichain/common-contracts-sdk';
@@ -27,7 +28,6 @@ import {
   TokenItemType
 } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import { ibcInfos, ibcInfosOld } from '@oraichain/oraidex-common';
 import isEqual from 'lodash/isEqual';
@@ -596,7 +596,7 @@ function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity)
   return msg;
 }
 
-function generateMiningMsgsV3(data: BondMining | WithdrawMining | UnbondLiquidity): ExecuteInstruction {
+function generateMiningMsgsV3(data: MiningLP): ExecuteInstruction {
   const { type, sender, ...params } = data;
   let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
@@ -604,36 +604,33 @@ function generateMiningMsgsV3(data: BondMining | WithdrawMining | UnbondLiquidit
   let input: JsonObject;
   switch (type) {
     case Type.BOND_LIQUIDITY: {
-      const bondMsg = params as BondMining;
+      const bondMsgs = params as BondLP;
       // currently only support cw20 token pool
-      let { info: asset_info } = parseTokenInfo(bondMsg.assetToken);
       input = {
         send: {
           contract: network.staking,
-          amount: bondMsg.amount.toString(),
+          amount: bondMsgs.amount.toString(),
           msg: toBinary({
             bond: {
-              asset_info
+              asset_info: bondMsgs.assetInfo
             }
-          }) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
+          })
         }
       };
-      contractAddr = bondMsg.lpToken;
+      contractAddr = bondMsgs.lpAddress;
       break;
     }
     case Type.WITHDRAW_LIQUIDITY_MINING: {
-      const msg = params as WithdrawMining;
-      let { info: asset_info } = parseTokenInfo(msg.assetToken);
-      input = { withdraw: { asset_info } };
+      const msg = params as WithdrawLP;
+      input = { withdraw: { asset_info: msg.assetInfo } };
       contractAddr = network.staking;
       break;
     }
     case Type.UNBOND_LIQUIDITY:
-      const unbondMsg = params as UnbondLiquidity;
-      let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
+      const unbondMsg = params as UnbondLP;
       input = {
         unbond: {
-          asset_info: unbond_asset,
+          asset_info: unbondMsg.assetInfo,
           amount: unbondMsg.amount.toString()
         }
       };

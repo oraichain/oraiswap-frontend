@@ -21,6 +21,7 @@ import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './StakeLPModal.module.scss';
 import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
+import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 
@@ -59,20 +60,22 @@ export const StakeLPModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress();
       // generate bonding msg
-      const msgs = generateMiningMsgsV3({
+      const msg = generateMiningMsgsV3({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpToken: lpTokenInfoData.contractAddress!,
-        assetToken
+        lpAddress: lpTokenInfoData.contractAddress!,
+        assetInfo: Pairs.getStakingAssetInfo([
+          JSON.parse(pairInfoData.firstAssetInfo),
+          JSON.parse(pairInfoData.secondAssetInfo)
+        ])
       });
 
       // execute msg
-      const msg = msgs[0];
       const result = await CosmJs.execute({
-        address: msg.contract,
+        address: msg.contractAddress,
         walletAddr: oraiAddress,
-        handleMsg: msg.msg.toString(),
+        handleMsg: msg.msg,
         gasAmount: { denom: ORAI, amount: '0' },
         funds: msg.funds
       });
