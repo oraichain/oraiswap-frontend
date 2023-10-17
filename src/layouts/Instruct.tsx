@@ -5,11 +5,11 @@ import IconoirGift from 'assets/icons/iconoir_gift.svg';
 import MediaVideo from 'assets/icons/media-video.svg';
 import GroupImg from 'assets/icons/group.svg';
 import GraduationImg from 'assets/icons/graduation.svg';
-import UniversalWallet from 'assets/icons/universal_wallet.svg';
-import UniversalSwapBridge from 'assets/icons/universwap_bridge.svg';
+import UniversalWallet from 'assets/images/universal_wallet.png';
+import UniversalSwapBridge from 'assets/images/universalswap_bridge.png';
 import ChatBubbleQuestion from 'assets/icons/chat-bubble-question.svg';
-import TrackingTransaction from 'assets/icons/tracking_transaction.svg';
-import TrackingHistory from 'assets/icons/tracking_history.svg';
+import TrackingTransaction from 'assets/images/tracking_transaction.png';
+import TrackingHistory from 'assets/images/tracking_history.png';
 import styles from './Instruct.module.scss';
 import cn from 'classnames/bind';
 import Modal from 'components/Modal';
@@ -23,11 +23,11 @@ const WhatsNewItems = [
   {
     label: 'Universal Swap & Bridge',
     icon: true,
-    img: UniversalWallet
+    img: UniversalSwapBridge
   },
   {
     label: 'Universal Wallet',
-    img: UniversalSwapBridge
+    img: UniversalWallet
   },
   {
     label: 'Tracking Transaction status',

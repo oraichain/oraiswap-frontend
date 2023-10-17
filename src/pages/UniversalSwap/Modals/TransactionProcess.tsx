@@ -1,6 +1,7 @@
 import cn from 'classnames/bind';
 import styles from './TransactionProcess.module.scss';
 import { FC, useState } from 'react';
+import ImagesCrossChain from 'assets/images/img_cross-chain.png';
 
 const cx = cn.bind(styles);
 
@@ -23,7 +24,9 @@ export const TransactionProcess: FC<ModalProps> = ({
     <div className={cx('process')}>
       <div className={cx('txs')}>
         <div className={cx('header')}>
-          <div></div>
+          <div>
+            <img src={ImagesCrossChain} alt="crosschain" width={'100%'} height={'100%'} />
+          </div>
         </div>
         <div className={cx('section')}>
           <div className={cx('label')}>{label}</div>

@@ -50,8 +50,9 @@
         .info {
           display: flex;
           flex-direction: column;
-          justify-content: flex-start;
+          justify-content: center;
           flex: 1;
+          height: 40px;
           margin-left: 12px;
 
           .name {
