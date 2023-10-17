@@ -22,7 +22,7 @@ const Swap: React.FC = () => {
           <div>
             <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />
             <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
-              {!isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
+              {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
               <TVChartContainer />
             </div>
             <RoutingSection />

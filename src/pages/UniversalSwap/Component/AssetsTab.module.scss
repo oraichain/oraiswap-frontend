@@ -39,11 +39,15 @@
 
 .assets {
   display: flex;
-  justify-content: center;
+  padding-left: 24px;
   color: #494949;
   .left {
     display: flex;
     align-items: center;
+    .tokenIcon {
+      width: 44px;
+      height: 44px;
+    }
   }
   .right {
     text-align: left;
@@ -52,12 +56,22 @@
       color: #121212;
       font-size: 14px;
       font-weight: 500;
+      width: 100%;
       text-transform: uppercase;
+      -webkit-box-orient: vertical;
+      white-space: nowrap;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+      width: 100%;
     }
     .assetChain {
       font-size: 13px;
       font-weight: 400;
+      width: 100%;
       text-transform: capitalize;
+      -webkit-box-orient: vertical;
+      white-space: nowrap;
+      -webkit-line-clamp: 1;
     }
   }
 }

@@ -4,59 +4,68 @@ import styles from './AssetsTab.module.scss';
 import cn from 'classnames/bind';
 import { TableHeaderProps, Table } from 'components/Table';
 import { AssetInfoResponse } from 'types/swap';
-import OraiIcon from 'assets/icons/oraichain_light.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { getTotalUsd } from 'libs/utils';
+import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
+import { TokenItemType, getSubAmountDetails, toAmount } from '@oraichain/oraidex-common';
+import React from 'react';
+import { tokens } from 'config/bridgeTokens';
+import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
 const cx = cn.bind(styles);
-
-const data = [
-  {
-    asset: 'orai',
-    chain: 'oraichain',
-    price: 2.51,
-    balance: 10432,
-    denom: 'orai',
-    value: 26080.13,
-    coeff: 5.21,
-    coeffType: 'increase'
-  },
-  {
-    asset: 'orai',
-    chain: 'oraichain',
-    price: 2.51,
-    balance: 10432,
-    denom: 'orai',
-    value: 26080.13,
-    coeff: 5.21,
-    coeffType: 'decrease'
-  },
-  {
-    asset: 'orai',
-    chain: 'oraichain',
-    price: 2.51,
-    balance: 10432,
-    denom: 'orai',
-    value: 26080.13,
-    coeff: 5.21,
-    coeffType: 'decrease'
-  }
-];
 
 export const AssetsTab: React.FC<{}> = () => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const totalUsd = getTotalUsd(amounts, prices);
+  const [[otherChainTokens, oraichainTokens], setTokens] = React.useState<TokenItemType[][]>(tokens);
+  console.log({ otherChainTokens, oraichainTokens });
+
+  const data = [...oraichainTokens, ...otherChainTokens]
+    .filter((token) => {
+      // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
+      if (!token.bridgeTo && !token.contractAddress) return false;
+      // if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
+      //   return false;
+      // }
+      if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
+      return true;
+    })
+    // .sort((a, b) => {
+    //   return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
+    // })
+    .map((t: TokenItemType) => {
+      let amount = BigInt(amounts[t.denom] ?? 0);
+      let usd = getUsd(amount, t, prices);
+      let subAmounts: AmountDetails;
+      if (t.contractAddress && t.evmDenoms) {
+        subAmounts = getSubAmountDetails(amounts, t);
+        const subAmount = toAmount(toSumDisplay(subAmounts), t.decimals);
+        amount += subAmount;
+        usd += getUsd(subAmount, t, prices);
+      }
+
+      return {
+        asset: t.name,
+        chain: t.org,
+        icon: t.Icon,
+        iconLight: t?.IconLight,
+        price: prices[t.coinGeckoId],
+        balance: amount,
+        denom: t.denom,
+        value: 0,
+        coeff: 0,
+        coeffType: 'increase'
+      };
+    });
+
   const headers: TableHeaderProps<AssetInfoResponse> = {
     assets: {
       name: 'ASSET',
       accessor: (data) => (
         <div className={styles.assets}>
-          <div className={styles.left}>
-            <img src={OraiIcon} width={26} height={26} alt="arrow" />
-          </div>
+          <div className={styles.left}>{data.icon && <data.icon className={styles.tokenIcon} />}</div>
           <div className={styles.right}>
             <div className={styles.assetName}>{data.asset}</div>
             <div className={styles.assetChain}>{data.chain}</div>
@@ -69,7 +78,9 @@ export const AssetsTab: React.FC<{}> = () => {
     price: {
       name: 'PRICE',
       width: '22%',
-      accessor: (data) => <span>${data.price}</span>,
+      accessor: (data) => (
+        <span style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 50 }}>${data.price}</span>
+      ),
       align: 'center'
     },
     balance: {
@@ -123,7 +134,7 @@ export const AssetsTab: React.FC<{}> = () => {
           {
             src: StakeIcon,
             label: 'Total staked',
-            balance: '10,425.42'
+            balance: '0'
           }
         ].map((e, i) => {
           return (
@@ -142,6 +153,7 @@ export const AssetsTab: React.FC<{}> = () => {
       <div>
         <Table
           headers={headers}
+          // @ts-ignore
           data={data}
           stylesColumn={{
             padding: '16px 0'
