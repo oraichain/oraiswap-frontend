@@ -121,6 +121,7 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
     return res.data;
   } catch (e) {
     console.error('getPools', e);
+    return [];
   }
 };
 
