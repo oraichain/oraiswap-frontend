@@ -158,7 +158,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, oraiAddress);
       const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, oraiAddress);
 
-      const msgs = generateContractMessages({
+      const msg = generateContractMessages({
         type: Type.PROVIDE,
         sender: oraiAddress,
         fromInfo: token1!,
@@ -169,9 +169,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
       } as ProvideQuery);
 
-      const msg = msgs[0];
-
-      var messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
+      const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
 
       const result = await CosmJs.executeMultiple({
         msgs: messages,
