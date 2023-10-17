@@ -185,7 +185,10 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         });
 
         const amountUsdt = Number(toAmount(getUsd(baseAmount, token1, prices) * 2));
-        onLiquidityChange(amountUsdt);
+
+        if (typeof onLiquidityChange == 'function') {
+          onLiquidityChange(amountUsdt);
+        }
       }
     } catch (error) {
       console.log('error in providing liquidity: ', error);
