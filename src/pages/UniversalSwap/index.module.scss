@@ -29,11 +29,11 @@
 @include mobile {
   .swap-container {
     padding: 0;
-
+    display: flex;
+    flex-direction: column-reverse;
     .swap-col {
       &.w60 {
         width: 100%;
-        height: 400px;
       }
 
       &.w40 {

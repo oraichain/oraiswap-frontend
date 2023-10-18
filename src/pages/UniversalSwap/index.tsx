@@ -7,6 +7,7 @@ import styles from './index.module.scss';
 import { RoutingSection, HeaderTab, TabsTxs, HistoryTab, AssetsTab } from './Component';
 import { NetworkFilter, TYPE, initNetworkFilter } from './helpers';
 import { TransactionProcess } from './Modals';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 
@@ -16,17 +17,22 @@ const Swap: React.FC = () => {
   const [type, setType] = useState<string>(TYPE.ASSETS);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
-
+  const mobileMode = isMobile();
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
         <div className={cx('swap-col', 'w60')}>
           <div>
-            <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />
-            <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
-              {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
-              <TVChartContainer />
-            </div>
+            {!mobileMode && (
+              <>
+                <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />
+                <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
+                  {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
+                  <TVChartContainer />
+                </div>
+              </>
+            )}
+
             <RoutingSection />
             <TabsTxs
               type={type}

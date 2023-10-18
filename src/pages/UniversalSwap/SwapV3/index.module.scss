@@ -41,6 +41,10 @@
       margin: 5.5px 0;
       flex-grow: 1;
 
+      @include mobile {
+        font-size: 14px;
+      }
+
       letter-spacing: 0.02em;
       text-transform: uppercase;
 
@@ -81,7 +85,6 @@
 
     @include theme() {
       background: theme-get('neutral-6');
-      // box-shadow: theme-get('shadow-swap-from-to');
     }
 
     border-radius: 16px;
@@ -97,9 +100,10 @@
 
     @include mobile {
       border: none;
-      border-radius: 0;
+      border-radius: 8px;
       background: none;
       box-shadow: none;
+      padding: 16px;
     }
 
     /* Inside auto layout */
@@ -124,10 +128,18 @@
     display: flex;
     justify-content: space-between;
     padding-top: 16px;
+    font-size: 14px;
+    color: #979995;
+    .is-active {
+      @include theme() {
+        color: theme-get('sea-stone-800');
+        border: 1px solid theme-get('sea-stone-800');
+      }
+      font-weight: 600;
+    }
     button {
       @include theme() {
         background-color: theme-get('neutral-6');
-        color: theme-get('neutral-8');
       }
       border-radius: 8px;
       width: 24%;
@@ -135,7 +147,9 @@
     }
     button:hover {
       font-weight: 600;
-      color: black;
+      @include theme() {
+        color: theme-get('sea-stone-800');
+      }
     }
   }
 
@@ -307,6 +321,9 @@
 
 .swap-icon {
   padding: 5px;
+  @include mobile {
+    padding: 3px;
+  }
   @include theme() {
     background-color: theme-get('bg-btn-switch');
   }
@@ -320,6 +337,9 @@
     @include theme() {
       background-color: theme-get('neutral-white');
       border: 6px solid theme-get('neutral-white');
+      @include mobile {
+        border: 4px solid theme-get('neutral-white');
+      }
     }
     img {
       border-radius: 50%;
@@ -329,6 +349,10 @@
       width: 38px;
       // position: absolute;
       // transform: translate(-50%, -50%);
+      @include mobile {
+        height: 24px;
+        width: 24px;
+      }
     }
   }
 }

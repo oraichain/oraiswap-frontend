@@ -15,7 +15,7 @@ export const StepByStep: FC<ModalProps> = () => {
           <div>Approve</div>
           <div className={cx('info-step')}>
             <img src={OraiIcon} width={14} height={14} alt="orai" />
-            <div>95 ORAI</div>
+            <div className={cx('info-step-balance')}>95 ORAI</div>
           </div>
         </li>
         <li className={cx('next')}>Confirmed</li>
@@ -23,7 +23,7 @@ export const StepByStep: FC<ModalProps> = () => {
           <div>Swap</div>
           <div className={cx('info-step')}>
             <img src={OraiIcon} width={14} height={14} alt="orai" />
-            <div>238.32 USDT</div>
+            <div className={cx('info-step-balance')}>238.32 USDT</div>
           </div>
         </li>
         <li>Bridge</li>
@@ -31,7 +31,7 @@ export const StepByStep: FC<ModalProps> = () => {
           <div>Completed</div>
           <div className={cx('info-step')}>
             <img src={OraiIcon} width={14} height={14} alt="orai" />
-            <div>238.25 USDT</div>
+            <div className={cx('info-step-balance')}>238.25 USDT</div>
           </div>
         </li>
       </ul>
