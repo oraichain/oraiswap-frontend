@@ -21,7 +21,7 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { collectWallet } from 'libs/cosmjs';
-import { reduceString } from 'libs/utils';
+import { getTotalUsd, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import Keplr from 'libs/keplr';
 import MetamaskImage from 'assets/images/metamask.png';
@@ -38,6 +38,10 @@ import CosmosImage from 'assets/images/cosmos-logo.png';
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
 import { NetworkChainId, WalletType } from '@oraichain/oraidex-common';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import TokenBalance from 'components/TokenBalance';
 
 const cx = cn.bind(styles);
 const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1'];
@@ -286,7 +290,9 @@ const MyWallets: React.FC<{
       return () => clearTimeout(timeoutId);
     }
   }, [copiedAddressCoordinates]);
-
+  const { data: prices } = useCoinGeckoPrices();
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const totalUsd = getTotalUsd(amounts, prices);
   const MetamaskInfo = {
     id: 1,
     name: 'Metamask',
@@ -310,7 +316,7 @@ const MyWallets: React.FC<{
     name: 'Owallet',
     code: WALLET_TYPES.OWALLET,
     icon: OwalletImage,
-    totalUsd: 0,
+    totalUsd: totalUsd,
     isOpen: false,
     isConnect: !!oraiAddressWallet,
     networks: [
@@ -385,6 +391,10 @@ const MyWallets: React.FC<{
                 </div>
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
+
+                  <div>
+                    <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
+                  </div>
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
