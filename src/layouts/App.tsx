@@ -163,13 +163,17 @@ const App = () => {
         }
         // TODO: owallet get address evm
         if (window.ethereum) {
-          const [address] = await window.ethereum!.request({
-            method: 'eth_requestAccounts',
-            params: []
-          });
-          console.log('window.ethereum', window.ethereum);
-          console.log('address ===> ', address);
-          setMetamaskAddress(ethers.utils.getAddress(address));
+          try {
+            const [address] = await window.ethereum!.request({
+              method: 'eth_requestAccounts',
+              params: []
+            });
+            console.log('window.ethereum', window.ethereum);
+            console.log('address ===> ', address);
+            setMetamaskAddress(ethers.utils.getAddress(address));
+          } catch (error) {
+            console.log('🚀 ~ file: App.tsx:172 ~ keplrHandler ~ error:', error);
+          }
         }
       }
 

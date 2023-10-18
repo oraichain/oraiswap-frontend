@@ -16,7 +16,7 @@ import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { displayInstallWallet, setStorageKey, cosmosNetworks } from 'helper';
+import { displayInstallWallet, setStorageKey, cosmosNetworks, tronNetworks } from 'helper';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -42,6 +42,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import TokenBalance from 'components/TokenBalance';
+import { evmChains } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
@@ -76,6 +77,7 @@ const MyWallets: React.FC<{
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  console.log('🚀 ~ file: index.tsx:80 ~ metamaskAddress:', metamaskAddress);
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
@@ -83,8 +85,8 @@ const MyWallets: React.FC<{
   const [theme] = useConfigReducer('theme');
   const [wallets, setWallets] = useState<WalletItem[]>([]);
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
-  const [copiedAddressCoordinates, setCopiedAddressCoordinates] = useState<{ networkId: number; walletId: number }>({
-    networkId: 0,
+  const [copiedAddressCoordinates, setCopiedAddressCoordinates] = useState<{ networkId: string; walletId: number }>({
+    networkId: '',
     walletId: 0
   });
 
@@ -267,7 +269,7 @@ const MyWallets: React.FC<{
     setWallets(walletsModified);
   };
 
-  const copyWalletAddress = (e, address: string, walletId: number, networkId: number) => {
+  const copyWalletAddress = (e, address: string, walletId: number, networkId: string) => {
     timeoutCopyId && clearTimeout(timeoutCopyId);
     if (address) {
       e.stopPropagation();
@@ -280,7 +282,7 @@ const MyWallets: React.FC<{
     if (copiedAddressCoordinates.networkId && copiedAddressCoordinates.walletId) {
       const TIMEOUT_COPY = 2000;
       const timeoutId = setTimeout(() => {
-        setCopiedAddressCoordinates({ walletId: 0, networkId: 0 });
+        setCopiedAddressCoordinates({ walletId: 0, networkId: '' });
       }, TIMEOUT_COPY);
 
       setTimeoutCopyId(Number(timeoutId));
@@ -298,14 +300,10 @@ const MyWallets: React.FC<{
     totalUsd: 0,
     isOpen: false,
     isConnect: !!metamaskAddress,
-    networks: [
-      {
-        id: 1,
-        name: 'Ethereum, BNB Chain',
-        address: metamaskAddress,
-        icon: EvmIcon
-      }
-    ]
+    networks: evmChains.map((item, index) => {
+      (item as any).address = metamaskAddress;
+      return item;
+    })
   };
 
   const OwalletInfo = {
@@ -330,19 +328,15 @@ const MyWallets: React.FC<{
     totalUsd: 0,
     isOpen: false,
     isConnect: !!tronAddress,
-    networks: [
-      {
-        id: 1,
-        name: 'Tron network',
-        address: tronAddress,
-        icon: TronlinkImage
-      }
-    ]
+    networks: tronNetworks.map((item, index) => {
+      (item as any).address = tronAddress;
+      return item;
+    })
   };
 
   useEffect(() => {
     const infoWallet = [MetamaskInfo, OwalletInfo, TronInfo];
-    setWallets(infoWallet);
+    setWallets(infoWallet as any);
   }, [tronAddress, metamaskAddress, oraiAddressWallet]);
 
   return (
@@ -395,9 +389,9 @@ const MyWallets: React.FC<{
                             <>
                               <div
                                 className={cx('copy')}
-                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.id)}
+                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
                               >
-                                {copiedAddressCoordinates.networkId === network.id &&
+                                {copiedAddressCoordinates.networkId === network.chainId &&
                                 copiedAddressCoordinates.walletId === wallet.id ? (
                                   <SuccessIcon width={20} height={20} />
                                 ) : (
@@ -407,7 +401,11 @@ const MyWallets: React.FC<{
                               <div
                                 className={cx('qr_code')}
                                 onClick={() =>
-                                  getUrlQrCode({ address: network.address, name: network.name, icon: network.icon })
+                                  getUrlQrCode({
+                                    address: network.address,
+                                    name: network.chainName,
+                                    icon: network.Icon
+                                  })
                                 }
                               >
                                 <QRCodeIcon />

@@ -9,7 +9,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 export interface QRGeneratorInfo {
   url: string;
   name: string;
-  icon: string;
+  icon: any;
   address: string;
 }
 
@@ -21,7 +21,7 @@ const cx = cn.bind(styles);
 
 const QRGeneratorModal: React.FC<QRGeneratorProps & QRGeneratorInfo> = ({ url, name, icon, address, close }) => {
   const [theme] = useConfigReducer('theme');
-
+  const IconComponnet = typeof icon === 'string' ? <img src={icon} alt="network icon" /> : icon;
   return (
     <Modal
       isOpen={!!url}
@@ -39,7 +39,7 @@ const QRGeneratorModal: React.FC<QRGeneratorProps & QRGeneratorInfo> = ({ url, n
         </div>
         <div className={cx('info')}>
           <div className={cx('icon')}>
-            <img src={icon} alt="network icon" />
+            <IconComponnet />
           </div>
           <div className={cx('name')}>{name}</div>
         </div>
