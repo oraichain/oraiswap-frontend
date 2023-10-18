@@ -4,11 +4,11 @@ import ArrowImg from 'assets/icons/arrow_new.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 import NetworkImg from 'assets/icons/network.svg';
 import cn from 'classnames/bind';
-import { TYPE } from '../helpers';
+import { NetworkFilter, TYPE, initNetworkFilter } from '../helpers';
 import { networks } from 'helper';
 import CheckImg from 'assets/icons/check.svg';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { CoinIcon } from '@oraichain/oraidex-common';
+import { CoinIcon, CustomChainInfo } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 const Item: React.FC<{
@@ -49,7 +49,7 @@ const TabsNetwork: React.FC<{
   theme: string;
   setIsNetwork: (isNetwork: boolean) => void;
   networkFilter: string;
-  setNetworkFilter: (networkFilter: string) => void;
+  setNetworkFilter: (networkFilter: NetworkFilter) => void;
 }> = ({ networkFilter, setIsNetwork, setNetworkFilter, theme }) => {
   return (
     <div className={cx('network')}>
@@ -59,7 +59,7 @@ const TabsNetwork: React.FC<{
       <div className={cx('options', 'border')}>
         <Item
           onClick={() => {
-            setNetworkFilter('All networks');
+            setNetworkFilter(initNetworkFilter);
             setIsNetwork(false);
           }}
           icons={<img className={cx('logo')} src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />}
@@ -70,12 +70,15 @@ const TabsNetwork: React.FC<{
         />
       </div>
       <div className={cx('options')}>
-        {networks?.map((item) => {
+        {networks?.map((item: CustomChainInfo) => {
           return (
             <div key={item.chainName}>
               <Item
                 onClick={() => {
-                  setNetworkFilter(item.chainName);
+                  setNetworkFilter({
+                    label: item.chainName,
+                    value: item.chainId
+                  });
                   setIsNetwork(false);
                 }}
                 item={item}
@@ -90,10 +93,14 @@ const TabsNetwork: React.FC<{
   );
 };
 
-export const TabsTxs: React.FC<{ type: string; setType: (type: string) => void }> = ({ type, setType }) => {
+export const TabsTxs: React.FC<{
+  type: string;
+  setType: (type: string) => void;
+  networkFilter: string;
+  setNetworkFilter: (networkFilter: NetworkFilter) => void;
+}> = ({ type, setType, setNetworkFilter, networkFilter }) => {
   const [isNetwork, setIsNetwork] = useState<boolean>(false);
   const [theme] = useConfigReducer('theme');
-  const [networkFilter, setNetworkFilter] = useState<string>('All networks');
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
     setIsNetwork(false);

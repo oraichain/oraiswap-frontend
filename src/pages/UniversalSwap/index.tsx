@@ -4,8 +4,8 @@ import Content from 'layouts/Content';
 import React, { useState } from 'react';
 import SwapComponent from './SwapV3';
 import styles from './index.module.scss';
-import { RoutingSection, HeaderTab, TabsTxs, HistoryTab, AssetsTab, StepByStep } from './Component';
-import { TYPE } from './helpers';
+import { RoutingSection, HeaderTab, TabsTxs, HistoryTab, AssetsTab } from './Component';
+import { NetworkFilter, TYPE, initNetworkFilter } from './helpers';
 import { TransactionProcess } from './Modals';
 
 const cx = cn.bind(styles);
@@ -15,6 +15,8 @@ const Swap: React.FC = () => {
   const [hideChart, setHideChart] = useState<boolean>(false);
   const [type, setType] = useState<string>(TYPE.ASSETS);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
+  const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
+
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
@@ -26,9 +28,14 @@ const Swap: React.FC = () => {
               <TVChartContainer />
             </div>
             <RoutingSection />
-            <TabsTxs type={type} setType={setType} />
-            {type === TYPE.HISTORY && <HistoryTab />}
-            {type === TYPE.ASSETS && <AssetsTab />}
+            <TabsTxs
+              type={type}
+              setType={setType}
+              setNetworkFilter={setNetworkFilter}
+              networkFilter={networkFilter.label}
+            />
+            {type === TYPE.HISTORY && <HistoryTab networkFilter={networkFilter.value} />}
+            {type === TYPE.ASSETS && <AssetsTab networkFilter={networkFilter.value} />}
           </div>
         </div>
         <div className={cx('swap-col', 'w40')}>
