@@ -37,9 +37,10 @@ import CosmosImage from 'assets/images/cosmos-logo.png';
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
-import { WalletType } from '@oraichain/oraidex-common';
+import { NetworkChainId, WalletType } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
+const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1'];
 
 enum WALLET_TYPES {
   METAMASK = 'METAMASK',
@@ -74,7 +75,7 @@ const MyWallets: React.FC<{
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddress] = useConfigReducer('cosmosAddress');
+  const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
@@ -87,7 +88,6 @@ const MyWallets: React.FC<{
   });
 
   const connectMetamask = async () => {
-    console.log('connectMetamask', metamaskAddress);
     try {
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum.chainId) {
@@ -96,6 +96,26 @@ const MyWallets: React.FC<{
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
+    }
+  };
+
+  useEffect(() => {
+    getListAddressCosmos();
+  }, []);
+
+  const getListAddressCosmos = async () => {
+    try {
+      let listAddressCosmos = {};
+      for (const chainId of listChainId) {
+        const address = await window.Keplr.getKeplrAddr(chainId as NetworkChainId);
+        listAddressCosmos = {
+          ...listAddressCosmos,
+          [chainId]: address
+        };
+      }
+      setCosmosAddress(listAddressCosmos);
+    } catch (error) {
+      console.log({ error });
     }
   };
 
