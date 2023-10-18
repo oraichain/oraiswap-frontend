@@ -19,6 +19,12 @@
   }
 }
 
+@mixin small-mobile {
+  @media (max-width: ($breakpoint-sm - 0.02)) {
+    @content;
+  }
+}
+
 @mixin flex($justify-content: center, $align-items: center, $flex-direction: row) {
   display: flex;
   justify-content: $justify-content;
