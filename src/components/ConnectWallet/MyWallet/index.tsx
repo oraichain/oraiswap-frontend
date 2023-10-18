@@ -16,7 +16,7 @@ import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { displayInstallWallet, setStorageKey } from 'helper';
+import { displayInstallWallet, setStorageKey, cosmosNetworks } from 'helper';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -37,14 +37,14 @@ import CosmosImage from 'assets/images/cosmos-logo.png';
 
 import { QRGeneratorInfo } from '../QRGenerator';
 import styles from './index.module.scss';
-import { NetworkChainId, WalletType } from '@oraichain/oraidex-common';
+import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import TokenBalance from 'components/TokenBalance';
 
 const cx = cn.bind(styles);
-const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1'];
+const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
 
 enum WALLET_TYPES {
   METAMASK = 'METAMASK',
@@ -53,10 +53,7 @@ enum WALLET_TYPES {
   TRON = 'TRON'
 }
 
-interface NetworkItem {
-  name: string;
-  icon: string;
-  id: number;
+interface NetworkItem extends CustomChainInfo {
   address: string;
 }
 
@@ -319,32 +316,10 @@ const MyWallets: React.FC<{
     totalUsd: totalUsd,
     isOpen: false,
     isConnect: !!oraiAddressWallet,
-    networks: [
-      {
-        id: 1,
-        name: 'Oraichain',
-        address: cosmosAddress['Oraichain'],
-        icon: OraichainImage
-      },
-      {
-        id: 2,
-        name: 'Injective',
-        address: cosmosAddress['injective-1'],
-        icon: InjectiveImage
-      },
-      {
-        id: 3,
-        name: 'Cosmos Hub',
-        address: cosmosAddress['cosmoshub-4'],
-        icon: CosmosImage
-      },
-      {
-        id: 4,
-        name: 'Osmosis',
-        address: cosmosAddress['osmosis-1'],
-        icon: OsmosImage
-      }
-    ]
+    networks: cosmosNetworks.map((item, index) => {
+      (item as any).address = cosmosAddress[item.chainId];
+      return item;
+    })
   };
 
   const TronInfo = {
@@ -405,11 +380,12 @@ const MyWallets: React.FC<{
                   {wallet.networks.map((network, index) => {
                     return (
                       <div key={'network' + index} className={cx('network_container')}>
-                        <div className={cx('logo')}>
-                          <img src={network.icon} alt="wallet icon" />
-                        </div>
+                        {/* <div className={cx('logo')}> */}
+                        {/* <img src={network.Icon} alt="wallet icon" /> */}
+                        <div>{network.Icon && <network.Icon className={cx('icon')} />}</div>
+                        {/* </div> */}
                         <div className={cx('info')}>
-                          <div className={cx('name')}>{network.name}</div>
+                          <div className={cx('name')}>{network.chainName}</div>
                           {network.address ? (
                             <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
                           ) : null}

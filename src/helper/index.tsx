@@ -23,7 +23,10 @@ export interface Tokens {
 }
 
 export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
-
+export const cosmosNetworks = chainInfos.filter(
+  (c) => c.networkType === 'cosmos' && c.chainId !== 'oraibridge-subnet-2'
+);
+export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
