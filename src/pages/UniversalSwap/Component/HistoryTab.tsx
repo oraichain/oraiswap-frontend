@@ -112,7 +112,9 @@ const RowsComponent: React.FC<{
   );
 };
 
-export const HistoryTab: React.FC<unknown> = () => {
+export const HistoryTab: React.FC<{
+  networkFilter: string;
+}> = ({ networkFilter }) => {
   const headers: TableHeaderProps<HistoryInfoResponse> = {
     assets: {
       name: 'May 6, 2023',

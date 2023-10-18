@@ -37,6 +37,13 @@ export const TYPE = {
   HISTORY: 'History'
 };
 
+export interface NetworkFilter {
+  label?: string;
+  value?: string;
+}
+
+export const initNetworkFilter = { label: 'All networks', value: '' };
+
 /**
  * Get transfer token fee when universal swap
  * @param param0

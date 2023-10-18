@@ -15,22 +15,20 @@ import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
 const cx = cn.bind(styles);
 
-export const AssetsTab: React.FC<{}> = () => {
+export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const totalUsd = getTotalUsd(amounts, prices);
-  const [[otherChainTokens, oraichainTokens], setTokens] = React.useState<TokenItemType[][]>(tokens);
-  console.log({ otherChainTokens, oraichainTokens });
+  const [[otherChainTokens, oraichainTokens], _] = React.useState<TokenItemType[][]>(tokens);
 
   const data = [...oraichainTokens, ...otherChainTokens]
-    .filter((token) => {
+    .filter((token: TokenItemType) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
       if (!token.bridgeTo && !token.contractAddress) return false;
-      // if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
-      //   return false;
-      // }
+      if (!toTotalDisplay(amounts, token)) return false;
       if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
-      return true;
+      if (!networkFilter) return true;
+      return token.chainId == networkFilter;
     })
     // .sort((a, b) => {
     //   return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
@@ -87,7 +85,7 @@ export const AssetsTab: React.FC<{}> = () => {
       name: 'BALANCE',
       width: '22%',
       align: 'center',
-      accessor: (data) => <span>${data.balance}</span>
+      accessor: (data) => <span>{data.balance}</span>
     },
     value: {
       name: 'VALUE',
