@@ -7,7 +7,7 @@
     height: 100%;
     max-width: 90%;
 
-    @media (max-width: 575px) {
+    @include mobile() {
         padding: 0;
     }
 }

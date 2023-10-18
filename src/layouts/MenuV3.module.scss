@@ -1,24 +1,13 @@
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
 
+
 .menu {
   display: flex;
   justify-content: space-between;
   padding: 20px 120px;
   position: sticky;
-  z-index: 9999;
   top: 0;
-  transition: margin-left 0.2s ease-in-out;
-
-  @include mobile {
-    margin-left: calc(-1 * var(--menu-width));
-    padding-top: 75px;
-    overflow: auto;
-
-    &.open {
-      margin-left: 0;
-    }
-  }
 
   @include theme() {
     background-color: theme-get('bg-color');
@@ -26,10 +15,16 @@
   }
 }
 
-.logo {
+.menuMobile {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  z-index: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
 
   &_text {
     font-weight: 600;
@@ -39,15 +34,47 @@
     color: #fff;
   }
 
-  @include mobile {
-    justify-content: space-between;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 16px;
-    z-index: 9999;
-    background-color: #111111;
+  .logo {
+    display: flex;
+    align-items: center;
+
+    svg {
+      margin-right: 10px;
+    }
+  }
+
+  @include theme() {
+    background-color: theme-get('bg-color');
+    border-bottom: 1px solid theme-get('neutron-5');
+  }
+}
+
+.sideMenu {
+  margin-left: -70%;
+  width: 70%;
+  height: 100vh;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  overflow: auto;
+  transition: margin-left 0.2s ease-in-out;
+
+  &.open {
+    margin-left: 0;
+  }
+
+  @include theme() {
+    background-color: theme-get('bg-color');
+    border-bottom: 1px solid theme-get('neutron-5');
+  }
+
+  .menu_list {
+    flex-direction: column;
   }
 }
 
@@ -121,6 +148,13 @@
         }
       }
     }
+
+    @include mobile() {
+      margin-bottom: 24px;
+      margin-left: 0;
+      margin-right: 0;
+      width: fit-content;
+    }
   }
 }
 
@@ -139,22 +173,22 @@
     margin-right: 20px;
     box-shadow: 0px 3.33333px 6.66667px -3.33333px rgba(0, 0, 0, 0.25),
       inset 0px -0.833333px 0.833333px rgba(0, 0, 0, 0.49), inset 0px 1.66667px 0.833333px rgba(255, 255, 255, 0.06);
-  
+
     &:hover {
       background: #2d2938;
       cursor: pointer;
     }
-  
+
     &.active {
       background: #2d2938;
-  
+
       &.light {
         background-color: #fcfcfc;
         box-shadow: 0px 1px 6px -2px rgba(0, 0, 0, 0.25), inset 0px -0.833333px 0.833333px rgba(0, 0, 0, 0.04),
           inset 0px 1.66667px 0px rgba(255, 255, 255, 0.25);
       }
     }
-  
+
     &_text {
       font-style: normal;
       font-weight: 500;
@@ -163,7 +197,7 @@
       margin-left: 10px;
     }
   }
-  
+
 }
 
 .spin {
