@@ -1,5 +1,4 @@
 .connected_container {
-  min-width: 170px;
   height: 52px;
   display: flex;
   align-items: center;
@@ -15,8 +14,7 @@
     padding: 6px;
   }
 
-  .down_icon {
-  }
+  .down_icon {}
 
   .content {
     display: flex;
@@ -24,12 +22,14 @@
     flex-direction: column;
     flex: 1;
     margin-left: 12px;
+
     .title {
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
       color: #494949;
     }
+
     .money {
       font-size: 14px;
       font-style: normal;
@@ -44,6 +44,7 @@
     .title {
       color: #efefef;
     }
+
     .money {
       color: #f7f7f7;
     }

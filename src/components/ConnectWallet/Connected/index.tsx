@@ -9,10 +9,13 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd } from 'libs/utils';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 
 const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({ setIsShowMyWallet }) => {
+  const mobileMode = isMobile();
+
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
@@ -23,13 +26,17 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
       <div className={cx('wallet_icon')}>
         <WalletIcon />
       </div>
-      <div className={cx('content')}>
-        <div className={cx('title')}>My Wallets</div>
-        <div className={cx('money')}>$ {totalUsd.toFixed(6)}</div>
-      </div>
-      <div className={cx('down_icon')}>
-        <DownArrowIcon />
-      </div>
+      {!mobileMode && (
+        <>
+          <div className={cx('content')}>
+            <div className={cx('title')}>My Wallets</div>
+            <div className={cx('money')}>$ {totalUsd.toFixed(6)}</div>
+          </div>
+          <div className={cx('down_icon')}>
+            <DownArrowIcon />
+          </div>
+        </>
+      )}
     </div>
   );
 };
