@@ -85,7 +85,9 @@
   }
   .content {
     width: 68.75%;
-    background-color: #efefef;
+    @include theme() {
+      background-color: theme-get('neutral-surface-bg-section-2');
+    }
     border-top-right-radius: 12px;
     border-bottom-right-radius: 12px;
     img {

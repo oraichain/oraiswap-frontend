@@ -6,7 +6,9 @@
   margin-bottom: 24px;
   width: 100%;
   min-height: 484px;
-  border: 1px solid #efefef;
+  @include theme() {
+    border: 1px solid theme-get('neutral-6');
+  }
   border-radius: 12px;
   .info {
     display: flex;
@@ -28,9 +30,16 @@
         padding-left: 16px;
         color: #979995;
         .value {
-          color: #232521;
+          @include theme() {
+            color: theme-get('sea-stone-200');
+          }
           font-size: 18px;
           font-weight: 600;
+        }
+        .label {
+          @include theme() {
+            color: theme-get('sea-stone-200');
+          }
         }
       }
     }
@@ -53,7 +62,9 @@
     text-align: left;
     padding-left: 8px;
     .assetName {
-      color: #121212;
+      @include theme() {
+        color: theme-get('sea-stone-200');
+      }
       font-size: 14px;
       font-weight: 500;
       width: 100%;
@@ -72,6 +83,9 @@
       -webkit-box-orient: vertical;
       white-space: nowrap;
       -webkit-line-clamp: 1;
+      @include theme() {
+        color: theme-get('sea-stone-200');
+      }
     }
   }
 }

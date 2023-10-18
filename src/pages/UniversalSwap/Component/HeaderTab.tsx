@@ -55,12 +55,12 @@ export const HeaderTab: React.FC<{
               <img src={ArrowImg} alt="arrow" /> */}
             </div>
             {/* {isOpen && <PoolSelect setIsOpen={setIsOpen} pool={pool} setPool={setPool} />} */}
-            {!!balance && (
+            {/* {!!balance && (
               <div className={cx('bottom')}>
                 <span className={cx('balance')}>{balance}</span>
                 <span className={cx('percent')}>{percent}</span>
               </div>
-            )}
+            )} */}
           </>
         )}
       </div>

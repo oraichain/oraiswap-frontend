@@ -255,7 +255,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
+  const FromIcon =
+    theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   const isSwapBtn = swapLoading || !fromAmountToken || !toAmountToken;
@@ -369,11 +370,7 @@ const SwapComponent: React.FC<{
         <div className={cx('coeff')}>
           {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
             <button
-              style={{
-                color: coe == coeff ? 'black' : 'inherit',
-                fontWeight: coe == coeff ? '600' : 'inherit',
-                border: coe == coeff ? '1px solid #232521' : 'none'
-              }}
+              className={cx(`${coe == coeff && 'is-active'}`)}
               key={coeff}
               onClick={(event) => {
                 event.stopPropagation();
