@@ -1,0 +1,37 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.pool {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid;
+    width: 100%;
+    position: relative;
+
+    @include theme() {
+        border-color: theme-get('neutral-border-border-default');
+        background-color: theme-get('neutral-surface-bg-section');
+    }
+
+    .poolHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 16px;
+        border-bottom: 1px solid;
+
+        @include theme() {
+            border-color: theme-get('neutral-border-border-default');
+        }
+    }
+
+    .poolInfo {
+        gap: 27px;
+    }
+
+    .btnAddLp {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+    }
+}

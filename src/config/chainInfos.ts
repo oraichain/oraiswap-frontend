@@ -1,4 +1,5 @@
 import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
+import { TokenItemType, oraichainTokens, tokens } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as AtomLightIcon } from 'assets/icons/atom_light.svg';
@@ -57,6 +58,107 @@ import {
   WRAP_TRON_TRX_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
+
+type TokenIcon = Pick<TokenItemType, 'denom' | 'Icon' | 'IconLight'>;
+export const oraichainTokenIcons: TokenIcon[] = [
+  {
+    denom: 'orai',
+    Icon: OraiIcon,
+    IconLight: OraiLightIcon
+  },
+  {
+    denom: 'ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78',
+    Icon: AtomIcon,
+    IconLight: AtomLightIcon
+  },
+  {
+    denom: 'airi',
+    Icon: AiriIcon,
+    IconLight: AiriIcon
+  },
+  {
+    denom: 'usdt',
+    Icon: UsdtIcon,
+    IconLight: UsdtIcon
+  },
+  {
+    denom: 'usdc',
+    Icon: UsdcIcon,
+    IconLight: UsdcIcon
+  },
+  {
+    denom: 'ibc/9C4DCD21B48231D0BC2AC3D1B74A864746B37E4292694C93C617324250D002FC',
+    Icon: OsmoIcon,
+    IconLight: OsmoLightIcon
+  },
+  {
+    denom: KWT_BSC_CONTRACT,
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  {
+    denom: 'kwt',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  {
+    denom: MILKYBSC_ORAICHAIN_DENOM,
+    Icon: MilkyIcon,
+    IconLight: MilkyIcon
+  },
+  {
+    denom: 'milky',
+    Icon: MilkyIcon,
+    IconLight: MilkyIcon
+  },
+  {
+    denom: 'oraix',
+    Icon: OraixIcon,
+    IconLight: OraixLightIcon
+  },
+  {
+    denom: 'scorai',
+    Icon: ScOraiIcon,
+    IconLight: ScOraiIcon
+  },
+  {
+    denom: 'trx',
+    Icon: TronIcon,
+    IconLight: TronIcon
+  },
+  {
+    denom: 'scatom',
+    Icon: ScAtomIcon,
+    IconLight: ScAtomIcon
+  },
+  {
+    denom: INJECTIVE_ORAICHAIN_DENOM,
+    Icon: InjIcon,
+    IconLight: InjIcon
+  },
+  {
+    denom: 'injective',
+    Icon: InjIcon,
+    IconLight: InjIcon
+  }
+];
+
+export const oraichainTokensWithIcon = oraichainTokens.map((token) => {
+  let Icon = OraiIcon;
+  let IconLight = OraiLightIcon;
+
+  const tokenIcon = oraichainTokenIcons.find((item) => item.denom === token.denom);
+  if (tokenIcon) {
+    Icon = tokenIcon.Icon;
+    IconLight = tokenIcon.IconLight;
+  }
+
+  return {
+    ...token,
+    Icon,
+    IconLight
+  };
+});
 
 export const OraiToken: BridgeAppCurrency = {
   coinDenom: 'ORAI',
