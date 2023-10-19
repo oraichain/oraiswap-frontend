@@ -5,11 +5,20 @@
     display: flex;
     margin-bottom: 32px;
 
+    @include small-mobile() {
+        flex-wrap: wrap;
+    }
+
     .liquidity {
         width: 50%;
         border-top-left-radius: 16px;
         border-bottom-left-radius: 16px;
         position: relative;
+
+        @include small-mobile() {
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 16px;
+        }
 
         @include theme() {
             background-color: theme-get('neutral-surface-bg-section-2');
@@ -32,6 +41,35 @@
                 border-color: theme-get('neutral-surface-bg');
                 background-color: theme-get('neutral-surface-bg-section');
             }
+
+            @include small-mobile() {
+                right: 50%;
+                bottom: 0;
+                transform: translate(50%, 50%) rotate(90deg);
+            }
+        }
+    }
+
+    .stake {
+        width: 50%;
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+        position: relative;
+
+        @include small-mobile() {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        @include theme() {
+            background-color: theme-get('neutral-surface-bg-section');
+        }
+
+        .bgCoin {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            display: flex;
         }
     }
 
@@ -97,25 +135,18 @@
 
             button {
                 width: 45%;
+
+                @include small-mobile() {
+                    padding: 8px 16px;
+                }
             }
+
+        }
+
+        @include small-mobile() {
+            width: 100%;
+            padding: 24px 16px;
         }
     }
 
-    .stake {
-        width: 50%;
-        border-top-right-radius: 16px;
-        border-bottom-right-radius: 16px;
-        position: relative;
-
-        @include theme() {
-            background-color: theme-get('neutral-surface-bg-section');
-        }
-
-        .bgCoin {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            display: flex;
-        }
-    }
 }

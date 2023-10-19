@@ -53,7 +53,9 @@ export const UnstakeLPModal: FC<ModalProps> = ({
     assetInfo: stakingAssetInfo
   });
 
-  const totalBondAmount = BigInt(totalRewardInfoData.reward_infos[0].bond_amount || '0');
+  const totalBondAmount = totalRewardInfoData.reward_infos[0]
+    ? BigInt(totalRewardInfoData.reward_infos[0].bond_amount || '0')
+    : BigInt(0);
 
   // handle update unbond amount in usdt
   useEffect(() => {

@@ -5,8 +5,8 @@ import useTheme from 'hooks/useTheme';
 import { PoolTableData } from 'pages/Pools/indexV3';
 import { useState } from 'react';
 import { AddLiquidityModal } from '../AddLiquidityModal';
-import styles from './ListPoolModule.module.scss';
 import { PoolMobileItem } from '../ItemPoolMobile';
+import styles from './ListPoolModule.module.scss';
 
 type ListPoolProps = {
   poolTableData: PoolTableData[];

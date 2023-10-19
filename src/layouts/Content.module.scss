@@ -21,4 +21,8 @@
     min-height: calc(100vh - 110px);
     padding: 24px 8px 24px 8px;
   }
+
+  @include small-mobile {
+    margin-top: 85px;
+  }
 }

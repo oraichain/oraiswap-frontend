@@ -324,6 +324,10 @@
           &.light {
             background-color: #EFEFEF;
           }
+
+          @include small-mobile() {
+            padding: 10px 16px;
+          }
         }
 
         .isChosen {
@@ -442,8 +446,6 @@
 //responsive
 @media (max-width: 575px) {
   .modal {
-    max-height: 85vh;
-    margin-top: 60px;
 
     .container {
       max-height: 85vh;

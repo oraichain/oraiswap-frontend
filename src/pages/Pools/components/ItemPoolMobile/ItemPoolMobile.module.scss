@@ -41,6 +41,7 @@
         justify-content: space-between;
         padding-bottom: 16px;
         border-bottom: 1px solid;
+        margin-bottom: 10px;
 
         @include theme() {
             border-color: theme-get('neutral-border-border-default');
