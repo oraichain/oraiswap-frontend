@@ -45,7 +45,7 @@ import TokenBalance from 'components/TokenBalance';
 import { evmChains } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
-const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
+// const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
 
 enum WALLET_TYPES {
   METAMASK = 'METAMASK',
@@ -109,11 +109,11 @@ const MyWallets: React.FC<{
   const getListAddressCosmos = async () => {
     try {
       let listAddressCosmos = {};
-      for (const chainId of listChainId) {
-        const address = await window.Keplr.getKeplrAddr(chainId as NetworkChainId);
+      for (const info of cosmosNetworks) {
+        const address = await window.Keplr.getKeplrAddr(info.chainId as NetworkChainId);
         listAddressCosmos = {
           ...listAddressCosmos,
-          [chainId]: address
+          [info.chainId]: address
         };
       }
       setCosmosAddress(listAddressCosmos);
