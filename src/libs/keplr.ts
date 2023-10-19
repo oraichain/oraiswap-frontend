@@ -100,12 +100,16 @@ export default class Keplr extends CosmosWallet {
   }
 
   async getKeplrKey(chainId?: string): Promise<Key | undefined> {
-    chainId = chainId ?? network.chainId;
-    if (!chainId) return undefined;
+    try {
+      chainId = chainId ?? network.chainId;
+      if (!chainId) return undefined;
 
-    const keplr = await this.getKeplr();
-    if (keplr) {
-      return keplr.getKey(chainId);
+      const keplr = await this.getKeplr();
+      if (keplr) {
+        return keplr.getKey(chainId);
+      }
+    } catch (error) {
+      console.log('🚀 ~ file: keplr.ts:112 ~ Keplr ~ getKeplrKey ~ error:', error);
     }
   }
 

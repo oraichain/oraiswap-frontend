@@ -175,19 +175,23 @@ const MyWallets: React.FC<{
   };
 
   const connectKeplr = async (type: WalletType) => {
-    window.Keplr = new Keplr(type);
-    setStorageKey('typeWallet', type);
-    if (!(await window.Keplr.getKeplr())) {
-      return displayInstallWallet();
+    try {
+      window.Keplr = new Keplr(type);
+      setStorageKey('typeWallet', type);
+      if (!(await window.Keplr.getKeplr())) {
+        return displayInstallWallet();
+      }
+      const wallet = await collectWallet(network.chainId);
+      window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+      });
+      await window.Keplr.suggestChain(network.chainId);
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      loadTokenAmounts({ oraiAddress });
+      setOraiAddressWallet(oraiAddress);
+    } catch (error) {
+      console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
     }
-    const wallet = await collectWallet(network.chainId);
-    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-    });
-    await window.Keplr.suggestChain(network.chainId);
-    const oraiAddress = await window.Keplr.getKeplrAddr();
-    loadTokenAmounts({ oraiAddress });
-    setOraiAddressWallet(oraiAddress);
   };
 
   const disconnectKeplr = async () => {
@@ -218,7 +222,7 @@ const MyWallets: React.FC<{
     }
     const walletsModified = wallets.map((w) => {
       if (w.code === walletType) {
-        w.isConnect = true;
+        w.isConnect = !!w.address;
         w.isOpen = true;
       }
       return w;
@@ -318,6 +322,7 @@ const MyWallets: React.FC<{
     icon: MetamaskImage,
     totalUsd: handleGetTotalUsd('evm'),
     isOpen: false,
+    address: metamaskAddress,
     isConnect: !!metamaskAddress,
     networks: evmChains.map((item, index) => {
       (item as any).address = metamaskAddress;
@@ -332,6 +337,7 @@ const MyWallets: React.FC<{
     icon: OwalletImage,
     totalUsd: handleGetTotalUsd('cosmos'),
     isOpen: false,
+    address: cosmosAddress,
     isConnect: !!oraiAddressWallet,
     networks: cosmosNetworks.map((item, index) => {
       (item as any).address = cosmosAddress[item.chainId];
@@ -346,6 +352,7 @@ const MyWallets: React.FC<{
     icon: TronWalletImage,
     totalUsd: handleGetTotalUsd('trx'),
     isOpen: false,
+    address: tronAddress,
     isConnect: !!tronAddress,
     networks: tronNetworks.map((item, index) => {
       (item as any).address = tronAddress;
@@ -380,7 +387,7 @@ const MyWallets: React.FC<{
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
 
-                  {wallet.isConnect && (
+                  {wallet.isConnect && !!wallet.address && (
                     <div>
                       <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
                     </div>
