@@ -32,9 +32,9 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
           <span className={styles.symbols_name}>{pool.symbols}</span>
         </div>
         <div className={styles.apr}>
-          <div>APR</div>
-          <div>{`${pool.apr.toFixed(2)}%`}</div>
-          <div className={styles.apr_reward}>
+          <div className={styles.title}>APR</div>
+          <div className={styles.value}>{`${pool.apr.toFixed(2)}%`}</div>
+          <div className={styles.aprReward}>
             {pool.reward.map((asset) => (
               <span key={asset}>+{asset}</span>
             ))}
@@ -43,20 +43,22 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
       </div>
       <div className={styles.poolInfo}>
         <div>
-          <div>My Staked LP</div>
-          <span>{formatDisplayUsdt(pool.myStakedLP)}</span>
+          <div className={styles.title}>My Staked LP</div>
+          <span className={styles.value}>{formatDisplayUsdt(pool.myStakedLP)}</span>
         </div>
         <div>
-          <div>Earned</div>
-          <span>{formatDisplayUsdt(pool.earned)}</span>
+          <div className={styles.title}>Earned</div>
+          <span className={styles.value}>{formatDisplayUsdt(pool.earned)}</span>
         </div>
         <div>
-          <div>Volume (24h)</div>
-          <span>{formatDisplayUsdt(toDisplay(pool.volume24Hour))}</span>
+          <div className={styles.title}>Volume (24h)</div>
+          <span className={styles.value}>{formatDisplayUsdt(toDisplay(pool.volume24Hour))}</span>
         </div>
         <div>
-          <div>Liquidity</div>
-          <span>{formatDisplayUsdt(toDisplay(parseInt(pool.totalLiquidity.toString()).toString()))}</span>
+          <div className={styles.title}>Liquidity</div>
+          <span className={styles.value}>
+            {formatDisplayUsdt(toDisplay(parseInt(pool.totalLiquidity.toString()).toString()))}
+          </span>
         </div>
       </div>
       <div className={styles.btnAddLp}>

@@ -10,6 +10,8 @@ $blue-color: #7e5cc5;
 $success-color: #00ad26;
 $error-color: #e01600;
 $primary-text-link: #78ca11;
+$primary-surface-default-light: #E5F7D6;
+
 // for dark-light mode
 $themes: (
   dark: ('text-color': white,
@@ -70,6 +72,7 @@ $themes: (
     'primary-surface-default': #92e54c,
     'neutral-surface-bg': #121511,
     'neutral-text-body-on-section': #979995,
+    'neutral-text-text-btn-default': #163300,
   ),
   light: ('text-color': #272b30,
     'text-color-secondary': #a871df,
@@ -128,5 +131,6 @@ $themes: (
     'primary-surface-default': #2f5711,
     'neutral-surface-bg': #fff,
     'neutral-text-body-on-section': #686a,
-    'neutral-text-text-token-name': #232521)
+    'neutral-text-text-token-name': #232521,
+    'neutral-text-text-btn-default': #232521, )
 );
