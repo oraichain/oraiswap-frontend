@@ -26,6 +26,9 @@
       }
       .section {
         padding-left: 8px;
+        @include mobile() {
+          line-height: 18px;
+        }
         .chain {
           display: -webkit-box;
           -webkit-line-clamp: 1;

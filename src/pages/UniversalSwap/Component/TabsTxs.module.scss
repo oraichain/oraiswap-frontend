@@ -7,7 +7,7 @@
   align-items: center;
   margin-top: 40px;
   @include theme() {
-    border-bottom: 2px solid theme-get('neutral-5');
+    border-bottom: 1px solid theme-get('neutral-5');
   }
   .left {
     display: flex;
@@ -19,7 +19,7 @@
       font-size: 16px;
       font-weight: 600;
       @include theme() {
-        color: theme-get('sea-stone-500');
+        color: theme-get('neutral-text-body');
       }
       border-bottom-width: 2px;
       border-bottom-style: solid;
@@ -48,7 +48,7 @@
         font-size: 16px;
         font-weight: 600;
         @include theme() {
-          color: theme-get('sea-stone-700');
+          color: theme-get('neutral-text-text-token-name');
         }
       }
       .balance {
@@ -77,7 +77,6 @@
     font-weight: 600;
     padding: 16px 12px;
     .title {
-      color: #1e300a;
       text-align: center;
       font-size: 16px;
     }
@@ -130,7 +129,9 @@
 
         .grow {
           flex-grow: 1;
-
+          @include theme() {
+            color: theme-get('neutral-text-text-token-name');
+          }
           display: flex;
           flex-direction: column;
           gap: 5px;
