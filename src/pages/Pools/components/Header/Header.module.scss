@@ -5,6 +5,7 @@
     border-radius: 12px;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 20px;
 
     @include theme() {
         background-color: theme-get('neutral-6');
@@ -12,16 +13,10 @@
 
     &_data {
         display: flex;
-        gap: 10px;
         padding: 24px;
 
         &_item {
             margin-right: 100px;
-
-            @media (max-width: 575px) {
-                margin: 0;
-                width: 100%;
-            }
         }
 
         &_name {
@@ -60,13 +55,48 @@
         margin-right: 24px;
         position: relative;
 
+        @include small-mobile() {
+            width: 100%;
+            margin-right: 0;
+            margin-top: 24px;
+            padding: 0;
+        }
+
         .claim_reward_bg {
             position: absolute;
             top: -5px;
+
+            @include small-mobile() {
+                display: none;
+            }
         }
 
         button {
             z-index: 1;
+
+            @include small-mobile() {
+                width: 100%;
+                z-index: 0;
+            }
+        }
+    }
+
+    @include small-mobile() {
+        flex-direction: column;
+        padding: 16px 24px;
+
+        &_data {
+            flex-wrap: wrap;
+            padding: 0;
+
+            &_item {
+                margin-right: 0;
+                width: 50%;
+            }
+
+            &_item:last-child {
+                margin-top: 24px;
+            }
         }
     }
 }

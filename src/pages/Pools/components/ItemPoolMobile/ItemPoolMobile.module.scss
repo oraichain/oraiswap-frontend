@@ -1,0 +1,116 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.pool {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid;
+    width: 100%;
+    position: relative;
+
+    @include theme() {
+        border-color: theme-get('neutral-border-border-default');
+        background-color: theme-get('neutral-surface-bg-section');
+    }
+
+    .title {
+        @include theme() {
+            color: theme-get('neutral-text-body');
+        }
+
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 150%;
+    }
+
+    .value {
+        @include theme() {
+            color: theme-get('neutral-text-title');
+        }
+
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 150%;
+    }
+
+    .poolHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 16px;
+        border-bottom: 1px solid;
+
+        @include theme() {
+            border-color: theme-get('neutral-border-border-default');
+        }
+
+        .symbols {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 50%;
+
+            .symbols_name {
+                @include theme() {
+                    color: theme-get('neutral-text-title');
+                }
+
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 500;
+                line-height: 150%;
+            }
+        }
+
+        .apr {
+            width: 50%;
+
+            .aprReward {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+
+                &>span {
+                    padding: 4px;
+                    background-color: $primary-surface-default-light;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: 150%;
+                    letter-spacing: 0.012px;
+                    margin-top: 5px;
+                    margin-right: 5px;
+                }
+
+
+                @include theme() {
+                    color: theme-get('neutral-text-text-btn-default');
+                }
+            }
+        }
+    }
+
+    .poolInfo {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+
+        &>div {
+            width: 50%;
+        }
+
+        &>div:nth-child(1),
+        &>div:nth-child(2) {
+            margin-bottom: 16px;
+        }
+    }
+
+    .btnAddLp {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+    }
+}

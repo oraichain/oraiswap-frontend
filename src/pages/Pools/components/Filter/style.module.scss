@@ -9,6 +9,11 @@
     .pool_filter_left {
         display: flex;
         align-items: center;
+
+        @include mobile() {
+            flex-direction: column;
+            gap: 6px;
+        }
     }
 }
 

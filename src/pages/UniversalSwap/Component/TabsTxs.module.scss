@@ -13,6 +13,9 @@
     display: flex;
     .label {
       width: 120px;
+      @include mobile() {
+        width: 100px;
+      }
       text-align: center;
       padding: 12px;
       cursor: pointer;
@@ -76,6 +79,10 @@
     z-index: 2;
     font-weight: 600;
     padding: 16px 12px;
+    visibility: visible;
+    inset: 0px 0px auto auto;
+    margin: 0px;
+    transform: translate3d(-16px, 1070px, 0px);
     .title {
       text-align: center;
       font-size: 16px;

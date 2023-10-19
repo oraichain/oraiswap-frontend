@@ -10,10 +10,20 @@
   .info {
     display: flex;
     padding: 24px;
+    @include mobile() {
+      padding: 24px 16px;
+    }
     color: #232521;
     .filter {
       cursor: pointer;
       padding: 8px 16px;
+      &-icon {
+        width: 20px;
+        height: 20px;
+      }
+      &-title {
+        padding-left: 4px;
+      }
       display: flex;
       align-items: center;
       border-radius: 99px;
@@ -73,6 +83,7 @@
       }
     }
   }
+
   .icon {
     width: 6%;
     display: flex;
@@ -100,6 +111,21 @@
         display: flex;
         align-items: center;
       }
+    }
+  }
+
+  .from,
+  .txhash,
+  .icon {
+    @include mobile() {
+      display: none;
+    }
+  }
+
+  .time,
+  .to {
+    @include mobile() {
+      width: 50%;
     }
   }
 }
