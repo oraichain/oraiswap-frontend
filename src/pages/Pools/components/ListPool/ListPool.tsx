@@ -1,91 +1,26 @@
+import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import { Button } from 'components/Button';
 import { Table, TableHeaderProps } from 'components/Table';
-import { oraichainTokens } from 'config/bridgeTokens';
-import { Pairs } from 'config/pools';
-import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { useGetMyStake, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
 import { AddLiquidityModal } from '../AddLiquidityModal';
-import { Filter } from '../Filter';
 import styles from './ListPool.module.scss';
-import isEqual from 'lodash/isEqual';
-import { CW20_DECIMALS, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { PoolTableData } from 'pages/Pools/indexV3';
 
-type PoolTableData = PoolInfoResponse & {
-  reward: string[];
-  myStakedLP: number;
-  earned: number;
-  baseToken: TokenItemType;
-  quoteToken: TokenItemType;
+type ListPoolProps = {
+  poolTableData: PoolTableData[];
+  generateIcon: (baseToken: TokenItemType, quoteToken: TokenItemType) => JSX.Element;
 };
 
-export const ListPools: React.FC = () => {
-  const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
+export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon }) => {
   const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
-  const [cachedReward] = useConfigReducer('rewardPools');
-  const [address] = useConfigReducer('address');
   const theme = useTheme();
   const navigate = useNavigate();
-  const { myStakes } = useGetMyStake({
-    stakerAddress: address
-  });
-
-  const { totalRewardInfoData } = useGetRewardInfo({
-    stakerAddr: address
-  });
-
-  const poolTableData: PoolTableData[] = filteredPools.map((pool) => {
-    const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
-    const stakingAssetInfo = Pairs.getStakingAssetInfo([
-      JSON.parse(pool.firstAssetInfo),
-      JSON.parse(pool.secondAssetInfo)
-    ]);
-
-    // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
-    const myStakedLP = stakingAssetInfo
-      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
-      : 0;
-    const totalSupply = pool.totalSupply;
-    const lpPrice = pool.totalSupply ? pool.totalLiquidity / Number(totalSupply) : 0;
-    const myStakeLPInUsdt = +myStakedLP * lpPrice;
-
-    const earned = stakingAssetInfo
-      ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt || 0
-      : 0;
-
-    const [baseDenom, quoteDenom] = [
-      parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo)),
-      parseAssetOnlyDenom(JSON.parse(pool.secondAssetInfo))
-    ];
-    const [baseToken, quoteToken] = [baseDenom, quoteDenom].map((denom) =>
-      oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom)
-    );
-    return {
-      ...pool,
-      reward: poolReward?.reward ?? [],
-      myStakedLP: toDisplay(BigInt(Math.trunc(myStakeLPInUsdt)), CW20_DECIMALS),
-      earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS),
-      baseToken,
-      quoteToken
-    };
-  });
-
-  const generateIcon = (baseToken: TokenItemType, quoteToken: TokenItemType) => {
-    const BaseTokenIcon = theme === 'light' ? baseToken?.IconLight || baseToken?.Icon : baseToken?.Icon;
-    const QuoteTokenIcon = theme === 'light' ? quoteToken?.IconLight || quoteToken?.Icon : quoteToken?.Icon;
-    return (
-      <>
-        <BaseTokenIcon className={styles.symbols_logo_left} />
-        <QuoteTokenIcon className={styles.symbols_logo_right} />
-      </>
-    );
-  };
 
   const headers: TableHeaderProps<PoolTableData> = {
     symbols: {
@@ -178,10 +113,8 @@ export const ListPools: React.FC = () => {
 
   return (
     <div className={styles.listpools}>
-      <Filter setFilteredPools={setFilteredPools} />
-
       <div className={styles.listpools_list}>
-        {filteredPools.length > 0 ? (
+        {poolTableData.length > 0 ? (
           <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
         ) : (
           <div className={styles.no_data}>

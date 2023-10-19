@@ -8,6 +8,7 @@
   padding: 20px 120px;
   position: sticky;
   top: 0;
+  z-index: 2;
 
   @include theme() {
     background-color: theme-get('bg-color');
