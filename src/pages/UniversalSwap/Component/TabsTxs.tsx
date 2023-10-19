@@ -11,7 +11,7 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import { CoinIcon, CustomChainInfo } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
-const Item: React.FC<{
+const ItemNetwork: React.FC<{
   theme: string;
   item: {
     IconLight?: CoinIcon;
@@ -57,7 +57,7 @@ const TabsNetwork: React.FC<{
         <div className={cx('title')}>Select network</div>
       </div>
       <div className={cx('options', 'border')}>
-        <Item
+        <ItemNetwork
           onClick={() => {
             setNetworkFilter(initNetworkFilter);
             setIsNetwork(false);
@@ -73,7 +73,7 @@ const TabsNetwork: React.FC<{
         {networks?.map((item: CustomChainInfo) => {
           return (
             <div key={item.chainName}>
-              <Item
+              <ItemNetwork
                 onClick={() => {
                   setNetworkFilter({
                     label: item.chainName,

@@ -8,7 +8,9 @@
     max-width: 90%;
 
     @include mobile() {
+        max-width: 100%;
         padding: 0;
+        margin: 24px 0;
     }
 }
 
@@ -17,7 +19,7 @@
         display: flex;
         align-items: center;
 
-        @media (max-width: 930px) {
+        @include mobile {
             padding-top: 10px;
         }
 
@@ -38,5 +40,31 @@
                 background: #804af2 !important;
             }
         }
+    }
+}
+
+.symbols {
+    display: flex;
+    align-items: center;
+
+    &_logo {
+        margin-right: 12px;
+
+        &_right {
+            position: relative;
+            right: 10px;
+            width: 44px;
+            height: 44px;
+        }
+
+        &_left {
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+    &_name {
+        font-weight: 500;
+        font-size: 16px;
     }
 }

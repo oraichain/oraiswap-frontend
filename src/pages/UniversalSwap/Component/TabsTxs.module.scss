@@ -7,19 +7,22 @@
   align-items: center;
   margin-top: 40px;
   @include theme() {
-    border-bottom: 2px solid theme-get('neutral-5');
+    border-bottom: 1px solid theme-get('neutral-5');
   }
   .left {
     display: flex;
     .label {
       width: 120px;
+      @include mobile() {
+        width: 100px;
+      }
       text-align: center;
       padding: 12px;
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
       @include theme() {
-        color: theme-get('sea-stone-500');
+        color: theme-get('neutral-text-body');
       }
       border-bottom-width: 2px;
       border-bottom-style: solid;
@@ -48,7 +51,7 @@
         font-size: 16px;
         font-weight: 600;
         @include theme() {
-          color: theme-get('sea-stone-700');
+          color: theme-get('neutral-text-text-token-name');
         }
       }
       .balance {
@@ -76,8 +79,11 @@
     z-index: 2;
     font-weight: 600;
     padding: 16px 12px;
+    visibility: visible;
+    inset: 0px 0px auto auto;
+    margin: 0px;
+    transform: translate3d(-16px, 1070px, 0px);
     .title {
-      color: #1e300a;
       text-align: center;
       font-size: 16px;
     }
@@ -130,7 +136,9 @@
 
         .grow {
           flex-grow: 1;
-
+          @include theme() {
+            color: theme-get('neutral-text-text-token-name');
+          }
           display: flex;
           flex-direction: column;
           gap: 5px;

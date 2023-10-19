@@ -1,5 +1,6 @@
 import {
   BSC_SCAN,
+  CosmosChainId,
   ETHEREUM_SCAN,
   HIGH_GAS_PRICE,
   KWT_SCAN,
@@ -101,12 +102,12 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
   );
 };
 
-export const handleCheckAddress = async (): Promise<string> => {
-  const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress) {
+export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
+  const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
+  if (!cosmosAddress) {
     throw new Error('Please login both metamask and keplr!');
   }
-  return oraiAddress;
+  return cosmosAddress;
 };
 
 export const handleErrorTransaction = (error: any) => {

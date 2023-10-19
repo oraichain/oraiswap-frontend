@@ -8,10 +8,12 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import React from 'react';
 import { tokens } from 'config/bridgeTokens';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
+import { useGetMyStake } from 'pages/Pools/hookV3';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
@@ -19,7 +21,12 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const totalUsd = getTotalUsd(amounts, prices);
-  const [[otherChainTokens, oraichainTokens], _] = React.useState<TokenItemType[][]>(tokens);
+  const [otherChainTokens, oraichainTokens] = tokens;
+  const [address] = useConfigReducer('address');
+  const [theme] = useConfigReducer('theme');
+  const { totalStaked } = useGetMyStake({
+    stakerAddress: address
+  });
 
   const data = [...oraichainTokens, ...otherChainTokens]
     .filter((token: TokenItemType) => {
@@ -30,9 +37,9 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
       if (!networkFilter) return true;
       return token.chainId == networkFilter;
     })
-    // .sort((a, b) => {
-    //   return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
-    // })
+    .sort((a, b) => {
+      return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
+    })
     .map((t: TokenItemType) => {
       let amount = BigInt(amounts[t.denom] ?? 0);
       let usd = getUsd(amount, t, prices);
@@ -43,16 +50,17 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
         amount += subAmount;
         usd += getUsd(subAmount, t, prices);
       }
+      const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
 
       return {
         asset: t.name,
         chain: t.org,
         icon: t.Icon,
         iconLight: t?.IconLight,
-        price: prices[t.coinGeckoId],
+        price: prices[t.coinGeckoId] || 0,
         balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
-        value: 0,
+        value: value.toFixed(6),
         coeff: 0,
         coeffType: 'increase'
       };
@@ -63,7 +71,17 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
       name: 'ASSET',
       accessor: (data) => (
         <div className={styles.assets}>
-          <div className={styles.left}>{data.icon && <data.icon className={styles.tokenIcon} />}</div>
+          <div className={styles.left}>
+            {theme === 'light' ? (
+              data.iconLight ? (
+                <data.iconLight className={styles.tokenIcon} />
+              ) : (
+                <data.icon className={styles.tokenIcon} />
+              )
+            ) : (
+              <data.icon className={styles.tokenIcon} />
+            )}
+          </div>
           <div className={styles.right}>
             <div className={styles.assetName}>{data.asset}</div>
             <div className={styles.assetChain}>{data.chain}</div>
@@ -76,16 +94,14 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
     price: {
       name: 'PRICE',
       width: '22%',
-      accessor: (data) => (
-        <span style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 50 }}>${data.price}</span>
-      ),
+      accessor: (data) => <div className={styles.price}>${data.price}</div>,
       align: 'center'
     },
     balance: {
       name: 'BALANCE',
       width: '22%',
       align: 'center',
-      accessor: (data) => <span>{data.balance}</span>
+      accessor: (data) => <div className={styles.balance}>{data.balance}</div>
     },
     value: {
       name: 'VALUE',
@@ -98,7 +114,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           <div className={styles.valuesColumn}>
             <div className={styles.values}>
               <div className={styles.value}>${data.value}</div>
-              <div
+              {/* <div
                 style={{
                   color: checkCoeffType ? '#00AD26' : '#E01600'
                 }}
@@ -106,7 +122,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
               >
                 {coeffTypeValue}
                 {data.coeff}%
-              </div>
+              </div> */}
             </div>
           </div>
         );
@@ -132,7 +148,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           {
             src: StakeIcon,
             label: 'Total staked',
-            balance: '0'
+            balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
           }
         ].map((e, i) => {
           return (

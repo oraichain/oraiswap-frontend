@@ -143,7 +143,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       if (token1AllowanceToPair < amount1) {
         await increaseAllowance('9'.repeat(30), token1!.contractAddress!, oraiAddress);

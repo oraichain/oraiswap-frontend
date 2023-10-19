@@ -1,13 +1,13 @@
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
 
-
 .menu {
   display: flex;
   justify-content: space-between;
   padding: 20px 120px;
   position: sticky;
   top: 0;
+  z-index: 2;
 
   @include theme() {
     background-color: theme-get('bg-color');
@@ -21,7 +21,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 16px;
-  z-index: 1;
+  z-index: 999;
   position: fixed;
   top: 0;
   left: 0;
@@ -60,7 +60,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  z-index: 100;
+  z-index: $zindex-sticky;
   overflow: auto;
   transition: margin-left 0.2s ease-in-out;
 
@@ -197,7 +197,6 @@
       margin-left: 10px;
     }
   }
-
 }
 
 .spin {
