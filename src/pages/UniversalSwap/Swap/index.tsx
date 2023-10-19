@@ -11,6 +11,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import {
+  CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
   ORAI,
@@ -212,11 +213,14 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const cosmosAddress = await handleCheckAddress(
+        originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
+      );
+      const oraiAddress = await handleCheckAddress('Oraichain');
       const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
       const univeralSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: oraiAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
           originalFromToken,
           originalToToken,
           fromAmount: fromAmountToken,

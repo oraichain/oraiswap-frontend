@@ -57,7 +57,7 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,

@@ -56,7 +56,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       const msg = generateContractMessages({
         type: Type.WITHDRAW,

@@ -58,7 +58,7 @@ export const StakeLPModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
       // generate bonding msg
       const msg = generateMiningMsgsV3({
         type: Type.BOND_LIQUIDITY,

@@ -74,7 +74,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({
   };
 
   const handleUnbond = async (parsedAmount: bigint) => {
-    const oraiAddress = await handleCheckAddress();
+    const oraiAddress = await handleCheckAddress('Oraichain');
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);

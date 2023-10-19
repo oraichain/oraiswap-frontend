@@ -39,7 +39,8 @@ import {
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
   ORAI,
-  TRON_DENOM
+  TRON_DENOM,
+  CosmosChainId
 } from '@oraichain/oraidex-common';
 import {
   isEvmSwappable,
@@ -223,13 +224,16 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const cosmosAddress = await handleCheckAddress(
+        originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
+      );
+      const oraiAddress = await handleCheckAddress('Oraichain');
       const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const univeralSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: oraiAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
           originalFromToken,
           originalToToken,
           fromAmount: fromAmountToken,
