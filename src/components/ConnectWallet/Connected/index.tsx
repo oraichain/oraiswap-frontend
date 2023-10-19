@@ -30,7 +30,7 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
         <>
           <div className={cx('content')}>
             <div className={cx('title')}>My Wallets</div>
-            <div className={cx('money')}>$ {totalUsd.toFixed(6)}</div>
+            <div className={cx('money')}>$ {totalUsd.toFixed(2)}</div>
           </div>
           <div className={cx('down_icon')}>
             <DownArrowIcon />

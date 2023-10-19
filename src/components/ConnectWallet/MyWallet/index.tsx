@@ -78,7 +78,6 @@ const MyWallets: React.FC<{
 }> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  console.log('🚀 ~ file: index.tsx:80 ~ metamaskAddress:', metamaskAddress);
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
@@ -292,13 +291,8 @@ const MyWallets: React.FC<{
   }, [copiedAddressCoordinates]);
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const totalUsd = 0;
 
   const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
-    // let totalBalance = 0;
-
-    // for (let i = 0; i < cosmosNetworks.length; i++) {
-    // const network = cosmosNetworks[i];
     let subAmounts = null;
     if (typeWallet === 'cosmos') {
       subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
@@ -313,13 +307,9 @@ const MyWallets: React.FC<{
         Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
       );
     }
-    console.log('🚀 ~ file: index.tsx:304 ~ handleGetTotalUsd ~ tokenMap:', tokenMap);
-    console.log('🚀 ~ file: index.tsx:304 ~ handleGetTotalUsd ~ amounts:', amounts);
+
     const totalUsd = getTotalUsd(subAmounts, prices);
     return totalUsd;
-    // }
-
-    // balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
   };
   const MetamaskInfo = {
     id: 1,
@@ -390,9 +380,11 @@ const MyWallets: React.FC<{
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
 
-                  <div>
-                    <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
-                  </div>
+                  {wallet.isConnect && (
+                    <div>
+                      <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
+                    </div>
+                  )}
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
@@ -403,18 +395,15 @@ const MyWallets: React.FC<{
                   {wallet.networks.map((network, index) => {
                     return (
                       <div key={'network' + index} className={cx('network_container')}>
-                        {/* <div className={cx('logo')}> */}
-                        {/* <img src={network.Icon} alt="wallet icon" /> */}
                         <div>{network.Icon && <network.Icon className={cx('icon')} />}</div>
-                        {/* </div> */}
                         <div className={cx('info')}>
                           <div className={cx('name')}>{network.chainName}</div>
-                          {network.address ? (
+                          {network.address && wallet.isConnect ? (
                             <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
                           ) : null}
                         </div>
                         <div className={cx('actions')}>
-                          {network.address ? (
+                          {network.address && wallet.isConnect ? (
                             <>
                               <div
                                 className={cx('copy')}
