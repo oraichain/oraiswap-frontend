@@ -43,6 +43,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import TokenBalance from 'components/TokenBalance';
 import { evmChains } from 'config/chainInfos';
+import { tokenMap } from 'config/bridgeTokens';
 
 const cx = cn.bind(styles);
 // const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
@@ -291,13 +292,41 @@ const MyWallets: React.FC<{
   }, [copiedAddressCoordinates]);
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const totalUsd = getTotalUsd(amounts, prices);
+  const totalUsd = 0;
+
+  const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
+    // let totalBalance = 0;
+
+    // for (let i = 0; i < cosmosNetworks.length; i++) {
+    // const network = cosmosNetworks[i];
+    let subAmounts = null;
+    if (typeWallet === 'cosmos') {
+      subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
+    } else if (typeWallet === 'evm') {
+      subAmounts = Object.fromEntries(
+        Object.entries(amounts).filter(
+          ([denom]) => tokenMap?.[denom]?.cosmosBased === false && tokenMap?.[denom].chainId !== '0x2b6653dc'
+        )
+      );
+    } else if (typeWallet === 'trx') {
+      subAmounts = Object.fromEntries(
+        Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
+      );
+    }
+    console.log('🚀 ~ file: index.tsx:304 ~ handleGetTotalUsd ~ tokenMap:', tokenMap);
+    console.log('🚀 ~ file: index.tsx:304 ~ handleGetTotalUsd ~ amounts:', amounts);
+    const totalUsd = getTotalUsd(subAmounts, prices);
+    return totalUsd;
+    // }
+
+    // balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
+  };
   const MetamaskInfo = {
     id: 1,
     name: 'Metamask',
     code: WALLET_TYPES.METAMASK,
     icon: MetamaskImage,
-    totalUsd: 0,
+    totalUsd: handleGetTotalUsd('evm'),
     isOpen: false,
     isConnect: !!metamaskAddress,
     networks: evmChains.map((item, index) => {
@@ -311,7 +340,7 @@ const MyWallets: React.FC<{
     name: 'Owallet',
     code: WALLET_TYPES.OWALLET,
     icon: OwalletImage,
-    totalUsd: totalUsd,
+    totalUsd: handleGetTotalUsd('cosmos'),
     isOpen: false,
     isConnect: !!oraiAddressWallet,
     networks: cosmosNetworks.map((item, index) => {
@@ -325,7 +354,7 @@ const MyWallets: React.FC<{
     name: 'TronLink',
     code: WALLET_TYPES.TRON,
     icon: TronWalletImage,
-    totalUsd: 0,
+    totalUsd: handleGetTotalUsd('trx'),
     isOpen: false,
     isConnect: !!tronAddress,
     networks: tronNetworks.map((item, index) => {
