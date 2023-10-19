@@ -1,5 +1,7 @@
 import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
 import { ReactComponent as VolumeIcon } from 'assets/icons/ic_volume.svg';
+import { ReactComponent as ArrowUpIcon } from 'assets/icons/arrow_up.svg';
+import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow_down.svg';
 import TokenBalance from 'components/TokenBalance';
 import useTheme from 'hooks/useTheme';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
@@ -7,17 +9,23 @@ import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
 import { CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
+import { useState } from 'react';
+import classNames from 'classnames';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
   const theme = useTheme();
+  const mobileMode = isMobile();
   const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
   const { token1, token2 } = poolDetailData;
+
+  const [isShowMore, setIsShowMore] = useState(false);
 
   const BaseTokenIcon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const QuoteTokenIcon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
   return (
     <section className={styles.overview}>
-      <div className={styles.totalLiquidity}>
+      <div className={classNames(styles.totalLiquidity, { [styles.isShowMore]: isShowMore })}>
         <h3 className={styles.title}>Total Liquidity</h3>
         <div className={styles.totalTop}>
           <div className={styles.pairLogos}>
@@ -71,8 +79,20 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
             />
           </div>
         </div>
+        {mobileMode &&
+          (!isShowMore ? (
+            <div className={styles.showMore} onClick={() => setIsShowMore(true)}>
+              Show more
+              <ArrowDownIcon />
+            </div>
+          ) : (
+            <div className={styles.showMore} onClick={() => setIsShowMore(false)}>
+              Show less
+              <ArrowUpIcon />
+            </div>
+          ))}
       </div>
-      <div className={styles.volume}>
+      <div className={classNames(styles.volume, { [styles.open]: isShowMore })}>
         <div className={styles.icon}>
           <VolumeIcon />
         </div>
@@ -91,7 +111,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           {toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2)}%
         </div>
       </div>
-      <div className={styles.apr}>
+      <div className={classNames(styles.apr, { [styles.open]: isShowMore })}>
         <div className={styles.icon}>
           <AprIcon />
         </div>

@@ -9,6 +9,11 @@
     border: 1px solid $primary-text-link;
     padding: 24px 40px;
 
+    @include small-mobile() {
+        flex-wrap: wrap;
+        padding: 24px 16px;
+    }
+
     .earningLeft {
         display: flex;
         align-items: center;
@@ -56,6 +61,19 @@
                 line-height: 150%;
             }
         }
+
+        @include small-mobile() {
+            width: 100%;
+            margin-bottom: 24px;
+
+            .assetEarning {
+                width: 50%;
+            }
+
+            .assetEarning:first-child {
+                margin-right: 0;
+            }
+        }
     }
 
     .claim {
@@ -85,5 +103,15 @@
                 }
             }
         }
+
+        @include small-mobile() {
+            width: 100%;
+            align-items: center;
+
+            button {
+                width: 100%;
+            }
+        }
     }
+
 }
