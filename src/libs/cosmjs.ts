@@ -4,7 +4,7 @@ import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
 import { network } from 'config/networks';
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-// import { Stargate } from '@injectivelabs/sdk-ts';
+import { Stargate } from '@injectivelabs/sdk-ts';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 
 export type clientType = 'cosmwasm' | 'injective';
@@ -42,7 +42,7 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
       return client;
     case 'injective':
       const tmClient = await Tendermint37Client.connect(rpc);
-    // return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
+      return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
   }
 };
 

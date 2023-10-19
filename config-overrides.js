@@ -132,8 +132,7 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest,
-        scope: 'src'
+        manifest
       })
     );
 
