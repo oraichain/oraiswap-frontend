@@ -94,16 +94,14 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
     price: {
       name: 'PRICE',
       width: '22%',
-      accessor: (data) => (
-        <span style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 50 }}>${data.price}</span>
-      ),
+      accessor: (data) => <div className={styles.price}>${data.price}</div>,
       align: 'center'
     },
     balance: {
       name: 'BALANCE',
       width: '22%',
       align: 'center',
-      accessor: (data) => <span>{data.balance}</span>
+      accessor: (data) => <div className={styles.balance}>{data.balance}</div>
     },
     value: {
       name: 'VALUE',

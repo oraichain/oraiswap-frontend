@@ -13,6 +13,9 @@
   .info {
     display: flex;
     padding: 24px;
+    @include mobile() {
+      padding: 12px;
+    }
     .total-info {
       width: 50%;
       display: flex;
@@ -20,7 +23,9 @@
       .icon {
         width: 40px;
         height: 40px;
-        background-color: #efefef;
+        @include theme() {
+          background-color: theme-get('neutral-border-border-default');
+        }
         display: flex;
         align-items: center;
         justify-content: center;
@@ -34,6 +39,9 @@
             color: theme-get('sea-stone-200');
           }
           font-size: 18px;
+          @include mobile() {
+            font-size: 13px;
+          }
           font-weight: 600;
         }
         .label {
@@ -49,6 +57,10 @@
 .assets {
   display: flex;
   padding-left: 24px;
+  @include mobile() {
+    padding-left: 0px;
+    text-align: center;
+  }
   color: #494949;
   .left {
     display: flex;
@@ -56,6 +68,10 @@
     .tokenIcon {
       width: 44px;
       height: 44px;
+      @include mobile() {
+        width: 30px;
+        height: 30px;
+      }
     }
   }
   .right {
@@ -90,9 +106,29 @@
   }
 }
 
+.price {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 50px;
+  @include mobile() {
+    padding-left: 0px;
+    justify-content: center;
+    font-size: 13px;
+  }
+}
+
+.balance {
+  @include mobile() {
+    font-size: 13px;
+  }
+}
+
 .valuesColumn {
   display: flex;
   justify-content: center;
+  @include mobile() {
+    font-size: 13px;
+  }
   .values {
     text-align: left;
   }
