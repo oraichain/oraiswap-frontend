@@ -128,8 +128,8 @@ export const HistoryTab: React.FC<{
     <div className={cx('historyTab')}>
       <div className={cx('info')}>
         <div className={cx('filter')}>
-          <img src={FilterIcon} width={26} height={26} alt="filter" />
-          <span>Transaction</span>
+          <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
+          <span className={cx('filter-title')}>Transaction</span>
         </div>
         <div className={cx('search')}>
           <SearchInput placeholder="Search by address, asset, type" onSearch={(tokenName) => {}} />

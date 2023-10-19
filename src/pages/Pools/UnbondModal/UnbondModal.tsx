@@ -50,7 +50,7 @@ const UnbondModal: FC<ModalProps> = ({
         message: 'Amount is invalid!'
       });
 
-    const oraiAddress = await handleCheckAddress();
+    const oraiAddress = await handleCheckAddress('Oraichain');
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);

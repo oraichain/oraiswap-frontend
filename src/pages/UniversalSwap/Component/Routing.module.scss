@@ -64,6 +64,9 @@
     .info-progress {
       display: flex;
       justify-content: space-between;
+      @include mobile() {
+        flex-direction: column;
+      }
       padding-top: 16px;
       font-size: 14px;
       font-weight: 400;

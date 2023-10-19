@@ -78,8 +78,6 @@ module.exports = {
   webpack: function (config, env) {
     config.resolve.fallback = fallback;
 
-    const isDevelopment = env === 'development';
-
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
 
