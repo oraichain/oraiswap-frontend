@@ -68,7 +68,14 @@
       align-items: center;
       padding-top: 10px;
       gap: 6px;
+      @include mobile() {
+        gap: 3px;
+      }
       &-balance {
+        @include mobile() {
+          white-space: nowrap;
+          font-size: 12px;
+        }
         @include theme() {
           color: theme-get('neutral-text-body');
         }
