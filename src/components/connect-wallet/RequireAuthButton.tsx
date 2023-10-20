@@ -27,9 +27,10 @@ const RequireAuthButton: React.FC<any> = () => {
       setIsInactiveMetamask(false);
 
       // if chain id empty, we switch to default network which is BSC
-      if (!window.ethereum.chainId) {
+      if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
       }
+
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);

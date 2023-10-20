@@ -81,6 +81,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
       }
+      const isMetamask = !!window?.ethereum?.isMetaMask;
+      if (isMetamask) {
+        const isUnlock = await window.ethereum._metamask.isUnlocked();
+        if (!isUnlock) {
+          displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock metamask wallet' });
+          return;
+        }
+      }
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
@@ -193,7 +201,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
 
   const handleLoginWallets = async (walletType) => {
-    console.log('🚀 ~ file: index.tsx:196 ~ handleLoginWallets ~ walletType:', walletType);
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
         await connectMetamask();

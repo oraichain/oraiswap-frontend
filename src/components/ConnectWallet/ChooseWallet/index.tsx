@@ -50,7 +50,6 @@ const ChooseWalletModal: React.FC<{
   const isOwallet = !!window.owallet;
   const isKeplr = !!window.keplr;
   const isTron = !!window.tronLink;
-  console.log('🚀 ~ file: index.tsx:50 ~ isMetamask:', isMetamask);
   const WALLETS: WalletItem[] = [
     { name: 'Owallet', icon: OwalletIcon, isActive: isOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
