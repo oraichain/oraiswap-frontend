@@ -47,7 +47,8 @@ const MyWallets: React.FC<{
     networkId: '',
     walletId: 0
   });
-
+  
+  
   const getUrlQrCode = async ({ address, icon, name }) => {
     try {
       const url = await QRCode.toDataURL(address);

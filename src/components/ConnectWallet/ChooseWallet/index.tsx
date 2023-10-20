@@ -46,12 +46,17 @@ const ChooseWalletModal: React.FC<{
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const isMetamask = !!window.ethereum?.isMetaMask;
+  const isOwallet = !!window.owallet;
+  const isKeplr = !!window.keplr;
+  const isTron = !!window.tronLink;
+  console.log('🚀 ~ file: index.tsx:50 ~ isMetamask:', isMetamask);
   const WALLETS: WalletItem[] = [
-    { name: 'Owallet', icon: OwalletIcon, isActive: true, walletType: WALLET_TYPES.OWALLET },
-    { name: 'Metamask', icon: MetamaskIcon, isActive: true, walletType: WALLET_TYPES.METAMASK },
-    { name: 'TronLink', icon: TronIcon, isActive: true, walletType: WALLET_TYPES.TRON },
+    { name: 'Owallet', icon: OwalletIcon, isActive: isOwallet, walletType: WALLET_TYPES.OWALLET },
+    { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
+    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
-    { name: 'Keplr', icon: KeplrIcon, isActive: true, walletType: WALLET_TYPES.KEPLR },
+    { name: 'Keplr', icon: KeplrIcon, isActive: isKeplr, walletType: WALLET_TYPES.KEPLR },
     { name: 'Ledger', icon: LedgerIcon, walletType: WALLET_TYPES.LEDGER },
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
     { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
