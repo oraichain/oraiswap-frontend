@@ -156,3 +156,7 @@ export const switchWallet = (type: WalletType) => {
   }
   return false;
 };
+
+export const isEmptyObject = (value:object)=>{
+  return !!value && Object.keys(value).length === 0;
+}

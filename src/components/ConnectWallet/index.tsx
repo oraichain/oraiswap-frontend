@@ -19,7 +19,7 @@ import { RootState } from 'store/configure';
 import { evmChains } from 'config/chainInfos';
 import { tokenMap } from 'config/bridgeTokens';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { displayInstallWallet, setStorageKey, cosmosNetworks, tronNetworks } from 'helper';
+import { displayInstallWallet, setStorageKey, cosmosNetworks, tronNetworks, isEmptyObject } from 'helper';
 import { collectWallet } from 'libs/cosmjs';
 import { getTotalUsd } from 'libs/utils';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -65,6 +65,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  console.log('🚀 ~ file: index.tsx:68 ~ cosmosAddress:', cosmosAddress);
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
@@ -80,6 +81,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       console.log('error in connecting metamask: ', ex);
     }
   };
+  const isConnected = !!metamaskAddress || !!tronAddress || isEmptyObject(cosmosAddress);
+  console.log('🚀 ~ file: index.tsx:85 ~ metamaskAddress:', metamaskAddress);
+  console.log('🚀 ~ file: index.tsx:85 ~ isConnected:', isConnected);
 
   useEffect(() => {
     getListAddressCosmos();
@@ -242,7 +246,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     });
     setWallets(walletsModified);
   };
-  
+
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
@@ -310,7 +314,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     })
   };
 
-
   useEffect(() => {
     const infoWallet = [MetamaskInfo, OwalletInfo, TronInfo];
     setWallets(infoWallet as any);
@@ -341,7 +344,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
             />
           }
         >
-          <Connected setIsShowMyWallet={() => setIsShowMyWallet(true)} />
+          <Connected isConnected={isConnected} setIsShowMyWallet={() => setIsShowMyWallet(true)} />
         </TooltipContainer>
       )}
       {isShowChooseWallet ? <ChooseWalletModal close={() => setIsShowChooseWallet(false)} /> : null}
