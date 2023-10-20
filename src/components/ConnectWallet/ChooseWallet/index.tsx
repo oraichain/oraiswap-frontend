@@ -66,6 +66,7 @@ const ChooseWalletModal: React.FC<{
                 className={cx('wallet_item', `${!wallet.isActive && 'not-active'}`)}
                 onClick={() => {
                   if (wallet.isActive) {
+                    
                     setWalletSelected(wallet);
                     setConnectStatus(CONNECT_STATUS.PROCESSING);
                   }
