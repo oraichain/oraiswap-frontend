@@ -33,11 +33,16 @@ import TronWalletImage from 'assets/images/tronlink.jpg';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
-enum WALLET_TYPES {
+export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
-  KPLER = 'KPLER',
+  KEPLR = 'KEPLR',
   OWALLET = 'OWALLET',
-  TRON = 'TRON'
+  TRON = 'TRON',
+  PHANTOM = 'PHANTOM',
+  LEDGER = 'LEDGER',
+  GOOGLE = 'GOOGLE',
+  APPLE = 'APPLE',
+  PHONE = 'PHONE'
 }
 
 interface NetworkItem extends CustomChainInfo {
@@ -73,7 +78,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectMetamask = async () => {
     try {
       // if chain id empty, we switch to default network which is BSC
-      if (!window.ethereum.chainId) {
+      if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
       }
       await connect();
@@ -188,6 +193,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
 
   const handleLoginWallets = async (walletType) => {
+    console.log('🚀 ~ file: index.tsx:196 ~ handleLoginWallets ~ walletType:', walletType);
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
         await connectMetamask();
@@ -195,7 +201,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       case WALLET_TYPES.OWALLET:
         await connectKeplr('owallet');
         break;
-      case WALLET_TYPES.KPLER:
+      case WALLET_TYPES.KEPLR:
         await connectKeplr('keplr');
         break;
       case WALLET_TYPES.TRON:
@@ -220,7 +226,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         await disconnectMetamask();
         break;
       case WALLET_TYPES.OWALLET:
-      case WALLET_TYPES.KPLER:
+      case WALLET_TYPES.KEPLR:
         await disconnectKeplr();
         break;
       case WALLET_TYPES.TRON:
@@ -320,7 +326,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   }, [tronAddress, metamaskAddress, oraiAddressWallet]);
   return (
     <div className={cx('connect-wallet-container', theme)}>
-      {isShowConnectWallet ? (
+      {!isConnected ? (
         <Button type="primary" onClick={() => setIsShowChooseWallet(true)}>
           Connect Wallet
         </Button>
@@ -344,10 +350,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
             />
           }
         >
-          <Connected isConnected={isConnected} setIsShowMyWallet={() => setIsShowMyWallet(true)} />
+          <Connected setIsShowMyWallet={() => setIsShowMyWallet(true)} />
         </TooltipContainer>
       )}
-      {isShowChooseWallet ? <ChooseWalletModal close={() => setIsShowChooseWallet(false)} /> : null}
+      {isShowChooseWallet ? (
+        <ChooseWalletModal connectToWallet={handleLoginWallets} close={() => setIsShowChooseWallet(false)} />
+      ) : null}
       {QRUrlInfo.url ? (
         <QRGeneratorModal
           url={QRUrlInfo.url}

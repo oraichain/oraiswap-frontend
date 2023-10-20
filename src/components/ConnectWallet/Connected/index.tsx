@@ -13,10 +13,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 
-const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void; isConnected: boolean }> = ({
-  setIsShowMyWallet,
-  isConnected
-}) => {
+const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({ setIsShowMyWallet }) => {
   const mobileMode = isMobile();
 
   const [theme] = useConfigReducer('theme');
@@ -25,29 +22,19 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void; isConn
   const totalUsd = getTotalUsd(amounts, prices);
 
   return (
-    <div
-      className={cx('connected_container', !isConnected ? 'bg-not-connect' : null, theme)}
-      onClick={() => setIsShowMyWallet(true)}
-    >
-      {isConnected && (
-        <div className={cx('wallet_icon')}>
-          <WalletIcon />
-        </div>
-      )}
-      {!mobileMode && isConnected ? (
+    <div className={cx('connected_container', theme)} onClick={() => setIsShowMyWallet(true)}>
+      <div className={cx('wallet_icon')}>
+        <WalletIcon />
+      </div>
+      {!mobileMode && (
         <>
-          <div className={cx('content', 'ml')}>
-            <div className={cx('title')}>{'My Wallets'}</div>
+          <div className={cx('content')}>
+            <div className={cx('title')}>My Wallets</div>
             <div className={cx('money')}>$ {totalUsd.toFixed(2)}</div>
+
           </div>
           <div className={cx('down_icon')}>
             <DownArrowIcon />
-          </div>
-        </>
-      ) : (
-        <>
-          <div className={cx('content')}>
-            <div className={cx('label-start')}>{'Connect wallet'}</div>
           </div>
         </>
       )}

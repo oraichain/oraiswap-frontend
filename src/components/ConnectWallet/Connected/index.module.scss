@@ -5,9 +5,7 @@
   margin-left: 12px;
   margin-right: 10px;
 }
-.bg-not-connect {
-  background-color: #aee67f !important;
-}
+
 .connected_container {
   height: 52px;
   display: flex;
@@ -38,7 +36,8 @@
     justify-content: space-between;
     flex-direction: column;
     flex: 1;
-
+    margin-left: 12px;
+    margin-right: 10px;
     .label-start {
       font-size: 16px;
       color: #232521;

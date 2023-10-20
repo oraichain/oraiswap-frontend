@@ -5,10 +5,15 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import OraiDEXLoadingBlack from 'assets/lottie/oraiDEX_loading_black.json';
 
 import styles from './index.module.scss';
+import { WalletItem } from '../';
+import { useEffect } from 'react';
 
 const cx = cn.bind(styles);
 
-const ConnectProcessing: React.FC<{ walletName: string; close: () => void }> = ({ walletName, close }) => {
+const ConnectProcessing: React.FC<{ walletName: string; wallet: WalletItem; close: () => void }> = ({
+  walletName,
+  close
+}) => {
   const [theme] = useConfigReducer('theme');
 
   return (
