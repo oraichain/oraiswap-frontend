@@ -19,6 +19,9 @@ import ConnectError from './ConnectError';
 import styles from './index.module.scss';
 
 import { WALLET_TYPES } from '../';
+import { ConnectProgressDone } from './ConnectDone';
+import { getStorageKey, keplrCheck, owalletCheck } from 'helper';
+import { WalletType } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 
@@ -32,6 +35,7 @@ export interface WalletItem {
 enum CONNECT_STATUS {
   SELECTING = 'SELECTING',
   PROCESSING = 'PROCESSING',
+  DONE = 'DONE',
   ERROR = 'ERROR'
 }
 
@@ -47,15 +51,16 @@ const ChooseWalletModal: React.FC<{
   const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const isMetamask = !!window.ethereum?.isMetaMask;
-  const isOwallet = !!window.owallet;
-  const isKeplr = !!window.keplr;
+
+  const isCheckKeplr = keplrCheck('keplr');
+  const isCheckOwallet = owalletCheck('owallet');
   const isTron = !!window.tronLink;
   const WALLETS: WalletItem[] = [
-    { name: 'Owallet', icon: OwalletIcon, isActive: isOwallet, walletType: WALLET_TYPES.OWALLET },
+    { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
-    { name: 'Keplr', icon: KeplrIcon, isActive: isKeplr, walletType: WALLET_TYPES.KEPLR },
+    { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
     { name: 'Ledger', icon: LedgerIcon, walletType: WALLET_TYPES.LEDGER },
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
     { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
@@ -71,11 +76,18 @@ const ChooseWalletModal: React.FC<{
               <div
                 key={index}
                 className={cx('wallet_item', `${!wallet.isActive && 'not-active'}`)}
-                onClick={() => {
+                onClick={async () => {
                   if (wallet.isActive) {
                     setWalletSelected(wallet);
                     connectToWallet(wallet.walletType);
-                    setConnectStatus(CONNECT_STATUS.PROCESSING);
+                    if (isMetamask) {
+                      const isUnlock = await window.ethereum._metamask.isUnlocked();
+                      if (isUnlock && metamaskAddress) {
+                        setConnectStatus(CONNECT_STATUS.DONE);
+                      } else {
+                        setConnectStatus(CONNECT_STATUS.PROCESSING);
+                      }
+                    }
                   }
                 }}
               >
@@ -95,8 +107,18 @@ const ChooseWalletModal: React.FC<{
             close();
             setConnectStatus(CONNECT_STATUS.SELECTING);
           }}
+          onDone={() => {}}
           wallet={walletSelected}
           walletName={walletSelected.name}
+        />
+      );
+    } else if (connectStatus === CONNECT_STATUS.DONE) {
+      return (
+        <ConnectProgressDone
+          close={() => {
+            setConnectStatus(CONNECT_STATUS.SELECTING);
+          }}
+          address={metamaskAddress}
         />
       );
     } else {

@@ -10,12 +10,20 @@ import { useEffect } from 'react';
 
 const cx = cn.bind(styles);
 
-const ConnectProcessing: React.FC<{ walletName: string; wallet: WalletItem; close: () => void }> = ({
+const ConnectProcessing: React.FC<{ onDone: () => void; walletName: string; wallet: WalletItem; close: () => void }> = ({
   walletName,
   close
 }) => {
   const [theme] = useConfigReducer('theme');
-
+  // const isConnected = 
+  useEffect(() => {
+    
+  
+    return () => {
+      
+    }
+  }, [])
+  
   return (
     <div className={cx('connect_processing', theme)}>
       <div className={cx('loading_icon')}>
