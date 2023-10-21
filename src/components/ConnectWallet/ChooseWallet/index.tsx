@@ -44,7 +44,8 @@ const ChooseWalletModal: React.FC<{
   cancel: () => void;
   connectToWallet: (walletType: WALLET_TYPES) => void;
   connectStatus: CONNECT_STATUS;
-}> = ({ close, connectToWallet, connectStatus, cancel }) => {
+  tryAgain: (walletType: WALLET_TYPES) => void;
+}> = ({ close, connectToWallet, connectStatus, cancel, tryAgain }) => {
   const [theme] = useConfigReducer('theme');
   // const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
@@ -100,7 +101,7 @@ const ChooseWalletModal: React.FC<{
     } else if (connectStatus === CONNECT_STATUS.DONE) {
       return <ConnectProgressDone cancel={cancel} address={metamaskAddress} />;
     } else {
-      return <ConnectError cancel={cancel} handleTryAgain={() => {}} />;
+      return <ConnectError cancel={cancel} handleTryAgain={()=>tryAgain(walletSelected.walletType)} />;
     }
   }, [connectStatus]);
 

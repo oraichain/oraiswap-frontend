@@ -4,9 +4,13 @@ import useConfigReducer from 'hooks/useConfigReducer';
 
 import styles from './index.module.scss';
 
+
 const cx = cn.bind(styles);
 
-const ConnectError: React.FC<{ cancel: () => void; handleTryAgain: () => void }> = ({ cancel, handleTryAgain }) => {
+const ConnectError: React.FC<{ cancel: () => void; handleTryAgain: () => void }> = ({
+  cancel,
+  handleTryAgain
+}) => {
   const [theme] = useConfigReducer('theme');
 
   return (

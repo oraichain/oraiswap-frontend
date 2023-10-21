@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import cn from 'classnames/bind';
 
 import { Button } from 'components/Button';
@@ -30,6 +30,7 @@ import { GasPrice } from '@cosmjs/stargate';
 import MetamaskImage from 'assets/images/metamask.png';
 import OwalletImage from 'assets/images/owallet-logo.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
+import { delay } from 'lodash';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
@@ -62,6 +63,7 @@ export interface WalletItem {
 }
 
 export enum METHOD_WALLET_TYPES {
+  START = 'START',
   CONNECT = 'CONNECT',
   DISCONNECT = 'DISCONNECT',
   PROCESSING = 'PROCESSING'
@@ -80,14 +82,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  console.log('🚀 ~ file: index.tsx:85 ~ metamaskAddress:', metamaskAddress);
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  console.log('🚀 ~ file: index.tsx:68 ~ cosmosAddress:', cosmosAddress);
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
-  const connectMetamask = async () => {
+  const connectMetamask = useCallback(async () => {
     try {
       // if chain id empty, we switch to default network which is BSC
       if (!window?.ethereum?.chainId) {
@@ -103,9 +105,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       }
       await connect();
     } catch (ex) {
+      setConnectStatus(CONNECT_STATUS.ERROR);
       console.log('error in connecting metamask: ', ex);
+    } finally {
+      console.log('🚀 ~ file: index.tsx:111 ~ connectMetamask ~ metamaskAddress:', metamaskAddress);
+      delay(() => {
+        setConnectStatus(CONNECT_STATUS.DONE);
+      }, 1000);
     }
-  };
+  }, [metamaskAddress]);
   const isConnected = !!metamaskAddress || !!tronAddress || isEmptyObject(cosmosAddress);
 
   useEffect(() => {
@@ -231,11 +239,20 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const processingTron = async () => {
     return;
   };
-
+  const startMetamask = async () => {
+    if (metamaskAddress) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.METAMASK, METHOD_WALLET_TYPES.CONNECT);
+  };
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
-        if (method === METHOD_WALLET_TYPES.CONNECT) {
+        if (method === METHOD_WALLET_TYPES.START) {
+          await startMetamask();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          setConnectStatus(CONNECT_STATUS.PROCESSING);
           await connectMetamask();
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectMetamask();
@@ -397,12 +414,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       {isShowChooseWallet ? (
         <ChooseWalletModal
           connectStatus={connectStatus}
-          connectToWallet={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.PROCESSING)}
+          connectToWallet={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.START)}
           close={() => {
             setIsShowChooseWallet(false);
           }}
           cancel={() => {
             setConnectStatus(CONNECT_STATUS.SELECTING);
+          }}
+          tryAgain={async (walletType) => {
+            await requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT);
           }}
         />
       ) : null}
