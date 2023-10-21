@@ -153,7 +153,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
-  // const [walletTypeActive, setWalletTypeActive] = useState(null);
+  const [walletTypeActive, setWalletTypeActive] = useState(null);
   // const walletType = getStorageKey() as WalletType;
   // console.log('🚀 ~ file: index.tsx:104 ~ walletType:', walletType);
   // const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck(walletType);
@@ -162,7 +162,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   // console.log('🚀 ~ file: index.tsx:107 ~ isCheckOwallet:', isCheckOwallet);
   const connectMetamask = async () => {
     try {
-      // setWalletTypeActive(WALLET_TYPES.METAMASK);
       // if chain id empty, we switch to default network which is BSC
       if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
@@ -242,9 +241,16 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
   useEffect(() => {
-    setWallets(walletInit);
+    const walletData = walletInit.map((item, index) => {
+      if (item.code === walletTypeActive) {
+        item.isOpen = true;
+        return item;
+      }
+      return item;
+    });
+    setWallets(walletData);
     return () => {};
-  }, [metamaskAddress, cosmosAddress, tronAddress]);
+  }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
     try {
@@ -284,6 +290,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const disconnectTronLink = async () => {
     try {
       setTronAddress(undefined);
+
       // remove account storage tron owallet
       localStorage.removeItem('tronWeb.defaultAddress');
     } catch (ex) {
@@ -295,7 +302,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     try {
       console.log('🚀 ~ file: index.tsx:230 ~ connectKeplr ~ type:', type);
       window.Keplr = new Keplr(type);
-      // setWalletTypeActive(type === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET);
       setStorageKey('typeWallet', type);
       if (!(await window.Keplr.getKeplr())) {
         return displayInstallWallet();
@@ -352,6 +358,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
+        setWalletTypeActive(WALLET_TYPES.METAMASK);
         if (method === METHOD_WALLET_TYPES.START) {
           // await startMetamask();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
@@ -362,6 +369,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         }
         break;
       case WALLET_TYPES.OWALLET:
+        setWalletTypeActive(WALLET_TYPES.OWALLET);
         if (method === METHOD_WALLET_TYPES.START) {
           // await startOwallet();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
@@ -373,6 +381,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
         break;
       case WALLET_TYPES.KEPLR:
+        setWalletTypeActive(WALLET_TYPES.KEPLR);
         if (method === METHOD_WALLET_TYPES.START) {
           // await startKeplr();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
@@ -384,6 +393,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
         break;
       case WALLET_TYPES.TRON:
+        setWalletTypeActive(WALLET_TYPES.TRON);
         if (method === METHOD_WALLET_TYPES.CONNECT) {
           // setConnectStatus(CONNECT_STATUS.PROCESSING);
           await connectTronLink();
@@ -508,26 +518,24 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           setVisible={setIsShowMyWallet}
           content={
             <MyWallets
-              // handleAddWallet={() => {
-              //   setConnectStatus(CONNECT_STATUS.SELECTING);
-              //   setIsShowChooseWallet(true);
-              //   setIsShowMyWallet(false);
-              // }}
+              handleAddWallet={() => {
+                setConnectStatus(CONNECT_STATUS.SELECTING);
+                setIsShowChooseWallet(true);
+                setIsShowMyWallet(false);
+              }}
               toggleShowNetworks={toggleShowNetworks}
               handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
               handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
               setQRUrlInfo={setQRUrlInfo}
-              // setIsShowMyWallet={setIsShowMyWallet}
-              handleAddWallet={null}
+              setIsShowMyWallet={setIsShowMyWallet}
               wallets={wallets}
-              setIsShowMyWallet={null}
             />
           }
         >
           <Connected setIsShowMyWallet={() => setIsShowMyWallet(true)} />
         </TooltipContainer>
       )}
-      {/* {isShowChooseWallet ? (
+      {isShowChooseWallet ? (
         <ChooseWalletModal
           connectStatus={connectStatus}
           connectToWallet={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.START)}
@@ -542,7 +550,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           }}
         />
       ) : null}
-     */}
+
       {QRUrlInfo.url ? (
         <QRGeneratorModal
           url={QRUrlInfo.url}
