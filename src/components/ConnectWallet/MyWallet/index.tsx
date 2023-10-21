@@ -16,11 +16,10 @@ import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { displayInstallWallet, setStorageKey, cosmosNetworks, tronNetworks } from 'helper';
+import { cosmosNetworks, tronNetworks, switchWalletCosmos, switchWalletTron, getListAddressCosmos } from 'helper';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { collectWallet } from 'libs/cosmjs';
 import { getTotalUsd, reduceString } from 'libs/utils';
 import { network } from 'config/networks';
 import Keplr from 'libs/keplr';
@@ -103,19 +102,12 @@ const MyWallets: React.FC<{
   };
 
   useEffect(() => {
-    getListAddressCosmos();
+    fetchListAddressCosmos();
   }, []);
 
-  const getListAddressCosmos = async () => {
+  const fetchListAddressCosmos = async () => {
     try {
-      let listAddressCosmos = {};
-      for (const info of cosmosNetworks) {
-        const address = await window.Keplr.getKeplrAddr(info.chainId as NetworkChainId);
-        listAddressCosmos = {
-          ...listAddressCosmos,
-          [info.chainId]: address
-        };
-      }
+      const { listAddressCosmos } = await getListAddressCosmos();
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log({ error });
@@ -135,26 +127,7 @@ const MyWallets: React.FC<{
       // if not requestAccounts before
       if (window.Metamask.checkTron()) {
         // TODO: Check owallet mobile
-        let tronAddress: string;
-        if (isMobile()) {
-          const addressTronMobile = await window.tronLink.request({
-            method: 'tron_requestAccounts'
-          });
-          //@ts-ignore
-          tronAddress = addressTronMobile?.base58;
-        } else {
-          if (!window.tronWeb.defaultAddress?.base58) {
-            const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-              method: 'tron_requestAccounts'
-            });
-            // throw error when not connected
-            if (code !== 200) {
-              displayToast(TToastType.TRONLINK_FAILED, { message });
-              return;
-            }
-          }
-          tronAddress = window.tronWeb.defaultAddress.base58;
-        }
+        const { tronAddress } = await switchWalletTron();
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);
       }
@@ -176,15 +149,7 @@ const MyWallets: React.FC<{
 
   const connectKeplr = async (type: WalletType) => {
     try {
-      window.Keplr = new Keplr(type);
-      setStorageKey('typeWallet', type);
-      if (!(await window.Keplr.getKeplr())) {
-        return displayInstallWallet();
-      }
-      const wallet = await collectWallet(network.chainId);
-      window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-        gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-      });
+      await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
@@ -293,34 +258,34 @@ const MyWallets: React.FC<{
       return () => clearTimeout(timeoutId);
     }
   }, [copiedAddressCoordinates]);
-  const { data: prices } = useCoinGeckoPrices();
-  const amounts = useSelector((state: RootState) => state.token.amounts);
+  // const { data: prices } = useCoinGeckoPrices();
+  // const amounts = useSelector((state: RootState) => state.token.amounts);
 
-  const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
-    let subAmounts = null;
-    if (typeWallet === 'cosmos') {
-      subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
-    } else if (typeWallet === 'evm') {
-      subAmounts = Object.fromEntries(
-        Object.entries(amounts).filter(
-          ([denom]) => tokenMap?.[denom]?.cosmosBased === false && tokenMap?.[denom].chainId !== '0x2b6653dc'
-        )
-      );
-    } else if (typeWallet === 'trx') {
-      subAmounts = Object.fromEntries(
-        Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
-      );
-    }
+  // const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
+  //   let subAmounts = null;
+  //   if (typeWallet === 'cosmos') {
+  //     subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
+  //   } else if (typeWallet === 'evm') {
+  //     subAmounts = Object.fromEntries(
+  //       Object.entries(amounts).filter(
+  //         ([denom]) => tokenMap?.[denom]?.cosmosBased === false && tokenMap?.[denom].chainId !== '0x2b6653dc'
+  //       )
+  //     );
+  //   } else if (typeWallet === 'trx') {
+  //     subAmounts = Object.fromEntries(
+  //       Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
+  //     );
+  //   }
 
-    const totalUsd = getTotalUsd(subAmounts, prices);
-    return totalUsd;
-  };
+  //   const totalUsd = getTotalUsd(subAmounts, prices);
+  //   return totalUsd;
+  // };
   const MetamaskInfo = {
     id: 1,
     name: 'Metamask',
     code: WALLET_TYPES.METAMASK,
     icon: MetamaskImage,
-    totalUsd: handleGetTotalUsd('evm'),
+    // totalUsd: handleGetTotalUsd('evm'),
     isOpen: false,
     address: metamaskAddress,
     isConnect: !!metamaskAddress,
@@ -335,7 +300,7 @@ const MyWallets: React.FC<{
     name: 'Owallet',
     code: WALLET_TYPES.OWALLET,
     icon: OwalletImage,
-    totalUsd: handleGetTotalUsd('cosmos'),
+    // totalUsd: handleGetTotalUsd('cosmos'),
     isOpen: false,
     address: cosmosAddress,
     isConnect: !!oraiAddressWallet,
@@ -350,7 +315,7 @@ const MyWallets: React.FC<{
     name: 'TronLink',
     code: WALLET_TYPES.TRON,
     icon: TronWalletImage,
-    totalUsd: handleGetTotalUsd('trx'),
+    // totalUsd: handleGetTotalUsd('trx'),
     isOpen: false,
     address: tronAddress,
     isConnect: !!tronAddress,
@@ -387,11 +352,11 @@ const MyWallets: React.FC<{
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
 
-                  {wallet.isConnect && !!wallet.address && (
+                  {/* {wallet.isConnect && !!wallet.address && (
                     <div>
                       <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
