@@ -173,8 +173,7 @@ const App = () => {
               method: 'eth_requestAccounts',
               params: []
             });
-            console.log('window.ethereum', window.ethereum);
-            console.log('address ===> ', address);
+
             setMetamaskAddress(ethers.utils.getAddress(address));
           } catch (error) {
             if (error?.code === -32002) {
