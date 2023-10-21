@@ -7,36 +7,46 @@
   width: 100%;
   border: 1px solid #efefef;
   border-radius: 12px;
+
   .info {
     display: flex;
     padding: 24px;
+
     @include mobile() {
       padding: 24px 16px;
     }
+
     color: #232521;
+
     .filter {
       cursor: pointer;
       padding: 8px 16px;
+
       &-icon {
         width: 20px;
         height: 20px;
       }
+
       &-title {
         padding-left: 4px;
       }
+
       display: flex;
       align-items: center;
       border-radius: 99px;
       border: 1px solid #232521;
+
       &:hover {
         opacity: 0.6;
       }
+
       span {
         font-size: 16px;
         font-style: normal;
         font-weight: 500;
       }
     }
+
     .search {
       padding-left: 12px;
     }
@@ -50,15 +60,19 @@
   align-items: center;
   font-size: 13px;
   font-weight: 400;
+
   .from,
   .to {
     width: 25%;
+
     .list {
       display: flex;
+
       .img {
         display: flex;
         align-items: center;
         position: relative;
+
         .imgChain {
           width: 14px;
           height: 14px;
@@ -71,10 +85,13 @@
           z-index: 1;
         }
       }
+
       .value {
         padding-left: 12px;
+
         .balance {
           font-size: 14px;
+
           .denom {
             padding-left: 4px;
             text-transform: uppercase;
@@ -89,6 +106,7 @@
     display: flex;
     align-items: center;
   }
+
   .time,
   .txhash {
     width: 20%;
@@ -99,13 +117,19 @@
       text-transform: capitalize;
       font-style: normal;
       font-weight: 500;
-      color: #232521;
+
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+      }
     }
+
     .link {
       display: flex;
+
       &:hover {
         font-weight: 600;
       }
+
       .open_link {
         padding-left: 4px;
         display: flex;
@@ -126,6 +150,20 @@
   .to {
     @include mobile() {
       width: 50%;
+    }
+  }
+
+  .timestamp {
+    @include theme() {
+      color: theme-get('neutral-text-body-on-section');
+    }
+  }
+
+  .txhash {
+    .type {
+      @include theme() {
+        color: theme-get('neutral-text-body');
+      }
     }
   }
 }
