@@ -1,5 +1,5 @@
 import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
-import { TokenItemType, oraichainTokens, tokens } from '@oraichain/oraidex-common';
+import { TokenItemType, oraichainTokens, tokens, chainInfos as customChainInfos } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as AtomLightIcon } from 'assets/icons/atom_light.svg';
@@ -60,6 +60,7 @@ import {
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 
 type TokenIcon = Pick<TokenItemType, 'denom' | 'Icon' | 'IconLight'>;
+type ChainIcon = Pick<CustomChainInfo, 'chainId' | 'Icon' | 'IconLight'>;
 export const oraichainTokenIcons: TokenIcon[] = [
   {
     denom: 'orai',
@@ -143,22 +144,83 @@ export const oraichainTokenIcons: TokenIcon[] = [
   }
 ];
 
-export const oraichainTokensWithIcon = oraichainTokens.map((token) => {
-  let Icon = OraiIcon;
-  let IconLight = OraiLightIcon;
-
-  const tokenIcon = oraichainTokenIcons.find((item) => item.denom === token.denom);
-  if (tokenIcon) {
-    Icon = tokenIcon.Icon;
-    IconLight = tokenIcon.IconLight;
+export const chainIcons: ChainIcon[] = [
+  {
+    chainId: 'Oraichain',
+    Icon: OraiIcon,
+    IconLight: OraiLightIcon
+  },
+  {
+    chainId: 'oraibridge-subnet-2',
+    Icon: AtomIcon,
+    IconLight: AtomLightIcon
+  },
+  {
+    chainId: 'kawaii_6886-1',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  {
+    chainId: 'osmosis-1',
+    Icon: OsmoIcon,
+    IconLight: OsmoLightIcon
+  },
+  {
+    chainId: 'injective-1',
+    Icon: InjIcon,
+    IconLight: InjIcon
+  },
+  {
+    chainId: 'cosmoshub-4',
+    Icon: AtomIcon,
+    IconLight: AtomLightIcon
+  },
+  {
+    chainId: '0x01',
+    Icon: EthIcon,
+    IconLight: EthIcon
+  },
+  {
+    chainId: '0x2b6653dc',
+    Icon: TronIcon,
+    IconLight: TronIcon
+  },
+  {
+    chainId: '0x38',
+    Icon: BnbIcon,
+    IconLight: BnbIcon
+  },
+  {
+    chainId: '0x1ae6',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
   }
+];
+export const mapListWithIcon = <T>(
+  list: T[],
+  listIcon: ChainIcon[] | TokenIcon[],
+  key: 'denom' | 'chainId'
+): (T & { Icon: React.ComponentType; IconLight: React.ComponentType })[] => {
+  return list.map((item) => {
+    let Icon = OraiIcon;
+    let IconLight = OraiLightIcon;
 
-  return {
-    ...token,
-    Icon,
-    IconLight
-  };
-});
+    const findedItem = listIcon.find((icon) => icon[key] === item[key]);
+    if (findedItem) {
+      Icon = findedItem.Icon;
+      IconLight = findedItem.IconLight;
+    }
+
+    return {
+      ...item,
+      Icon,
+      IconLight
+    };
+  });
+};
+
+export const chainInfosWithIcon = mapListWithIcon(customChainInfos, chainIcons, 'chainId');
+export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, oraichainTokenIcons, 'denom');
 
 export const OraiToken: BridgeAppCurrency = {
   coinDenom: 'ORAI',
