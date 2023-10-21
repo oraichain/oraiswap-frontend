@@ -50,11 +50,6 @@ const ChooseWalletModal: React.FC<{
   const [theme] = useConfigReducer('theme');
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
-  const [oraiAddressWallet] = useConfigReducer('address');
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddress] = useConfigReducer('cosmosAddress');
-  const [tronAddress] = useConfigReducer('tronAddress');
-
   const content = useMemo(() => {
     if (connectStatus === CONNECT_STATUS.SELECTING) {
       return (
