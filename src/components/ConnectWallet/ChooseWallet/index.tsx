@@ -20,7 +20,7 @@ import styles from './index.module.scss';
 
 import { CONNECT_STATUS, WALLET_TYPES } from '../';
 import { ConnectProgressDone } from './ConnectDone';
-import { getStorageKey, keplrCheck, owalletCheck } from 'helper';
+import { checkVersionWallet, getStorageKey, keplrCheck, owalletCheck } from 'helper';
 import { WalletType } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
@@ -54,8 +54,10 @@ const ChooseWalletModal: React.FC<{
   const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const isMetamask = !!window?.ethereum?.isMetaMask;
-  const isCheckKeplr = keplrCheck('keplr');
-  const isCheckOwallet = owalletCheck('owallet');
+  const vs = window?.keplr?.version;
+  console.log('🚀 ~ file: index.tsx:58 ~ vs:', vs);
+  const isCheckKeplr = !!vs && keplrCheck('keplr');
+  const isCheckOwallet = !!vs && owalletCheck('owallet');
   const isTron = !!window.tronLink;
   const WALLETS: WalletItem[] = [
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
@@ -101,7 +103,7 @@ const ChooseWalletModal: React.FC<{
     } else if (connectStatus === CONNECT_STATUS.DONE) {
       return <ConnectProgressDone cancel={cancel} address={metamaskAddress} />;
     } else {
-      return <ConnectError cancel={cancel} handleTryAgain={()=>tryAgain(walletSelected.walletType)} />;
+      return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;
     }
   }, [connectStatus]);
 

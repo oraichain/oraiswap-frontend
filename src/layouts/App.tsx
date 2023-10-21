@@ -12,6 +12,7 @@ import {
   displayInstallWallet,
   getNetworkGasPrice,
   getStorageKey,
+  keplrCheck,
   setStorageKey,
   switchWallet
 } from 'helper';
@@ -149,9 +150,13 @@ const App = () => {
       if (!keplr) {
         return displayInstallWallet();
       }
-
+      const vs = window?.keplr?.version;
+      const isCheckKeplr = !!vs && keplrCheck('keplr');
+      console.log('🚀 ~ file: App.tsx:154 ~ keplrHandler ~ checkVersionWallet():', checkVersionWallet());
       if (checkVersionWallet()) {
         setStorageKey('typeWallet', 'owallet');
+      } else if (isCheckKeplr) {
+        setStorageKey('typeWallet', 'keplr' as WalletType);
       }
       // TODO: owallet get address tron
       if (!isMobile()) {
@@ -172,7 +177,11 @@ const App = () => {
             console.log('address ===> ', address);
             setMetamaskAddress(ethers.utils.getAddress(address));
           } catch (error) {
-            console.log('🚀 ~ file: App.tsx:172 ~ keplrHandler ~ error:', error);
+            if (error?.code === -32002) {
+              displayToast(TToastType.METAMASK_FAILED, {
+                message: ' Already processing request Ethereum account. Please wait'
+              });
+            }
           }
         }
       }

@@ -15,7 +15,7 @@ import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg'
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { QRGeneratorInfo } from '../QRGenerator';
-import {  reduceString } from 'libs/utils';
+import { reduceString } from 'libs/utils';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import { WalletItem } from '../';
@@ -29,7 +29,7 @@ const MyWallets: React.FC<{
   handleLogoutWallets: (walletType: any) => Promise<void>;
   handleLoginWallets: (walletType: any) => Promise<void>;
   toggleShowNetworks: (id: number) => void;
-  wallets:WalletItem[]
+  wallets: WalletItem[];
 }> = ({
   setQRUrlInfo,
   setIsShowMyWallet,
@@ -47,8 +47,7 @@ const MyWallets: React.FC<{
     networkId: '',
     walletId: 0
   });
-  
-  
+
   const getUrlQrCode = async ({ address, icon, name }) => {
     try {
       const url = await QRCode.toDataURL(address);
@@ -102,11 +101,11 @@ const MyWallets: React.FC<{
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
 
-                  {wallet.isConnect && !!wallet.address && (
+                  {/* {wallet.isConnect && !!wallet.address && (
                     <div>
                       <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}

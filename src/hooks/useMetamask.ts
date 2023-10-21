@@ -29,6 +29,8 @@ export function useEagerConnect() {
       const metamaskAddress = ethers.utils.getAddress(accounts[0]);
       loadTokenAmounts({ metamaskAddress });
       setMetamaskAddress(metamaskAddress);
+    } else {
+      setMetamaskAddress(undefined);
     }
   };
 

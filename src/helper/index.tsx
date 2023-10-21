@@ -157,6 +157,26 @@ export const switchWallet = (type: WalletType) => {
   return false;
 };
 
-export const isEmptyObject = (value:object)=>{
-  return !!value && Object.keys(value).length === 0;
-}
+export const isUnlockMetamask = async () => {
+  const isMetamask = !!window?.ethereum?.isMetaMask;
+  if (isMetamask) {
+    const isUnlock = await window.ethereum._metamask.isUnlocked();
+    return isUnlock;
+  }
+};
+export const isEmptyObject = (value: object) => {
+  if (!!value === false) return true;
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries?.length === 0) {
+      return true;
+    }
+    for (const key in value) {
+      if (value[key] !== undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return true;
+};

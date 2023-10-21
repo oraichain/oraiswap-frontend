@@ -18,6 +18,7 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
 
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
+  console.log('🚀 ~ file: index.tsx:21 ~ amounts:', amounts);
   const { data: prices } = useCoinGeckoPrices();
   const totalUsd = getTotalUsd(amounts, prices);
 
@@ -31,7 +32,6 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
           <div className={cx('content')}>
             <div className={cx('title')}>My Wallets</div>
             <div className={cx('money')}>$ {totalUsd.toFixed(2)}</div>
-
           </div>
           <div className={cx('down_icon')}>
             <DownArrowIcon />
