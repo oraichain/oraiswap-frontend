@@ -203,7 +203,13 @@ const SwapComponent: React.FC<{
         fromAmountToken,
         simulateData.amount,
         userSlippage,
-        averageRatio.amount
+        averageRatio.amount,
+        undefined,
+        fromTokenBalance,
+        {
+          relayerAmount: relayerFeeToken && relayerFeeToken.amount,
+          relayerDecimals: relayerFeeToken && relayerFeeInfo[relayerFeeToken.prefix],
+        }
       );
       const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
         metamaskAddress,
@@ -251,11 +257,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 

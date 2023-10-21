@@ -21,7 +21,7 @@ import CosmJs, {
   getEncodedExecuteContractMsgs
 } from 'libs/cosmjs';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { atomic, generateError, toAmount, toDisplay } from 'libs/utils';
+import { atomic, generateError, toAmount, toDisplay, toTokenInfo } from 'libs/utils';
 import { findToTokenOnOraiBridge, getBalanceIBCOraichain, transferEvmToIBC } from 'pages/Balance/helpers';
 import {
   SwapQuery,
@@ -71,6 +71,13 @@ export const getTransferTokenFee = async ({ remoteTokenDenom }): Promise<Ratio |
   } catch (error) {
     console.log({ error });
   }
+};
+
+export const getRelayerInfoFromToken = (relayerFee, fromTokenTotalBalance, originalFromToken, fromAmount) => {
+  const relayeFeeFromToken = toDisplay(relayerFee.relayerAmount, relayerFee.relayerDecimals);
+  const caculateTotalBalanceFromToken = toDisplay(fromTokenTotalBalance, originalFromToken.decimals);
+  let calulateFromTokenAndFeeRelayer = relayeFeeFromToken + fromAmount;
+  return { caculateTotalBalanceFromToken, calulateFromTokenAndFeeRelayer };
 };
 
 export async function handleSimulateSwap(query: {
@@ -176,6 +183,11 @@ export class UniversalSwapHandler {
     public userSlippage: number,
     public simulateAverage: string,
     public cwIcs20LatestClient?: CwIcs20LatestInterface | CwIcs20LatestReadOnlyInterface,
+    public fromTokenBalance?: bigint,
+    public relayerFee?: {
+      relayerAmount: string;
+      relayerDecimals: number;
+    },
     public _ibcInfos: IBCInfoMap = ibcInfos
   ) {}
 
@@ -287,6 +299,42 @@ export class UniversalSwapHandler {
     return `${ibcPort}/${ibcChannel}/${denom}`;
   }
 
+  async checkFeeRelayer() {
+    if (!this.relayerFee.relayerAmount) return true;
+    const { caculateTotalBalanceFromToken, calulateFromTokenAndFeeRelayer } = getRelayerInfoFromToken(
+      this.relayerFee,
+      this.fromTokenBalance,
+      this.originalFromToken,
+      this.fromAmount
+    );
+
+    // From Token is orai
+    if (
+      this.originalFromToken.coinGeckoId === 'oraichain-token' &&
+      calulateFromTokenAndFeeRelayer > caculateTotalBalanceFromToken
+    ) {
+      throw generateError(`fee relayer is not enough`);
+    }
+    // estimate exchange token when From Token not orai
+    await this.checkFeeRelayerNotOrai(caculateTotalBalanceFromToken);
+  }
+
+  async checkFeeRelayerNotOrai(totalBalanceFrom) {
+    const tokenTo = getTokenOnOraichain('oraichain-token');
+    const tokenFrom = getTokenOnOraichain(this.originalFromToken.coinGeckoId);
+    const { amount } = await simulateSwap({
+      fromInfo: toTokenInfo(tokenTo),
+      toInfo: tokenFrom,
+      amount: this.relayerFee.relayerAmount
+    });
+
+    const calulateFromTokenAndFeeRelayer = toDisplay(amount, tokenFrom.decimals) + this.fromAmount;
+    if (calulateFromTokenAndFeeRelayer > totalBalanceFrom) {
+      throw generateError(`fee relayer is not enough`);
+    }
+    return;
+  }
+
   async checkBalanceChannelIbc(ibcInfo: IBCInfo, toToken: TokenItemType) {
     const ics20Contract =
       this.cwIcs20LatestClient ?? new CwIcs20LatestQueryClient(window.client, process.env.REACT_APP_IBC_WASM_CONTRACT);
@@ -383,7 +431,7 @@ export class UniversalSwapHandler {
     const combinedMsgs = await this.combineMsgs(metamaskAddress, tronAddress);
     const { ibcInfo } = this.getIbcInfoIbcMemo(metamaskAddress, tronAddress);
     await this.checkBalanceChannelIbc(ibcInfo, this.originalToToken);
-
+    await this.checkFeeRelayer();
     // handle sign and broadcast transactions
     const wallet = await collectWallet(this.originalFromToken.chainId);
     const { client } = await getCosmWasmClient(
@@ -427,6 +475,7 @@ export class UniversalSwapHandler {
       fromAmount: this.fromAmount,
       toAmount: this.simulateAmount
     });
+    await this.checkFeeRelayer();
 
     const toTokenSameFromChainId = getTokenOnSpecificChainId(
       this.originalToToken.coinGeckoId,
