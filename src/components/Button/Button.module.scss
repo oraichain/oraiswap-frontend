@@ -22,17 +22,17 @@
 }
 
 .primary {
-  background-color: #aee67f;
-  color: #1e300a;
+  background-color: $primary-bg-btn;
+  color: $text-btn-default;
   border: 1px;
   padding: 14.5px 39px;
   border-radius: 99px;
 }
 
 .primary-sm {
-  background-color: #aee67f;
+  background-color: $primary-bg-btn;
   font-weight: 400;
-  color: #1e300a;
+  color: $text-btn-default;
   border: 1px;
   padding: 4px 16px;
 }

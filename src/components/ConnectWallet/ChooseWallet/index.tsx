@@ -20,8 +20,7 @@ import styles from './index.module.scss';
 
 import { CONNECT_STATUS, WALLET_TYPES } from '../';
 import { ConnectProgressDone } from './ConnectDone';
-import { checkVersionWallet, getStorageKey, keplrCheck, owalletCheck } from 'helper';
-import { WalletType } from '@oraichain/oraidex-common';
+import { keplrCheck, owalletCheck } from 'helper';
 
 const cx = cn.bind(styles);
 
@@ -32,30 +31,19 @@ export interface WalletItem {
   isActive?: boolean;
 }
 
-// enum CONNECT_STATUS {
-//   SELECTING = 'SELECTING',
-//   PROCESSING = 'PROCESSING',
-//   DONE = 'DONE',
-//   ERROR = 'ERROR'
-// }
-
 const ChooseWalletModal: React.FC<{
   close: () => void;
   cancel: () => void;
   connectToWallet: (walletType: WALLET_TYPES) => void;
   connectStatus: CONNECT_STATUS;
   tryAgain: (walletType: WALLET_TYPES) => void;
-}> = ({ close, connectToWallet, connectStatus, cancel, tryAgain }) => {
+  address: string;
+}> = ({ close, connectToWallet, connectStatus, cancel, tryAgain, address }) => {
   const [theme] = useConfigReducer('theme');
-  // const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
-  const [oraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddress] = useConfigReducer('cosmosAddress');
-  const [tronAddress] = useConfigReducer('tronAddress');
   const isMetamask = !!window?.ethereum?.isMetaMask;
   const vs = window?.keplr?.version;
-  console.log('🚀 ~ file: index.tsx:58 ~ vs:', vs);
   const isCheckKeplr = !!vs && keplrCheck('keplr');
   const isCheckOwallet = !!vs && owalletCheck('owallet');
   const isTron = !!window.tronLink;
@@ -97,11 +85,9 @@ const ChooseWalletModal: React.FC<{
         </div>
       );
     } else if (connectStatus === CONNECT_STATUS.PROCESSING) {
-      return (
-        <ConnectProcessing cancel={cancel} onDone={() => {}} wallet={walletSelected} walletName={walletSelected.name} />
-      );
+      return <ConnectProcessing cancel={cancel} walletName={walletSelected.name} />;
     } else if (connectStatus === CONNECT_STATUS.DONE) {
-      return <ConnectProgressDone cancel={cancel} address={metamaskAddress} />;
+      return <ConnectProgressDone cancel={cancel} address={address} />;
     } else {
       return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;
     }

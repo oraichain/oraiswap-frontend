@@ -8,6 +8,7 @@ export const ConnectProgressDone: React.FC<{ cancel: () => void; address: string
   return (
     <div className={cx('connect_processing', theme)}>
       <div className={cx('content')}>This address has already been added</div>
+      <div className={cx('content')}>{address}</div>
       <div className={cx('cancel_btn')} onClick={cancel}>
         Cancel
       </div>

@@ -24,16 +24,7 @@ import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 
-export const UnstakeLPModal: FC<ModalProps> = ({
-  isOpen,
-  close,
-  open,
-  myLpBalance,
-  myLpUsdt,
-  onLiquidityChange,
-  assetToken,
-  lpPrice
-}) => {
+export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidityChange, lpPrice }) => {
   let { poolUrl } = useParams();
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');

@@ -45,7 +45,7 @@ const RowsComponent: React.FC<{
       <div className={styles.history}>
         <div className={styles.time}>
           <div className={styles.type}>{rows.type}</div>
-          <div>{rows.time}</div>
+          <div className={styles.timestamp}>{rows.time}</div>
         </div>
         <div className={styles.from}>
           <div className={styles.list}>
@@ -66,7 +66,7 @@ const RowsComponent: React.FC<{
                 {rows.balance}
                 <span className={styles.denom}>{rows.denom}</span>
               </div>
-              <div className={styles.usd}>${rows.usd}</div>
+              <div className={styles.timestamp}>${rows.usd}</div>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ const RowsComponent: React.FC<{
                   {rows.balance}
                   <span className={styles.denom}>{rows.denom}</span>
                 </div>
-                <div className={styles.usd}>${rows.usd}</div>
+                <div className={styles.timestamp}>${rows.usd}</div>
               </div>
             </div>
           )}
