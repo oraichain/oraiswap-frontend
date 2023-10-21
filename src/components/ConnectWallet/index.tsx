@@ -123,8 +123,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       // address: '',
       isConnect: !!isEmptyObject(cosmosAddress) === false,
       networks: cosmosNetworks.map((item: any, index) => {
-        item.address = cosmosAddress[item.chainId];
-        return item;
+        if (!!isEmptyObject(cosmosAddress) === false) {
+          item.address = cosmosAddress[item.chainId];
+          return item;
+        } else {
+          item.address = undefined;
+          return item;
+        }
       })
     },
     {
@@ -145,7 +150,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
 
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
-  // const loadTokenAmounts = useLoadTokens();
+  const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   // const [walletTypeActive, setWalletTypeActive] = useState(null);
@@ -238,54 +243,53 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
   useEffect(() => {
     setWallets(walletInit);
-
     return () => {};
   }, [metamaskAddress, cosmosAddress, tronAddress]);
 
-  // const connectTronLink = async () => {
-  //   try {
-  //     // if not requestAccounts before
-  //     if (window.Metamask.checkTron()) {
-  //       // TODO: Check owallet mobile
-  //       let tronAddress: string;
-  //       if (isMobile()) {
-  //         const addressTronMobile = await window.tronLink.request({
-  //           method: 'tron_requestAccounts'
-  //         });
-  //         //@ts-ignore
-  //         tronAddress = addressTronMobile?.base58;
-  //       } else {
-  //         if (!window.tronWeb.defaultAddress?.base58) {
-  //           const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-  //             method: 'tron_requestAccounts'
-  //           });
-  //           // throw error when not connected
-  //           if (code !== 200) {
-  //             displayToast(TToastType.TRONLINK_FAILED, { message });
-  //             return;
-  //           }
-  //         }
+  const connectTronLink = async () => {
+    try {
+      // if not requestAccounts before
+      if (window.Metamask.checkTron()) {
+        // TODO: Check owallet mobile
+        let tronAddress: string;
+        if (isMobile()) {
+          const addressTronMobile = await window.tronLink.request({
+            method: 'tron_requestAccounts'
+          });
+          //@ts-ignore
+          tronAddress = addressTronMobile?.base58;
+        } else {
+          if (!window.tronWeb.defaultAddress?.base58) {
+            const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+              method: 'tron_requestAccounts'
+            });
+            // throw error when not connected
+            if (code !== 200) {
+              displayToast(TToastType.TRONLINK_FAILED, { message });
+              return;
+            }
+          }
 
-  //         tronAddress = window.tronWeb.defaultAddress.base58;
-  //       }
-  //       loadTokenAmounts({ tronAddress });
-  //       setTronAddress(tronAddress);
-  //     }
-  //   } catch (ex) {
-  //     console.log('error in connecting tron link: ', ex);
-  //     displayToast(TToastType.TRONLINK_FAILED, { message: JSON.stringify(ex) });
-  //   }
-  // };
+          tronAddress = window.tronWeb.defaultAddress.base58;
+        }
+        loadTokenAmounts({ tronAddress });
+        setTronAddress(tronAddress);
+      }
+    } catch (ex) {
+      console.log('error in connecting tron link: ', ex);
+      displayToast(TToastType.TRONLINK_FAILED, { message: JSON.stringify(ex) });
+    }
+  };
 
-  // const disconnectTronLink = async () => {
-  //   try {
-  //     setTronAddress(undefined);
-  //     // remove account storage tron owallet
-  //     localStorage.removeItem('tronWeb.defaultAddress');
-  //   } catch (ex) {
-  //     console.log(ex);
-  //   }
-  // };
+  const disconnectTronLink = async () => {
+    try {
+      setTronAddress(undefined);
+      // remove account storage tron owallet
+      localStorage.removeItem('tronWeb.defaultAddress');
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
 
   const connectKeplr = async (type: WalletType) => {
     try {
@@ -302,8 +306,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       });
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddress = await window.Keplr.getKeplrAddr();
-      // loadTokenAmounts({ oraiAddress });
+      loadTokenAmounts({ oraiAddress });
       // setOraiAddressWallet(oraiAddress);
+      getListAddressCosmos();
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
     }
@@ -312,7 +317,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const disconnectKeplr = async () => {
     try {
       window.Keplr.disconnect();
-      // setOraiAddressWallet('');
+      setCosmosAddress({});
     } catch (ex) {
       console.log(ex);
     }
@@ -350,41 +355,41 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         if (method === METHOD_WALLET_TYPES.START) {
           // await startMetamask();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          setConnectStatus(CONNECT_STATUS.PROCESSING);
+          // setConnectStatus(CONNECT_STATUS.PROCESSING);
           await connectMetamask();
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectMetamask();
         }
         break;
-        // case WALLET_TYPES.OWALLET:
-        //   if (method === METHOD_WALLET_TYPES.START) {
-        //     // await startOwallet();
-        //   } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
-        //     await connectKeplr('owallet');
-        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-        //     await disconnectKeplr();
-        //   }
+      case WALLET_TYPES.OWALLET:
+        if (method === METHOD_WALLET_TYPES.START) {
+          // await startOwallet();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          // setConnectStatus(CONNECT_STATUS.PROCESSING);
+          await connectKeplr('owallet');
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectKeplr();
+        }
 
-        //   break;
-        // case WALLET_TYPES.KEPLR:
-        //   if (method === METHOD_WALLET_TYPES.START) {
-        //     // await startKeplr();
-        //   } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
-        //     await connectKeplr('keplr');
-        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-        //     await disconnectKeplr();
-        //   }
+        break;
+      case WALLET_TYPES.KEPLR:
+        if (method === METHOD_WALLET_TYPES.START) {
+          // await startKeplr();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          // setConnectStatus(CONNECT_STATUS.PROCESSING);
+          await connectKeplr('keplr');
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectKeplr();
+        }
 
-        //   break;
-        // case WALLET_TYPES.TRON:
-        //   if (method === METHOD_WALLET_TYPES.CONNECT) {
-        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
-        //     await connectTronLink();
-        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-        //     await disconnectTronLink();
-        //   }
+        break;
+      case WALLET_TYPES.TRON:
+        if (method === METHOD_WALLET_TYPES.CONNECT) {
+          // setConnectStatus(CONNECT_STATUS.PROCESSING);
+          await connectTronLink();
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectTronLink();
+        }
 
         break;
       default:
