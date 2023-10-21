@@ -152,7 +152,6 @@ const App = () => {
       }
       const vs = window?.keplr?.version;
       const isCheckKeplr = !!vs && keplrCheck('keplr');
-      console.log('🚀 ~ file: App.tsx:154 ~ keplrHandler ~ checkVersionWallet():', checkVersionWallet());
       if (checkVersionWallet()) {
         setStorageKey('typeWallet', 'owallet');
       } else if (isCheckKeplr) {
