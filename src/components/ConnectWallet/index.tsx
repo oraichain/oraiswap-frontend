@@ -89,8 +89,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
-  const connectMetamask = useCallback(async () => {
+  const [walletTypeActive, setWalletTypeActive] = useState(null);
+  const connectMetamask = async () => {
     try {
+      setWalletTypeActive(WALLET_TYPES.METAMASK);
       // if chain id empty, we switch to default network which is BSC
       if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
@@ -100,7 +102,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         const isUnlock = await window.ethereum._metamask.isUnlocked();
         if (!isUnlock) {
           displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock metamask wallet' });
-          return;
+          throw Error('Please unlock metamask wallet');
         }
       }
       await connect();
@@ -108,13 +110,23 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       setConnectStatus(CONNECT_STATUS.ERROR);
       console.log('error in connecting metamask: ', ex);
     } finally {
-      console.log('🚀 ~ file: index.tsx:111 ~ connectMetamask ~ metamaskAddress:', metamaskAddress);
-      delay(() => {
-        setConnectStatus(CONNECT_STATUS.DONE);
-      }, 1000);
+      console.log('🚀 ~ file: index.tsx:117 ~ metamaskAddress:', metamaskAddress);
+      setWalletTypeActive(null);
     }
-  }, [metamaskAddress]);
+  };
+
   const isConnected = !!metamaskAddress || !!tronAddress || isEmptyObject(cosmosAddress);
+  useEffect(() => {
+    if (connectStatus === CONNECT_STATUS.PROCESSING) {
+      if (walletTypeActive === WALLET_TYPES.METAMASK && !!metamaskAddress) {
+        delay(() => {
+          setConnectStatus(CONNECT_STATUS.DONE);
+        }, 2000);
+      }
+    }
+
+    return () => {};
+  }, [metamaskAddress, connectStatus, walletTypeActive]);
 
   useEffect(() => {
     getListAddressCosmos();
