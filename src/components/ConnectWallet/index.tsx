@@ -101,8 +101,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   console.log('🚀 ~ file: index.tsx:101 ~ tronAddress:', tronAddress);
   const walletType = getStorageKey() as WalletType;
-
-  const [wallets, setWallets] = useState<WalletItem[]>([
+  const walletInit = [
     {
       id: 1,
       name: 'Metamask',
@@ -142,8 +141,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         return item;
       })
     }
-  ]);
-  // const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
+  ];
+  const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
+
+  const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   // const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
@@ -154,27 +155,34 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   // console.log('🚀 ~ file: index.tsx:105 ~ isCheckKeplr:', isCheckKeplr);
   // const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck(walletType);
   // console.log('🚀 ~ file: index.tsx:107 ~ isCheckOwallet:', isCheckOwallet);
-  // const connectMetamask = async () => {
-  //   try {
-  //     setWalletTypeActive(WALLET_TYPES.METAMASK);
-  //     // if chain id empty, we switch to default network which is BSC
-  //     if (!window?.ethereum?.chainId) {
-  //       await window.Metamask.switchNetwork(Networks.bsc);
-  //     }
-  //     const isUnlock = await isUnlockMetamask();
-  //     if (!isUnlock) {
-  //       displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-  //       return;
-  //     }
-  //     await connect();
-  //   } catch (ex) {
-  //     setConnectStatus(CONNECT_STATUS.ERROR);
-  //     console.log('error in connecting metamask: ', ex);
-  //   } finally {
-  //     console.log('🚀 ~ file: index.tsx:117 ~ metamaskAddress:', metamaskAddress);
-  //     setWalletTypeActive(null);
-  //   }
-  // };
+  const connectMetamask = async () => {
+    try {
+      // setWalletTypeActive(WALLET_TYPES.METAMASK);
+      // if chain id empty, we switch to default network which is BSC
+      if (!window?.ethereum?.chainId) {
+        await window.Metamask.switchNetwork(Networks.bsc);
+      }
+
+      const isMetamask = !!window?.ethereum?.isMetaMask;
+      console.log('🚀 ~ file: index.tsx:167 ~ connectMetamask ~ isMetamask:', isMetamask);
+      if (!isMetamask) {
+        displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
+        return;
+      }
+      const isUnlock = await isUnlockMetamask();
+      if (!isUnlock) {
+        displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
+        return;
+      }
+      await connect();
+    } catch (ex) {
+      setConnectStatus(CONNECT_STATUS.ERROR);
+      console.log('error in connecting metamask: ', ex);
+    } finally {
+      console.log('🚀 ~ file: index.tsx:117 ~ metamaskAddress:', metamaskAddress);
+      // setWalletTypeActive(null);
+    }
+  };
 
   const isConnected = !!metamaskAddress || !!tronAddress || !!isEmptyObject(cosmosAddress) === false;
   console.log('🚀 ~ file: index.tsx:137 ~ isEmptyObject(cosmosAddress):', !!isEmptyObject(cosmosAddress));
@@ -221,13 +229,18 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
 
-  // const disconnectMetamask = async () => {
-  //   try {
-  //     setMetamaskAddress(undefined);
-  //   } catch (ex) {
-  //     console.log(ex);
-  //   }
-  // };
+  const disconnectMetamask = async () => {
+    try {
+      setMetamaskAddress(undefined);
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
+  useEffect(() => {
+    setWallets(walletInit);
+
+    return () => {};
+  }, [metamaskAddress, cosmosAddress, tronAddress]);
 
   // const connectTronLink = async () => {
   //   try {
@@ -274,36 +287,36 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   //   }
   // };
 
-  // const connectKeplr = async (type: WalletType) => {
-  //   try {
-  //     console.log('🚀 ~ file: index.tsx:230 ~ connectKeplr ~ type:', type);
-  //     window.Keplr = new Keplr(type);
-  //     setWalletTypeActive(type === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET);
-  //     setStorageKey('typeWallet', type);
-  //     if (!(await window.Keplr.getKeplr())) {
-  //       return displayInstallWallet();
-  //     }
-  //     const wallet = await collectWallet(network.chainId);
-  //     window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-  //       gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  //     });
-  //     await window.Keplr.suggestChain(network.chainId);
-  //     const oraiAddress = await window.Keplr.getKeplrAddr();
-  //     loadTokenAmounts({ oraiAddress });
-  //     setOraiAddressWallet(oraiAddress);
-  //   } catch (error) {
-  //     console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
-  //   }
-  // };
+  const connectKeplr = async (type: WalletType) => {
+    try {
+      console.log('🚀 ~ file: index.tsx:230 ~ connectKeplr ~ type:', type);
+      window.Keplr = new Keplr(type);
+      // setWalletTypeActive(type === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET);
+      setStorageKey('typeWallet', type);
+      if (!(await window.Keplr.getKeplr())) {
+        return displayInstallWallet();
+      }
+      const wallet = await collectWallet(network.chainId);
+      window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+      });
+      await window.Keplr.suggestChain(network.chainId);
+      const oraiAddress = await window.Keplr.getKeplrAddr();
+      // loadTokenAmounts({ oraiAddress });
+      // setOraiAddressWallet(oraiAddress);
+    } catch (error) {
+      console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
+    }
+  };
 
-  // const disconnectKeplr = async () => {
-  //   try {
-  //     window.Keplr.disconnect();
-  //     setOraiAddressWallet('');
-  //   } catch (ex) {
-  //     console.log(ex);
-  //   }
-  // };
+  const disconnectKeplr = async () => {
+    try {
+      window.Keplr.disconnect();
+      // setOraiAddressWallet('');
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
 
   // const startMetamask = async () => {
   //   const isUnlock = await isUnlockMetamask();
@@ -331,60 +344,61 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   //   await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
   //   return;
   // };
-  // const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
-  //   switch (walletType) {
-  //     case WALLET_TYPES.METAMASK:
-  //       if (method === METHOD_WALLET_TYPES.START) {
-  //         await startMetamask();
-  //       } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-  //         setConnectStatus(CONNECT_STATUS.PROCESSING);
-  //         await connectMetamask();
-  //       } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-  //         await disconnectMetamask();
-  //       }
-  //       break;
-  //     case WALLET_TYPES.OWALLET:
-  //       if (method === METHOD_WALLET_TYPES.START) {
-  //         await startOwallet();
-  //       } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-  //         setConnectStatus(CONNECT_STATUS.PROCESSING);
-  //         await connectKeplr('owallet');
-  //       } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-  //         await disconnectKeplr();
-  //       }
+  const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
+    switch (walletType) {
+      case WALLET_TYPES.METAMASK:
+        if (method === METHOD_WALLET_TYPES.START) {
+          // await startMetamask();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          setConnectStatus(CONNECT_STATUS.PROCESSING);
+          await connectMetamask();
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectMetamask();
+        }
+        break;
+        // case WALLET_TYPES.OWALLET:
+        //   if (method === METHOD_WALLET_TYPES.START) {
+        //     // await startOwallet();
+        //   } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
+        //     await connectKeplr('owallet');
+        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+        //     await disconnectKeplr();
+        //   }
 
-  //       break;
-  //     case WALLET_TYPES.KEPLR:
-  //       if (method === METHOD_WALLET_TYPES.START) {
-  //         await startKeplr();
-  //       } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-  //         setConnectStatus(CONNECT_STATUS.PROCESSING);
-  //         await connectKeplr('keplr');
-  //       } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-  //         await disconnectKeplr();
-  //       }
+        //   break;
+        // case WALLET_TYPES.KEPLR:
+        //   if (method === METHOD_WALLET_TYPES.START) {
+        //     // await startKeplr();
+        //   } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
+        //     await connectKeplr('keplr');
+        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+        //     await disconnectKeplr();
+        //   }
 
-  //       break;
-  //     case WALLET_TYPES.TRON:
-  //       if (method === METHOD_WALLET_TYPES.CONNECT) {
-  //         await connectTronLink();
-  //       } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-  //         await disconnectTronLink();
-  //       }
+        //   break;
+        // case WALLET_TYPES.TRON:
+        //   if (method === METHOD_WALLET_TYPES.CONNECT) {
+        //     setConnectStatus(CONNECT_STATUS.PROCESSING);
+        //     await connectTronLink();
+        //   } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+        //     await disconnectTronLink();
+        //   }
 
-  //       break;
-  //     default:
-  //       break;
+        break;
+      default:
+        break;
+    }
+  };
+  // const walletsModified = wallets.map((w) => {
+  //   if (w.code === walletType) {
+  //     w.isConnect = !!w.address;
+  //     w.isOpen = true;
   //   }
-  //   const walletsModified = wallets.map((w) => {
-  //     if (w.code === walletType) {
-  //       w.isConnect = !!w.address;
-  //       w.isOpen = true;
-  //     }
-  //     return w;
-  //   });
-  //   setWallets(walletsModified);
-  // };
+  //   return w;
+  // });
+  // setWallets(walletsModified);
 
   const toggleShowNetworks = (id: number) => {
     const walletsModified = wallets.map((w) => {
@@ -494,16 +508,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
               //   setIsShowChooseWallet(true);
               //   setIsShowMyWallet(false);
               // }}
-              // wallets={wallets}
               toggleShowNetworks={toggleShowNetworks}
-              // handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
-              // handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
+              handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
+              handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
               setQRUrlInfo={setQRUrlInfo}
               // setIsShowMyWallet={setIsShowMyWallet}
               handleAddWallet={null}
               wallets={wallets}
-              handleLogoutWallets={null}
-              handleLoginWallets={null}
               setIsShowMyWallet={null}
             />
           }
