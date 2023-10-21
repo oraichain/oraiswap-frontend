@@ -40,7 +40,8 @@ import {
   GAS_ESTIMATION_SWAP_DEFAULT,
   ORAI,
   TRON_DENOM,
-  CosmosChainId
+  CosmosChainId,
+  oraichainTokens
 } from '@oraichain/oraidex-common';
 import {
   isEvmSwappable,
@@ -216,6 +217,23 @@ const SwapComponent: React.FC<{
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
   const handleSubmit = async () => {
+    // save to duckdb
+    console.log({ originalFromToken, originalToToken });
+    await window.duckdb.addTransHistory({
+      initialTxHash: '1',
+      fromCoingeckoId: originalFromToken.coinGeckoId,
+      toCoingeckoId: originalToToken.coinGeckoId,
+      fromChainId: originalFromToken.chainId,
+      toChainId: originalToToken.chainId,
+      fromAmount: fromAmountToken.toString(),
+      toAmount: toAmountToken.toString(),
+      fromAmountInUsdt: fromAmountToken.toString(),
+      toAmountInUsdt: toAmountToken.toString(),
+      status: 'ok',
+      type: 'Swap',
+      timestamp: Date.now()
+    });
+    return;
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
@@ -243,7 +261,9 @@ const SwapComponent: React.FC<{
         },
         { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
+      console.log('prev');
       const result = await univeralSwapHandler.processUniversalSwap();
+
       if (result) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)

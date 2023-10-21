@@ -15,10 +15,11 @@ import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
+import { DuckDb } from 'libs/duckdb';
 
 const queryClient = new QueryClient();
 
-if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
+if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   Sentry.init({
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
@@ -41,6 +42,9 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
 const initApp = async () => {
   // @ts-ignore
   window.client = await SigningCosmWasmClient.connect(network.rpc);
+
+  await DuckDb.create();
+  window.duckdb = DuckDb.instance;
 
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
