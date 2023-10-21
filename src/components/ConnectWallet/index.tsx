@@ -88,7 +88,7 @@ export enum CONNECT_STATUS {
 const ConnectWallet: FC<ModalProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
   // const [isShowConnectWallet, setIsShowConnectWallet] = useState(false);
-  // const [wallets, setWallets] = useState<WalletItem[]>([]);
+
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   // const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
@@ -100,10 +100,53 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   console.log('🚀 ~ file: index.tsx:101 ~ tronAddress:', tronAddress);
+  const walletType = getStorageKey() as WalletType;
+
+  const [wallets, setWallets] = useState<WalletItem[]>([
+    {
+      id: 1,
+      name: 'Metamask',
+      code: WALLET_TYPES.METAMASK,
+      icon: MetamaskImage,
+      totalUsd: 0,
+      isOpen: false,
+      // address: metamaskAddress,
+      isConnect: !!metamaskAddress,
+      networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }]
+    },
+    {
+      id: 2,
+      name: walletType === 'keplr' ? 'Keplr' : 'Owallet',
+      code: walletType === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
+      icon: walletType === 'keplr' ? KeplrImage : OwalletImage,
+      totalUsd: 0,
+      isOpen: false,
+      // address: '',
+      isConnect: !!isEmptyObject(cosmosAddress) === false,
+      networks: cosmosNetworks.map((item: any, index) => {
+        item.address = cosmosAddress[item.chainId];
+        return item;
+      })
+    },
+    {
+      id: 3,
+      name: 'TronLink',
+      code: WALLET_TYPES.TRON,
+      icon: TronWalletImage,
+      totalUsd: 0,
+      isOpen: false,
+      // address: tronAddress,
+      isConnect: !!tronAddress,
+      networks: tronNetworks.map((item: any, index) => {
+        item.address = tronAddress;
+        return item;
+      })
+    }
+  ]);
   // const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   // const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
-  // const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
+  const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   // const [walletTypeActive, setWalletTypeActive] = useState(null);
   // const walletType = getStorageKey() as WalletType;
   // console.log('🚀 ~ file: index.tsx:104 ~ walletType:', walletType);
@@ -343,13 +386,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   //   setWallets(walletsModified);
   // };
 
-  // const toggleShowNetworks = (id: number) => {
-  //   const walletsModified = wallets.map((w) => {
-  //     if (w.id === id) w.isOpen = !w.isOpen;
-  //     return w;
-  //   });
-  //   setWallets(walletsModified);
-  // };
+  const toggleShowNetworks = (id: number) => {
+    const walletsModified = wallets.map((w) => {
+      if (w.id === id) w.isOpen = !w.isOpen;
+      return w;
+    });
+    setWallets(walletsModified);
+  };
 
   // const { data: prices } = useCoinGeckoPrices();
   // const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -452,17 +495,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
               //   setIsShowMyWallet(false);
               // }}
               // wallets={wallets}
-              // toggleShowNetworks={toggleShowNetworks}
+              toggleShowNetworks={toggleShowNetworks}
               // handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
               // handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
-              // setQRUrlInfo={setQRUrlInfo}
+              setQRUrlInfo={setQRUrlInfo}
               // setIsShowMyWallet={setIsShowMyWallet}
               handleAddWallet={null}
-              wallets={[]}
-              toggleShowNetworks={null}
+              wallets={wallets}
               handleLogoutWallets={null}
               handleLoginWallets={null}
-              setQRUrlInfo={null}
               setIsShowMyWallet={null}
             />
           }
@@ -485,6 +526,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           }}
         />
       ) : null}
+     */}
       {QRUrlInfo.url ? (
         <QRGeneratorModal
           url={QRUrlInfo.url}
@@ -493,7 +535,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           address={QRUrlInfo.address}
           close={() => setQRUrlInfo({ ...QRUrlInfo, url: '' })}
         />
-      ) : null} */}
+      ) : null}
     </div>
   );
 };
