@@ -10,9 +10,9 @@ import { useEffect } from 'react';
 
 const cx = cn.bind(styles);
 
-const ConnectProcessing: React.FC<{ onDone: () => void; walletName: string; wallet: WalletItem; close: () => void }> = ({
+const ConnectProcessing: React.FC<{ onDone: () => void; walletName: string; wallet: WalletItem; cancel: () => void }> = ({
   walletName,
-  close
+  cancel
 }) => {
   const [theme] = useConfigReducer('theme');
   // const isConnected = 
@@ -32,7 +32,7 @@ const ConnectProcessing: React.FC<{ onDone: () => void; walletName: string; wall
         </span>
       </div>
       <div className={cx('content')}>Connect {walletName} to OraiDEX to proceed</div>
-      <div className={cx('cancel_btn')} onClick={close}>
+      <div className={cx('cancel_btn')} onClick={cancel}>
         Cancel
       </div>
     </div>

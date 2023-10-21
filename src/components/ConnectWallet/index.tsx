@@ -61,6 +61,17 @@ export interface WalletItem {
   address?: string;
 }
 
+export enum METHOD_WALLET_TYPES {
+  CONNECT = 'CONNECT',
+  DISCONNECT = 'DISCONNECT',
+  PROCESSING = 'PROCESSING'
+}
+export enum CONNECT_STATUS {
+  SELECTING = 'SELECTING',
+  PROCESSING = 'PROCESSING',
+  DONE = 'DONE',
+  ERROR = 'ERROR'
+}
 const ConnectWallet: FC<ModalProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const [isShowConnectWallet, setIsShowConnectWallet] = useState(false);
@@ -72,6 +83,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   console.log('🚀 ~ file: index.tsx:68 ~ cosmosAddress:', cosmosAddress);
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
@@ -95,8 +107,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
   const isConnected = !!metamaskAddress || !!tronAddress || isEmptyObject(cosmosAddress);
-  console.log('🚀 ~ file: index.tsx:85 ~ metamaskAddress:', metamaskAddress);
-  console.log('🚀 ~ file: index.tsx:85 ~ isConnected:', isConnected);
 
   useEffect(() => {
     getListAddressCosmos();
@@ -200,19 +210,68 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
 
-  const handleLoginWallets = async (walletType) => {
+  const processingMetamask = async () => {
+    const isMetamask = !!window.ethereum?.isMetaMask;
+    if (isMetamask) {
+      const isUnlock = await window.ethereum._metamask.isUnlocked();
+      if (isUnlock && metamaskAddress) {
+        setConnectStatus(CONNECT_STATUS.DONE);
+      } else {
+        setConnectStatus(CONNECT_STATUS.PROCESSING);
+      }
+    }
+    return;
+  };
+  const processingOwallet = async () => {
+    return;
+  };
+  const processingKeplr = async () => {
+    return;
+  };
+  const processingTron = async () => {
+    return;
+  };
+
+  const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
-        await connectMetamask();
+        if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await connectMetamask();
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectMetamask();
+        } else if (method === METHOD_WALLET_TYPES.PROCESSING) {
+          await processingMetamask();
+        }
         break;
       case WALLET_TYPES.OWALLET:
-        await connectKeplr('owallet');
+        if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await connectKeplr('owallet');
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectKeplr();
+        } else if (method === METHOD_WALLET_TYPES.PROCESSING) {
+          await processingOwallet();
+        }
+
         break;
       case WALLET_TYPES.KEPLR:
-        await connectKeplr('keplr');
+        if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await connectKeplr('keplr');
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectKeplr();
+        } else if (method === METHOD_WALLET_TYPES.PROCESSING) {
+          await processingKeplr();
+        }
+
         break;
       case WALLET_TYPES.TRON:
-        await connectTronLink();
+        if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await connectTronLink();
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectTronLink();
+        } else if (method === METHOD_WALLET_TYPES.PROCESSING) {
+          await processingTron();
+        }
+
         break;
       default:
         break;
@@ -220,31 +279,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     const walletsModified = wallets.map((w) => {
       if (w.code === walletType) {
         w.isConnect = !!w.address;
-        w.isOpen = true;
-      }
-      return w;
-    });
-    setWallets(walletsModified);
-  };
-
-  const handleLogoutWallets = async (walletType) => {
-    switch (walletType) {
-      case WALLET_TYPES.METAMASK:
-        await disconnectMetamask();
-        break;
-      case WALLET_TYPES.OWALLET:
-      case WALLET_TYPES.KEPLR:
-        await disconnectKeplr();
-        break;
-      case WALLET_TYPES.TRON:
-        await disconnectTronLink();
-        break;
-      default:
-        break;
-    }
-    const walletsModified = wallets.map((w) => {
-      if (w.code === walletType) {
-        w.isConnect = false;
         w.isOpen = true;
       }
       return w;
@@ -350,8 +384,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
               }}
               wallets={wallets}
               toggleShowNetworks={toggleShowNetworks}
-              handleLogoutWallets={handleLogoutWallets}
-              handleLoginWallets={handleLoginWallets}
+              handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
+              handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
               setQRUrlInfo={setQRUrlInfo}
               setIsShowMyWallet={setIsShowMyWallet}
             />
@@ -361,7 +395,16 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         </TooltipContainer>
       )}
       {isShowChooseWallet ? (
-        <ChooseWalletModal connectToWallet={handleLoginWallets} close={() => setIsShowChooseWallet(false)} />
+        <ChooseWalletModal
+          connectStatus={connectStatus}
+          connectToWallet={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.PROCESSING)}
+          close={() => {
+            setIsShowChooseWallet(false);
+          }}
+          cancel={() => {
+            setConnectStatus(CONNECT_STATUS.SELECTING);
+          }}
+        />
       ) : null}
       {QRUrlInfo.url ? (
         <QRGeneratorModal

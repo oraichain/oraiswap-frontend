@@ -18,7 +18,7 @@ import ConnectProcessing from './ConnectProcessing';
 import ConnectError from './ConnectError';
 import styles from './index.module.scss';
 
-import { WALLET_TYPES } from '../';
+import { CONNECT_STATUS, WALLET_TYPES } from '../';
 import { ConnectProgressDone } from './ConnectDone';
 import { getStorageKey, keplrCheck, owalletCheck } from 'helper';
 import { WalletType } from '@oraichain/oraidex-common';
@@ -32,26 +32,27 @@ export interface WalletItem {
   isActive?: boolean;
 }
 
-enum CONNECT_STATUS {
-  SELECTING = 'SELECTING',
-  PROCESSING = 'PROCESSING',
-  DONE = 'DONE',
-  ERROR = 'ERROR'
-}
+// enum CONNECT_STATUS {
+//   SELECTING = 'SELECTING',
+//   PROCESSING = 'PROCESSING',
+//   DONE = 'DONE',
+//   ERROR = 'ERROR'
+// }
 
 const ChooseWalletModal: React.FC<{
   close: () => void;
+  cancel: () => void;
   connectToWallet: (walletType: WALLET_TYPES) => void;
-}> = ({ close, connectToWallet }) => {
+  connectStatus: CONNECT_STATUS;
+}> = ({ close, connectToWallet, connectStatus, cancel }) => {
   const [theme] = useConfigReducer('theme');
-  const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
+  // const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
   const [oraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
-  const isMetamask = !!window.ethereum?.isMetaMask;
-
+  const isMetamask = !!window?.ethereum?.isMetaMask;
   const isCheckKeplr = keplrCheck('keplr');
   const isCheckOwallet = owalletCheck('owallet');
   const isTron = !!window.tronLink;
@@ -80,14 +81,6 @@ const ChooseWalletModal: React.FC<{
                   if (wallet.isActive) {
                     setWalletSelected(wallet);
                     connectToWallet(wallet.walletType);
-                    if (isMetamask) {
-                      const isUnlock = await window.ethereum._metamask.isUnlocked();
-                      if (isUnlock && metamaskAddress) {
-                        setConnectStatus(CONNECT_STATUS.DONE);
-                      } else {
-                        setConnectStatus(CONNECT_STATUS.PROCESSING);
-                      }
-                    }
                   }
                 }}
               >
@@ -102,35 +95,12 @@ const ChooseWalletModal: React.FC<{
       );
     } else if (connectStatus === CONNECT_STATUS.PROCESSING) {
       return (
-        <ConnectProcessing
-          close={() => {
-            close();
-            setConnectStatus(CONNECT_STATUS.SELECTING);
-          }}
-          onDone={() => {}}
-          wallet={walletSelected}
-          walletName={walletSelected.name}
-        />
+        <ConnectProcessing cancel={cancel} onDone={() => {}} wallet={walletSelected} walletName={walletSelected.name} />
       );
     } else if (connectStatus === CONNECT_STATUS.DONE) {
-      return (
-        <ConnectProgressDone
-          close={() => {
-            setConnectStatus(CONNECT_STATUS.SELECTING);
-          }}
-          address={metamaskAddress}
-        />
-      );
+      return <ConnectProgressDone cancel={cancel} address={metamaskAddress} />;
     } else {
-      return (
-        <ConnectError
-          close={() => {
-            close();
-            setConnectStatus(CONNECT_STATUS.SELECTING);
-          }}
-          handleTryAgain={() => {}}
-        />
-      );
+      return <ConnectError cancel={cancel} handleTryAgain={() => {}} />;
     }
   }, [connectStatus]);
 
