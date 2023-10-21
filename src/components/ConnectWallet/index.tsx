@@ -87,19 +87,11 @@ export enum CONNECT_STATUS {
 }
 const ConnectWallet: FC<ModalProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
-  // const [isShowConnectWallet, setIsShowConnectWallet] = useState(false);
-
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
-  // const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  console.log('🚀 ~ file: index.tsx:96 ~ metamaskAddress:', metamaskAddress);
-
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  console.log('🚀 ~ file: index.tsx:99 ~ cosmosAddress:', cosmosAddress);
-
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  console.log('🚀 ~ file: index.tsx:101 ~ tronAddress:', tronAddress);
   const walletType = getStorageKey() as WalletType;
   const walletInit = [
     {
@@ -109,7 +101,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       icon: MetamaskImage,
       totalUsd: 0,
       isOpen: false,
-      // address: metamaskAddress,
       isConnect: !!metamaskAddress,
       networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }]
     },
@@ -120,7 +111,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       icon: walletType === 'keplr' ? KeplrImage : OwalletImage,
       totalUsd: 0,
       isOpen: false,
-      // address: '',
       isConnect: !!isEmptyObject(cosmosAddress) === false,
       networks: cosmosNetworks.map((item: any, index) => {
         if (!!isEmptyObject(cosmosAddress) === false) {
@@ -139,7 +129,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       icon: TronWalletImage,
       totalUsd: 0,
       isOpen: false,
-      // address: tronAddress,
       isConnect: !!tronAddress,
       networks: tronNetworks.map((item: any, index) => {
         item.address = tronAddress;
@@ -148,18 +137,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   ];
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
-
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   const [walletTypeActive, setWalletTypeActive] = useState(null);
-  // const walletType = getStorageKey() as WalletType;
-  // console.log('🚀 ~ file: index.tsx:104 ~ walletType:', walletType);
   const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
-  // console.log('🚀 ~ file: index.tsx:105 ~ isCheckKeplr:', isCheckKeplr);
   const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck(walletType);
-  // console.log('🚀 ~ file: index.tsx:107 ~ isCheckOwallet:', isCheckOwallet);
   const connectMetamask = async () => {
     try {
       // if chain id empty, we switch to default network which is BSC
@@ -168,7 +152,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       }
 
       const isMetamask = !!window?.ethereum?.isMetaMask;
-      console.log('🚀 ~ file: index.tsx:167 ~ connectMetamask ~ isMetamask:', isMetamask);
       if (!isMetamask) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
         throw Error('Please install Metamask wallet');
@@ -186,7 +169,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
 
   const isConnected = !!metamaskAddress || !!tronAddress || !!isEmptyObject(cosmosAddress) === false;
-  console.log('🚀 ~ file: index.tsx:137 ~ isEmptyObject(cosmosAddress):', !!isEmptyObject(cosmosAddress));
 
   useEffect(() => {
     getListAddressCosmos();
@@ -246,7 +228,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
             });
             // throw error when not connected
             if (code !== 200) {
-              // displayToast(TToastType.TRONLINK_FAILED, { message });
               throw Error(message);
             }
           }
@@ -276,7 +257,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const connectKeplr = async (type: WalletType) => {
     try {
-      console.log('🚀 ~ file: index.tsx:230 ~ connectKeplr ~ type:', type);
       window.Keplr = new Keplr(type);
       setStorageKey('typeWallet', type);
       if (!(await window.Keplr.getKeplr())) {
@@ -289,7 +269,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
-      // setOraiAddressWallet(oraiAddress);
       getListAddressCosmos();
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -307,7 +286,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const startMetamask = async () => {
     const isUnlock = await isUnlockMetamask();
-    console.log('🚀 ~ file: index.tsx:272 ~ isUnlock ~ isUnlock:', !!isUnlock);
     if (!!isUnlock && !!metamaskAddress) {
       setConnectStatus(CONNECT_STATUS.DONE);
       return;
@@ -402,14 +380,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         break;
     }
   };
-  // const walletsModified = wallets.map((w) => {
-  //   if (w.code === walletType) {
-  //     w.isConnect = !!w.address;
-  //     w.isOpen = true;
-  //   }
-  //   return w;
-  // });
-  // setWallets(walletsModified);
 
   const toggleShowNetworks = (id: number) => {
     const walletsModified = wallets.map((w) => {
@@ -418,88 +388,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     });
     setWallets(walletsModified);
   };
-
-  // const { data: prices } = useCoinGeckoPrices();
-  // const amounts = useSelector((state: RootState) => state.token.amounts);
-
-  // const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
-  //   let subAmounts = null;
-  //   if (typeWallet === 'cosmos') {
-  //     subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
-  //   } else if (typeWallet === 'evm') {
-  //     subAmounts = Object.fromEntries(
-  //       Object.entries(amounts).filter(
-  //         ([denom]) => tokenMap?.[denom]?.cosmosBased === false && tokenMap?.[denom].chainId !== '0x2b6653dc'
-  //       )
-  //     );
-  //   } else if (typeWallet === 'trx') {
-  //     subAmounts = Object.fromEntries(
-  //       Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
-  //     );
-  //   }
-
-  //   const totalUsd = getTotalUsd(subAmounts, prices);
-  //   return totalUsd;
-  // };
-  // const isKeplr = () => {
-  //   if (!!walletTypeActive && walletTypeActive === WALLET_TYPES.KEPLR) {
-  //     return true;
-  //   } else if (isCheckKeplr && !!walletTypeActive === false) {
-  //     return true;
-  //   }
-
-  //   return false;
-  // };
-  // console.log('🚀 ~ file: index.tsx:379 ~ isKeplr ~ isKeplr:', isKeplr());
-  // const MetamaskInfo = {
-  //   id: 1,
-  //   name: 'Metamask',
-  //   code: WALLET_TYPES.METAMASK,
-  //   icon: MetamaskImage,
-  //   totalUsd: handleGetTotalUsd('evm'),
-  //   isOpen: false,
-  //   address: metamaskAddress,
-  //   isConnect: !!metamaskAddress,
-  //   networks: evmChains.map((item, index) => {
-  //     (item as any).address = metamaskAddress;
-  //     return item;
-  //   })
-  // };
-  // const keplrChecked = isKeplr();
-  // const OwalletInfo = {
-  //   id: 2,
-  //   name: 'Owallet',
-  //   code: WALLET_TYPES.OWALLET,
-  //   icon: OwalletImage,
-  //   totalUsd: handleGetTotalUsd('cosmos'),
-  //   isOpen: false,
-  //   address: cosmosAddress,
-  //   isConnect: !!oraiAddressWallet,
-  //   networks: cosmosNetworks.map((item, index) => {
-  //     (item as any).address = cosmosAddress[item.chainId];
-  //     return item;
-  //   })
-  // };
-
-  // const TronInfo = {
-  //   id: 3,
-  //   name: 'TronLink',
-  //   code: WALLET_TYPES.TRON,
-  //   icon: TronWalletImage,
-  //   totalUsd: handleGetTotalUsd('trx'),
-  //   isOpen: false,
-  //   address: tronAddress,
-  //   isConnect: !!tronAddress,
-  //   networks: tronNetworks.map((item, index) => {
-  //     (item as any).address = tronAddress;
-  //     return item;
-  //   })
-  // };
-
-  // useEffect(() => {
-  //   const infoWallet = [MetamaskInfo, OwalletInfo, TronInfo];
-  //   setWallets(infoWallet as any);
-  // }, [tronAddress, metamaskAddress, oraiAddressWallet]);
 
   return (
     <div className={cx('connect-wallet-container', theme)}>
