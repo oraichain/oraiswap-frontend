@@ -28,7 +28,8 @@ import {
   getStorageKey,
   keplrCheck,
   owalletCheck,
-  isUnlockMetamask
+  isUnlockMetamask,
+  sleep
 } from 'helper';
 import { collectWallet } from 'libs/cosmjs';
 import { getTotalUsd } from 'libs/utils';
@@ -41,7 +42,6 @@ import MetamaskImage from 'assets/images/metamask.png';
 import OwalletImage from 'assets/images/owallet-logo.png';
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
-import { delay } from 'lodash';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
@@ -156,9 +156,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   // const walletType = getStorageKey() as WalletType;
   // console.log('🚀 ~ file: index.tsx:104 ~ walletType:', walletType);
-  // const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck(walletType);
+  const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
   // console.log('🚀 ~ file: index.tsx:105 ~ isCheckKeplr:', isCheckKeplr);
-  // const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck(walletType);
+  const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck(walletType);
   // console.log('🚀 ~ file: index.tsx:107 ~ isCheckOwallet:', isCheckOwallet);
   const connectMetamask = async () => {
     try {
@@ -171,47 +171,22 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       console.log('🚀 ~ file: index.tsx:167 ~ connectMetamask ~ isMetamask:', isMetamask);
       if (!isMetamask) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
-        return;
+        throw Error('Please install Metamask wallet');
       }
       const isUnlock = await isUnlockMetamask();
       if (!isUnlock) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-        return;
+        throw Error('Please unlock Metamask wallet');
       }
       await connect();
     } catch (ex) {
-      setConnectStatus(CONNECT_STATUS.ERROR);
       console.log('error in connecting metamask: ', ex);
-    } finally {
-      console.log('🚀 ~ file: index.tsx:117 ~ metamaskAddress:', metamaskAddress);
-      // setWalletTypeActive(null);
+      throw Error('Connect Metamask failed');
     }
   };
 
   const isConnected = !!metamaskAddress || !!tronAddress || !!isEmptyObject(cosmosAddress) === false;
   console.log('🚀 ~ file: index.tsx:137 ~ isEmptyObject(cosmosAddress):', !!isEmptyObject(cosmosAddress));
-
-  // useEffect(() => {
-  //   (async () => {
-  //     if (connectStatus === CONNECT_STATUS.PROCESSING) {
-  //       const isUnlock = await isUnlockMetamask();
-  //       if (walletTypeActive === WALLET_TYPES.METAMASK && !!isUnlock && !!metamaskAddress) {
-  //         delay(() => {
-  //           setConnectStatus(CONNECT_STATUS.DONE);
-  //         }, 2000);
-  //       } else if (walletTypeActive === WALLET_TYPES.OWALLET && !isEmptyObject(cosmosAddress)) {
-  //         delay(() => {
-  //           setConnectStatus(CONNECT_STATUS.DONE);
-  //         }, 2000);
-  //       } else if (walletTypeActive === WALLET_TYPES.KEPLR && !isEmptyObject(cosmosAddress)) {
-  //         delay(() => {
-  //           setConnectStatus(CONNECT_STATUS.DONE);
-  //         }, 2000);
-  //       }
-  //     }
-  //   })();
-  //   return () => {};
-  // }, [metamaskAddress, connectStatus, walletTypeActive]);
 
   useEffect(() => {
     getListAddressCosmos();
@@ -271,8 +246,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
             });
             // throw error when not connected
             if (code !== 200) {
-              displayToast(TToastType.TRONLINK_FAILED, { message });
-              return;
+              // displayToast(TToastType.TRONLINK_FAILED, { message });
+              throw Error(message);
             }
           }
 
@@ -282,8 +257,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         setTronAddress(tronAddress);
       }
     } catch (ex) {
-      console.log('error in connecting tron link: ', ex);
-      displayToast(TToastType.TRONLINK_FAILED, { message: JSON.stringify(ex) });
+      let msg = typeof ex.message === 'string' ? ex.message : JSON.stringify(ex);
+      displayToast(TToastType.TRONLINK_FAILED, { message: msg });
+      throw Error(msg);
     }
   };
 
@@ -329,78 +305,98 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
 
-  // const startMetamask = async () => {
-  //   const isUnlock = await isUnlockMetamask();
-  //   console.log('🚀 ~ file: index.tsx:272 ~ isUnlock ~ isUnlock:', !!isUnlock);
-  //   if (!!isUnlock && metamaskAddress) {
-  //     setConnectStatus(CONNECT_STATUS.DONE);
-  //     return;
-  //   }
-  //   await requestMethod(WALLET_TYPES.METAMASK, METHOD_WALLET_TYPES.CONNECT);
-  //   return;
-  // };
-  // const startKeplr = async () => {
-  //   if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.KEPLR) {
-  //     setConnectStatus(CONNECT_STATUS.DONE);
-  //     return;
-  //   }
-  //   await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
-  //   return;
-  // };
-  // const startOwallet = async () => {
-  //   if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.OWALLET) {
-  //     setConnectStatus(CONNECT_STATUS.DONE);
-  //     return;
-  //   }
-  //   await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
-  //   return;
-  // };
+  const startMetamask = async () => {
+    const isUnlock = await isUnlockMetamask();
+    console.log('🚀 ~ file: index.tsx:272 ~ isUnlock ~ isUnlock:', !!isUnlock);
+    if (!!isUnlock && !!metamaskAddress) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.METAMASK, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const startKeplr = async () => {
+    if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.KEPLR && isCheckKeplr) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const startOwallet = async () => {
+    if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.OWALLET && isCheckOwallet) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const startTron = async () => {
+    if (!!tronAddress) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.TRON, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const handleConnectWallet = async (cb) => {
+    try {
+      setConnectStatus(CONNECT_STATUS.PROCESSING);
+      await sleep(2000);
+      await cb();
+      setConnectStatus(CONNECT_STATUS.DONE);
+      setIsShowMyWallet(true);
+      return;
+    } catch (error) {
+      console.log('🚀 ~ file: index.tsx:350 ~ handleConnectWal ~ error:', error);
+      setConnectStatus(CONNECT_STATUS.ERROR);
+    }
+  };
+
+  const connectDetectOwallet = async () => {
+    await connectKeplr('owallet');
+  };
+  const connectDetectKeplr = async () => {
+    await connectKeplr('keplr');
+  };
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
+    setWalletTypeActive(walletType);
     switch (walletType) {
       case WALLET_TYPES.METAMASK:
-        setWalletTypeActive(WALLET_TYPES.METAMASK);
         if (method === METHOD_WALLET_TYPES.START) {
-          // await startMetamask();
+          await startMetamask();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          // setConnectStatus(CONNECT_STATUS.PROCESSING);
-          await connectMetamask();
+          await handleConnectWallet(connectMetamask);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectMetamask();
         }
         break;
       case WALLET_TYPES.OWALLET:
-        setWalletTypeActive(WALLET_TYPES.OWALLET);
         if (method === METHOD_WALLET_TYPES.START) {
-          // await startOwallet();
+          await startOwallet();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          // setConnectStatus(CONNECT_STATUS.PROCESSING);
-          await connectKeplr('owallet');
+          await handleConnectWallet(connectDetectOwallet);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectKeplr();
         }
-
         break;
       case WALLET_TYPES.KEPLR:
-        setWalletTypeActive(WALLET_TYPES.KEPLR);
         if (method === METHOD_WALLET_TYPES.START) {
-          // await startKeplr();
+          await startKeplr();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          // setConnectStatus(CONNECT_STATUS.PROCESSING);
-          await connectKeplr('keplr');
+          await handleConnectWallet(connectDetectKeplr);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectKeplr();
         }
-
         break;
       case WALLET_TYPES.TRON:
-        setWalletTypeActive(WALLET_TYPES.TRON);
-        if (method === METHOD_WALLET_TYPES.CONNECT) {
-          // setConnectStatus(CONNECT_STATUS.PROCESSING);
-          await connectTronLink();
+        if (method === METHOD_WALLET_TYPES.START) {
+          await startTron();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await handleConnectWallet(connectTronLink);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectTronLink();
         }
-
         break;
       default:
         break;
@@ -522,6 +518,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
                 setConnectStatus(CONNECT_STATUS.SELECTING);
                 setIsShowChooseWallet(true);
                 setIsShowMyWallet(false);
+                setWalletTypeActive(null);
               }}
               toggleShowNetworks={toggleShowNetworks}
               handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
@@ -532,7 +529,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
             />
           }
         >
-          <Connected setIsShowMyWallet={() => setIsShowMyWallet(true)} />
+          <Connected
+            setIsShowMyWallet={() => {
+              setWalletTypeActive(null);
+              setIsShowMyWallet(true);
+            }}
+          />
         </TooltipContainer>
       )}
       {isShowChooseWallet ? (

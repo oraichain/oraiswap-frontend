@@ -22,7 +22,7 @@ export interface Tokens {
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
 }
-
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== 'oraibridge-subnet-2'
