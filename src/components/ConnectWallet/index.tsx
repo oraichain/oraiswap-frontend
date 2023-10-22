@@ -84,6 +84,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [oraiAddress, setOraiAddress] = useState('');
   const walletType = getStorageKey() as WalletType;
+  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
+  console.log('🚀 ~ file: index.tsx:88 ~ walletTypeStore:', walletTypeStore);
+  const [address, setAddress] = useConfigReducer('address');
+
   const walletInit = [
     {
       id: 1,
@@ -97,9 +101,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     },
     {
       id: 2,
-      name: walletType === 'keplr' ? 'Keplr' : 'Owallet',
-      code: walletType === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
-      icon: walletType === 'keplr' ? KeplrImage : OwalletImage,
+      name: walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet',
+      code: walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
+      icon: walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
       totalUsd: 0,
       isOpen: false,
       isConnect: !!isEmptyObject(cosmosAddress) === false,
@@ -134,7 +138,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
-  const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck(walletType);
+  const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
   const connectMetamask = async () => {
     try {
       // if chain id empty, we switch to default network which is BSC
@@ -166,8 +170,19 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       const { listAddressCosmos } = await getListAddressCosmos();
       setCosmosAddress(listAddressCosmos);
     })();
+    setWalletTypeStore(walletType);
   }, []);
-
+  useEffect(() => {
+    (async () => {
+      console.log('🚀 ~ file: index.tsx:178 ~ walletTypeStore:', walletTypeStore);
+      if (walletTypeStore === 'owallet') {
+        await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
+      } else {
+        await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
+      }
+    })();
+    return () => {};
+  }, [address]);
   const disconnectMetamask = async () => {
     try {
       setMetamaskAddress(undefined);
@@ -212,6 +227,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const connectKeplr = async (type: WalletType) => {
     try {
+      setWalletTypeStore(type);
       await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddress = await window.Keplr.getKeplrAddr();
