@@ -19,6 +19,7 @@ import { reduceString } from 'libs/utils';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import { WalletItem } from '../';
+import { isMobile } from '@walletconnect/browser-utils';
 const cx = cn.bind(styles);
 // const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
 
@@ -165,10 +166,12 @@ const MyWallets: React.FC<{
           );
         })}
       </div>
-      <div className={cx('btn')} onClick={handleAddWallet}>
-        <AddIcon />
-        <div className={cx('content')}>Add Wallet</div>
-      </div>
+      {!isMobile() && (
+        <div className={cx('btn')} onClick={handleAddWallet}>
+          <AddIcon />
+          <div className={cx('content')}>Add Wallet</div>
+        </div>
+      )}
     </div>
   );
 };

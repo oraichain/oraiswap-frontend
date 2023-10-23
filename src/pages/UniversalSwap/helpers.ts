@@ -123,3 +123,10 @@ export const relayerFeeInfo = {
   [ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX]: 6,
   [ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX]: 6
 };
+
+export const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
+  [0.25, '25%', 'one-quarter'],
+  [0.5, '50%', 'half'],
+  [0.75, '75%', 'three-quarters'],
+  [1, '100%', 'max']
+];
