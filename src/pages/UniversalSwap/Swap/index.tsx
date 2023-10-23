@@ -18,7 +18,7 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee from 'hooks/useTokenFee';
 import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
 import { combineReceiver } from 'pages/Balance/helpers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import {
@@ -175,9 +175,9 @@ const SwapComponent: React.FC<{
   );
   const relayerFee = useRelayerFee();
 
-  const relayerFeeToken = React.useMemo(
-    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
-    [originalFromToken]
+  const relayerFeeToken = useMemo(
+    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix || relayer.prefix === originalToToken.prefix),
+    [originalFromToken, originalToToken]
   );
 
   useEffect(() => {
