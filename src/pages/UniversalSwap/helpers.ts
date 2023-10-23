@@ -309,30 +309,36 @@ export class UniversalSwapHandler {
     );
 
     // From Token is orai
-    if (
-      this.originalFromToken.coinGeckoId === 'oraichain-token' &&
-      calulateFromTokenAndFeeRelayer > caculateTotalBalanceFromToken
-    ) {
-      throw generateError(`fee relayer is not enough`);
+    if (this.originalFromToken.coinGeckoId === 'oraichain-token') {
+      if (calulateFromTokenAndFeeRelayer > caculateTotalBalanceFromToken) {
+        throw generateError(`Fee relayer is not enough!`);
+      }
+      return true;
     }
     // estimate exchange token when From Token not orai
     await this.checkFeeRelayerNotOrai(caculateTotalBalanceFromToken);
   }
 
-  async checkFeeRelayerNotOrai(totalBalanceFrom) {
+  async checkFeeRelayerNotOrai(totalBalanceFrom: number, amountSimulate?: string, fromAmount?: number) {
     const tokenTo = getTokenOnOraichain('oraichain-token');
     const tokenFrom = getTokenOnOraichain(this.originalFromToken.coinGeckoId);
-    const { amount } = await simulateSwap({
-      fromInfo: toTokenInfo(tokenTo),
-      toInfo: tokenFrom,
-      amount: this.relayerFee.relayerAmount
-    });
-
-    const calulateFromTokenAndFeeRelayer = toDisplay(amount, tokenFrom.decimals) + this.fromAmount;
-    if (calulateFromTokenAndFeeRelayer > totalBalanceFrom) {
-      throw generateError(`fee relayer is not enough`);
+    let amountSimulateOraiToToken = amountSimulate;
+    if (!amountSimulate) {
+      const { amount } = await simulateSwap({
+        fromInfo: toTokenInfo(tokenTo),
+        toInfo: tokenFrom,
+        amount: this.relayerFee.relayerAmount
+      });
+      amountSimulateOraiToToken = amount;
     }
-    return;
+
+    const calulateFromTokenAndFeeRelayer =
+      toDisplay(amountSimulateOraiToToken, tokenFrom.decimals) + (fromAmount ?? this.fromAmount);
+
+    if (calulateFromTokenAndFeeRelayer > totalBalanceFrom) {
+      throw generateError(`Fee relayer is not enough!`);
+    }
+    return true;
   }
 
   async checkBalanceChannelIbc(ibcInfo: IBCInfo, toToken: TokenItemType) {
