@@ -227,7 +227,6 @@ export const initClient = async () => {
 
 export const timeSince = (date: number): string => {
   const seconds = Math.floor((Date.now() - date) / 1000);
-  console.log({ date, seconds });
   let interval = seconds / 31536000;
 
   if (interval > 1) {

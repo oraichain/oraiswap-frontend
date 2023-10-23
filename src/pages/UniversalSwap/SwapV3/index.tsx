@@ -217,23 +217,6 @@ const SwapComponent: React.FC<{
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
   const handleSubmit = async () => {
-    // save to duckdb
-    console.log({ originalFromToken, originalToToken });
-    await window.duckdb.addTransHistory({
-      initialTxHash: '1',
-      fromCoingeckoId: originalFromToken.coinGeckoId,
-      toCoingeckoId: originalToToken.coinGeckoId,
-      fromChainId: originalFromToken.chainId,
-      toChainId: originalToToken.chainId,
-      fromAmount: fromAmountToken.toString(),
-      toAmount: toAmountToken.toString(),
-      fromAmountInUsdt: fromAmountToken.toString(),
-      toAmountInUsdt: toAmountToken.toString(),
-      status: 'ok',
-      type: 'Swap',
-      timestamp: Date.now()
-    });
-    return;
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
         message: 'From amount should be higher than 0!'
@@ -270,6 +253,22 @@ const SwapComponent: React.FC<{
         });
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
+
+        // save to duckdb
+        await window.duckdb.addTransHistory({
+          initialTxHash: result.transactionHash,
+          fromCoingeckoId: originalFromToken.coinGeckoId,
+          toCoingeckoId: originalToToken.coinGeckoId,
+          fromChainId: originalFromToken.chainId,
+          toChainId: originalToToken.chainId,
+          fromAmount: fromAmountToken.toString(),
+          toAmount: toAmountToken.toString(),
+          fromAmountInUsdt: fromAmountToken.toString(),
+          toAmountInUsdt: toAmountToken.toString(),
+          status: 'initial',
+          type: 'Swap',
+          timestamp: Date.now()
+        });
       }
     } catch (error) {
       console.log({ error });
