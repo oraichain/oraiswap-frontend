@@ -85,7 +85,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [oraiAddress, setOraiAddress] = useState('');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
-  console.log('🚀 ~ file: index.tsx:88 ~ walletTypeStore:', walletTypeStore);
   const [address, setAddress] = useConfigReducer('address');
 
   const walletInit = [
@@ -175,11 +174,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   useEffect(() => {
     if (!!address) {
       (async () => {
-        console.log('🚀 ~ file: index.tsx:178 ~ walletTypeStore:', walletTypeStore);
         if (walletTypeStore === 'owallet') {
-          await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
+          await connectDetectOwallet();
         } else {
-          await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
+          await connectDetectKeplr();
         }
       })();
     }
