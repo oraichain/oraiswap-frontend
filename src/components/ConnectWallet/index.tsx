@@ -173,14 +173,17 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     setWalletTypeStore(walletType);
   }, []);
   useEffect(() => {
-    (async () => {
-      console.log('🚀 ~ file: index.tsx:178 ~ walletTypeStore:', walletTypeStore);
-      if (walletTypeStore === 'owallet') {
-        await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
-      } else {
-        await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
-      }
-    })();
+    if (!!address) {
+      (async () => {
+        console.log('🚀 ~ file: index.tsx:178 ~ walletTypeStore:', walletTypeStore);
+        if (walletTypeStore === 'owallet') {
+          await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
+        } else {
+          await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
+        }
+      })();
+    }
+
     return () => {};
   }, [address]);
   const disconnectMetamask = async () => {
@@ -289,7 +292,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await sleep(2000);
       await cb();
       setConnectStatus(CONNECT_STATUS.DONE);
-      setIsShowMyWallet(true);
       return;
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:350 ~ handleConnectWal ~ error:', error);
