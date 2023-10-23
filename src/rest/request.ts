@@ -10,9 +10,8 @@ const axios = Axios.create({
     throttleAdapterEnhancer(Axios.defaults.adapter!, {
       threshold: AXIOS_THROTTLE_THRESHOLD
     })
-  )
+  ),
+  baseURL: process.env.REACT_APP_BASE_API_URL
 });
-
-export const withBaseApiUrl = (url: string) => process.env.REACT_APP_BASE_API_URL + url;
 
 export default axios;
