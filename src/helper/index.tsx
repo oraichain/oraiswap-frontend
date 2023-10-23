@@ -16,13 +16,17 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
+import { collectWallet } from 'libs/cosmjs';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
 }
-
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== 'oraibridge-subnet-2'
@@ -155,4 +159,77 @@ export const switchWallet = (type: WalletType) => {
     return true;
   }
   return false;
+};
+
+export const isUnlockMetamask = async () => {
+  const isMetamask = !!window?.ethereum?.isMetaMask;
+  if (isMetamask) {
+    const isUnlock = await window.ethereum._metamask.isUnlocked();
+    return isUnlock;
+  }
+};
+export const isEmptyObject = (value: object) => {
+  if (!!value === false) return true;
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries?.length === 0) {
+      return true;
+    }
+    for (const key in value) {
+      if (value[key] !== undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return true;
+};
+
+export const switchWalletCosmos = async (type: WalletType) => {
+  window.Keplr = new Keplr(type);
+  setStorageKey('typeWallet', type);
+  if (!(await window.Keplr.getKeplr())) {
+    return displayInstallWallet();
+  }
+  const wallet = await collectWallet(network.chainId);
+  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  });
+};
+
+export const switchWalletTron = async () => {
+  let tronAddress: string;
+  if (isMobile()) {
+    const addressTronMobile = await window.tronLink.request({
+      method: 'tron_requestAccounts'
+    });
+    //@ts-ignore
+    tronAddress = addressTronMobile?.base58;
+  } else {
+    if (!window.tronWeb.defaultAddress?.base58) {
+      const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
+      // throw error when not connected
+      if (code !== 200) {
+        throw Error(message);
+      }
+    }
+    tronAddress = window.tronWeb.defaultAddress.base58;
+  }
+  return {
+    tronAddress
+  };
+};
+
+export const getListAddressCosmos = async () => {
+  let listAddressCosmos = {};
+  for (const info of cosmosNetworks) {
+    const address = await window.Keplr.getKeplrAddr(info.chainId as NetworkChainId);
+    listAddressCosmos = {
+      ...listAddressCosmos,
+      [info.chainId]: address
+    };
+  }
+  return { listAddressCosmos };
 };

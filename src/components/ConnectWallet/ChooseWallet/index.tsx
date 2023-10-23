@@ -18,42 +18,46 @@ import ConnectProcessing from './ConnectProcessing';
 import ConnectError from './ConnectError';
 import styles from './index.module.scss';
 
+import { CONNECT_STATUS, WALLET_TYPES } from '../';
+import { ConnectProgressDone } from './ConnectDone';
+import { keplrCheck, owalletCheck } from 'helper';
+
 const cx = cn.bind(styles);
 
-interface WalletItem {
+export interface WalletItem {
   name: string;
   icon: FunctionComponent;
+  walletType: WALLET_TYPES;
   isActive?: boolean;
-}
-
-const WALLETS: WalletItem[] = [
-  { name: 'Owallet', icon: OwalletIcon, isActive: true },
-  { name: 'Metamask', icon: MetamaskIcon, isActive: true },
-  { name: 'TronLink', icon: TronIcon, isActive: true },
-  { name: 'Phantom', icon: PhantomIcon },
-  { name: 'Keplr', icon: KeplrIcon, isActive: true },
-  { name: 'Ledger', icon: LedgerIcon },
-  { name: 'Connect with Google', icon: GoogleIcon },
-  { name: 'Connect with Apple', icon: AppleIcon },
-  { name: 'Use phone number', icon: PhoneIcon }
-];
-
-enum CONNECT_STATUS {
-  SELECTING = 'SELECTING',
-  PROCESSING = 'PROCESSING',
-  ERROR = 'ERROR'
 }
 
 const ChooseWalletModal: React.FC<{
   close: () => void;
-}> = ({ close }) => {
+  cancel: () => void;
+  connectToWallet: (walletType: WALLET_TYPES) => void;
+  connectStatus: CONNECT_STATUS;
+  tryAgain: (walletType: WALLET_TYPES) => void;
+  address: string;
+}> = ({ close, connectToWallet, connectStatus, cancel, tryAgain, address }) => {
   const [theme] = useConfigReducer('theme');
-  const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
-  const [oraiAddressWallet] = useConfigReducer('address');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddress] = useConfigReducer('cosmosAddress');
-  const [tronAddress] = useConfigReducer('tronAddress');
+  const isMetamask = !!window?.ethereum?.isMetaMask;
+  const vs = window?.keplr?.version;
+  const isCheckKeplr = !!vs && keplrCheck('keplr');
+  const isCheckOwallet = !!vs && owalletCheck('owallet');
+  const isTron = !!window.tronLink;
+  const WALLETS: WalletItem[] = [
+    { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
+    { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
+    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
+    { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
+    { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
+    { name: 'Ledger', icon: LedgerIcon, walletType: WALLET_TYPES.LEDGER },
+    { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
+    { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
+    { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
+  ];
 
   const content = useMemo(() => {
     if (connectStatus === CONNECT_STATUS.SELECTING) {
@@ -64,10 +68,10 @@ const ChooseWalletModal: React.FC<{
               <div
                 key={index}
                 className={cx('wallet_item', `${!wallet.isActive && 'not-active'}`)}
-                onClick={() => {
+                onClick={async () => {
                   if (wallet.isActive) {
                     setWalletSelected(wallet);
-                    setConnectStatus(CONNECT_STATUS.PROCESSING);
+                    connectToWallet(wallet.walletType);
                   }
                 }}
               >
@@ -81,25 +85,11 @@ const ChooseWalletModal: React.FC<{
         </div>
       );
     } else if (connectStatus === CONNECT_STATUS.PROCESSING) {
-      return (
-        <ConnectProcessing
-          close={() => {
-            close();
-            setConnectStatus(CONNECT_STATUS.SELECTING);
-          }}
-          walletName={walletSelected.name}
-        />
-      );
+      return <ConnectProcessing cancel={cancel} walletName={walletSelected.name} />;
+    } else if (connectStatus === CONNECT_STATUS.DONE) {
+      return <ConnectProgressDone cancel={cancel} address={address} />;
     } else {
-      return (
-        <ConnectError
-          close={() => {
-            close();
-            setConnectStatus(CONNECT_STATUS.SELECTING);
-          }}
-          handleTryAgain={() => {}}
-        />
-      );
+      return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;
     }
   }, [connectStatus]);
 

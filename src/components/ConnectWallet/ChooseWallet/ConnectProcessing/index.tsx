@@ -1,6 +1,5 @@
 import cn from 'classnames/bind';
 import Lottie from 'lottie-react';
-
 import useConfigReducer from 'hooks/useConfigReducer';
 import OraiDEXLoadingBlack from 'assets/lottie/oraiDEX_loading_black.json';
 
@@ -8,7 +7,10 @@ import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 
-const ConnectProcessing: React.FC<{ walletName: string; close: () => void }> = ({ walletName, close }) => {
+const ConnectProcessing: React.FC<{
+  walletName: string;
+  cancel: () => void;
+}> = ({ walletName, cancel }) => {
   const [theme] = useConfigReducer('theme');
 
   return (
@@ -19,7 +21,7 @@ const ConnectProcessing: React.FC<{ walletName: string; close: () => void }> = (
         </span>
       </div>
       <div className={cx('content')}>Connect {walletName} to OraiDEX to proceed</div>
-      <div className={cx('cancel_btn')} onClick={close}>
+      <div className={cx('cancel_btn')} onClick={cancel}>
         Cancel
       </div>
     </div>

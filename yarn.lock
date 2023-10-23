@@ -3016,10 +3016,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.9.tgz#5e7992f4107ae9e41dff3fa010f05a4b01acfe90"
-  integrity sha512-xEMHzhdZQVIgSQWDGkLaYQ9u1LXg3ecTvPxMf/j9L27d8oZLSkrRSyXM+zw8DdlVYLaTvC1B1+/F2wtZXF3Y9g==
+"@oraichain/oraidex-common@^1.0.10":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.10.tgz#0a4cb50e42a19cb28d957643288f90be2de3f4b4"
+  integrity sha512-MkdyZ28psrnQQZx7WKjQEJ7E55BFlrNIdIVO3pQ3ZjCytbsy0stE3pAe8q62SDgVMxihY3cc9dxihyPHaC+QNw==
 
 "@oraichain/oraidex-contracts-build@^1.0.20":
   version "1.0.20"
@@ -3031,10 +3031,16 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.24.tgz#6662b3e916bfe9bd256de0f4c463bd2630b9fae3"
   integrity sha512-FUzGli0ueR7VwD1oJPn0z1zZ0uSrBmuQS77Tkd3OasUvHoptCYkuY1CeeiFw7woQxHWhHpeS9RjH9K7JLLGhmQ==
 
-"@oraichain/oraidex-universal-swap@1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.11.tgz#efe186ae0bf9704c1e827ae9afea8ca895cfdf48"
-  integrity sha512-gqN7PGgXbbpHohe93Ln5h0FtsqGAUtKdba9MPGIUQ8Q4bj9pOr2rTIXSiCaZqL/7qFf/TFP6Sv4poOGYWVos0A==
+"@oraichain/oraidex-universal-swap@1.0.14":
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.14.tgz#fd4b60e7cfc21984dbaa14a7b9a2c560f02da37d"
+  integrity sha512-45tq+ywD/xhP5IHXu5+KYfTJ3II1PSUWhaLEEkTxQyhhSnHatS7uose7UwSQkZc1VW7oxNdAh0Mq9yI69dG7Lg==
+  dependencies:
+    "@oraichain/oraidex-common" "^1.0.10"
+    "@oraichain/oraidex-contracts-sdk" "^1.0.24"
+    bech32 "1.1.4"
+    ethers "^5.0.15"
+    tronweb "5.3.0"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
@@ -15147,7 +15153,7 @@ triple-beam@^1.3.0:
   resolved "https://registry.yarnpkg.com/triple-beam/-/triple-beam-1.4.1.tgz#6fde70271dc6e5d73ca0c3b24e2d92afb7441984"
   integrity sha512-aZbgViZrg1QNcG+LULa7nhZpJTZSLm/mXnHXnbAbjmN5aSa0y7V+wvv6+4WaBtpISJzThKy+PIPxc1Nq1EJ9mg==
 
-tronweb@^5.1.0:
+tronweb@5.3.0, tronweb@^5.1.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/tronweb/-/tronweb-5.3.0.tgz#b40c4aa68f81b70bac4d8de52960b82b61f9ab04"
   integrity sha512-i03+3UviQacqdrr3VgXHDL8h/2E24BeULak4w6+yRkJaCuEyxjWOtEn1dq87ulTkHzS/vKK0zIyvW7rSxuISOA==

@@ -4,9 +4,13 @@ import useConfigReducer from 'hooks/useConfigReducer';
 
 import styles from './index.module.scss';
 
+
 const cx = cn.bind(styles);
 
-const ConnectError: React.FC<{ close: () => void; handleTryAgain: () => void }> = ({ close, handleTryAgain }) => {
+const ConnectError: React.FC<{ cancel: () => void; handleTryAgain: () => void }> = ({
+  cancel,
+  handleTryAgain
+}) => {
   const [theme] = useConfigReducer('theme');
 
   return (
@@ -16,7 +20,7 @@ const ConnectError: React.FC<{ close: () => void; handleTryAgain: () => void }> 
         <p>Please, try again.</p>
       </div>
       <div className={cx('actions')}>
-        <div className={cx('cancel_btn')} onClick={close}>
+        <div className={cx('cancel_btn')} onClick={cancel}>
           Cancel
         </div>
         <div className={cx('try_again_btn')} onClick={handleTryAgain}>

@@ -1,7 +1,5 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
 import cn from 'classnames/bind';
-import { isMobile } from '@walletconnect/browser-utils';
+
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
@@ -15,245 +13,40 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { displayInstallWallet, setStorageKey, cosmosNetworks, tronNetworks } from 'helper';
-import { useInactiveConnect } from 'hooks/useMetamask';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
-import { collectWallet } from 'libs/cosmjs';
-import { getTotalUsd, reduceString } from 'libs/utils';
-import { network } from 'config/networks';
-import Keplr from 'libs/keplr';
-import MetamaskImage from 'assets/images/metamask.png';
-import EvmIcon from 'assets/icons/icon_evm.svg';
-import TronWalletImage from 'assets/images/tronlink.jpg';
-import TronlinkImage from 'assets/images/tron-link-logo.png';
-import InjectiveImage from 'assets/images/injective-logo.png';
-import OraichainImage from 'assets/images/oraichain-logo.png';
-import OwalletImage from 'assets/images/owallet-logo.png';
-import OsmosImage from 'assets/images/osmos-logo.png';
-import KawwaiImage from 'assets/images/Kawwai-logo.png';
-import CosmosImage from 'assets/images/cosmos-logo.png';
-
 import { QRGeneratorInfo } from '../QRGenerator';
+import { reduceString } from 'libs/utils';
 import styles from './index.module.scss';
-import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
 import TokenBalance from 'components/TokenBalance';
-import { evmChains } from 'config/chainInfos';
-import { tokenMap } from 'config/bridgeTokens';
-
+import { WalletItem } from '../';
 const cx = cn.bind(styles);
 // const listChainId = ['Oraichain', 'osmosis-1', 'cosmoshub-4', 'injective-1', 'kawaii_6886-1'];
-
-enum WALLET_TYPES {
-  METAMASK = 'METAMASK',
-  KPLER = 'KPLER',
-  OWALLET = 'OWALLET',
-  TRON = 'TRON'
-}
-
-interface NetworkItem extends CustomChainInfo {
-  address: string;
-}
-
-interface WalletItem {
-  id: number;
-  name: string;
-  code: WALLET_TYPES;
-  icon: string;
-  totalUsd: number;
-  isOpen: boolean;
-  isConnect: boolean;
-  networks: NetworkItem[];
-  address?: string;
-}
 
 const MyWallets: React.FC<{
   setQRUrlInfo: (qRGeneratorInfo: QRGeneratorInfo) => void;
   setIsShowMyWallet: (isShow: boolean) => void;
   handleAddWallet: () => void;
-}> = ({ setQRUrlInfo, setIsShowMyWallet, handleAddWallet }) => {
-  const [oraiAddressWallet, setOraiAddressWallet] = useConfigReducer('address');
-  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const loadTokenAmounts = useLoadTokens();
-  const connect = useInactiveConnect();
+  handleLogoutWallets: (walletType: any) => Promise<void>;
+  handleLoginWallets: (walletType: any) => Promise<void>;
+  toggleShowNetworks: (id: number) => void;
+  wallets: WalletItem[];
+}> = ({
+  setQRUrlInfo,
+  setIsShowMyWallet,
+  handleAddWallet,
+  handleLogoutWallets,
+  handleLoginWallets,
+  toggleShowNetworks,
+  wallets
+}) => {
   const [theme] = useConfigReducer('theme');
-  const [wallets, setWallets] = useState<WalletItem[]>([]);
+
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
+
   const [copiedAddressCoordinates, setCopiedAddressCoordinates] = useState<{ networkId: string; walletId: number }>({
     networkId: '',
     walletId: 0
   });
-
-  const connectMetamask = async () => {
-    try {
-      // if chain id empty, we switch to default network which is BSC
-      if (!window.ethereum.chainId) {
-        await window.Metamask.switchNetwork(Networks.bsc);
-      }
-      await connect();
-    } catch (ex) {
-      console.log('error in connecting metamask: ', ex);
-    }
-  };
-
-  useEffect(() => {
-    getListAddressCosmos();
-  }, []);
-
-  const getListAddressCosmos = async () => {
-    try {
-      let listAddressCosmos = {};
-      for (const info of cosmosNetworks) {
-        const address = await window.Keplr.getKeplrAddr(info.chainId as NetworkChainId);
-        listAddressCosmos = {
-          ...listAddressCosmos,
-          [info.chainId]: address
-        };
-      }
-      setCosmosAddress(listAddressCosmos);
-    } catch (error) {
-      console.log({ error });
-    }
-  };
-
-  const disconnectMetamask = async () => {
-    try {
-      setMetamaskAddress(undefined);
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  const connectTronLink = async () => {
-    try {
-      // if not requestAccounts before
-      if (window.Metamask.checkTron()) {
-        // TODO: Check owallet mobile
-        let tronAddress: string;
-        if (isMobile()) {
-          const addressTronMobile = await window.tronLink.request({
-            method: 'tron_requestAccounts'
-          });
-          //@ts-ignore
-          tronAddress = addressTronMobile?.base58;
-        } else {
-          if (!window.tronWeb.defaultAddress?.base58) {
-            const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-              method: 'tron_requestAccounts'
-            });
-            // throw error when not connected
-            if (code !== 200) {
-              displayToast(TToastType.TRONLINK_FAILED, { message });
-              return;
-            }
-          }
-          tronAddress = window.tronWeb.defaultAddress.base58;
-        }
-        loadTokenAmounts({ tronAddress });
-        setTronAddress(tronAddress);
-      }
-    } catch (ex) {
-      console.log('error in connecting tron link: ', ex);
-      displayToast(TToastType.TRONLINK_FAILED, { message: JSON.stringify(ex) });
-    }
-  };
-
-  const disconnectTronLink = async () => {
-    try {
-      setTronAddress(undefined);
-      // remove account storage tron owallet
-      localStorage.removeItem('tronWeb.defaultAddress');
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  const connectKeplr = async (type: WalletType) => {
-    try {
-      window.Keplr = new Keplr(type);
-      setStorageKey('typeWallet', type);
-      if (!(await window.Keplr.getKeplr())) {
-        return displayInstallWallet();
-      }
-      const wallet = await collectWallet(network.chainId);
-      window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-        gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-      });
-      await window.Keplr.suggestChain(network.chainId);
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ oraiAddress });
-      setOraiAddressWallet(oraiAddress);
-    } catch (error) {
-      console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
-    }
-  };
-
-  const disconnectKeplr = async () => {
-    try {
-      window.Keplr.disconnect();
-      setOraiAddressWallet('');
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
-
-  const handleLoginWallets = async (walletType) => {
-    switch (walletType) {
-      case WALLET_TYPES.METAMASK:
-        await connectMetamask();
-        break;
-      case WALLET_TYPES.OWALLET:
-        await connectKeplr('owallet');
-        break;
-      case WALLET_TYPES.KPLER:
-        await connectKeplr('keplr');
-        break;
-      case WALLET_TYPES.TRON:
-        await connectTronLink();
-        break;
-      default:
-        break;
-    }
-    const walletsModified = wallets.map((w) => {
-      if (w.code === walletType) {
-        w.isConnect = !!w.address;
-        w.isOpen = true;
-      }
-      return w;
-    });
-    setWallets(walletsModified);
-  };
-
-  const handleLogoutWallets = async (walletType) => {
-    switch (walletType) {
-      case WALLET_TYPES.METAMASK:
-        await disconnectMetamask();
-        break;
-      case WALLET_TYPES.OWALLET:
-      case WALLET_TYPES.KPLER:
-        await disconnectKeplr();
-        break;
-      case WALLET_TYPES.TRON:
-        await disconnectTronLink();
-        break;
-      default:
-        break;
-    }
-    const walletsModified = wallets.map((w) => {
-      if (w.code === walletType) {
-        w.isConnect = false;
-        w.isOpen = true;
-      }
-      return w;
-    });
-    setWallets(walletsModified);
-  };
 
   const getUrlQrCode = async ({ address, icon, name }) => {
     try {
@@ -262,23 +55,6 @@ const MyWallets: React.FC<{
       setIsShowMyWallet(false);
     } catch (err) {
       console.error('ERROR getUrlQrCode:', err);
-    }
-  };
-
-  const toggleShowNetworks = (id: number) => {
-    const walletsModified = wallets.map((w) => {
-      if (w.id === id) w.isOpen = !w.isOpen;
-      return w;
-    });
-    setWallets(walletsModified);
-  };
-
-  const copyWalletAddress = (e, address: string, walletId: number, networkId: string) => {
-    timeoutCopyId && clearTimeout(timeoutCopyId);
-    if (address) {
-      e.stopPropagation();
-      copy(address);
-      setCopiedAddressCoordinates({ walletId, networkId });
     }
   };
 
@@ -293,77 +69,15 @@ const MyWallets: React.FC<{
       return () => clearTimeout(timeoutId);
     }
   }, [copiedAddressCoordinates]);
-  const { data: prices } = useCoinGeckoPrices();
-  const amounts = useSelector((state: RootState) => state.token.amounts);
 
-  const handleGetTotalUsd = (typeWallet: 'evm' | 'trx' | 'cosmos' = 'cosmos') => {
-    let subAmounts = null;
-    if (typeWallet === 'cosmos') {
-      subAmounts = Object.fromEntries(Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.cosmosBased));
-    } else if (typeWallet === 'evm') {
-      subAmounts = Object.fromEntries(
-        Object.entries(amounts).filter(
-          ([denom]) => tokenMap?.[denom]?.cosmosBased === false && tokenMap?.[denom].chainId !== '0x2b6653dc'
-        )
-      );
-    } else if (typeWallet === 'trx') {
-      subAmounts = Object.fromEntries(
-        Object.entries(amounts).filter(([denom]) => tokenMap?.[denom].chainId === '0x2b6653dc')
-      );
+  const copyWalletAddress = (e, address: string, walletId: number, networkId: string) => {
+    timeoutCopyId && clearTimeout(timeoutCopyId);
+    if (address) {
+      e.stopPropagation();
+      copy(address);
+      setCopiedAddressCoordinates({ walletId, networkId });
     }
-
-    const totalUsd = getTotalUsd(subAmounts, prices);
-    return totalUsd;
   };
-  const MetamaskInfo = {
-    id: 1,
-    name: 'Metamask',
-    code: WALLET_TYPES.METAMASK,
-    icon: MetamaskImage,
-    totalUsd: handleGetTotalUsd('evm'),
-    isOpen: false,
-    address: metamaskAddress,
-    isConnect: !!metamaskAddress,
-    networks: evmChains.map((item, index) => {
-      (item as any).address = metamaskAddress;
-      return item;
-    })
-  };
-
-  const OwalletInfo = {
-    id: 2,
-    name: 'Owallet',
-    code: WALLET_TYPES.OWALLET,
-    icon: OwalletImage,
-    totalUsd: handleGetTotalUsd('cosmos'),
-    isOpen: false,
-    address: cosmosAddress,
-    isConnect: !!oraiAddressWallet,
-    networks: cosmosNetworks.map((item, index) => {
-      (item as any).address = cosmosAddress[item.chainId];
-      return item;
-    })
-  };
-
-  const TronInfo = {
-    id: 3,
-    name: 'TronLink',
-    code: WALLET_TYPES.TRON,
-    icon: TronWalletImage,
-    totalUsd: handleGetTotalUsd('trx'),
-    isOpen: false,
-    address: tronAddress,
-    isConnect: !!tronAddress,
-    networks: tronNetworks.map((item, index) => {
-      (item as any).address = tronAddress;
-      return item;
-    })
-  };
-
-  useEffect(() => {
-    const infoWallet = [MetamaskInfo, OwalletInfo, TronInfo];
-    setWallets(infoWallet as any);
-  }, [tronAddress, metamaskAddress, oraiAddressWallet]);
 
   return (
     <div className={cx('my_wallets_container', theme)}>
@@ -387,11 +101,11 @@ const MyWallets: React.FC<{
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
 
-                  {wallet.isConnect && !!wallet.address && (
+                  {/* {wallet.isConnect && !!wallet.address && (
                     <div>
                       <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
@@ -405,12 +119,12 @@ const MyWallets: React.FC<{
                         <div>{network.Icon && <network.Icon className={cx('icon')} />}</div>
                         <div className={cx('info')}>
                           <div className={cx('name')}>{network.chainName}</div>
-                          {network.address && wallet.isConnect ? (
+                          {network.address ? (
                             <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
                           ) : null}
                         </div>
                         <div className={cx('actions')}>
-                          {network.address && wallet.isConnect ? (
+                          {network.address ? (
                             <>
                               <div
                                 className={cx('copy')}
