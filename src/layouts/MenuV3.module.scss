@@ -5,7 +5,8 @@
   display: flex;
   justify-content: space-between;
   padding: 20px 120px;
-  position: sticky;
+  position: fixed;
+  width: 100%;
   top: 0;
   z-index: 2;
 
@@ -221,9 +222,8 @@
       border-bottom-color: theme-get('neutral-1');
     }
 
-    transition: border-left-color 0.05s linear,
-    border-right-color 0.05s linear 0.05s,
-    border-bottom-color 0.05s linear 0.05s;
+    transition: border-left-color 0.05s linear, border-right-color 0.05s linear 0.05s,
+      border-bottom-color 0.05s linear 0.05s;
   }
 
   &::after {

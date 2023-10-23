@@ -4,10 +4,15 @@
 @import 'src/styles/reboot';
 @import 'src/styles/utils';
 
+html {
+  background-color: $primary-background;
+}
+
 .app {
   font-size: $font-size;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding-top: 110px;
 }
