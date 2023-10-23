@@ -28,13 +28,7 @@ import copy from 'copy-to-clipboard';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import useTokenFee from 'hooks/useTokenFee';
 import { toDisplay } from '@oraichain/oraidex-common';
-
-const AMOUNT_BALANCE_ENTRIES: [number, string][] = [
-  [0.25, '25%'],
-  [0.5, '50%'],
-  [0.75, '75%'],
-  [1, 'MAX']
-];
+import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;

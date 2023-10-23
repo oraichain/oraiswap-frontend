@@ -1,9 +1,9 @@
-import { TokenItemType, network, toAmount, toDisplay } from '@oraichain/oraidex-common';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
+import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 
 /**
  * Simulate ratio between fromToken & toToken
@@ -19,27 +19,27 @@ export const useSimulate = (
   toTokenInfoData: TokenInfo,
   originalFromTokenInfo: TokenItemType,
   originalToTokenInfo: TokenItemType,
+  routerClient: OraiswapRouterReadOnlyInterface,
   initAmount?: number
 ) => {
   const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || 0, 0]);
 
   const { data: simulateData } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, fromAmountToken],
-    () =>
-      handleSimulateSwap({
+    () => {
+      console.log('original from info chain id: ', originalFromTokenInfo.chainId);
+      return handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
         originalAmount: fromAmountToken,
-        routerClient: new OraiswapRouterQueryClient(window.client, network.router)
-      }),
+        routerClient
+      });
+    },
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
 
   useEffect(() => {
-    setSwapAmount([
-      fromAmountToken,
-      toDisplay(simulateData?.amount, originalToTokenInfo?.decimals, toTokenInfoData?.decimals)
-    ]);
+    setSwapAmount([fromAmountToken, Number(simulateData?.displayAmount)]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };

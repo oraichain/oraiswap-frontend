@@ -74,9 +74,9 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>≈ ${amount && (prices?.[originalToken?.coinGeckoId] * amount || 0).toFixed(6)}</div>
+        <div>≈ ${!amount ? 0 : (prices?.[originalToken?.coinGeckoId] * amount).toFixed(6)}</div>
       </div>
-      {tokenFee !== 0 && (
+      {!!tokenFee && (
         <div className={cx('input-swap-fee')}>
           <div>Fee: {tokenFee}%</div>
         </div>
