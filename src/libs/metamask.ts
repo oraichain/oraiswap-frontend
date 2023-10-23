@@ -243,7 +243,7 @@ export default class Metamask {
     );
     const currentAllowance = await tokenContract.allowance(ownerHex, spender);
 
-    if (currentAllowance.toString() >= amount) return;
+    if (BigInt(currentAllowance.toString()) >= BigInt(amount)) return;
 
     if (this.isTron(token.chainId)) {
       if (Metamask.checkTron())
