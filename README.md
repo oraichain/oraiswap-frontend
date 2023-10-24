@@ -32,8 +32,8 @@ yarn start
 yarn build
 
 # watch scss to typescript
-yarn global add typed-scss-modules node-sass
-typed-scss-modules src --watch
+yarn watch:scss
+
 ```
 
 If there is a problem related to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again

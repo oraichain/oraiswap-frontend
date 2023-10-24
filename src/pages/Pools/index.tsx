@@ -30,7 +30,7 @@ import classNames from 'classnames';
 import { RewardPoolType } from 'reducer/config';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
 
-interface PoolsProps { }
+interface PoolsProps {}
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -50,7 +50,7 @@ const LIST_FILTER_POOL = [
 
 const Header: FC<{ theme: string; amount: number; oraiPrice: number }> = ({ amount, oraiPrice, theme }) => {
   return (
-    <div className={styles.header}>
+    <div>
       <div className={styles.header_title}>Pools</div>
       <div className={styles.header_data}>
         <div className={styles.header_data_item}>
@@ -101,7 +101,7 @@ const PairBox = memo<PairInfoData & { apr: number; theme?: string; cachedReward?
               <token2.Icon className={styles.pairbox_logo2} />
             )}
           </div>
-          <div className={styles.pairbox_pair}>
+          <div>
             <div className={styles.pairbox_pair_name}>
               {token1.name}/{token2.name}
             </div>
@@ -149,7 +149,11 @@ const ListPools = memo<{
   }, [typeFilter]);
 
   const listMyPool = useMemo(() => {
-    return pairInfos.filter((pairInfo) => parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) || parseInt(bondLpPools[pairInfo?.pair?.contract_addr]));
+    return pairInfos.filter(
+      (pairInfo) =>
+        parseInt(lpPools[pairInfo?.pair?.liquidity_token]?.balance) ||
+        parseInt(bondLpPools[pairInfo?.pair?.contract_addr])
+    );
   }, [pairInfos]);
 
   useEffect(() => {
