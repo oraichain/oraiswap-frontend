@@ -3,6 +3,7 @@
 @import 'src/styles/variables';
 @import 'src/styles/reboot';
 @import 'src/styles/utils';
+@import 'src/styles/mixins';
 
 html {
   background-color: $primary-background;
@@ -14,5 +15,8 @@ html {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-top: 110px;
+  padding-top: 93px;
+  @include mobile {
+    padding-top: 0;
+  }
 }

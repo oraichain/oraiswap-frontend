@@ -201,7 +201,10 @@ const App = () => {
       <div className={`app ${theme}`}>
         <MenuV3 />
         {routes()}
-        <Instruct />
+        {
+          !isMobile() && <Instruct />
+        }
+
       </div>
     </ThemeProvider>
   );

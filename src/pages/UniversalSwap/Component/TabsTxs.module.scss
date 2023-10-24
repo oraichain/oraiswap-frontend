@@ -67,7 +67,6 @@
   .network {
     @include theme() {
       background-color: theme-get('bg-color');
-      box-shadow: theme-get('shadow-modal-token');
       border-color: theme-get('border-color-secondary');
     }
     min-width: 300px;
@@ -79,10 +78,10 @@
     z-index: 2;
     font-weight: 600;
     padding: 16px 12px;
-    visibility: visible;
-    inset: 0px 0px auto auto;
-    margin: 0px;
-    transform: translate3d(-16px, 1070px, 0px);
+    @include mobile() {
+      right: 10px;
+    }
+
     .title {
       text-align: center;
       font-size: 16px;
