@@ -7,12 +7,12 @@ import { TokenItemType } from 'config/bridgeTokens';
 const cx = cn.bind(styles);
 
 interface InputSwapProps {
-    Icon: CoinIcon
-    setIsSelectFrom: (value: boolean) => void
-    token: TokenItemType
-    amount: number
-    tokenFee: number
-    onChangeAmount?: (amount: number | undefined) => void
+    Icon: CoinIcon;
+    setIsSelectFrom: (value: boolean) => void;
+    token: TokenItemType;
+    amount: number;
+    tokenFee: number;
+    onChangeAmount?: (amount: number | undefined) => void;
 }
 
 export default function InputSwap({ Icon, setIsSelectFrom, token, amount, onChangeAmount, tokenFee }: InputSwapProps) {
@@ -47,5 +47,5 @@ export default function InputSwap({ Icon, setIsSelectFrom, token, amount, onChan
                 </div>
             )}
         </>
-    )
+    );
 }

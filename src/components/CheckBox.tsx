@@ -20,7 +20,7 @@ const CheckBox: FC<{
         }}
       />
       <span className={classNames(styles.checkmark, radioBox && styles.radioBox)}></span>
-    </label >
+    </label>
   );
 };
 export default CheckBox;
