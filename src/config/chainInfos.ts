@@ -1,5 +1,5 @@
 import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
-import { TokenItemType, oraichainTokens, tokens, chainInfos as customChainInfos } from '@oraichain/oraidex-common';
+import { TokenItemType, tokens, chainInfos as customChainInfos } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as AtomLightIcon } from 'assets/icons/atom_light.svg';
@@ -58,89 +58,97 @@ import {
   WRAP_TRON_TRX_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
+import { flatten } from 'lodash';
 
-type TokenIcon = Pick<TokenItemType, 'denom' | 'Icon' | 'IconLight'>;
+const [otherChainTokens, oraichainTokens] = tokens;
+type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
 type ChainIcon = Pick<CustomChainInfo, 'chainId' | 'Icon' | 'IconLight'>;
-export const oraichainTokenIcons: TokenIcon[] = [
+
+export const tokensIcon: TokenIcon[] = [
   {
-    denom: 'orai',
+    coinGeckoId: 'oraichain-token',
     Icon: OraiIcon,
     IconLight: OraiLightIcon
   },
   {
-    denom: 'ibc/A2E2EEC9057A4A1C2C0A6A4C78B0239118DF5F278830F50B4A6BDD7A66506B78',
-    Icon: AtomIcon,
-    IconLight: AtomLightIcon
-  },
-  {
-    denom: 'airi',
-    Icon: AiriIcon,
-    IconLight: AiriIcon
-  },
-  {
-    denom: 'usdt',
-    Icon: UsdtIcon,
-    IconLight: UsdtIcon
-  },
-  {
-    denom: 'usdc',
+    coinGeckoId: 'usd-coin',
     Icon: UsdcIcon,
     IconLight: UsdcIcon
   },
   {
-    denom: 'ibc/9C4DCD21B48231D0BC2AC3D1B74A864746B37E4292694C93C617324250D002FC',
-    Icon: OsmoIcon,
-    IconLight: OsmoLightIcon
+    coinGeckoId: 'airight',
+    Icon: AiriIcon,
+    IconLight: AiriIcon
   },
   {
-    denom: KWT_BSC_CONTRACT,
-    Icon: KwtIcon,
-    IconLight: KwtIcon
+    coinGeckoId: 'tether',
+    Icon: UsdtIcon,
+    IconLight: UsdtIcon
   },
   {
-    denom: 'kwt',
-    Icon: KwtIcon,
-    IconLight: KwtIcon
-  },
-  {
-    denom: MILKYBSC_ORAICHAIN_DENOM,
-    Icon: MilkyIcon,
-    IconLight: MilkyIcon
-  },
-  {
-    denom: 'milky',
-    Icon: MilkyIcon,
-    IconLight: MilkyIcon
-  },
-  {
-    denom: 'oraix',
-    Icon: OraixIcon,
-    IconLight: OraixLightIcon
-  },
-  {
-    denom: 'scorai',
-    Icon: ScOraiIcon,
-    IconLight: ScOraiIcon
-  },
-  {
-    denom: 'trx',
+    coinGeckoId: 'tron',
     Icon: TronIcon,
     IconLight: TronIcon
   },
   {
-    denom: 'scatom',
+    coinGeckoId: 'kawaii-islands',
+    Icon: KwtIcon,
+    IconLight: KwtIcon
+  },
+  {
+    coinGeckoId: 'milky-token',
+    Icon: MilkyIcon,
+    IconLight: MilkyIcon
+  },
+  {
+    coinGeckoId: 'osmosis',
+    Icon: OsmoIcon,
+    IconLight: OsmoLightIcon
+  },
+  {
+    coinGeckoId: 'injective-protocol',
+    Icon: InjIcon,
+    IconLight: InjIcon
+  },
+  {
+    coinGeckoId: 'cosmos',
+    Icon: AtomIcon,
+    IconLight: AtomLightIcon
+  },
+  {
+    coinGeckoId: 'weth',
+    Icon: EthIcon,
+    IconLight: EthIcon
+  },
+  {
+    coinGeckoId: 'ethereum',
+    Icon: EthIcon,
+    IconLight: EthIcon
+  },
+  {
+    coinGeckoId: 'wbnb',
+    Icon: BnbIcon,
+    IconLight: BnbIcon
+  },
+  {
+    coinGeckoId: 'binancecoin',
+    Icon: BnbIcon,
+    IconLight: BnbIcon
+  },
+  {
+    coinGeckoId: 'oraidex',
+    Icon: OraiIcon,
+    IconLight: OraiLightIcon
+  },
+  {
+    coinGeckoId: 'scorai',
+    Icon: ScOraiIcon,
+    IconLight: ScOraiIcon
+  },
+  {
+    coinGeckoId: 'scatom',
     Icon: ScAtomIcon,
     IconLight: ScAtomIcon
-  },
-  {
-    denom: INJECTIVE_ORAICHAIN_DENOM,
-    Icon: InjIcon,
-    IconLight: InjIcon
-  },
-  {
-    denom: 'injective',
-    Icon: InjIcon,
-    IconLight: InjIcon
   }
 ];
 
@@ -149,11 +157,6 @@ export const chainIcons: ChainIcon[] = [
     chainId: 'Oraichain',
     Icon: OraiIcon,
     IconLight: OraiLightIcon
-  },
-  {
-    chainId: 'oraibridge-subnet-2',
-    Icon: AtomIcon,
-    IconLight: AtomLightIcon
   },
   {
     chainId: 'kawaii_6886-1',
@@ -196,11 +199,7 @@ export const chainIcons: ChainIcon[] = [
     IconLight: KwtIcon
   }
 ];
-export const mapListWithIcon = <T>(
-  list: T[],
-  listIcon: ChainIcon[] | TokenIcon[],
-  key: 'denom' | 'chainId'
-): (T & { Icon: React.ComponentType; IconLight: React.ComponentType })[] => {
+export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
   return list.map((item) => {
     let Icon = OraiIcon;
     let IconLight = OraiLightIcon;
@@ -219,8 +218,15 @@ export const mapListWithIcon = <T>(
   });
 };
 
+// mapped chain info with icon
 export const chainInfosWithIcon = mapListWithIcon(customChainInfos, chainIcons, 'chainId');
-export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, oraichainTokenIcons, 'denom');
+
+// mapped token with icon
+export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, tokensIcon, 'coinGeckoId');
+export const otherTokensWithIcon = mapListWithIcon(otherChainTokens, tokensIcon, 'coinGeckoId');
+
+export const tokensWithIcon = [otherTokensWithIcon, oraichainTokensWithIcon];
+export const flattenTokensWithIcon = flatten(tokensWithIcon);
 
 export const OraiToken: BridgeAppCurrency = {
   coinDenom: 'ORAI',
