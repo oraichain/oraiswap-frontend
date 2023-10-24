@@ -15,7 +15,7 @@ import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, han
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { toSubAmount } from 'libs/utils';
+import { getUsd, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTokenInfos } from 'rest/api';
@@ -244,7 +244,6 @@ const SwapComponent: React.FC<{
         },
         { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
-      console.log('prev');
       const result = await univeralSwapHandler.processUniversalSwap();
 
       if (result) {
@@ -263,11 +262,12 @@ const SwapComponent: React.FC<{
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
           toAmount: toAmountToken.toString(),
-          fromAmountInUsdt: fromAmountToken.toString(),
-          toAmountInUsdt: toAmountToken.toString(),
+          fromAmountInUsdt: getUsd(fromAmountToken.toString(), originalFromToken, prices).toString(),
+          toAmountInUsdt: getUsd(toAmountToken.toString(), originalToToken, prices).toString(),
           status: 'initial',
           type: 'Swap',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          userAddress: oraiAddress
         });
       }
     } catch (error) {
@@ -411,7 +411,7 @@ const SwapComponent: React.FC<{
           ))}
         </div>
         <button className={cx('swap-btn', `${isSwapBtn ? 'disable' : ''}`)} onClick={handleSubmit} disabled={isSwapBtn}>
-          {swapLoading && <Loader width={40} height={40} />}
+          {swapLoading && <Loader width={35} height={35} />}
           {/* hardcode check minimum tron */}
           {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
             <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>

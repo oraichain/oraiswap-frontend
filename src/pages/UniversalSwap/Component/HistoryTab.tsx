@@ -1,19 +1,16 @@
 import ArrowImg from 'assets/icons/arrow_right.svg';
-import FilterIcon from 'assets/icons/filter.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
-import OraiIcon from 'assets/icons/oraichain_light.svg';
 import cn from 'classnames/bind';
-import SearchInput from 'components/SearchInput';
 import { Table, TableHeaderProps } from 'components/Table';
+import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { reduceString, timeSince } from 'libs/utils';
-import { HistoryInfoResponse } from 'types/swap';
-import styles from './HistoryTab.module.scss';
-import { useEffect, useState } from 'react';
-import { TransactionHistory } from 'libs/duckdb';
-import { flattenTokens, tokens } from '@oraichain/oraidex-common';
-import { chainInfosWithIcon } from 'config/chainInfos';
+import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
+import { TransactionHistory } from 'libs/duckdb';
+import { reduceString, timeSince } from 'libs/utils';
+import { useEffect, useState } from 'react';
+import styles from './HistoryTab.module.scss';
+import { FallbackEmptyData } from 'components/FallbackEmptyData';
 
 const cx = cn.bind(styles);
 
@@ -22,17 +19,16 @@ const RowsComponent: React.FC<{
 }> = ({ rows }) => {
   const theme = useTheme();
   const [fromToken, toToken] = [
-    flattenTokens.find((token) => token.coinGeckoId === rows.fromCoingeckoId),
-    flattenTokens.find((token) => token.coinGeckoId === rows.toCoingeckoId)
+    flattenTokensWithIcon.find((token) => token.coinGeckoId === rows.fromCoingeckoId),
+    flattenTokensWithIcon.find((token) => token.coinGeckoId === rows.toCoingeckoId)
   ];
-
   if (!fromToken || !toToken) return <></>;
 
   const [fromChain, toChain] = [
     chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === fromToken.chainId),
     chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === toToken.chainId)
   ];
-
+  if (!fromChain || !fromChain) return <></>;
   return (
     <div>
       <div className={styles.history}>
@@ -43,8 +39,11 @@ const RowsComponent: React.FC<{
         <div className={styles.from}>
           <div className={styles.list}>
             <div className={styles.img}>
-              <img src={OraiIcon} width={26} height={26} alt="filter" />
-              {/* <fromToken.Icon /> */}
+              {theme === 'light' ? (
+                <fromToken.IconLight width={26} height={26} />
+              ) : (
+                <fromToken.Icon width={26} height={26} />
+              )}
               <div className={styles.imgChain}>
                 {theme === 'light' ? (
                   <fromChain.IconLight width={14} height={14} />
@@ -54,12 +53,7 @@ const RowsComponent: React.FC<{
               </div>
             </div>
             <div className={styles.value}>
-              <div
-                className={styles.balance}
-                style={{
-                  color: '#e01600'
-                }}
-              >
+              <div className={styles.subBalance}>
                 {'-'}
                 {rows.fromAmount}
                 <span className={styles.denom}>{fromToken.name}</span>
@@ -74,7 +68,11 @@ const RowsComponent: React.FC<{
         <div className={styles.to}>
           <div className={styles.list}>
             <div className={styles.img}>
-              <img src={OraiIcon} width={26} height={26} alt="filter" />
+              {theme === 'light' ? (
+                <toToken.IconLight width={26} height={26} />
+              ) : (
+                <toToken.Icon width={26} height={26} />
+              )}
               <div className={styles.imgChain}>
                 {theme === 'light' ? (
                   <toChain.IconLight width={14} height={14} />
@@ -84,12 +82,7 @@ const RowsComponent: React.FC<{
               </div>
             </div>
             <div className={styles.value}>
-              <div
-                className={styles.balance}
-                style={{
-                  color: '#00AD26'
-                }}
-              >
+              <div className={styles.addBalance}>
                 {'+'}
                 {rows.toAmount}
                 <span className={styles.denom}>{toToken.name}</span>
@@ -115,17 +108,19 @@ const RowsComponent: React.FC<{
 export const HistoryTab: React.FC<{
   networkFilter: string;
 }> = ({ networkFilter }) => {
+  const [address] = useConfigReducer('address');
+
   const [transHistory, setTransHistory] = useState([]);
 
   useEffect(() => {
-    window.duckdb.getTransHistory().then((history) => {
+    window.duckdb.getTransHistory(address).then((history) => {
       setTransHistory(history);
     });
-  }, []);
+  }, [address]);
 
   const headers: TableHeaderProps<TransactionHistory> = {
     assets: {
-      name: 'May 6, 2023',
+      name: '',
       accessor: (data) => <RowsComponent rows={data} />,
       width: '100%',
       align: 'left'
@@ -135,22 +130,26 @@ export const HistoryTab: React.FC<{
   return (
     <div className={cx('historyTab')}>
       <div className={cx('info')}>
-        <div className={cx('filter')}>
+        {/* <div className={cx('filter')}>
           <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
           <span className={cx('filter-title')}>Transaction</span>
         </div>
         <div className={cx('search')}>
           <SearchInput placeholder="Search by address, asset, type" onSearch={(tokenName) => {}} />
-        </div>
+        </div> */}
       </div>
       <div>
-        <Table
-          headers={headers}
-          data={transHistory}
-          stylesColumn={{
-            padding: '16px 0'
-          }}
-        />
+        {transHistory.length > 0 ? (
+          <Table
+            headers={headers}
+            data={transHistory}
+            stylesColumn={{
+              padding: '16px 0'
+            }}
+          />
+        ) : (
+          <FallbackEmptyData />
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ export type TransactionHistory = {
   status: string;
   type: 'Swap' | 'Bridge' | 'Universal Swap';
   timestamp: number;
+  userAddress: string;
 };
 
 const TRANSACTION_HISTORY_TABLE = 'trans_history';
@@ -82,6 +83,7 @@ export class DuckDb {
         status varchar,
         type varchar,
         timestamp ubigint,
+        userAddress varchar
       )
       `);
     }
@@ -91,15 +93,13 @@ export class DuckDb {
     // Export Parquet
     await this.conn.send(`copy (select * from trans_history) to 'trans_history.parquet'`);
     const buf = await compress(await this.conn.bindings.copyFileToBuffer('trans_history.parquet'));
-    console.log('saveDuckdb parquet', buf);
     await set('trans_history', buf);
   }
 
   async addTransHistory(transHistory: TransactionHistory) {
-    console.log({ transHistory });
     await this.conn.send(
       `insert into trans_history
-        (initialTxHash,fromCoingeckoId,toCoingeckoId,fromChainId,toChainId,fromAmount,toAmount,status,type,timestamp) 
+        (initialTxHash,fromCoingeckoId,toCoingeckoId,fromChainId,toChainId,fromAmount,toAmount,status,type,timestamp,userAddress) 
         values
         (
           '${transHistory.initialTxHash}',
@@ -109,16 +109,21 @@ export class DuckDb {
           '${transHistory.toChainId}',
           '${transHistory.fromAmount}',
           '${transHistory.toAmount}',
+          '${transHistory.fromAmountInUsdt}',
+          '${transHistory.toAmountInUsdt}',
           '${transHistory.status}',
           '${transHistory.type}',
           ${transHistory.timestamp},
+          '${transHistory.userAddress}',
         )
       `
     );
     await this.save();
   }
 
-  async getTransHistory(): Promise<TransactionHistory[]> {
+  async getTransHistory(userAddress: string): Promise<TransactionHistory[]> {
+    if (!userAddress) return [];
+    // const histories = await this.conn.query(`select * from trans_history where userAddress = ${userAddress}`);
     const histories = await this.conn.query(`select * from trans_history`);
     return histories.toArray();
   }

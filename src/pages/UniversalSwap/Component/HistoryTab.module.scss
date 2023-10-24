@@ -5,8 +5,13 @@
   margin-top: 24px;
   margin-bottom: 24px;
   width: 100%;
-  border: 1px solid #efefef;
   border-radius: 12px;
+  border: 1px solid;
+
+  @include theme() {
+    border-color: theme-get('neutral-border-border-default');
+  }
+
 
   .info {
     display: flex;
@@ -34,7 +39,11 @@
       display: flex;
       align-items: center;
       border-radius: 99px;
-      border: 1px solid #232521;
+      border: 1px solid;
+
+      @include theme() {
+        border-color: theme-get('neutral-border-border-default');
+      }
 
       &:hover {
         opacity: 0.6;
@@ -76,7 +85,6 @@
         .imgChain {
           width: 14px;
           height: 14px;
-          background-color: #efefef;
           border-radius: 2px;
           position: absolute;
           top: 95%;
@@ -89,12 +97,27 @@
       .value {
         padding-left: 12px;
 
-        .balance {
+        .subBalance,
+        addBalance {
           font-size: 14px;
 
           .denom {
             padding-left: 4px;
             text-transform: uppercase;
+          }
+        }
+
+        .subBalance {
+          color: $error-color;
+        }
+
+        .addBalance {
+          color: $success-color;
+        }
+
+        .timestamp {
+          @include theme() {
+            color: theme-get('neutral-text-body-on-section');
           }
         }
       }
@@ -150,12 +173,6 @@
   .to {
     @include mobile() {
       width: 50%;
-    }
-  }
-
-  .timestamp {
-    @include theme() {
-      color: theme-get('neutral-text-body-on-section');
     }
   }
 
