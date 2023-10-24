@@ -32,6 +32,7 @@ import {
   UniversalSwapHandler,
   checkEvmAddress,
   filterNonPoolEvmTokens,
+  getRelayerInfoFromToken,
   handleSimulateSwap
 } from 'pages/UniversalSwap/helpers';
 import * as restApi from 'rest/api';
@@ -183,6 +184,50 @@ describe('universal-swap', () => {
     const tokens = filterNonPoolEvmTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
     expect(tokens.length).toEqual(expectedLength);
   });
+
+  it.each<[object, bigint, TokenItemType, number, number, number]>([
+    [
+      {
+        relayerAmount: '1000',
+        relayerDecimals: 6
+      },
+      10000000n,
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'),
+      1,
+      10,
+      1.001
+    ],
+    [
+      {
+        relayerAmount: '1000',
+        relayerDecimals: 6
+      },
+      1000000000000000000000n,
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'),
+      10,
+      1000,
+      10.001
+    ]
+  ])(
+    'test-getRelayerInfoFromToken',
+    (
+      relayerFee,
+      fromTokenTotalBalance,
+      originalFromToken,
+      fromAmount,
+      expectedTotalBalance,
+      expectedTotalBalanceFromTokenAndFeeRelayer
+    ) => {
+      const { caculateTotalBalanceFromToken, calulateFromTokenAndFeeRelayer } = getRelayerInfoFromToken(
+        relayerFee,
+        fromTokenTotalBalance,
+        originalFromToken,
+        fromAmount
+      );
+      expect(caculateTotalBalanceFromToken).toEqual(expectedTotalBalance);
+      expect(calulateFromTokenAndFeeRelayer).toEqual(expectedTotalBalanceFromTokenAndFeeRelayer);
+    }
+  );
 
   // it('test-evmSwap', () => {
   //   throw 'evmSwap error';
@@ -557,6 +602,88 @@ describe('universal-swap', () => {
     );
     expect(result.combinedReceiver).toEqual(`${oraib2oraichain}/receiver:foobar:orai`);
   });
+
+  it.each<[TokenItemType, TokenItemType, bigint, number]>([
+    [
+      oraichainTokens[0],
+      flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === '0x38'),
+      1000000n,
+      1
+    ],
+    [
+      flattenTokens.find((item) => item.coinGeckoId === 'oraichain-token' && item.chainId === '0x38'),
+      oraichainTokens[0],
+      1000000000000000000000n,
+      1
+    ]
+  ])('test checkRelayerFee', async (originalFromToken, originalToToken, fromTokenBalance, fromAmount) => {
+    const universalSwap = new UniversalSwapHandler(
+      '',
+      originalFromToken,
+      originalToToken,
+      fromAmount,
+      '',
+      1,
+      '2',
+      undefined,
+      fromTokenBalance,
+      {
+        relayerAmount: '1000',
+        relayerDecimals: 6
+      }
+    );
+
+    try {
+      const result = await universalSwap.checkFeeRelayer();
+      expect(result).toEqual(true);
+    } catch (error) {
+      expect(error?.ex?.message).toEqual('Fee relayer is not enough!');
+    }
+  });
+
+  it.each<[TokenItemType, TokenItemType, number, string, number]>([
+    [
+      oraichainTokens[1],
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'),
+      1000,
+      '1092640043',
+      1
+    ],
+    [
+      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === '0x38'),
+      oraichainTokens[1],
+      100000,
+      '1092640043',
+      1
+    ]
+  ])(
+    'test checkFeeRelayerNotOrai',
+    async (originalFromToken, originalToToken, totalBalance, simulateAmount, fromAmount) => {
+      const universalSwap = new UniversalSwapHandler(
+        '',
+        originalFromToken,
+        originalToToken,
+        fromAmount,
+        '',
+        1,
+        '2',
+        undefined,
+        0n,
+        {
+          relayerAmount: '1000',
+          relayerDecimals: 6
+        }
+      );
+
+      try {
+        const result = await universalSwap.checkFeeRelayerNotOrai(totalBalance, simulateAmount, fromAmount);
+        expect(result).toEqual(true);
+      } catch (error) {
+        expect(error?.ex?.message).toEqual('Fee relayer is not enough!');
+      }
+    }
+  );
+
   it('test-getUniversalSwapToAddress', async () => {
     const universalSwap = new UniversalSwapHandler('', oraichainTokens[0], oraichainTokens[0], 1, '', 1, '2');
     windowSpy.mockImplementation(() => ({
