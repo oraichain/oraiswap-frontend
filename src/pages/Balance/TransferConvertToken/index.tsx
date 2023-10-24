@@ -178,7 +178,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     denom: evmToken.name,
                     decimals: evmToken.decimals
                   }}
-                  className={styles.tokenAmount}
                   decimalScale={token.decimals}
                 />
               </div>
