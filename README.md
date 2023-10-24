@@ -32,7 +32,7 @@ yarn start
 yarn build
 
 # watch scss to typescript
-yarn watch:scss
+yarn ts-css
 
 ```
 
