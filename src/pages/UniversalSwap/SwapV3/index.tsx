@@ -417,7 +417,7 @@ const SwapComponent: React.FC<{
           {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
             <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
           ) : (
-            <span>{isSwapBtn ? 'Enter an amount' : 'Swap'}</span>
+            <span>{isSwapBtn && !swapLoading ? 'Enter an amount' : 'Swap'}</span>
           )}
         </button>
         <div className={cx('detail')}>
