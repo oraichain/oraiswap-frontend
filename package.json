@@ -73,6 +73,7 @@
     "sass": "^1.65.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
+    "typed-scss-modules": "^7.1.4",
     "typescript": "^5.1.6"
   },
   "scripts": {
@@ -83,6 +84,7 @@
     "ts-check": "tsc --noEmit",
     "postinstall": "patch-package",
     "prepare": "husky install",
+    "ts-css": "typed-scss-modules src --watch --implementation sass -n all -e default",
     "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*"
   },
   "eslintConfig": {
