@@ -36,7 +36,7 @@ import {
 } from 'rest/api';
 
 // @ts-ignore
-window.Networks = require('libs/ethereum-multicall/enums').Networks;
+window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {

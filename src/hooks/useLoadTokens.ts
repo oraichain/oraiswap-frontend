@@ -1,25 +1,28 @@
-import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import bech32 from 'bech32';
-import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
-import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
+import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
 import { generateError } from '../libs/utils';
 
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
+import {
+  CustomChainInfo,
+  EVM_BALANCE_RETRY_COUNT,
+  ERC20__factory,
+  getEvmAddress,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
+import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
-import { CustomChainInfo, EVM_BALANCE_RETRY_COUNT } from '@oraichain/oraidex-common';
-import { getEvmAddress, tronToEthAddress } from '@oraichain/oraidex-common';
-import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -138,7 +141,7 @@ async function loadEvmEntries(
     const input = tokens.map((token) => ({
       reference: token.denom,
       contractAddress: token.contractAddress,
-      abi: tokenABI,
+      abi: ERC20__factory.abi.toSorted(),
       calls: [
         {
           reference: token.denom,

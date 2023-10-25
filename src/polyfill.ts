@@ -7,7 +7,7 @@ import Metamask from 'libs/metamask';
 
 // inject global
 window.TronWeb = require('tronweb');
-window.Networks = require('libs/ethereum-multicall/enums').Networks;
+window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
 window.Keplr = new Keplr();
