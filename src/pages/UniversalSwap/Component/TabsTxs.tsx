@@ -1,14 +1,15 @@
-import { useRef, useState } from 'react';
-import styles from './TabsTxs.module.scss';
+import { CoinIcon, CustomChainInfo } from '@oraichain/oraidex-common';
 import ArrowImg from 'assets/icons/arrow_new.svg';
-import useConfigReducer from 'hooks/useConfigReducer';
+import CheckImg from 'assets/icons/check.svg';
 import NetworkImg from 'assets/icons/network.svg';
 import cn from 'classnames/bind';
-import { NetworkFilter, TYPE, initNetworkFilter } from '../helpers';
 import { networks } from 'helper';
-import CheckImg from 'assets/icons/check.svg';
+import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { CoinIcon, CustomChainInfo } from '@oraichain/oraidex-common';
+import { useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from '../helpers';
+import styles from './TabsTxs.module.scss';
 
 const cx = cn.bind(styles);
 const ItemNetwork: React.FC<{
@@ -94,33 +95,43 @@ const TabsNetwork: React.FC<{
 };
 
 export const TabsTxs: React.FC<{
-  type: string;
-  setType: (type: string) => void;
   networkFilter: string;
   setNetworkFilter: (networkFilter: NetworkFilter) => void;
-}> = ({ type, setType, setNetworkFilter, networkFilter }) => {
+}> = ({ setNetworkFilter, networkFilter }) => {
   const [isNetwork, setIsNetwork] = useState<boolean>(false);
   const [theme] = useConfigReducer('theme');
   const ref = useRef(null);
+  const navigate = useNavigate();
+
   useOnClickOutside(ref, () => {
     setIsNetwork(false);
   });
+
+  const [searchParams] = useSearchParams();
+  let tab = searchParams.get('type');
+
   return (
     <div className={cx('tabsTxs')} ref={ref}>
       <div className={cx('left')}>
-        {Object.values(TYPE).map((types) => {
+        {Object.values(TYPE_TAB_HISTORY).map((type) => {
           return (
             <div
-              key={types}
-              className={cx('label', `${type === types ? 'active' : ''}`)}
-              onClick={() => setType(types)}
+              key={type}
+              className={cx(
+                'label',
+                `${tab === type ? 'active' : ''}`,
+                `${!tab && type === TYPE_TAB_HISTORY.ASSETS ? 'active' : ''}`
+              )}
+              onClick={() => {
+                navigate(`/universalswap?type=${type}`);
+              }}
             >
-              {types}
+              {type}
             </div>
           );
         })}
       </div>
-      {type === TYPE.ASSETS && (
+      {tab !== TYPE_TAB_HISTORY.HISTORY && (
         <div>
           <div
             className={cx('right')}

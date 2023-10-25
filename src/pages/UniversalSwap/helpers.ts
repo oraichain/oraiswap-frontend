@@ -33,7 +33,7 @@ export interface SwapData {
   tronAddress?: string;
 }
 
-export const TYPE = {
+export const TYPE_TAB_HISTORY = {
   ASSETS: 'Assets',
   HISTORY: 'History'
 };
