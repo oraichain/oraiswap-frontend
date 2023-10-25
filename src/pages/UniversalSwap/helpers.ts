@@ -5,7 +5,9 @@ import {
   NetworkChainId,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId
 } from '@oraichain/oraidex-common';
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
 import { generateError } from 'libs/utils';
@@ -15,7 +17,6 @@ import {
   isSupportedNoPoolSwapEvm,
   swapEvmRoutes
 } from '@oraichain/oraidex-universal-swap';
-import { getTokenOnOraichain, getTokenOnSpecificChainId, NetworkChainId } from '@oraichain/oraidex-common';
 
 export enum SwapDirection {
   From,
