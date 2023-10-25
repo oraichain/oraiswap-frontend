@@ -13,7 +13,7 @@ import CheckImg from 'assets/icons/check.svg';
 import BackImg from 'assets/icons/back.svg';
 import { networks } from 'helper';
 import { TokenItemType, CustomChainInfo, getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
-import { oraichainTokenIcons } from 'config/chainInfos';
+import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -194,7 +194,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
             // TODO: hardcode list icon oraichain need fix after listing v3
             if (!item.Icon && item.chainId === 'Oraichain') {
               const tokenItem = item as TokenItemType;
-              const itemTokenIcon = oraichainTokenIcons.find(oraichainToken => oraichainToken.denom === tokenItem.denom)
+              const itemTokenIcon = flattenTokensWithIcon.find(oraichainToken => oraichainToken.denom === tokenItem.denom)
               itemIcon = isLightTheme ? <itemTokenIcon.IconLight className={cx('logo')} /> : <itemTokenIcon.Icon className={cx('logo')} />
             }
             return (
