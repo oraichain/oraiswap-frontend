@@ -162,7 +162,7 @@ async function loadEvmEntries(
     const input = tokens.map((token) => ({
       reference: token.denom,
       contractAddress: token.contractAddress,
-      abi: ERC20__factory.abi.toSorted(),
+      abi: ERC20__factory.abi,
       calls: [
         {
           reference: token.denom,
@@ -172,7 +172,7 @@ async function loadEvmEntries(
       ]
     }));
 
-    const results: ContractCallResults = await multicall.call(input);
+    const results: ContractCallResults = await multicall.call(input as any);
     const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address, chain) : 0;
     let entries: [string, string][] = tokens.map((token) => {
       const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
