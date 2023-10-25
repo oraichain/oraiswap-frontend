@@ -1,5 +1,11 @@
 import { CoinGeckoId, NetworkChainId } from '@oraichain/oraidex-common';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens } from 'pages/UniversalSwap/helpers';
+import {
+  SwapDirection,
+  SwapType,
+  checkEvmAddress,
+  filterNonPoolEvmTokens,
+  getSwapType
+} from 'pages/UniversalSwap/helpers';
 
 describe('universal-swap', () => {
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
@@ -44,4 +50,16 @@ describe('universal-swap', () => {
       }).not.toThrow();
     });
   });
+
+  it.each([
+    ['Oraichain', 'Oraichain', 'oraichain-token', 'osmosis', 'Swap'] as const,
+    ['Oraichain', '0x38', 'tether', 'tether', 'Bridge'] as const,
+    ['Oraichain', '0x38', 'oraichain-token', 'tether', 'Universal Swap'] as const
+  ])(
+    'get-swap-type-with-fromChainId=%s, toChainId=%s, fromCoingeckoId=%s, toCoingeckoId=%s-should-return-type-%s',
+    (fromChainId, toChainId, fromCoingeckoId, toCoingeckoId, expectedResult) => {
+      const result: SwapType = getSwapType({ fromChainId, toChainId, fromCoingeckoId, toCoingeckoId });
+      expect(result).toEqual(expectedResult);
+    }
+  );
 });
