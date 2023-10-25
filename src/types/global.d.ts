@@ -6,7 +6,7 @@ import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
 import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
-import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
+import { Networks as _Networks } from '@oraichain/ethereum-multicall';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
