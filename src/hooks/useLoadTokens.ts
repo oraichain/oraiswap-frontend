@@ -3,7 +3,7 @@ import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { handleCheckWallet } from 'helper';
+import { genAddressCosmos, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
@@ -53,12 +53,17 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 }
 
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
+  let kawaiiAddress;
+  if (oraiAddress) {
+    const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+    kawaiiAddress = kwtAddress;
+  }
   await Promise.all(
     [
-      oraiAddress && loadTokensCosmos(dispatch),
+      oraiAddress && loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
       oraiAddress && loadCw20Balance(dispatch, oraiAddress),
       // different cointype but also require keplr connected by checking oraiAddress
-      oraiAddress && loadKawaiiSubnetAmount(dispatch),
+      oraiAddress && loadKawaiiSubnetAmount(dispatch, kawaiiAddress),
       metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChains),
       tronAddress &&
         loadEvmAmounts(
@@ -70,13 +75,15 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
   );
 }
 
-async function loadTokensCosmos(dispatch: Dispatch) {
+async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddress: string) {
+  if (!kwtAddress || !oraiAddress) return;
   await handleCheckWallet();
   const cosmosInfos = chainInfos.filter(
     (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
   );
   for (const chainInfo of cosmosInfos) {
-    const cosmosAddress = await window.Keplr.getKeplrAddr(chainInfo.chainId);
+    // const cosmosAddress = await window.Keplr.getKeplrAddr(chainInfo.chainId);
+    const { cosmosAddress } = genAddressCosmos(chainInfo, kwtAddress, oraiAddress);
     loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
@@ -176,8 +183,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
   dispatch(updateAmounts(amountDetails));
 }
 
-async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
-  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
   if (!kwtAddress) return;
   const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
