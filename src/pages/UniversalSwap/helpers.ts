@@ -15,7 +15,7 @@ import {
   isSupportedNoPoolSwapEvm,
   swapEvmRoutes
 } from '@oraichain/oraidex-universal-swap';
-import { getTokenOnOraichain, getTokenOnSpecificChainId } from '@oraichain/oraidex-common';
+import { getTokenOnOraichain, getTokenOnSpecificChainId, NetworkChainId } from '@oraichain/oraidex-common';
 
 export enum SwapDirection {
   From,
@@ -130,3 +130,22 @@ export const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
   [0.75, '75%', 'three-quarters'],
   [1, '100%', 'max']
 ];
+
+export type SwapType = 'Swap' | 'Bridge' | 'Universal Swap';
+export const getSwapType = ({
+  fromChainId,
+  toChainId,
+  fromCoingeckoId,
+  toCoingeckoId
+}: {
+  fromChainId: NetworkChainId;
+  toChainId: NetworkChainId;
+  fromCoingeckoId: CoinGeckoId;
+  toCoingeckoId: CoinGeckoId;
+}): SwapType => {
+  if (fromChainId === 'Oraichain' && toChainId === 'Oraichain') return 'Swap';
+
+  if (fromCoingeckoId === toCoingeckoId) return 'Bridge';
+
+  return 'Universal Swap';
+};

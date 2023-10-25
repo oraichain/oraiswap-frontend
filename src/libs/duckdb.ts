@@ -80,6 +80,8 @@ export class DuckDb {
         toChainId varchar, 
         fromAmount varchar, 
         toAmount varchar, 
+        fromAmountInUsdt varchar,
+        toAmountInUsdt varchar,
         status varchar,
         type varchar,
         timestamp ubigint,
@@ -99,7 +101,7 @@ export class DuckDb {
   async addTransHistory(transHistory: TransactionHistory) {
     await this.conn.send(
       `insert into trans_history
-        (initialTxHash,fromCoingeckoId,toCoingeckoId,fromChainId,toChainId,fromAmount,toAmount,status,type,timestamp,userAddress) 
+        (initialTxHash,fromCoingeckoId,toCoingeckoId,fromChainId,toChainId,fromAmount,toAmount,fromAmountInUsdt,toAmountInUsdt,status,type,timestamp,userAddress) 
         values
         (
           '${transHistory.initialTxHash}',
@@ -124,7 +126,7 @@ export class DuckDb {
   async getTransHistory(userAddress: string): Promise<TransactionHistory[]> {
     if (!userAddress) return [];
     // const histories = await this.conn.query(`select * from trans_history where userAddress = ${userAddress}`);
-    const histories = await this.conn.query(`select * from trans_history`);
+    const histories = await this.conn.query(`SELECT * FROM trans_history ORDER BY timestamp DESC`);
     return histories.toArray();
   }
 }

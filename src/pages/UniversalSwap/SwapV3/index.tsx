@@ -22,6 +22,7 @@ import {
   AMOUNT_BALANCE_ENTRIES,
   checkEvmAddress,
   filterNonPoolEvmTokens,
+  getSwapType,
   relayerFeeInfo,
   SwapDirection
 } from '../helpers';
@@ -259,6 +260,12 @@ const SwapComponent: React.FC<{
         setSwapLoading(false);
 
         // save to duckdb
+        const swapType = getSwapType({
+          fromChainId: originalFromToken.chainId,
+          toChainId: originalToToken.chainId,
+          fromCoingeckoId: originalFromToken.coinGeckoId,
+          toCoingeckoId: originalToToken.coinGeckoId
+        });
         await window.duckdb.addTransHistory({
           initialTxHash: transactionHash,
           fromCoingeckoId: originalFromToken.coinGeckoId,
@@ -267,10 +274,14 @@ const SwapComponent: React.FC<{
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
           toAmount: toAmountToken.toString(),
-          fromAmountInUsdt: getUsd(fromAmountToken.toString(), originalFromToken, prices).toString(),
-          toAmountInUsdt: getUsd(toAmountToken.toString(), originalToToken, prices).toString(),
+          fromAmountInUsdt: getUsd(
+            toAmount(fromAmountToken, originalFromToken.decimals),
+            originalFromToken,
+            prices
+          ).toString(),
+          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
           status: 'initial',
-          type: 'Swap',
+          type: swapType,
           timestamp: Date.now(),
           userAddress: oraiAddress
         });

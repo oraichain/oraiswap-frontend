@@ -11,6 +11,7 @@ import { reduceString, timeSince } from 'libs/utils';
 import { useEffect, useState } from 'react';
 import styles from './HistoryTab.module.scss';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 
@@ -25,10 +26,10 @@ const RowsComponent: React.FC<{
   if (!fromToken || !toToken) return <></>;
 
   const [fromChain, toChain] = [
-    chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === fromToken.chainId),
-    chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === toToken.chainId)
+    chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === rows.fromChainId),
+    chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === rows.toChainId)
   ];
-  if (!fromChain || !fromChain) return <></>;
+  if (!fromChain || !toChain) return <></>;
   return (
     <div>
       <div className={styles.history}>
@@ -58,7 +59,7 @@ const RowsComponent: React.FC<{
                 {rows.fromAmount}
                 <span className={styles.denom}>{fromToken.name}</span>
               </div>
-              <div className={styles.timestamp}>${rows.fromAmountInUsdt}</div>
+              <div className={styles.timestamp}>{formatDisplayUsdt(rows.fromAmountInUsdt)}</div>
             </div>
           </div>
         </div>
@@ -87,7 +88,7 @@ const RowsComponent: React.FC<{
                 {rows.toAmount}
                 <span className={styles.denom}>{toToken.name}</span>
               </div>
-              <div className={styles.timestamp}>${rows.toAmountInUsdt}</div>
+              <div className={styles.timestamp}>{formatDisplayUsdt(rows.toAmountInUsdt)}</div>
             </div>
           </div>
         </div>
@@ -129,16 +130,17 @@ export const HistoryTab: React.FC<{
 
   return (
     <div className={cx('historyTab')}>
-      <div className={cx('info')}>
-        {/* <div className={cx('filter')}>
+      {/* <div className={cx('info')}>
+        <div className={cx('filter')}>
           <img src={FilterIcon} className={cx('filter-icon')} alt="filter" />
           <span className={cx('filter-title')}>Transaction</span>
         </div>
         <div className={cx('search')}>
           <SearchInput placeholder="Search by address, asset, type" onSearch={(tokenName) => {}} />
-        </div> */}
-      </div>
-      <div>
+        </div>
+      </div> */}
+      <div className={styles.historyData}>
+        <h2>Latest 20 transactions</h2>
         {transHistory.length > 0 ? (
           <Table
             headers={headers}
