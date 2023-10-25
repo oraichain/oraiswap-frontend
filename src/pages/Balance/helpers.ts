@@ -1,44 +1,38 @@
 import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
-import { coin, Coin } from '@cosmjs/proto-signing';
+import { Coin, coin } from '@cosmjs/proto-signing';
 import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
-import { cosmosTokens, flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
 import {
   CosmosChainId,
   IBCInfo,
-  IBC_WASM_CONTRACT,
   KWT,
-  NetworkChainId,
   ORAI,
   TokenItemType,
-  gravityContracts
+  ibcInfos,
+  ibcInfosOld,
+  oraichain2oraib
 } from '@oraichain/oraidex-common';
-import { ibcInfos, ibcInfosOld, oraichain2oraib } from '@oraichain/oraidex-common';
+import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
+import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';
 
-import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
-import {
-  OraiswapTokenClient,
-  OraiswapTokenQueryClient,
-  OraiswapTokenReadOnlyInterface
-} from '@oraichain/oraidex-contracts-sdk';
-import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
-import KawaiiverseJs from 'libs/kawaiiversejs';
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { generateError } from 'libs/utils';
-import { generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages, Type } from 'rest/api';
-import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
-import { Long } from 'cosmjs-types/helpers';
+import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   buildMultipleExecuteMessages,
   calculateTimeoutTimestamp,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount,
-  toDisplay
+  toAmount
 } from '@oraichain/oraidex-common';
+import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
+import { Long } from 'cosmjs-types/helpers';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
+import KawaiiverseJs from 'libs/kawaiiversejs';
+import { generateError } from 'libs/utils';
+import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages } from 'rest/api';
+import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -353,6 +347,7 @@ export const transferIbcCustom = async (
         amount.amount,
         ibcMemo
       );
+      // @ts-ignore
       return { ...result, code: 0 };
     } catch (error) {
       throw generateError(error.toString());

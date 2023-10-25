@@ -1,11 +1,10 @@
+// @ts-nocheck
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-import { toUtf8 } from '@cosmjs/encoding';
-import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
-import { network } from 'config/networks';
-import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-import { Stargate } from '@injectivelabs/sdk-ts';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import { Stargate } from '@injectivelabs/sdk-ts';
+import { network } from 'config/networks';
 
 export type clientType = 'cosmwasm' | 'injective';
 
@@ -104,6 +103,6 @@ class CosmJs {
   }
 }
 
-export { getCosmWasmClient, collectWallet };
+export { collectWallet, getCosmWasmClient };
 
 export default CosmJs;
