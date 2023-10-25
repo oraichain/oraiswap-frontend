@@ -31,7 +31,7 @@ import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import InputSwap from './InputSwapV3';
-import { useSimulate, useTaxRate } from './hooks';
+import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useWarningSlippage } from '../Swap/hooks';
 import {
   TokenItemType,
@@ -81,6 +81,7 @@ const SwapComponent: React.FC<{
   const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
+  const { refetchTransHistory } = useGetTransHistory();
 
   const refreshBalances = async () => {
     try {
@@ -285,6 +286,7 @@ const SwapComponent: React.FC<{
           timestamp: Date.now(),
           userAddress: oraiAddress
         });
+        refetchTransHistory();
       }
     } catch (error) {
       console.log({ error });

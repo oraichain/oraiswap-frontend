@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import styles from './HistoryTab.module.scss';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useGetTransHistory } from '../SwapV3/hooks';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
@@ -125,15 +126,7 @@ const RowsComponent: React.FC<{
 export const HistoryTab: React.FC<{
   networkFilter: string;
 }> = ({ networkFilter }) => {
-  const [address] = useConfigReducer('address');
-
-  const [transHistory, setTransHistory] = useState([]);
-
-  useEffect(() => {
-    window.duckDb.getTransHistory(address).then((history) => {
-      setTransHistory(history);
-    });
-  }, [address]);
+  const { transHistory } = useGetTransHistory();
 
   const headers: TableHeaderProps<TransactionHistory> = {
     assets: {
