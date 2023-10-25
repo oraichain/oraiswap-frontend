@@ -3,18 +3,16 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/ic_status_done.svg';
 import { ReactComponent as ErrorIcon } from 'assets/icons/ic_status_failed.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
 import cn from 'classnames/bind';
+import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import { chainInfosWithIcon, flattenTokensWithIcon } from 'config/chainInfos';
 import { network } from 'config/networks';
-import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { TransactionHistory } from 'libs/duckdb';
 import { reduceString, timeSince } from 'libs/utils';
-import { useEffect, useState } from 'react';
-import styles from './HistoryTab.module.scss';
-import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useGetTransHistory } from '../SwapV3/hooks';
+import styles from './HistoryTab.module.scss';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
