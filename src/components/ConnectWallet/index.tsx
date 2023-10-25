@@ -34,7 +34,7 @@ import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 const cx = cn.bind(styles);
 
-interface ModalProps {}
+interface ModalProps { }
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   KEPLR = 'KEPLR',
@@ -75,7 +75,7 @@ export enum CONNECT_STATUS {
   DONE = 'DONE',
   ERROR = 'ERROR'
 }
-const ConnectWallet: FC<ModalProps> = ({}) => {
+const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [theme] = useConfigReducer('theme');
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
@@ -166,8 +166,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   useEffect(() => {
     (async () => {
-      const { listAddressCosmos } = await getListAddressCosmos();
-      setCosmosAddress(listAddressCosmos);
+      if (oraiAddress) {
+        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+        setCosmosAddress(listAddressCosmos);
+      }
     })();
     setWalletTypeStore(walletType);
   }, []);
@@ -182,7 +184,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       })();
     }
 
-    return () => {};
+    return () => { };
   }, [address]);
   const disconnectMetamask = async () => {
     try {
@@ -200,7 +202,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return item;
     });
     setWallets(walletData);
-    return () => {};
+    return () => { };
   }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
@@ -234,7 +236,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       setOraiAddress(oraiAddress);
-      const { listAddressCosmos } = await getListAddressCosmos();
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
