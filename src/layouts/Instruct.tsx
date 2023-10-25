@@ -7,17 +7,17 @@ import GroupImg from 'assets/icons/group.svg';
 import GraduationImg from 'assets/icons/graduation.svg';
 import UniversalWallet from 'assets/images/universal_wallet.png';
 import UniversalSwapBridge from 'assets/images/universalswap_bridge.png';
-import ChatBubbleQuestion from 'assets/icons/chat-bubble-question.svg';
 import TrackingTransaction from 'assets/images/tracking_transaction.png';
 import TrackingHistory from 'assets/images/tracking_history.png';
 import styles from './Instruct.module.scss';
 import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import SearchInput from 'components/SearchInput';
+import { ReactComponent as ChatBubbleQuestion } from 'assets/icons/chat-bubble-question.svg';
 
 const cx = cn.bind(styles);
 
-interface InstructProps {}
+interface InstructProps { }
 
 const WhatsNewItems = [
   {
@@ -55,21 +55,15 @@ const Instruct: React.FC<InstructProps> = () => {
         <img src={QuestionImg} alt="question" />
       </div>
       <Modal className={cx('helper-modal')} isOpen={isOpen} close={() => setIsOpen(false)} isCloseBtn={true}>
-        <div className={cx('helper-center')}>
-          <div className={cx('topic')}>
+        <div className={cx('helper-center', `${theme}-center`)}>
+          <div className={cx('topic', `${theme}-topic`)}>
             <div className={cx('title')}>Help Center</div>
             <SearchInput
               placeholder="Search for tutorials, help..."
-              onSearch={() => {}}
+              onSearch={() => { }}
               theme={theme}
               isBorder
-              style={{
-                fontSize: 14,
-                color: '#979995',
-                backgroundColor: '#F7F7F7',
-                borderRadius: 99,
-                border: 'none'
-              }}
+              className={cx('search-input', `search-input-${theme}`)}
             />
             <div className={cx('what-news')}>
               <div className={cx('label')}>
@@ -82,7 +76,7 @@ const Instruct: React.FC<InstructProps> = () => {
                     <div
                       onClick={() => ind !== activeInd && setActiveInd(ind)}
                       key={ind}
-                      className={cx('what-news-item', `${activeInd === ind && 'active'}`)}
+                      className={cx('what-news-item', `what-news-item-${theme}`, `${activeInd === ind && `${theme}-active`}`)}
                     >
                       <div>{whatsNew.label}</div>
                       {whatsNew.icon && <img src={MediaVideo} alt="media-video" width={14} height={14} />}
@@ -100,24 +94,26 @@ const Instruct: React.FC<InstructProps> = () => {
               <div>AI x Blockchain Savvy</div>
             </div>
           </div>
-          <div className={cx('content')}>
+          <div className={cx('content', `${theme}-content`)}>
             <img src={WhatsNewItems[activeInd].img} alt="universal-swap" />
             <div className={cx('info')}>
-              <div className={cx('title')}>Universal Wallet</div>
-              <div className={cx('describe')}>
+              <div className={cx('title', `${theme}-title`)}>
+                {WhatsNewItems[activeInd].label}
+              </div>
+              <div className={cx('describe', `${theme}-describe`)}>
                 Bridge and universal swap all in one place. Lorem Ipsum has been the industry's standard dummy text ever
                 since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen
                 book.
               </div>
-              <div className={cx('contact')}>
-                <img src={ChatBubbleQuestion} alt="chat" width={20} height={20} />
+              <div className={cx('contact', `${theme}-contact`)}>
+                <ChatBubbleQuestion className={cx('icon')} />
                 <div>Contact us</div>
               </div>
             </div>
           </div>
         </div>
-      </Modal>
-    </div>
+      </Modal >
+    </div >
   );
 };
 
