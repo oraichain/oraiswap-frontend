@@ -13,11 +13,11 @@ $primary-text-link: #78ca11;
 $primary-surface-default-light: #E5F7D6;
 $primary-bg-btn: #aee67f;
 $text-btn-default: #1e300a;
-
+$text-placeholder: #505665;
+$warning-surface-default: #E6CF00;
 // for dark-light mode
 $themes: (
-  dark: (
-    'text-color': white,
+  dark: ('text-color': white,
     'text-color-secondary': #fff,
     'bg-connect-wallet': #232521,
     'text-color-third': #fff,
@@ -76,10 +76,8 @@ $themes: (
     'primary-surface-default': #92e54c,
     'neutral-surface-bg': #121511,
     'neutral-text-body-on-section': #979995,
-    'neutral-text-text-btn-default': #163300
-  ),
-  light: (
-    'text-color': #272b30,
+    'neutral-text-text-btn-default': #163300),
+  light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
@@ -138,6 +136,5 @@ $themes: (
     'neutral-surface-bg': #fff,
     'neutral-text-body-on-section': #686a,
     'neutral-text-text-token-name': #232521,
-    'neutral-text-text-btn-default': #232521
-  )
+    'neutral-text-text-btn-default': #232521)
 );

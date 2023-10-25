@@ -1,6 +1,6 @@
 import { oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formateNumberDecimalsAuto, toSumDisplay } from 'libs/utils';
+import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
@@ -117,4 +117,23 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(result).toEqual(expectedResult);
     }
   );
+
+  describe('timeSince', () => {
+    it.each<[number, string]>([
+      [Date.now() - 366 * 24 * 60 * 60 * 1000, '1 years'],
+      [Date.now() - 31 * 24 * 60 * 60 * 1000, '1 months'],
+      [Date.now() - 2 * 24 * 60 * 60 * 1000, '2 days'],
+      [Date.now() - 2 * 60 * 60 * 1000, '2 hours'],
+      [Date.now() - 2 * 60 * 1000, '2 minutes'],
+      [Date.now() - 2 * 1000, '2 seconds']
+    ])('returns correct time interval for %d milliseconds', (input, expected) => {
+      const result = timeSince(input);
+      expect(result).toEqual(expected);
+    });
+
+    it('returns "0 seconds" for current timestamp', () => {
+      const result = timeSince(Date.now());
+      expect(result).toEqual('0 seconds');
+    });
+  });
 });
