@@ -214,11 +214,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -319,6 +319,7 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
             )}
             {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
@@ -382,6 +383,7 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
             )}
           </div>
@@ -407,7 +409,10 @@ const SwapComponent: React.FC<{
           ))}
         </div>
         <button className={cx('swap-btn', `${isSwapBtn ? 'disable' : ''}`)} onClick={handleSubmit} disabled={isSwapBtn}>
-          {swapLoading && <Loader width={40} height={40} />}
+          {swapLoading && <>
+            <Loader width={40} height={40} />
+            <div style={{ width: 6 }} />
+          </>}
           {/* hardcode check minimum tron */}
           {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
             <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
