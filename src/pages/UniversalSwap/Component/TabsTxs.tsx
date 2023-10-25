@@ -120,28 +120,30 @@ export const TabsTxs: React.FC<{
           );
         })}
       </div>
-      <div>
-        <div
-          className={cx('right')}
-          onClick={() => {
-            setIsNetwork(!isNetwork);
-          }}
-        >
-          <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
-          <div className={cx('all-network')}>
-            <span className={cx(`detail`)}>{networkFilter ? networkFilter : 'All Networks'}</span>
+      {type === TYPE.ASSETS && (
+        <div>
+          <div
+            className={cx('right')}
+            onClick={() => {
+              setIsNetwork(!isNetwork);
+            }}
+          >
+            <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+            <div className={cx('all-network')}>
+              <span className={cx(`detail`)}>{networkFilter ? networkFilter : 'All Networks'}</span>
+            </div>
+            <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
           </div>
-          <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
+          {isNetwork && (
+            <TabsNetwork
+              networkFilter={networkFilter}
+              theme={theme}
+              setIsNetwork={setIsNetwork}
+              setNetworkFilter={setNetworkFilter}
+            />
+          )}
         </div>
-        {isNetwork && (
-          <TabsNetwork
-            networkFilter={networkFilter}
-            theme={theme}
-            setIsNetwork={setIsNetwork}
-            setNetworkFilter={setNetworkFilter}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 };

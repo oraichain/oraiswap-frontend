@@ -33,7 +33,7 @@ const Swap: React.FC = () => {
               </>
             )}
 
-            <RoutingSection />
+            {/* <RoutingSection /> */}
             <TabsTxs
               type={type}
               setType={setType}
