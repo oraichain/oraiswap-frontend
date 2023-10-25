@@ -52,27 +52,42 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   dispatch(updateAmounts(amountDetails));
 }
 
+const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  let kawaiiAddress;
   if (oraiAddress) {
-    const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
-    kawaiiAddress = kwtAddress;
+    clearTimeout(timer[oraiAddress]);
+    let kawaiiAddress;
+    if (oraiAddress) {
+      const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+      kawaiiAddress = kwtAddress;
+    }
+    timer[oraiAddress] = setTimeout(async () => {
+      await Promise.all([
+        loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
+        loadCw20Balance(dispatch, oraiAddress),
+        // different cointype but also require keplr connected by checking oraiAddress
+        loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
+      ]);
+    }, 2000);
   }
-  await Promise.all(
-    [
-      oraiAddress && loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
-      oraiAddress && loadCw20Balance(dispatch, oraiAddress),
-      // different cointype but also require keplr connected by checking oraiAddress
-      oraiAddress && loadKawaiiSubnetAmount(dispatch, kawaiiAddress),
-      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChains),
-      tronAddress &&
-        loadEvmAmounts(
-          dispatch,
-          tronToEthAddress(tronAddress),
-          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
-        )
-    ].filter(Boolean)
-  );
+
+  if (metamaskAddress) {
+    clearTimeout(timer[metamaskAddress]);
+    timer[metamaskAddress] = setTimeout(() => {
+      loadEvmAmounts(dispatch, metamaskAddress, evmChains);
+    }, 2000);
+  }
+
+  if (tronAddress) {
+    clearTimeout(timer[tronAddress]);
+    timer[tronAddress] = setTimeout(() => {
+      loadEvmAmounts(
+        dispatch,
+        tronToEthAddress(tronAddress),
+        chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+      );
+    }, 2000);
+  }
 }
 
 async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddress: string) {
@@ -82,7 +97,6 @@ async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddr
     (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
   );
   for (const chainInfo of cosmosInfos) {
-    // const cosmosAddress = await window.Keplr.getKeplrAddr(chainInfo.chainId);
     const { cosmosAddress } = genAddressCosmos(chainInfo, kwtAddress, oraiAddress);
     loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
