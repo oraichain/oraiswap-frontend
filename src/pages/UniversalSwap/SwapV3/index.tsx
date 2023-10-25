@@ -1,3 +1,22 @@
+import {
+  CosmosChainId,
+  DEFAULT_SLIPPAGE,
+  TRON_DENOM,
+  TokenItemType,
+  calculateMinReceive,
+  getTokenOnOraichain,
+  network,
+  toAmount,
+  toDisplay,
+  truncDecimals
+} from '@oraichain/oraidex-common';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import {
+  UniversalSwapHandler,
+  isEvmNetworkNativeSwapSupported,
+  isEvmSwappable,
+  isSupportedNoPoolSwapEvm
+} from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
@@ -5,55 +24,36 @@ import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { evmTokens, tokenMap } from 'config/bridgeTokens';
-import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { tokenMap } from 'config/bridgeTokens';
+import { ethers } from 'ethers';
+import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useTokenFee from 'hooks/useTokenFee';
 import { getUsd, toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
+import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import { useWarningSlippage } from '../Swap/hooks';
 import {
   AMOUNT_BALANCE_ENTRIES,
+  SwapDirection,
   checkEvmAddress,
   filterNonPoolEvmTokens,
   getSwapType,
-  relayerFeeInfo,
-  SwapDirection
+  relayerFeeInfo
 } from '../helpers';
-import styles from './index.module.scss';
-import useTokenFee from 'hooks/useTokenFee';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
-import { useWarningSlippage } from '../Swap/hooks';
-import {
-  TokenItemType,
-  toDisplay,
-  getTokenOnOraichain,
-  calculateMinReceive,
-  toAmount,
-  truncDecimals,
-  DEFAULT_SLIPPAGE,
-  TRON_DENOM,
-  CosmosChainId,
-  network
-} from '@oraichain/oraidex-common';
-import {
-  isEvmSwappable,
-  UniversalSwapHandler,
-  isSupportedNoPoolSwapEvm,
-  isEvmNetworkNativeSwapSupported
-} from '@oraichain/oraidex-universal-swap';
-import { ethers } from 'ethers';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { useRelayerFee } from './hooks/useRelayerFee';
+import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -106,17 +106,6 @@ const SwapComponent: React.FC<{
   const onMaxFromAmount = (amount: bigint, type) => {
     const displayAmount = toDisplay(amount, originalFromToken?.decimals);
     let finalAmount = displayAmount;
-    //TODO: need check again - hardcode fee when swap token orai
-    // if (fromTokenDenom === ORAI) {
-    //   const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
-    //   const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
-    //   if (type === 'max') {
-    //     finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
-    //   }
-    //   if (type === 'half') {
-    //     finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-    //   }
-    // }
     setSwapAmount([finalAmount, toAmountToken]);
   };
 
@@ -301,15 +290,6 @@ const SwapComponent: React.FC<{
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   const isSwapBtn = swapLoading || !fromAmountToken || !toAmountToken;
-  // const filteredFromTokens = swapFromTokens.filter(
-  //   (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  // );
-
-  // const filteredToTokens = swapToTokens.filter(
-  //   (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  // );
-
-  // minimum receive after slippage
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>
@@ -331,7 +311,6 @@ const SwapComponent: React.FC<{
               balance={fromTokenBalance}
               originalToken={originalFromToken}
               prices={prices}
-              ////////////
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
               token={originalFromToken}
@@ -385,18 +364,12 @@ const SwapComponent: React.FC<{
           </div>
         </div>
         <div className={cx('to')}>
-          {/* <div className={cx('balance')}>
-            <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${averageRatio} ${originalToToken?.name}`}
-            </span>
-          </div> */}
           <div className={cx('input-wrapper')}>
             <InputSwap
               balance={toTokenBalance}
               originalToken={originalToToken}
               disable={true}
               prices={prices}
-              ////////////
               Icon={ToIcon}
               setIsSelectFrom={setIsSelectTo}
               token={originalToToken}
@@ -421,7 +394,7 @@ const SwapComponent: React.FC<{
         <div className={cx('coeff')}>
           {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
             <button
-              className={cx(`${coe == coeff && 'is-active'}`)}
+              className={cx(`${coe === coeff && 'is-active'}`)}
               key={coeff}
               onClick={(event) => {
                 event.stopPropagation();
