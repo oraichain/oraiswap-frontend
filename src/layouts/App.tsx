@@ -24,16 +24,15 @@ import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import './index.scss';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
-import GlobalStyles from 'styles/global';
-import './index.scss';
 import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
 import { pairsChart } from 'components/TVChartContainer/config';
 import MenuV3 from './MenuV3';
+import FuturePromotion from './FuturePromotion';
 import Instruct from './Instruct';
+import './index.scss';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -200,11 +199,13 @@ const App = () => {
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
-      <GlobalStyles />
       <div className={`app ${theme}`}>
         <MenuV3 />
         {routes()}
-        <Instruct />
+        {
+          !isMobile() && <Instruct />
+        }
+        <FuturePromotion />
       </div>
     </ThemeProvider>
   );

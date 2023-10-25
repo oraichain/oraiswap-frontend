@@ -3016,10 +3016,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.10.tgz#0a4cb50e42a19cb28d957643288f90be2de3f4b4"
-  integrity sha512-MkdyZ28psrnQQZx7WKjQEJ7E55BFlrNIdIVO3pQ3ZjCytbsy0stE3pAe8q62SDgVMxihY3cc9dxihyPHaC+QNw==
+"@oraichain/oraidex-common@^1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.12.tgz#3cf7b00070ba1e33d698918dba4c08a508a195b7"
+  integrity sha512-4S/WRurOnDnWL83FmpZrhFK6lIdVyL4cOqqi3rzMAVVPKTRLuqe/FUWBSttpfejaN463IB5ZMaNdMm0/cdxPcg==
 
 "@oraichain/oraidex-contracts-build@^1.0.20":
   version "1.0.20"
@@ -3031,12 +3031,12 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.24.tgz#6662b3e916bfe9bd256de0f4c463bd2630b9fae3"
   integrity sha512-FUzGli0ueR7VwD1oJPn0z1zZ0uSrBmuQS77Tkd3OasUvHoptCYkuY1CeeiFw7woQxHWhHpeS9RjH9K7JLLGhmQ==
 
-"@oraichain/oraidex-universal-swap@1.0.14":
-  version "1.0.14"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.14.tgz#fd4b60e7cfc21984dbaa14a7b9a2c560f02da37d"
-  integrity sha512-45tq+ywD/xhP5IHXu5+KYfTJ3II1PSUWhaLEEkTxQyhhSnHatS7uose7UwSQkZc1VW7oxNdAh0Mq9yI69dG7Lg==
+"@oraichain/oraidex-universal-swap@1.0.16":
+  version "1.0.16"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.16.tgz#48c0844c73769f44270f89415a05c019250d5b77"
+  integrity sha512-MC3A+unMZnbhQb4zl4DT76bRW3dZimn+0Jb+8TAe3HOnekAmzCB2NDHf8carHZsHET+Vim3s1VuG8Hf1/O298Q==
   dependencies:
-    "@oraichain/oraidex-common" "^1.0.10"
+    "@oraichain/oraidex-common" "^1.0.12"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
@@ -12815,6 +12815,11 @@ process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
+
+process@^0.11.10:
+  version "0.11.10"
+  resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
+  integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
 
 progress@^2.0.3:
   version "2.0.3"

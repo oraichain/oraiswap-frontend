@@ -1,6 +1,6 @@
 import { PeriodParams } from 'charting_library';
 import { Bar } from './types';
-import axios, { withBaseApiUrl } from 'rest/request';
+import axios from 'rest/request';
 
 export const getTokenChartPrice = async (
   pair: string,
@@ -8,7 +8,7 @@ export const getTokenChartPrice = async (
   resolution: string
 ): Promise<Bar[]> => {
   try {
-    const res = await axios.get(withBaseApiUrl('/v1/candles/'), {
+    const res = await axios.get('/v1/candles/', {
       params: {
         pair,
         startTime: periodParams.from,

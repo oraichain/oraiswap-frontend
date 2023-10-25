@@ -32,6 +32,7 @@ export const useGetOraiPrice = () => {
           })
     );
     if (!oraiUsdtPool) return;
+    console.log(oraiUsdtPool);
     const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
     setOraiPrice(oraiPrice);
   }, [pools]);

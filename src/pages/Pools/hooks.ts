@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
 import { updatePairInfos } from 'reducer/pairs';
 import { fetchRewardPerSecInfo } from 'rest/api';
-import axios, { withBaseApiUrl } from 'rest/request';
+import axios from 'rest/request';
 import { updateLpPools, updatePairs, updateBondLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
@@ -202,7 +202,7 @@ export const useFetchPairInfoDataList = (pairs: PairInfoExtend[]) => {
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
   try {
-    const res = await axios.get(withBaseApiUrl('/v1/pools/'), {});
+    const res = await axios.get('/v1/pools/', {});
     return res.data;
   } catch (e) {
     console.error('getPools', e);

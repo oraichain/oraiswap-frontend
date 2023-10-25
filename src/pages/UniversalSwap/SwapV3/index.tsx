@@ -1,6 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import AntSwapImg from 'assets/images/ant_swap.svg';
-import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
@@ -10,7 +8,6 @@ import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { evmTokens, tokenMap } from 'config/bridgeTokens';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -21,7 +18,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { TooltipIcon, SlippageModal, SelectTokenModalV2 } from '../Modals';
-import { checkEvmAddress, filterNonPoolEvmTokens, SwapDirection } from '../helpers';
+import {
+  AMOUNT_BALANCE_ENTRIES,
+  checkEvmAddress,
+  filterNonPoolEvmTokens,
+  relayerFeeInfo,
+  SwapDirection
+} from '../helpers';
 import styles from './index.module.scss';
 import useTokenFee from 'hooks/useTokenFee';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -37,11 +40,9 @@ import {
   toAmount,
   truncDecimals,
   DEFAULT_SLIPPAGE,
-  GAS_ESTIMATION_SWAP_DEFAULT,
-  ORAI,
   TRON_DENOM,
   CosmosChainId,
-  oraichainTokens
+  network
 } from '@oraichain/oraidex-common';
 import {
   isEvmSwappable,
@@ -50,13 +51,8 @@ import {
   isEvmNetworkNativeSwapSupported
 } from '@oraichain/oraidex-universal-swap';
 import { ethers } from 'ethers';
-
-const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
-  [0.25, '25%', 'one-quarter'],
-  [0.5, '50%', 'half'],
-  [0.75, '75%', 'three-quarters'],
-  [1, '100%', 'max']
-];
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { useRelayerFee } from './hooks/useRelayerFee';
 
 const cx = cn.bind(styles);
 
@@ -184,12 +180,14 @@ const SwapComponent: React.FC<{
   }, [fromTokenDenom, toTokenDenom]);
 
   const taxRate = useTaxRate();
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
     toTokenInfoData,
     originalFromToken,
-    originalToToken
+    originalToToken,
+    routerClient
   );
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -197,7 +195,15 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
+    routerClient,
     1
+  );
+
+  const relayerFee = useRelayerFee();
+
+  const relayerFeeToken = React.useMemo(
+    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
+    [originalFromToken]
   );
 
   useEffect(() => {
@@ -244,18 +250,17 @@ const SwapComponent: React.FC<{
         },
         { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
-      const result = await univeralSwapHandler.processUniversalSwap();
-
-      if (result) {
+      const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
+      if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
+          customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
 
         // save to duckdb
         await window.duckdb.addTransHistory({
-          initialTxHash: result.transactionHash,
+          initialTxHash: transactionHash,
           fromCoingeckoId: originalFromToken.coinGeckoId,
           toCoingeckoId: originalToToken.coinGeckoId,
           fromChainId: originalFromToken.chainId,
@@ -332,6 +337,14 @@ const SwapComponent: React.FC<{
                 }}
                 setSearchTokenName={setSearchTokenName}
               />
+            )}
+            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              <div className={cx('impact-warning')}>
+                <div className={cx('title')}>
+                  <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -426,15 +439,29 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: toDisplay(minimumReceive, originalToToken?.decimals, toTokenInfoData?.decimals).toFixed(
-                  truncDecimals
-                ),
+                amount: minimumReceive,
+                decimals: originalFromToken?.decimals,
                 denom: toTokenInfoData?.symbol
               }}
               decimalScale={truncDecimals}
             />
           </div>
 
+          {relayerFeeToken && (
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Relayer Fee</span>
+              </div>
+              <TokenBalance
+                balance={{
+                  amount: relayerFeeToken.amount,
+                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  denom: relayerFeeToken.prefix
+                }}
+                decimalScale={truncDecimals}
+              />
+            </div>
+          )}
           {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>
               <div className={cx('title')}>
