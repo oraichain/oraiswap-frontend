@@ -47,7 +47,8 @@ const RowsComponent: React.FC<{
   return (
     <div>
       <div className={styles.history}>
-        <div className={styles.status}>{generateTransactionStatus(rows.status)}</div>
+        {/* TODO: show later */}
+        {/* <div className={styles.status}>{generateTransactionStatus(rows.status)}</div> */}
         <div className={styles.time}>
           <div className={styles.type}>{rows.type}</div>
           <div className={styles.timestamp}>{timeSince(Number(rows.timestamp))}</div>

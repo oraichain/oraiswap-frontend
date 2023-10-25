@@ -131,7 +131,12 @@ export class DuckDb {
 
     // get data from parquet
     await this.conn.send(`copy (select * from trans_history_${userAddress}.parquet) to 'trans_history'`);
-    const histories = await this.conn.query(`SELECT * FROM trans_history ORDER BY timestamp DESC`);
+
+    // TODO: need to update limit later for pagination
+    const DEFAULT_LIMIT = 20;
+    const histories = await this.conn.query(
+      `SELECT * FROM trans_history ORDER BY timestamp DESC LIMIT ${DEFAULT_LIMIT}`
+    );
     return histories.toArray();
   }
 }
