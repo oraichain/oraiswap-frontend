@@ -30,6 +30,9 @@ yarn install
 ```shell
 yarn start
 yarn build
+
+# typescript generated for scss
+yarn ts-css
 ```
 
 If there is a problem related to `babel-preset-react-app` go to `node_modules/babel-preset-react-app` and run `yarn` then try again

@@ -28,7 +28,7 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
     <article className={styles.pool} onClick={(e) => handleClickRow(e)}>
       <div className={styles.poolHead}>
         <div className={styles.symbols}>
-          <div className={styles.symbols_logo}>{generateIcon(pool.baseToken, pool.quoteToken)}</div>
+          <div>{generateIcon(pool.baseToken, pool.quoteToken)}</div>
           <span className={styles.symbols_name}>{pool.symbols}</span>
         </div>
         <div className={styles.apr}>

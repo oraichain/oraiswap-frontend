@@ -26,6 +26,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
+  searchTokenName?: string
 }
 
 export const SelectTokenModalV2: FC<ModalProps> = ({
@@ -35,7 +36,8 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  setSearchTokenName
+  setSearchTokenName,
+  searchTokenName
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
@@ -61,7 +63,11 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     };
   });
 
-  const itemsFilter = networkFilter ? items.filter((item) => item.org === networkFilter) : items;
+  const itemsFilter = searchTokenName || networkFilter ? items.filter((item) => {
+    if (searchTokenName && networkFilter) return item.name.includes(searchTokenName) && item.org === networkFilter
+    if (searchTokenName) return item.name.includes(searchTokenName)
+    return item.org === networkFilter
+  }) : items;
 
   useOnClickOutside(ref, () => {
     setSearchTokenName('');
@@ -75,6 +81,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
           <SearchInput
             isBorder
             placeholder="Search Token"
+            defaultValue={searchTokenName}
             onSearch={(tokenName) => setSearchTokenName(tokenName.toUpperCase())}
           />
         </div>

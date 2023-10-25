@@ -1,5 +1,5 @@
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import TransSetting from 'assets/images/trans_setting.svg';
+import { ReactComponent as TransSetting } from 'assets/images/trans_setting.svg';
 import cn from 'classnames/bind';
 import { DEFAULT_MANUAL_SLIPPAGE, DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
@@ -23,7 +23,7 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
     <div className={cx('setting', `${theme}-modal`)}>
       <div className={cx('header')}>
         <div className={cx('title')}>
-          <img className={cx('btn')} src={TransSetting} alt="btn" />
+          <TransSetting className={cx('btn')} />
           <div>Transaction settings</div>
         </div>
         <CloseIcon className={cx('close-icon')} onClick={() => setVisible(false)} />

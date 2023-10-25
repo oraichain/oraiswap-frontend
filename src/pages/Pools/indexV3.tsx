@@ -105,7 +105,7 @@ const Pools: React.FC<{}> = () => {
     <Content nonBackground>
       <div className={styles.pools}>
         <Header />
-        <div className={styles.listPool}>
+        <div>
           <Filter setFilteredPools={setFilteredPools} />
           {mobileMode ? (
             <ListPoolsMobile poolTableData={poolTableData} generateIcon={generateIcon} />

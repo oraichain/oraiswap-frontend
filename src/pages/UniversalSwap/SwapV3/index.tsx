@@ -347,6 +347,7 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
             )}
             {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
@@ -410,6 +411,7 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
             )}
           </div>

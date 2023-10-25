@@ -2,7 +2,6 @@ import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import classNames from 'classnames';
 import Loader from 'components/Loader';
 import { reduceString } from 'libs/utils';
 import { FunctionComponent } from 'react';
@@ -146,7 +145,7 @@ export const displayToast: DisplayToastFn = (
 };
 
 const ToastTxBroadcasting: FunctionComponent = () => (
-  <div className={classNames(styles.toast_content, styles.toast_broadcasting)}>
+  <div className={styles.toast_content}>
     <Loader />
     <section className={styles.toast_section}>
       <h6>Transaction Broadcasting</h6>
@@ -160,7 +159,7 @@ const ToastInfo: FunctionComponent<{
   link: string;
   textLink: string;
 }> = ({ message, link, textLink }) => (
-  <div className={classNames(styles.toast_content, styles.toast_info)}>
+  <div className={styles.toast_content}>
     <InfoIcon />
     <section className={styles.toast_section}>
       <p>{message}</p>
@@ -174,7 +173,7 @@ const ToastInfo: FunctionComponent<{
 );
 
 const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+  <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Failed</h6>
@@ -184,7 +183,7 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 );
 
 const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+  <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Keplr failed</h6>
@@ -194,7 +193,7 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) =
 );
 
 const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+  <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Metamask failed</h6>
@@ -204,7 +203,7 @@ const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }
 );
 
 const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={classNames(styles.toast_content, styles.toast_failed)}>
+  <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Tronlink failed</h6>
@@ -220,7 +219,7 @@ const ToastTxSuccess: FunctionComponent<{
   linkLpAddress?: string;
   linkPairAddress?: string;
 }> = ({ link, linkCw20Token, cw20Address, linkLpAddress, linkPairAddress }) => (
-  <div className={classNames(styles.toast_content, styles.toast_success)}>
+  <div className={styles.toast_content}>
     <SuccessIcon />
     <section className={styles.toast_section}>
       <h6>Transaction Successful</h6>
