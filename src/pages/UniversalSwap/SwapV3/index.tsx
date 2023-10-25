@@ -280,7 +280,7 @@ const SwapComponent: React.FC<{
             prices
           ).toString(),
           toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
-          status: 'initial',
+          status: 'success',
           type: swapType,
           timestamp: Date.now(),
           userAddress: oraiAddress

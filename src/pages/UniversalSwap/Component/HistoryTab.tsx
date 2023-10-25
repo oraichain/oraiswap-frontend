@@ -1,4 +1,6 @@
 import ArrowImg from 'assets/icons/arrow_right.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/ic_status_done.svg';
+import { ReactComponent as ErrorIcon } from 'assets/icons/ic_status_failed.svg';
 import OpenNewWindowImg from 'assets/icons/open_new_window.svg';
 import cn from 'classnames/bind';
 import { Table, TableHeaderProps } from 'components/Table';
@@ -14,7 +16,6 @@ import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
-
 const RowsComponent: React.FC<{
   rows: TransactionHistory;
 }> = ({ rows }) => {
@@ -30,9 +31,24 @@ const RowsComponent: React.FC<{
     chainInfosWithIcon.find((chainInfo) => chainInfo.chainId === rows.toChainId)
   ];
   if (!fromChain || !toChain) return <></>;
+
+  const generateTransactionStatus = (status: string) => {
+    if (status === 'error') return <ErrorIcon />;
+    if (status === 'success') return <SuccessIcon />;
+    return (
+      <div className={styles.loadingTrans}>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className={styles.history}>
+        <div className={styles.status}>{generateTransactionStatus(rows.status)}</div>
         <div className={styles.time}>
           <div className={styles.type}>{rows.type}</div>
           <div className={styles.timestamp}>{timeSince(Number(rows.timestamp))}</div>
