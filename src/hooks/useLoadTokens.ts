@@ -52,22 +52,37 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   dispatch(updateAmounts(amountDetails));
 }
 
+const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  await Promise.all(
-    [
-      oraiAddress && loadTokensCosmos(dispatch),
-      oraiAddress && loadCw20Balance(dispatch, oraiAddress),
-      // different cointype but also require keplr connected by checking oraiAddress
-      oraiAddress && loadKawaiiSubnetAmount(dispatch),
-      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChains),
-      tronAddress &&
-        loadEvmAmounts(
-          dispatch,
-          tronToEthAddress(tronAddress),
-          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
-        )
-    ].filter(Boolean)
-  );
+  if (oraiAddress) {
+    clearTimeout(timer[oraiAddress]);
+    timer[oraiAddress] = setTimeout(async () => {
+      await Promise.all([
+        loadTokensCosmos(dispatch),
+        loadCw20Balance(dispatch, oraiAddress),
+        // different cointype but also require keplr connected by checking oraiAddress
+        loadKawaiiSubnetAmount(dispatch)
+      ]);
+    }, 2000);
+  }
+
+  if (metamaskAddress) {
+    clearTimeout(timer[metamaskAddress]);
+    timer[metamaskAddress] = setTimeout(() => {
+      loadEvmAmounts(dispatch, metamaskAddress, evmChains);
+    }, 2000);
+  }
+
+  if (tronAddress) {
+    clearTimeout(timer[tronAddress]);
+    timer[tronAddress] = setTimeout(() => {
+      loadEvmAmounts(
+        dispatch,
+        tronToEthAddress(tronAddress),
+        chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+      );
+    }, 2000);
+  }
 }
 
 async function loadTokensCosmos(dispatch: Dispatch) {
