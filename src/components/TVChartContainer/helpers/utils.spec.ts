@@ -2,7 +2,6 @@ import { Bar } from './types';
 import {
   fillBarGaps,
   formatTimeInBarToMs,
-  getCurrentBarTimestamp,
   getCurrentCandleTime,
   getObjectKeyFromValue,
   parseChannelFromPair,
