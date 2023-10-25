@@ -266,7 +266,7 @@ const SwapComponent: React.FC<{
           fromCoingeckoId: originalFromToken.coinGeckoId,
           toCoingeckoId: originalToToken.coinGeckoId
         });
-        await window.duckdb.addTransHistory({
+        await window.duckDb.addTransHistory({
           initialTxHash: transactionHash,
           fromCoingeckoId: originalFromToken.coinGeckoId,
           toCoingeckoId: originalToToken.coinGeckoId,

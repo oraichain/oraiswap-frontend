@@ -130,7 +130,7 @@ export const HistoryTab: React.FC<{
   const [transHistory, setTransHistory] = useState([]);
 
   useEffect(() => {
-    window.duckdb.getTransHistory(address).then((history) => {
+    window.duckDb.getTransHistory(address).then((history) => {
       setTransHistory(history);
     });
   }, [address]);

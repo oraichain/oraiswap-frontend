@@ -46,16 +46,13 @@ const App = () => {
   useTronEventListener();
 
   const dispatch = useDispatch();
-  const getPairs = () => {
-    dispatch(setListToken(pairsChart));
-  };
 
+  // init chart pairs
   useEffect(() => {
-    getPairs();
+    dispatch(setListToken(pairsChart));
   }, []);
 
   //Public API that will echo messages sent to it back to the client
-
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
@@ -202,9 +199,7 @@ const App = () => {
       <div className={`app ${theme}`}>
         <MenuV3 />
         {routes()}
-        {
-          !isMobile() && <Instruct />
-        }
+        {!isMobile() && <Instruct />}
         <FuturePromotion />
       </div>
     </ThemeProvider>

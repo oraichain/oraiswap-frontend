@@ -17,8 +17,6 @@ export type TransactionHistory = {
   userAddress: string;
 };
 
-const TRANSACTION_HISTORY_TABLE = 'trans_history';
-
 const compress = async (buf: Uint8Array) => {
   try {
     return new Uint8Array(
@@ -42,7 +40,7 @@ const decompress = async (buf: Uint8Array) => {
 export class DuckDb {
   static instance: DuckDb;
 
-  protected constructor(public readonly conn: duckdb.AsyncDuckDBConnection) {}
+  protected constructor(public readonly conn: duckdb.AsyncDuckDBConnection, public readonly db: duckdb.AsyncDuckDB) {}
 
   static async create() {
     // Select a bundle based on browser checks
@@ -59,19 +57,20 @@ export class DuckDb {
     URL.revokeObjectURL(worker_url);
 
     const conn = await db.connect();
-    DuckDb.instance = new DuckDb(conn);
+    DuckDb.instance = new DuckDb(conn, db);
+  }
 
+  async createTableTransHistory(userAddress: string): Promise<boolean> {
     // Import Parquet
     /**
      * @type {Uint8Array} buf
      */
-    const buf = await get('trans_history');
+    const buf = await get(`trans_history_${userAddress}`);
     if (buf) {
-      console.log('parquet', buf);
-      await db.registerFileBuffer(`trans_history.parquet`, await decompress(buf));
-      conn.send(`create table trans_history as select * from 'trans_history.parquet'`);
+      await this.db.registerFileBuffer(`trans_history_${userAddress}.parquet`, await decompress(buf));
+      this.conn.send(`create table trans_history as select * from 'trans_history_${userAddress}.parquet'`);
     } else {
-      conn.send(`create table trans_history
+      this.conn.send(`create table trans_history
       (
         initialTxHash varchar primary key, 
         fromCoingeckoId varchar, 
@@ -89,13 +88,14 @@ export class DuckDb {
       )
       `);
     }
+    return Boolean(buf);
   }
 
-  async save() {
+  async save(userAddress: string) {
     // Export Parquet
-    await this.conn.send(`copy (select * from trans_history) to 'trans_history.parquet'`);
-    const buf = await compress(await this.conn.bindings.copyFileToBuffer('trans_history.parquet'));
-    await set('trans_history', buf);
+    await this.conn.send(`copy (select * from trans_history) to 'trans_history_${userAddress}.parquet'`);
+    const buf = await compress(await this.conn.bindings.copyFileToBuffer(`trans_history_${userAddress}.parquet`));
+    await set(`trans_history_${userAddress}`, buf);
   }
 
   async addTransHistory(transHistory: TransactionHistory) {
@@ -120,12 +120,17 @@ export class DuckDb {
         )
       `
     );
-    await this.save();
+    await this.save(transHistory.userAddress);
   }
 
   async getTransHistory(userAddress: string): Promise<TransactionHistory[]> {
     if (!userAddress) return [];
-    // const histories = await this.conn.query(`select * from trans_history where userAddress = ${userAddress}`);
+
+    const isTableExist = await this.createTableTransHistory(userAddress);
+    if (!isTableExist) return [];
+
+    // get data from parquet
+    await this.conn.send(`copy (select * from trans_history_${userAddress}.parquet) to 'trans_history'`);
     const histories = await this.conn.query(`SELECT * FROM trans_history ORDER BY timestamp DESC`);
     return histories.toArray();
   }

@@ -1,6 +1,9 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from 'components/Toasts/context';
+import { network } from 'config/networks';
+import { DuckDb } from 'libs/duckdb';
 import { initClient } from 'libs/utils';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
@@ -13,9 +16,6 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { network } from 'config/networks';
-import { DuckDb } from 'libs/duckdb';
 
 const queryClient = new QueryClient();
 
@@ -44,7 +44,7 @@ const initApp = async () => {
   window.client = await SigningCosmWasmClient.connect(network.rpc);
 
   await DuckDb.create();
-  window.duckdb = DuckDb.instance;
+  window.duckDb = DuckDb.instance;
 
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(

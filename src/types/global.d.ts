@@ -126,7 +126,7 @@ declare global {
     owallet: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
-    duckdb: DuckDb;
+    duckDb: DuckDb;
   }
 
   declare const APP_SETTINGS: Record<string, any>;
