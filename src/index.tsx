@@ -1,7 +1,7 @@
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastProvider } from 'components/Toasts/context';
+import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
 import { DuckDb } from 'libs/duckdb';
 import { initClient } from 'libs/utils';
@@ -43,6 +43,7 @@ const initApp = async () => {
   // @ts-ignore
   window.client = await SigningCosmWasmClient.connect(network.rpc);
 
+  // init duckdb
   await DuckDb.create();
   window.duckDb = DuckDb.instance;
 
@@ -57,7 +58,9 @@ const initApp = async () => {
               <App />
             </QueryClientProvider>
           </Router>
-          <ToastContainer transition={Bounce} />
+          <ToastContext.Consumer>
+            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+          </ToastContext.Consumer>
         </ToastProvider>
       </PersistGate>
     </Provider>

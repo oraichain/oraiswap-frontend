@@ -1,29 +1,25 @@
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
-import { ReactComponent as FailedIcon } from 'assets/icons/toast_failed.svg';
-import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as FailedIcon } from 'assets/icons/ic_failed_trans.svg';
+import { ReactComponent as InfoIcon } from 'assets/icons/ic_info_trans.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/ic_status_done.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_toast.svg';
 import Loader from 'components/Loader';
 import { reduceString } from 'libs/utils';
-import { FunctionComponent } from 'react';
 import { toast, ToastOptions } from 'react-toastify';
 import styles from './Toast.module.scss';
-
-const CloseButton = ({ closeToast }: { closeToast: () => void }) => {
-  return <button onClick={closeToast} className={styles.btn_close}></button>;
-};
+import { FunctionComponent } from 'react';
 
 const defaultOptions: ToastOptions = {
   position: 'top-right',
   theme: 'dark',
   autoClose: 7000,
-  icon: false,
   hideProgressBar: true,
   closeOnClick: false,
   pauseOnHover: true,
   draggable: false,
   progress: undefined,
   pauseOnFocusLoss: false,
-  closeButton: CloseButton
+  closeButton: <CloseIcon />
 };
 
 const defaultExtraData = { message: '', customLink: '' };
@@ -89,6 +85,7 @@ export type DisplayToastFn = ((
 
 export interface DisplayToast {
   displayToast: DisplayToastFn;
+  theme: 'dark' | 'light';
 }
 
 export const displayToast: DisplayToastFn = (
@@ -146,7 +143,7 @@ export const displayToast: DisplayToastFn = (
 
 const ToastTxBroadcasting: FunctionComponent = () => (
   <div className={styles.toast_content}>
-    <Loader />
+    <Loader width={40} height={40} />
     <section className={styles.toast_section}>
       <h6>Transaction Broadcasting</h6>
       <p>Waiting for transaction to be included in the block</p>
@@ -241,7 +238,7 @@ const ToastTxSuccess: FunctionComponent<{
         </div>
       )}
       <a target="__blank" href={link}>
-        View on Explorer <LinkIcon />
+        View on Explorer <LinkIcon width={15} height={15} />
       </a>
     </section>
   </div>
