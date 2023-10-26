@@ -52,7 +52,6 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   useEffect(() => {
     if (!totalBondAmount) return;
     const unbondAmountInUsdt = Number(unbondAmount) * Number(lpPrice);
-    console.log({ unbondAmountInUsdt });
     setUnBondAmountInUsdt(unbondAmountInUsdt);
   }, [unbondAmount, totalBondAmount, lpPrice]);
 
