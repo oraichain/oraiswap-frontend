@@ -1,23 +1,6 @@
-@import 'src/styles/themes';
+@import 'src/styles/variables';
 @import 'src/styles/mixins';
-
-
-.btn_close {
-  margin-top: -5px;
-  align-self: flex-start;
-}
-
-.btn_close_light {
-  path {
-    fill: #777e90;
-  }
-}
-
-.btn_close_img:hover {
-  path {
-    fill: #a871df;
-  }
-}
+@import 'src/styles/themes';
 
 .toast_content {
   display: flex;
@@ -80,11 +63,11 @@
   align-items: center;
 
   &_label {
-    color: #a871df;
+    color: $blue-color;
   }
 
   &_value {
-    color: #bdc3d3;
+    color: $lavender-gray;
     padding-left: 6px;
     padding-right: 6px;
 
@@ -98,11 +81,11 @@
   align-items: center;
 
   &_label {
-    color: #a871df;
+    color: $blue-color;
   }
 
   &_value {
-    color: #bdc3d3;
+    color: $lavender-gray;
     padding-left: 6px;
     padding-right: 6px;
 

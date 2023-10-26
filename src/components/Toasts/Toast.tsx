@@ -7,6 +7,7 @@ import Loader from 'components/Loader';
 import { reduceString } from 'libs/utils';
 import { toast, ToastOptions } from 'react-toastify';
 import styles from './Toast.module.scss';
+import { FunctionComponent } from 'react';
 
 const defaultOptions: ToastOptions = {
   position: 'top-right',
