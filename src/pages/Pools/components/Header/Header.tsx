@@ -32,7 +32,6 @@ export const useGetOraiPrice = () => {
           })
     );
     if (!oraiUsdtPool) return;
-    console.log(oraiUsdtPool);
     const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
     setOraiPrice(oraiPrice);
   }, [pools]);
@@ -108,7 +107,7 @@ export const Header: FC = () => {
           />
         </div>
         <div className={styles.header_data_item}>
-          <span className={styles.header_data_name}>Total Earned</span>
+          <span className={styles.header_data_name}>Total Earned (30D)</span>
           <br />
           <TokenBalance
             balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
