@@ -212,10 +212,7 @@ const SwapComponent: React.FC<{
       )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
-  displayToast(TToastType.TX_BROADCASTING, {
-    autoClose: false
-  });
-  displayToast(TToastType.TX_SUCCESSFUL);
+
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
