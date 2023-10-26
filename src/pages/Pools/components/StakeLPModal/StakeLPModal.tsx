@@ -130,11 +130,11 @@ export const StakeLPModal: FC<ModalProps> = ({
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance)}>
+                Max
               </Button>
             </div>
           </div>

@@ -128,11 +128,11 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount)}>
+                Max
               </Button>
             </div>
           </div>
