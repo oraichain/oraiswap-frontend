@@ -9,6 +9,10 @@
     border: 1px solid $primary-text-link;
     padding: 24px 40px;
 
+    @include theme() {
+        background-color: theme-get('primary-surface-default-subtle');
+    }
+
     @include small-mobile() {
         flex-wrap: wrap;
         padding: 24px 16px;
