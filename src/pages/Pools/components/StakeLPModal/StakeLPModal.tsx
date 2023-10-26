@@ -11,7 +11,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -22,6 +22,7 @@ import { ModalProps } from '../MyPoolInfo/type';
 import styles from './StakeLPModal.module.scss';
 import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
 import { Pairs } from 'config/pools';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 
 const cx = cn.bind(styles);
 
@@ -37,10 +38,16 @@ export const StakeLPModal: FC<ModalProps> = ({
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
+  const [address] = useConfigReducer('address');
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
+  const stakingAssetInfo = useGetStakingAssetInfo();
+  const { refetchRewardInfo } = useGetRewardInfo({
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
+  });
   const [bondAmount, setBondAmount] = useState(BigInt(0));
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
@@ -53,6 +60,11 @@ export const StakeLPModal: FC<ModalProps> = ({
     const bondAmountInUsdt = (Number(bondAmount) / Number(myLpBalance)) * Number(myLpUsdt);
     setBondAmountInUsdt(bondAmountInUsdt);
   }, [bondAmount, myLpBalance, myLpUsdt]);
+
+  const onBonedSuccess = () => {
+    onLiquidityChange();
+    refetchRewardInfo();
+  };
 
   const handleBond = async (parsedAmount: bigint) => {
     setActionLoading(true);
@@ -83,7 +95,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        onLiquidityChange();
+        onBonedSuccess();
       }
     } catch (error) {
       console.log('error in bond: ', error);
