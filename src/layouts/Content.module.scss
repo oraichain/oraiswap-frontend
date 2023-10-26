@@ -9,7 +9,7 @@
   background-color: $primary-background;
 
   &.light {
-    background-color: #fff;
+    background-color: $white-color;
   }
 
   flex-grow: 1;
