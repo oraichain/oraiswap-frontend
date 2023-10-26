@@ -8,6 +8,7 @@ import GraduationImg from 'assets/icons/graduation.svg';
 import UniversalWallet from 'assets/images/universal_wallet.png';
 import UniversalSwapBridge from 'assets/images/universalswap_bridge.png';
 import TrackingTransaction from 'assets/images/tracking_transaction.png';
+import ImprovedPoolInterface from 'assets/images/improved-pool-interface.png';
 import TrackingHistory from 'assets/images/tracking_history.png';
 import styles from './Instruct.module.scss';
 import cn from 'classnames/bind';
@@ -41,7 +42,7 @@ const WhatsNewItems = [
   {
     label: 'Improved Pool Interface',
     icon: true,
-    img: TrackingHistory
+    img: ImprovedPoolInterface
   }
 ];
 

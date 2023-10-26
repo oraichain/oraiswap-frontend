@@ -344,7 +344,7 @@ const SwapComponent: React.FC<{
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
             <div className={cx('title')}>
-              <span>*Additional: 5% entry tax rate for MILKY transactions</span>
+              <span>*Additional: 5% sell tax for swap transactions from MILKY</span>
             </div>
           </div>
         )}
