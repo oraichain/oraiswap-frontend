@@ -9,7 +9,8 @@ import { TransactionProcess } from './Modals';
 import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
-
+import { useSelector } from 'react-redux';
+import { selectChartDataLength } from "reducer/tradingSlice";
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -18,7 +19,7 @@ const Swap: React.FC = () => {
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
-
+  const chartDataLength = useSelector(selectChartDataLength)
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
 
@@ -29,8 +30,8 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />
-                <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
+                {chartDataLength > 0 && <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />}
+                <div className={cx('tv-chart', hideChart || chartDataLength == 0 ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <TVChartContainer />
                 </div>
@@ -50,7 +51,7 @@ const Swap: React.FC = () => {
           <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
         </div>
       </div>
-    </Content>
+    </Content >
   );
 };
 

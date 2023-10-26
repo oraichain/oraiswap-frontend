@@ -36,6 +36,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
     cosmosBased: network.networkType === 'cosmos',
     maxGas: (network.feeCurrencies?.[0].gasPriceStep?.high ?? 0) * 20000,
     gasPriceStep: currency.gasPriceStep,
+    feeCurrencies: network.feeCurrencies,
     minAmountSwap: minAmountSwapMap[currency.coinMinimalDenom],
     evmDenoms: evmDenomsMap[currency.coinMinimalDenom],
     Icon: currency.Icon,

@@ -22,19 +22,25 @@
         counter-increment: step;
         width: 24px;
         height: 24px;
-        border: 1px solid #ddd;
+        @include theme() {
+          border: 1px solid theme-get('sea-stone-200');
+        }
         display: block;
         text-align: center;
         margin: 0 auto 10px auto;
         border-radius: 50%;
-        background-color: white;
+        @include theme() {
+          background-color: theme-get('sea-stone-200');
+        }
       }
       &::after {
         content: '';
         position: absolute;
         width: 100%;
         height: 3px;
-        background-color: #ddd;
+        @include theme() {
+          background-color: theme-get('sea-stone-200');
+        }
         top: 11px;
         left: -50%;
         z-index: 0;
@@ -44,14 +50,14 @@
         content: none;
       }
       &.active {
-        // color: red;
         &::before {
-          border-color: green;
-          // content: '✔';
           content: url('../../../assets/images/iconoir_check.png');
-          background: #aee67f;
-          border: 1px solid #2f5711;
-          color: green;
+          @include theme() {
+            border-color: theme-get('sea-stone-200'); // green;
+            color: theme-get('sea-stone-200'); // green
+            border: 1px solid theme-get('sea-stone-200'); // #2f5711;
+            background: theme-get('sea-stone-200'); // #aee67f;
+          }
         }
       }
     }
@@ -59,7 +65,9 @@
       background: linear-gradient(#78ca11, #92e54c);
     }
     li.next:before {
-      border-color: #2f5711;
+      @include theme() {
+        border-color: theme-get('sea-stone-200');
+      }
     }
 
     .info-step {

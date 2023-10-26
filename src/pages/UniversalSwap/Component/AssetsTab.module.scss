@@ -33,7 +33,6 @@
       }
       .balance {
         padding-left: 16px;
-        color: #979995;
         .value {
           @include theme() {
             color: theme-get('sea-stone-200');
@@ -61,7 +60,6 @@
     padding-left: 0px;
     text-align: center;
   }
-  color: #494949;
   .left {
     display: flex;
     align-items: center;

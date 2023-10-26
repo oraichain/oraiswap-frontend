@@ -56,11 +56,7 @@ const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
   if (oraiAddress) {
     clearTimeout(timer[oraiAddress]);
-    let kawaiiAddress;
-    if (oraiAddress) {
-      const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
-      kawaiiAddress = kwtAddress;
-    }
+    const kawaiiAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
     timer[oraiAddress] = setTimeout(async () => {
       await Promise.all([
         loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
