@@ -138,7 +138,11 @@ export const useGetPriceChange = (params: { base_denom: string; quote_denom: str
 
   const { data: priceChange, isLoading } = useQuery(['price-change', params], () => getPriceChange(params), {
     refetchOnWindowFocus: true,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
+    placeholderData: {
+      price: 0,
+      price_change: 0
+    }
   });
 
   return {
