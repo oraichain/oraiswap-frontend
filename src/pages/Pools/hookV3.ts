@@ -128,7 +128,7 @@ export const getPools = async (): Promise<PoolInfoResponse[]> => {
 export const useGetPriceChange = (params: { base_denom: string; quote_denom: string; tf: number }) => {
   const getPriceChange = async (queries: { base_denom: string; quote_denom: string; tf: number }) => {
     try {
-      const res = await axios.get('https://api-staging.oraidex.io/price', { params: queries }); // TODO: change Server url
+      const res = await axios.get(`${process.env.REACT_APP_BASE_API_URL}/price`, { params: queries }); // TODO: change Server url
       return res.data;
     } catch (e) {
       console.error('useGetPriceChange', e);

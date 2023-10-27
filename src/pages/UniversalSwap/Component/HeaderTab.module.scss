@@ -82,7 +82,9 @@
       padding-left: 6px;
 
       &.increment {
-        color: $green;
+        @include theme() {
+          color: theme-get('success-surface-default');
+        }
       }
       &.decrement {
         color: $red;
