@@ -8,7 +8,7 @@ import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg'
 import { ReactComponent as AddWalletIcon } from 'assets/icons/Add.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as QRCodeIcon } from 'assets/icons/qr-code.svg';
-import { ReactComponent as TrashIcon } from 'assets/icons/trash_icon.svg';
+import { ReactComponent as DisconnectIcon } from 'assets/icons/Icon-disconnect.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
@@ -89,7 +89,7 @@ const MyWallets: React.FC<{
                 <div className={cx('logo')}>
                   {wallet.isConnect ? (
                     <div className={cx('remove')} onClick={() => handleLogoutWallets(wallet.code)}>
-                      <TrashIcon />
+                      <DisconnectIcon />
                     </div>
                   ) : (
                     <div className={cx('add')} onClick={() => handleLoginWallets(wallet.code)}>
