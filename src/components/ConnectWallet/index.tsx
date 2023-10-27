@@ -143,20 +143,20 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
   const connectMetamask = async () => {
     try {
-      // if chain id empty, we switch to default network which is BSC
-      if (!window?.ethereum?.chainId) {
-        await window.Metamask.switchNetwork(Networks.bsc);
-      }
-
       const isMetamask = !!window?.ethereum?.isMetaMask;
-      if (!isMetamask) {
+      if (isMetamask) {
+        const isUnlock = await isUnlockMetamask();
+        if (!isUnlock) {
+          displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
+          throw Error('Please unlock Metamask wallet');
+        }
+      } else if (!isCheckOwallet && !isMetamask) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
         throw Error('Please install Metamask wallet');
       }
-      const isUnlock = await isUnlockMetamask();
-      if (!isUnlock) {
-        displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-        throw Error('Please unlock Metamask wallet');
+      // if chain id empty, we switch to default network which is BSC
+      if (!window?.ethereum?.chainId) {
+        await window.Metamask.switchNetwork(Networks.bsc);
       }
       await connect();
     } catch (ex) {
