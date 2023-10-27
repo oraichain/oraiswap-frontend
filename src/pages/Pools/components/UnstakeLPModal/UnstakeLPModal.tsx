@@ -44,15 +44,15 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
     assetInfo: stakingAssetInfo
   });
 
-  const totalBondAmount = totalRewardInfoData.reward_infos[0]
-    ? BigInt(totalRewardInfoData.reward_infos[0].bond_amount || '0')
-    : BigInt(0);
+  const totalBondAmount =
+    totalRewardInfoData && totalRewardInfoData.reward_infos[0]
+      ? BigInt(totalRewardInfoData.reward_infos[0].bond_amount || '0')
+      : BigInt(0);
 
   // handle update unbond amount in usdt
   useEffect(() => {
     if (!totalBondAmount) return;
     const unbondAmountInUsdt = Number(unbondAmount) * Number(lpPrice);
-    console.log({ unbondAmountInUsdt });
     setUnBondAmountInUsdt(unbondAmountInUsdt);
   }, [unbondAmount, totalBondAmount, lpPrice]);
 
@@ -129,11 +129,11 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => setUnbondAmount(totalBondAmount)}>
+                Max
               </Button>
             </div>
           </div>

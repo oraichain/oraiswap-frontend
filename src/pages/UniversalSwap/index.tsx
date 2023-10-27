@@ -39,7 +39,7 @@ const Swap: React.FC = () => {
             )}
 
             {/* <RoutingSection /> */}
-            <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter.label} />
+            <TabsTxs setNetworkFilter={setNetworkFilter} networkFilter={networkFilter} />
             {tab === TYPE_TAB_HISTORY.HISTORY ? (
               <HistoryTab networkFilter={networkFilter.value} />
             ) : (

@@ -1,3 +1,5 @@
+@import 'mixins';
+
 .desktop {
   @include mobile {
     display: none !important;

@@ -687,7 +687,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinMinimalDenom: 'uatom',
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
-        Icon: AtomIcon
+        Icon: AtomIcon,
+        IconLight: AtomLightIcon
       }
     ]
   },

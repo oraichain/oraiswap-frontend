@@ -55,7 +55,12 @@ const Menu: React.FC = React.memo(() => {
           setOpen(!open);
           onClick(to);
         }}
-        className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
+        className={classNames(
+          styles.menu_item,
+          { [styles.active]: link.includes(to) || (link === '/' && to === '/universalswap') },
+          styles[theme],
+          styles.spin
+        )}
       >
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
@@ -70,12 +75,12 @@ const Menu: React.FC = React.memo(() => {
 
   const menuList = (
     <div className={classNames(styles.menu_list)}>
-      {renderLink('/bridge', 'Bridge', setLink)}
       {renderLink('/universalswap', 'Swap', setLink)}
+      {renderLink('/bridge', 'Bridge', setLink)}
       {renderLink('/pools', 'Pools', setLink)}
-      {renderLink('https://orderbook.oraidex.io/spot', 'Order Book', () => {}, true)}
-      {renderLink('https://orderbook.oraidex.io/future', 'Future', () => {}, true)}
-      {renderLink('https://payment.orai.io/', 'Buy ORAI', () => {}, true)}
+      {renderLink('https://orderbook.oraidex.io/spot', 'Order Book', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io/future', 'Future', () => { }, true)}
+      {renderLink('https://payment.orai.io/', 'Buy ORAI', () => { }, true)}
     </div>
   );
   return (

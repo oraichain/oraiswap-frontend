@@ -1,6 +1,7 @@
 import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
+  ORAI,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -197,6 +198,13 @@ const SwapComponent: React.FC<{
     [originalFromToken]
   );
 
+  const relayerFeeFromToTokenIsEvm = (relayerFeeAmount: string) => {
+    if (!originalFromToken.cosmosBased && !originalToToken.cosmosBased) {
+      return BigInt(relayerFeeAmount) * BigInt(2)
+    }
+    return BigInt(relayerFeeAmount)
+  }
+
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -205,11 +213,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -429,7 +437,7 @@ const SwapComponent: React.FC<{
               balance={{
                 amount: minimumReceive,
                 decimals: originalFromToken?.decimals,
-                denom: toTokenInfoData?.symbol
+                denom: originalToToken?.name
               }}
               decimalScale={truncDecimals}
             />
@@ -442,9 +450,9 @@ const SwapComponent: React.FC<{
               </div>
               <TokenBalance
                 balance={{
-                  amount: relayerFeeToken.amount,
+                  amount: relayerFeeFromToTokenIsEvm(relayerFeeToken.amount),
                   decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                  denom: relayerFeeToken.prefix
+                  denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
                 }}
                 decimalScale={truncDecimals}
               />

@@ -43,6 +43,10 @@
     align-items: center;
     gap: 6px;
 
+    .logo {
+      width: 30px;
+      height: 30px;
+    }
     .all-network {
       display: flex;
       flex-direction: column;

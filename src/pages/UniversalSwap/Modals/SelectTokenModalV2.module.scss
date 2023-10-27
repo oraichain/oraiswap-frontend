@@ -97,7 +97,7 @@
       display: flex;
       gap: 10px;
       align-items: center;
-      padding: 8px;
+      padding: 12px 24px 12px 16px;
       font-style: normal;
       font-weight: 500;
       font-size: 16px;
@@ -106,10 +106,8 @@
 
       &:hover {
         cursor: pointer;
-        color: $white-color;
-
         @include theme() {
-          background-color: theme-get('primary-1');
+          background-color: theme-get('neutral-surface-bg-dropdown-hover');
         }
       }
 
