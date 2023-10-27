@@ -8,6 +8,7 @@ export type TableHeaderProps<T extends object> = Record<
     accessor: (data: T) => ReactNode | string | undefined;
     width: string;
     align: 'left' | 'right' | 'center';
+    padding?: string;
   }
 >;
 export type TableProps<T extends object> = {
@@ -24,7 +25,7 @@ export const Table = <T extends object>({ headers, data, handleClickRow, stylesC
         <tr style={stylesColumn}>
           {Object.keys(headers).map((key, index) => {
             return (
-              <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
+              <th scope="col" key={index} style={{ width: headers[key].width, textAlign: headers[key].align, padding: headers[key].padding }}>
                 {headers[key].name}
               </th>
             );
@@ -37,7 +38,7 @@ export const Table = <T extends object>({ headers, data, handleClickRow, stylesC
             <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>
               {Object.keys(headers).map((key, index) => {
                 return (
-                  <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align }}>
+                  <td key={index} style={{ width: headers[key].width, textAlign: headers[key].align, padding: headers[key].padding }}>
                     {headers[key].accessor(datum)}
                   </td>
                 );

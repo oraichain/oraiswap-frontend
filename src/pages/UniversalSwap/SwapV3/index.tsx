@@ -1,6 +1,7 @@
 import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
+  ORAI,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -196,6 +197,13 @@ const SwapComponent: React.FC<{
     () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
     [originalFromToken]
   );
+
+  const relayerFeeFromToTokenIsEvm = (relayerFeeAmount: string) => {
+    if (!originalFromToken.cosmosBased && !originalToToken.cosmosBased) {
+      return BigInt(relayerFeeAmount) * BigInt(2)
+    }
+    return BigInt(relayerFeeAmount)
+  }
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -442,9 +450,9 @@ const SwapComponent: React.FC<{
               </div>
               <TokenBalance
                 balance={{
-                  amount: relayerFeeToken.amount,
+                  amount: relayerFeeFromToTokenIsEvm(relayerFeeToken.amount),
                   decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                  denom: relayerFeeToken.prefix
+                  denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
                 }}
                 decimalScale={truncDecimals}
               />
