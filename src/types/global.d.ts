@@ -7,6 +7,7 @@ import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
 import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
 import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
+import { DuckDb } from 'libs/duckdb';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -125,6 +126,7 @@ declare global {
     owallet: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
+    duckDb: DuckDb;
   }
 
   declare const APP_SETTINGS: Record<string, any>;

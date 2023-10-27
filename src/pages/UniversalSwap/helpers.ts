@@ -5,7 +5,9 @@ import {
   NetworkChainId,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  getTokenOnOraichain,
+  getTokenOnSpecificChainId
 } from '@oraichain/oraidex-common';
 import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
 import { generateError } from 'libs/utils';
@@ -15,7 +17,6 @@ import {
   isSupportedNoPoolSwapEvm,
   swapEvmRoutes
 } from '@oraichain/oraidex-universal-swap';
-import { getTokenOnOraichain, getTokenOnSpecificChainId } from '@oraichain/oraidex-common';
 
 export enum SwapDirection {
   From,
@@ -32,7 +33,7 @@ export interface SwapData {
   tronAddress?: string;
 }
 
-export const TYPE = {
+export const TYPE_TAB_HISTORY = {
   ASSETS: 'Assets',
   HISTORY: 'History'
 };
@@ -130,3 +131,22 @@ export const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
   [0.75, '75%', 'three-quarters'],
   [1, '100%', 'max']
 ];
+
+export type SwapType = 'Swap' | 'Bridge' | 'Universal Swap';
+export const getSwapType = ({
+  fromChainId,
+  toChainId,
+  fromCoingeckoId,
+  toCoingeckoId
+}: {
+  fromChainId: NetworkChainId;
+  toChainId: NetworkChainId;
+  fromCoingeckoId: CoinGeckoId;
+  toCoingeckoId: CoinGeckoId;
+}): SwapType => {
+  if (fromChainId === 'Oraichain' && toChainId === 'Oraichain') return 'Swap';
+
+  if (fromCoingeckoId === toCoingeckoId) return 'Bridge';
+
+  return 'Universal Swap';
+};

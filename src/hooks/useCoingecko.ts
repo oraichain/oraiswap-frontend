@@ -1,6 +1,6 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { cosmosTokens } from 'config/bridgeTokens';
+import { cosmosTokens, evmTokens } from 'config/bridgeTokens';
 import useConfigReducer from './useConfigReducer';
 import { CoinGeckoId } from '@oraichain/oraidex-common';
 
@@ -27,7 +27,7 @@ export type CoinGeckoPrices<T extends string> = {
 export const useCoinGeckoPrices = <T extends CoinGeckoId>(
   options: Omit<UseQueryOptions<CoinGeckoPrices<T>, unknown, CoinGeckoPrices<T>, string[]>, 'queryKey' | 'queryFn'> = {}
 ): UseQueryResult<CoinGeckoPrices<T>, unknown> => {
-  const tokens = [...new Set(cosmosTokens.map((t) => t.coinGeckoId))];
+  const tokens = [...new Set([...cosmosTokens, ...evmTokens].map((t) => t.coinGeckoId))];
   tokens.sort();
 
   // use cached first then update by query, if is limited then return cached version

@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
 import { updateLpPools } from 'reducer/token';
 import { fetchRewardPerSecInfo } from 'rest/api';
-import axios, { withBaseApiUrl } from 'rest/request';
+import axios from 'rest/request';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
 
@@ -117,7 +117,7 @@ export const useFetchLpPoolsV3 = (lpAddresses: string[]) => {
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
   try {
-    const res = await axios.get(withBaseApiUrl('/v1/pools/'), {});
+    const res = await axios.get('/v1/pools/', {});
     return res.data;
   } catch (e) {
     console.error('getPools', e);
@@ -148,7 +148,7 @@ export type StakeByUserResponse = {
 
 const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {
   try {
-    const res = await axios.get(withBaseApiUrl('/v1/my-staking/'), { params: queries });
+    const res = await axios.get('/v1/my-staking/', { params: queries });
     return res.data;
   } catch (e) {
     console.error('getMyStake', e);
@@ -200,7 +200,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
 export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
   const getPoolDetail = async (queries: { pairDenoms: string }): Promise<PoolInfoResponse> => {
     try {
-      const res = await axios.get(withBaseApiUrl('/v1/pool-detail/'), { params: queries });
+      const res = await axios.get('/v1/pool-detail/', { params: queries });
       return res.data;
     } catch (e) {
       console.error('error getPoolDetail: ', e);

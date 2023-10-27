@@ -1,13 +1,16 @@
 import React, { FC } from 'react';
 import { displayToast, DisplayToast } from './Toast';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export const ToastContext = React.createContext<DisplayToast | null>(null);
 
 export const ToastProvider: FC<{ children: ReactChildren }> = ({ children }) => {
+  const [theme] = useConfigReducer('theme');
   return (
     <ToastContext.Provider
       value={{
-        displayToast
+        displayToast,
+        theme
       }}
     >
       {children}

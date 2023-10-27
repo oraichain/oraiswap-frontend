@@ -13,6 +13,7 @@ import CheckImg from 'assets/icons/check.svg';
 import BackImg from 'assets/icons/back.svg';
 import { networks } from 'helper';
 import { TokenItemType, CustomChainInfo, getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
+import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -26,6 +27,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
+  searchTokenName?: string
 }
 
 export const SelectTokenModalV2: FC<ModalProps> = ({
@@ -35,7 +37,8 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   setToken,
   prices,
   amounts,
-  setSearchTokenName
+  setSearchTokenName,
+  searchTokenName
 }) => {
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
@@ -61,7 +64,11 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     };
   });
 
-  const itemsFilter = networkFilter ? items.filter((item) => item.org === networkFilter) : items;
+  const itemsFilter = searchTokenName || networkFilter ? items.filter((item) => {
+    if (searchTokenName && networkFilter) return item.name.includes(searchTokenName) && item.org === networkFilter
+    if (searchTokenName) return item.name.includes(searchTokenName)
+    return item.org === networkFilter
+  }) : items;
 
   useOnClickOutside(ref, () => {
     setSearchTokenName('');
@@ -75,6 +82,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
           <SearchInput
             isBorder
             placeholder="Search Token"
+            defaultValue={searchTokenName}
             onSearch={(tokenName) => setSearchTokenName(tokenName.toUpperCase())}
           />
         </div>
@@ -167,10 +175,27 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
               title = network.chainName;
               org = network.chainName;
               const subAmounts = Object.fromEntries(
-                Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
+                Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
               );
               const totalUsd = getTotalUsd(subAmounts, prices);
               balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
+            }
+
+            // TODO: need handle list icon 
+            const isLightTheme = theme === 'light';
+            let itemIcon = isLightTheme ? (
+              item.IconLight ? (
+                <item.IconLight className={cx('logo')} />
+              ) : (
+                item.Icon && <item.Icon className={cx('logo')} />
+              )
+            ) : <item.Icon className={cx('logo')} />
+
+            // TODO: hardcode list icon oraichain need fix after listing v3
+            if (!item.Icon && item.chainId === 'Oraichain') {
+              const tokenItem = item as TokenItemType;
+              const itemTokenIcon = flattenTokensWithIcon.find(oraichainToken => oraichainToken.denom === tokenItem.denom)
+              itemIcon = isLightTheme ? <itemTokenIcon.IconLight className={cx('logo')} /> : <itemTokenIcon.Icon className={cx('logo')} />
             }
             return (
               <div
@@ -182,15 +207,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
                   close();
                 }}
               >
-                {theme === 'light' ? (
-                  item.IconLight ? (
-                    <item.IconLight className={cx('logo')} />
-                  ) : (
-                    <item.Icon className={cx('logo')} />
-                  )
-                ) : (
-                  <item.Icon className={cx('logo')} />
-                )}
+                {itemIcon}
                 <div className={cx('grow')}>
                   <div>{title}</div>
                   <div className={cx('org')}>{org}</div>

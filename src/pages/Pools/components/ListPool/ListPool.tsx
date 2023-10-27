@@ -11,6 +11,7 @@ import { PoolInfoResponse } from 'types/pool';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import styles from './ListPool.module.scss';
 import { PoolTableData } from 'pages/Pools/indexV3';
+import { FallbackEmptyData } from 'components/FallbackEmptyData';
 
 type ListPoolProps = {
   poolTableData: PoolTableData[];
@@ -117,10 +118,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
         {poolTableData.length > 0 ? (
           <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
         ) : (
-          <div className={styles.no_data}>
-            <img src={theme === 'light' ? NoDataLightSvg : NoDataSvg} alt="nodata" />
-            <span>No data</span>
-          </div>
+          <FallbackEmptyData />
         )}
       </div>
       {pairDenomsDeposit && (

@@ -55,6 +55,9 @@ const config = {
   plugins: [
     new webpack.ProgressPlugin(),
     new webpack.ProvidePlugin({
+      process: 'process/browser.js'
+    }),
+    new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer']
     }),
     // new webpack.ProvidePlugin({

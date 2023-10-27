@@ -1,25 +1,28 @@
-import { CosmWasmClient, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import bech32 from 'bech32';
-import tokenABI from 'config/abi/erc20.json';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { handleCheckWallet } from 'helper';
+import { genAddressCosmos, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
-import { ContractCallResults, Multicall } from '../libs/ethereum-multicall';
+import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
 import { generateError } from '../libs/utils';
 
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
+import {
+  CustomChainInfo,
+  EVM_BALANCE_RETRY_COUNT,
+  ERC20__factory,
+  getEvmAddress,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
+import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
-import { CustomChainInfo, EVM_BALANCE_RETRY_COUNT } from '@oraichain/oraidex-common';
-import { getEvmAddress, tronToEthAddress } from '@oraichain/oraidex-common';
-import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -49,31 +52,48 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   dispatch(updateAmounts(amountDetails));
 }
 
+const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  await Promise.all(
-    [
-      oraiAddress && loadTokensCosmos(dispatch),
-      oraiAddress && loadCw20Balance(dispatch, oraiAddress),
-      // different cointype but also require keplr connected by checking oraiAddress
-      oraiAddress && loadKawaiiSubnetAmount(dispatch),
-      metamaskAddress && loadEvmAmounts(dispatch, metamaskAddress, evmChains),
-      tronAddress &&
-        loadEvmAmounts(
-          dispatch,
-          tronToEthAddress(tronAddress),
-          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
-        )
-    ].filter(Boolean)
-  );
+  if (oraiAddress) {
+    clearTimeout(timer[oraiAddress]);
+    const kawaiiAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+    timer[oraiAddress] = setTimeout(async () => {
+      await Promise.all([
+        loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
+        loadCw20Balance(dispatch, oraiAddress),
+        // different cointype but also require keplr connected by checking oraiAddress
+        loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
+      ]);
+    }, 2000);
+  }
+
+  if (metamaskAddress) {
+    clearTimeout(timer[metamaskAddress]);
+    timer[metamaskAddress] = setTimeout(() => {
+      loadEvmAmounts(dispatch, metamaskAddress, evmChains);
+    }, 2000);
+  }
+
+  if (tronAddress) {
+    clearTimeout(timer[tronAddress]);
+    timer[tronAddress] = setTimeout(() => {
+      loadEvmAmounts(
+        dispatch,
+        tronToEthAddress(tronAddress),
+        chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+      );
+    }, 2000);
+  }
 }
 
-async function loadTokensCosmos(dispatch: Dispatch) {
+async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddress: string) {
+  if (!kwtAddress || !oraiAddress) return;
   await handleCheckWallet();
   const cosmosInfos = chainInfos.filter(
     (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
   );
   for (const chainInfo of cosmosInfos) {
-    const cosmosAddress = await window.Keplr.getKeplrAddr(chainInfo.chainId);
+    const { cosmosAddress } = genAddressCosmos(chainInfo, kwtAddress, oraiAddress);
     loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
@@ -138,7 +158,7 @@ async function loadEvmEntries(
     const input = tokens.map((token) => ({
       reference: token.denom,
       contractAddress: token.contractAddress,
-      abi: tokenABI,
+      abi: ERC20__factory.abi,
       calls: [
         {
           reference: token.denom,
@@ -148,7 +168,7 @@ async function loadEvmEntries(
       ]
     }));
 
-    const results: ContractCallResults = await multicall.call(input);
+    const results: ContractCallResults = await multicall.call(input as any);
     const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address, chain) : 0;
     let entries: [string, string][] = tokens.map((token) => {
       const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
@@ -173,8 +193,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
   dispatch(updateAmounts(amountDetails));
 }
 
-async function loadKawaiiSubnetAmount(dispatch: Dispatch) {
-  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
   if (!kwtAddress) return;
   const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);

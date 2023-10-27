@@ -88,12 +88,12 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           </div>
         </div>
       ),
-      width: '22%',
+      width: '28%',
       align: 'center'
     },
     price: {
       name: 'PRICE',
-      width: '22%',
+      width: '28%',
       accessor: (data) => <div className={styles.price}>${data.price}</div>,
       align: 'center'
     },
@@ -128,12 +128,12 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
         );
       }
     },
-    filter: {
-      name: 'FILTER',
-      width: '12%',
-      align: 'center',
-      accessor: () => <span></span>
-    }
+    // filter: {
+    //   name: 'FILTER',
+    //   width: '12%',
+    //   align: 'center',
+    //   accessor: () => <span></span>
+    // }
   };
 
   return (

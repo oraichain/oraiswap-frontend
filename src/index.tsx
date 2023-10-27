@@ -1,6 +1,9 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastProvider } from 'components/Toasts/context';
+import { ToastContext, ToastProvider } from 'components/Toasts/context';
+import { network } from 'config/networks';
+import { DuckDb } from 'libs/duckdb';
 import { initClient } from 'libs/utils';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
@@ -13,12 +16,10 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { network } from 'config/networks';
 
 const queryClient = new QueryClient();
 
-if (process.env.REACT_APP_SENTRY_ENVIRONMENT == 'production') {
+if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   Sentry.init({
     environment: process.env.REACT_APP_SENTRY_ENVIRONMENT,
     dsn: 'https://763cf7889ff3440d86c7c1fbc72c8780@o1323226.ingest.sentry.io/6580749',
@@ -42,6 +43,10 @@ const initApp = async () => {
   // @ts-ignore
   window.client = await SigningCosmWasmClient.connect(network.rpc);
 
+  // init duckdb
+  await DuckDb.create();
+  window.duckDb = DuckDb.instance;
+
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -53,7 +58,9 @@ const initApp = async () => {
               <App />
             </QueryClientProvider>
           </Router>
-          <ToastContainer transition={Bounce} />
+          <ToastContext.Consumer>
+            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+          </ToastContext.Consumer>
         </ToastProvider>
       </PersistGate>
     </Provider>

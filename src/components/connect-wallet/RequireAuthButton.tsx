@@ -49,7 +49,7 @@ const RequireAuthButton: React.FC<any> = () => {
   const connectTronLink = async () => {
     try {
       // if not requestAccounts before
-      if (new Metamask().checkTron()) {
+      if (window.Metamask.checkTron() || new Metamask(window.tronWeb).checkTron()) {
         // TODO: Check owallet mobile
         let tronAddress: string;
         if (isMobile()) {

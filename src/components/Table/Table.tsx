@@ -20,7 +20,7 @@ export type TableProps<T extends object> = {
 export const Table = <T extends object>({ headers, data, handleClickRow, stylesColumn }: TableProps<T>) => {
   return (
     <table className={styles.table}>
-      <thead className={styles.tableHeader}>
+      <thead>
         <tr style={stylesColumn}>
           {Object.keys(headers).map((key, index) => {
             return (
@@ -31,7 +31,7 @@ export const Table = <T extends object>({ headers, data, handleClickRow, stylesC
           })}
         </tr>
       </thead>
-      <tbody className={styles.tableBody}>
+      <tbody>
         {data.map((datum, index) => {
           return (
             <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>

@@ -1,12 +1,13 @@
 {
-  "prettier.singleQuote": true,
-  "prettier.trailingComma": "none",
-  "prettier.jsxSingleQuote": false,
-  "prettier.printWidth": 120,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "prettier.useEditorConfig": false,
+    "prettier.useTabs": false,
+    "prettier.trailingComma": "none",
+    "prettier.tabWidth": 2,
+    "prettier.printWidth": 120,
+    "prettier.semi": true,
+    "prettier.singleQuote": true,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

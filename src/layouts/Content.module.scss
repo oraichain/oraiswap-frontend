@@ -1,11 +1,12 @@
 @import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 .content {
   background-image: url(../assets/images/background_dark.png);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
-  background-color: #111111;
+  background-color: $primary-background;
 
   &.light {
     background-color: #fff;
