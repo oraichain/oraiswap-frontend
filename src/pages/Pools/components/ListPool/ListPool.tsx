@@ -102,7 +102,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
     const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
 
     navigate(
-      `/pool/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
+      `/pools/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
         parseAssetOnlyDenom(secondAssetInfo)
       )}`
     );
