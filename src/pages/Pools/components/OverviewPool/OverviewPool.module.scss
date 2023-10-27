@@ -199,12 +199,19 @@
             line-height: 120%;
         }
 
-        .positivePercent {
-            color: $success-color;
+        .percent {
             font-size: 16px;
             font-style: normal;
             font-weight: 500;
             line-height: 150%;
+        }
+
+        .positiveVol {
+            color: $success-color;
+        }
+
+        .negativeVol {
+            color: $error-color;
         }
     }
 

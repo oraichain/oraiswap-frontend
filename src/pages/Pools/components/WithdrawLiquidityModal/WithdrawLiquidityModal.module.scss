@@ -250,6 +250,7 @@
 
         .input-amount {
           flex-grow: 1;
+          position: relative;
         }
 
         .amount {
@@ -260,6 +261,7 @@
           background: #1e1e21;
           border-radius: 8px;
           height: 100%;
+          padding-bottom: 30px;
 
           &.light {
             background: #efefef;
@@ -271,6 +273,9 @@
           text-align: right;
           color: #979995;
           padding: 10px;
+          position: absolute;
+          right: 0;
+          bottom: 0;
 
           &.light {
             color: #686a66;

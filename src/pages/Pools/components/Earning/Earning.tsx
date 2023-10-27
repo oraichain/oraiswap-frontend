@@ -171,16 +171,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
                 </div>
                 <div className={styles.amount}>
                   <TokenBalance
-                    balance={{
-                      amount: pendingReward.amount,
-                      denom: pendingReward?.denom.toUpperCase(),
-                      decimals: 6
-                    }}
-                    decimalScale={6}
-                  />
-                </div>
-                <div className={styles.amountOrai}>
-                  <TokenBalance
                     balance={getUsd(
                       pendingReward.amount,
                       pendingReward,
@@ -189,6 +179,16 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
                     )}
                     prefix="~$"
                     decimalScale={4}
+                  />
+                </div>
+                <div className={styles.amountOrai}>
+                  <TokenBalance
+                    balance={{
+                      amount: pendingReward.amount,
+                      denom: pendingReward?.denom.toUpperCase(),
+                      decimals: 6
+                    }}
+                    decimalScale={6}
                   />
                 </div>
               </div>

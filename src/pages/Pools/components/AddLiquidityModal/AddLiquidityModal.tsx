@@ -226,11 +226,11 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance)}>
+                Max
               </Button>
             </div>
           </div>
@@ -275,11 +275,11 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
+                Max
               </Button>
             </div>
           </div>
