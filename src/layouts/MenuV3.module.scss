@@ -117,6 +117,12 @@
         color: theme-get('neutral-1');
       }
 
+      span {
+        @include theme() {
+          color: theme-get('neutral-1');
+        }
+      }
+
       &::before {
         @include theme() {
           border-left-color: theme-get('neutral-1');
@@ -222,8 +228,9 @@
       border-bottom-color: theme-get('neutral-1');
     }
 
-    transition: border-left-color 0.05s linear, border-right-color 0.05s linear 0.05s,
-      border-bottom-color 0.05s linear 0.05s;
+    transition: border-left-color 0.05s linear,
+    border-right-color 0.05s linear 0.05s,
+    border-bottom-color 0.05s linear 0.05s;
   }
 
   &::after {
