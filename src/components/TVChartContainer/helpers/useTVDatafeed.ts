@@ -8,7 +8,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectCurrentToken, setChartDataLength } from 'reducer/tradingSlice';
+import { selectCurrentToken, setChartDataLength, setChartTimeFrame } from 'reducer/tradingSlice';
 import { TVDataProvider } from './TVDataProvider';
 import { SUPPORTED_RESOLUTIONS } from './constants';
 import { pairsChart } from '../config';
@@ -35,8 +35,8 @@ export default function useTVDatafeed({ dataProvider }: Props) {
   const tvDataProvider = useRef<TVDataProvider>();
   const shouldRefetchBars = useRef<boolean>(false);
   const lastBarsCache = new Map();
-
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (dataProvider && tvDataProvider.current !== dataProvider) {
       tvDataProvider.current = dataProvider;
@@ -95,6 +95,9 @@ export default function useTVDatafeed({ dataProvider }: Props) {
               return;
             }
             const pair = pairsChart.find((p) => p.symbol === symbolInfo.ticker);
+
+            dispatch(setChartTimeFrame(+resolution * 60));
+
             const bars = await tvDataProvider.current?.getBars(
               pair?.info,
               ticker,
