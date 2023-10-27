@@ -11,7 +11,13 @@ import ArrowImg from 'assets/icons/arrow_new.svg';
 import CheckImg from 'assets/icons/check.svg';
 import BackImg from 'assets/icons/back.svg';
 import { networks } from 'helper';
-import { TokenItemType, CustomChainInfo, getSubAmountDetails, truncDecimals, tokenMap } from '@oraichain/oraidex-common';
+import {
+  TokenItemType,
+  CustomChainInfo,
+  getSubAmountDetails,
+  truncDecimals,
+  tokenMap
+} from '@oraichain/oraidex-common';
 import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
@@ -26,7 +32,7 @@ interface ModalProps {
   setToken: (denom: string) => void;
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
-  searchTokenName?: string
+  searchTokenName?: string;
 }
 
 export const SelectTokenModalV2: FC<ModalProps> = ({
@@ -63,11 +69,86 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     };
   });
 
-  const itemsFilter = searchTokenName || networkFilter ? items.filter((item) => {
-    if (searchTokenName && networkFilter) return item.name.includes(searchTokenName) && item.org === networkFilter
-    if (searchTokenName) return item.name.includes(searchTokenName)
-    return item.org === networkFilter
-  }) : items;
+  const networksMap = {};
+
+  let itemsFilter = (
+    searchTokenName || networkFilter
+      ? items.filter((item) => {
+          if (searchTokenName && networkFilter)
+            return item.name.includes(searchTokenName) && item.org === networkFilter;
+          if (searchTokenName) return item.name.includes(searchTokenName);
+          return item.org === networkFilter;
+        })
+      : items
+  ).map((item: TokenItemType | CustomChainInfo) => {
+    let key: string, title: string, balance: string, org: string;
+
+    if (type === 'token') {
+      const token = item as TokenItemType;
+      key = token.denom;
+      title = token.name;
+      org = token.org;
+      let sumAmountDetails: AmountDetails = {};
+      // by default, we only display the amount that matches the token denom
+      sumAmountDetails[token.denom] = amounts[token.denom];
+      let sumAmount: number = toSumDisplay(sumAmountDetails);
+      // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
+      if (token.evmDenoms) {
+        const subAmounts = getSubAmountDetails(amounts, token);
+        sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
+        sumAmount = toSumDisplay(sumAmountDetails);
+      }
+      balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
+    } else {
+      const network = item as CustomChainInfo;
+      key = network.chainId.toString();
+      title = network.chainName;
+      org = network.chainName;
+      const subAmounts = Object.fromEntries(
+        Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
+      );
+      const totalUsd = getTotalUsd(subAmounts, prices);
+      balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
+    }
+
+    // TODO: need handle list icon
+    const isLightTheme = theme === 'light';
+    let itemIcon = isLightTheme ? (
+      item.IconLight ? (
+        <item.IconLight className={cx('logo')} />
+      ) : (
+        item.Icon && <item.Icon className={cx('logo')} />
+      )
+    ) : (
+      <item.Icon className={cx('logo')} />
+    );
+
+    // TODO: hardcode list icon oraichain need fix after listing v3
+    if (!item.Icon && item.chainId === 'Oraichain') {
+      const tokenItem = item as TokenItemType;
+      const itemTokenIcon = flattenTokensWithIcon.find((oraichainToken) => oraichainToken.denom === tokenItem.denom);
+      itemIcon = isLightTheme ? (
+        <itemTokenIcon.IconLight className={cx('logo')} />
+      ) : (
+        <itemTokenIcon.Icon className={cx('logo')} />
+      );
+    }
+    if (networksMap[item.chainId] === undefined) networksMap[item.chainId] = [];
+    networksMap[item.chainId].push({ balance, key, title, chainId: item.chainId, org, itemIcon });
+
+    return null;
+  });
+
+  itemsFilter = [];
+
+  for (const key in networksMap) {
+    if (Object.prototype.hasOwnProperty.call(networksMap, key)) {
+      const prices = networksMap[key].sort((a, b) => b.balance - a.balance);
+      itemsFilter.push(prices);
+    }
+  }
+
+  itemsFilter = itemsFilter.reverse().flat();
 
   useOnClickOutside(ref, () => {
     setSearchTokenName('');
@@ -149,72 +230,24 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
             );
           })}
         {!isNetwork &&
-          itemsFilter.map((item: TokenItemType | CustomChainInfo) => {
-            let key: string, title: string, balance: string, org: string;
-
-            if (type === 'token') {
-              const token = item as TokenItemType;
-              key = token.denom;
-              title = token.name;
-              org = token.org;
-              let sumAmountDetails: AmountDetails = {};
-              // by default, we only display the amount that matches the token denom
-              sumAmountDetails[token.denom] = amounts[token.denom];
-              let sumAmount: number = toSumDisplay(sumAmountDetails);
-              // if there are sub-denoms, we get sub amounts & calculate sum display of both sub & main amount
-              if (token.evmDenoms) {
-                const subAmounts = getSubAmountDetails(amounts, token);
-                sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
-                sumAmount = toSumDisplay(sumAmountDetails);
-              }
-              balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
-            } else {
-              const network = item as CustomChainInfo;
-              key = network.chainId.toString();
-              title = network.chainName;
-              org = network.chainName;
-              const subAmounts = Object.fromEntries(
-                Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
-              );
-              const totalUsd = getTotalUsd(subAmounts, prices);
-              balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
-            }
-
-            // TODO: need handle list icon 
-            const isLightTheme = theme === 'light';
-            let itemIcon = isLightTheme ? (
-              item.IconLight ? (
-                <item.IconLight className={cx('logo')} />
-              ) : (
-                item.Icon && <item.Icon className={cx('logo')} />
-              )
-            ) : <item.Icon className={cx('logo')} />
-
-            // TODO: hardcode list icon oraichain need fix after listing v3
-            if (!item.Icon && item.chainId === 'Oraichain') {
-              const tokenItem = item as TokenItemType;
-              const itemTokenIcon = flattenTokensWithIcon.find(oraichainToken => oraichainToken.denom === tokenItem.denom)
-              itemIcon = isLightTheme ? <itemTokenIcon.IconLight className={cx('logo')} /> : <itemTokenIcon.Icon className={cx('logo')} />
-            }
-            return (
-              <div
-                className={cx('item')}
-                key={key}
-                onClick={() => {
-                  setToken(key);
-                  setSearchTokenName('');
-                  close();
-                }}
-              >
-                {itemIcon}
-                <div className={cx('grow')}>
-                  <div>{title}</div>
-                  <div className={cx('org')}>{org}</div>
-                </div>
-                <div>{balance}</div>
+          itemsFilter.map((item) => (
+            <div
+              className={cx('item')}
+              key={item.key}
+              onClick={() => {
+                setToken(item.key);
+                setSearchTokenName('');
+                close();
+              }}
+            >
+              {item.itemIcon}
+              <div className={cx('grow')}>
+                <div>{item.title}</div>
+                <div className={cx('org')}>{item.org}</div>
               </div>
-            );
-          })}
+              <div>{item.balance}</div>
+            </div>
+          ))}
       </div>
     </div>
   );
