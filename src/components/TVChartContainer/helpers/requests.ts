@@ -8,7 +8,7 @@ export const getTokenChartPrice = async (
   resolution: string
 ): Promise<Bar[]> => {
   try {
-    const res = await axios.get('/v1/candles/', {
+    const res = await axios.get('/v1/candles', {
       params: {
         pair,
         startTime: periodParams.from,
