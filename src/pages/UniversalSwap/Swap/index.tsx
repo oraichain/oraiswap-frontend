@@ -226,7 +226,8 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          simulatePrice: averageRatio.amount
+          simulatePrice: averageRatio.amount,
+          relayerFee: relayerFeeToken
         },
         { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       );
@@ -263,11 +264,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 

@@ -40,7 +40,7 @@ import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -166,7 +166,7 @@ const Balance: React.FC<BalanceProps> = () => {
           originalToToken: from,
           fromAmount
         },
-        { evmWallet: window.Metamask }
+        { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
       ).processUniversalSwap();
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
