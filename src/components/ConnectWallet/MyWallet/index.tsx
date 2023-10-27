@@ -26,7 +26,7 @@ const MyWallets: React.FC<{
   setQRUrlInfo: (qRGeneratorInfo: QRGeneratorInfo) => void;
   setIsShowMyWallet: (isShow: boolean) => void;
   handleAddWallet: () => void;
-  handleLogoutWallets: (walletType: any) => Promise<void>;
+  handleLogoutWallets: (walletType: any) => void;
   handleLoginWallets: (walletType: any) => Promise<void>;
   toggleShowNetworks: (id: number) => void;
   wallets: WalletItem[];

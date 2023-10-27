@@ -32,9 +32,10 @@ import MetamaskImage from 'assets/images/metamask.png';
 import OwalletImage from 'assets/images/owallet-logo.png';
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
+import DisconnectModal from './Disconnect';
 const cx = cn.bind(styles);
 
-interface ModalProps { }
+interface ModalProps {}
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   KEPLR = 'KEPLR',
@@ -75,10 +76,11 @@ export enum CONNECT_STATUS {
   DONE = 'DONE',
   ERROR = 'ERROR'
 }
-const ConnectWallet: FC<ModalProps> = ({ }) => {
+const ConnectWallet: FC<ModalProps> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
+  const [isShowDisconnect, setIsShowDisconnect] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
@@ -184,7 +186,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       })();
     }
 
-    return () => { };
+    return () => {};
   }, [address]);
   const disconnectMetamask = async () => {
     try {
@@ -202,7 +204,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       return item;
     });
     setWallets(walletData);
-    return () => { };
+    return () => {};
   }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
@@ -365,6 +367,16 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       return oraiAddress;
     }
   };
+  const handleDisconnectWallet = (walletType) => {
+    setIsShowDisconnect(true);
+    setIsShowMyWallet(false);
+    setWalletTypeActive(walletType);
+  };
+  const approveDisconnectWallet = async (walletType) => {
+    await requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT);
+    setIsShowDisconnect(false);
+    setIsShowMyWallet(true);
+  };
   return (
     <div className={cx('connect-wallet-container', theme)}>
       {!isConnected ? (
@@ -385,7 +397,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
                 setWalletTypeActive(null);
               }}
               toggleShowNetworks={toggleShowNetworks}
-              handleLogoutWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT)}
+              handleLogoutWallets={handleDisconnectWallet}
               handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
               setQRUrlInfo={setQRUrlInfo}
               setIsShowMyWallet={setIsShowMyWallet}
@@ -417,7 +429,17 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           address={checkAddressByWalletType(walletTypeActive)}
         />
       ) : null}
-
+      {isShowDisconnect && (
+        <DisconnectModal
+          close={() => {
+            setIsShowDisconnect(false);
+            setIsShowMyWallet(true);
+          }}
+          approve={approveDisconnectWallet}
+          walletActive={wallets.find((item, index) => item.code === walletTypeActive)}
+          address={checkAddressByWalletType(walletTypeActive)}
+        />
+      )}
       {QRUrlInfo.url ? (
         <QRGeneratorModal
           url={QRUrlInfo.url}

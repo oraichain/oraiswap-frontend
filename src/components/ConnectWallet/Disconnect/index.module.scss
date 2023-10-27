@@ -1,0 +1,150 @@
+.icon {
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+}
+.choose_wallet_modal_container {
+  .choose_wallet_modal_wrapper {
+    width: 520px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #232521;
+    border-radius: 12px;
+    padding: 24px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+
+      .close_icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    .wallets_wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+      .not-active {
+        opacity: 0.5;
+      }
+      .wallet_item {
+        padding: 16px 0px 8px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 140px;
+        border-radius: 5px;
+        min-height: 140px;
+        .wallet_name {
+          margin-top: 16px;
+          text-align: center;
+        }
+
+        &:hover {
+          background: #efefef;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+.dark {
+  .choose_wallet_modal_wrapper {
+    background: #121511;
+    color: #f7f7f7;
+    .wallets_wrapper {
+      .wallet_item {
+        &:hover {
+          background: #31332e;
+        }
+      }
+    }
+  }
+}
+.connect_error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  .wallet-type {
+    font-weight: 600;
+  }
+  .content {
+    margin: 30px 0;
+    width: 100%;
+    text-align: center;
+    .label {
+      font-size: 16px;
+    }
+  }
+  .content-2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-top: 16px;
+    .sub-label {
+      color: #979995;
+      font-size: 14px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    div {
+      display: flex;
+      height: 40px;
+      padding: 8px 16px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      border-radius: 99px;
+      border: 1px solid #232521;
+      font-size: 16px;
+      font-style: normal;
+      color: #232521;
+      font-weight: 500;
+      cursor: pointer;
+      width: 45%;
+    }
+    .try_again_btn {
+      background: #aee67f;
+      border: none;
+    }
+  }
+}
+
+.dark {
+  .actions {
+    .cancel_btn {
+      background: #121511;
+      color: #f7f7f7;
+      border: 1px solid #f7f7f7;
+    }
+  }
+}
