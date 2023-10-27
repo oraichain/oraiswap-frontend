@@ -44,7 +44,7 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             {option}%
           </div>
         ))}
-        <div
+        {/* <div
           className={cx('item', 'border', {
             isChosen: indexChosenOption === OPTIONS_SLIPPAGE.length
           })}
@@ -65,7 +65,7 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             value={manualSlippage}
           />
           %
-        </div>
+        </div> */}
       </div>
     </div>
   );
