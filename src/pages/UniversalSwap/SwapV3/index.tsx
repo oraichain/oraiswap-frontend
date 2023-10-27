@@ -205,11 +205,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -429,7 +429,7 @@ const SwapComponent: React.FC<{
               balance={{
                 amount: minimumReceive,
                 decimals: originalFromToken?.decimals,
-                denom: toTokenInfoData?.symbol
+                denom: originalToToken?.name
               }}
               decimalScale={truncDecimals}
             />

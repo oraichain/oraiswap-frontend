@@ -1,6 +1,7 @@
 import { oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import {
   CoinGeckoId,
+  CoinIcon,
   IBC_WASM_CONTRACT,
   NetworkChainId,
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
@@ -41,9 +42,11 @@ export const TYPE_TAB_HISTORY = {
 export interface NetworkFilter {
   label?: string;
   value?: string;
+  Icon?: CoinIcon;
+  IconLight?: CoinIcon;
 }
 
-export const initNetworkFilter = { label: 'All networks', value: '' };
+export const initNetworkFilter = { label: 'All networks', value: '', Icon: undefined, IconLight: undefined };
 
 /**
  * Get transfer token fee when universal swap

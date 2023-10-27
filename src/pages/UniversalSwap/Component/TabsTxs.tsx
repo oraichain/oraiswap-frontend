@@ -78,7 +78,9 @@ const TabsNetwork: React.FC<{
                 onClick={() => {
                   setNetworkFilter({
                     label: item.chainName,
-                    value: item.chainId
+                    value: item.chainId,
+                    Icon: item.Icon,
+                    IconLight: item.IconLight || item.Icon
                   });
                   setIsNetwork(false);
                 }}
@@ -95,7 +97,7 @@ const TabsNetwork: React.FC<{
 };
 
 export const TabsTxs: React.FC<{
-  networkFilter: string;
+  networkFilter: NetworkFilter;
   setNetworkFilter: (networkFilter: NetworkFilter) => void;
 }> = ({ setNetworkFilter, networkFilter }) => {
   const [isNetwork, setIsNetwork] = useState<boolean>(false);
@@ -139,15 +141,25 @@ export const TabsTxs: React.FC<{
               setIsNetwork(!isNetwork);
             }}
           >
-            <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+            {networkFilter.value ? (
+              theme === 'light' ? (
+                (networkFilter.IconLight && <networkFilter.IconLight className={cx('logo')} />) || (
+                  <networkFilter.IconLight className={cx('logo')} />
+                )
+              ) : (
+                networkFilter.Icon && <networkFilter.Icon className={cx('logo')} />
+              )
+            ) : (
+              <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+            )}
             <div className={cx('all-network')}>
-              <span className={cx(`detail`)}>{networkFilter ? networkFilter : 'All Networks'}</span>
+              <span className={cx(`detail`)}>{networkFilter.label ? networkFilter.label : 'All Networks'}</span>
             </div>
             <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
           </div>
           {isNetwork && (
             <TabsNetwork
-              networkFilter={networkFilter}
+              networkFilter={networkFilter.label}
               theme={theme}
               setIsNetwork={setIsNetwork}
               setNetworkFilter={setNetworkFilter}
