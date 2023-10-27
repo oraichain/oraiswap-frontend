@@ -110,7 +110,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = generateContractMessages({
+    const msg = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -118,12 +118,10 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       token
     });
 
-    const msg = msgs[0];
-
     const result = await CosmJs.execute({
-      address: msg.contract,
+      address: msg.contractAddress,
       walletAddr,
-      handleMsg: msg.msg.toString(),
+      handleMsg: msg.msg,
       gasAmount: { denom: ORAI, amount: '0' },
       funds: msg.funds
     });
