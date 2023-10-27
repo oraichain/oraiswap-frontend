@@ -8,7 +8,15 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { CW20_DECIMALS, TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import {
+  CW20_DECIMALS,
+  CoinIcon,
+  TokenItemType,
+  getSubAmountDetails,
+  toAmount,
+  toDisplay,
+  tokenMap
+} from '@oraichain/oraidex-common';
 import React from 'react';
 import { tokens } from 'config/bridgeTokens';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
@@ -20,13 +28,42 @@ const cx = cn.bind(styles);
 export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const totalUsd = getTotalUsd(amounts, prices);
   const [otherChainTokens, oraichainTokens] = tokens;
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const { totalStaked } = useGetMyStake({
     stakerAddress: address
   });
+  let totalUsd: number = getTotalUsd(amounts, prices);
+  if (networkFilter) {
+    const subAmounts = Object.fromEntries(
+      Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === networkFilter)
+    );
+    totalUsd = getTotalUsd(subAmounts, prices);
+  }
+
+  let listAsset: {
+    src?: CoinIcon;
+    label?: string;
+    balance?: number;
+  }[] = [
+      {
+        src: WalletIcon,
+        label: 'Total balance',
+        balance: totalUsd
+      }
+    ];
+
+  if (!networkFilter || networkFilter === 'Oraichain') {
+    listAsset = [
+      ...listAsset,
+      {
+        src: StakeIcon,
+        label: 'Total staked',
+        balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
+      }
+    ];
+  }
 
   const data = [...oraichainTokens, ...otherChainTokens]
     .filter((token: TokenItemType) => {
@@ -127,7 +164,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           </div>
         );
       }
-    },
+    }
     // filter: {
     //   name: 'FILTER',
     //   width: '12%',
@@ -139,18 +176,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
   return (
     <div className={cx('assetsTab')}>
       <div className={cx('info')}>
-        {[
-          {
-            src: WalletIcon,
-            label: 'Total balance',
-            balance: totalUsd.toFixed(6)
-          },
-          {
-            src: StakeIcon,
-            label: 'Total staked',
-            balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
-          }
-        ].map((e, i) => {
+        {listAsset.map((e, i) => {
           return (
             <div key={i} className={cx('total-info')}>
               <div className={cx('icon')}>
@@ -158,7 +184,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
               </div>
               <div className={cx('balance')}>
                 <div className={cx('label')}>{e.label}</div>
-                <div className={cx('value')}>${e.balance}</div>
+                <div className={cx('value')}>${e.balance.toFixed(6)}</div>
               </div>
             </div>
           );

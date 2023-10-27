@@ -106,9 +106,14 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           decimalScale={2}
           prefix="$"
         />
-        <div className={styles.positivePercent}>
+        <div
+          className={classNames(
+            styles.percent,
+            +poolDetailData.info?.volume24hChange > 0 ? styles.positiveVol : styles.negativeVol
+          )}
+        >
           <span>{+poolDetailData.info?.volume24hChange > 0 && '+'}</span>
-          {toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2)}%
+          {poolDetailData.info?.volume24hChange ? toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2) : 0}%
         </div>
       </div>
       <div className={classNames(styles.apr, { [styles.open]: isShowMore })}>

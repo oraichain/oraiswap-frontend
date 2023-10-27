@@ -1,17 +1,14 @@
 import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
-import NoDataSvg from 'assets/images/NoDataPool.svg';
-import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import { Button } from 'components/Button';
+import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
-import useTheme from 'hooks/useTheme';
 import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { PoolTableData } from 'pages/Pools/indexV3';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import styles from './ListPool.module.scss';
-import { PoolTableData } from 'pages/Pools/indexV3';
-import { FallbackEmptyData } from 'components/FallbackEmptyData';
 
 type ListPoolProps = {
   poolTableData: PoolTableData[];
@@ -20,7 +17,6 @@ type ListPoolProps = {
 
 export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon }) => {
   const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const headers: TableHeaderProps<PoolTableData> = {
@@ -106,7 +102,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
     const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
 
     navigate(
-      `/pool/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
+      `/pools/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
         parseAssetOnlyDenom(secondAssetInfo)
       )}`
     );

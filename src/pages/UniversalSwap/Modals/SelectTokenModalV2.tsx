@@ -1,6 +1,5 @@
 import cn from 'classnames/bind';
 import SearchInput from 'components/SearchInput';
-import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC, useRef, useState } from 'react';
@@ -12,7 +11,7 @@ import ArrowImg from 'assets/icons/arrow_new.svg';
 import CheckImg from 'assets/icons/check.svg';
 import BackImg from 'assets/icons/back.svg';
 import { networks } from 'helper';
-import { TokenItemType, CustomChainInfo, getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
+import { TokenItemType, CustomChainInfo, getSubAmountDetails, truncDecimals, tokenMap } from '@oraichain/oraidex-common';
 import { flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);

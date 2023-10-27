@@ -6,7 +6,7 @@
   @include flex;
   display: inline-flex;
   height: $height;
-  border-radius: ($height / 2);
+  border-radius: calc($height / 2);
   background: fade-out(white, 0.9);
   color: $white-color;
   font-size: 10px;
