@@ -381,7 +381,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   return (
     <div className={cx('connect-wallet-container', theme)}>
       {!isConnected ? (
-        <Button type="primary" onClick={() => setIsShowChooseWallet(true)}>
+        <Button
+          type="primary"
+          onClick={() => {
+            setConnectStatus(CONNECT_STATUS.SELECTING);
+            setIsShowChooseWallet(true);
+          }}
+        >
           Connect Wallet
         </Button>
       ) : (
