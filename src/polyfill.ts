@@ -24,7 +24,7 @@ window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
 window.Keplr = new Keplr();
-window.Metamask = new Metamask();
+window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;

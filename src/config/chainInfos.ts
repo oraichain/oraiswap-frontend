@@ -1,5 +1,12 @@
 import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
-import { TokenItemType, tokens, chainInfos as customChainInfos } from '@oraichain/oraidex-common';
+import {
+  TokenItemType,
+  tokens,
+  chainInfos as customChainInfos,
+  OsmoToken,
+  AtomToken,
+  InjectiveToken
+} from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
 import { ReactComponent as AtomLightIcon } from 'assets/icons/atom_light.svg';
@@ -612,6 +619,7 @@ export const chainInfos: CustomChainInfo[] = [
     Icon: OsmoIcon,
     IconLight: OsmoLightIcon,
     bech32Config: defaultBech32Config('osmo'),
+    feeCurrencies: [OsmoToken],
     currencies: [
       {
         coinDenom: 'OSMO',
@@ -637,6 +645,7 @@ export const chainInfos: CustomChainInfo[] = [
     Icon: InjIcon,
     IconLight: InjIcon,
     bech32Config: defaultBech32Config('inj'),
+    feeCurrencies: [InjectiveToken],
     currencies: [
       {
         coinDenom: 'INJ',
@@ -669,6 +678,7 @@ export const chainInfos: CustomChainInfo[] = [
     },
     Icon: AtomIcon,
     bech32Config: defaultBech32Config('cosmos'),
+    feeCurrencies: [AtomToken],
     currencies: [
       {
         coinDenom: 'ATOM',

@@ -55,15 +55,15 @@ export const Header: FC = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const msgs = totalRewardInfoData.reward_infos
-        .map((rewardInfo) => {
-          if (rewardInfo.pending_reward === '0') return null;
-          return {
-            contractAddress: network.staking,
-            msg: { withdraw: { asset_info: rewardInfo.asset_info } },
-            funds: null
-          } as ExecuteInstruction;
-        })
-        .filter(Boolean);
+        .filter((rewardInfo) => rewardInfo.pending_reward !== '0')
+        .map(
+          (rewardInfo) =>
+            ({
+              contractAddress: network.staking,
+              msg: { withdraw: { asset_info: rewardInfo.asset_info } },
+              funds: null
+            } as ExecuteInstruction)
+        );
 
       const result = await CosmJs.executeMultiple({
         msgs,
