@@ -149,7 +149,7 @@ export const HistoryTab: React.FC<{
       </div> */}
       <div className={styles.historyData}>
         <h2>Latest 20 transactions</h2>
-        {transHistory.length > 0 ? (
+        {transHistory && transHistory.length > 0 ? (
           <Table
             headers={headers}
             data={transHistory}

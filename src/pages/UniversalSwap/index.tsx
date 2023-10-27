@@ -2,7 +2,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
 import TVChartContainer from 'components/TVChartContainer/TVChartContainer';
 import Content from 'layouts/Content';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import { TransactionProcess } from './Modals';
@@ -11,6 +11,7 @@ import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useSelector } from 'react-redux';
 import { selectChartDataLength } from "reducer/tradingSlice";
+import { DuckDb } from 'libs/duckdb';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -22,6 +23,15 @@ const Swap: React.FC = () => {
   const chartDataLength = useSelector(selectChartDataLength)
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
+
+  const initDuckdb = async () => {
+    await DuckDb.create()
+    window.duckDb = DuckDb.instance;
+  }
+
+  useEffect(() => {
+    if (!window.duckDb) initDuckdb()
+  }, [window.duckDb])
 
   return (
     <Content nonBackground>

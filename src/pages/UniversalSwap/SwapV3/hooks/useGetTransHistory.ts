@@ -20,7 +20,7 @@ export const useGetTransHistory = () => {
     {
       refetchOnWindowFocus: false,
       placeholderData: [],
-      enabled: !!address
+      enabled: !!address && !!window.duckDb
     }
   );
 
