@@ -35,6 +35,12 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
     stakerAddress: address
   });
   let totalUsd: number = getTotalUsd(amounts, prices);
+  if (networkFilter) {
+    const subAmounts = Object.fromEntries(
+      Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === networkFilter)
+    );
+    totalUsd = getTotalUsd(subAmounts, prices);
+  }
 
   let listAsset: {
     src?: CoinIcon;
@@ -47,13 +53,6 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
         balance: totalUsd
       }
     ];
-
-  if (networkFilter) {
-    const subAmounts = Object.fromEntries(
-      Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === networkFilter)
-    );
-    totalUsd = getTotalUsd(subAmounts, prices);
-  }
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [
