@@ -33,6 +33,7 @@ import OwalletImage from 'assets/images/owallet-logo.png';
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
+import LoadingBox from 'components/LoadingBox';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
@@ -389,20 +390,22 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           visible={isShowMyWallet}
           setVisible={setIsShowMyWallet}
           content={
-            <MyWallets
-              handleAddWallet={() => {
-                setConnectStatus(CONNECT_STATUS.SELECTING);
-                setIsShowChooseWallet(true);
-                setIsShowMyWallet(false);
-                setWalletTypeActive(null);
-              }}
-              toggleShowNetworks={toggleShowNetworks}
-              handleLogoutWallets={handleDisconnectWallet}
-              handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
-              setQRUrlInfo={setQRUrlInfo}
-              setIsShowMyWallet={setIsShowMyWallet}
-              wallets={wallets}
-            />
+            <LoadingBox loading={connectStatus === CONNECT_STATUS.PROCESSING}>
+              <MyWallets
+                handleAddWallet={() => {
+                  setConnectStatus(CONNECT_STATUS.SELECTING);
+                  setIsShowChooseWallet(true);
+                  setIsShowMyWallet(false);
+                  setWalletTypeActive(null);
+                }}
+                toggleShowNetworks={toggleShowNetworks}
+                handleLogoutWallets={handleDisconnectWallet}
+                handleLoginWallets={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.CONNECT)}
+                setQRUrlInfo={setQRUrlInfo}
+                setIsShowMyWallet={setIsShowMyWallet}
+                wallets={wallets}
+              />
+            </LoadingBox>
           }
         >
           <Connected
