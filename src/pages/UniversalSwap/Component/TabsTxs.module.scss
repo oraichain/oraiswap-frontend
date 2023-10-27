@@ -81,16 +81,9 @@
     @include mobile() {
       right: 10px;
     }
-
-    .title {
-      text-align: center;
-      font-size: 16px;
-    }
-
     .options {
       display: flex;
       flex-direction: column;
-      padding-top: 12px;
       &.border {
         @include theme() {
           border-bottom: 0.5px solid theme-get('neutral-4');

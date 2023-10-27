@@ -54,9 +54,6 @@ const TabsNetwork: React.FC<{
 }> = ({ networkFilter, setIsNetwork, setNetworkFilter, theme }) => {
   return (
     <div className={cx('network')}>
-      <div>
-        <div className={cx('title')}>Select network</div>
-      </div>
       <div className={cx('options', 'border')}>
         <ItemNetwork
           onClick={() => {
