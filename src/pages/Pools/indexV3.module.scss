@@ -12,6 +12,10 @@
         padding: 0;
         margin: 24px 0;
     }
+
+    @include medium-desktop() {
+        max-width: 100%;
+    }
 }
 
 .listpoolsToken {
