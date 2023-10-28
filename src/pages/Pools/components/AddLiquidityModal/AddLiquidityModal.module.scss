@@ -260,14 +260,15 @@
           padding: 10px;
           flex-grow: 1;
           text-align: right;
-          background: #1e1e21;
+          background: $raisin-black;
           border-radius: 8px;
           height: 100%;
           padding-bottom: 30px;
+          color: $neutral-surface-search;
 
           &.light {
-            background: #efefef;
-            color: $light-text-color;
+            background: $neutral-surface-search;
+            color: $raisin-black;
           }
         }
 
