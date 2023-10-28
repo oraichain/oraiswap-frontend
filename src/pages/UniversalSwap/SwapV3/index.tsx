@@ -224,7 +224,7 @@ const SwapComponent: React.FC<{
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
       const oraiAddress = await handleCheckAddress('Oraichain');
-      const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
+      const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const univeralSwapHandler = new UniversalSwapHandler(
