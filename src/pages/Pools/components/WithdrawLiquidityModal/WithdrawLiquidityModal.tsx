@@ -110,7 +110,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         </div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: lpTokenBalance,
@@ -135,7 +135,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
                   else setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(lpAmountBurnUsdt)),
@@ -163,7 +163,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
               </div>
             ))}
             <div
-              className={cx('item', theme, 'border', {
+              className={cx('item', theme, 'manual-option', {
                 isChosen: chosenWithdrawPercent === 4
               })}
               onClick={() => setChosenWithdrawPercent(4)}

@@ -118,7 +118,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: lpTokenBalance,
@@ -152,7 +152,7 @@ export const StakeLPModal: FC<ModalProps> = ({
                   else setBondAmount(toAmount(floatValue, lpTokenInfoData.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(bondAmountInUsdt || 0)),

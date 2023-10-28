@@ -212,7 +212,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         </div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: token1Balance.toString(),
@@ -252,7 +252,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                   onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance balance={getUsd(baseAmount, token1, prices)} decimalScale={2} />
               </div>
             </div>
@@ -261,7 +261,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
 
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: token2Balance.toString(),
@@ -301,7 +301,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                   onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance balance={getUsd(quoteAmount, token2, prices)} decimalScale={2} />
               </div>
             </div>

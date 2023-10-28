@@ -117,7 +117,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
         <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: totalBondAmount,
@@ -152,7 +152,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
                 }}
               />
 
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(unbondAmountInUsdt)),
