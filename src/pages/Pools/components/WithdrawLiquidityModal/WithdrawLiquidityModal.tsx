@@ -78,6 +78,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setLpAmountBurn(0n);
         onLiquidityChange(-lpAmountBurnUsdt);
       }
     } catch (error) {
@@ -96,7 +97,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
     totalSupply === BigInt(0) || !lpAmountBurn ? BigInt(0) : (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
   const lp2BurnAmount =
     totalSupply === BigInt(0) || !lpAmountBurn ? BigInt(0) : (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
-  const lpAmountBurnUsdt = (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt) || 0;
+  const lpAmountBurnUsdt = !myLpBalance ? 0 : (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt);
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
