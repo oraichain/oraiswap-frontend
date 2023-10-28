@@ -39,7 +39,9 @@ export default function InputSwapV3({
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
           <div className={cx('left')}>
-            {Icon && <Icon className={cx('logo')} />}
+            <div className={cx('icon')}>
+              {Icon && <Icon className={cx('logo')} />}
+            </div>
             <div className={cx('section')}>
               <div className={cx('name')}>{token?.name}</div>
               <div className={cx('chain')}>{token?.org}</div>
@@ -56,7 +58,7 @@ export default function InputSwapV3({
           decimalScale={6}
           disabled={disable}
           type="text"
-          value={amount ? amount : undefined}
+          value={amount}
           onValueChange={({ floatValue }) => {
             onChangeAmount && onChangeAmount(floatValue);
           }}
