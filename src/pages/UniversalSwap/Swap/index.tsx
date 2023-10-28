@@ -50,6 +50,7 @@ import {
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
+import Metamask from 'libs/metamask';
 
 const cx = cn.bind(styles);
 
@@ -229,7 +230,7 @@ const SwapComponent: React.FC<{
           simulatePrice: averageRatio.amount,
           relayerFee: relayerFeeToken
         },
-        { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);

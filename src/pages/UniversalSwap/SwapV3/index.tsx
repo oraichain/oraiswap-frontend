@@ -55,6 +55,7 @@ import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
+import Metamask from 'libs/metamask';
 
 const cx = cn.bind(styles);
 
@@ -247,7 +248,7 @@ const SwapComponent: React.FC<{
           userSlippage,
           simulatePrice: averageRatio.amount
         },
-        { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {

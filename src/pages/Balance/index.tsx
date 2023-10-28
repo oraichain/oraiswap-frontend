@@ -166,7 +166,7 @@ const Balance: React.FC<BalanceProps> = () => {
           originalToToken: from,
           fromAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: window.Metamask }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       ).processUniversalSwap();
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
