@@ -56,7 +56,7 @@ export default function InputSwapV3({
           decimalScale={6}
           disabled={disable}
           type="text"
-          value={amount}
+          value={amount ? amount : undefined}
           onValueChange={({ floatValue }) => {
             onChangeAmount && onChangeAmount(floatValue);
           }}

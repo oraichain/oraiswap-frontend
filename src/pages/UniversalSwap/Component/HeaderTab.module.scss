@@ -69,12 +69,22 @@
   }
 
   .bottom {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    @include theme() {
+      color: theme-get('neutral-1');
+    }
     .balance {
-      @include theme() {
-        color: theme-get('neutral-1');
-      }
       font-size: 18px;
       font-weight: 600;
+    }
+    .icon {
+      width: 18px;
+      height: 18px;
+    }
+    .denom {
+      text-transform: uppercase;
     }
     .percent {
       font-size: 14px;

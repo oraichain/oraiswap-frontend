@@ -85,17 +85,6 @@ const SwapComponent: React.FC<{
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
 
-  const refreshBalances = async () => {
-    try {
-      if (loadingRefresh) return;
-      setLoadingRefresh(true);
-      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
-      setLoadingRefresh(false);
-    } catch (err) {
-      setLoadingRefresh(false);
-    }
-  };
-
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) {
       setCoe(0);
@@ -235,7 +224,7 @@ const SwapComponent: React.FC<{
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
       const oraiAddress = await handleCheckAddress('Oraichain');
-      const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
+      const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const univeralSwapHandler = new UniversalSwapHandler(
@@ -309,9 +298,9 @@ const SwapComponent: React.FC<{
             setVisible={setVisible}
             content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
           />
-          <button className={cx('btn')} onClick={refreshBalances}>
+          {/* <button className={cx('btn')} onClick={refreshBalances}>
             <RefreshImg />
-          </button>
+          </button> */}
         </div>
         <div className={cx('from')}>
           <div className={cx('input-wrapper')}>

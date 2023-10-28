@@ -16,21 +16,21 @@ import {
   getSubAmountDetails,
   toAmount,
   toDisplay,
-  tokenMap
+  tokenMap,
 } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
-import { tokens } from 'config/bridgeTokens';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import { useGetMyStake } from 'pages/Pools/hookV3';
 import useConfigReducer from 'hooks/useConfigReducer';
 import ToggleSwitch from 'components/ToggleSwitch';
+import { tokensIcon } from 'config/chainInfos';
+import { flattenTokens } from 'config/bridgeTokens';
 
 const cx = cn.bind(styles);
 
 export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const [otherChainTokens, oraichainTokens] = tokens;
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
@@ -70,7 +70,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     ];
   }
 
-  const data = [...oraichainTokens, ...otherChainTokens]
+  const data = flattenTokens
     .filter((token: TokenItemType) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
       if (!token.bridgeTo && !token.contractAddress) return false;
@@ -95,12 +95,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         usd += getUsd(subAmount, t, prices);
       }
       const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
-
+      const tokenIcon = tokensIcon.find(token => token.coinGeckoId === t.coinGeckoId);
       return {
         asset: t.name,
         chain: t.org,
-        icon: t.Icon,
-        iconLight: t?.IconLight,
+        icon: tokenIcon && tokenIcon.Icon,
+        iconLight: tokenIcon && tokenIcon.IconLight,
         price: prices[t.coinGeckoId] || 0,
         balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
@@ -117,11 +117,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         <div className={styles.assets}>
           <div className={styles.left}>
             {theme === 'light' ? (
-              data.iconLight ? (
-                <data.iconLight className={styles.tokenIcon} />
-              ) : (
-                <data.icon className={styles.tokenIcon} />
-              )
+              <data.iconLight className={styles.tokenIcon} />
             ) : (
               <data.icon className={styles.tokenIcon} />
             )}

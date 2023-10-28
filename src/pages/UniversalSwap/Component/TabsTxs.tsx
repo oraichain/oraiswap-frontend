@@ -10,6 +10,7 @@ import { useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from '../helpers';
 import styles from './TabsTxs.module.scss';
+import { chainIcons } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 const ItemNetwork: React.FC<{
@@ -68,7 +69,8 @@ const TabsNetwork: React.FC<{
         />
       </div>
       <div className={cx('options')}>
-        {networks?.map((item: CustomChainInfo) => {
+        {networks && networks.map((item: CustomChainInfo) => {
+          const networkIcon = chainIcons.find(chain => chain.chainId === item.chainId)
           return (
             <div key={item.chainName}>
               <ItemNetwork
@@ -76,12 +78,17 @@ const TabsNetwork: React.FC<{
                   setNetworkFilter({
                     label: item.chainName,
                     value: item.chainId,
-                    Icon: item.Icon,
-                    IconLight: item.IconLight || item.Icon
+                    Icon: networkIcon.Icon,
+                    IconLight: networkIcon.IconLight
                   });
                   setIsNetwork(false);
                 }}
-                item={item}
+
+                item={{
+                  ...item,
+                  Icon: networkIcon.Icon,
+                  IconLight: networkIcon.IconLight
+                }}
                 theme={theme}
                 isCheck={networkFilter === item.chainName}
               />
@@ -140,11 +147,9 @@ export const TabsTxs: React.FC<{
           >
             {networkFilter.value ? (
               theme === 'light' ? (
-                (networkFilter.IconLight && <networkFilter.IconLight className={cx('logo')} />) || (
-                  <networkFilter.IconLight className={cx('logo')} />
-                )
+                <networkFilter.IconLight className={cx('logo')} />
               ) : (
-                networkFilter.Icon && <networkFilter.Icon className={cx('logo')} />
+                <networkFilter.Icon className={cx('logo')} />
               )
             ) : (
               <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
