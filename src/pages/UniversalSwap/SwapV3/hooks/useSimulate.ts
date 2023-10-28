@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TokenItemType } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { SimulateResponse, handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 
 /**
@@ -27,7 +27,6 @@ export const useSimulate = (
   const { data: simulateData } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, fromAmountToken],
     () => {
-      console.log('original from info chain id: ', originalFromTokenInfo.chainId);
       return handleSimulateSwap({
         originalFromInfo: originalFromTokenInfo,
         originalToInfo: originalToTokenInfo,
@@ -35,7 +34,9 @@ export const useSimulate = (
         routerClient
       });
     },
-    { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
+    {
+      enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0
+    }
   );
 
   useEffect(() => {

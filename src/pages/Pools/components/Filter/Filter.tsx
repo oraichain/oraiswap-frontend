@@ -50,7 +50,7 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools }) => {
 
   const findBondAmount = (pool: PoolInfoResponse) => {
     const assetInfo = Pairs.getStakingAssetInfo([JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)]);
-    const rewardInfo = totalRewardInfoData.reward_infos.find(({ asset_info }) => isEqual(asset_info, assetInfo));
+    const rewardInfo = totalRewardInfoData?.reward_infos.find(({ asset_info }) => isEqual(asset_info, assetInfo));
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 
