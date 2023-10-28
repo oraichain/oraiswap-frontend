@@ -85,17 +85,6 @@ const SwapComponent: React.FC<{
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
 
-  const refreshBalances = async () => {
-    try {
-      if (loadingRefresh) return;
-      setLoadingRefresh(true);
-      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
-      setLoadingRefresh(false);
-    } catch (err) {
-      setLoadingRefresh(false);
-    }
-  };
-
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) {
       setCoe(0);
@@ -310,9 +299,9 @@ const SwapComponent: React.FC<{
             setVisible={setVisible}
             content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
           />
-          <button className={cx('btn')} onClick={refreshBalances}>
+          {/* <button className={cx('btn')} onClick={refreshBalances}>
             <RefreshImg />
-          </button>
+          </button> */}
         </div>
         <div className={cx('from')}>
           <div className={cx('input-wrapper')}>

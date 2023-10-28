@@ -88,6 +88,7 @@
     .options {
       display: flex;
       flex-direction: column;
+      padding-top: 10px;
       &.border {
         @include theme() {
           border-bottom: 0.5px solid theme-get('neutral-4');
@@ -114,7 +115,7 @@
           color: $white-color;
 
           @include theme() {
-            background-color: theme-get('primary-1');
+            background-color: theme-get('neutral-surface-bg-dropdown-hover');
           }
         }
 

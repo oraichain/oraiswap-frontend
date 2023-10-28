@@ -40,7 +40,7 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                {chartDataLength > 0 && <HeaderTab setHideChart={setHideChart} hideChart={hideChart} />}
+                {chartDataLength > 0 && <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />}
                 <div className={cx('tv-chart', hideChart || chartDataLength == 0 ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <TVChartContainer />

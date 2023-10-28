@@ -8,6 +8,9 @@ import { useState } from 'react';
 import { useGetPriceChange } from 'pages/Pools/hookV3';
 import { useSelector } from 'react-redux';
 import { selectChartTimeFrame, selectCurrentToken } from 'reducer/tradingSlice';
+import { flattenTokens } from '@oraichain/oraidex-common';
+import { tokensIcon } from 'config/chainInfos';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 // const arr: Array<string> = ['ORAI/USDT', 'USDT/ORAI', 'ORAI/USD', 'USD/ORAI'];
@@ -43,18 +46,20 @@ const cx = cn.bind(styles);
 export const HeaderTab: React.FC<{
   hideChart: boolean;
   setHideChart: (isHideChart: boolean) => void;
-}> = ({ setHideChart, hideChart }) => {
+  toTokenDenom: string;
+}> = ({ setHideChart, hideChart, toTokenDenom }) => {
+  const [theme] = useConfigReducer('theme');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const currentPair = useSelector(selectCurrentToken);
   const tf = useSelector(selectChartTimeFrame);
   // const [pool, setPool] = useState<string>('OHAI/USDT');
-
+  const tokenPrice = flattenTokens.find((token) => token.denom === toTokenDenom);
   const { isLoading, priceChange } = useGetPriceChange({
     base_denom: currentPair.info.split('-')[0],
     quote_denom: currentPair.info.split('-')[1],
     tf
   });
-
+  const tokenPriceIcon = tokenPrice && tokensIcon.find(tokenIcon => tokenIcon.coinGeckoId === tokenPrice.coinGeckoId)
   const isIncrement = priceChange && Number(priceChange.price_change) > 0;
 
   return (
@@ -71,10 +76,12 @@ export const HeaderTab: React.FC<{
               '-'
             ) : (
               <div className={cx('bottom')}>
-                <span className={cx('balance')}>{priceChange.price.toFixed(2)}</span>
-                <span className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+                <div className={cx('balance')}>{priceChange.price.toFixed(6)} </div>
+                <div className={cx('denom')}>{tokenPrice && tokenPrice.name}</div>
+                {tokenPriceIcon && (theme === 'light' ? <tokenPriceIcon.IconLight className={cx('icon')} /> : <tokenPriceIcon.Icon className={cx('icon')} />)}
+                <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
                   {(isIncrement ? '+' : '') + priceChange.price_change.toFixed(2)} %
-                </span>
+                </div>
               </div>
             )}
           </>
