@@ -70,8 +70,8 @@
 
   .network {
     @include theme() {
-      background-color: theme-get('bg-color');
-      border-color: theme-get('border-color-secondary');
+      background-color: theme-get('neutral-surface-bg');
+      border: 1px solid theme-get('neutral-border-border-bold');
     }
     min-width: 300px;
     max-height: 500px;
@@ -96,7 +96,7 @@
       }
       .item {
         @include theme() {
-          background-color: theme-get('bg-color');
+          background-color: theme-get('neutral-surface-bg');
           color: theme-get('text-color');
         }
         border-radius: 8px;

@@ -311,7 +311,7 @@ const SwapComponent: React.FC<{
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
               token={originalFromToken}
-              amount={fromAmountToken ? fromAmountToken : undefined}
+              amount={fromAmountToken ? fromAmountToken : NaN}
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
             />
@@ -395,8 +395,12 @@ const SwapComponent: React.FC<{
               key={coeff}
               onClick={(event) => {
                 event.stopPropagation();
+                if (coeff === coe) {
+                  setCoe(0)
+                  setSwapAmount([0, 0])
+                  return;
+                };
                 setCoe(coeff);
-                if (coeff === coe) return setSwapAmount([0, 0]);
                 if (type === 'max') {
                   onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), type);
                 } else {
