@@ -40,7 +40,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
   const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
-  const [lpAmountBurn, setLpAmountBurn] = useState(BigInt(0));
+  const [lpAmountBurn, setLpAmountBurn] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData?.liquidityAddr]?.balance ?? '0' : 0);
@@ -78,6 +78,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
+        setLpAmountBurn(0n);
         onLiquidityChange(-lpAmountBurnUsdt);
       }
     } catch (error) {
@@ -92,9 +93,11 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
   const totalSupply = BigInt(lpTokenInfoData?.total_supply || 0);
-  const lp1BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
-  const lp2BurnAmount = totalSupply === BigInt(0) ? BigInt(0) : (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
-  const lpAmountBurnUsdt = (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt) || 0;
+  const lp1BurnAmount =
+    totalSupply === BigInt(0) || !lpAmountBurn ? BigInt(0) : (token1Amount * BigInt(lpAmountBurn)) / totalSupply;
+  const lp2BurnAmount =
+    totalSupply === BigInt(0) || !lpAmountBurn ? BigInt(0) : (token2Amount * BigInt(lpAmountBurn)) / totalSupply;
+  const lpAmountBurnUsdt = !myLpBalance ? 0 : (Number(lpAmountBurn) / Number(myLpBalance)) * Number(myLpUsdt);
   return (
     <Modal isOpen={isOpen} close={close} open={open} isCloseBtn={false} className={cx('modal')}>
       <div className={cx('container', theme)}>
@@ -108,7 +111,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
         </div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: lpTokenBalance,
@@ -127,11 +130,13 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
-                allowNegative={false}
-                onValueChange={({ floatValue }) => setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals))}
+                value={lpAmountBurn === null ? '' : toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
+                onValueChange={({ floatValue }) => {
+                  if (floatValue === undefined) setLpAmountBurn(null);
+                  else setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals));
+                }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(lpAmountBurnUsdt)),
@@ -159,7 +164,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
               </div>
             ))}
             <div
-              className={cx('item', theme, 'border', {
+              className={cx('item', theme, 'manual-option', {
                 isChosen: chosenWithdrawPercent === 4
               })}
               onClick={() => setChosenWithdrawPercent(4)}

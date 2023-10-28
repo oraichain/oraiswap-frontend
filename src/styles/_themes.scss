@@ -8,7 +8,7 @@ $shadow-modal: 0px 4px 8px -4px rgba(0, 0, 0, 0.1), inset 0px -1px 1px rgba(0, 0
 $shadow-btn: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
 $blue-color: #7e5cc5;
 $success-color: #00ad26;
-$error-color: #e01600;
+$error-color: #FF5947;
 $primary-text-link: #78ca11;
 $primary-surface-default-light: #e5f7d6;
 $primary-bg-btn: #aee67f;
@@ -16,13 +16,12 @@ $text-btn-default: #1e300a;
 $text-placeholder: #505665;
 $warning-surface-default: #e6cf00;
 
-$neutron-text-body-dark: #979995;
-$neutron-text-body-light: #686a66;
+$neutron-text-body-dark: #C7C8C6;
+$neutron-text-body-light: #494949;
 
 // for dark-light mode
 $themes: (
-  dark: (
-    'text-color': white,
+  dark: ('text-color': white,
     'text-color-secondary': #fff,
     'bg-connect-wallet': #232521,
     'text-color-third': #fff,
@@ -86,10 +85,9 @@ $themes: (
     'neutral-surface-bg-dropdown-hover': #494949,
     'success-surface-default': #00ad26,
     'primary-surface-default-dark': #92e54c,
-    'primary-surface-default-subtle': #111900
-  ),
-  light: (
-    'text-color': #272b30,
+    'primary-surface-default-subtle': #111900,
+    'neutral-text-text-dropdown': #f7f7f7),
+  light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
@@ -153,6 +151,6 @@ $themes: (
     'success-surface-default': #00ad26,
     'neutral-surface-bg-dropdown-hover': #efefef,
     'primary-surface-default-dark': #2f5711,
-    'primary-surface-default-subtle': #eef9e5
-  )
+    'primary-surface-default-subtle': #eef9e5,
+    'neutral-text-text-dropdown': #232521)
 );

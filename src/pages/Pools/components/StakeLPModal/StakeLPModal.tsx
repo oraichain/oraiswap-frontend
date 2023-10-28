@@ -48,7 +48,7 @@ export const StakeLPModal: FC<ModalProps> = ({
     stakerAddr: address,
     assetInfo: stakingAssetInfo
   });
-  const [bondAmount, setBondAmount] = useState(BigInt(0));
+  const [bondAmount, setBondAmount] = useState<bigint | null>(null);
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -118,7 +118,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: lpTokenBalance,
@@ -146,12 +146,13 @@ export const StakeLPModal: FC<ModalProps> = ({
                 decimalScale={6}
                 placeholder={'0'}
                 allowNegative={false}
-                value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
-                onChange={(e: { target: { value: string } }) => {
-                  setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.decimals));
+                value={bondAmount === null ? '' : toDisplay(bondAmount, lpTokenInfoData.decimals)}
+                onValueChange={({ floatValue }) => {
+                  if (floatValue === undefined) setBondAmount(null);
+                  else setBondAmount(toAmount(floatValue, lpTokenInfoData.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(bondAmountInUsdt || 0)),

@@ -31,7 +31,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
 
   const [actionLoading, setActionLoading] = useState(false);
   const [chosenOption, setChosenOption] = useState(-1);
-  const [unbondAmount, setUnbondAmount] = useState(BigInt(0));
+  const [unbondAmount, setUnbondAmount] = useState<bigint | null>(null);
   const [unbondAmountInUsdt, setUnBondAmountInUsdt] = useState(0);
 
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
@@ -117,7 +117,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
         <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: totalBondAmount,
@@ -144,12 +144,15 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(unbondAmount, lpTokenInfoData?.decimals)}
                 allowNegative={false}
-                onValueChange={({ floatValue }) => setUnbondAmount(toAmount(floatValue, lpTokenInfoData?.decimals))}
+                value={unbondAmount === null ? '' : toDisplay(unbondAmount, lpTokenInfoData.decimals)}
+                onValueChange={({ floatValue }) => {
+                  if (floatValue === undefined) setUnbondAmount(null);
+                  else setUnbondAmount(toAmount(floatValue, lpTokenInfoData?.decimals));
+                }}
               />
 
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(unbondAmountInUsdt)),

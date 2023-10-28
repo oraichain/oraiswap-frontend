@@ -3,9 +3,9 @@
 
 .select {
   @include theme() {
-    background-color: theme-get('bg-color');
-    box-shadow: theme-get('shadow-modal-token');
-    border-color: theme-get('border-color-secondary');
+    background-color: theme-get('neutral-surface-bg');
+    box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+    border-color: theme-get('neutral-border-border-bold');
   }
 
   border: 1px solid;
@@ -34,9 +34,11 @@
     display: flex;
     justify-content: space-between;
     padding-bottom: 24px;
+
     img {
       cursor: pointer;
     }
+
     .network {
       color: #1e300a;
       text-align: center;
@@ -47,13 +49,16 @@
   .label {
     display: flex;
     justify-content: space-between;
+
     @include theme() {
       border-bottom: 0.5px solid theme-get('neutral-4');
       color: theme-get('neutral-1');
     }
+
     font-size: 16px;
     font-style: normal;
     padding-bottom: 12px;
+
     .right {
       cursor: pointer;
       display: flex;
@@ -63,18 +68,22 @@
       .all-network {
         display: flex;
         flex-direction: column;
+
         .detail {
           text-align: center;
           font-size: 14px;
           font-weight: 500;
+
           @include theme() {
             color: theme-get('neutral-2');
           }
         }
+
         .balance {
           @include theme() {
             color: theme-get('neutral-3');
           }
+
           font-size: 13px;
           font-weight: 400;
         }
@@ -87,10 +96,11 @@
     flex-direction: column;
     gap: 10px;
     padding-top: 12px;
+
     .item {
       @include theme() {
-        background-color: theme-get('bg-color');
-        color: theme-get('text-color');
+        background-color: theme-get('neutral-surface-bg');
+        color: theme-get('neutral-text-title');
       }
 
       border-radius: 8px;
@@ -106,6 +116,7 @@
 
       &:hover {
         cursor: pointer;
+
         @include theme() {
           background-color: theme-get('neutral-surface-bg-dropdown-hover');
         }
@@ -125,8 +136,11 @@
       }
 
       .org {
-        opacity: 0.5;
-        font-size: 14px;
+        font-size: 13px;
+
+        @include theme() {
+          color: theme-get('neutral-text-body');
+        }
       }
     }
   }

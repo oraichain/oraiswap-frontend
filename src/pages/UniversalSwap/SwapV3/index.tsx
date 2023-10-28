@@ -190,10 +190,10 @@ const SwapComponent: React.FC<{
 
   const relayerFeeFromToTokenIsEvm = (relayerFeeAmount: string) => {
     if (!originalFromToken.cosmosBased && !originalToToken.cosmosBased) {
-      return BigInt(relayerFeeAmount) * BigInt(2)
+      return BigInt(relayerFeeAmount) * BigInt(2);
     }
-    return BigInt(relayerFeeAmount)
-  }
+    return BigInt(relayerFeeAmount);
+  };
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -203,13 +203,13 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
-  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
+  const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -287,7 +287,6 @@ const SwapComponent: React.FC<{
     theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  const isSwapBtn = swapLoading || !fromAmountToken || !toAmountToken;
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>
@@ -409,15 +408,35 @@ const SwapComponent: React.FC<{
             </button>
           ))}
         </div>
-        <button className={cx('swap-btn', `${isSwapBtn ? 'disable' : ''}`)} onClick={handleSubmit} disabled={isSwapBtn}>
-          {swapLoading && <Loader width={35} height={35} />}
-          {/* hardcode check minimum tron */}
-          {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-            <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
-          ) : (
-            <span>{isSwapBtn && !swapLoading ? 'Enter an amount' : 'Swap'}</span>
-          )}
-        </button>
+
+        {(() => {
+          const disabledSwapBtn =
+            swapLoading ||
+            !fromAmountToken ||
+            !toAmountToken ||
+            toAmount(fromAmountToken, originalFromToken.decimals) > fromTokenBalance; // insufficent fund
+
+          let disableMsg: string;
+          if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
+          if (toAmount(fromAmountToken, originalFromToken.decimals) > fromTokenBalance)
+            disableMsg = `Insufficient funds`;
+          return (
+            <button
+              className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
+              onClick={handleSubmit}
+              disabled={disabledSwapBtn}
+            >
+              {swapLoading && <Loader width={35} height={35} />}
+              {/* hardcode check minimum tron */}
+              {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+                <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+              ) : (
+                <span>{disableMsg || 'Swap'}</span>
+              )}
+            </button>
+          );
+        })()}
+
         <div className={cx('detail')}>
           <div className={cx('row')}>
             <div className={cx('title')}>

@@ -141,12 +141,14 @@
         width: 100%;
 
         .amount {
-          span {
-            color: #979995;
-
-            &.light {
-              color: #686a66;
+          &.light {
+            span {
+              color: $neutral-text-describe;
             }
+          }
+
+          span {
+            color: $neutral-text-body-on-section;
           }
         }
 
@@ -275,14 +277,15 @@
           padding: 10px;
           flex-grow: 1;
           text-align: right;
-          background: #1e1e21;
+          background: $raisin-black;
           border-radius: 8px;
           height: 100%;
           padding-bottom: 30px;
+          color: $neutral-surface-search;
 
           &.light {
-            background: #efefef;
-            color: $light-text-color;
+            background: $neutral-surface-search;
+            color: $raisin-black;
           }
         }
 
@@ -310,6 +313,7 @@
         display: flex;
         justify-content: space-between;
         gap: 8px;
+        margin-top: 8px;
 
         .item {
           display: flex;
@@ -318,8 +322,8 @@
           font-size: 14px;
           line-height: 150%;
           text-align: center;
-          background: #494949;
-          color: #979995;
+          background-color: $raisin-black;
+          color: $neutral-surface-search;
           border-radius: 8px;
           padding: 15px 25px;
           cursor: pointer;
@@ -327,7 +331,9 @@
           opacity: 0.5;
 
           &.light {
-            background-color: #EFEFEF;
+            background-color: $neutral-surface-search;
+            color: $raisin-black;
+            border-color: $raisin-black
           }
 
           @include small-mobile() {
@@ -336,10 +342,16 @@
         }
 
         .isChosen {
-          border-color: $primary-text-link;
+          border-color: $neutral-surface-search;
+
+          &.light {
+            border-color: $raisin-black;
+          }
+
           opacity: 1;
           font-weight: 600;
         }
+
 
         .input {
           padding: 0;
@@ -348,14 +360,14 @@
           font-size: 16px;
           line-height: 100%;
           text-align: center;
-          color: #ffffff;
+          color: $neutral-surface-search;
 
           &.light {
-            color: #a871df;
+            color: $raisin-black;
           }
         }
 
-        .border {
+        .manual-option {
           border: 1px solid #3c404d;
         }
       }
