@@ -37,8 +37,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
 
-  const [baseAmount, setBaseAmount] = useState<bigint>(BigInt(0));
-  const [quoteAmount, setQuoteAmount] = useState<bigint>(BigInt(0));
+  const [baseAmount, setBaseAmount] = useState<bigint | null>(null);
+  const [quoteAmount, setQuoteAmount] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [estimatedShare, setEstimatedShare] = useState(0);
@@ -246,7 +246,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(baseAmount, token1.decimals)}
+                value={baseAmount === null ? '' : toDisplay(baseAmount, token1.decimals)}
                 allowNegative={false}
                 onChange={(e: any) => {
                   onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
@@ -296,7 +296,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                 decimalScale={6}
                 placeholder={'0'}
                 allowNegative={false}
-                value={toDisplay(quoteAmount, token2.decimals)}
+                value={quoteAmount === null ? '' : toDisplay(quoteAmount, token2.decimals)}
                 onChange={(e: any) => {
                   onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
                 }}
