@@ -327,14 +327,24 @@
           border-radius: 8px;
           padding: 15px 25px;
           cursor: pointer;
-          border: 1px solid;
           opacity: 0.5;
+          border: 1px solid transparent;
+
+          &:hover {
+            background-color: $neutral-surface-bg-dropdown-hover;
+            opacity: 1;
+          }
 
           &.light {
             background-color: $neutral-surface-search;
             color: $raisin-black;
-            border-color: $raisin-black
+
+            &:hover {
+              background-color: $neutral-text-title;
+              opacity: 1;
+            }
           }
+
 
           @include small-mobile() {
             padding: 10px 16px;
@@ -343,9 +353,11 @@
 
         .isChosen {
           border-color: $neutral-surface-search;
+          background-color: $outer-space;
 
           &.light {
             border-color: $raisin-black;
+            background-color: $neutral-text-title;
           }
 
           opacity: 1;
