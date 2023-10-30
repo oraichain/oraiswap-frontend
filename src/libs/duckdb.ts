@@ -17,6 +17,15 @@ export type TransactionHistory = {
   userAddress: string;
 };
 
+export const toSql = (tableName: string, obj: Object) => {
+  const keys = Object.keys(obj);
+  const values = Object.values(obj).map((value) => {
+    if (typeof value === 'number') return value;
+    return `'${value}'`;
+  });
+  return `insert into ${tableName} (${keys.join(', ')}) values (${values.join(', ')})`;
+};
+
 const compress = async (buf: Uint8Array) => {
   try {
     return new Uint8Array(
@@ -56,10 +65,7 @@ export class DuckDb {
 
   async createTableTransHistory(userAddress: string): Promise<boolean> {
     // Import Parquet
-    /**
-     * @type {Uint8Array} buf
-     */
-    const buf = await get(`trans_history_${userAddress}`);
+    const buf: Uint8Array = await get(`trans_history_${userAddress}`);
     if (buf) {
       await this.db.registerFileBuffer(`trans_history_${userAddress}.parquet`, await decompress(buf));
       this.conn.send(`create table trans_history as select * from 'trans_history_${userAddress}.parquet'`);
@@ -82,7 +88,7 @@ export class DuckDb {
       )
       `);
     }
-    return Boolean(buf);
+    return buf.length > 0;
   }
 
   async save(userAddress: string) {
@@ -93,27 +99,7 @@ export class DuckDb {
   }
 
   async addTransHistory(transHistory: TransactionHistory) {
-    await this.conn.send(
-      `insert into trans_history
-        (initialTxHash,fromCoingeckoId,toCoingeckoId,fromChainId,toChainId,fromAmount,toAmount,fromAmountInUsdt,toAmountInUsdt,status,type,timestamp,userAddress) 
-        values
-        (
-          '${transHistory.initialTxHash}',
-          '${transHistory.fromCoingeckoId}', 
-          '${transHistory.toCoingeckoId}',
-          '${transHistory.fromChainId}',
-          '${transHistory.toChainId}',
-          '${transHistory.fromAmount}',
-          '${transHistory.toAmount}',
-          '${transHistory.fromAmountInUsdt}',
-          '${transHistory.toAmountInUsdt}',
-          '${transHistory.status}',
-          '${transHistory.type}',
-          ${transHistory.timestamp},
-          '${transHistory.userAddress}',
-        )
-      `
-    );
+    await this.conn.send(toSql('trans_history', transHistory));
     console.log({ transHistory });
     await this.save(transHistory.userAddress);
   }
