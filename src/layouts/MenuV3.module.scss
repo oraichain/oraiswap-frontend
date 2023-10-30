@@ -10,6 +10,10 @@
   top: 0;
   z-index: 2;
 
+  .logo {
+    display: flex;
+  }
+
   @include theme() {
     background-color: theme-get('neutral-surface-bg');
     border-bottom: 1px solid theme-get('neutral-border-border-default');
@@ -45,8 +49,8 @@
   }
 
   @include theme() {
-    background-color: theme-get('bg-color');
-    border-bottom: 1px solid theme-get('neutron-5');
+    background-color: theme-get('neutral-surface-bg');
+    border-bottom: 1px solid theme-get('neutral-border-border-default');
   }
 }
 
@@ -147,7 +151,7 @@
 
     &_text {
       font-weight: 400;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 100%;
 
       @include theme() {
@@ -234,8 +238,9 @@
       border-bottom-color: theme-get('neutral-1');
     }
 
-    transition: border-left-color 0.05s linear, border-right-color 0.05s linear 0.05s,
-      border-bottom-color 0.05s linear 0.05s;
+    transition: border-left-color 0.05s linear,
+    border-right-color 0.05s linear 0.05s,
+    border-bottom-color 0.05s linear 0.05s;
   }
 
   &::after {

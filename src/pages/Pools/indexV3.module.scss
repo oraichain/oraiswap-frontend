@@ -16,6 +16,10 @@
     @include medium-desktop() {
         max-width: 100%;
     }
+
+    @include small-mobile {
+        margin-top: 85px;
+    }
 }
 
 .listpoolsToken {

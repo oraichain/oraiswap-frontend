@@ -16,7 +16,14 @@ html {
   flex-direction: column;
   width: 100%;
   padding-top: 93px;
+
   @include mobile {
     padding-top: 0;
+  }
+
+  background-color: $primary-background;
+
+  &.light {
+    background-color: $white-color;
   }
 }

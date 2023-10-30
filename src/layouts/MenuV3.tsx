@@ -75,12 +75,12 @@ const Menu: React.FC = React.memo(() => {
 
   const menuList = (
     <div className={classNames(styles.menu_list)}>
-      {renderLink('/universalswap', 'Swap', setLink)}
-      {renderLink('/bridge', 'Bridge', setLink)}
-      {renderLink('/pools', 'Pools', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'Order Book', () => { }, true)}
-      {renderLink('https://orderbook.oraidex.io/future', 'Futures', () => { }, true)}
-      {renderLink('https://payment.orai.io/', 'Buy ORAI', () => { }, true)}
+      {renderLink('/universalswap', 'SWAP', setLink)}
+      {renderLink('/bridge', 'BRIDGE', setLink)}
+      {renderLink('/pools', 'POOLS', setLink)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('https://feat-future-feature.orderbook-frontend.pages.dev/', 'FUTURES', () => {}, true)}
+      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
     </div>
   );
   return (
