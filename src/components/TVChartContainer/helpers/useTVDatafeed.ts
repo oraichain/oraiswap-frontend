@@ -96,7 +96,7 @@ export default function useTVDatafeed({ dataProvider }: Props) {
             }
             const pair = pairsChart.find((p) => p.symbol === symbolInfo.ticker);
 
-            dispatch(setChartTimeFrame(+resolution * 60));
+            dispatch(setChartTimeFrame(+resolution));
 
             const bars = await tvDataProvider.current?.getBars(
               pair?.info,
