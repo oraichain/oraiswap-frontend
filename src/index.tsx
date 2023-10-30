@@ -43,10 +43,6 @@ const initApp = async () => {
   // @ts-ignore
   window.client = await SigningCosmWasmClient.connect(network.rpc);
 
-  // init duckdb
-  await DuckDb.create();
-  window.duckDb = DuckDb.instance;
-
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>

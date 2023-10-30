@@ -55,10 +55,7 @@ export class Pairs {
       let firstInfoIndex = 0;
       let secondInfoIndex = 1;
       // we reverse the pair because the main asset info is not USDT, but the other token
-      if (
-        parseAssetInfo(pair.asset_infos[0]) === USDT_CONTRACT ||
-        parseAssetInfo(pair.asset_infos[1]) === INJECTIVE_CONTRACT
-      ) {
+      if (parseAssetInfo(pair.asset_infos[0]) === USDT_CONTRACT) {
         firstInfoIndex = 1;
         secondInfoIndex = 0;
       }

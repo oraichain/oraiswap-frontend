@@ -37,8 +37,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
 
-  const [baseAmount, setBaseAmount] = useState<bigint>(BigInt(0));
-  const [quoteAmount, setQuoteAmount] = useState<bigint>(BigInt(0));
+  const [baseAmount, setBaseAmount] = useState<bigint | null>(null);
+  const [quoteAmount, setQuoteAmount] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [estimatedShare, setEstimatedShare] = useState(0);
@@ -110,7 +110,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   };
 
   const increaseAllowance = async (amount: string, token: string, walletAddr: string) => {
-    const msgs = generateContractMessages({
+    const msg = generateContractMessages({
       type: Type.INCREASE_ALLOWANCE,
       amount,
       sender: walletAddr,
@@ -118,12 +118,10 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       token
     });
 
-    const msg = msgs[0];
-
     const result = await CosmJs.execute({
-      address: msg.contract,
+      address: msg.contractAddress,
       walletAddr,
-      handleMsg: msg.msg.toString(),
+      handleMsg: msg.msg,
       gasAmount: { denom: ORAI, amount: '0' },
       funds: msg.funds
     });
@@ -214,7 +212,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         </div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: token1Balance.toString(),
@@ -226,11 +224,11 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance)}>
+                Max
               </Button>
             </div>
           </div>
@@ -248,13 +246,13 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                 thousandSeparator
                 decimalScale={6}
                 placeholder={'0'}
-                value={toDisplay(baseAmount, token1.decimals)}
+                value={baseAmount === null ? '' : toDisplay(baseAmount, token1.decimals)}
                 allowNegative={false}
                 onChange={(e: any) => {
                   onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance balance={getUsd(baseAmount, token1, prices)} decimalScale={2} />
               </div>
             </div>
@@ -263,7 +261,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
 
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: token2Balance.toString(),
@@ -275,11 +273,11 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
+                Max
               </Button>
             </div>
           </div>
@@ -298,12 +296,12 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                 decimalScale={6}
                 placeholder={'0'}
                 allowNegative={false}
-                value={toDisplay(quoteAmount, token2.decimals)}
+                value={quoteAmount === null ? '' : toDisplay(quoteAmount, token2.decimals)}
                 onChange={(e: any) => {
                   onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance balance={getUsd(quoteAmount, token2, prices)} decimalScale={2} />
               </div>
             </div>

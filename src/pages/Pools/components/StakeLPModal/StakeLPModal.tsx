@@ -11,7 +11,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -22,6 +22,7 @@ import { ModalProps } from '../MyPoolInfo/type';
 import styles from './StakeLPModal.module.scss';
 import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
 import { Pairs } from 'config/pools';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 
 const cx = cn.bind(styles);
 
@@ -37,11 +38,17 @@ export const StakeLPModal: FC<ModalProps> = ({
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
+  const [address] = useConfigReducer('address');
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const [bondAmount, setBondAmount] = useState(BigInt(0));
+  const stakingAssetInfo = useGetStakingAssetInfo();
+  const { refetchRewardInfo } = useGetRewardInfo({
+    stakerAddr: address,
+    assetInfo: stakingAssetInfo
+  });
+  const [bondAmount, setBondAmount] = useState<bigint | null>(null);
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -53,6 +60,11 @@ export const StakeLPModal: FC<ModalProps> = ({
     const bondAmountInUsdt = (Number(bondAmount) / Number(myLpBalance)) * Number(myLpUsdt);
     setBondAmountInUsdt(bondAmountInUsdt);
   }, [bondAmount, myLpBalance, myLpUsdt]);
+
+  const onBonedSuccess = () => {
+    onLiquidityChange();
+    refetchRewardInfo();
+  };
 
   const handleBond = async (parsedAmount: bigint) => {
     setActionLoading(true);
@@ -83,7 +95,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `${network.explorer}/txs/${result.transactionHash}`
         });
-        onLiquidityChange();
+        onBonedSuccess();
       }
     } catch (error) {
       console.log('error in bond: ', error);
@@ -106,7 +118,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
         <div className={cx('supply', theme)}>
           <div className={cx('balance')}>
-            <div className={cx('amount')}>
+            <div className={cx('amount', theme)}>
               <TokenBalance
                 balance={{
                   amount: lpTokenBalance,
@@ -118,11 +130,11 @@ export const StakeLPModal: FC<ModalProps> = ({
               />
             </div>
             <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance)}>
-                Max
-              </Button>
               <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
                 Half
+              </Button>
+              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance)}>
+                Max
               </Button>
             </div>
           </div>
@@ -134,12 +146,13 @@ export const StakeLPModal: FC<ModalProps> = ({
                 decimalScale={6}
                 placeholder={'0'}
                 allowNegative={false}
-                value={toDisplay(bondAmount, lpTokenInfoData.decimals)}
-                onChange={(e: { target: { value: string } }) => {
-                  setBondAmount(toAmount(Number(e.target.value.replaceAll(',', '')), lpTokenInfoData.decimals));
+                value={bondAmount === null ? '' : toDisplay(bondAmount, lpTokenInfoData.decimals)}
+                onValueChange={({ floatValue }) => {
+                  if (floatValue === undefined) setBondAmount(null);
+                  else setBondAmount(toAmount(floatValue, lpTokenInfoData.decimals));
                 }}
               />
-              <div className={cx('amount-usd')}>
+              <div className={cx('amount-usd', theme)}>
                 <TokenBalance
                   balance={{
                     amount: BigInt(Math.trunc(bondAmountInUsdt || 0)),

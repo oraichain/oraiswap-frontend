@@ -39,8 +39,9 @@ import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
+import Metamask from 'libs/metamask';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -166,7 +167,7 @@ const Balance: React.FC<BalanceProps> = () => {
           originalToToken: from,
           fromAmount
         },
-        { evmWallet: window.Metamask }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       ).processUniversalSwap();
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));

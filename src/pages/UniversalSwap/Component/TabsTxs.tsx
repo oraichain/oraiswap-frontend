@@ -10,6 +10,7 @@ import { useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from '../helpers';
 import styles from './TabsTxs.module.scss';
+import { chainIcons } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 const ItemNetwork: React.FC<{
@@ -54,9 +55,6 @@ const TabsNetwork: React.FC<{
 }> = ({ networkFilter, setIsNetwork, setNetworkFilter, theme }) => {
   return (
     <div className={cx('network')}>
-      <div>
-        <div className={cx('title')}>Select network</div>
-      </div>
       <div className={cx('options', 'border')}>
         <ItemNetwork
           onClick={() => {
@@ -71,18 +69,26 @@ const TabsNetwork: React.FC<{
         />
       </div>
       <div className={cx('options')}>
-        {networks?.map((item: CustomChainInfo) => {
+        {networks && networks.map((item: CustomChainInfo) => {
+          const networkIcon = chainIcons.find(chain => chain.chainId === item.chainId)
           return (
             <div key={item.chainName}>
               <ItemNetwork
                 onClick={() => {
                   setNetworkFilter({
                     label: item.chainName,
-                    value: item.chainId
+                    value: item.chainId,
+                    Icon: networkIcon.Icon,
+                    IconLight: networkIcon.IconLight
                   });
                   setIsNetwork(false);
                 }}
-                item={item}
+
+                item={{
+                  ...item,
+                  Icon: networkIcon.Icon,
+                  IconLight: networkIcon.IconLight
+                }}
                 theme={theme}
                 isCheck={networkFilter === item.chainName}
               />
@@ -95,7 +101,7 @@ const TabsNetwork: React.FC<{
 };
 
 export const TabsTxs: React.FC<{
-  networkFilter: string;
+  networkFilter: NetworkFilter;
   setNetworkFilter: (networkFilter: NetworkFilter) => void;
 }> = ({ setNetworkFilter, networkFilter }) => {
   const [isNetwork, setIsNetwork] = useState<boolean>(false);
@@ -139,15 +145,23 @@ export const TabsTxs: React.FC<{
               setIsNetwork(!isNetwork);
             }}
           >
-            <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+            {networkFilter.value ? (
+              theme === 'light' ? (
+                <networkFilter.IconLight className={cx('logo')} />
+              ) : (
+                <networkFilter.Icon className={cx('logo')} />
+              )
+            ) : (
+              <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+            )}
             <div className={cx('all-network')}>
-              <span className={cx(`detail`)}>{networkFilter ? networkFilter : 'All Networks'}</span>
+              <span className={cx(`detail`)}>{networkFilter.label ? networkFilter.label : 'All Networks'}</span>
             </div>
             <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
           </div>
           {isNetwork && (
             <TabsNetwork
-              networkFilter={networkFilter}
+              networkFilter={networkFilter.label}
               theme={theme}
               setIsNetwork={setIsNetwork}
               setNetworkFilter={setNetworkFilter}

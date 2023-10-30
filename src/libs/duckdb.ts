@@ -1,5 +1,5 @@
-import { get, set } from 'idb-keyval';
 import * as duckdb from '@duckdb/duckdb-wasm';
+import { get, set } from 'idb-keyval';
 
 export type TransactionHistory = {
   initialTxHash: string;
@@ -44,18 +44,12 @@ export class DuckDb {
 
   static async create() {
     // Select a bundle based on browser checks
-    const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
-    const worker_url = URL.createObjectURL(
-      new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
-    );
-
     // Instantiate the asynchronus version of DuckDB-Wasm
-    const worker = new Worker(worker_url);
-    const logger = new duckdb.VoidLogger();
-    const db = new duckdb.AsyncDuckDB(logger, worker);
-    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    URL.revokeObjectURL(worker_url);
-
+    const db = new duckdb.AsyncDuckDB(
+      new duckdb.ConsoleLogger(),
+      new Worker(new URL('@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js', import.meta.url).toString())
+    );
+    await db.instantiate(require('@duckdb/duckdb-wasm/dist/duckdb-eh.wasm'));
     const conn = await db.connect();
     DuckDb.instance = new DuckDb(conn, db);
   }
@@ -120,6 +114,7 @@ export class DuckDb {
         )
       `
     );
+    console.log({ transHistory });
     await this.save(transHistory.userAddress);
   }
 

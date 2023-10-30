@@ -124,12 +124,14 @@
         width: 100%;
 
         .amount {
-          span {
-            color: #979995;
-
-            &.light {
-              color: #686a66;
+          &.light {
+            span {
+              color: $neutral-text-describe;
             }
+          }
+
+          span {
+            color: $neutral-text-body-on-section;
           }
         }
 
@@ -250,6 +252,7 @@
 
         .input-amount {
           flex-grow: 1;
+          position: relative;
         }
 
         .amount {
@@ -257,23 +260,28 @@
           padding: 10px;
           flex-grow: 1;
           text-align: right;
-          background: #1e1e21;
+          background: $raisin-black;
           border-radius: 8px;
           height: 100%;
+          padding-bottom: 30px;
+          color: $neutral-surface-search;
 
           &.light {
-            background: #efefef;
-            color: $light-text-color;
+            background: $neutral-surface-search;
+            color: $raisin-black;
           }
         }
 
         .amount-usd {
           text-align: right;
-          color: #979995;
+          color: $neutral-text-body-on-section;
           padding: 10px;
+          position: absolute;
+          right: 0;
+          bottom: 0;
 
           &.light {
-            color: #686a66;
+            color: $neutral-text-describe;
           }
 
           font-size: 13px;
@@ -293,20 +301,32 @@
         .item {
           display: flex;
           justify-content: center;
+          align-items: center;
           font-weight: 400;
           font-size: 14px;
-          line-height: 150%;
+          line-height: 100%;
           text-align: center;
-          background: #494949;
-          color: #979995;
+          background-color: $raisin-black;
+          color: $neutral-surface-search;
           border-radius: 8px;
           padding: 15px 25px;
           cursor: pointer;
-          border: 1px solid;
+          border: 1px solid transparent;
           opacity: 0.5;
 
+          &:hover {
+            background-color: $neutral-surface-bg-dropdown-hover;
+            opacity: 1;
+          }
+
           &.light {
-            background-color: #EFEFEF;
+            background-color: $neutral-surface-search;
+            color: $raisin-black;
+
+            &:hover {
+              background-color: $neutral-text-title;
+              opacity: 1;
+            }
           }
 
           @include small-mobile() {
@@ -315,7 +335,14 @@
         }
 
         .isChosen {
-          border-color: $primary-text-link;
+          border-color: $neutral-surface-search;
+          background-color: $outer-space;
+
+          &.light {
+            border-color: $raisin-black;
+            background-color: $neutral-text-title;
+          }
+
           opacity: 1;
           font-weight: 600;
         }
@@ -451,7 +478,6 @@
             }
           }
 
-          .input-amount {}
         }
       }
     }

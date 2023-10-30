@@ -1,10 +1,16 @@
 import ShowImg from 'assets/icons/show.svg';
 import HideImg from 'assets/icons/hidden.svg';
-import CheckImg from 'assets/icons/check.svg';
-import ArrowImg from 'assets/icons/arrow_new.svg';
+// import CheckImg from 'assets/icons/check.svg';
+// import ArrowImg from 'assets/icons/arrow_new.svg';
 import styles from './HeaderTab.module.scss';
 import cn from 'classnames/bind';
 import { useState } from 'react';
+import { useGetPriceChange } from 'pages/Pools/hookV3';
+import { useSelector } from 'react-redux';
+import { selectChartTimeFrame, selectCurrentToken } from 'reducer/tradingSlice';
+import { flattenTokens } from '@oraichain/oraidex-common';
+import { tokensIcon } from 'config/chainInfos';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 // const arr: Array<string> = ['ORAI/USDT', 'USDT/ORAI', 'ORAI/USD', 'USD/ORAI'];
@@ -39,28 +45,45 @@ const cx = cn.bind(styles);
 
 export const HeaderTab: React.FC<{
   hideChart: boolean;
-  balance?: number;
-  percent?: string;
   setHideChart: (isHideChart: boolean) => void;
-}> = ({ setHideChart, hideChart, balance = 1, percent = '+0' }) => {
+  toTokenDenom: string;
+}> = ({ setHideChart, hideChart, toTokenDenom }) => {
+  const [theme] = useConfigReducer('theme');
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const currentPair = useSelector(selectCurrentToken);
+  const tf = useSelector(selectChartTimeFrame);
   // const [pool, setPool] = useState<string>('OHAI/USDT');
+  const tokenPrice = flattenTokens.find((token) => token.denom === toTokenDenom);
+  const { isLoading, priceChange } = useGetPriceChange({
+    base_denom: currentPair.info.split('-')[0],
+    quote_denom: currentPair.info.split('-')[1],
+    tf
+  });
+  const tokenPriceIcon = tokenPrice && tokensIcon.find(tokenIcon => tokenIcon.coinGeckoId === tokenPrice.coinGeckoId)
+  const isIncrement = priceChange && Number(priceChange.price_change) > 0;
+
   return (
     <div className={cx('headerTab')}>
       <div>
         {!hideChart && (
           <>
-            <div className={cx('top')} onClick={() => setIsOpen(!isOpen)}>
-              {/* <span>{pool}</span>
+            {/* <div className={cx('top')} onClick={() => setIsOpen(!isOpen)}> */}
+            {/* <span>{pool}</span>
               <img src={ArrowImg} alt="arrow" /> */}
-            </div>
+            {/* </div> */}
             {/* {isOpen && <PoolSelect setIsOpen={setIsOpen} pool={pool} setPool={setPool} />} */}
-            {/* {!!balance && (
+            {isLoading ? (
+              '-'
+            ) : (
               <div className={cx('bottom')}>
-                <span className={cx('balance')}>{balance}</span>
-                <span className={cx('percent')}>{percent}</span>
+                <div className={cx('balance')}>{priceChange.price.toFixed(6)} </div>
+                <div className={cx('denom')}>{tokenPrice && tokenPrice.name}</div>
+                {tokenPriceIcon && (theme === 'light' ? <tokenPriceIcon.IconLight className={cx('icon')} /> : <tokenPriceIcon.Icon className={cx('icon')} />)}
+                <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+                  {(isIncrement ? '+' : '') + priceChange.price_change.toFixed(2)} %
+                </div>
               </div>
-            )} */}
+            )}
           </>
         )}
       </div>

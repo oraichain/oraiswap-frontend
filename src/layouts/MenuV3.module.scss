@@ -11,8 +11,8 @@
   z-index: 2;
 
   @include theme() {
-    background-color: theme-get('bg-color');
-    border-bottom: 1px solid theme-get('neutron-5');
+    background-color: theme-get('neutral-surface-bg');
+    border-bottom: 1px solid theme-get('neutral-border-border-default');
   }
 }
 
@@ -100,8 +100,8 @@
       content: '';
       position: absolute;
       top: 8px;
-      width: 102%;
-      height: 67%;
+      width: 105%;
+      height: 72%;
     }
 
     &:hover {
@@ -115,6 +115,12 @@
     &.active {
       @include theme() {
         color: theme-get('neutral-1');
+      }
+
+      span {
+        @include theme() {
+          color: theme-get('neutral-1');
+        }
       }
 
       &::before {
@@ -207,8 +213,9 @@
   &::before,
   &::after {
     top: 0;
-    left: 0;
-    border-radius: 86%;
+    left: -2px;
+    border-radius: 50%;
+    transform: rotate(-8.549deg);
   }
 
   &::before {

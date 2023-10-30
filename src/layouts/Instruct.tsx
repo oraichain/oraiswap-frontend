@@ -59,13 +59,13 @@ const Instruct: React.FC<InstructProps> = () => {
         <div className={cx('helper-center', `${theme}-center`)}>
           <div className={cx('topic', `${theme}-topic`)}>
             <div className={cx('title')}>Help Center</div>
-            <SearchInput
+            {/* <SearchInput
               placeholder="Search for tutorials, help..."
               onSearch={() => { }}
               theme={theme}
               isBorder
               className={cx('search-input', `search-input-${theme}`)}
-            />
+            /> */}
             <div className={cx('what-news')}>
               <div className={cx('label')}>
                 <img src={IconoirGift} alt="gift" width={20} height={20} />

@@ -8,31 +8,75 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { CW20_DECIMALS, TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
-import React from 'react';
-import { tokens } from 'config/bridgeTokens';
+import { isMobile } from '@walletconnect/browser-utils';
+import {
+  CW20_DECIMALS,
+  CoinIcon,
+  TokenItemType,
+  getSubAmountDetails,
+  toAmount,
+  toDisplay,
+  tokenMap,
+} from '@oraichain/oraidex-common';
+import { FC, useState } from 'react';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import { useGetMyStake } from 'pages/Pools/hookV3';
 import useConfigReducer from 'hooks/useConfigReducer';
+import ToggleSwitch from 'components/ToggleSwitch';
+import { tokensIcon } from 'config/chainInfos';
+import { flattenTokens } from 'config/bridgeTokens';
 
 const cx = cn.bind(styles);
 
-export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }) => {
+export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const totalUsd = getTotalUsd(amounts, prices);
-  const [otherChainTokens, oraichainTokens] = tokens;
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
+
+  const sizePadding = isMobile() ? '12px' : '24px';
   const { totalStaked } = useGetMyStake({
     stakerAddress: address
   });
+  let totalUsd: number = getTotalUsd(amounts, prices);
+  if (networkFilter) {
+    const subAmounts = Object.fromEntries(
+      Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === networkFilter)
+    );
+    totalUsd = getTotalUsd(subAmounts, prices);
+  }
 
-  const data = [...oraichainTokens, ...otherChainTokens]
+  let listAsset: {
+    src?: CoinIcon;
+    label?: string;
+    balance?: number;
+  }[] = [
+      {
+        src: WalletIcon,
+        label: 'Total balance',
+        balance: totalUsd
+      }
+    ];
+
+  if (!networkFilter || networkFilter === 'Oraichain') {
+    listAsset = [
+      ...listAsset,
+      {
+        src: StakeIcon,
+        label: 'Total staked',
+        balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
+      }
+    ];
+  }
+
+  const data = flattenTokens
     .filter((token: TokenItemType) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
       if (!token.bridgeTo && !token.contractAddress) return false;
-      if (!toTotalDisplay(amounts, token)) return false;
+      if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
+        return false;
+      }
       if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
       if (!networkFilter) return true;
       return token.chainId == networkFilter;
@@ -51,12 +95,12 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
         usd += getUsd(subAmount, t, prices);
       }
       const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
-
+      const tokenIcon = tokensIcon.find(token => token.coinGeckoId === t.coinGeckoId);
       return {
         asset: t.name,
         chain: t.org,
-        icon: t.Icon,
-        iconLight: t?.IconLight,
+        icon: tokenIcon && tokenIcon.Icon,
+        iconLight: tokenIcon && tokenIcon.IconLight,
         price: prices[t.coinGeckoId] || 0,
         balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
@@ -73,11 +117,7 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
         <div className={styles.assets}>
           <div className={styles.left}>
             {theme === 'light' ? (
-              data.iconLight ? (
-                <data.iconLight className={styles.tokenIcon} />
-              ) : (
-                <data.icon className={styles.tokenIcon} />
-              )
+              <data.iconLight className={styles.tokenIcon} />
             ) : (
               <data.icon className={styles.tokenIcon} />
             )}
@@ -88,28 +128,30 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           </div>
         </div>
       ),
-      width: '28%',
-      align: 'center'
+      width: '30%',
+      align: 'left',
+      padding: `0px 0px 0px ${sizePadding}`
     },
     price: {
       name: 'PRICE',
-      width: '28%',
+      width: '23%',
       accessor: (data) => <div className={styles.price}>${data.price}</div>,
-      align: 'center'
+      align: 'left'
     },
     balance: {
       name: 'BALANCE',
-      width: '22%',
-      align: 'center',
-      accessor: (data) => <div className={styles.balance}>{data.balance}</div>
+      width: '23%',
+      align: 'left',
+      accessor: (data) => <div className={cx("balance", `${!data.balance && 'balance-low'}`)}>{data.balance}</div>
     },
     value: {
       name: 'VALUE',
-      width: '22%',
-      align: 'center',
+      width: '24%',
+      align: 'left',
+      padding: '0px 8px 0px 0px',
       accessor: (data) => {
-        const checkCoeffType = data.coeffType === 'increase';
-        const coeffTypeValue = checkCoeffType ? '+' : '-';
+        // const checkCoeffType = data.coeffType === 'increase';
+        // const coeffTypeValue = checkCoeffType ? '+' : '-';
         return (
           <div className={styles.valuesColumn}>
             <div className={styles.values}>
@@ -127,30 +169,13 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
           </div>
         );
       }
-    },
-    // filter: {
-    //   name: 'FILTER',
-    //   width: '12%',
-    //   align: 'center',
-    //   accessor: () => <span></span>
-    // }
+    }
   };
 
   return (
     <div className={cx('assetsTab')}>
       <div className={cx('info')}>
-        {[
-          {
-            src: WalletIcon,
-            label: 'Total balance',
-            balance: totalUsd.toFixed(6)
-          },
-          {
-            src: StakeIcon,
-            label: 'Total staked',
-            balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
-          }
-        ].map((e, i) => {
+        {listAsset.map((e, i) => {
           return (
             <div key={i} className={cx('total-info')}>
               <div className={cx('icon')}>
@@ -158,11 +183,20 @@ export const AssetsTab: React.FC<{ networkFilter: string }> = ({ networkFilter }
               </div>
               <div className={cx('balance')}>
                 <div className={cx('label')}>{e.label}</div>
-                <div className={cx('value')}>${e.balance}</div>
+                <div className={cx('value')}>${e.balance.toFixed(6)}</div>
               </div>
             </div>
           );
         })}
+        <div className={cx('switch')}>
+          <ToggleSwitch
+            small={true}
+            id="small-balances"
+            checked={hideOtherSmallAmount}
+            onChange={() => setHideOtherSmallAmount(!hideOtherSmallAmount)}
+          />
+          <label htmlFor="small-balances">Hide small balances!</label>
+        </div>
       </div>
       <div>
         <Table

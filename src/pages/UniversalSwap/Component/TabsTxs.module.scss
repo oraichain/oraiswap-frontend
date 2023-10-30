@@ -43,6 +43,10 @@
     align-items: center;
     gap: 6px;
 
+    .logo {
+      width: 30px;
+      height: 30px;
+    }
     .all-network {
       display: flex;
       flex-direction: column;
@@ -66,8 +70,8 @@
 
   .network {
     @include theme() {
-      background-color: theme-get('bg-color');
-      border-color: theme-get('border-color-secondary');
+      background-color: theme-get('neutral-surface-bg');
+      border: 1px solid theme-get('neutral-border-border-bold');
     }
     min-width: 300px;
     max-height: 500px;
@@ -81,16 +85,10 @@
     @include mobile() {
       right: 10px;
     }
-
-    .title {
-      text-align: center;
-      font-size: 16px;
-    }
-
     .options {
       display: flex;
       flex-direction: column;
-      padding-top: 12px;
+      padding-top: 10px;
       &.border {
         @include theme() {
           border-bottom: 0.5px solid theme-get('neutral-4');
@@ -98,7 +96,7 @@
       }
       .item {
         @include theme() {
-          background-color: theme-get('bg-color');
+          background-color: theme-get('neutral-surface-bg');
           color: theme-get('text-color');
         }
         border-radius: 8px;
@@ -117,7 +115,7 @@
           color: $white-color;
 
           @include theme() {
-            background-color: theme-get('primary-1');
+            background-color: theme-get('neutral-surface-bg-dropdown-hover');
           }
         }
 

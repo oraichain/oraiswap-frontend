@@ -677,6 +677,7 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 118
     },
     Icon: AtomIcon,
+    IconLight: AtomLightIcon,
     bech32Config: defaultBech32Config('cosmos'),
     feeCurrencies: [AtomToken],
     currencies: [
@@ -686,7 +687,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinMinimalDenom: 'uatom',
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
-        Icon: AtomIcon
+        Icon: AtomIcon,
+        IconLight: AtomLightIcon
       }
     ]
   },

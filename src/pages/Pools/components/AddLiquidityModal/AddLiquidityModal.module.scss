@@ -124,12 +124,14 @@
         width: 100%;
 
         .amount {
-          span {
-            color: #979995;
-
-            &.light {
-              color: #686a66;
+          &.light {
+            span {
+              color: $neutral-text-describe;
             }
+          }
+
+          span {
+            color: $neutral-text-body-on-section;
           }
         }
 
@@ -250,6 +252,7 @@
 
         .input-amount {
           flex-grow: 1;
+          position: relative;
         }
 
         .amount {
@@ -257,23 +260,28 @@
           padding: 10px;
           flex-grow: 1;
           text-align: right;
-          background: #1e1e21;
+          background: $raisin-black;
           border-radius: 8px;
           height: 100%;
+          padding-bottom: 30px;
+          color: $neutral-surface-search;
 
           &.light {
-            background: #efefef;
-            color: $light-text-color;
+            background: $neutral-surface-search;
+            color: $raisin-black;
           }
         }
 
         .amount-usd {
           text-align: right;
-          color: #979995;
+          color: $neutral-text-body-on-section;
           padding: 10px;
+          position: absolute;
+          right: 0;
+          bottom: 0;
 
           &.light {
-            color: #686a66;
+            color: $neutral-text-describe;
           }
 
           font-size: 13px;
