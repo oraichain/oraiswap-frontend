@@ -10,6 +10,10 @@
     max-width: 95%;
   }
 
+  @include small-mobile {
+    margin-top: 85px;
+  }
+
   .back {
     cursor: pointer;
     display: flex;
