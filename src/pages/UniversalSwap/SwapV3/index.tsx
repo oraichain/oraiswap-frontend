@@ -202,11 +202,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -310,7 +310,7 @@ const SwapComponent: React.FC<{
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
               token={originalFromToken}
-              amount={fromAmountToken ? fromAmountToken : null}
+              amount={fromAmountToken}
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
             />

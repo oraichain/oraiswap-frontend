@@ -51,15 +51,14 @@ export const HeaderTab: React.FC<{
   const [theme] = useConfigReducer('theme');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const currentPair = useSelector(selectCurrentToken);
+  const [baseDenom, quoteDenom] = currentPair.symbol.split("/");
   const tf = useSelector(selectChartTimeFrame);
   // const [pool, setPool] = useState<string>('OHAI/USDT');
-  const tokenPrice = flattenTokens.find((token) => token.denom === toTokenDenom);
   const { isLoading, priceChange } = useGetPriceChange({
     base_denom: currentPair.info.split('-')[0],
     quote_denom: currentPair.info.split('-')[1],
     tf
   });
-  const tokenPriceIcon = tokenPrice && tokensIcon.find(tokenIcon => tokenIcon.coinGeckoId === tokenPrice.coinGeckoId)
   const isIncrement = priceChange && Number(priceChange.price_change) > 0;
 
   return (
@@ -76,9 +75,7 @@ export const HeaderTab: React.FC<{
               '-'
             ) : (
               <div className={cx('bottom')}>
-                <div className={cx('balance')}>{priceChange.price.toFixed(6)} </div>
-                <div className={cx('denom')}>{tokenPrice && tokenPrice.name}</div>
-                {tokenPriceIcon && (theme === 'light' ? <tokenPriceIcon.IconLight className={cx('icon')} /> : <tokenPriceIcon.Icon className={cx('icon')} />)}
+                <div className={cx('balance')}>{baseDenom && quoteDenom && "1 " + baseDenom + " ≈ " + priceChange.price.toFixed(6) + " " + quoteDenom}</div>
                 <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
                   {(isIncrement ? '+' : '') + priceChange.price_change.toFixed(2)} %
                 </div>

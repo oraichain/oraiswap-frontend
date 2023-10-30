@@ -22,7 +22,7 @@ export const useSimulate = (
   routerClient: OraiswapRouterReadOnlyInterface,
   initAmount?: number
 ) => {
-  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || 0, 0]);
+  const [[fromAmountToken, toAmountToken], setSwapAmount] = useState([initAmount || null, 0]);
 
   const { data: simulateData } = useQuery(
     [queryKey, fromTokenInfoData, toTokenInfoData, fromAmountToken],

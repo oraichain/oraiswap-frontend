@@ -104,6 +104,11 @@
       height: 72%;
     }
 
+    .menu_item_text {
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
     &:hover {
       .menu_item_text {
         @include theme() {
