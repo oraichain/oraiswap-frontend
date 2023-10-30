@@ -52,15 +52,18 @@ export class DuckDb {
   protected constructor(public readonly conn: duckdb.AsyncDuckDBConnection, public readonly db: duckdb.AsyncDuckDB) {}
 
   static async create() {
-    // Select a bundle based on browser checks
-    // Instantiate the asynchronus version of DuckDB-Wasm
-    const db = new duckdb.AsyncDuckDB(
-      new duckdb.ConsoleLogger(),
-      new Worker(new URL('@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js', import.meta.url).toString())
-    );
-    await db.instantiate(require('@duckdb/duckdb-wasm/dist/duckdb-eh.wasm'));
-    const conn = await db.connect();
-    DuckDb.instance = new DuckDb(conn, db);
+    if (!DuckDb.instance) {
+      // Select a bundle based on browser checks
+      // Instantiate the asynchronus version of DuckDB-Wasm
+      const db = new duckdb.AsyncDuckDB(
+        process.env.NODE_ENV === 'development' ? new duckdb.ConsoleLogger() : new duckdb.VoidLogger(),
+        new Worker(new URL('@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js', import.meta.url).toString())
+      );
+      await db.instantiate(require('@duckdb/duckdb-wasm/dist/duckdb-eh.wasm'));
+      const conn = await db.connect();
+      DuckDb.instance = new DuckDb(conn, db);
+    }
+    return DuckDb.instance;
   }
 
   async createTableTransHistory(userAddress: string): Promise<boolean> {
