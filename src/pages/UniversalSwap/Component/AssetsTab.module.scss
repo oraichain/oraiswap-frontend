@@ -126,6 +126,12 @@
   }
 }
 
+.balance-low {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
 .valuesColumn {
   display: flex;
   @include mobile() {

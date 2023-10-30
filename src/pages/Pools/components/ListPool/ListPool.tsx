@@ -50,13 +50,13 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       name: 'My Staked LP',
       width: '12%',
       align: 'left',
-      accessor: (data) => <span>{formatDisplayUsdt(data.myStakedLP)}</span>
+      accessor: (data) => <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
     },
     earned: {
       name: 'Earned',
       width: '10%',
       align: 'left',
-      accessor: (data) => <span>{formatDisplayUsdt(data.earned)}</span>
+      accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
     },
     fee7Days: {
       name: 'Fee (7D)',

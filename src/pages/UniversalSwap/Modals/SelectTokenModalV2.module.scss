@@ -40,7 +40,9 @@
     }
 
     .network {
-      color: #1e300a;
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+      }
       text-align: center;
       font-size: 16px;
     }

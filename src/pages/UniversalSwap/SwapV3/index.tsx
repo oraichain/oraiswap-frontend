@@ -72,7 +72,6 @@ const SwapComponent: React.FC<{
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [oraiAddress] = useConfigReducer('address');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
@@ -332,7 +331,7 @@ const SwapComponent: React.FC<{
             {!fromTokenFee && !toTokenFee && isWarningSlippage && (
               <div className={cx('impact-warning')}>
                 <div className={cx('title')}>
-                  <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
+                  <span>Current slippage exceed configuration!</span>
                 </div>
               </div>
             )}
@@ -341,9 +340,6 @@ const SwapComponent: React.FC<{
         <div className={cx('swap-icon')}>
           <div className={cx('wrap-img')}>
             <img
-              style={{
-                backgroundColor: theme === 'light' ? '#f7f7f7' : '#232521'
-              }}
               src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
               onClick={() => {
                 // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token

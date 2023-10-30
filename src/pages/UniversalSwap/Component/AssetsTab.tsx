@@ -142,7 +142,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       name: 'BALANCE',
       width: '23%',
       align: 'left',
-      accessor: (data) => <div className={styles.balance}>{data.balance}</div>
+      accessor: (data) => <div className={cx("balance", `${!data.balance && 'balance-low'}`)}>{data.balance}</div>
     },
     value: {
       name: 'VALUE',

@@ -150,6 +150,18 @@
   }
 }
 
+.my_stake_lp {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
+.earned {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
 .liquidity {
   display: flex;
   align-items: center;
