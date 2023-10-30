@@ -2826,10 +2826,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.17.0.tgz#af10baa9f05ce1e64a14065fc138b5739bfb65f6"
   integrity sha512-+fguCd2d8d2qruk0H0DsCEy2CTK3t0Tugg7MhZ/UQMvmewbZLNnJ6heSYyzIZWG5IPfAXzoj4f4F/qpM7l4VBA==
 
-"@oraichain/common-contracts-build@1.0.32":
-  version "1.0.32"
-  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.32.tgz#6ba11a98eab1066ac42f290fbf7e877dc00b45a8"
-  integrity sha512-g9wk2oeTWPkOUDwvr19XkDDtH3OkXQGAQKEFlAVn8t4/8KvOC5Jo5XrQwqSd5O4tvfxW6vX+XVpbkhEDcsOkRw==
+"@oraichain/common-contracts-build@1.0.34":
+  version "1.0.34"
+  resolved "https://registry.yarnpkg.com/@oraichain/common-contracts-build/-/common-contracts-build-1.0.34.tgz#7db1940b83df850517471bd23bb4aade1283a343"
+  integrity sha512-2nhGKNxxAcGd8cFGMVYbRLROLTcbJEev5quDAdQ/l9vZIry146gqemV6BiPjxe8cIQMWIDub+59VawCmmxHR7A==
   dependencies:
     "@oraichain/common-contracts-sdk" "1.0.31"
 

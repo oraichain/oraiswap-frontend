@@ -1341,86 +1341,140 @@ describe.only('IBCModule', () => {
       ).not.toBeUndefined();
     });
 
-    it('cw-ics20-test-single-step-ibc-handle_ibc_packet_receive_native_remote_chain-has-token-fee-should-be-deducted', async () => {
-      // setup relayer fee
-      const numberator = 1;
-      const denominator = 10;
-      const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
-      await ics20Contract.updateConfig({
-        tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }]
-      });
+    it.each<[string, string]>([
+      [`${channel}/${bobAddress}:orai`, '20000000'],
+      [`${bobAddress}:orai`, '10000000']
+    ])(
+      'cw-ics20-test-single-step-ibc-handle_ibc_packet_receive_native_remote_chain-has-token-fee-should-be-deducted',
+      async (memo, expectedTokenFee) => {
+        // setup relayer fee
+        await ics20Contract.updateConfig({
+          tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }]
+        });
 
-      const icsPackage: FungibleTokenPacketData = {
-        amount: ibcTransferAmount,
-        denom: airiIbcDenom,
-        receiver: bobAddress,
-        sender: oraibridgeSenderAddress,
-        memo: `${channel}/${bobAddress}:orai`
-      };
-      // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
-        packet: {
-          data: toBinary(icsPackage),
-          ...packetData
-        },
-        relayer: relayerAddress
-      });
-      const hasTokenFee = result.events.find(
-        (event) =>
-          event.type === 'wasm' &&
-          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
-          event.attributes.find((attr) => attr.key === 'amount' && attr.value === tokenFee)
-      );
-      expect(hasTokenFee).not.toBeUndefined();
-      expect(result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === tokenFee)).not.toBeUndefined();
-    });
+        const icsPackage: FungibleTokenPacketData = {
+          amount: ibcTransferAmount,
+          denom: airiIbcDenom,
+          receiver: bobAddress,
+          sender: oraibridgeSenderAddress,
+          memo
+        };
+        // transfer from cosmos to oraichain, should pass
+        let result = await cosmosChain.ibc.sendPacketReceive({
+          packet: {
+            data: toBinary(icsPackage),
+            ...packetData
+          },
+          relayer: relayerAddress
+        });
+        const hasTokenFee = result.events.filter(
+          (event) =>
+            event.type === 'wasm' && event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress)
+        );
+        expect(hasTokenFee).not.toBeUndefined();
+        expect(result.attributes.find((attr) => attr.key === 'token_fee' && expectedTokenFee)).not.toBeUndefined();
+      }
+    );
 
-    it('cw-ics20-test-single-step-handle_ibc_packet_receive_native_remote_chain-has-both-token-fee-and-relayer-fee-should-be-both-deducted', async () => {
-      // setup relayer fee
-      const relayerFee = '100000';
-      const numberator = 1;
-      const denominator = 10;
-      const tokenFee = ((parseInt(ibcTransferAmount) * numberator) / denominator).toString();
-      await ics20Contract.updateConfig({
-        tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }],
-        relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }]
-      });
+    it.each<[string, string, string]>([
+      [`${channel}/${bobAddress}:orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu`, '20000000', '100000'],
+      [`${channel}/${bridgeReceiver}:orai18cvw806fj5n7xxz06ak8vjunveeks4zzzn37cu`, '20000000', '200000'], // double deducted when there's an outgoing ibc msg after receiving the packet
+      [`${bobAddress}:orai`, '10000000', '100000']
+    ])(
+      'test-handle_ibc_packet_receive_native_remote_chain-has-both-token-fee-and-relayer-fee-should-be-both-deducted-given memo %s should give expected token fee %s and expected relayer fee %s',
+      async (memo, expectedTokenFee, expectedRelayerFee) => {
+        // setup relayer fee
+        const relayerFee = '100000';
+        await ics20Contract.updateConfig({
+          tokenFee: [
+            { token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } },
+            { token_denom: 'orai', ratio: { nominator: 1, denominator: 10 } }
+          ],
+          relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }]
+        });
 
-      const icsPackage: FungibleTokenPacketData = {
-        amount: ibcTransferAmount,
-        denom: airiIbcDenom,
-        receiver: bobAddress,
-        sender: oraibridgeSenderAddress,
-        memo: `${channel}/${bobAddress}:orai`
-      };
-      // transfer from cosmos to oraichain, should pass
-      let result = await cosmosChain.ibc.sendPacketReceive({
-        packet: {
-          data: toBinary(icsPackage),
-          ...packetData
-        },
-        relayer: relayerAddress
-      });
-      const hasRelayerFee = result.events.find(
-        (event) =>
-          event.type === 'wasm' &&
-          event.attributes.find((attr) => attr.key === 'to' && attr.value === relayerAddress) &&
-          event.attributes.find((attr) => attr.key === 'amount' && attr.value === relayerFee)
-      );
-      expect(hasRelayerFee).not.toBeUndefined();
-      expect(
-        result.attributes.find((attr) => attr.key === 'relayer_fee' && attr.value === relayerFee)
-      ).not.toBeUndefined();
+        const icsPackage: FungibleTokenPacketData = {
+          amount: ibcTransferAmount,
+          denom: airiIbcDenom,
+          receiver: bobAddress,
+          sender: oraibridgeSenderAddress,
+          memo
+        };
+        // transfer from cosmos to oraichain, should pass
+        let result = await cosmosChain.ibc.sendPacketReceive({
+          packet: {
+            data: toBinary(icsPackage),
+            ...packetData
+          },
+          relayer: relayerAddress
+        });
+        console.dir(result, { depth: null });
+        const hasRelayerFee = result.events.find(
+          (event) =>
+            event.type === 'wasm' &&
+            event.attributes.find((attr) => attr.key === 'to' && attr.value === relayerAddress) &&
+            event.attributes.find((attr) => attr.key === 'amount' && attr.value === expectedRelayerFee)
+        );
+        expect(hasRelayerFee).not.toBeUndefined();
+        expect(
+          result.attributes.find((attr) => attr.key === 'relayer_fee' && attr.value === expectedRelayerFee)
+        ).not.toBeUndefined();
 
-      const hasTokenFee = result.events.find(
-        (event) =>
-          event.type === 'wasm' &&
-          event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
-          event.attributes.find((attr) => attr.key === 'amount' && attr.value === tokenFee)
-      );
-      expect(hasTokenFee).not.toBeUndefined();
-      expect(result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === tokenFee)).not.toBeUndefined();
-    });
+        const hasTokenFee = result.events.find(
+          (event) =>
+            event.type === 'wasm' &&
+            event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+            event.attributes.find((attr) => attr.key === 'amount' && attr.value === expectedTokenFee)
+        );
+        expect(hasTokenFee).not.toBeUndefined();
+        expect(
+          result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === expectedTokenFee)
+        ).not.toBeUndefined();
+      }
+    );
+
+    it.each<[string, string, string, string, string]>([
+      [ibcTransferAmount, ibcTransferAmount, '10000000', '90000000', ibcTransferAmount]
+    ])(
+      'cw-ics20-test-single-step-handle_ibc_packet_receive_native_remote_chain-deducted-amount-is-zero-should-still-charge-fees',
+      async (transferAmount, relayerFee, expectedTokenFee, expectedRelayerFee, expectedTotalFee) => {
+        await ics20Contract.updateConfig({
+          tokenFee: [{ token_denom: airiIbcDenom, ratio: { nominator: 1, denominator: 10 } }],
+          relayerFee: [{ prefix: 'tron-testnet', fee: relayerFee }]
+        });
+
+        const icsPackage: FungibleTokenPacketData = {
+          amount: transferAmount,
+          denom: airiIbcDenom,
+          receiver: bobAddress,
+          sender: oraibridgeSenderAddress,
+          memo: `${bobAddress}:orai`
+        };
+        // transfer from cosmos to oraichain, should pass
+        let result = await cosmosChain.ibc.sendPacketReceive({
+          packet: {
+            data: toBinary(icsPackage),
+            ...packetData
+          },
+          relayer: relayerAddress
+        });
+
+        const hasFees = result.events.find(
+          (event) =>
+            event.type === 'wasm' &&
+            event.attributes.find((attr) => attr.key === 'to' && attr.value === senderAddress) &&
+            event.attributes.find((attr) => attr.key === 'amount' && attr.value === expectedTotalFee)
+        );
+        console.dir(result, { depth: null });
+        expect(hasFees).not.toBeUndefined();
+        expect(
+          result.attributes.find((attr) => attr.key === 'token_fee' && attr.value === expectedTokenFee)
+        ).not.toBeUndefined();
+        expect(
+          result.attributes.find((attr) => attr.key === 'relayer_fee' && attr.value === expectedRelayerFee)
+        ).not.toBeUndefined();
+      }
+    );
 
     // execute transfer to remote test cases
     it('test-execute_transfer_back_to_remote_chain-native-FAILED-no-funds-sent', async () => {
