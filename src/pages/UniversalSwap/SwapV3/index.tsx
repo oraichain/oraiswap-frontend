@@ -58,6 +58,7 @@ import styles from './index.module.scss';
 import Metamask from 'libs/metamask';
 
 const cx = cn.bind(styles);
+const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -168,7 +169,7 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
-    routerClient
+    routerClient,
   );
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -181,18 +182,12 @@ const SwapComponent: React.FC<{
   );
 
   const relayerFee = useRelayerFee();
-
-  const relayerFeeToken = React.useMemo(
-    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
-    [originalFromToken]
-  );
-
-  const relayerFeeFromToTokenIsEvm = (relayerFeeAmount: string) => {
-    if (!originalFromToken.cosmosBased && !originalToToken.cosmosBased) {
-      return BigInt(relayerFeeAmount) * BigInt(2);
+  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
+    if (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix) {
+      return acc = BigInt(cur.amount) + acc
     }
-    return BigInt(relayerFeeAmount);
-  };
+    return acc;
+  }, 0n)
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -226,6 +221,10 @@ const SwapComponent: React.FC<{
       const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
+      const relayerFee = relayerFeeToken && {
+        relayerAmount: relayerFeeToken.toString(),
+        relayerDecimals: RELAYER_DECIMAL
+      }
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -234,7 +233,8 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          simulatePrice: averageRatio.amount
+          simulatePrice: averageRatio.amount,
+          relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
@@ -459,8 +459,9 @@ const SwapComponent: React.FC<{
               </div>
               <TokenBalance
                 balance={{
-                  amount: relayerFeeFromToTokenIsEvm(relayerFeeToken.amount),
-                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  amount: relayerFeeToken,
+                  // decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  decimals: RELAYER_DECIMAL,
                   denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
                 }}
                 decimalScale={truncDecimals}
