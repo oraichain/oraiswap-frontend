@@ -202,11 +202,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -310,7 +310,7 @@ const SwapComponent: React.FC<{
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
               token={originalFromToken}
-              amount={fromAmountToken ? fromAmountToken : NaN}
+              amount={fromAmountToken ? fromAmountToken : null}
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
             />
@@ -392,10 +392,10 @@ const SwapComponent: React.FC<{
               onClick={(event) => {
                 event.stopPropagation();
                 if (coeff === coe) {
-                  setCoe(0)
-                  setSwapAmount([0, 0])
+                  setCoe(0);
+                  setSwapAmount([0, 0]);
                   return;
-                };
+                }
                 setCoe(coeff);
                 if (type === 'max') {
                   onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), type);

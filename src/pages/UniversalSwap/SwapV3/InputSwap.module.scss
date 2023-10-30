@@ -8,6 +8,13 @@
   justify-content: space-between;
   align-items: center;
 
+  input::placeholder {
+    @include theme() {
+      color: theme-get('neutral-text-body');
+      opacity: 0.5;
+    }
+  }
+
   .box-select {
     display: flex;
     justify-content: space-between;
@@ -35,6 +42,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
         .logo {
           width: 26px;
           height: 26px;

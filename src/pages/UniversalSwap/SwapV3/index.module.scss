@@ -258,7 +258,9 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
 
     .token {
       cursor: pointer;
@@ -306,6 +308,7 @@
       }
     }
   }
+
   @include mobile {
     border-bottom: 1px solid;
   }
@@ -359,6 +362,7 @@
       @include theme() {
         background-color: theme-get('neutral-surface-bg-section');
       }
+
       // position: absolute;
       // transform: translate(-50%, -50%);
       @include mobile {
