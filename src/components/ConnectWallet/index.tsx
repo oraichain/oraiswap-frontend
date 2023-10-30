@@ -34,9 +34,10 @@ import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
+import { isMobile } from '@walletconnect/browser-utils';
 const cx = cn.bind(styles);
 
-interface ModalProps {}
+interface ModalProps { }
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   KEPLR = 'KEPLR',
@@ -77,7 +78,7 @@ export enum CONNECT_STATUS {
   DONE = 'DONE',
   ERROR = 'ERROR'
 }
-const ConnectWallet: FC<ModalProps> = ({}) => {
+const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [theme] = useConfigReducer('theme');
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
@@ -187,7 +188,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       })();
     }
 
-    return () => {};
+    return () => { };
   }, [address]);
   const disconnectMetamask = async () => {
     try {
@@ -205,7 +206,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return item;
     });
     setWallets(walletData);
-    return () => {};
+    return () => { };
   }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
@@ -422,7 +423,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           />
         </TooltipContainer>
       )}
-      {isShowChooseWallet ? (
+      {isShowChooseWallet && !isMobile() ? (
         <ChooseWalletModal
           connectStatus={connectStatus}
           connectToWallet={(walletType) => requestMethod(walletType, METHOD_WALLET_TYPES.START)}

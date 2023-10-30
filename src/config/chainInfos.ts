@@ -144,8 +144,8 @@ export const tokensIcon: TokenIcon[] = [
   },
   {
     coinGeckoId: 'oraidex',
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon
+    Icon: OraixIcon,
+    IconLight: OraixLightIcon
   },
   {
     coinGeckoId: 'scorai',

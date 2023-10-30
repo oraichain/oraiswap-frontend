@@ -36,6 +36,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
 
   const sizePadding = isMobile() ? '12px' : '24px';
+  const toFixNumber = isMobile() ? 4 : 6;
   const { totalStaked } = useGetMyStake({
     stakerAddress: address
   });
@@ -104,7 +105,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         price: prices[t.coinGeckoId] || 0,
         balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
-        value: value.toFixed(6),
+        value: value.toFixed(toFixNumber),
         coeff: 0,
         coeffType: 'increase'
       };
@@ -135,14 +136,14 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     price: {
       name: 'PRICE',
       width: '23%',
-      accessor: (data) => <div className={styles.price}>${data.price}</div>,
+      accessor: (data) => <div className={styles.price}>${Number(data.price.toFixed(6))}</div>,
       align: 'left'
     },
     balance: {
       name: 'BALANCE',
       width: '23%',
       align: 'left',
-      accessor: (data) => <div className={cx("balance", `${!data.balance && 'balance-low'}`)}>{data.balance}</div>
+      accessor: (data) => <div className={cx("balance", `${!data.balance && 'balance-low'}`)}>{Number(data.balance.toFixed(toFixNumber))}</div>
     },
     value: {
       name: 'VALUE',

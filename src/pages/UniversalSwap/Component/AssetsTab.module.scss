@@ -82,6 +82,7 @@
   }
   .right {
     padding-left: 8px;
+    text-align: left;
     .assetName {
       @include theme() {
         color: theme-get('sea-stone-200');
@@ -92,17 +93,24 @@
       text-transform: uppercase;
       -webkit-box-orient: vertical;
       white-space: nowrap;
+      @include mobile() {
+        white-space: wrap;
+      }
       -webkit-line-clamp: 1;
       overflow: hidden;
-      width: 100%;
     }
     .assetChain {
       font-size: 13px;
       font-weight: 400;
       width: 100%;
+      display: -webkit-box;
       text-transform: capitalize;
       -webkit-box-orient: vertical;
       white-space: nowrap;
+      @include mobile() {
+        white-space: wrap;
+      }
+      overflow: hidden;
       -webkit-line-clamp: 1;
       @include theme() {
         color: theme-get('sea-stone-200');
@@ -122,6 +130,11 @@
 
 .balance {
   @include mobile() {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
     font-size: 13px;
   }
 }
