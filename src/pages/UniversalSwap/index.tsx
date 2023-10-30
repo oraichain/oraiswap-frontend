@@ -10,7 +10,7 @@ import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useSelector } from 'react-redux';
-import { selectChartDataLength } from "reducer/tradingSlice";
+import { selectChartDataLength } from 'reducer/tradingSlice';
 import { DuckDb } from 'libs/duckdb';
 const cx = cn.bind(styles);
 
@@ -20,18 +20,17 @@ const Swap: React.FC = () => {
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
-  const chartDataLength = useSelector(selectChartDataLength)
+  const chartDataLength = useSelector(selectChartDataLength);
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
 
   const initDuckdb = async () => {
-    await DuckDb.create()
-    window.duckDb = DuckDb.instance;
-  }
+    window.duckDb = await DuckDb.create();
+  };
 
   useEffect(() => {
-    if (!window.duckDb) initDuckdb()
-  }, [window.duckDb])
+    if (!window.duckDb) initDuckdb();
+  }, [window.duckDb]);
 
   return (
     <Content nonBackground>
@@ -40,7 +39,9 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                {chartDataLength > 0 && <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />}
+                {chartDataLength > 0 && (
+                  <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
+                )}
                 <div className={cx('tv-chart', hideChart || chartDataLength == 0 ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <TVChartContainer />
@@ -61,7 +62,7 @@ const Swap: React.FC = () => {
           <SwapComponent fromTokenDenom={fromTokenDenom} toTokenDenom={toTokenDenom} setSwapTokens={setSwapTokens} />
         </div>
       </div>
-    </Content >
+    </Content>
   );
 };
 

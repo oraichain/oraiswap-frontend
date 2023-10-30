@@ -16,7 +16,7 @@ import {
   getSubAmountDetails,
   toAmount,
   toDisplay,
-  tokenMap,
+  tokenMap
 } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
@@ -96,7 +96,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         usd += getUsd(subAmount, t, prices);
       }
       const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
-      const tokenIcon = tokensIcon.find(token => token.coinGeckoId === t.coinGeckoId);
+      const tokenIcon = tokensIcon.find((token) => token.coinGeckoId === t.coinGeckoId);
       return {
         asset: t.name,
         chain: t.org,
@@ -155,7 +155,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         // const coeffTypeValue = checkCoeffType ? '+' : '-';
         return (
           <div className={styles.valuesColumn}>
-            <div className={styles.values}>
+            <div>
               <div className={styles.value}>${data.value}</div>
               {/* <div
                 style={{
