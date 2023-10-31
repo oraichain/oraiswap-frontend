@@ -57,7 +57,6 @@ import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 import Metamask from 'libs/metamask';
-import { useNewReceiveAmount } from './hooks/useNewReceiveAmount';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -225,17 +224,6 @@ const SwapComponent: React.FC<{
       originalFromToken.decimals
     )
     : '0';
-
-  const newReceiveAmount = useNewReceiveAmount({
-    relayerFeeToken,
-    toTokenFee,
-    fromTokenFee,
-    minimumReceive,
-    originalToToken,
-    originalFromToken,
-    fromAmountTokenBalance,
-    simulateData: simulateData && simulateData.amount
-  });
 
   const isWarningSlippage =
     simulateData && simulateData.amount && new BigDecimal(minimumReceive) > new BigDecimal(simulateData.amount);
@@ -466,13 +454,23 @@ const SwapComponent: React.FC<{
         })()}
 
         <div className={cx('detail')}>
+          {
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> Expected Output</span>
+              </div>
+              <div>
+                ≈ {(simulateData && simulateData.displayAmount) || '0'} {originalToToken && originalToToken.name}
+              </div>
+            </div>
+          }
           <div className={cx('row')}>
             <div className={cx('title')}>
-              <span>Minimum Received</span>
+              <span>Minimum Received after slippage ( {userSlippage}% )</span>
             </div>
             <TokenBalance
               balance={{
-                amount: newReceiveAmount,
+                amount: minimumReceive,
                 decimals: originalFromToken?.decimals,
                 denom: originalToToken?.name
               }}
