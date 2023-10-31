@@ -24,25 +24,30 @@ const WhatsNewItems = [
   {
     label: 'Universal Swap & Bridge',
     icon: true,
-    img: UniversalSwapBridge
+    img: UniversalSwapBridge,
+    content: "Bridging and universal swapping are now optimized, all in one place. OraiDEX brings you convenience and enhancements."
   },
   {
     label: 'Universal Wallet',
-    img: UniversalWallet
+    img: UniversalWallet,
+    content: "Bridge and universal swap all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
   },
   {
     label: 'Tracking Transaction status',
-    img: TrackingTransaction
+    img: TrackingTransaction,
+    content: "Tracking Transaction status in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
   },
   {
     label: 'Transaction History',
-    img: TrackingHistory
+    img: TrackingHistory,
+    content: "Transaction History all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
   },
 
   {
     label: 'Improved Pool Interface',
     icon: true,
-    img: ImprovedPoolInterface
+    img: ImprovedPoolInterface,
+    content: "Improved Pool Interface all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
   }
 ];
 
@@ -86,11 +91,11 @@ const Instruct: React.FC<InstructProps> = () => {
                 })}
               </div>
             </div>
-            <div className={cx('ask')}>
+            <div className={cx('ask')} onClick={() => window.open("https://beacons.ai/oraidex")}>
               <img src={GroupImg} alt="gift" width={20} height={20} />
               <div> Ask the community</div>
             </div>
-            <div className={cx('ai')}>
+            <div className={cx('ai')} onClick={() => window.open("https://academy.orai.io/tag/oraisavvy")}>
               <img src={GraduationImg} alt="gift" width={20} height={20} />
               <div>AI x Blockchain Savvy</div>
             </div>
@@ -102,11 +107,9 @@ const Instruct: React.FC<InstructProps> = () => {
                 {WhatsNewItems[activeInd].label}
               </div>
               <div className={cx('describe', `${theme}-describe`)}>
-                Bridge and universal swap all in one place. Lorem Ipsum has been the industry's standard dummy text ever
-                since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen
-                book.
+                {WhatsNewItems[activeInd].content}
               </div>
-              <div className={cx('contact', `${theme}-contact`)}>
+              <div className={cx('contact', `${theme}-contact`)} onClick={() => window.open("mailto:support@orai.io")} >
                 <ChatBubbleQuestion className={cx('icon')} />
                 <div>Contact us</div>
               </div>

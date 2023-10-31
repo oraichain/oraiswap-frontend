@@ -73,12 +73,12 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
 
   let itemsFilter = (
     searchTokenName || networkFilter
-      ? items.filter((item) => {
-          if (searchTokenName && networkFilter)
-            return item.name.includes(searchTokenName) && item.org === networkFilter;
-          if (searchTokenName) return item.name.includes(searchTokenName);
-          return item.org === networkFilter;
-        })
+      ? items.filter((item: TokenItemType) => {
+        if (searchTokenName && networkFilter)
+          return item.name.toLowerCase().includes(searchTokenName.toLowerCase()) && item.org === networkFilter;
+        if (searchTokenName) return item.name.toLowerCase().includes(searchTokenName.toLowerCase());
+        return item.org === networkFilter;
+      })
       : items
   ).map((item: TokenItemType | CustomChainInfo) => {
     let key: string, title: string, balance: string, org: string;
