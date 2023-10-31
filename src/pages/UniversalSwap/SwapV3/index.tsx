@@ -76,6 +76,7 @@ const SwapComponent: React.FC<{
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
@@ -84,6 +85,20 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+
+  const refreshBalances = async () => {
+    try {
+      if (loadingRefresh) return;
+      setLoadingRefresh(true);
+      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
+    } catch (err) {
+      console.log({ err });
+    } finally {
+      setTimeout(() => {
+        setLoadingRefresh(false);
+      }, 2000);
+    }
+  };
 
   const onChangeFromAmount = (amount: number | undefined) => {
     if (!amount) {
@@ -225,6 +240,7 @@ const SwapComponent: React.FC<{
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
       }
+
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -297,9 +313,9 @@ const SwapComponent: React.FC<{
             setVisible={setVisible}
             content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
           />
-          {/* <button className={cx('btn')} onClick={refreshBalances}>
+          <button className={cx('btn')} onClick={refreshBalances}>
             <RefreshImg />
-          </button> */}
+          </button>
         </div>
         <div className={cx('from')}>
           <div className={cx('input-wrapper')}>

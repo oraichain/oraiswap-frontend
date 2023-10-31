@@ -105,9 +105,12 @@ const Balance: React.FC<BalanceProps> = () => {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
       await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
-      setLoadingRefresh(false);
     } catch (err) {
-      setLoadingRefresh(false);
+      console.log({ err });
+    } finally {
+      setTimeout(() => {
+        setLoadingRefresh(false);
+      }, 2000);
     }
   };
 
