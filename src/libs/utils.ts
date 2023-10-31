@@ -162,7 +162,6 @@ export const processWsResponseMsg = (message: any): string => {
   ) {
     if (!result.events) return null;
     const events = result.events;
-    console.log('events: ', events);
     const packets = events['recv_packet.packet_data'];
     if (!packets) return null;
     let tokens = '';
