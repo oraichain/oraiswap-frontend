@@ -1,4 +1,5 @@
 import {
+  BigDecimal,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   ORAI,
@@ -56,6 +57,7 @@ import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 import Metamask from 'libs/metamask';
+import { useNewReceiveAmount } from './hooks/useNewReceiveAmount';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -184,7 +186,7 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
-    routerClient,
+    routerClient
   );
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -198,11 +200,14 @@ const SwapComponent: React.FC<{
 
   const relayerFee = useRelayerFee();
   const relayerFeeToken = relayerFee.reduce((acc, cur) => {
-    if (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix) {
-      return acc = BigInt(cur.amount) + acc
+    if (
+      originalFromToken.chainId !== originalToToken.chainId &&
+      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
+    ) {
+      return (acc = new BigDecimal(cur.amount) + acc);
     }
     return acc;
-  }, 0n)
+  }, 0n);
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -210,15 +215,30 @@ const SwapComponent: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
 
+  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
       averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      fromAmountTokenBalance.toString(),
       userSlippage,
       originalFromToken.decimals
     )
     : '0';
-  const isWarningSlippage = +minimumReceive > +simulateData?.amount;
+
+  const newReceiveAmount = useNewReceiveAmount({
+    relayerFeeToken,
+    toTokenFee,
+    fromTokenFee,
+    minimumReceive,
+    originalToToken,
+    originalFromToken,
+    fromAmountTokenBalance,
+    simulateData: simulateData && simulateData.amount
+  });
+
+  const isWarningSlippage =
+    simulateData && simulateData.amount && new BigDecimal(minimumReceive) > new BigDecimal(simulateData.amount);
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -277,11 +297,7 @@ const SwapComponent: React.FC<{
           toChainId: originalToToken.chainId,
           fromAmount: fromAmountToken.toString(),
           toAmount: toAmountToken.toString(),
-          fromAmountInUsdt: getUsd(
-            toAmount(fromAmountToken, originalFromToken.decimals),
-            originalFromToken,
-            prices
-          ).toString(),
+          fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
           toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
           status: 'success',
           type: swapType,
@@ -427,15 +443,11 @@ const SwapComponent: React.FC<{
 
         {(() => {
           const disabledSwapBtn =
-            swapLoading ||
-            !fromAmountToken ||
-            !toAmountToken ||
-            toAmount(fromAmountToken, originalFromToken.decimals) > fromTokenBalance; // insufficent fund
+            swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
 
           let disableMsg: string;
           if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
-          if (toAmount(fromAmountToken, originalFromToken.decimals) > fromTokenBalance)
-            disableMsg = `Insufficient funds`;
+          if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
           return (
             <button
               className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
@@ -460,7 +472,7 @@ const SwapComponent: React.FC<{
             </div>
             <TokenBalance
               balance={{
-                amount: minimumReceive,
+                amount: newReceiveAmount,
                 decimals: originalFromToken?.decimals,
                 denom: originalToToken?.name
               }}
