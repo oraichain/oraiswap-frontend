@@ -1,0 +1,10 @@
+{
+    "plugins": [
+        [
+            "./plugins/operator-overloading",
+            {
+                "enabled": true
+            }
+        ]
+    ]
+}
