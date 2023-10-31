@@ -103,7 +103,6 @@ export class DuckDb {
 
   async addTransHistory(transHistory: TransactionHistory) {
     await this.conn.send(toSql('trans_history', transHistory));
-    console.log({ transHistory });
     await this.save(transHistory.userAddress);
   }
 

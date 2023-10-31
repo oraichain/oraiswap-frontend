@@ -17,7 +17,6 @@ const RequireAuthButton: React.FC<any> = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [isSameAddress, setIsSameAddress] = useState(false);
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  console.log('🚀 ~ file: RequireAuthButton.tsx:20 ~ metamaskAddress:', metamaskAddress);
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
@@ -100,7 +99,6 @@ const RequireAuthButton: React.FC<any> = () => {
     window.client = client;
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
-    console.log('oraiAddress', oraiAddress);
     if (oraiAddress === address) {
       setIsSameAddress(!isSameAddress);
     }

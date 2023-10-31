@@ -16,7 +16,6 @@ const DisconnectModal: React.FC<{
   walletActive: WalletItem;
   address: string;
 }> = ({ close, approve, walletActive, address }) => {
-  console.log('🚀 ~ file: index.tsx:18 ~ walletActive:', walletActive);
   const [theme] = useConfigReducer('theme');
   const network = walletActive?.networks?.length > 0 ? walletActive?.networks[0] : null;
   return (

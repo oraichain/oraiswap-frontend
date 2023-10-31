@@ -202,7 +202,6 @@ export const transferTokenErc20Cw20Map = async ({
   const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
 
   const executeContractMsgs = buildMultipleExecuteMessages(undefined, ...msgConvertReverses);
-  console.log({ executeContractMsgs });
   // note need refactor
   // get raw ibc tx
   const msgTransfer = {
@@ -217,7 +216,6 @@ export const transferTokenErc20Cw20Map = async ({
       timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout)
     })
   };
-  console.log({ msgTransfer });
 
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
   const { client } = await getCosmWasmClient(
@@ -266,9 +264,7 @@ export const transferToRemoteChainIbcWasm = async (
     memo: ibcMemo
   };
   let result: ExecuteResult;
-  console.log({ amount });
   if ('native_token' in assetInfo) {
-    console.log({ msg, amount: { amount, denom: fromToken.denom } });
     result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
   } else {
     const transferBackMsgCw20Msg: TransferBackMsg = {
@@ -278,7 +274,6 @@ export const transferToRemoteChainIbcWasm = async (
       timeout: msg.timeout,
       memo: msg.memo
     };
-    console.log({ transferBackMsgCw20Msg });
     const cw20Token = new OraiswapTokenClient(window.client, fromAddress, fromToken.contractAddress);
     result = await cw20Token.send(
       {
@@ -336,7 +331,6 @@ export const transferIbcCustom = async (
   // if it includes wasm in source => ibc wasm case
   if (ibcInfo.channel === oraichain2oraib) {
     try {
-      console.log({ ibcInfo, fromToken, toToken, toAddress, amount: amount.amount, ibcMemo });
       // special case. We try-catch because cosmwasm stargate already check tx code for us & throw an error if code != 0 => we can safely cast to DeliverTxResponse if there's no error
       const result = await transferToRemoteChainIbcWasm(
         ibcInfo,
