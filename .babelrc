@@ -1,10 +1,20 @@
 {
-    "plugins": [
-        [
-            "./plugins/operator-overloading",
-            {
-                "enabled": true
-            }
-        ]
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
     ]
+  ],
+  "plugins": [
+    [
+      "./plugins/operator-overloading",
+      {
+        "enabled": true
+      }
+    ]
+  ]
 }

@@ -1,5 +1,4 @@
-const babelTemplate = require('@babel/template');
-const template = babelTemplate.default;
+const template = require('@babel/template').default;
 
 const OperatorOverloadDirectiveName = 'operator-overloading';
 
@@ -10,12 +9,15 @@ const methodMap = {
   '/': 'div'
 };
 
-function createBinaryTemplate(op) {
-  return template(`() => LHS.${methodMap[op]}(RHS)`);
+function createBinaryTemplate(op, type) {
+  return template(`() => {
+    '${OperatorOverloadDirectiveName} disabled'
+    return LHS.${methodMap[op]}(RHS)
+  }`);
 }
 
 function assignLeftNode(node) {
-  return node.type === 'BinaryExpression'
+  return node?.type === 'BinaryExpression'
     ? template(`LHS.${methodMap[node.operator]}(RHS)`)({
         LHS: assignLeftNode(node.left),
         RHS: node.right
@@ -39,6 +41,37 @@ function hasOverloadingDirective(directives) {
 
 module.exports = function ({ types: t }) {
   return {
+    pre(state) {
+      const expressionStatement = template(`() => {
+        '${OperatorOverloadDirectiveName} disabled'
+        String.prototype.add = function(other) {
+          return this + other
+        }            
+        String.prototype.sub = function(other) {
+          return this - other
+        }            
+        String.prototype.mul = function(other) {
+          return this * other
+        }            
+        String.prototype.div = function(other) {
+          return this / other
+        }
+        Number.prototype.add = function(other) {
+          return this + other
+        }            
+        Number.prototype.sub = function(other) {
+          return this - other
+        }            
+        Number.prototype.mul = function(other) {
+          return this * other
+        }            
+        Number.prototype.div = function(other) {
+          return this / other
+        }
+      }`)();
+
+      state.ast.program.body.unshift(t.callExpression(expressionStatement.expression, []));
+    },
     visitor: {
       Program: {
         enter(path, state) {
@@ -61,9 +94,7 @@ module.exports = function ({ types: t }) {
               break;
             default:
               // Default to false.
-              state.dynamicData[OperatorOverloadDirectiveName].directives.unshift(
-                state.opts.enabled == undefined ? false : state.opts.enabled
-              );
+              state.dynamicData[OperatorOverloadDirectiveName].directives.unshift(state.opts.enabled ?? false);
               break;
           }
         },
@@ -100,16 +131,14 @@ module.exports = function ({ types: t }) {
           return;
         }
 
-        if (
-          path.node.operator.endsWith('===') ||
-          path.node.operator == '&&' ||
-          path.node.operator == '||' ||
-          path.node.operator == 'instanceof'
-        ) {
+        if (!methodMap[path.node.operator]) {
           return;
         }
 
-        const expressionStatement = createBinaryTemplate(path.node.operator)({
+        const expressionStatement = createBinaryTemplate(
+          path.node.operator,
+          path.node.type
+        )({
           LHS: assignLeftNode(path.node.left),
           RHS: path.node.right
         });
