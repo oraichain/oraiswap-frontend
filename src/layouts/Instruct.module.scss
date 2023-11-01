@@ -121,10 +121,16 @@
       }
 
       .describe {
+        height: 87px;
         padding-top: 24px;
         color: $neutral-text-describe;
         font-size: 14px;
         font-weight: 400;
+        display: -webkit-box;
+        // text-transform: capitalize;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        -webkit-line-clamp: 3;
       }
       .dark-describe {
         color: $neutral-text-body-on-section;
@@ -146,20 +152,12 @@
       }
       .dark-contact {
         color: $neutral-text-title;
-        .icon {
-          path {
-            fill: $neutral-text-title;
-          }
-        }
       }
     }
   }
 
   .dark-content {
     background-color: $neutral-surface-bg-section-2;
-    path {
-      fill: $neutral-surface-fill;
-    }
   }
 }
 

@@ -15,6 +15,7 @@ import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import SearchInput from 'components/SearchInput';
 import { ReactComponent as ChatBubbleQuestion } from 'assets/icons/chat-bubble-question.svg';
+import { ReactComponent as ChatBubbleQuestionDark } from 'assets/icons/chat-bubble-question-dark.svg';
 
 const cx = cn.bind(styles);
 
@@ -30,24 +31,24 @@ const WhatsNewItems = [
   {
     label: 'Universal Wallet',
     img: UniversalWallet,
-    content: "Bridge and universal swap all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    content: "Easily swiftly switch between different networks and wallet types"
   },
   {
     label: 'Tracking Transaction status',
     img: TrackingTransaction,
-    content: "Tracking Transaction status in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    content: "Coming soon in the next updates!"
   },
   {
     label: 'Transaction History',
     img: TrackingHistory,
-    content: "Transaction History all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    content: "Effortlessly access details of your recent transactions with real-time updates."
   },
 
   {
     label: 'Improved Pool Interface',
     icon: true,
     img: ImprovedPoolInterface,
-    content: "Improved Pool Interface all in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    content: "Liquidity pools are presented with comprehensive details, streamlining option comparison and asset control with real-time data."
   }
 ];
 
@@ -109,9 +110,9 @@ const Instruct: React.FC<InstructProps> = () => {
               <div className={cx('describe', `${theme}-describe`)}>
                 {WhatsNewItems[activeInd].content}
               </div>
-              <div className={cx('contact', `${theme}-contact`)} onClick={() => window.open("mailto:support@orai.io")} >
-                <ChatBubbleQuestion className={cx('icon')} />
-                <div>Contact us</div>
+              <div className={cx('contact', `${theme}-contact`)} >
+                {theme === 'light' ? <ChatBubbleQuestion /> : <ChatBubbleQuestionDark />}
+                <div onClick={() => window.open("mailto:support@orai.io")} >Contact us</div>
               </div>
             </div>
           </div>

@@ -91,7 +91,26 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [address, setAddress] = useConfigReducer('address');
 
-  const walletInit = [
+  const OwalletInfo = {
+    id: 2,
+    name: isMobile() ? 'Owallet' : (walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet'),
+    code: isMobile() ? WALLET_TYPES.OWALLET : (walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET),
+    icon: isMobile() ? OwalletImage : (walletTypeStore === 'keplr' ? KeplrImage : OwalletImage),
+    totalUsd: 0,
+    isOpen: false,
+    isConnect: !!isEmptyObject(cosmosAddress) === false,
+    networks: cosmosNetworks.map((item: any, index) => {
+      if (!!isEmptyObject(cosmosAddress) === false) {
+        item.address = cosmosAddress[item.chainId];
+        return item;
+      } else {
+        item.address = undefined;
+        return item;
+      }
+    })
+  }
+
+  let walletInit = [
     {
       id: 1,
       name: 'Metamask',
@@ -102,24 +121,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       isConnect: !!metamaskAddress,
       networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }]
     },
-    {
-      id: 2,
-      name: walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet',
-      code: walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
-      icon: walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
-      totalUsd: 0,
-      isOpen: false,
-      isConnect: !!isEmptyObject(cosmosAddress) === false,
-      networks: cosmosNetworks.map((item: any, index) => {
-        if (!!isEmptyObject(cosmosAddress) === false) {
-          item.address = cosmosAddress[item.chainId];
-          return item;
-        } else {
-          item.address = undefined;
-          return item;
-        }
-      })
-    },
+    OwalletInfo,
     {
       id: 3,
       name: 'TronLink',
@@ -128,12 +130,30 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       totalUsd: 0,
       isOpen: false,
       isConnect: !!tronAddress,
-      networks: tronNetworks.map((item: any, index) => {
+      networks: tronNetworks.map((item: any) => {
         item.address = tronAddress;
         return item;
       })
     }
   ];
+
+  if (isMobile()) {
+    walletInit = [
+      {
+        ...OwalletInfo,
+        networks: [
+          ...OwalletInfo.networks,
+          ...[{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }],
+          ...tronNetworks.map((item: any) => {
+            item.address = tronAddress;
+            return item;
+          })
+        ]
+      }
+    ]
+  }
+
+
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
@@ -439,7 +459,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           address={checkAddressByWalletType(walletTypeActive)}
         />
       ) : null}
-      {isShowDisconnect && (
+      {isShowDisconnect && !isMobile() && (
         <DisconnectModal
           close={() => {
             setIsShowDisconnect(false);
