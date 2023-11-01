@@ -34,7 +34,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
-  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(true);
 
   const sizePadding = isMobile() ? '12px' : '24px';
   const { totalStaked } = useGetMyStake({
@@ -53,12 +53,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     label?: string;
     balance?: number | string;
   }[] = [
-    {
-      src: WalletIcon,
-      label: 'Total balance',
-      balance: formatDisplayUsdt(totalUsd)
-    }
-  ];
+      {
+        src: WalletIcon,
+        label: 'Total balance',
+        balance: formatDisplayUsdt(totalUsd)
+      }
+    ];
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [
