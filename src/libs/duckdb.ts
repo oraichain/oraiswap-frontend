@@ -91,7 +91,7 @@ export class DuckDb {
       )
       `);
     }
-    return buf.length > 0;
+    return Boolean(buf);
   }
 
   async save(userAddress: string) {
