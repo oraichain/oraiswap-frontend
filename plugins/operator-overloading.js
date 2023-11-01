@@ -172,11 +172,7 @@ module.exports = function ({ types: t }) {
        * @param {NodePath} path
        */
       BinaryExpression(path, state) {
-        if (!state.dynamicData[OperatorOverloadDirectiveName].directives[0]) {
-          return;
-        }
-
-        if (!methodMap[path.node.operator]) {
+        if (!state.dynamicData[OperatorOverloadDirectiveName].directives[0] || !methodMap[path.node.operator]) {
           return;
         }
 
