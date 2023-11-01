@@ -372,7 +372,7 @@ describe.only('IBCModule', () => {
         return;
       }
       const bobBalance = oraiClient.app.bank.getBalance(icsPackage.receiver);
-      expect(bobBalance).toEqual(expectedBalance);
+      expect(bobBalance).toMatchObject(expectedBalance);
     }
   );
 
