@@ -7,18 +7,18 @@ import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
 import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward } from './hooks';
 
-import { CW20_DECIMALS, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
+import { oraichainTokensWithIcon } from 'config/chainInfos';
 import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useTheme from 'hooks/useTheme';
 import isEqual from 'lodash/isEqual';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
 import { useFetchLpPoolsV3, useGetMyStake, useGetPools, useGetRewardInfo } from './hookV3';
 import styles from './indexV3.module.scss';
-import { oraichainTokensWithIcon } from 'config/chainInfos';
-import useTheme from 'hooks/useTheme';
 
 export type PoolTableData = PoolInfoResponse & {
   reward: string[];
@@ -79,6 +79,11 @@ const Pools: React.FC<{}> = () => {
     const [baseToken, quoteToken] = [baseDenom, quoteDenom].map((denom) =>
       oraichainTokensWithIcon.find((token) => token.denom === denom || token.contractAddress === denom)
     );
+    // TODO: hardcode reverse symbol order for ORAI/INJ pools, need to update later
+    let { symbols } = pool;
+    if (baseDenom === INJECTIVE_CONTRACT && quoteDenom === ORAI) {
+      symbols = symbols.split('/').reverse().join('/');
+    }
 
     return {
       ...pool,
@@ -86,13 +91,24 @@ const Pools: React.FC<{}> = () => {
       myStakedLP: toDisplay(BigInt(Math.trunc(myStakeLPInUsdt)), CW20_DECIMALS),
       earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS),
       baseToken,
-      quoteToken
+      quoteToken,
+      symbols
     };
   });
 
   const generateIcon = (baseToken: TokenItemType, quoteToken: TokenItemType): JSX.Element => {
     const BaseTokenIcon = theme === 'light' ? baseToken.IconLight : baseToken.Icon;
     const QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight : quoteToken.Icon;
+    // TODO: hardcode reverse logo for ORAI/INJ, need to update later
+    if (baseToken.coinGeckoId === 'injective-protocol' && quoteToken.coinGeckoId === 'oraichain-token') {
+      return (
+        <div className={styles.symbols}>
+          <QuoteTokenIcon className={styles.symbols_logo_left} />
+          <BaseTokenIcon className={styles.symbols_logo_right} />
+        </div>
+      );
+    }
+
     return (
       <div className={styles.symbols}>
         <BaseTokenIcon className={styles.symbols_logo_left} />
