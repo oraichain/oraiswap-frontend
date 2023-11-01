@@ -200,10 +200,11 @@ const SwapComponent: React.FC<{
       originalFromToken.chainId !== originalToToken.chainId &&
       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
     ) {
-      return (acc = cur.amount + acc);
+      return +cur.amount + acc;
     }
     return acc;
-  }, 0n);
+  }, 0);
+
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -215,11 +216,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
 
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
@@ -482,7 +483,7 @@ const SwapComponent: React.FC<{
               </div>
               <TokenBalance
                 balance={{
-                  amount: relayerFeeToken,
+                  amount: relayerFeeToken.toString(),
                   // decimals: relayerFeeInfo[relayerFeeToken.prefix],
                   decimals: RELAYER_DECIMAL,
                   denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
