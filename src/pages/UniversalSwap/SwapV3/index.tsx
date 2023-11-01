@@ -196,26 +196,40 @@ const SwapComponent: React.FC<{
   );
 
   const relayerFee = useRelayerFee();
-  let relayerFeeToken = 0;
+  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
+    if (
+      originalFromToken.chainId !== originalToToken.chainId &&
+      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
+    ) {
+      return +cur.amount + acc;
+    }
+    return acc;
+  }, 0);
   // TODO: need testcase
-  const RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN = 20000
-  const { universalSwapType } = getRoute(originalFromToken, originalToToken, oraiAddress);
-  const isEvmToEvm = !originalFromToken.cosmosBased && !originalToToken.cosmosBased && originalFromToken.chainId !== originalToToken.chainId;
-  const isEvmBridge = !originalFromToken.cosmosBased && !originalToToken.cosmosBased && originalFromToken.chainId === originalToToken.chainId
-  if (universalSwapType === "other-networks-to-oraichain" && !isEvmBridge) {
-    relayerFeeToken = RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN
-  }
-  if (universalSwapType === "oraichain-to-evm" || isEvmToEvm) {
-    relayerFeeToken = relayerFee.reduce((acc, cur) => {
-      if (
-        originalFromToken.chainId !== originalToToken.chainId &&
-        (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-      ) {
-        return +cur.amount + acc;
-      }
-      return acc;
-    }, 0)
-  }
+  // const RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN = 20000;
+  // const { universalSwapType } = getRoute(originalFromToken, originalToToken, oraiAddress);
+  // const isEvmToEvm =
+  //   !originalFromToken.cosmosBased &&
+  //   !originalToToken.cosmosBased &&
+  //   originalFromToken.chainId !== originalToToken.chainId;
+  // const isEvmBridge =
+  //   !originalFromToken.cosmosBased &&
+  //   !originalToToken.cosmosBased &&
+  //   originalFromToken.chainId === originalToToken.chainId;
+  // if (universalSwapType === "other-networks-to-oraichain" && !isEvmBridge) {
+  //   relayerFeeToken = RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN
+  // }
+  // if (universalSwapType === 'oraichain-to-evm' || isEvmToEvm) {
+  //   relayerFeeToken = relayerFee.reduce((acc, cur) => {
+  //     if (
+  //       originalFromToken.chainId !== originalToToken.chainId &&
+  //       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
+  //     ) {
+  //       return +cur.amount + acc;
+  //     }
+  //     return acc;
+  //   }, 0);
+  // }
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -227,11 +241,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
 
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
