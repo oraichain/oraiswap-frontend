@@ -12,6 +12,7 @@ import { Link, useLocation } from 'react-router-dom';
 import styles from './MenuV3.module.scss';
 import ConnectWallet from 'components/ConnectWallet';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 
 const Menu: React.FC = React.memo(() => {
   const location = useLocation();
@@ -33,6 +34,20 @@ const Menu: React.FC = React.memo(() => {
   }, []);
 
   const renderLink = (to: string, title: string, onClick: any, externalLink = false) => {
+    if (to === 'coming-soon') {
+      return (
+        <span
+          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
+          onClick={() => {
+            displayToast(TToastType.TX_INFO, {
+              message: `Coming soon!`
+            });
+          }}
+        >
+          <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
+        </span>
+      );
+    }
     if (externalLink)
       return (
         <a
@@ -77,9 +92,10 @@ const Menu: React.FC = React.memo(() => {
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'SWAP', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
-      {renderLink('https://feat-future-feature.orderbook-frontend.pages.dev/', 'FUTURES', () => { }, true)}
-      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('coming-soon', 'FUTURES', () => {}, true)}
+      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+      {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
     </div>
   );
   return (

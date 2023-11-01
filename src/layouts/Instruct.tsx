@@ -22,7 +22,7 @@ interface InstructProps {}
 
 const WhatsNewItems = [
   {
-    label: 'Universal Swap & Bridge',
+    label: 'Bridge & Swap: All in one place',
     icon: true,
     img: UniversalSwapBridge,
     content:
@@ -31,13 +31,12 @@ const WhatsNewItems = [
   {
     label: 'Universal Wallet',
     img: UniversalWallet,
-    content: 'Effortlessly manage all your wallets at once. Seamlessly connect to multiple popular wallets with ease'
+    content: 'Effortlessly manage all your wallets at once. Seamlessly connect to multiple wallets with ease.'
   },
   {
     label: 'Tracking Transaction status',
     img: TrackingTransaction,
-    content:
-      "Tracking Transaction status in one place. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    content: 'Coming soon in the next update!'
   },
   {
     label: 'Transaction History',
