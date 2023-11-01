@@ -41,7 +41,7 @@ import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -332,7 +332,8 @@ const Balance: React.FC<BalanceProps> = () => {
           prices={prices}
           amounts={amounts}
           type="network"
-          items={networks}
+          // TODO: current hide ethereum network, open later after fixed sdk.
+          items={networks.filter((network) => network.chainId !== '0x01')}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}
