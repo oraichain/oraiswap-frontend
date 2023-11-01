@@ -28,10 +28,8 @@ export default () => (
   >
     <Routes>
       <Route path="/" element={<UniversalSwap />} />
-      <Route path="/swap" element={<SwapV2 />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
-      <Route path="/bridge" element={<Balance />} />
       <Route path="/pools/:poolUrl" element={<PoolDetail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
