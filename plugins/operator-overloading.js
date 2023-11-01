@@ -147,7 +147,6 @@ module.exports = function ({ types: t }) {
               operatorOverloadState.directives.shift();
               break;
           }
-          console.log(state._map);
         }
       },
       /**
