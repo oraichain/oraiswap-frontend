@@ -25,6 +25,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import ToggleSwitch from 'components/ToggleSwitch';
 import { tokensIcon } from 'config/chainInfos';
 import { flattenTokens } from 'config/bridgeTokens';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 
@@ -36,7 +37,6 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(false);
 
   const sizePadding = isMobile() ? '12px' : '24px';
-  const toFixNumber = isMobile() ? 4 : 6;
   const { totalStaked } = useGetMyStake({
     stakerAddress: address
   });
@@ -51,14 +51,14 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   let listAsset: {
     src?: CoinIcon;
     label?: string;
-    balance?: number;
+    balance?: number | string;
   }[] = [
-      {
-        src: WalletIcon,
-        label: 'Total balance',
-        balance: totalUsd
-      }
-    ];
+    {
+      src: WalletIcon,
+      label: 'Total balance',
+      balance: formatDisplayUsdt(totalUsd)
+    }
+  ];
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [
@@ -66,7 +66,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       {
         src: StakeIcon,
         label: 'Total staked',
-        balance: toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)
+        balance: formatDisplayUsdt(toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS))
       }
     ];
   }
@@ -80,7 +80,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       }
       if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
       if (!networkFilter) return true;
-      return token.chainId == networkFilter;
+      return token.chainId === networkFilter;
     })
     .sort((a, b) => {
       return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
@@ -105,7 +105,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         price: prices[t.coinGeckoId] || 0,
         balance: toDisplay(amount.toString(), t.decimals),
         denom: t.denom,
-        value: value.toFixed(toFixNumber),
+        value: value,
         coeff: 0,
         coeffType: 'increase'
       };
@@ -143,7 +143,9 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       name: 'BALANCE',
       width: '23%',
       align: 'left',
-      accessor: (data) => <div className={cx("balance", `${!data.balance && 'balance-low'}`)}>{Number(data.balance.toFixed(toFixNumber))}</div>
+      accessor: (data) => (
+        <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>{formatDisplayUsdt(data.balance)}</div>
+      )
     },
     value: {
       name: 'VALUE',
@@ -151,21 +153,10 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       align: 'left',
       padding: '0px 8px 0px 0px',
       accessor: (data) => {
-        // const checkCoeffType = data.coeffType === 'increase';
-        // const coeffTypeValue = checkCoeffType ? '+' : '-';
         return (
           <div className={styles.valuesColumn}>
             <div>
-              <div className={styles.value}>${data.value}</div>
-              {/* <div
-                style={{
-                  color: checkCoeffType ? '#00AD26' : '#E01600'
-                }}
-                className={styles.coeff}
-              >
-                {coeffTypeValue}
-                {data.coeff}%
-              </div> */}
+              <div className={styles.value}>{formatDisplayUsdt(data.value)}</div>
             </div>
           </div>
         );
@@ -184,7 +175,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
               </div>
               <div className={cx('balance')}>
                 <div className={cx('label')}>{e.label}</div>
-                <div className={cx('value')}>${e.balance.toFixed(6)}</div>
+                <div className={cx('value')}>{e.balance}</div>
               </div>
             </div>
           );
