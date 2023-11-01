@@ -205,7 +205,6 @@ const SwapComponent: React.FC<{
     return acc;
   }, 0);
 
-
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -476,7 +475,7 @@ const SwapComponent: React.FC<{
             />
           </div>
 
-          {relayerFeeToken && (
+          {!!relayerFeeToken && (
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Relayer Fee</span>
