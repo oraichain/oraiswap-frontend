@@ -71,9 +71,11 @@ export class DuckDb {
     const buf: Uint8Array = await get(`trans_history_${userAddress}`);
     if (buf) {
       await this.db.registerFileBuffer(`trans_history_${userAddress}.parquet`, await decompress(buf));
-      this.conn.send(`create table trans_history as select * from 'trans_history_${userAddress}.parquet'`);
+      await this.conn.send(
+        `create table trans_history_${userAddress} as select * from 'trans_history_${userAddress}.parquet'`
+      );
     } else {
-      this.conn.send(`create table trans_history
+      await this.conn.send(`create table trans_history_${userAddress}
       (
         initialTxHash varchar primary key, 
         fromCoingeckoId varchar, 
@@ -96,29 +98,26 @@ export class DuckDb {
 
   async save(userAddress: string) {
     // Export Parquet
-    await this.conn.send(`copy (select * from trans_history) to 'trans_history_${userAddress}.parquet'`);
+    await this.conn.send(`copy (select * from trans_history_${userAddress}) to 'trans_history_${userAddress}.parquet'`);
     const buf = await compress(await this.conn.bindings.copyFileToBuffer(`trans_history_${userAddress}.parquet`));
     await set(`trans_history_${userAddress}`, buf);
   }
 
   async addTransHistory(transHistory: TransactionHistory) {
-    await this.conn.send(toSql('trans_history', transHistory));
+    await this.conn.send(toSql(`trans_history_${transHistory.userAddress}`, transHistory));
     await this.save(transHistory.userAddress);
   }
 
   async getTransHistory(userAddress: string): Promise<TransactionHistory[]> {
     if (!userAddress) return [];
 
-    const isTableExist = await this.createTableTransHistory(userAddress);
-    if (!isTableExist) return [];
-
-    // get data from parquet
-    await this.conn.send(`copy (select * from trans_history_${userAddress}.parquet) to 'trans_history'`);
+    const isTableExistOrHasData = await this.createTableTransHistory(userAddress);
+    if (!isTableExistOrHasData) return [];
 
     // TODO: need to update limit later for pagination
     const DEFAULT_LIMIT = 20;
     const histories = await this.conn.query(
-      `SELECT * FROM trans_history ORDER BY timestamp DESC LIMIT ${DEFAULT_LIMIT}`
+      `SELECT * FROM trans_history_${userAddress} ORDER BY timestamp DESC LIMIT ${DEFAULT_LIMIT}`
     );
     return histories.toArray();
   }
