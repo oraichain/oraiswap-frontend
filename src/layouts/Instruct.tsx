@@ -92,7 +92,7 @@ const Instruct: React.FC<InstructProps> = () => {
             </div>
             <div className={cx('ask')} onClick={() => window.open('https://beacons.ai/oraidex')}>
               <img src={GroupImg} alt="gift" width={20} height={20} />
-              <div> Ask the community</div>
+              <div> Join the community</div>
             </div>
             <div className={cx('ai')} onClick={() => window.open('https://academy.orai.io/tag/oraisavvy')}>
               <img src={GraduationImg} alt="gift" width={20} height={20} />

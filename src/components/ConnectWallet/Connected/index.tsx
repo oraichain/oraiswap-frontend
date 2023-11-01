@@ -10,6 +10,7 @@ import { getTotalUsd } from 'libs/utils';
 import { RootState } from 'store/configure';
 import styles from './index.module.scss';
 import { isMobile } from '@walletconnect/browser-utils';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 
@@ -30,7 +31,7 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
         <>
           <div className={cx('content')}>
             <div className={cx('title')}>My Wallets</div>
-            <div className={cx('money')}>${totalUsd.toFixed(2)}</div>
+            <div className={cx('money')}>{formatDisplayUsdt(totalUsd)}</div>
           </div>
           <div className={cx('down_icon')}>
             <DownArrowIcon />
