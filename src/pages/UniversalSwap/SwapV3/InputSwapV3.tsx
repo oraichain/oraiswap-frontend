@@ -20,6 +20,7 @@ interface InputSwapProps {
   balance: string | bigint;
   disable?: boolean;
   originalToken?: TokenInfo;
+  setCoe?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function InputSwapV3({
@@ -32,16 +33,15 @@ export default function InputSwapV3({
   balance,
   disable,
   prices,
-  originalToken
+  originalToken,
+  setCoe
 }: InputSwapProps) {
   return (
     <>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
           <div className={cx('left')}>
-            <div className={cx('icon')}>
-              {Icon && <Icon className={cx('logo')} />}
-            </div>
+            <div className={cx('icon')}>{Icon && <Icon className={cx('logo')} />}</div>
             <div className={cx('section')}>
               <div className={cx('name')}>{token?.name}</div>
               <div className={cx('chain')}>{token?.org}</div>
@@ -59,6 +59,9 @@ export default function InputSwapV3({
           disabled={disable}
           type="text"
           value={amount}
+          onChange={() => {
+            setCoe(0);
+          }}
           onValueChange={({ floatValue }) => {
             onChangeAmount && onChangeAmount(floatValue);
           }}

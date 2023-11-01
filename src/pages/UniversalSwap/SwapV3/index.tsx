@@ -42,7 +42,6 @@ import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
 import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { useWarningSlippage } from '../Swap/hooks';
 import {
   AMOUNT_BALANCE_ENTRIES,
   SwapDirection,
@@ -109,10 +108,9 @@ const SwapComponent: React.FC<{
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = (amount: bigint, type) => {
+  const onChangePercent = (amount: bigint) => {
     const displayAmount = toDisplay(amount, originalFromToken?.decimals);
-    let finalAmount = displayAmount;
-    setSwapAmount([finalAmount, toAmountToken]);
+    setSwapAmount([displayAmount, toAmountToken]);
   };
 
   // get token on oraichain to simulate swap amount.
@@ -202,7 +200,7 @@ const SwapComponent: React.FC<{
       originalFromToken.chainId !== originalToToken.chainId &&
       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
     ) {
-      return acc = cur.amount + acc;
+      return (acc = cur.amount + acc);
     }
     return acc;
   }, 0n);
@@ -217,11 +215,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
 
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
@@ -245,7 +243,7 @@ const SwapComponent: React.FC<{
       const relayerFee = relayerFeeToken && {
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
-      }
+      };
 
       const univeralSwapHandler = new UniversalSwapHandler(
         {
@@ -331,6 +329,7 @@ const SwapComponent: React.FC<{
               amount={fromAmountToken}
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
+              setCoe={setCoe}
             />
             {isSelectFrom && (
               <SelectTokenModalV2
@@ -416,9 +415,9 @@ const SwapComponent: React.FC<{
                 }
                 setCoe(coeff);
                 if (type === 'max') {
-                  onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), type);
+                  onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
                 } else {
-                  onMaxFromAmount((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6), type);
+                  onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
                 }
               }}
             >

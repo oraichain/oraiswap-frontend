@@ -2918,6 +2918,11 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.13.tgz#3c9896520e18070c045fc3419322bd34e42b1277"
   integrity sha512-DvEbz8oakiFWj4HnFM9NBJ5eHibWltmIQ32dfqrgA6inlti/33zkTVW8cxztwAS+ZQSAf/mdZnzhamRrbEn18A==
 
+"@oraichain/oraidex-common@^1.0.27":
+  version "1.0.27"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.27.tgz#028c08f957502d430d9e795c7e8f9fa3bf905972"
+  integrity sha512-IPkhxpMtWJUeacbNFX7jWosUNuQ/tRr96iOfXv8ARyy9LlXSSO/QlQoYm9G0nLI8yX6kL/AyyqgfSO+wEjj75g==
+
 "@oraichain/oraidex-contracts-build@^1.0.20":
   version "1.0.20"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.20.tgz#4e54d96c34cfb28a8c16ecd0d82c7c839f9f9690"
