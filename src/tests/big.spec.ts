@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { BigDecimal } from '@oraichain/oraidex-common';
+import { transform } from '@babel/core';
 
-describe('operator', () => {
-  it('transplie', () => {
+describe('operator overloading', () => {
+  it('binary expression', () => {
     const a = new BigDecimal('123.45');
     const b = new BigDecimal('678.9');
 
@@ -11,23 +12,26 @@ describe('operator', () => {
     const e: BigDecimal = c + d;
     expect(c.toNumber()).toBe(8373.441);
   });
+
+  it('transform', () => {
+    const actual = transform(
+      `
+    import { BigDecimal } from '@oraichain/oraidex-common';
+
+    const a = new BigDecimal('123.45');
+    const b = new BigDecimal('678.9');
+
+    const c = ((a + b) / 2 + 15) * 20.12;
+    const d = 10 + 12 - 5;
+    const e = c + d;    
+    `,
+      {
+        configFile: false,
+        presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
+        plugins: [['./plugins/operator-overloading', { enabled: true, classNames: ['BigDecimal'] }]]
+      }
+    );
+
+    console.log(actual.code);
+  });
 });
-
-// describe('operator', () => {
-//   it('transplie', () => {
-//     const { transform } = require('@babel/core');
-//     const actual = transform(
-//       `
-//     import { BigDecimal } from '@oraichain/oraidex-common';
-
-//     console.log(  BigDecimal('2') -  BigDecimal('1'));
-//     `,
-//       {
-//         presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
-//         plugins: [['./plugins/operator-overloading', { enabled: true }]]
-//       }
-//     );
-//     eval(actual.code);
-//     console.log(actual.code);
-//   });
-// });
