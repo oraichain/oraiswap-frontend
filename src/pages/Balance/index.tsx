@@ -167,7 +167,7 @@ const Balance: React.FC<BalanceProps> = () => {
         {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
-          originalToToken: from,
+          originalToToken: to,
           fromAmount
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
