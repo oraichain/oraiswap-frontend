@@ -1,5 +1,4 @@
 import {
-  BigDecimal,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   ORAI,
@@ -203,7 +202,7 @@ const SwapComponent: React.FC<{
       originalFromToken.chainId !== originalToToken.chainId &&
       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
     ) {
-      return (acc = new BigDecimal(cur.amount) + acc);
+      return acc = cur.amount + acc;
     }
     return acc;
   }, 0n);
@@ -225,8 +224,7 @@ const SwapComponent: React.FC<{
     )
     : '0';
 
-  const isWarningSlippage =
-    simulateData && simulateData.amount && new BigDecimal(minimumReceive) > new BigDecimal(simulateData.amount);
+  const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
