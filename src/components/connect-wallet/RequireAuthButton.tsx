@@ -10,7 +10,7 @@ import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
-import { WalletType } from 'config/constants';
+import { WalletType } from '@oraichain/oraidex-common';
 
 const RequireAuthButton: React.FC<any> = () => {
   const [, setIsInactiveMetamask] = useState(false);
@@ -26,9 +26,10 @@ const RequireAuthButton: React.FC<any> = () => {
       setIsInactiveMetamask(false);
 
       // if chain id empty, we switch to default network which is BSC
-      if (!window.ethereum.chainId) {
+      if (!window?.ethereum?.chainId) {
         await window.Metamask.switchNetwork(Networks.bsc);
       }
+
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
@@ -47,7 +48,7 @@ const RequireAuthButton: React.FC<any> = () => {
   const connectTronLink = async () => {
     try {
       // if not requestAccounts before
-      if (Metamask.checkTron()) {
+      if (window.Metamask.checkTron() || new Metamask(window.tronWeb).checkTron()) {
         // TODO: Check owallet mobile
         let tronAddress: string;
         if (isMobile()) {
@@ -98,7 +99,6 @@ const RequireAuthButton: React.FC<any> = () => {
     window.client = client;
     await window.Keplr.suggestChain(network.chainId);
     const oraiAddress = await window.Keplr.getKeplrAddr();
-    console.log('oraiAddress', oraiAddress);
     if (oraiAddress === address) {
       setIsSameAddress(!isSameAddress);
     }

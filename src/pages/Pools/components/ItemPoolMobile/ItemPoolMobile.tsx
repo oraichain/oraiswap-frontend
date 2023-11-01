@@ -1,0 +1,81 @@
+import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { Button } from 'components/Button';
+import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { PoolTableData } from 'pages/Pools/indexV3';
+import { useNavigate } from 'react-router-dom';
+import styles from './ItemPoolMobile.module.scss';
+
+type PoolMobileItemProps = {
+  pool: PoolTableData;
+  setPairDenomsDeposit: React.Dispatch<React.SetStateAction<string>>;
+  generateIcon: (baseToken: TokenItemType, quoteToken: TokenItemType) => JSX.Element;
+};
+export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDenomsDeposit, generateIcon }) => {
+  const navigate = useNavigate();
+
+  const handleClickRow = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    event.stopPropagation();
+    const [firstAssetInfo, secondAssetInfo] = [JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)];
+
+    navigate(
+      `/pools/${encodeURIComponent(parseAssetOnlyDenom(firstAssetInfo))}_${encodeURIComponent(
+        parseAssetOnlyDenom(secondAssetInfo)
+      )}`
+    );
+  };
+
+  return (
+    <article className={styles.pool} onClick={(e) => handleClickRow(e)}>
+      <div className={styles.poolHead}>
+        <div className={styles.symbols}>
+          <div>{generateIcon(pool.baseToken, pool.quoteToken)}</div>
+          <span className={styles.symbols_name}>{pool.symbols}</span>
+        </div>
+        <div className={styles.apr}>
+          <div className={styles.title}>APR</div>
+          <div className={styles.value}>{`${pool.apr.toFixed(2)}%`}</div>
+          <div className={styles.aprReward}>
+            {pool.reward.map((asset) => (
+              <span key={asset}>+{asset}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className={styles.poolInfo}>
+        <div>
+          <div className={styles.title}>My Staked LP</div>
+          <span className={styles.value}>{formatDisplayUsdt(pool.myStakedLP)}</span>
+        </div>
+        <div>
+          <div className={styles.title}>Earned</div>
+          <span className={styles.value}>{formatDisplayUsdt(pool.earned)}</span>
+        </div>
+        <div>
+          <div className={styles.title}>Volume (24h)</div>
+          <span className={styles.value}>{formatDisplayUsdt(toDisplay(pool.volume24Hour))}</span>
+        </div>
+        <div>
+          <div className={styles.title}>Liquidity</div>
+          <span className={styles.value}>
+            {formatDisplayUsdt(toDisplay(parseInt(pool.totalLiquidity.toString()).toString()))}
+          </span>
+        </div>
+      </div>
+      <div className={styles.btnAddLp}>
+        <Button
+          type="primary-sm"
+          onClick={(event) => {
+            event.stopPropagation();
+            setPairDenomsDeposit(
+              `${parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo))}_${parseAssetOnlyDenom(
+                JSON.parse(pool.secondAssetInfo)
+              )}`
+            );
+          }}
+        >
+          Add
+        </Button>
+      </div>
+    </article>
+  );
+};

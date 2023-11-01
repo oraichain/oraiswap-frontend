@@ -3,11 +3,11 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from 'config/constants';
+import { ORAI } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import CosmJs from 'libs/cosmjs';
-import { toAmount, toDisplay } from 'libs/utils';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { Type, generateMiningMsgs } from 'rest/api';
@@ -50,7 +50,7 @@ const UnbondModal: FC<ModalProps> = ({
         message: 'Amount is invalid!'
       });
 
-    const oraiAddress = await handleCheckAddress();
+    const oraiAddress = await handleCheckAddress('Oraichain');
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);

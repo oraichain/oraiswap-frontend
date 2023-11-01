@@ -8,20 +8,20 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, TRON_DENOM } from 'config/constants';
+import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, MILKY, ORAI, TRON_DENOM } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { feeEstimate, floatToPercent, getPairSwapV2, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { feeEstimate, floatToPercent, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useLoadTokens from 'hooks/useLoadTokens';
 import CosmJs from 'libs/cosmjs';
-import { toAmount, toDisplay, toSubAmount } from 'libs/utils';
+import { toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCachedPairInfo, fetchTaxRate, fetchTokenInfos, simulateSwap } from 'rest/api';
+import { fetchCachedPairInfo, fetchTaxRate, fetchTokenInfos } from 'rest/api';
 import { RootState } from 'store/configure';
-import { calculateMinReceive, generateMsgsSwap } from '../helpers';
+import { generateMsgsSwap } from '../helpers';
 import SelectTokenModal from '../Modals/SelectTokenModal';
 import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
@@ -30,6 +30,9 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { useWarningSlippage } from 'pages/UniversalSwap/Swap/hooks';
+import { calculateMinReceive, getPairSwapV2, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { simulateSwap } from '@oraichain/oraidex-universal-swap';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const cx = cn.bind(styles);
 
@@ -105,6 +108,7 @@ const SwapComponent: React.FC<{
   const subAmountTo = toSubAmount(amounts, toToken);
   const fromTokenBalance = fromToken ? BigInt(amounts[fromToken.denom] ?? '0') + subAmountFrom : BigInt(0);
   const toTokenBalance = toToken ? BigInt(amounts[toToken.denom] ?? '0') + subAmountTo : BigInt(0);
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
 
   const { data: simulateData } = useQuery(
     ['simulate-data', fromTokenInfoData, toTokenInfoData, fromAmountToken],
@@ -112,7 +116,8 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString()
+        amount: toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        routerClient
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData && fromAmountToken > 0 }
   );
@@ -123,7 +128,8 @@ const SwapComponent: React.FC<{
       simulateSwap({
         fromInfo: fromTokenInfoData!,
         toInfo: toTokenInfoData!,
-        amount: toAmount(1, fromTokenInfoData!.decimals).toString()
+        amount: toAmount(1, fromTokenInfoData!.decimals).toString(),
+        routerClient
       }),
     { enabled: !!fromTokenInfoData && !!toTokenInfoData }
   );
@@ -151,7 +157,7 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       const messages = generateMsgsSwap(
         fromTokenInfoData,
@@ -338,7 +344,7 @@ const SwapComponent: React.FC<{
         {(fromToken?.denom === MILKY || toToken?.denom === MILKY) && (
           <div className={cx('row')}>
             <div className={cx('title')}>
-              <span>*Additional: 5% entry tax rate for MILKY transactions</span>
+              <span>*Additional: 5% sell tax for swap transactions from MILKY</span>
             </div>
           </div>
         )}

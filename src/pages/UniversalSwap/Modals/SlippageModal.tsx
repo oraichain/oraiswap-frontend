@@ -1,7 +1,7 @@
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import TransSetting from 'assets/images/trans_setting.svg';
+import { ReactComponent as TransSetting } from 'assets/images/trans_setting.svg';
 import cn from 'classnames/bind';
-import { DEFAULT_MANUAL_SLIPPAGE, DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from 'config/constants';
+import { DEFAULT_MANUAL_SLIPPAGE, DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import NumberFormat, { NumberFormatValues } from 'react-number-format';
 import styles from './SlippageModal.module.scss';
@@ -11,7 +11,7 @@ const cx = cn.bind(styles);
 
 interface ModalProps {
   setUserSlippage: React.Dispatch<React.SetStateAction<number>>;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
@@ -23,12 +23,12 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
     <div className={cx('setting', `${theme}-modal`)}>
       <div className={cx('header')}>
         <div className={cx('title')}>
-          <img className={cx('btn')} src={TransSetting} alt="btn" />
+          <TransSetting className={cx('btn')} />
           <div>Transaction settings</div>
         </div>
         <CloseIcon className={cx('close-icon')} onClick={() => setVisible(false)} />
       </div>
-      <div className={cx("subtitle")}>Slippage tolerance</div>
+      <div className={cx('subtitle')}>Slippage tolerance</div>
       <div className={cx('options')}>
         {OPTIONS_SLIPPAGE.map((option, idx) => (
           <div
@@ -44,15 +44,14 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             {option}%
           </div>
         ))}
-        <div
+        {/* <div
           className={cx('item', 'border', {
             isChosen: indexChosenOption === OPTIONS_SLIPPAGE.length
           })}
           onClick={() => {
             setUserSlippage(manualSlippage ?? 0);
-            setIndexChosenOption(OPTIONS_SLIPPAGE.length)
-          }
-          }
+            setIndexChosenOption(OPTIONS_SLIPPAGE.length);
+          }}
         >
           <NumberFormat
             className={cx('input')}
@@ -60,13 +59,13 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             decimalScale={6}
             type="text"
             onValueChange={({ floatValue }: NumberFormatValues) => {
-              setManualSlippage(floatValue ?? 0)
-              setUserSlippage(floatValue ?? 0)
+              setManualSlippage(floatValue ?? 0);
+              setUserSlippage(floatValue ?? 0);
             }}
             value={manualSlippage}
           />
           %
-        </div>
+        </div> */}
       </div>
     </div>
   );

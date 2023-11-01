@@ -4,10 +4,10 @@ import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import Pie from 'components/Pie';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { Pairs } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { toDisplay } from 'libs/utils';
+import { toDisplay } from '@oraichain/oraidex-common';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
@@ -331,10 +331,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="text"
-            // value={supplyToken2 ? supplyToken2 : ''}
-            // onValueChange={({ floatValue }) => {
-            //   setSupplyToken2(floatValue);
-            // }}
+              // value={supplyToken2 ? supplyToken2 : ''}
+              // onValueChange={({ floatValue }) => {
+              //   setSupplyToken2(floatValue);
+              // }}
             />
             <span>%</span>
           </div>
@@ -353,7 +353,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => { }}>
+        <div className={cx('swap-btn')} onClick={() => {}}>
           Create
         </div>
       </div>
@@ -370,7 +370,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
             <div className={cx('white-line')} />
             {steps.map((undefine, _idx) => {
               const idx = _idx + 1;
-              if (step > idx) return <img key={idx} className={cx('done', `point-${idx}`)} alt='done-step' src={DoneStepImg} />;
+              if (step > idx)
+                return <img key={idx} className={cx('done', `point-${idx}`)} alt="done-step" src={DoneStepImg} />;
               if (step === idx)
                 return (
                   <div key={idx} className={cx('point', `point-${idx}`, 'highlight')}>

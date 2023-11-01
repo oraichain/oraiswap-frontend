@@ -1,17 +1,30 @@
 //@ts-nocheck
 
 import _BigInt from 'big-integer';
-
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
+import { chainInfos } from 'config/chainInfos';
+
+// polyfill
+Tendermint37Client.detectVersion = () => {};
+Tendermint37Client.prototype.status = function () {
+  const chainInfo = chainInfos.find((chain) => chain.networkType === 'cosmos' && chain.rpc === this.client.url);
+  return {
+    nodeInfo: {
+      network: chainInfo.chainId,
+      version: ''
+    }
+  };
+};
 
 // inject global
 window.TronWeb = require('tronweb');
-window.Networks = require('libs/ethereum-multicall/enums').Networks;
+window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
 window.Keplr = new Keplr();
-window.Metamask = new Metamask();
+window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;

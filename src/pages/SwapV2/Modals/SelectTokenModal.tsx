@@ -1,12 +1,13 @@
 import cn from 'classnames/bind';
 import Modal from 'components/Modal';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { CustomChainInfo } from 'config/chainInfos';
+import { tokenMap } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { getSubAmountDetails, getTotalUsd, toSumDisplay, truncDecimals } from 'libs/utils';
+import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC } from 'react';
 import styles from './SelectTokenModal.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { CustomChainInfo, TokenItemType, getSubAmountDetails, truncDecimals } from '@oraichain/oraidex-common';
+import { chainIcons, tokensIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -46,7 +47,7 @@ const SelectTokenModal: FC<ModalProps> = ({
         <div className={cx('options')}>
           {items?.map((item: TokenItemType | CustomChainInfo) => {
             let key: string, title: string, balance: string;
-
+            let tokenAndChainIcons;
             if (type === 'token') {
               const token = item as TokenItemType;
               key = token.denom;
@@ -61,6 +62,7 @@ const SelectTokenModal: FC<ModalProps> = ({
                 sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
                 sumAmount = toSumDisplay(sumAmountDetails);
               }
+              tokenAndChainIcons = tokensIcon.find(tok => tok.coinGeckoId === token.coinGeckoId);
               balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
             } else {
               const network = item as CustomChainInfo;
@@ -70,8 +72,11 @@ const SelectTokenModal: FC<ModalProps> = ({
                 Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
               );
               const totalUsd = getTotalUsd(subAmounts, prices);
+              tokenAndChainIcons = chainIcons.find(tok => tok.chainId === network.chainId);
               balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
             }
+            const icon = tokenAndChainIcons && theme === 'light' ? <tokenAndChainIcons.IconLight className={cx('logo')} /> : <tokenAndChainIcons.Icon className={cx('logo')} />
+
             return (
               <div
                 className={cx('item', theme)}
@@ -79,20 +84,12 @@ const SelectTokenModal: FC<ModalProps> = ({
                 onClick={() => {
                   setToken(key, type === 'token' && (item as TokenItemType).contractAddress);
                   if (setSymbol) {
-                    setSymbol(title)
+                    setSymbol(title);
                   }
                   close();
                 }}
               >
-                {theme === 'light' ? (
-                  item.IconLight ? (
-                    <item.IconLight className={cx('logo')} />
-                  ) : (
-                    <item.Icon className={cx('logo')} />
-                  )
-                ) : (
-                  item.Icon && <item.Icon className={cx('logo')} />
-                )}
+                {icon}
                 <div className={cx('grow')}>
                   <div>{title}</div>
                 </div>

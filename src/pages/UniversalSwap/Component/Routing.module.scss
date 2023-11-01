@@ -1,0 +1,93 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.routings {
+  @include theme() {
+    background-color: theme-get('neutral-6');
+  }
+  display: flex;
+  margin-top: 16px;
+  padding: 24px 0px 0px;
+  border-radius: 12px;
+
+  .container {
+    width: 100%;
+    .progresses {
+      .label {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        @include theme() {
+          color: theme-get('neutral-2');
+        }
+      }
+      .progress {
+        padding-top: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        .point {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          p {
+            padding-top: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            @include theme() {
+              color: theme-get('neutral-1');
+            }
+          }
+        }
+        .line {
+          position: relative;
+          span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 8px;
+            padding: 4px 8px;
+            display: inline-flex;
+            font-size: 13px;
+            justify-content: center;
+            align-items: center;
+            @include theme() {
+              color: theme-get('neutral-1');
+              background-color: theme-get('primary-1');
+            }
+          }
+        }
+      }
+    }
+    .info-progress {
+      display: flex;
+      justify-content: space-between;
+      @include mobile() {
+        flex-direction: column;
+      }
+      padding-top: 16px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 24px;
+      padding: 16px 24px;
+      background-color: #efefef;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      @include theme() {
+        background-color: theme-get('neutral-surface-bg-section-2');
+        color: theme-get('neutral-8');
+      }
+      .pool {
+        display: flex;
+        .key {
+          width: 150px;
+        }
+        .value {
+          padding-left: 6;
+        }
+      }
+    }
+  }
+}

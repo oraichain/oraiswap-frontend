@@ -3,11 +3,27 @@
 @import 'src/styles/variables';
 @import 'src/styles/reboot';
 @import 'src/styles/utils';
+@import 'src/styles/mixins';
 
-.app
-{
+html {
+  background-color: $primary-background;
+}
+
+.app {
   font-size: $font-size;
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   width: 100%;
+  padding-top: 93px;
+
+  @include mobile {
+    padding-top: 0;
+  }
+
+  background-color: $primary-background;
+
+  &.light {
+    background-color: $white-color;
+  }
 }

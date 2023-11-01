@@ -3,13 +3,13 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { TokenItemType } from '@oraichain/oraidex-common';
+import { ORAI } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
-import { toAmount, toDisplay } from 'libs/utils';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { generateMiningMsgs, Type } from 'rest/api';
@@ -57,7 +57,7 @@ const BondingModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,

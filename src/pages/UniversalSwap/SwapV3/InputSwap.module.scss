@@ -1,0 +1,132 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.input-swap-box {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  input::placeholder {
+    @include theme() {
+      color: theme-get('neutral-text-body');
+      opacity: 0.5;
+    }
+  }
+
+  .box-select {
+    display: flex;
+    justify-content: space-between;
+    width: 145px;
+    padding: 8px;
+    border-radius: 99px;
+    cursor: pointer;
+
+    @include theme() {
+      background-color: theme-get('neutral-5');
+    }
+
+    @mixin medium-desktop {
+      width: 145px;
+    }
+
+    @include desktop {
+      width: 185px;
+    }
+
+    .left {
+      display: flex;
+
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .logo {
+          width: 26px;
+          height: 26px;
+        }
+      }
+
+      .section {
+        padding-left: 8px;
+
+        @include mobile() {
+          line-height: 18px;
+        }
+
+        .chain {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          align-self: stretch;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 12px;
+          font-weight: 500;
+
+          @include theme() {
+            color: theme-get('neutral-8');
+          }
+        }
+
+        .name {
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 1;
+
+          @include theme() {
+            color: theme-get('neutral-1');
+          }
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .amount {
+    flex-grow: 1;
+    max-width: 50%;
+    width: inherit;
+    text-align: right;
+    font-size: 28px;
+    font-weight: 500;
+
+    @include theme() {
+      color: theme-get('neutral-1');
+    }
+
+    @include mobile {
+      width: 100%;
+    }
+  }
+}
+
+.input-swap-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+
+  @include theme() {
+    color: theme-get('neutral-8');
+  }
+
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.input-swap-fee {
+  @include theme() {
+    color: theme-get('neutral-8');
+  }
+
+  padding-top: 6px;
+  font-size: 14px;
+  font-weight: 400;
+}

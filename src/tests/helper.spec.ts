@@ -1,22 +1,17 @@
-import { TokenItemType, cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
+import { oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { formateNumberDecimalsAuto, toSubAmount, toSumDisplay } from 'libs/utils';
-import { getSubAmountDetails, getTotalUsd, reduceString, toSubDisplay, toTotalDisplay } from './../libs/utils';
-import { getTokenOnOraichain, parseTokenInfoRawDenom } from 'rest/api';
-import { CoinGeckoId } from 'config/chainInfos';
-import { ORAI } from 'config/constants';
-import { isFactoryV1, parseAssetInfo, getPairSwapV2 } from 'helper';
+import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
+import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
-import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
+import { MILKYBSC_ORAICHAIN_DENOM, USDT_CONTRACT } from '@oraichain/oraidex-common';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
     usdt: '1000000', // 1
     orai: '1000000', // 1
     milky: '1000000', // 1
-    [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]: '1000000000000000000' // 1
+    [MILKYBSC_ORAICHAIN_DENOM]: '1000000000000000000' // 1
   };
 
   const prices: CoinGeckoPrices<string> = {
@@ -33,23 +28,6 @@ describe('should utils functions in libs/utils run exactly', () => {
   it('should get sumn display correctly', () => {
     const subDisplay = toSumDisplay(amounts);
     expect(subDisplay).toEqual(4);
-  });
-
-  it('should get sub amount of evm token correctly and to sum display, to total display correctly', () => {
-    // test for milky token that have evm denom => have sub amount.
-    const tokenInfo = flattenTokens.find((t) => t.evmDenoms && t.coinGeckoId === 'milky-token');
-    const subAmounts = getSubAmountDetails(amounts, tokenInfo);
-    expect(subAmounts).toEqual({
-      [process.env.REACT_APP_MILKYBSC_ORAICHAIN_DENOM]: '1000000000000000000'
-    });
-    const subDisplay = toSubDisplay(subAmounts, tokenInfo);
-    expect(subDisplay).toEqual(1);
-
-    const subAmount = toSubAmount(amounts, tokenInfo);
-    expect(subAmount).toEqual(BigInt(1000000));
-
-    const totalDisplay = toTotalDisplay(amounts, tokenInfo);
-    expect(totalDisplay).toEqual(2);
   });
 
   it.each([
@@ -81,70 +59,6 @@ describe('should utils functions in libs/utils run exactly', () => {
     it('should return "-" if the input string is null', () => {
       expect(reduceString(null, 5, 6)).toEqual('-');
     });
-  });
-
-  it.each<[TokenItemType, string]>([
-    [
-      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain'),
-      flattenTokens.find((item) => item.coinGeckoId === 'airight' && item.chainId === 'Oraichain').contractAddress
-    ],
-    [
-      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain'),
-      flattenTokens.find((item) => item.coinGeckoId === 'cosmos' && item.chainId === 'Oraichain').denom
-    ]
-  ])('test-parseTokenInfoRawDenom-given-%j-should-receive-%s', (token, expectedDenom) => {
-    expect(parseTokenInfoRawDenom(token)).toEqual(expectedDenom);
-  });
-
-  it.each<[CoinGeckoId, TokenItemType, string]>([
-    ['airight', cosmosTokens.find((token) => token.coinGeckoId === 'airight' && token.chainId === 'Oraichain'), ''],
-    ['tether', cosmosTokens.find((token) => token.coinGeckoId === 'tether' && token.chainId === 'Oraichain'), ''],
-    ['tron', cosmosTokens.find((token) => token.coinGeckoId === 'tron' && token.chainId === 'Oraichain'), ''],
-    [
-      'kawaii-islands',
-      cosmosTokens.find((token) => token.coinGeckoId === 'kawaii-islands' && token.chainId === 'Oraichain'),
-      'KWT and MILKY not supported in this function'
-    ]
-  ])('test-getTokenOnOraichain-given-%s-should-receive-%j', (coingeckoId, expectedToken, err) => {
-    try {
-      expect(getTokenOnOraichain(coingeckoId)).toEqual(expectedToken);
-    } catch (error) {
-      expect(error).toEqual(new Error(err));
-    }
-  });
-
-  it.each<[AssetInfo, string]>([
-    [{ native_token: { denom: ORAI } }, ORAI],
-    [{ token: { contract_addr: 'foobar' } }, 'foobar']
-  ])('test-parseAssetInfo-given-%j-should-receive-%s', (assetInfo, expectedResult) => {
-    expect(parseAssetInfo(assetInfo)).toEqual(expectedResult);
-  });
-
-  it.each<[string, string[], string, boolean]>([
-    [process.env.REACT_APP_MILKY_CONTRACT, [process.env.REACT_APP_USDT_CONTRACT], 'usdt', false],
-    [process.env.REACT_APP_USDC_CONTRACT, ['orai'], 'orai', true]
-  ])('test-get-pair-swap', (contractAddress, expectedArr, exprectArrDenom, expectedArrIncludesOrai) => {
-    const { arr, arrLength, arrIncludesOrai, arrDenom } = getPairSwapV2(contractAddress);
-    expect(arr).toEqual(expectedArr);
-    expect(arrLength).toEqual(arr.length);
-    expect(arrDenom).toEqual(exprectArrDenom);
-    expect(arrIncludesOrai).toEqual(expectedArrIncludesOrai);
-  });
-
-  it('test-isFactoryV1-true', () => {
-    const data = isFactoryV1([
-      { native_token: { denom: 'orai' } },
-      { token: { contract_addr: 'orai10ldgzued6zjp0mkqwsv2mux3ml50l97c74x8sg' } }
-    ]);
-    expect(data).toEqual(true);
-  });
-
-  it('test-isFactoryV1-false', () => {
-    const data = isFactoryV1([
-      { native_token: { denom: 'orai' } },
-      { token: { contract_addr: 'orai15un8msx3n5zf9ahlxmfeqd2kwa5wm0nrpxer304m9nd5q6qq0g6sku5pdd' } }
-    ]);
-    expect(data).toEqual(false);
   });
 
   it.each<[string, string, string, PairToken, PairToken | null]>([
@@ -181,7 +95,7 @@ describe('should utils functions in libs/utils run exactly', () => {
       },
       {
         symbol: 'ORAI/USDT',
-        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+        info: `orai-${USDT_CONTRACT}`
       }
     ],
     [
@@ -190,7 +104,7 @@ describe('should utils functions in libs/utils run exactly', () => {
       'ORAI',
       {
         symbol: 'ORAI/USDT',
-        info: `orai-${process.env.REACT_APP_USDT_CONTRACT}`
+        info: `orai-${USDT_CONTRACT}`
       },
       null
     ]
@@ -204,15 +118,22 @@ describe('should utils functions in libs/utils run exactly', () => {
     }
   );
 
-  it.each([
-    ['1000000', '1000000', 1, 6, '990000'],
-    ['1800000', '100000', 1, 6, '178200'],
-    ['1000000000000000000', '1000000000000000000', 1, 18, '990000000000000000']
-  ])(
-    'calculateMinReceive should return correctly minimum receive',
-    (simulateAverage: string, fromAmount: string, userSlippage: number, decimals: number, expectedResult) => {
-      const result = calculateMinReceive(simulateAverage, fromAmount, userSlippage, decimals);
-      expect(result).toEqual(expectedResult);
-    }
-  );
+  describe('timeSince', () => {
+    it.each<[number, string]>([
+      [Date.now() - 366 * 24 * 60 * 60 * 1000, '1 years'],
+      [Date.now() - 31 * 24 * 60 * 60 * 1000, '1 months'],
+      [Date.now() - 2 * 24 * 60 * 60 * 1000, '2 days'],
+      [Date.now() - 2 * 60 * 60 * 1000, '2 hours'],
+      [Date.now() - 2 * 60 * 1000, '2 minutes'],
+      [Date.now() - 2 * 1000, '2 seconds']
+    ])('returns correct time interval for %d milliseconds', (input, expected) => {
+      const result = timeSince(input);
+      expect(result).toEqual(expected);
+    });
+
+    it('returns "0 seconds" for current timestamp', () => {
+      const result = timeSince(Date.now());
+      expect(result).toEqual('0 seconds');
+    });
+  });
 });

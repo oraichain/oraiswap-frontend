@@ -1,11 +1,10 @@
+// @ts-nocheck
 import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
-import { toUtf8 } from '@cosmjs/encoding';
-import { EncodeObject, OfflineSigner } from '@cosmjs/proto-signing';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
-import { network } from 'config/networks';
-import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-import { Stargate } from '@injectivelabs/sdk-ts';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import { Stargate } from '@injectivelabs/sdk-ts';
+import { network } from 'config/networks';
 
 export type clientType = 'cosmwasm' | 'injective';
 
@@ -43,33 +42,6 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
     case 'injective':
       const tmClient = await Tendermint37Client.connect(rpc);
       return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
-  }
-};
-
-const getEncodedExecuteContractMsgs = (senderAddress: string, msgs: cosmwasm.ExecuteInstruction[]): EncodeObject[] => {
-  return msgs.map(({ msg, funds, contractAddress }) => {
-    return {
-      typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-      value: MsgExecuteContract.fromPartial({
-        sender: senderAddress,
-        contract: contractAddress,
-        msg: toUtf8(JSON.stringify(msg)),
-        funds: funds ? (funds as Coin[]) : []
-      })
-    };
-  });
-};
-
-const buildMultipleExecuteMessages = (
-  mainMsg?: cosmwasm.ExecuteInstruction,
-  ...preMessages: cosmwasm.ExecuteInstruction[]
-): cosmwasm.ExecuteInstruction[] => {
-  try {
-    var messages: cosmwasm.ExecuteInstruction[] = mainMsg ? [mainMsg] : [];
-    messages.unshift(...preMessages.flat(1));
-    return messages;
-  } catch (error) {
-    console.log('error in buildMultipleExecuteMessages', error);
   }
 };
 
@@ -131,6 +103,6 @@ class CosmJs {
   }
 }
 
-export { getCosmWasmClient, collectWallet, getEncodedExecuteContractMsgs, buildMultipleExecuteMessages };
+export { collectWallet, getCosmWasmClient };
 
 export default CosmJs;

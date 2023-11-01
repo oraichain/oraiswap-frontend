@@ -1,0 +1,90 @@
+.QR_generator_modal_container {
+  .QR_generator_modal_wrapper {
+    height: 406px;
+    background: #efefef;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #232521;
+    border-radius: 12px;
+    padding: 24px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+
+      .close-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    .info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 30px;
+      background: #f7f7f7;
+      padding: 10px 18px;
+
+      .icon {
+        display: flex;
+        align-items: center;
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+      .name {
+        font-size: 16px;
+        margin-left: 5px;
+      }
+    }
+
+    img {
+      width: 152px;
+      height: 152px;
+      border-radius: 8px;
+    }
+
+    .address {
+      font-size: 16px;
+    }
+
+    .cancel-btn {
+      border-radius: 99px;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      height: 40px;
+      padding: 8px 16px;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #232521;
+      width: 100%;
+      cursor: pointer;
+    }
+  }
+}
+
+.dark {
+  .QR_generator_modal_wrapper {
+    background: #121511;
+    color: #f7f7f7;
+
+    .info {
+      background: #31332e;
+    }
+    .cancel-btn {
+      border: 1px solid #f7f7f7;
+    }
+  }
+}

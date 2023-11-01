@@ -2,7 +2,7 @@ import { CHART_PERIODS } from './constants';
 import { Bar } from './types';
 import { pairsChart } from '../config';
 import { PairToken } from 'reducer/type';
-import { TokenItemType } from 'config/bridgeTokens';
+import { TokenItemType } from '@oraichain/oraidex-common';
 
 export function getObjectKeyFromValue(value, object) {
   return Object.keys(object).find((key) => object[key] === value);

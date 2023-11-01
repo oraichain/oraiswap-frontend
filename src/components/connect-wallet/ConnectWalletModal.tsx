@@ -10,7 +10,7 @@ import { ReactComponent as Logout } from 'assets/icons/logout.svg';
 import OWalletImage from 'assets/images/orai_wallet_logo.png';
 import CenterEllipsis from 'components/CenterEllipsis';
 import LoadingBox from 'components/LoadingBox';
-import { WalletType } from 'config/constants';
+import { WalletType } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(style);
 

@@ -5,8 +5,9 @@ import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
 import Metamask from '../libs/metamask';
-import { TronWeb as _TronWeb } from './tronweb';
+import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
 import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
+import { DuckDb } from 'libs/duckdb';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -125,6 +126,7 @@ declare global {
     owallet: keplr;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
+    duckDb: DuckDb;
   }
 
   declare const APP_SETTINGS: Record<string, any>;
@@ -140,51 +142,6 @@ declare global {
     interface ProcessEnv {
       REACT_APP_SITE_TITLE: string;
       REACT_APP_SITE_DESC: string;
-
-      // config for relayer
-      REACT_APP_ATOM_ORAICHAIN_CHANNELS: string;
-      REACT_APP_OSMOSIS_ORAICHAIN_CHANNELS: string;
-      REACT_APP_ORAIB_ORAICHAIN_CHANNELS: string;
-      REACT_APP_ORAIB_ORAICHAIN_CHANNELS_OLD: string;
-      REACT_APP_KWT_ORAICHAIN_CHANNELS: string;
-
-      // config for ibc denom
-      REACT_APP_ATOM_ORAICHAIN_DENOM: string;
-      REACT_APP_OSMOSIS_ORAICHAIN_DENOM: string;
-      REACT_APP_AIRIBSC_ORAICHAIN_DENOM: string;
-      REACT_APP_USDTBSC_ORAICHAIN_DENOM: string;
-      REACT_APP_KWTBSC_ORAICHAIN_DENOM: string;
-      REACT_APP_MILKYBSC_ORAICHAIN_DENOM: string;
-      REACT_APP_KWT_SUB_NETWORK_DENOM: string;
-      REACT_APP_INJECTIVE_ORAICHAIN_DENOM: string;
-      REACT_APP_ORAIIBC_INJECTIVE_DENOM: string;
-
-      // config for oraichain token
-      REACT_APP_AIRI_CONTRACT: string;
-      REACT_APP_ORAIX_CONTRACT: string;
-      REACT_APP_USDT_CONTRACT: string;
-      REACT_APP_USDC_CONTRACT: string;
-
-      // config for oraichain contract
-      REACT_APP_FACTORY_CONTRACT: string;
-      REACT_APP_FACTORY_V2_CONTRACT: string;
-      REACT_APP_ROUTER_V2_CONTRACT: string;
-      REACT_APP_ORACLE_CONTRACT: string;
-      REACT_APP_GRAVITY_EVM_CONTRACT: string;
-      REACT_APP_GRAVITY_TRON_CONTRACT: string;
-      REACT_APP_STAKING_CONTRACT: string;
-      REACT_APP_REWARDER_CONTRACT: string;
-      REACT_APP_CONVERTER_CONTRACT: string;
-      REACT_APP_ORAIDEX_LISTING_CONTRACT: string;
-      REACT_APP_SENTRY_ENVIRONMENT: string;
-      REACT_APP_KWT_CONTRACT: string;
-      REACT_APP_MILKY_CONTRACT: string;
-      REACT_APP_SCORAI_CONTRACT: string;
-      REACT_APP_TRX_CONTRACT: string;
-
-      // config for ibc wasm contract (cw20-ics20)
-      REACT_APP_IBC_WASM_CONTRACT: string;
-      REACT_APP_MULTICALL_CONTRACT: string;
     }
   }
 

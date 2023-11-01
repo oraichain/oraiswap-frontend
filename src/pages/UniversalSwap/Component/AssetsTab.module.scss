@@ -1,0 +1,153 @@
+@import 'src/styles/themes';
+@import 'src/styles/mixins';
+
+.assetsTab {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+  min-height: 484px;
+  @include theme() {
+    border: 1px solid theme-get('neutral-6');
+  }
+  border-radius: 12px;
+  .info {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px;
+    @include mobile() {
+      padding: 12px;
+      flex-flow: wrap;
+      gap: 20px;
+    }
+    .total-info {
+      display: flex;
+      align-items: center;
+      .icon {
+        width: 40px;
+        height: 40px;
+        @include theme() {
+          background-color: theme-get('neutral-border-border-default');
+        }
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+      .balance {
+        padding-left: 16px;
+        .value {
+          @include theme() {
+            color: theme-get('sea-stone-200');
+          }
+          font-size: 18px;
+          @include mobile() {
+            font-size: 13px;
+          }
+          font-weight: 600;
+        }
+        .label {
+          @include theme() {
+            color: theme-get('sea-stone-200');
+          }
+        }
+      }
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      @include theme() {
+        color: theme-get('neutral-text-title');
+      }
+    }
+  }
+}
+
+.assets {
+  display: flex;
+  @include mobile() {
+    padding-left: 0px;
+    text-align: center;
+  }
+  .left {
+    display: flex;
+    align-items: center;
+    .tokenIcon {
+      width: 44px;
+      height: 44px;
+      @include mobile() {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  }
+  .right {
+    padding-left: 8px;
+    text-align: left;
+    .assetName {
+      @include theme() {
+        color: theme-get('sea-stone-200');
+      }
+      font-size: 14px;
+      font-weight: 500;
+      width: 100%;
+      text-transform: uppercase;
+      -webkit-box-orient: vertical;
+      white-space: nowrap;
+      @include mobile() {
+        white-space: wrap;
+      }
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+    }
+    .assetChain {
+      font-size: 13px;
+      font-weight: 400;
+      width: 100%;
+      display: -webkit-box;
+      text-transform: capitalize;
+      -webkit-box-orient: vertical;
+      white-space: nowrap;
+      @include mobile() {
+        white-space: wrap;
+      }
+      overflow: hidden;
+      -webkit-line-clamp: 1;
+      @include theme() {
+        color: theme-get('sea-stone-200');
+      }
+    }
+  }
+}
+
+.price {
+  display: flex;
+  justify-content: flex-start;
+  @include mobile() {
+    padding-left: 0px;
+    font-size: 13px;
+  }
+}
+
+.balance {
+  @include mobile() {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    font-size: 13px;
+  }
+}
+
+.balance-low {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
+.valuesColumn {
+  display: flex;
+  @include mobile() {
+    font-size: 13px;
+  }
+}

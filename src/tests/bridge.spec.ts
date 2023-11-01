@@ -1,6 +1,17 @@
 import { coin } from '@cosmjs/stargate';
-import { cosmosTokens, flattenTokens, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId } from 'config/chainInfos';
+import {
+  IBC_WASM_CONTRACT,
+  INJECTIVE_ORAICHAIN_DENOM,
+  KWTBSC_ORAICHAIN_DENOM,
+  TokenItemType,
+  buildMultipleExecuteMessages,
+  getEncodedExecuteContractMsgs,
+  parseTokenInfo,
+  toAmount
+} from '@oraichain/oraidex-common';
+import { getSourceReceiver } from '@oraichain/oraidex-universal-swap';
+import { cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
+import { CoinGeckoId, NetworkChainId } from '@oraichain/oraidex-common';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,
@@ -12,23 +23,20 @@ import {
   ORAI_BSC_CONTRACT,
   ORAI_INFO,
   TRON_SCAN
-} from 'config/constants';
-import { ibcInfos, ibcInfosOld, oraib2oraichain } from 'config/ibcInfos';
+} from '@oraichain/oraidex-common';
+import { ibcInfos, ibcInfosOld, oraib2oraichain } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { filterChainBridge, getTransactionUrl, networks, Tokens } from 'helper';
-import { buildMultipleExecuteMessages, getEncodedExecuteContractMsgs } from 'libs/cosmjs';
-import { toAmount } from 'libs/utils';
 import Long from 'long';
-import { findDefaultToToken, getSourceReceiver } from 'pages/Balance/helpers';
+import { findDefaultToToken } from 'pages/Balance/helpers';
 import {
   generateConvertCw20Erc20Message,
   generateConvertErc20Cw20Message,
-  generateMoveOraib2OraiMessages,
-  parseTokenInfo
+  generateMoveOraib2OraiMessages
 } from 'rest/api';
 
 // @ts-ignore
-window.Networks = require('libs/ethereum-multicall/enums').Networks;
+window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 const keplrAddress = 'orai1329tg05k3snr66e2r9ytkv6hcjx6fkxcarydx6';
 describe('bridge', () => {
@@ -59,7 +67,7 @@ describe('bridge', () => {
   });
 
   describe('bridge-transfer-token-erc20-cw20', () => {
-    const denom = process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM;
+    const denom = KWTBSC_ORAICHAIN_DENOM;
     const decimal = 18;
     const transferAmount = 10;
     const fromToken = cosmosTokens.find((item) => item.name === 'KWT' && item.chainId === 'Oraichain');
@@ -72,7 +80,7 @@ describe('bridge', () => {
 
     it.each<[string, AmountDetails, number]>([
       ['scatom', {}, 0],
-      ['injective', { [`${process.env.REACT_APP_INJECTIVE_ORAICHAIN_DENOM}`]: '10' }, 1],
+      ['injective', { [`${INJECTIVE_ORAICHAIN_DENOM}`]: '10' }, 1],
       ['injective', { injective: '10' }, 0]
     ])(
       'test-generateConvertErc20Cw20Message-should-return-correct-message-length',
@@ -86,7 +94,7 @@ describe('bridge', () => {
     it('bridge-transfer-token-erc20-cw20-should-return-only-evm-amount', async () => {
       expect(evmAmount).toMatchObject({
         amount: '10000000000000000000', // 10 * 10**18
-        denom: process.env.REACT_APP_KWTBSC_ORAICHAIN_DENOM
+        denom: KWTBSC_ORAICHAIN_DENOM
       });
     });
 
@@ -113,7 +121,7 @@ describe('bridge', () => {
     const toToken = cosmosTokens.find((item) => item.name === 'ORAI' && item.chainId === 'oraibridge-subnet-2');
     let ibcInfo = ibcInfos[fromToken.chainId][toToken.chainId];
     const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
-    expect(ibcWasmContractAddress).toBe(process.env.REACT_APP_IBC_WASM_CONTRACT);
+    expect(ibcWasmContractAddress).toBe(IBC_WASM_CONTRACT);
   });
 
   it('bridge-transfer-to-remote-chain-ibc-wasm-should-return-only-asset-info-token', async () => {

@@ -1,9 +1,8 @@
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
 import TransferConvertToken from '../TransferConvertToken';
-import useConfigReducer from 'hooks/useConfigReducer';
+import { TokenItemType } from '@oraichain/oraidex-common';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };

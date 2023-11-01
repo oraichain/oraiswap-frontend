@@ -1,5 +1,3 @@
-import { Pairs } from 'config/pools';
-import { parseAssetInfo } from 'helper';
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import {
@@ -11,11 +9,10 @@ import {
   OraiswapStakingTypes,
   PairInfo
 } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType, assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
-import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from 'config/constants';
+import { assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
+import { ORAI, ORAIXOCH_INFO, ORAIX_INFO, ORAI_INFO, SEC_PER_YEAR, STABLE_DENOM } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { atomic, toDecimal, validateNumber } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
 import {
@@ -23,12 +20,20 @@ import {
   fetchAllTokenAssetPools,
   fetchPoolInfoAmount,
   fetchTokenInfos,
-  getPairAmountInfo,
-  parseTokenInfo
+  getPairAmountInfo
 } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
-import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
+import {
+  atomic,
+  parseAssetInfo,
+  parseTokenInfo,
+  toDecimal,
+  validateNumber,
+  TokenItemType
+} from '@oraichain/oraidex-common';
+import { Pairs } from 'config/pools';
+import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -319,6 +324,38 @@ const calculateLpPools = (pairs: PairInfo[], res: AggregateResult) => {
   return lpTokenData;
 };
 
+export const calculateLpPoolsV3 = (lpAddresses: string[], res: AggregateResult) => {
+  const lpTokenData = Object.fromEntries(
+    lpAddresses.map((lpAddress, ind) => {
+      const data = res.return_data[ind];
+      if (!data.success) {
+        return [lpAddress, {}];
+      }
+      return [lpAddress, fromBinary(data.data)];
+    })
+  );
+  return lpTokenData;
+};
+
+export const fetchCacheLpPoolsV3 = async (
+  lpAddresses: string[],
+  userAddress: string,
+  multicall: MulticallReadOnlyInterface
+) => {
+  const queries = lpAddresses.map((lpAddress) => ({
+    address: lpAddress,
+    data: toBinary({
+      balance: {
+        address: userAddress
+      }
+    })
+  }));
+  const res = await multicall.aggregate({
+    queries
+  });
+  return calculateLpPoolsV3(lpAddresses, res);
+};
+
 const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: MulticallReadOnlyInterface) => {
   const queries = generateLpPoolsInfoQueries(pairs, address);
   const res = await multicall.aggregate({
@@ -328,16 +365,95 @@ const fetchCacheLpPools = async (pairs: PairInfo[], address: string, multicall: 
 };
 
 const isBigIntZero = (value: BigInt): boolean => {
-  if (value === BigInt(0)) return true;
-  return false;
+  return value === BigInt(0);
+};
+
+export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
+  if ('native_token' in assetInfo) return assetInfo.native_token.denom;
+  return assetInfo.token.contract_addr;
+};
+
+export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
+  const validatedAmount = validateNumber(amount);
+  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+
+  // add `,` when split thounsand value.
+  return `$${toFixedIfNecessary(amount.toString(), dp)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+};
+
+export const toFixedIfNecessary = (value: string, dp: number): number => {
+  return +parseFloat(value).toFixed(dp);
+};
+
+/**
+ * Estmate LP share when provide liquidity pool
+ * @param baseAmount input base amount
+ * @param quoteAmount input quote amount
+ * @param totalShare total LP share of pool
+ * @param totalBaseAmount total base amount in pool
+ * @param totalQuoteAmount total quote amount in pool
+ * @returns // min(1, 2)
+  // 1. sqrt(deposit_0 * exchange_rate_0_to_1 * deposit_0) * (total_share / sqrt(pool_0 * pool_1))
+  // == deposit_0 * total_share / pool_0
+  // 2. sqrt(deposit_1 * exchange_rate_1_to_0 * deposit_1) * (total_share / sqrt(pool_1 * pool_1))
+  // == deposit_1 * total_share / pool_1
+ */
+export const estimateShare = ({
+  baseAmount,
+  quoteAmount,
+  totalShare,
+  totalBaseAmount,
+  totalQuoteAmount
+}: {
+  baseAmount: number;
+  quoteAmount: number;
+  totalShare: number;
+  totalBaseAmount: number;
+  totalQuoteAmount: number;
+}): number => {
+  if (totalBaseAmount === 0 || totalQuoteAmount === 0) return 0;
+
+  const share = Math.min(
+    Number((baseAmount * totalShare) / totalBaseAmount),
+    Number((quoteAmount * totalShare) / totalQuoteAmount)
+  );
+  return share;
+};
+
+/**
+ * Re-calculate APR after provide/withdraw LP to optimistic update UI.
+ * @param currentApr
+ * @param currentVolume
+ * @param amountUsdt - amount volume to add
+ * @returns new APR
+ */
+export const recalculateApr = ({
+  current24hChange,
+  currentVolume,
+  amountUsdt
+}: {
+  current24hChange: number;
+  currentVolume: number;
+  amountUsdt: number;
+}) => {
+  // guard to avoid crash
+  if (currentVolume === 0) return current24hChange;
+  const volume24hAgo = currentVolume / (current24hChange + 1);
+
+  // guard to avoid crash
+  if (currentVolume === volume24hAgo) return current24hChange;
+  const newApr = current24hChange * (1 + amountUsdt / (currentVolume - volume24hAgo));
+  return newApr;
 };
 
 export {
   fetchAprResult,
-  fetchPoolListAndOraiPrice,
-  fetchPairsData,
-  fetchMyPairsData,
   fetchCacheLpPools,
+  fetchMyPairsData,
+  fetchPairsData,
+  fetchPoolListAndOraiPrice,
   generateMsgFrontierAddToken,
   getInfoLiquidityPool,
   isBigIntZero

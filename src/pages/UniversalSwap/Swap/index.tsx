@@ -9,31 +9,48 @@ import LoadingBox from 'components/LoadingBox';
 import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, GAS_ESTIMATION_SWAP_DEFAULT, ORAI, TRON_DENOM } from 'config/constants';
+import { tokenMap } from 'config/bridgeTokens';
+import {
+  CosmosChainId,
+  DEFAULT_SLIPPAGE,
+  GAS_ESTIMATION_SWAP_DEFAULT,
+  ORAI,
+  TRON_DENOM,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee from 'hooks/useTokenFee';
-import { toAmount, toDisplay, toSubAmount, truncDecimals } from 'libs/utils';
-import { combineReceiver } from 'pages/Balance/helpers';
+import { toSubAmount } from 'libs/utils';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { fetchTokenInfos } from 'rest/api';
+import { RootState } from 'store/configure';
+import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, relayerFeeInfo } from '../helpers';
+import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
+import styles from './index.module.scss';
 import {
-  fetchTokenInfos,
+  calculateMinReceive,
   getTokenOnOraichain,
+  network,
+  toAmount,
+  toDisplay,
+  truncDecimals
+} from '@oraichain/oraidex-common';
+import { useRelayerFee } from './hooks/useRelayerFee';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ethers } from 'ethers';
+import {
+  UniversalSwapHandler,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
-} from 'rest/api';
-import { RootState } from 'store/configure';
-import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, UniversalSwapHandler, checkEvmAddress, filterNonPoolEvmTokens } from '../helpers';
-import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
-import styles from './index.module.scss';
-import { calculateMinReceive } from 'pages/SwapV2/helpers';
+} from '@oraichain/oraidex-universal-swap';
+import Metamask from 'libs/metamask';
 
 const cx = cn.bind(styles);
 
@@ -157,12 +174,14 @@ const SwapComponent: React.FC<{
   }, [fromTokenDenom, toTokenDenom, searchTokenName]);
 
   const taxRate = useTaxRate();
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
     fromTokenInfoData,
     toTokenInfoData,
     originalFromToken,
-    originalToToken
+    originalToToken,
+    routerClient
   );
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -170,7 +189,14 @@ const SwapComponent: React.FC<{
     toTokenInfoData,
     originalFromToken,
     originalToToken,
+    routerClient,
     1
+  );
+  const relayerFee = useRelayerFee();
+
+  const relayerFeeToken = React.useMemo(
+    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
+    [originalFromToken]
   );
 
   useEffect(() => {
@@ -188,36 +214,30 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
-      const univeralSwapHandler = new UniversalSwapHandler(
-        oraiAddress,
-        originalFromToken,
-        originalToToken,
-        fromAmountToken,
-        simulateData.amount,
-        userSlippage,
-        averageRatio.amount
+      const cosmosAddress = await handleCheckAddress(
+        originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
-      const toAddress = await univeralSwapHandler.getUniversalSwapToAddress(originalToToken.chainId, {
-        metamaskAddress,
-        tronAddress
-      });
-      const { combinedReceiver, universalSwapType } = combineReceiver(
-        oraiAddress,
-        originalFromToken,
-        originalToToken,
-        toAddress
+      const oraiAddress = await handleCheckAddress('Oraichain');
+      const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
+      const univeralSwapHandler = new UniversalSwapHandler(
+        {
+          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+          originalFromToken,
+          originalToToken,
+          fromAmount: fromAmountToken,
+          simulateAmount: simulateData.amount,
+          userSlippage,
+          simulatePrice: averageRatio.amount,
+          relayerFee: relayerFeeToken
+        },
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const checksumMetamaskAddress = window.Metamask.toCheckSumEthAddress(metamaskAddress);
-      const result = await univeralSwapHandler.processUniversalSwap(combinedReceiver, universalSwapType, {
-        metamaskAddress: checksumMetamaskAddress,
-        tronAddress
-      });
-      if (result) {
+      const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
+      if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: getTransactionUrl(originalFromToken.chainId, result.transactionHash)
+          customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)
         });
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
@@ -230,7 +250,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : fromToken?.Icon;
+  const FromIcon =
+    theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
   // const filteredFromTokens = swapFromTokens.filter(
@@ -244,11 +265,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      averageRatio.amount,
+      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -402,6 +423,21 @@ const SwapComponent: React.FC<{
               decimalScale={truncDecimals}
             />
           </div>
+          {relayerFeeToken && (
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span>Relayer Fee</span>
+              </div>
+              <TokenBalance
+                balance={{
+                  amount: relayerFeeToken.amount,
+                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  denom: relayerFeeToken.prefix
+                }}
+                decimalScale={truncDecimals}
+              />
+            </div>
+          )}
 
           {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>

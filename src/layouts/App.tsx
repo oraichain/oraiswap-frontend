@@ -1,8 +1,21 @@
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WalletType, WEBSOCKET_RECONNECT_ATTEMPTS, WEBSOCKET_RECONNECT_INTERVAL } from 'config/constants';
+import {
+  IBC_WASM_CONTRACT,
+  WalletType,
+  WEBSOCKET_RECONNECT_ATTEMPTS,
+  WEBSOCKET_RECONNECT_INTERVAL
+} from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { checkVersionWallet, displayInstallWallet, getNetworkGasPrice, getStorageKey, setStorageKey, switchWallet } from 'helper';
+import {
+  checkVersionWallet,
+  displayInstallWallet,
+  getNetworkGasPrice,
+  getStorageKey,
+  keplrCheck,
+  setStorageKey,
+  switchWallet
+} from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -11,15 +24,15 @@ import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import './index.scss';
-import Menu from './Menu';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
-import GlobalStyles from 'styles/global';
-import './index.scss';
 import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
 import { pairsChart } from 'components/TVChartContainer/config';
+import MenuV3 from './MenuV3';
+import FuturePromotion from './FuturePromotion';
+import Instruct from './Instruct';
+import './index.scss';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -33,16 +46,13 @@ const App = () => {
   useTronEventListener();
 
   const dispatch = useDispatch();
-  const getPairs = () => {
-    dispatch(setListToken(pairsChart));
-  };
 
+  // init chart pairs
   useEffect(() => {
-    getPairs();
+    dispatch(setListToken(pairsChart));
   }, []);
 
   //Public API that will echo messages sent to it back to the client
-
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
@@ -51,7 +61,7 @@ const App = () => {
         // subscribe to IBC Wasm case
         sendJsonMessage(
           buildWebsocketSendMessage(
-            `wasm._contract_address = '${process.env.REACT_APP_IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`
+            `wasm._contract_address = '${IBC_WASM_CONTRACT}' AND wasm.action = 'receive_native' AND wasm.receiver = '${address}'`
           ),
           true
         );
@@ -136,9 +146,12 @@ const App = () => {
       if (!keplr) {
         return displayInstallWallet();
       }
-
+      const vs = window?.keplr?.version;
+      const isCheckKeplr = !!vs && keplrCheck('keplr');
       if (checkVersionWallet()) {
         setStorageKey('typeWallet', 'owallet');
+      } else if (isCheckKeplr) {
+        setStorageKey('typeWallet', 'keplr' as WalletType);
       }
       // TODO: owallet get address tron
       if (!isMobile()) {
@@ -150,11 +163,20 @@ const App = () => {
         }
         // TODO: owallet get address evm
         if (window.ethereum) {
-          const [address] = await window.ethereum!.request({
-            method: 'eth_requestAccounts',
-            params: []
-          });
-          setMetamaskAddress(ethers.utils.getAddress(address));
+          try {
+            const [address] = await window.ethereum!.request({
+              method: 'eth_requestAccounts',
+              params: []
+            });
+
+            setMetamaskAddress(ethers.utils.getAddress(address));
+          } catch (error) {
+            if (error?.code === -32002) {
+              displayToast(TToastType.METAMASK_FAILED, {
+                message: ' Already processing request Ethereum account. Please wait'
+              });
+            }
+          }
         }
       }
 
@@ -162,7 +184,6 @@ const App = () => {
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress });
       setAddress(oraiAddress);
-
     } catch (error) {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);
@@ -175,10 +196,11 @@ const App = () => {
   // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
-      <GlobalStyles />
       <div className={`app ${theme}`}>
-        <Menu />
+        <MenuV3 />
         {routes()}
+        {!isMobile() && <Instruct />}
+        <FuturePromotion />
       </div>
     </ThemeProvider>
   );

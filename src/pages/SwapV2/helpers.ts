@@ -1,18 +1,6 @@
-import { Uint128 } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType } from 'config/bridgeTokens';
-import { buildMultipleExecuteMessages } from 'libs/cosmjs';
-import { toAmount, toDisplay } from 'libs/utils';
+import { buildMultipleExecuteMessages, calculateMinReceive, toAmount } from '@oraichain/oraidex-common';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { generateContractMessages, generateConvertErc20Cw20Message, SwapQuery, Type } from 'rest/api';
-
-export const calculateMinReceive = (
-  simulateAverage: string,
-  fromAmount: string,
-  userSlippage: number,
-  decimals: number
-): Uint128 => {
-  const amount = BigInt(simulateAverage) * BigInt(fromAmount);
-  return ((BigInt(Math.trunc(toDisplay(amount, decimals))) * (100n - BigInt(userSlippage))) / 100n).toString();
-};
 
 export function generateMsgsSwap(
   fromTokenInfoData: TokenItemType,

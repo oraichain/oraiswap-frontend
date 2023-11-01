@@ -1,6 +1,6 @@
 import { coin } from '@cosmjs/proto-signing';
-import { assetInfoMap, flattenTokens, oraichainTokens, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { assetInfoMap, flattenTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { AIRI_CONTRACT, ORAI, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import { client } from './common';
@@ -10,13 +10,17 @@ import sumBy from 'lodash/sumBy';
 import {
   calculateAprResult,
   calculateReward,
+  estimateShare,
   calculateBondLpPools,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
   fetchPairsData,
   fetchPoolListAndOraiPrice,
+  formatDisplayUsdt,
   PairInfoData,
+  recalculateApr,
+  toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
 import {
@@ -38,10 +42,9 @@ import {
   instantiateCw20Token
 } from './listing-simulate';
 import { testCaculateBondLpData, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
-import { parseAssetInfo } from 'helper';
 import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { buildMultipleExecuteMessages } from 'libs/cosmjs';
+import { buildMultipleExecuteMessages, parseAssetInfo } from '@oraichain/oraidex-common';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
@@ -196,8 +199,8 @@ describe('pool', () => {
         assetToken.contractAddress = index === 0 ? airiContractAddress : usdtContractAddress;
       });
 
-      assetInfoMap[airiContractAddress] = assetInfoMap[process.env.REACT_APP_AIRI_CONTRACT];
-      assetInfoMap[usdtContractAddress] = assetInfoMap[process.env.REACT_APP_USDT_CONTRACT];
+      assetInfoMap[airiContractAddress] = assetInfoMap[AIRI_CONTRACT];
+      assetInfoMap[usdtContractAddress] = assetInfoMap[USDT_CONTRACT];
       const multicall = new MulticallQueryClient(client, network.multicall);
       const myPairs = await fetchMyPairsData(pairs, devAddress, multicall, typeReward);
       expect(myPairs[pairs[0].contract_addr]).toBe(expectedResult);
@@ -405,7 +408,7 @@ describe('pool', () => {
             asset_infos: [
               {
                 token: {
-                  contract_addr: process.env.REACT_APP_USDT_CONTRACT
+                  contract_addr: USDT_CONTRACT
                 }
               },
               {
@@ -428,7 +431,7 @@ describe('pool', () => {
           },
           {
             token: {
-              contract_addr: process.env.REACT_APP_USDT_CONTRACT
+              contract_addr: USDT_CONTRACT
             }
           }
         ] as AssetInfo[]
@@ -502,6 +505,75 @@ describe('pool', () => {
         [ORAI, usdtContractAddress]
       ]);
       expect(allPairsFromTwoFactoryVersions.length).toBe(Pairs.pairs.length);
+    });
+  });
+
+  it.each([
+    ['0.001234', '$0.0012'],
+    ['2', '$2'],
+    ['2.1', '$2.1'],
+    ['2.129', '$2.13'],
+    ['1234567', '$1,234,567'],
+    ['1234567.111', '$1,234,567.11']
+  ])('test formatDisplayUsdt should formats %s to %s', (input, expected) => {
+    expect(formatDisplayUsdt(input)).toBe(expected);
+  });
+
+  it.each([
+    ['2.12345', 2, 2.12],
+    ['2.1', 2, 2.1],
+    ['2', 2, 2],
+    ['2.12345', 1, 2.1],
+    ['2.129', 1, 2.1]
+  ])('test toFixedIfNecessary should rounds %s to %d decimal places as %f', (value, dp, expected) => {
+    expect(toFixedIfNecessary(value, dp)).toBeCloseTo(expected);
+  });
+
+  it.each<[number, number, number]>([
+    [0, 1, 0],
+    [1, 0, 0],
+    [100, 500, 0.02]
+  ])('test-estimateShare-should-return-correctly-share', (totalBaseAmount, totalQuoteAmount, expectedResult) => {
+    // setup
+    const payload = {
+      baseAmount: 1,
+      quoteAmount: 2,
+      totalShare: 5,
+      totalBaseAmount,
+      totalQuoteAmount
+    };
+
+    // act
+    const result = estimateShare(payload);
+
+    // assertion
+    expect(result).toEqual(expectedResult);
+  });
+
+  describe('recalculateApr', () => {
+    it.each([
+      [0.1, 1000, 100, 0.20999999999999988],
+      [0.2, 500, 50, 0.32000000000000006],
+      [0.5, 2000, 150, 0.6125]
+    ])('calculates new APR correctly', (current24hChange, currentVolume, amountUsdt, expectedApr) => {
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBeCloseTo(expectedApr, 6);
+    });
+
+    it('handles edge case when currentVolume is 0 should return current24hChange value', () => {
+      const current24hChange = 0.1;
+      const currentVolume = 0;
+      const amountUsdt = 100;
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBe(current24hChange);
+    });
+
+    it('handles edge case when current24hChange is 0', () => {
+      const current24hChange = 0;
+      const currentVolume = 1000;
+      const amountUsdt = 100;
+      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
+      expect(newApr).toBe(0);
     });
   });
 });

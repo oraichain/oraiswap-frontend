@@ -4,20 +4,21 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cw20TokenMap, TokenItemType, tokenMap } from 'config/bridgeTokens';
-import { ORAI } from 'config/constants';
+import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
+import { ORAI, TokenItemType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { Asset, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { getUsd, toDecimal } from 'libs/utils';
+import { getUsd } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { fetchTokenInfo, generateMiningMsgs, Type, WithdrawMining } from 'rest/api';
 import { TokenInfo } from 'types/token';
 import styles from './LiquidityMining.module.scss';
 import { handleErrorTransaction } from 'helper';
+import { toDecimal } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 

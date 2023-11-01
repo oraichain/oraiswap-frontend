@@ -30,8 +30,9 @@ button[disabled] {
   z-index: 10000000;
   padding: 16px 8px 16px 16px;
 
-  .Toastify__toast-theme--light {
-    background: $light-bg-primary-box;
+  .Toastify__toast-theme--dark {
+    background-color: $raisin-black;
+    border-color: $outer-space;
   }
 
   .Toastify__toast-container--top-right {
@@ -55,10 +56,11 @@ button[disabled] {
 }
 
 .Toastify__toast--default {
-  background: #2d2938;
   max-width: 360px !important;
   min-width: 360px !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.10);
+  border: 1px solid;
 
   @media (max-width: 767px) {
     min-width: 280px !important;
@@ -74,18 +76,32 @@ button[disabled] {
   @media (max-width: 767px) {
     padding: 16px !important;
   }
+
+  h6 {
+    color: $cultured;
+  }
+
+  p {
+    color: $neutron-text-body-dark;
+  }
+
+  &.light {
+    background: $white-color;
+    border-color: $gainsboro;
+
+    h6 {
+      color: $raisin-black;
+    }
+
+    p {
+      color: $neutron-text-body-light;
+    }
+  }
 }
 
 .Toastify__toast-body {
   padding: 0 !important;
 }
-
-// #oraiswap {
-//   font-size: $font-size;
-//   min-height: 100%;
-//   display: flex;
-//   width: 100%;
-// }
 
 #basement {
   min-height: 100vh;

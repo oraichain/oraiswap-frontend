@@ -6,14 +6,14 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType } from 'config/bridgeTokens';
-import { DEFAULT_SLIPPAGE, ORAI } from 'config/constants';
+import { TokenItemType } from '@oraichain/oraidex-common';
+import { DEFAULT_SLIPPAGE, ORAI } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import CosmJs, { buildMultipleExecuteMessages } from 'libs/cosmjs';
+import CosmJs from 'libs/cosmjs';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { getSubAmountDetails, getUsd, toAmount, toDecimal, toDisplay, toSumDisplay } from 'libs/utils';
+import { getUsd, toSumDisplay } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
@@ -23,6 +23,7 @@ import {
   fetchTokenAllowance,
   generateContractMessages,
   generateConvertErc20Cw20Message,
+  getSubAmountDetails,
   ProvideQuery,
   Type
 } from 'rest/api';
@@ -35,6 +36,7 @@ import SlippageModal from 'components/Modals/SlippageModal';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { isBigIntZero } from '../helpers';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { buildMultipleExecuteMessages, toAmount, toDecimal, toDisplay } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 
@@ -53,7 +55,7 @@ interface ModalProps {
   pairInfoData: PairInfo;
   pairs?: PairInfoExtend[];
   fetchCachedLpTokenAll: () => void;
-  fetchCachedBondLpTokenAll: () => void
+  fetchCachedBondLpTokenAll: () => void;
 }
 
 const LiquidityModal: FC<ModalProps> = ({
@@ -205,7 +207,7 @@ const LiquidityModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
 
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       if (token1AllowanceToPair < amount1) {
         await increaseAllowance('9'.repeat(30), token1InfoData!.contractAddress!, oraiAddress);
@@ -260,7 +262,7 @@ const LiquidityModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const oraiAddress = await handleCheckAddress();
+      const oraiAddress = await handleCheckAddress('Oraichain');
 
       const msg = generateContractMessages({
         type: Type.WITHDRAW,
@@ -358,7 +360,7 @@ const LiquidityModal: FC<ModalProps> = ({
         </div>
       </div>
       <div className={cx('swap-icon')}>
-        <img src={FluentAddImg} onClick={() => { }} />
+        <img src={FluentAddImg} onClick={() => {}} />
       </div>
       <div className={cx('supply', theme)}>
         <div className={cx('header')}>
@@ -539,11 +541,6 @@ const LiquidityModal: FC<ModalProps> = ({
               placeholder="0.00"
               type={'number'}
               className={cx('input', theme)}
-              // value={
-              //   chosenWithdrawPercent === 4 && !!withdrawPercent
-              //     ? withdrawPercent
-              //     : ''
-              // }
               onChange={(event) => {
                 onChangeWithdrawPercent(+event.target.value);
               }}

@@ -1,5 +1,6 @@
 import {
   BSC_SCAN,
+  CosmosChainId,
   ETHEREUM_SCAN,
   HIGH_GAS_PRICE,
   KWT_SCAN,
@@ -7,27 +8,30 @@ import {
   ORAI,
   TRON_SCAN,
   WalletType
-} from 'config/constants';
+} from '@oraichain/oraidex-common';
 
-import { EvmDenom, oraichainTokens, TokenItemType } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos, CustomChainInfo, NetworkChainId } from 'config/chainInfos';
-import { ethers } from 'ethers';
-import Long from 'long';
-import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import { Pairs } from 'config/pools';
+import { chainInfos } from 'config/chainInfos';
+import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
-
+import { collectWallet } from 'libs/cosmjs';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
+import { isMobile } from '@walletconnect/browser-utils';
+import { fromBech32, toBech32 } from '@cosmjs/encoding'
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
 }
-
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
-
+export const cosmosNetworks = chainInfos.filter(
+  (c) => c.networkType === 'cosmos' && c.chainId !== 'oraibridge-subnet-2'
+);
+export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
@@ -71,7 +75,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -88,16 +92,6 @@ export const handleCheckWallet = async () => {
   }
 };
 
-export const tronToEthAddress = (base58: string) =>
-  '0x' + Buffer.from(ethers.utils.base58.decode(base58)).slice(1, -4).toString('hex');
-
-export const ethToTronAddress = (address: string) => {
-  const evmAddress = '0x41' + address.substring(2);
-  const hash = ethers.utils.sha256(ethers.utils.sha256(evmAddress));
-  const checkSum = hash.substring(2, 10);
-  return ethers.utils.base58.encode(evmAddress + checkSum);
-};
-
 export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {
   displayToast(
     TToastType.TX_INFO,
@@ -112,12 +106,12 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
   );
 };
 
-export const handleCheckAddress = async (): Promise<string> => {
-  const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress) {
+export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
+  const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
+  if (!cosmosAddress) {
     throw new Error('Please login both metamask and keplr!');
   }
-  return oraiAddress;
+  return cosmosAddress;
 };
 
 export const handleErrorTransaction = (error: any) => {
@@ -134,73 +128,8 @@ export const handleErrorTransaction = (error: any) => {
   });
 };
 
-export const calculateTimeoutTimestamp = (timeout: number): string => {
-  return Long.fromNumber(Math.floor(Date.now() / 1000) + timeout)
-    .multiply(1000000000)
-    .toString();
-};
-
-export const parseAssetInfo = (assetInfo: AssetInfo): string => {
-  if ('native_token' in assetInfo) return assetInfo.native_token.denom;
-  return assetInfo.token.contract_addr;
-};
-
-export const isFactoryV1 = (assetInfos: [AssetInfo, AssetInfo]): boolean => {
-  console.dir(Pairs.pairs, { depth: null });
-  const pair = Pairs.pairs.find(
-    (pair) =>
-      pair.asset_infos.find((info) => parseAssetInfo(info) === parseAssetInfo(assetInfos[0])) &&
-      pair.asset_infos.find((info) => parseAssetInfo(info) === parseAssetInfo(assetInfos[1]))
-  );
-  if (!pair) {
-    return true;
-  }
-  return pair.factoryV1 ?? false;
-};
-
 export const floatToPercent = (value: number): number => {
   return value * 100;
-};
-
-/**
- * Get list contract_addr | denom that make a pair when combined with input
- * @param contractAddress
- * @returns
- */
-export const getPairSwapV2 = (contractAddress: string) => {
-  let arr = [];
-  let arrDenom = ORAI;
-  if (!contractAddress) return { arrLength: 0 };
-
-  const pairMapping = Pairs.pairs.filter((p) =>
-    p.asset_infos.find(
-      (asset: {
-        token: {
-          contract_addr: string;
-        };
-      }) => asset?.token?.contract_addr === contractAddress
-    )
-  );
-
-  if (pairMapping.length) {
-    for (const info of pairMapping) {
-      const assets0 = parseAssetInfo(info?.asset_infos?.[0]);
-      const assets1 = parseAssetInfo(info?.asset_infos?.[1]);
-      if (assets0 !== contractAddress) arr.push(assets0);
-      if (assets1 !== contractAddress) arr.push(assets1);
-    }
-  }
-
-  if (arr.length) {
-    arrDenom = oraichainTokens.find((e) => e.contractAddress === arr[0])?.denom ?? arr[0];
-  }
-
-  return {
-    arr,
-    arrLength: arr.length,
-    arrDenom,
-    arrIncludesOrai: arr.includes(ORAI)
-  };
 };
 
 // Switch Wallet Keplr Owallet
@@ -230,4 +159,95 @@ export const switchWallet = (type: WalletType) => {
     return true;
   }
   return false;
+};
+
+export const isUnlockMetamask = async () => {
+  const isMetamask = !!window?.ethereum?.isMetaMask;
+  if (isMetamask) {
+    const isUnlock = await window.ethereum._metamask.isUnlocked();
+    return isUnlock;
+  }
+};
+export const isEmptyObject = (value: object) => {
+  if (!!value === false) return true;
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries?.length === 0) {
+      return true;
+    }
+    for (const key in value) {
+      if (value[key] !== undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return true;
+};
+
+export const switchWalletCosmos = async (type: WalletType) => {
+  window.Keplr = new Keplr(type);
+  setStorageKey('typeWallet', type);
+  if (!(await window.Keplr.getKeplr())) {
+    return displayInstallWallet();
+  }
+  const wallet = await collectWallet(network.chainId);
+  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  });
+};
+
+export const switchWalletTron = async () => {
+  let tronAddress: string;
+  if (isMobile()) {
+    const addressTronMobile = await window.tronLink.request({
+      method: 'tron_requestAccounts'
+    });
+    //@ts-ignore
+    tronAddress = addressTronMobile?.base58;
+  } else {
+    if (!window.tronWeb.defaultAddress?.base58) {
+      const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
+      // throw error when not connected
+      if (code !== 200) {
+        throw Error(message);
+      }
+    }
+    tronAddress = window.tronWeb.defaultAddress.base58;
+  }
+  return {
+    tronAddress
+  };
+};
+
+const getAddress = (addr, prefix: string) => {
+  const { data } = fromBech32(addr);
+  return toBech32(prefix, data)
+}
+
+export const genAddressCosmos = (info, address60, address118) => {
+  const mapAddress = {
+    60: address60,
+    118: address118
+  }
+  const addr = mapAddress[info.bip44.coinType || 118];
+  const cosmosAddress = getAddress(addr, info.bech32Config.bech32PrefixAccAddr)
+  return { cosmosAddress }
+}
+
+export const getListAddressCosmos = async (oraiAddr) => {
+  let listAddressCosmos = {};
+  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+  if (!kwtAddress) return { listAddressCosmos }
+  for (const info of cosmosNetworks) {
+    if (!info) continue;
+    const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
+    listAddressCosmos = {
+      ...listAddressCosmos,
+      [info.chainId]: cosmosAddress
+    };
+  }
+  return { listAddressCosmos };
 };
