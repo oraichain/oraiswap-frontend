@@ -15,7 +15,8 @@ module.exports = function (api) {
       [
         './plugins/operator-overloading',
         {
-          enabled: true
+          enabled: true,
+          classNames: ['BigDecimal']
         }
       ]
     ],

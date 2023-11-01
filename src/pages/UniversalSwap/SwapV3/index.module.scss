@@ -419,7 +419,7 @@
   line-height: 150%;
   /* identical to box height, or 21px */
 
-  text-align: center;
+  // text-align: center;
   font-feature-settings: 'ss03' on;
 
   /* aiRight/Gray 3 */
@@ -434,9 +434,10 @@
     align-items: center;
 
     .title {
+      width: 70%;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: flex-start;
+      // align-items: center;
       gap: 5px;
     }
   }
