@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { flatten, uniq } from 'lodash';
 import { assetInfoMap } from './bridgeTokens';
-import { INJECTIVE_CONTRACT, ORAI, PAIRS, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
+import { ORAI, PAIRS, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
