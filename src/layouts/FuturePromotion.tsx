@@ -1,10 +1,10 @@
-import React, { memo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-import cn from 'classnames/bind';
 import PromotionImage from 'assets/images/future-promotion.png';
+import cn from 'classnames/bind';
 
-import styles from './FuturePromotion.module.scss';
 import { Button } from 'components/Button';
+import styles from './FuturePromotion.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -54,4 +54,4 @@ const FuturePromotion: React.FC = () => {
   return null;
 };
 
-export default memo(FuturePromotion);
+export default FuturePromotion;
