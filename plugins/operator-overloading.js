@@ -13,19 +13,20 @@ const methodMap = {
 
 /**
  * @param {BabelTypes.Node} node
- * @param {{[key: string]: boolean;}} declarations
+ * @param {{[key: string]: string;}} declarations
  * @param {Array<string>} classNames
  * @return {boolean}
  */
-function checkBigDecimalReturn(node, declarations, classNames) {
+function checkClassNameReturn(node, declarations, classNames) {
   let leftNode = node.left;
   while (leftNode) {
     switch (leftNode.type) {
       case 'NewExpression':
-        if (classNames.includes(leftNode.callee.name)) return true;
+        if (classNames.includes(leftNode.callee.name)) return leftNode.callee.name;
 
       case 'Identifier':
-        if (declarations[leftNode.name]) return true;
+        const className = declarations[leftNode.name];
+        if (className) return className;
     }
 
     leftNode = leftNode.left;
@@ -35,12 +36,16 @@ function checkBigDecimalReturn(node, declarations, classNames) {
 
 /**
  * @param {BabelTypes.Node} node
+ * @param {string} className
  * @return {BabelTypes.Node}
  */
-function createBinaryTemplate(node) {
-  return template(`LHS.${methodMap[node.operator]}(RHS)`)({
-    LHS: node.left.type === 'BinaryExpression' ? createBinaryTemplate(node.left) : node.left,
-    RHS: node.right.type === 'BinaryExpression' ? createBinaryTemplate(node.right) : node.right
+function createBinaryTemplate(node, className) {
+  const LHS = node.left.type === 'BinaryExpression' ? createBinaryTemplate(node.left, className) : node.left;
+  const RHS = node.right.type === 'BinaryExpression' ? createBinaryTemplate(node.right, className) : node.right;
+  const lhsAssign = node.left.type.endsWith('Literal') ? `new ${className}(LHS)` : 'LHS';
+  return template(`${lhsAssign}.${methodMap[node.operator]}(RHS)`)({
+    LHS,
+    RHS
   }).expression;
 }
 
@@ -78,13 +83,14 @@ module.exports = function ({ types: t }) {
           switch (d.init.type) {
             case 'NewExpression':
               if (classNames.includes(d.init.callee.name)) {
-                declarations[d.id.name] = true;
+                declarations[d.id.name] = d.init.callee.name;
               }
               break;
 
             case 'BinaryExpression':
-              if (checkBigDecimalReturn(d.init, declarations, classNames)) {
-                declarations[d.id.name] = true;
+              const className = checkClassNameReturn(d.init, declarations, classNames);
+              if (className) {
+                declarations[d.id.name] = className;
               }
               break;
           }
@@ -101,9 +107,9 @@ module.exports = function ({ types: t }) {
         }
 
         const { declarations, classNames } = state.get(OperatorOverloadDirectiveName);
-
-        if (checkBigDecimalReturn(path.node, declarations, classNames)) {
-          const expressionStatement = createBinaryTemplate(path.node);
+        const className = checkClassNameReturn(path.node, declarations, classNames);
+        if (className) {
+          const expressionStatement = createBinaryTemplate(path.node, className);
           path.replaceWith(t.expressionStatement(expressionStatement, []));
         }
       }
