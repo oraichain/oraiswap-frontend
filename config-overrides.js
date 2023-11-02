@@ -20,17 +20,38 @@ const fallback = {
   https: require.resolve('https-browserify')
 };
 
+const fixBabelRules = (config) => {
+  // find first loader and use babel.config.js
+  let ruleInd = 0;
+  let firstRule = true;
+  const rules = config.module.rules[0].oneOf;
+  while (ruleInd < rules.length) {
+    const rule = rules[ruleInd];
+    if (rule.loader) {
+      if (firstRule) {
+        // ignore js and mjs and use just one
+        rule.test = /\.(jsx|ts|tsx)$/;
+
+        rule.options.plugins.push([
+          path.resolve('./plugins/operator-overloading.js'),
+          {
+            classNames: ['BigDecimal']
+          }
+        ]);
+        firstRule = false;
+      } else {
+        rules.splice(ruleInd, 1);
+        continue;
+      }
+    }
+    ruleInd++;
+  }
+};
+
 module.exports = {
   fallback,
   webpack: function (config, env) {
-    // find first loader and use babel.config.js
-    const firstRule = config.module.rules[0].oneOf.find((c) => c.loader);
-    firstRule.options.plugins.push([
-      path.resolve('./plugins/operator-overloading.js'),
-      {
-        classNames: ['BigDecimal']
-      }
-    ]);
+    fixBabelRules(config);
 
     config.resolve.fallback = fallback;
 
