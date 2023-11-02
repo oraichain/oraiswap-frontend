@@ -26,12 +26,7 @@ describe('operator overloading', () => {
     const c = ((a + b) / 2 + 15) * 20.12;
     const d = 10 + 12 - 5;
     const e = c + d;    
-    `,
-      {
-        configFile: false,
-        presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
-        plugins: [['./plugins/operator-overloading', { enabled: true, classNames: ['BigDecimal'] }]]
-      }
+    `
     );
 
     console.log(actual.code);
