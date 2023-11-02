@@ -4,7 +4,6 @@ import { transform } from '@babel/core';
 
 describe('operator overloading', () => {
   it('binary expression', () => {
-    console.log(new BigDecimal('123.4578912345'));
     const a = new BigDecimal('123.45');
     const b = new BigDecimal('678.9');
 

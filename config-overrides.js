@@ -28,7 +28,6 @@ module.exports = {
     firstRule.options.plugins.push([
       path.resolve('./plugins/operator-overloading.js'),
       {
-        enabled: true,
         classNames: ['BigDecimal']
       }
     ]);

@@ -5,7 +5,6 @@ module.exports = function (api) {
       [
         './plugins/operator-overloading',
         {
-          enabled: true,
           classNames: ['BigDecimal']
         }
       ]

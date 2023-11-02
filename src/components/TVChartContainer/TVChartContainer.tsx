@@ -67,11 +67,12 @@ export default function TVChartContainer() {
       if (document.visibilityState === 'hidden') {
         localStorage.setItem('TV_CHART_RELOAD_TIMESTAMP_KEY', Date.now().toString());
       } else {
+        if (!tvWidgetRef.current) return;
         const tvReloadTimestamp = Number(localStorage.getItem('TV_CHART_RELOAD_TIMESTAMP_KEY'));
         if (tvReloadTimestamp && Date.now() - tvReloadTimestamp > TV_CHART_RELOAD_INTERVAL) {
           if (resetCache) {
             resetCache();
-            tvWidgetRef.current?.activeChart().resetData();
+            tvWidgetRef.current.activeChart().resetData();
           }
         }
       }
@@ -126,15 +127,15 @@ export default function TVChartContainer() {
     };
     // TODO: validate ChartingLibraryWidgetOptions
     tvWidgetRef.current = new window.TradingView.widget(widgetOptions as any as ChartingLibraryWidgetOptions);
-    tvWidgetRef.current!.onChartReady(function () {
+    tvWidgetRef.current.onChartReady(function () {
       setChartReady(true);
-      tvWidgetRef.current!.applyOverrides({
+      tvWidgetRef.current.applyOverrides({
         'paneProperties.background': theme === 'dark' ? DARK_BACKGROUND_CHART : LIGHT_BACKGROUND_CHART,
         'paneProperties.backgroundType': 'solid'
       });
 
       tvWidgetRef.current
-        ?.activeChart()
+        .activeChart()
         .onIntervalChanged()
         .subscribe(null, (interval) => {
           if (SUPPORTED_RESOLUTIONS[interval]) {
@@ -143,7 +144,7 @@ export default function TVChartContainer() {
           }
         });
 
-      tvWidgetRef.current?.activeChart().dataReady(() => {});
+      tvWidgetRef.current.activeChart().dataReady(() => {});
     });
 
     return () => {
