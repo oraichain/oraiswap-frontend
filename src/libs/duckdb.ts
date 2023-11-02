@@ -1,3 +1,4 @@
+import { NetworkChainId } from '@oraichain/oraidex-common';
 import * as duckdb from '@duckdb/duckdb-wasm';
 import { get, set } from 'idb-keyval';
 
@@ -5,8 +6,8 @@ export type TransactionHistory = {
   initialTxHash: string;
   fromCoingeckoId: string;
   toCoingeckoId: string;
-  fromChainId: string;
-  toChainId: string;
+  fromChainId: NetworkChainId;
+  toChainId: NetworkChainId;
   fromAmount: string;
   toAmount: string;
   fromAmountInUsdt: string;

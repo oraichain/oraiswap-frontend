@@ -66,10 +66,3 @@ const initApp = async () => {
 };
 
 initApp();
-
-const a = new BigDecimal('123.4578912345');
-const b = new BigDecimal('678.9645');
-
-// @ts-ignore
-const c: BigDecimal = ((a + b) / 2 + 15) * 20.123;
-console.log(a, c);

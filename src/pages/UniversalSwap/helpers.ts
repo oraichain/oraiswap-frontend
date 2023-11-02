@@ -154,7 +154,7 @@ export const getSwapType = ({
   return 'Universal Swap';
 };
 
-export const getExplorerScan = (chainId) => {
+export const getExplorerScan = (chainId: NetworkChainId) => {
   switch (chainId) {
     case '0x01':
       return 'https://etherscan.io/tx';
