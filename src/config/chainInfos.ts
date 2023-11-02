@@ -9,7 +9,6 @@ import {
 } from '@oraichain/oraidex-common';
 import { ReactComponent as AiriIcon } from 'assets/icons/airi.svg';
 import { ReactComponent as AtomIcon } from 'assets/icons/atom_cosmos.svg';
-import { ReactComponent as AtomLightIcon } from 'assets/icons/atom_light.svg';
 import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
 import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
@@ -120,7 +119,7 @@ export const tokensIcon: TokenIcon[] = [
   {
     coinGeckoId: 'cosmos',
     Icon: AtomIcon,
-    IconLight: AtomLightIcon
+    IconLight: AtomIcon
   },
   {
     coinGeckoId: 'weth',
@@ -183,7 +182,7 @@ export const chainIcons: ChainIcon[] = [
   {
     chainId: 'cosmoshub-4',
     Icon: AtomIcon,
-    IconLight: AtomLightIcon
+    IconLight: AtomIcon
   },
   {
     chainId: '0x01',
@@ -299,7 +298,7 @@ export const oraichainNetwork: CustomChainInfo = {
       bridgeTo: ['cosmoshub-4'],
       coinDecimals: 6,
       Icon: AtomIcon,
-      IconLight: AtomLightIcon
+      IconLight: AtomIcon
     },
     // {
     //   coinDenom: 'BEP20 AIRI',
@@ -677,7 +676,7 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 118
     },
     Icon: AtomIcon,
-    IconLight: AtomLightIcon,
+    IconLight: AtomIcon,
     bech32Config: defaultBech32Config('cosmos'),
     feeCurrencies: [AtomToken],
     currencies: [
@@ -688,7 +687,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
         Icon: AtomIcon,
-        IconLight: AtomLightIcon
+        IconLight: AtomIcon
       }
     ]
   },
