@@ -153,3 +153,29 @@ export const getSwapType = ({
 
   return 'Universal Swap';
 };
+
+export const getExplorerScan = (chainId) => {
+  switch (chainId) {
+    case '0x01':
+      return 'https://etherscan.io/tx';
+    case '0x38':
+      return 'https://bscscan.com/tx';
+    case '0x2b6653dc':
+      return 'https://tronscan.org/#/transaction';
+    case '0x1ae6':
+      return 'https://scan.kawaii.global/tx';
+    case 'Oraichain':
+      return 'https://scan.orai.io/txs';
+    case 'osmosis-1':
+      return 'https://www.mintscan.io/osmosis/tx';
+    case 'cosmoshub-4':
+      return 'https://www.mintscan.io/cosmos/tx';
+    case 'injective-1':
+      return 'https://explorer.injective.network/transaction';
+    case 'kawaii_6886-1':
+      return 'https://scan.kawaii.global/tx';
+    // case: 'noble-1':
+    default:
+      return 'https://scan.orai.io/txs';
+  }
+};

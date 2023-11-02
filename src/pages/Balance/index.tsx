@@ -167,7 +167,7 @@ const Balance: React.FC<BalanceProps> = () => {
         {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
-          originalToToken: from,
+          originalToToken: to,
           fromAmount
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
@@ -332,8 +332,7 @@ const Balance: React.FC<BalanceProps> = () => {
           prices={prices}
           amounts={amounts}
           type="network"
-          // TODO: current hide ethereum network, open later after fixed sdk.
-          items={networks.filter((network) => network.chainId !== '0x01')}
+          items={networks}
           setToken={(chainId) => {
             setFilterNetwork(chainId);
           }}
