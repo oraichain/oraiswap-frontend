@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
-import { DuckDb } from 'libs/duckdb';
 import { initClient } from 'libs/utils';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
@@ -16,6 +15,7 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import { BigDecimal } from '@oraichain/oraidex-common';
 
 const queryClient = new QueryClient();
 
@@ -66,3 +66,10 @@ const initApp = async () => {
 };
 
 initApp();
+
+const a = new BigDecimal('123.4578912345');
+const b = new BigDecimal('678.9645');
+
+// @ts-ignore
+const c: BigDecimal = ((a + b) / 2 + 15) * 20.123;
+console.log(a, c);
