@@ -1,23 +1,28 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocalStorage, useMedia } from "react-use";
+import { useEffect, useRef, useState } from 'react';
+import { useLocalStorage, useMedia } from 'react-use';
 import cn from 'classnames/bind';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 
-import { selectChartDataLength, selectCurrentToken } from "reducer/tradingSlice";
-import useTheme from "hooks/useTheme";
-import { SUPPORTED_RESOLUTIONS, TV_CHART_RELOAD_INTERVAL } from "components/TVChartContainer/helpers/constants";
-import useTVDatafeed from "./helpers/useTVDatafeed";
-import { TVDataProvider } from "./helpers/TVDataProvider";
-import { getObjectKeyFromValue } from "./helpers/utils";
-import { SaveLoadAdapter, } from "./SaveLoadAdapter";
+import { selectChartDataLength, selectCurrentToken } from 'reducer/tradingSlice';
+import useTheme from 'hooks/useTheme';
+import { SUPPORTED_RESOLUTIONS, TV_CHART_RELOAD_INTERVAL } from 'components/TVChartContainer/helpers/constants';
+import useTVDatafeed from './helpers/useTVDatafeed';
+import { TVDataProvider } from './helpers/TVDataProvider';
+import { getObjectKeyFromValue } from './helpers/utils';
+import { SaveLoadAdapter } from './SaveLoadAdapter';
 import {
   defaultChartProps,
   DEFAULT_PERIOD,
   disabledFeaturesOnMobile,
   DARK_BACKGROUND_CHART,
   LIGHT_BACKGROUND_CHART
-} from "./config";
-import { ChartData, IChartingLibraryWidget, ResolutionString } from "../../charting_library";
+} from './config';
+import {
+  ChartData,
+  ChartingLibraryWidgetOptions,
+  IChartingLibraryWidget,
+  ResolutionString
+} from '../../charting_library';
 
 import styles from './index.module.scss';
 
@@ -40,18 +45,18 @@ export default function TVChartContainer() {
   const theme = useTheme();
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const currentPair = useSelector(selectCurrentToken);
-  const chartDataLength = useSelector(selectChartDataLength)
+  const chartDataLength = useSelector(selectChartDataLength);
   const tvWidgetRef = useRef<IChartingLibraryWidget | null>(null);
   const [tvCharts, setTvCharts] = useLocalStorage<ChartData[] | undefined>('TV_SAVE_LOAD_CHARTS_KEY', []);
   const { datafeed, resetCache } = useTVDatafeed({ dataProvider: new TVDataProvider() });
-  const isMobile = useMedia("(max-width: 550px)");
+  const isMobile = useMedia('(max-width: 550px)');
   const [chartReady, setChartReady] = useState(false);
-  const [period, setPeriod] = useLocalStorageSerializeKey([currentPair.symbol, "Chart-period"], DEFAULT_PERIOD);
+  const [period, setPeriod] = useLocalStorageSerializeKey([currentPair.symbol, 'Chart-period'], DEFAULT_PERIOD);
   const symbolRef = useRef(currentPair.symbol);
 
   useEffect(() => {
     if (chartReady && tvWidgetRef.current && currentPair.symbol !== tvWidgetRef.current?.activeChart?.().symbol()) {
-      tvWidgetRef.current.setSymbol(currentPair.symbol, tvWidgetRef.current.activeChart().resolution(), () => { });
+      tvWidgetRef.current.setSymbol(currentPair.symbol, tvWidgetRef.current.activeChart().resolution(), () => {});
     }
   }, [currentPair, chartReady, period]);
 
@@ -59,26 +64,28 @@ export default function TVChartContainer() {
   for a long time, the historical data will be outdated. */
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
+      if (document.visibilityState === 'hidden') {
         localStorage.setItem('TV_CHART_RELOAD_TIMESTAMP_KEY', Date.now().toString());
       } else {
+        if (!tvWidgetRef.current) return;
         const tvReloadTimestamp = Number(localStorage.getItem('TV_CHART_RELOAD_TIMESTAMP_KEY'));
         if (tvReloadTimestamp && Date.now() - tvReloadTimestamp > TV_CHART_RELOAD_INTERVAL) {
           if (resetCache) {
             resetCache();
-            tvWidgetRef.current?.activeChart().resetData();
+            tvWidgetRef.current.activeChart().resetData();
           }
         }
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [resetCache]);
 
   useEffect(() => {
+    if (!window.TradingView) return;
     const widgetOptions = {
       debug: false,
       symbol: symbolRef.current, // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
@@ -108,26 +115,27 @@ export default function TVChartContainer() {
       studies: [],
       timeframe: '1M',
       time_scale: {
-        min_bar_spacing: 15,
+        min_bar_spacing: 15
       },
       time_frames: [
         { text: '6m', resolution: '6h' as ResolutionString, description: '6 Months' },
         { text: '1m', resolution: '1h' as ResolutionString, description: '1 Month' },
         { text: '2w', resolution: '1h' as ResolutionString, description: '2 Weeks' },
         { text: '1w', resolution: '1h' as ResolutionString, description: '1 Week' },
-        { text: '1d', resolution: '15' as ResolutionString, description: '1 Day' },
-      ],
+        { text: '1d', resolution: '15' as ResolutionString, description: '1 Day' }
+      ]
     };
-    tvWidgetRef.current = new (window as any).TradingView.widget(widgetOptions);
-    tvWidgetRef.current!.onChartReady(function () {
+    // TODO: validate ChartingLibraryWidgetOptions
+    tvWidgetRef.current = new window.TradingView.widget(widgetOptions as any as ChartingLibraryWidgetOptions);
+    tvWidgetRef.current.onChartReady(function () {
       setChartReady(true);
-      tvWidgetRef.current!.applyOverrides({
-        "paneProperties.background": theme === 'dark' ? DARK_BACKGROUND_CHART : LIGHT_BACKGROUND_CHART,
-        "paneProperties.backgroundType": "solid",
+      tvWidgetRef.current.applyOverrides({
+        'paneProperties.background': theme === 'dark' ? DARK_BACKGROUND_CHART : LIGHT_BACKGROUND_CHART,
+        'paneProperties.backgroundType': 'solid'
       });
 
       tvWidgetRef.current
-        ?.activeChart()
+        .activeChart()
         .onIntervalChanged()
         .subscribe(null, (interval) => {
           if (SUPPORTED_RESOLUTIONS[interval]) {
@@ -136,8 +144,7 @@ export default function TVChartContainer() {
           }
         });
 
-      tvWidgetRef.current?.activeChart().dataReady(() => {
-      });
+      tvWidgetRef.current.activeChart().dataReady(() => {});
     });
 
     return () => {
@@ -147,13 +154,13 @@ export default function TVChartContainer() {
         setChartReady(false);
       }
     };
-  }, [theme]);
+  }, [theme, window.TradingView]);
 
   return (
     <div className={cx('chart-container')}>
       <div
         className={cx('chart-content')}
-        style={{ visibility: chartDataLength > 0 ? "visible" : "hidden" }}
+        style={{ visibility: chartDataLength > 0 ? 'visible' : 'hidden' }}
         ref={chartContainerRef}
       />
     </div>

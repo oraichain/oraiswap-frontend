@@ -1,10 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
-const { EsbuildPlugin } = require('esbuild-loader');
 const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
-const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 
 const fallback = {
   fs: false,
@@ -22,60 +20,39 @@ const fallback = {
   https: require.resolve('https-browserify')
 };
 
-const rewiredEsbuild = (config, env) => {
-  const useTypeScript = fs.existsSync(paths.appTsConfig);
-  const target = 'es2020';
-  // replace babel-loader to esbuild-loader
-  for (const { oneOf } of config.module.rules) {
-    if (oneOf) {
-      let babelLoaderIndex = -1;
-      const rules = Object.entries(oneOf);
-      for (const [index, rule] of rules.slice().reverse()) {
-        if (rule.loader && rule.loader.includes(path.sep + 'babel-loader' + path.sep)) {
-          oneOf.splice(index, 1);
-          babelLoaderIndex = index;
-        }
-      }
-      if (~babelLoaderIndex) {
-        const options = {
-          loader: useTypeScript ? 'tsx' : 'jsx',
-          target
-        };
-        if (env !== 'development') {
-          options.drop = ['console'];
-        }
-        oneOf.splice(babelLoaderIndex, 0, {
-          test: /\.(js|mjs|jsx|ts|tsx)$/,
-          include: [paths.appSrc],
-          loader: require.resolve('esbuild-loader'),
-          options
-        });
+const fixBabelRules = (config) => {
+  // find first loader and use babel.config.js
+  let ruleInd = 0;
+  let firstRule = true;
+  const rules = config.module.rules[0].oneOf;
+  while (ruleInd < rules.length) {
+    const rule = rules[ruleInd];
+    if (rule.loader) {
+      if (firstRule) {
+        // ignore js and mjs and use just one
+        rule.test = /\.(jsx|ts|tsx)$/;
+
+        rule.options.plugins.push([
+          path.resolve('./plugins/operator-overloading.js'),
+          {
+            classNames: ['BigDecimal']
+          }
+        ]);
+        firstRule = false;
+      } else {
+        rules.splice(ruleInd, 1);
+        continue;
       }
     }
+    ruleInd++;
   }
-
-  // replace minimizer
-  for (const [index, minimizer] of Object.entries(config.optimization.minimizer).slice().reverse()) {
-    const options = {
-      target,
-      css: true
-    };
-    // replace TerserPlugin to EsbuildPlugin
-    if (minimizer.constructor.name === 'TerserPlugin') {
-      config.optimization.minimizer.splice(index, 1, new EsbuildPlugin(options));
-    }
-    // remove OptimizeCssAssetsWebpackPlugin
-    if (options.css && minimizer.constructor.name === 'OptimizeCssAssetsWebpackPlugin') {
-      config.optimization.minimizer.splice(index, 1);
-    }
-  }
-
-  return config;
 };
 
 module.exports = {
   fallback,
   webpack: function (config, env) {
+    fixBabelRules(config);
+
     config.resolve.fallback = fallback;
 
     // do not check issues
@@ -108,6 +85,7 @@ module.exports = {
     }
 
     // if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
+    // const SentryWebpackPlugin = require('@sentry/webpack-plugin');
     //   config.devtool = 'source-map';
     //   config.plugins.push(
     //     new SentryWebpackPlugin({
@@ -133,8 +111,8 @@ module.exports = {
         manifest
       })
     );
-
-    return rewiredEsbuild(config, env);
+    return config;
+    // return rewiredEsbuild(config, env);
   },
   jest: (config) => {
     config.setupFiles = ['<rootDir>/jest.setup.ts'];
