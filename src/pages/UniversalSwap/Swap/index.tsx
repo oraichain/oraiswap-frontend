@@ -1,39 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import AntSwapLightImg from 'assets/icons/ant_swap_light.svg';
-import AntSwapImg from 'assets/images/ant_swap.svg';
-import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
-import cn from 'classnames/bind';
-import InputSwap from 'components/InputSwap/InputSwap';
-import Loader from 'components/Loader';
-import LoadingBox from 'components/LoadingBox';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
-import { tokenMap } from 'config/bridgeTokens';
 import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
-  GAS_ESTIMATION_SWAP_DEFAULT,
   ORAI,
   TRON_DENOM,
-  TokenItemType
-} from '@oraichain/oraidex-common';
-import { feeEstimate, floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
-import useTokenFee from 'hooks/useTokenFee';
-import { toSubAmount } from 'libs/utils';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
-import { fetchTokenInfos } from 'rest/api';
-import { RootState } from 'store/configure';
-import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
-import { SwapDirection, checkEvmAddress, filterNonPoolEvmTokens, relayerFeeInfo } from '../helpers';
-import { useSimulate, useTaxRate, useWarningSlippage } from './hooks';
-import styles from './index.module.scss';
-import {
+  TokenItemType,
   calculateMinReceive,
   getTokenOnOraichain,
   network,
@@ -41,18 +11,54 @@ import {
   toDisplay,
   truncDecimals
 } from '@oraichain/oraidex-common';
-import { useRelayerFee } from './hooks/useRelayerFee';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { ethers } from 'ethers';
 import {
   UniversalSwapHandler,
+  getRoute,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
 } from '@oraichain/oraidex-universal-swap';
+import { useQuery } from '@tanstack/react-query';
+import SwitchDarkImg from 'assets/icons/switch.svg';
+import SwitchLightImg from 'assets/icons/switch_light.svg';
+import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
+import cn from 'classnames/bind';
+import Loader from 'components/Loader';
+import LoadingBox from 'components/LoadingBox';
+import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import TokenBalance from 'components/TokenBalance';
+import { tokenMap } from 'config/bridgeTokens';
+import { ethers } from 'ethers';
+import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
+import useTokenFee from 'hooks/useTokenFee';
+import { getUsd, toSubAmount } from 'libs/utils';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
+import { fetchTokenInfos } from 'rest/api';
+import { RootState } from 'store/configure';
+import { SelectTokenModalV2, SlippageModal, TooltipIcon } from '../Modals';
+import {
+  AMOUNT_BALANCE_ENTRIES,
+  SwapDirection,
+  checkEvmAddress,
+  filterNonPoolEvmTokens,
+  getSwapType,
+  relayerFeeInfo
+} from '../helpers';
+import InputSwap from './InputSwapV3';
+import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
+import { useRelayerFee } from './hooks/useRelayerFee';
+import styles from './index.module.scss';
 import Metamask from 'libs/metamask';
 
 const cx = cn.bind(styles);
+const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -63,13 +69,14 @@ const SwapComponent: React.FC<{
   const [isSelectFrom, setIsSelectFrom] = useState(false);
   const [isSelectTo, setIsSelectTo] = useState(false);
   const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [coe, setCoe] = useState(0);
   const [visible, setVisible] = useState(false);
   const [swapLoading, setSwapLoading] = useState(false);
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [oraiAddress] = useConfigReducer('address');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
@@ -77,39 +84,34 @@ const SwapComponent: React.FC<{
   const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
+  const { refetchTransHistory } = useGetTransHistory();
 
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
       await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
-      setLoadingRefresh(false);
     } catch (err) {
-      setLoadingRefresh(false);
+      console.log({ err });
+    } finally {
+      setTimeout(() => {
+        setLoadingRefresh(false);
+      }, 2000);
     }
   };
 
   const onChangeFromAmount = (amount: number | undefined) => {
-    if (!amount) return setSwapAmount([undefined, toAmountToken]);
+    if (!amount) {
+      setCoe(0);
+      setSwapAmount([undefined, toAmountToken]);
+      return;
+    }
     setSwapAmount([amount, toAmountToken]);
   };
 
-  const onMaxFromAmount = (amount: bigint, type: 'max' | 'half') => {
+  const onChangePercent = (amount: bigint) => {
     const displayAmount = toDisplay(amount, originalFromToken?.decimals);
-    let finalAmount = displayAmount;
-
-    // hardcode fee when swap token orai
-    if (fromTokenDenom === ORAI) {
-      const estimatedFee = feeEstimate(originalFromToken, GAS_ESTIMATION_SWAP_DEFAULT);
-      const fromTokenBalanceDisplay = toDisplay(fromTokenBalance, originalFromToken?.decimals);
-      if (type === 'max') {
-        finalAmount = estimatedFee > displayAmount ? 0 : displayAmount - estimatedFee;
-      }
-      if (type === 'half') {
-        finalAmount = estimatedFee > fromTokenBalanceDisplay - displayAmount ? 0 : displayAmount;
-      }
-    }
-    setSwapAmount([finalAmount, toAmountToken]);
+    setSwapAmount([displayAmount, toAmountToken]);
   };
 
   // get token on oraichain to simulate swap amount.
@@ -171,7 +173,7 @@ const SwapComponent: React.FC<{
       SwapDirection.From
     );
     setFilteredFromTokens(filteredFromTokens);
-  }, [fromTokenDenom, toTokenDenom, searchTokenName]);
+  }, [fromTokenDenom, toTokenDenom]);
 
   const taxRate = useTaxRate();
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
@@ -192,18 +194,61 @@ const SwapComponent: React.FC<{
     routerClient,
     1
   );
-  const relayerFee = useRelayerFee();
 
-  const relayerFeeToken = React.useMemo(
-    () => relayerFee.find((relayer) => relayer.prefix === originalFromToken.prefix),
-    [originalFromToken]
-  );
+  const relayerFee = useRelayerFee();
+  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
+    if (
+      originalFromToken.chainId !== originalToToken.chainId &&
+      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
+    ) {
+      return +cur.amount + acc;
+    }
+    return acc;
+  }, 0);
+  // TODO: need testcase
+  // const RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN = 20000;
+  // const { universalSwapType } = getRoute(originalFromToken, originalToToken, oraiAddress);
+  // const isEvmToEvm =
+  //   !originalFromToken.cosmosBased &&
+  //   !originalToToken.cosmosBased &&
+  //   originalFromToken.chainId !== originalToToken.chainId;
+  // const isEvmBridge =
+  //   !originalFromToken.cosmosBased &&
+  //   !originalToToken.cosmosBased &&
+  //   originalFromToken.chainId === originalToToken.chainId;
+  // if (universalSwapType === "other-networks-to-oraichain" && !isEvmBridge) {
+  //   relayerFeeToken = RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN
+  // }
+  // if (universalSwapType === 'oraichain-to-evm' || isEvmToEvm) {
+  //   relayerFeeToken = relayerFee.reduce((acc, cur) => {
+  //     if (
+  //       originalFromToken.chainId !== originalToToken.chainId &&
+  //       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
+  //     ) {
+  //       return +cur.amount + acc;
+  //     }
+  //     return acc;
+  //   }, 0);
+  // }
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
+
+  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+
+  const minimumReceive = averageRatio?.amount
+    ? calculateMinReceive(
+        averageRatio.amount,
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
+    : '0';
+
+  const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -218,7 +263,14 @@ const SwapComponent: React.FC<{
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
       const oraiAddress = await handleCheckAddress('Oraichain');
-      const checksumMetamaskAddress = ethers.utils.getAddress(metamaskAddress);
+      const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
+      checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
+      checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
+      const relayerFee = relayerFeeToken && {
+        relayerAmount: relayerFeeToken.toString(),
+        relayerDecimals: RELAYER_DECIMAL
+      };
+
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
@@ -228,12 +280,10 @@ const SwapComponent: React.FC<{
           simulateAmount: simulateData.amount,
           userSlippage,
           simulatePrice: averageRatio.amount,
-          relayerFee: relayerFeeToken
+          relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
-      checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
-      checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
@@ -241,6 +291,30 @@ const SwapComponent: React.FC<{
         });
         loadTokenAmounts({ oraiAddress, metamaskAddress, tronAddress });
         setSwapLoading(false);
+
+        // save to duckdb
+        const swapType = getSwapType({
+          fromChainId: originalFromToken.chainId,
+          toChainId: originalToToken.chainId,
+          fromCoingeckoId: originalFromToken.coinGeckoId,
+          toCoingeckoId: originalToToken.coinGeckoId
+        });
+        await window.duckDb.addTransHistory({
+          initialTxHash: transactionHash,
+          fromCoingeckoId: originalFromToken.coinGeckoId,
+          toCoingeckoId: originalToToken.coinGeckoId,
+          fromChainId: originalFromToken.chainId,
+          toChainId: originalToToken.chainId,
+          fromAmount: fromAmountToken.toString(),
+          toAmount: toAmountToken.toString(),
+          fromAmountInUsdt: getUsd(fromAmountTokenBalance, originalFromToken, prices).toString(),
+          toAmountInUsdt: getUsd(toAmount(toAmountToken, originalToToken.decimals), originalToToken, prices).toString(),
+          status: 'success',
+          type: swapType,
+          timestamp: Date.now(),
+          userAddress: oraiAddress
+        });
+        refetchTransHistory();
       }
     } catch (error) {
       console.log({ error });
@@ -254,70 +328,34 @@ const SwapComponent: React.FC<{
     theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
   const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
 
-  // const filteredFromTokens = swapFromTokens.filter(
-  //   (token) => token.denom !== toTokenDenom && token.name.includes(searchTokenName)
-  // );
-
-  // const filteredToTokens = swapToTokens.filter(
-  //   (token) => token.denom !== fromTokenDenom && token.name.includes(searchTokenName)
-  // );
-
-  // minimum receive after slippage
-  const minimumReceive = averageRatio?.amount
-    ? calculateMinReceive(
-      averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
-    : '0';
-  const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
-
   return (
     <LoadingBox loading={loadingRefresh}>
       <div className={cx('swap-box')}>
+        <div className={cx('header')}>
+          <div className={cx('title')}>Universal Swap & Bridge</div>
+          <TooltipIcon
+            placement="bottom-end"
+            visible={visible}
+            setVisible={setVisible}
+            content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+          />
+          <button className={cx('btn')} onClick={refreshBalances}>
+            <RefreshImg />
+          </button>
+        </div>
         <div className={cx('from')}>
-          <div className={cx('header')}>
-            <div className={cx('title')}>FROM</div>
-            <TooltipIcon
-              placement="bottom-end"
-              visible={visible}
-              setVisible={setVisible}
-              content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
-            />
-            <button className={cx('btn')} onClick={refreshBalances}>
-              <RefreshImg />
-            </button>
-          </div>
-          <div className={cx('balance')}>
-            <TokenBalance
-              balance={{
-                amount: fromTokenBalance,
-                decimals: originalFromToken?.decimals,
-                denom: fromTokenInfoData?.symbol ?? ''
-              }}
-              prefix="Balance: "
-              decimalScale={6}
-            />
-
-            <div
-              className={cx('btn')}
-              onClick={() => onMaxFromAmount(fromTokenBalance - BigInt(originalFromToken?.maxGas ?? 0), 'max')}
-            >
-              MAX
-            </div>
-            <div className={cx('btn')} onClick={() => onMaxFromAmount(fromTokenBalance / BigInt(2), 'half')}>
-              HALF
-            </div>
-          </div>
           <div className={cx('input-wrapper')}>
             <InputSwap
+              balance={fromTokenBalance}
+              originalToken={originalFromToken}
+              prices={prices}
               Icon={FromIcon}
               setIsSelectFrom={setIsSelectFrom}
               token={originalFromToken}
               amount={fromAmountToken}
               onChangeAmount={onChangeFromAmount}
               tokenFee={fromTokenFee}
+              setCoe={setCoe}
             />
             {isSelectFrom && (
               <SelectTokenModalV2
@@ -329,45 +367,45 @@ const SwapComponent: React.FC<{
                   setSwapTokens([denom, toTokenDenom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
+            )}
+            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+              <div className={cx('impact-warning')}>
+                <div className={cx('title')}>
+                  <span>Current slippage exceed configuration!</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
         <div className={cx('swap-icon')}>
-          <img
-            src={theme === 'light' ? AntSwapLightImg : AntSwapImg}
-            onClick={() => {
-              // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
-              // because non-evm token cannot be swapped to evm token with no Oraichain pool
-              if (isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) && !isEvmNetworkNativeSwapSupported(toToken.chainId))
-                return;
-              setSwapTokens([toTokenDenom, fromTokenDenom]);
-              setSwapAmount([toAmountToken, fromAmountToken]);
-            }}
-            alt="ant"
-          />
+          <div className={cx('wrap-img')}>
+            <img
+              src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
+              onClick={() => {
+                // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+                // because non-evm token cannot be swapped to evm token with no Oraichain pool
+                if (
+                  isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
+                  !isEvmNetworkNativeSwapSupported(toToken.chainId)
+                )
+                  return;
+                setSwapTokens([toTokenDenom, fromTokenDenom]);
+                setSwapAmount([toAmountToken, fromAmountToken]);
+              }}
+              alt="ant"
+            />
+          </div>
         </div>
         <div className={cx('to')}>
-          <div className={cx('header')}>
-            <div className={cx('title')}>TO</div>
-          </div>
-          <div className={cx('balance')}>
-            <TokenBalance
-              balance={{
-                amount: toTokenBalance,
-                denom: toTokenInfoData?.symbol ?? '',
-                decimals: originalToToken?.decimals
-              }}
-              prefix="Balance: "
-              decimalScale={6}
-            />
-
-            <span style={{ flexGrow: 1, textAlign: 'right' }}>
-              {`1 ${originalFromToken?.name} ≈ ${averageRatio?.displayAmount} ${originalToToken?.name}`}
-            </span>
-          </div>
           <div className={cx('input-wrapper')}>
             <InputSwap
+              balance={toTokenBalance}
+              originalToken={originalToToken}
+              disable={true}
+              prices={prices}
               Icon={ToIcon}
               setIsSelectFrom={setIsSelectTo}
               token={originalToToken}
@@ -384,61 +422,101 @@ const SwapComponent: React.FC<{
                   setSwapTokens([fromTokenDenom, denom]);
                 }}
                 setSearchTokenName={setSearchTokenName}
+                searchTokenName={searchTokenName}
               />
-            )}
-            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
-              <div className={cx('impact-warning')}>
-                <div className={cx('title')}>
-                  <span style={{ color: 'rgb(255, 171, 0)' }}>Current slippage exceed configuration!</span>
-                </div>
-              </div>
             )}
           </div>
         </div>
-        <button
-          className={cx('swap-btn')}
-          onClick={handleSubmit}
-          disabled={swapLoading || !fromAmountToken || !toAmountToken}
-        >
-          {swapLoading && <Loader width={40} height={40} />}
-          {/* hardcode check minimum tron */}
-          {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-            <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
-          ) : (
-            <span>Swap</span>
-          )}
-        </button>
+        <div className={cx('coeff')}>
+          {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
+            <button
+              className={cx(`${coe === coeff && 'is-active'}`)}
+              key={coeff}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (coeff === coe) {
+                  setCoe(0);
+                  setSwapAmount([0, 0]);
+                  return;
+                }
+                setCoe(coeff);
+                if (type === 'max') {
+                  onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
+                } else {
+                  onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
+                }
+              }}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+
+        {(() => {
+          const disabledSwapBtn =
+            swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+
+          let disableMsg: string;
+          if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
+          if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+          return (
+            <button
+              className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
+              onClick={handleSubmit}
+              disabled={disabledSwapBtn}
+            >
+              {swapLoading && <Loader width={35} height={35} />}
+              {/* hardcode check minimum tron */}
+              {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+                <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+              ) : (
+                <span>{disableMsg || 'Swap'}</span>
+              )}
+            </button>
+          );
+        })()}
+
         <div className={cx('detail')}>
+          {
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> Expected Output</span>
+              </div>
+              <div>
+                ≈ {(simulateData && simulateData.displayAmount) || '0'} {originalToToken && originalToToken.name}
+              </div>
+            </div>
+          }
           <div className={cx('row')}>
             <div className={cx('title')}>
-              <span>Minimum Received</span>
+              <span>Minimum Received after slippage ( {userSlippage}% )</span>
             </div>
             <TokenBalance
               balance={{
                 amount: minimumReceive,
                 decimals: originalFromToken?.decimals,
-                denom: toTokenInfoData?.symbol
+                denom: originalToToken?.name
               }}
               decimalScale={truncDecimals}
             />
           </div>
-          {relayerFeeToken && (
+
+          {!!relayerFeeToken && (
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Relayer Fee</span>
               </div>
               <TokenBalance
                 balance={{
-                  amount: relayerFeeToken.amount,
-                  decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                  denom: relayerFeeToken.prefix
+                  amount: relayerFeeToken.toString(),
+                  // decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                  decimals: RELAYER_DECIMAL,
+                  denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
                 }}
                 decimalScale={truncDecimals}
               />
             </div>
           )}
-
           {!fromTokenFee && !toTokenFee && (
             <div className={cx('row')}>
               <div className={cx('title')}>

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import { TransactionProcess } from './Modals';
-import SwapComponent from './SwapV3';
+import SwapComponent from './Swap';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useSelector } from 'react-redux';
