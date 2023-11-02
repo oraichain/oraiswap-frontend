@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
 import { ReactComponent as ORAIX } from 'assets/icons/oraix.svg';
 import cn from 'classnames/bind';
+import React from 'react';
 import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
@@ -39,4 +39,4 @@ const BlocLoaderDex: React.FC<{
   );
 };
 
-export default memo(BlocLoaderDex);
+export default BlocLoaderDex;
