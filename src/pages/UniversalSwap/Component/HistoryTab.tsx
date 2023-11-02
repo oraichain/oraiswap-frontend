@@ -13,6 +13,7 @@ import { reduceString, timeSince } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useGetTransHistory } from '../SwapV3/hooks';
 import styles from './HistoryTab.module.scss';
+import { getExplorerScan } from '../helpers';
 
 const cx = cn.bind(styles);
 const RowsComponent: React.FC<{
@@ -110,7 +111,7 @@ const RowsComponent: React.FC<{
         </div>
         <div className={styles.txhash}>
           <div className={styles.type}>TxHash</div>
-          <div className={styles.link} onClick={() => window.open(`${network.explorer}/txs/${rows.initialTxHash}`)}>
+          <div className={styles.link} onClick={() => window.open(`${getExplorerScan(rows.fromChainId)}/${rows.initialTxHash}`)}>
             <span>{reduceString(rows.initialTxHash, 6, 4)}</span>
             <div className={styles.open_link}>
               <img src={OpenNewWindowImg} width={11} height={11} alt="filter" />
