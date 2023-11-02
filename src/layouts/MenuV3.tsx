@@ -90,7 +90,8 @@ const Menu: React.FC = React.memo(() => {
 
   const menuList = (
     <div className={classNames(styles.menu_list)}>
-      {renderLink('/universalswap', 'SWAP', setLink)},{renderLink('/bridge', 'BRIDGE', setLink)},
+      {renderLink('/universalswap', 'SWAP', setLink)}
+      {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
       {renderLink('coming-soon', 'FUTURES', () => {}, true)}
