@@ -43,7 +43,8 @@ function createBinaryTemplate(node, className) {
   const LHS = node.left.type === 'BinaryExpression' ? createBinaryTemplate(node.left, className) : node.left;
   const RHS = node.right.type === 'BinaryExpression' ? createBinaryTemplate(node.right, className) : node.right;
   const lhsAssign = node.left.type.endsWith('Literal') ? `new ${className}(LHS)` : 'LHS';
-  return template(`${lhsAssign}.${methodMap[node.operator]}(RHS)`)({
+  const method = methodMap[node.operator];
+  return template(method ? `${lhsAssign}.${method}(RHS)` : `${lhsAssign} ${node.operator} RHS`)({
     LHS,
     RHS
   }).expression;

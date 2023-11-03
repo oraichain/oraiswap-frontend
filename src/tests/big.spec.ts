@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { transform } from '@babel/core';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 describe('operator overloading', () => {
   it('binary expression', () => {
@@ -25,9 +26,19 @@ describe('operator overloading', () => {
     const d = 10 + 12 - 5;
     const e = c + d;    
     console.log(c, d, e);
+    const decimals = 6;
+    console.log(new BigDecimal(totalStaked) / 10 ** decimals)
     `
     );
 
     console.log(actual.code);
+  });
+
+  it('utils', () => {
+    const totalStaked = '1289123.45678';
+    const decimals = 6;
+    const display = toDisplay(BigInt(Math.trunc(totalStaked)), decimals);
+    const displayBigDecimal = new BigDecimal(totalStaked) / 10 ** decimals;
+    console.log(display, displayBigDecimal.toNumber());
   });
 });
