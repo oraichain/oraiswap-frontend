@@ -20,7 +20,7 @@ import {
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { reduceString } from 'libs/utils';
+import { generateError, reduceString } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
@@ -139,11 +139,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount);
         return;
       }
-      // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
-      // to is Oraibridge tokens
-      // or other token that have same coingeckoId that show in at least 2 chain.
-      const to = findToTokenOnOraiBridge(token, filterNetwork);
-      await onClickTransfer(convertAmount, token, to);
+      await onClickTransfer(convertAmount, filterNetwork);
       return;
     } catch (error) {
       console.log({ error });

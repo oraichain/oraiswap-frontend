@@ -8,7 +8,7 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { tokens } from 'config/bridgeTokens';
+import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType } from '@oraichain/oraidex-common';
 import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
@@ -16,7 +16,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
-import { getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -37,7 +37,7 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
-import { toAmount, tronToEthAddress } from '@oraichain/oraidex-common';
+import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
@@ -124,7 +124,12 @@ const Balance: React.FC<BalanceProps> = () => {
     processTxResult(fromToken.rpc, result);
   };
 
-  const onClickTransfer = async (fromAmount: number, from: TokenItemType, to: TokenItemType) => {
+  const onClickTransfer = async (
+    fromAmount: number,
+    from: TokenItemType,
+    to: TokenItemType,
+    filterNetwork?: NetworkChainId
+  ) => {
     await handleCheckWallet();
     // disable send amount < 0
     if (!from || !to) {
@@ -163,11 +168,25 @@ const Balance: React.FC<BalanceProps> = () => {
       if (!window.Metamask.isTron(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
+
+      // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
+      // to is Oraibridge tokens
+      // or other token that have same coingeckoId that show in at least 2 chain.
+      let newToToken = to;
+      if (filterNetwork) {
+        let newToToken = findToTokenOnOraiBridge(from, filterNetwork);
+        if (!newToToken) {
+          newToToken = cosmosTokens.find((t) => t.chainId === filterNetwork && t.coinGeckoId === from.coinGeckoId);
+        }
+        if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
+      }
+      if (newToToken.coinGeckoId !== from.coinGeckoId)
+        throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
       result = await new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
-          originalToToken: to,
+          originalToToken: newToToken,
           fromAmount
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
@@ -301,12 +320,8 @@ const Balance: React.FC<BalanceProps> = () => {
                     token={t}
                     theme={theme}
                     onClick={() => onClickToken(t)}
-                    onClickTransfer={async (
-                      fromAmount: number,
-                      transferFrom?: TokenItemType,
-                      transferTo?: TokenItemType
-                    ) => {
-                      await onClickTransfer(fromAmount, transferFrom ?? from, transferTo ?? to);
+                    onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
+                      await onClickTransfer(fromAmount, from, to, filterNetwork);
                     }}
                     convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
                       try {
