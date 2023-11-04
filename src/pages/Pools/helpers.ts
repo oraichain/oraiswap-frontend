@@ -377,14 +377,16 @@ export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
   const validatedAmount = validateNumber(amount);
   if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
 
-  // add `,` when split thounsand value.
-  return `$${toFixedIfNecessary(amount.toString(), dp)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
 };
 
 export const toFixedIfNecessary = (value: string, dp: number): number => {
   return +parseFloat(value).toFixed(dp);
+};
+
+// add `,` when split thounsand value.
+export const numberWithCommas = (x: number) => {
+  return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
 };
 
 /**

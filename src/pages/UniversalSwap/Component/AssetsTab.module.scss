@@ -6,45 +6,59 @@
   margin-bottom: 24px;
   width: 100%;
   min-height: 484px;
+
   @include theme() {
     border: 1px solid theme-get('neutral-6');
   }
+
   border-radius: 12px;
+
   .info {
     display: flex;
     justify-content: space-between;
     padding: 24px;
+
     @include mobile() {
       padding: 12px;
       flex-flow: wrap;
       gap: 20px;
     }
+
     .total-info {
       display: flex;
       align-items: center;
+
       .icon {
         width: 40px;
         height: 40px;
+
         @include theme() {
           background-color: theme-get('neutral-border-border-default');
         }
+
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
       }
+
       .balance {
         padding-left: 16px;
+
         .value {
           @include theme() {
             color: theme-get('sea-stone-200');
           }
+
           font-size: 18px;
+
           @include mobile() {
-            font-size: 13px;
+            font-size: 12px;
           }
+
           font-weight: 600;
         }
+
         .label {
           @include theme() {
             color: theme-get('sea-stone-200');
@@ -52,9 +66,11 @@
         }
       }
     }
+
     .switch {
       display: flex;
       align-items: center;
+
       @include theme() {
         color: theme-get('neutral-text-title');
       }
@@ -64,41 +80,51 @@
 
 .assets {
   display: flex;
+
   @include mobile() {
     padding-left: 0px;
     text-align: center;
   }
+
   .left {
     display: flex;
     align-items: center;
+
     .tokenIcon {
       width: 44px;
       height: 44px;
+
       @include mobile() {
-        width: 30px;
-        height: 30px;
+        width: 25px;
+        height: 25px;
       }
     }
   }
+
   .right {
     padding-left: 8px;
     text-align: left;
+
     .assetName {
       @include theme() {
         color: theme-get('sea-stone-200');
       }
+
       font-size: 14px;
       font-weight: 500;
       width: 100%;
       text-transform: uppercase;
       -webkit-box-orient: vertical;
       white-space: nowrap;
+
       @include mobile() {
         white-space: wrap;
       }
+
       -webkit-line-clamp: 1;
       overflow: hidden;
     }
+
     .assetChain {
       font-size: 13px;
       font-weight: 400;
@@ -107,11 +133,15 @@
       text-transform: capitalize;
       -webkit-box-orient: vertical;
       white-space: nowrap;
+
       @include mobile() {
         white-space: wrap;
+        font-size: 12px;
       }
+
       overflow: hidden;
       -webkit-line-clamp: 1;
+
       @include theme() {
         color: theme-get('sea-stone-200');
       }
@@ -122,9 +152,10 @@
 .price {
   display: flex;
   justify-content: flex-start;
+
   @include mobile() {
     padding-left: 0px;
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 
@@ -134,7 +165,7 @@
     -webkit-box-orient: vertical;
     white-space: nowrap;
     overflow: hidden;
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 
@@ -146,7 +177,8 @@
 
 .valuesColumn {
   display: flex;
+
   @include mobile() {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
