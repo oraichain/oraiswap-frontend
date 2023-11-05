@@ -56,9 +56,9 @@ const RequireAuthButton: React.FC<any> = () => {
             method: 'tron_requestAccounts'
           });
           //@ts-ignore
-          tronAddress = addressTronMobile?.base58;
+          tronAddress = addressTronMobile && addressTronMobile.base58;
         } else {
-          if (!window.tronWeb.defaultAddress?.base58) {
+          if (!window.tronWeb.defaultAddress.base58) {
             const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
               method: 'tron_requestAccounts'
             });

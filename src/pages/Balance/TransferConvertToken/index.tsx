@@ -67,7 +67,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     setFilterNetwork(chainDefault);
     const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
-  }, [token?.chainId]);
+  }, [token.chainId]);
 
   // list of tokens where it exists in at least two different chains
   const listedTokens = cosmosTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
@@ -156,7 +156,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
   const fromTokenFee = useTokenFee(token.prefix + token.contractAddress);
-  const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress);
+  const remoteTokenDenomTo = to && to.chainId === 'oraibridge-subnet-2' ? to.denom : to.prefix + to.contractAddress;
+  const toTokenFee = useTokenFee(remoteTokenDenomTo);
   const bridgeFee = fromTokenFee || toTokenFee;
 
   return (

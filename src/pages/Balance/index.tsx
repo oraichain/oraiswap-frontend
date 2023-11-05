@@ -41,7 +41,7 @@ import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } f
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -316,7 +316,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
-                    active={from?.denom === t.denom || to?.denom === t.denom}
+                    active={(from && from.denom === t.denom) || (to && to.denom === t.denom)}
                     token={t}
                     theme={theme}
                     onClick={() => onClickToken(t)}
