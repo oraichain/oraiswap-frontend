@@ -7,7 +7,8 @@ import {
   MULTIPLIER,
   ORAI,
   TRON_SCAN,
-  WalletType
+  WalletType,
+  ChainIdEnum
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
@@ -27,9 +28,9 @@ export interface Tokens {
   bridgeTo?: Array<NetworkChainId>;
 }
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-export const networks = chainInfos.filter((c) => c.chainId !== 'oraibridge-subnet-2' && c.chainId !== '0x1ae6');
+export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== 'oraibridge-subnet-2'
+  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {

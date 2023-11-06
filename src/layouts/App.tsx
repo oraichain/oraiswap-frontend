@@ -30,7 +30,6 @@ import { setListToken } from 'reducer/tradingSlice';
 import { useDispatch } from 'react-redux';
 import { pairsChart } from 'components/TVChartContainer/config';
 import MenuV3 from './MenuV3';
-import FuturePromotion from './FuturePromotion';
 import Instruct from './Instruct';
 import './index.scss';
 
@@ -200,7 +199,6 @@ const App = () => {
         <MenuV3 />
         {routes()}
         {!isMobile() && <Instruct />}
-        <FuturePromotion />
       </div>
     </ThemeProvider>
   );

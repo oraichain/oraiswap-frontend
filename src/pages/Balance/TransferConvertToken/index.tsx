@@ -15,7 +15,8 @@ import {
   GAS_ESTIMATION_BRIDGE_DEFAULT,
   NetworkChainId,
   ORAI,
-  TokenItemType
+  TokenItemType,
+  ChainIdEnum
 } from '@oraichain/oraidex-common';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -151,12 +152,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
-    return buttonName + network?.chainName;
+    return buttonName + (network && network.chainName);
   };
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
-  const fromTokenFee = useTokenFee(token.prefix + token.contractAddress);
-  const remoteTokenDenomTo = to && to.chainId === 'oraibridge-subnet-2' ? to.denom : to.prefix + to.contractAddress;
+  const remoteTokenDenomFrom = token && (token.prefix + token.contractAddress);
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
+  const remoteTokenDenomTo = to && (to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress);
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
   const bridgeFee = fromTokenFee || toTokenFee;
 

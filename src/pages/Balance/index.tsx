@@ -174,7 +174,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // or other token that have same coingeckoId that show in at least 2 chain.
       let newToToken = to;
       if (filterNetwork) {
-        let newToToken = findToTokenOnOraiBridge(from, filterNetwork);
+        newToToken = findToTokenOnOraiBridge(from, filterNetwork);
         if (!newToToken) {
           newToToken = cosmosTokens.find((t) => t.chainId === filterNetwork && t.coinGeckoId === from.coinGeckoId);
         }

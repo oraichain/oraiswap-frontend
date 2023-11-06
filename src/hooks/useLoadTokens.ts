@@ -45,10 +45,8 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
         amountDetails[t.denom] = '0';
       });
 
-    Object.assign(
-      amountDetails,
-      Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
-    );
+    const tokensAmount = amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]);
+    Object.assign(amountDetails, Object.fromEntries(tokensAmount));
 
     dispatch(updateAmounts(amountDetails));
   } catch (ex) {
