@@ -17,14 +17,14 @@ const FuturePromotion: React.FC = () => {
     window.open(LEARN_MORE_LINK, '_blank');
   };
 
-  useEffect(() => {
-    const TIMEOUT_TIME = 5000;
-    const TIMEOUT_ID = setTimeout(() => {
-      setIsOpen(true);
-    }, TIMEOUT_TIME);
+  // useEffect(() => {
+  //   const TIMEOUT_TIME = 5000;
+  //   const TIMEOUT_ID = setTimeout(() => {
+  //     setIsOpen(true);
+  //   }, TIMEOUT_TIME);
 
-    return () => clearTimeout(TIMEOUT_ID);
-  }, []);
+  //   return () => clearTimeout(TIMEOUT_ID);
+  // }, []);
 
   if (isOpen)
     return (

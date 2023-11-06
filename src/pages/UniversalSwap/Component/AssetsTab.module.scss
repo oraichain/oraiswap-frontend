@@ -167,6 +167,16 @@
     overflow: hidden;
     font-size: 12px;
   }
+  &-assets {
+    font-size: 13px;
+    @include theme() {
+      color: theme-get('neutral-text-body');
+    }
+    @include mobile() {
+      font-size: 10px;
+      white-space: pre-wrap;
+    }
+  }
 }
 
 .balance-low {

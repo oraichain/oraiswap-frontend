@@ -70,7 +70,8 @@ export const calculateAprResult = (
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
       const assets = parseAssetInfo(info);
-      const coinGeckoId = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets)?.coinGeckoId;
+      const assetsToken = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets);
+      const coinGeckoId = assetsToken && assetsToken.coinGeckoId;
       if (coinGeckoId) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices[coinGeckoId]) / atomic;
       } else if (isEqual(info, ORAIXOCH_INFO)) {
@@ -208,7 +209,10 @@ export const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) =>
       if (!data.success) {
         return [pair.contract_addr, false];
       }
-      return [pair.contract_addr, fromBinary(data.data)?.reward_infos?.[0]?.bond_amount || '0'];
+      const binaryData = fromBinary(data.data);
+      const rewardInfos = binaryData && binaryData.reward_infos && binaryData.reward_infos;
+      const bondAmount = rewardInfos && rewardInfos[0] && rewardInfos[0].bond_amount;
+      return [pair.contract_addr, bondAmount || '0'];
     })
   );
   return myPairData;

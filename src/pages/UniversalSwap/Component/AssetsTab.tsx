@@ -52,12 +52,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     label?: string;
     balance?: number | string;
   }[] = [
-    {
-      src: WalletIcon,
-      label: 'Total balance',
-      balance: formatDisplayUsdt(totalUsd)
-    }
-  ];
+      {
+        src: WalletIcon,
+        label: 'Total balance',
+        balance: formatDisplayUsdt(totalUsd)
+      }
+    ];
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [
@@ -144,7 +144,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       align: 'left',
       accessor: (data) => (
         <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>
-          {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))} {data.asset}
+          {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))} <span className={cx('balance-assets')}>{data.asset}</span>
         </div>
       )
     },
