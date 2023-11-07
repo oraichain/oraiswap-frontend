@@ -41,7 +41,7 @@ import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } f
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -187,7 +187,8 @@ const Balance: React.FC<BalanceProps> = () => {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
-          fromAmount
+          fromAmount,
+          simulateAmount: '1'
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       ).processUniversalSwap();

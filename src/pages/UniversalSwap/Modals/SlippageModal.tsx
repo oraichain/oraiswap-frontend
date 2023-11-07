@@ -1,22 +1,22 @@
+import { DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as TransSetting } from 'assets/images/trans_setting.svg';
 import cn from 'classnames/bind';
-import { DEFAULT_MANUAL_SLIPPAGE, DEFAULT_SLIPPAGE, OPTIONS_SLIPPAGE } from '@oraichain/oraidex-common';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { FC, useState } from 'react';
 import NumberFormat, { NumberFormatValues } from 'react-number-format';
 import styles from './SlippageModal.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
 
 const cx = cn.bind(styles);
 
 interface ModalProps {
   setUserSlippage: React.Dispatch<React.SetStateAction<number>>;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  userSlippage: number;
 }
 
-export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
+export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, setVisible }) => {
   const [indexChosenOption, setIndexChosenOption] = useState(OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE));
-  const [manualSlippage, setManualSlippage] = useState(DEFAULT_MANUAL_SLIPPAGE);
   const [theme] = useConfigReducer('theme');
 
   return (
@@ -44,12 +44,11 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             {option}%
           </div>
         ))}
-        {/* <div
+        <div
           className={cx('item', 'border', {
             isChosen: indexChosenOption === OPTIONS_SLIPPAGE.length
           })}
           onClick={() => {
-            setUserSlippage(manualSlippage ?? 0);
             setIndexChosenOption(OPTIONS_SLIPPAGE.length);
           }}
         >
@@ -57,15 +56,19 @@ export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) =
             className={cx('input')}
             thousandSeparator
             decimalScale={6}
-            type="text"
-            onValueChange={({ floatValue }: NumberFormatValues) => {
-              setManualSlippage(floatValue ?? 0);
-              setUserSlippage(floatValue ?? 0);
+            isAllowed={(values) => {
+              const { floatValue } = values;
+              return floatValue === undefined || (floatValue >= 0 && floatValue <= 100);
             }}
-            value={manualSlippage}
+            onValueChange={({ floatValue }: NumberFormatValues) => {
+              let value = floatValue;
+              if (value === undefined) value = 0;
+              setUserSlippage(value);
+            }}
+            value={userSlippage}
           />
           %
-        </div> */}
+        </div>
       </div>
     </div>
   );

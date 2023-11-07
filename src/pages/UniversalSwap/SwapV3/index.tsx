@@ -1,4 +1,5 @@
 import {
+  BigDecimal,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   ORAI,
@@ -11,7 +12,7 @@ import {
   toDisplay,
   truncDecimals
 } from '@oraichain/oraidex-common';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapRouterQueryClient, Uint128 } from '@oraichain/oraidex-contracts-sdk';
 import {
   UniversalSwapHandler,
   getRoute,
@@ -238,7 +239,6 @@ const SwapComponent: React.FC<{
   }, [fromToken, toToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
-
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
         averageRatio.amount,
@@ -247,7 +247,6 @@ const SwapComponent: React.FC<{
         originalFromToken.decimals
       )
     : '0';
-
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
@@ -337,7 +336,9 @@ const SwapComponent: React.FC<{
             placement="bottom-end"
             visible={visible}
             setVisible={setVisible}
-            content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+            content={
+              <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
+            }
           />
           <button className={cx('btn')} onClick={refreshBalances}>
             <RefreshImg />
