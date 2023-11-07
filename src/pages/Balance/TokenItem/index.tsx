@@ -38,7 +38,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
-          {token.Icon && token.IconLight && theme === 'light' ? (
+          {theme === 'light' ? (
             <token.IconLight className={styles.tokenIcon} />
           ) : (
             <token.Icon className={styles.tokenIcon} />

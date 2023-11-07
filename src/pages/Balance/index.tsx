@@ -8,9 +8,9 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokens } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
-import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType } from '@oraichain/oraidex-common';
+import { cosmosTokens } from 'config/bridgeTokens';
+import { chainIcons, tokensIcon } from 'config/chainInfos';
+import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType, chainInfos, tokens } from '@oraichain/oraidex-common';
 import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -237,7 +237,8 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const network = networks.find((n) => n.chainId == filterNetwork) ?? networks[0];
-
+  const findChainIcon = network && chainIcons.find(chain => chain.chainId === network.chainId)
+  const chainIcon = findChainIcon && (theme === 'light' ? <findChainIcon.IconLight /> : <findChainIcon.Icon />)
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -257,15 +258,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 {network && (
                   <div className={styles.search_flex}>
                     <div className={styles.search_logo}>
-                      {theme === 'light' ? (
-                        network.IconLight ? (
-                          <network.IconLight />
-                        ) : (
-                          <network.Icon />
-                        )
-                      ) : (
-                        <network.Icon />
-                      )}
+                      {chainIcon}
                     </div>
                     <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
                   </div>
@@ -310,6 +303,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
+                const tIcon = tokensIcon.find(token => token.coinGeckoId === t.coinGeckoId);
                 return (
                   <TokenItem
                     className={classNames(styles.tokens_element, styles[theme])}
@@ -317,7 +311,11 @@ const Balance: React.FC<BalanceProps> = () => {
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
                     active={(from && from.denom === t.denom) || (to && to.denom === t.denom)}
-                    token={t}
+                    token={{
+                      ...t,
+                      Icon: tIcon?.Icon,
+                      IconLight: tIcon?.IconLight
+                    }}
                     theme={theme}
                     onClick={() => onClickToken(t)}
                     onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {

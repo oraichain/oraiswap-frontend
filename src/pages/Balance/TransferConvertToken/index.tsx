@@ -8,7 +8,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
-import { evmChains } from 'config/chainInfos';
+import { chainIcons, evmChains } from 'config/chainInfos';
 import {
   CustomChainInfo,
   findToTokenOnOraiBridge,
@@ -150,6 +150,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
+  const findChainIcon = network && chainIcons.find(chain => chain.chainId === network.chainId)
+  const chainIcon = findChainIcon && (theme === 'light' ? <findChainIcon.IconLight /> : <findChainIcon.Icon />)
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
     return buttonName + (network && network.chainName);
@@ -219,15 +221,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   {network && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div className={styles.search_logo}>
-                        {theme === 'light' ? (
-                          network.IconLight ? (
-                            <network.IconLight />
-                          ) : (
-                            <network.Icon />
-                          )
-                        ) : (
-                          <network.Icon />
-                        )}
+                        {chainIcon}
                       </div>
                       <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
                     </div>

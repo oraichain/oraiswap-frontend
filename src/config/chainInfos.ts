@@ -25,6 +25,7 @@ import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
+import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -203,6 +204,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: '0x1ae6',
     Icon: KwtIcon,
     IconLight: KwtIcon
+  },
+  {
+    chainId: 'noble-1',
+    Icon: NobleIcon,
+    IconLight: NobleIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
