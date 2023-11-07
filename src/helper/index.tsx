@@ -8,13 +8,13 @@ import {
   ORAI,
   TRON_SCAN,
   WalletType,
-  ChainIdEnum
+  ChainIdEnum,
+  chainInfos
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -163,6 +163,7 @@ export const switchWallet = (type: WalletType) => {
 };
 
 export const isUnlockMetamask = async () => {
+  if (!window.ethereum._metamask) return false;
   const isMetamask = !!window?.ethereum?.isMetaMask;
   if (isMetamask) {
     const isUnlock = await window.ethereum._metamask.isUnlocked();
