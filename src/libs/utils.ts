@@ -10,6 +10,7 @@ import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
@@ -220,7 +221,9 @@ export const initClient = async () => {
     }
   } catch (ex) {
     console.log(ex);
-    throw new Error('Cannot initialize wallet client. Please notify the developers to fix this problem!');
+    displayToast(TToastType.KEPLR_FAILED, {
+      message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
+    });
   }
 };
 
