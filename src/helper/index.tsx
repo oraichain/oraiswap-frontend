@@ -9,12 +9,12 @@ import {
   TRON_SCAN,
   WalletType,
   ChainIdEnum,
-  chainInfos
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
