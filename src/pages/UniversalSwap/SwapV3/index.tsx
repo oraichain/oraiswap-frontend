@@ -185,6 +185,8 @@ const SwapComponent: React.FC<{
     originalToToken,
     routerClient
   );
+
+  //TODO: Need to fix after migrating contract ( AIRI/USDC)
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
@@ -192,7 +194,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken,
     routerClient,
-    1
+    1000
   );
 
   const relayerFee = useRelayerFee();
@@ -205,31 +207,6 @@ const SwapComponent: React.FC<{
     }
     return acc;
   }, 0);
-  // TODO: need testcase
-  // const RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN = 20000;
-  // const { universalSwapType } = getRoute(originalFromToken, originalToToken, oraiAddress);
-  // const isEvmToEvm =
-  //   !originalFromToken.cosmosBased &&
-  //   !originalToToken.cosmosBased &&
-  //   originalFromToken.chainId !== originalToToken.chainId;
-  // const isEvmBridge =
-  //   !originalFromToken.cosmosBased &&
-  //   !originalToToken.cosmosBased &&
-  //   originalFromToken.chainId === originalToToken.chainId;
-  // if (universalSwapType === "other-networks-to-oraichain" && !isEvmBridge) {
-  //   relayerFeeToken = RELAYER_FEE_OTHER_NETWORK_TO_ORAICHAIN
-  // }
-  // if (universalSwapType === 'oraichain-to-evm' || isEvmToEvm) {
-  //   relayerFeeToken = relayerFee.reduce((acc, cur) => {
-  //     if (
-  //       originalFromToken.chainId !== originalToToken.chainId &&
-  //       (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-  //     ) {
-  //       return +cur.amount + acc;
-  //     }
-  //     return acc;
-  //   }, 0);
-  // }
 
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
@@ -241,11 +218,11 @@ const SwapComponent: React.FC<{
 
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-        averageRatio.amount,
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      (BigInt(averageRatio.amount) / 1000n).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
 
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
@@ -279,7 +256,7 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          simulatePrice: averageRatio.amount,
+          simulatePrice: averageRatio && (BigInt(averageRatio.amount) / 1000n).toString(),
           relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
@@ -482,7 +459,7 @@ const SwapComponent: React.FC<{
               <div className={cx('title')}>
                 <span> Expected Output</span>
               </div>
-              <div>
+              <div className={cx('value')} >
                 ≈ {(simulateData && simulateData.displayAmount) || '0'} {originalToToken && originalToToken.name}
               </div>
             </div>
@@ -491,14 +468,16 @@ const SwapComponent: React.FC<{
             <div className={cx('title')}>
               <span>Minimum Received after slippage ( {userSlippage}% )</span>
             </div>
-            <TokenBalance
-              balance={{
-                amount: minimumReceive,
-                decimals: originalFromToken?.decimals,
-                denom: originalToToken?.name
-              }}
-              decimalScale={truncDecimals}
-            />
+            <div className={cx('value')}>
+              <TokenBalance
+                balance={{
+                  amount: minimumReceive,
+                  decimals: originalFromToken?.decimals,
+                  denom: originalToToken?.name
+                }}
+                decimalScale={truncDecimals}
+              />
+            </div>
           </div>
 
           {!!relayerFeeToken && (
@@ -506,15 +485,17 @@ const SwapComponent: React.FC<{
               <div className={cx('title')}>
                 <span>Relayer Fee</span>
               </div>
-              <TokenBalance
-                balance={{
-                  amount: relayerFeeToken.toString(),
-                  // decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                  decimals: RELAYER_DECIMAL,
-                  denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
-                }}
-                decimalScale={truncDecimals}
-              />
+              <div className={cx('value')}>
+                <TokenBalance
+                  balance={{
+                    amount: relayerFeeToken.toString(),
+                    // decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                    decimals: RELAYER_DECIMAL,
+                    denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
+                  }}
+                  decimalScale={truncDecimals}
+                />
+              </div>
             </div>
           )}
           {!fromTokenFee && !toTokenFee && (

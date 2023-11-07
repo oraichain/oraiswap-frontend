@@ -164,7 +164,7 @@ export const switchWallet = (type: WalletType) => {
 
 export const isUnlockMetamask = async () => {
   const isMetamask = !!window?.ethereum?.isMetaMask;
-  if (isMetamask) {
+  if (isMetamask && !!window.ethereum._metamask) {
     const isUnlock = await window.ethereum._metamask.isUnlocked();
     return isUnlock;
   }
