@@ -58,12 +58,11 @@ export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, s
             decimalScale={6}
             isAllowed={(values) => {
               const { floatValue } = values;
-              return floatValue === undefined || (floatValue >= 0 && floatValue <= 100);
+              // allow !floatValue to let user can clear their input
+              return !floatValue || (floatValue >= 0 && floatValue <= 100);
             }}
             onValueChange={({ floatValue }: NumberFormatValues) => {
-              let value = floatValue;
-              if (value === undefined) value = 0;
-              setUserSlippage(value);
+              setUserSlippage(floatValue ?? 0);
             }}
             value={userSlippage}
           />
