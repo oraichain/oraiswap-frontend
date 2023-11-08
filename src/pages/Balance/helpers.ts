@@ -9,9 +9,11 @@ import {
   TokenItemType,
   ibcInfos,
   ibcInfosOld,
-  oraichain2oraib
+  oraichain2oraib,
+  flattenTokens,
+  tokenMap
 } from '@oraichain/oraidex-common';
-import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
+import { kawaiiTokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { getNetworkGasPrice } from 'helper';

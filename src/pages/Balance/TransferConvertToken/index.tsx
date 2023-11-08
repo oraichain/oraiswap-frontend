@@ -18,7 +18,7 @@ import {
   TokenItemType,
   ChainIdEnum
 } from '@oraichain/oraidex-common';
-import { feeEstimate, filterChainBridge, networks } from 'helper';
+import { feeEstimate, filterChainBridge, genAddressCosmos, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { generateError, reduceString } from 'libs/utils';
@@ -55,6 +55,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [theme] = useConfigReducer('theme');
+  const [oraiAddress] = useConfigReducer('address');
   const [addressTransfer, setAddressTransfer] = useState('');
   const { data: prices } = useCoinGeckoPrices();
   useEffect(() => {
@@ -106,7 +107,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await window.Keplr.getKeplrAddr(network.chainId);
+        const kawaiiAddress = await window.Keplr.getKeplrAddr("kawaii_6886-1");
+        const { cosmosAddress } = genAddressCosmos({
+          bech32Config: network.bech32Config,
+          bip44: network.bip44,
+        }, kawaiiAddress, oraiAddress);
+        address = cosmosAddress;
       }
     } catch (error) {
       console.log({
@@ -150,11 +156,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   };
 
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
-  const findChainIcon = network && chainIcons.find(chain => chain.chainId === network.chainId)
-  const chainIcon = findChainIcon && (theme === 'light' ? <findChainIcon.IconLight /> : <findChainIcon.Icon />)
+  let chainIcon;
+  let findChainIcon;
+  const isLightMode = theme === 'light';
+  if (network) {
+    findChainIcon = chainIcons.find(chain => chain.chainId === network.chainId);
+    chainIcon = isLightMode ? <findChainIcon.IconLight width={44} height={44} /> : <findChainIcon.Icon width={44} height={44} />
+  }
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
-    return buttonName + (network && network.chainName);
+    if (network) {
+      return buttonName + network.chainName;
+    }
+    return buttonName;
   };
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
@@ -227,7 +241,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                     </div>
                   )}
                   {bridgeNetworks.length > 1 && (
-                    <div>{theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
+                    <div>{isLightMode ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
                   )}
                 </div>
               </div>
@@ -236,18 +250,23 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <ul className={classNames(styles.items, styles[theme])}>
                     {networks
                       .filter((item) => filterChainBridge(token, item))
-                      .map((network) => {
+                      .map((net) => {
+                        const findNetworkIcon = chainIcons.find(chain => chain.chainId === net.chainId);
+                        let networkIcon;
+                        if (findNetworkIcon && Object.values(findNetworkIcon).length) {
+                          networkIcon = isLightMode ? <findNetworkIcon.IconLight width={44} height={44} /> : <findNetworkIcon.Icon width={44} height={44} />
+                        }
                         return (
                           <li
-                            key={network.chainId}
+                            key={net.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(network.chainId);
-                              await getAddressTransfer(network);
+                              setFilterNetwork(net.chainId);
+                              await getAddressTransfer(net);
                               setIsOpen(false);
                             }}
                           >
-                            {network && (
+                            {net && (
                               <div
                                 style={{
                                   display: 'flex',
@@ -255,9 +274,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                                 }}
                               >
                                 <div>
-                                  <network.Icon />
+                                  {networkIcon}
                                 </div>
-                                <div className={classNames(styles.items_title, styles[theme])}>{network.chainName}</div>
+                                <div className={classNames(styles.items_title, styles[theme])}>{net.chainName}</div>
                               </div>
                             )}
                           </li>

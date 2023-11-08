@@ -237,8 +237,13 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const network = networks.find((n) => n.chainId == filterNetwork) ?? networks[0];
-  const findChainIcon = network && chainIcons.find(chain => chain.chainId === network.chainId)
-  const chainIcon = findChainIcon && (theme === 'light' ? <findChainIcon.IconLight /> : <findChainIcon.Icon />)
+  let findChainIcon;
+  let chainIcon;
+  const isLightMode = theme === 'light';
+  if (network) {
+    findChainIcon = chainIcons.find(chain => chain.chainId === network.chainId);
+    chainIcon = isLightMode ? <findChainIcon.IconLight /> : <findChainIcon.Icon />
+  }
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -263,7 +268,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
                   </div>
                 )}
-                <div>{theme === 'light' ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
+                <div>{isLightMode ? <ArrowDownIconLight /> : <ArrowDownIcon />}</div>
               </div>
             </div>
 
