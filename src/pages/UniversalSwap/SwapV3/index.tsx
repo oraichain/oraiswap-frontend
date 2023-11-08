@@ -238,7 +238,7 @@ const SwapComponent: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
 
-  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData.decimals);
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
         averageRatio.amount,
