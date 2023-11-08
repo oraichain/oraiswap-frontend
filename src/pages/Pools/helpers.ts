@@ -59,7 +59,7 @@ export const calculateAprResult = (
   allRewardPerSec: OraiswapStakingTypes.RewardsPerSecResponse[]
 ) => {
   const aprResult = pairs.reduce((acc, pair, ind) => {
-    const liquidityAmount = pairInfos.find((e) => e.pair.contract_addr === pair.contract_addr);
+    const liquidityAmount = pairInfos.find(e => e.pair.contract_addr === pair.contract_addr);
     const lpToken = allLpTokenAsset[ind];
     const tokenSupply = allTokenInfo[ind];
     const rewardsPerSecData = allRewardPerSec[ind];
@@ -70,7 +70,7 @@ export const calculateAprResult = (
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
       const assets = parseAssetInfo(info);
-      const assetsToken = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets);
+      const assetsToken = oraichainTokens.find(o => o.contractAddress === assets || o.denom === assets);
       const coinGeckoId = assetsToken && assetsToken.coinGeckoId;
       if (coinGeckoId) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices[coinGeckoId]) / atomic;
@@ -89,7 +89,7 @@ export const calculateAprResult = (
 
 // Fetch APR
 const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
+  const lpTokens = pairs.map(p => ({ contractAddress: p.liquidity_token } as TokenItemType));
   const assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(pairs);
   try {
     const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
@@ -119,12 +119,12 @@ const fetchPoolListAndOraiPrice = async (pairs: PairInfoExtend[], cachedPairs: P
     })
   );
 
-  const oraiUsdtPool = poolList.find((pool) => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
+  const oraiUsdtPool = poolList.find(pool => pool.fromToken.denom === ORAI && pool.toToken.denom === STABLE_DENOM);
   const oraiPrice = toDecimal(oraiUsdtPool.askPoolAmount, oraiUsdtPool.offerPoolAmount);
   try {
     const poolOraiUsdData = await fetchPoolInfoAmount(tokenMap[ORAI], tokenMap[STABLE_DENOM], cachedPairs);
     const pairAmounts = await Promise.all(
-      poolList.map((pool) => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData))
+      poolList.map(pool => getPairAmountInfo(pool.fromToken, pool.toToken, cachedPairs, { ...pool }, poolOraiUsdData))
     );
     poolList = poolList
       .map((pool, ind) => ({
@@ -174,7 +174,7 @@ export const toPairDetails = (pairs: PairInfo[], res: AggregateResult): PairDeta
 
 // Fetch all pair data
 const fetchPairsData = async (pairs: PairInfo[], multicall: MulticallReadOnlyInterface) => {
-  const queries = pairs.map((pair) => ({
+  const queries = pairs.map(pair => ({
     address: pair.contract_addr,
     data: toBinary({
       pool: {}
@@ -219,7 +219,7 @@ export const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) =>
 };
 
 const generateRewardInfoQueries = (pairs: PairInfoExtend[], stakerAddress: string) => {
-  const queries = pairs.map((pair) => {
+  const queries = pairs.map(pair => {
     let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
     const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
 
@@ -304,7 +304,7 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
 };
 
 const generateLpPoolsInfoQueries = (pairs: PairInfo[], address: string) => {
-  const queries = pairs.map((pair) => ({
+  const queries = pairs.map(pair => ({
     address: pair.liquidity_token,
     data: toBinary({
       balance: {
@@ -346,7 +346,7 @@ export const fetchCacheLpPoolsV3 = async (
   userAddress: string,
   multicall: MulticallReadOnlyInterface
 ) => {
-  const queries = lpAddresses.map((lpAddress) => ({
+  const queries = lpAddresses.map(lpAddress => ({
     address: lpAddress,
     data: toBinary({
       balance: {
@@ -379,9 +379,9 @@ export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
 
 export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
   const validatedAmount = validateNumber(amount);
-  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+  if (validatedAmount < 1) return `${toFixedIfNecessary(amount.toString(), 4).toString()}`;
 
-  return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
+  return `${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
 };
 
 export const toFixedIfNecessary = (value: string, dp: number): number => {
