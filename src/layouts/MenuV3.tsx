@@ -6,15 +6,15 @@ import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import classNames from 'classnames';
+import ConnectWallet from 'components/ConnectWallet';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { ThemeContext } from 'context/theme-context';
-import React, { memo, useContext, useEffect, useRef, useState } from 'react';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MenuV3.module.scss';
-import ConnectWallet from 'components/ConnectWallet';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
 
-const Menu: React.FC = React.memo(() => {
+const Menu: React.FC = () => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const { theme, setTheme } = useContext(ThemeContext);
@@ -147,6 +147,6 @@ const Menu: React.FC = React.memo(() => {
       )}
     </>
   );
-});
+};
 
-export default memo(Menu);
+export default Menu;

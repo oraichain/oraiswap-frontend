@@ -25,7 +25,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import ToggleSwitch from 'components/ToggleSwitch';
 import { tokensIcon } from 'config/chainInfos';
 import { flattenTokens } from 'config/bridgeTokens';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas, toFixedIfNecessary } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 
@@ -35,7 +35,6 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const [address] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useState(true);
-
   const sizePadding = isMobile() ? '12px' : '24px';
   const { totalStaked } = useGetMyStake({
     stakerAddress: address
@@ -144,7 +143,9 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       width: '23%',
       align: 'left',
       accessor: (data) => (
-        <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>{formatDisplayUsdt(data.balance)}</div>
+        <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>
+          {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))} <span className={cx('balance-assets')}>{data.asset}</span>
+        </div>
       )
     },
     value: {

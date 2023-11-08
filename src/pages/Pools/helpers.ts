@@ -70,7 +70,8 @@ export const calculateAprResult = (
     let rewardsPerYearValue = 0;
     rewardsPerSec.forEach(({ amount, info }) => {
       const assets = parseAssetInfo(info);
-      const coinGeckoId = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets)?.coinGeckoId;
+      const assetsToken = oraichainTokens.find((o) => o.contractAddress === assets || o.denom === assets);
+      const coinGeckoId = assetsToken && assetsToken.coinGeckoId;
       if (coinGeckoId) {
         rewardsPerYearValue += (SEC_PER_YEAR * validateNumber(amount) * prices[coinGeckoId]) / atomic;
       } else if (isEqual(info, ORAIXOCH_INFO)) {
@@ -208,7 +209,10 @@ export const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) =>
       if (!data.success) {
         return [pair.contract_addr, false];
       }
-      return [pair.contract_addr, fromBinary(data.data)?.reward_infos?.[0]?.bond_amount || '0'];
+      const binaryData = fromBinary(data.data);
+      const rewardInfos = binaryData && binaryData.reward_infos && binaryData.reward_infos;
+      const bondAmount = rewardInfos && rewardInfos[0] && rewardInfos[0].bond_amount;
+      return [pair.contract_addr, bondAmount || '0'];
     })
   );
   return myPairData;
@@ -377,14 +381,16 @@ export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
   const validatedAmount = validateNumber(amount);
   if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
 
-  // add `,` when split thounsand value.
-  return `$${toFixedIfNecessary(amount.toString(), dp)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+  return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
 };
 
 export const toFixedIfNecessary = (value: string, dp: number): number => {
   return +parseFloat(value).toFixed(dp);
+};
+
+// add `,` when split thounsand value.
+export const numberWithCommas = (x: number) => {
+  return x.toLocaleString();
 };
 
 /**

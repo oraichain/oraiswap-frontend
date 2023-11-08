@@ -15,7 +15,6 @@ import { persistor, store } from 'store/configure';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import { BigDecimal } from '@oraichain/oraidex-common';
 
 const queryClient = new QueryClient();
 

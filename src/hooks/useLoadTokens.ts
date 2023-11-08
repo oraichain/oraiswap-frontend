@@ -33,23 +33,25 @@ export type LoadTokenParams = {
 
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
   if (!address) return;
-  const client = await StargateClient.connect(tokenInfo.rpc);
-  const amountAll = await client.getAllBalances(address);
-  let amountDetails: AmountDetails = {};
+  try {
+    const client = await StargateClient.connect(tokenInfo.rpc);
+    const amountAll = await client.getAllBalances(address);
+    let amountDetails: AmountDetails = {};
 
-  // reset native balances
-  cosmosTokens
-    .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
-    .forEach((t) => {
-      amountDetails[t.denom] = '0';
-    });
+    // reset native balances
+    cosmosTokens
+      .filter((t) => t.chainId === tokenInfo.chainId && !t.contractAddress)
+      .forEach((t) => {
+        amountDetails[t.denom] = '0';
+      });
 
-  Object.assign(
-    amountDetails,
-    Object.fromEntries(amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]))
-  );
+    const tokensAmount = amountAll.filter((coin) => tokenMap[coin.denom]).map((coin) => [coin.denom, coin.amount]);
+    Object.assign(amountDetails, Object.fromEntries(tokensAmount));
 
-  dispatch(updateAmounts(amountDetails));
+    dispatch(updateAmounts(amountDetails));
+  } catch (ex) {
+    console.log(ex);
+  }
 }
 
 const timer = {};

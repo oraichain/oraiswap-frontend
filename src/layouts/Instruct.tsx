@@ -13,7 +13,7 @@ import UniversalSwapBridge from 'assets/images/universalswap_bridge.png';
 import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import useTheme from 'hooks/useTheme';
-import React, { memo } from 'react';
+import React from 'react';
 import styles from './Instruct.module.scss';
 
 const cx = cn.bind(styles);
@@ -116,4 +116,4 @@ const Instruct: React.FC<InstructProps> = () => {
   );
 };
 
-export default memo(Instruct);
+export default Instruct;

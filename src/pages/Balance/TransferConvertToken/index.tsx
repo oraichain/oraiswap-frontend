@@ -15,12 +15,13 @@ import {
   GAS_ESTIMATION_BRIDGE_DEFAULT,
   NetworkChainId,
   ORAI,
-  TokenItemType
+  TokenItemType,
+  ChainIdEnum
 } from '@oraichain/oraidex-common';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { reduceString } from 'libs/utils';
+import { generateError, reduceString } from 'libs/utils';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
@@ -67,7 +68,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     setFilterNetwork(chainDefault);
     const findNetwork = networks.find((net) => net.chainId == chainDefault);
     getAddressTransfer(findNetwork);
-  }, [token?.chainId]);
+  }, [token.chainId]);
 
   // list of tokens where it exists in at least two different chains
   const listedTokens = cosmosTokens.filter((t) => t.chainId !== token.chainId && t.coinGeckoId === token.coinGeckoId);
@@ -139,11 +140,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount);
         return;
       }
-      // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
-      // to is Oraibridge tokens
-      // or other token that have same coingeckoId that show in at least 2 chain.
-      const to = findToTokenOnOraiBridge(token, filterNetwork);
-      await onClickTransfer(convertAmount, token, to);
+      await onClickTransfer(convertAmount, filterNetwork);
       return;
     } catch (error) {
       console.log({ error });
@@ -155,12 +152,14 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
-    return buttonName + network?.chainName;
+    return buttonName + (network && network.chainName);
   };
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
-  const fromTokenFee = useTokenFee(token.prefix + token.contractAddress);
-  const toTokenFee = useTokenFee(to?.chainId === 'oraibridge-subnet-2' ? to?.denom : to?.prefix + to?.contractAddress);
+  const remoteTokenDenomFrom = token && (token.prefix + token.contractAddress);
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
+  const remoteTokenDenomTo = to && (to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress);
+  const toTokenFee = useTokenFee(remoteTokenDenomTo);
   const bridgeFee = fromTokenFee || toTokenFee;
 
   return (

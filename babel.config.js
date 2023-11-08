@@ -1,5 +1,5 @@
 module.exports = function (api) {
-  api.cache(process.env.NODE_ENV === 'production');
+  api.cache(true);
   return {
     plugins: [
       [

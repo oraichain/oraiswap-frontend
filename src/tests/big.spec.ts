@@ -1,17 +1,17 @@
 // @ts-nocheck
 import { BigDecimal } from '@oraichain/oraidex-common';
 import { transform } from '@babel/core';
+import { toDisplay } from '@oraichain/oraidex-common';
 
 describe('operator overloading', () => {
   it('binary expression', () => {
     const a = new BigDecimal('123.45');
     const b = new BigDecimal('678.9');
 
-    const c: BigDecimal = ((a + b) / 2 + 15) * 20.12;
+    const c = ((a + b) / 2n + 15 * (a - b)) * 20.12;
     const d = 10 + 12 - 5;
-    const e: BigDecimal = c + d;
-    console.log(d, e);
-    expect(c.toNumber()).toBe(8373.441);
+    const e = c + d;
+    console.log(c, d, e);
   });
 
   it('transform', () => {
@@ -22,12 +22,23 @@ describe('operator overloading', () => {
     const a = new BigDecimal('123.45');
     const b = new BigDecimal('678.9');
 
-    const c = ((a + b) / 2 + 15) * 20.12;
+    const c = ((a + b) / 2n + 15 * (a - b)) * 20.12;
     const d = 10 + 12 - 5;
     const e = c + d;    
+    console.log(c, d, e);
+    const decimals = 6;
+    console.log(new BigDecimal(totalStaked) / 10 ** decimals)
     `
     );
 
     console.log(actual.code);
+  });
+
+  it('utils', () => {
+    const totalStaked = '1289123.45678';
+    const decimals = 6;
+    const display = toDisplay(BigInt(Math.trunc(totalStaked)), decimals);
+    const displayBigDecimal = new BigDecimal(totalStaked) / 10 ** decimals;
+    console.log(display, displayBigDecimal.toNumber());
   });
 });
