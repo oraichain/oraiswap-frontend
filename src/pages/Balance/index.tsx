@@ -159,6 +159,11 @@ const Balance: React.FC<BalanceProps> = () => {
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
+      // TODO: hardcode check case USDC oraichain -> USDC noble
+      if (from.cosmosBased && filterNetwork !== 'noble-1') {
+        await handleTransferIBC(from, to, fromAmount);
+        return;
+      }
 
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
