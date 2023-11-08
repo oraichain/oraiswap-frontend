@@ -91,7 +91,7 @@ const Menu: React.FC = () => {
   const menuList = (
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'SWAP', setLink)}
-      {renderLink('https://legacy-v2.oraidex.io/', 'BRIDGE', () => { }, true)}
+      {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
       {renderLink('coming-soon', 'FUTURES', () => { }, true)}

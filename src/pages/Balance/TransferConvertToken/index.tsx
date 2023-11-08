@@ -152,13 +152,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
-    return buttonName + (network && network.chainName);
+    if (network) return buttonName + network.chainName;
+    return buttonName;
   };
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
-  const remoteTokenDenomFrom = token && (token.prefix + token.contractAddress);
+  let remoteTokenDenomFrom;
+  if (token && Object.values(token).length) {
+    remoteTokenDenomFrom = token.prefix + token.contractAddress;
+  }
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
-  const remoteTokenDenomTo = to && (to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress);
+  let remoteTokenDenomTo;
+  if (to && Object.values(to).length) {
+    remoteTokenDenomTo = to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress;
+  }
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
   const bridgeFee = fromTokenFee || toTokenFee;
 
@@ -221,12 +228,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                       <div className={styles.search_logo}>
                         {theme === 'light' ? (
                           network.IconLight ? (
-                            <network.IconLight />
+                            <network.IconLight width={44} height={44} />
                           ) : (
-                            <network.Icon />
+                            <network.Icon width={44} height={44} />
                           )
                         ) : (
-                          <network.Icon />
+                          <network.Icon width={44} height={44} />
                         )}
                       </div>
                       <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
@@ -242,28 +249,23 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   <ul className={classNames(styles.items, styles[theme])}>
                     {networks
                       .filter((item) => filterChainBridge(token, item))
-                      .map((network) => {
+                      .map((net) => {
                         return (
                           <li
-                            key={network.chainId}
+                            key={net.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(network.chainId);
+                              setFilterNetwork(net.chainId);
                               await getAddressTransfer(network);
                               setIsOpen(false);
                             }}
                           >
-                            {network && (
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center'
-                                }}
-                              >
+                            {net && (
+                              <div className={classNames(styles.items_chain)}>
                                 <div>
-                                  <network.Icon />
+                                  <net.Icon width={44} height={44} />
                                 </div>
-                                <div className={classNames(styles.items_title, styles[theme])}>{network.chainName}</div>
+                                <div className={classNames(styles.items_title, styles[theme])}>{net.chainName}</div>
                               </div>
                             )}
                           </li>

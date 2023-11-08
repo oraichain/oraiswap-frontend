@@ -159,15 +159,6 @@ const Balance: React.FC<BalanceProps> = () => {
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
-      if (from.cosmosBased) {
-        await handleTransferIBC(from, to, fromAmount);
-        return;
-      }
-      const latestOraiAddress = await window.Keplr.getKeplrAddr();
-      // has to switch network to the correct chain id on evm since users can swap between network tokens
-      if (!window.Metamask.isTron(from.chainId)) {
-        await window.Metamask.switchNetwork(from.chainId);
-      }
 
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
@@ -182,12 +173,26 @@ const Balance: React.FC<BalanceProps> = () => {
       }
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
+
+      // TODO: hardcode check case USDC oraichain -> USDC noble
+      if (from.cosmosBased && filterNetwork !== 'noble-1') {
+        await handleTransferIBC(from, newToToken, fromAmount);
+        return;
+      }
+
+      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      // has to switch network to the correct chain id on evm since users can swap between network tokens
+      if (!window.Metamask.isTron(from.chainId) && !from.cosmosBased) {
+        await window.Metamask.switchNetwork(from.chainId);
+      }
+
       result = await new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
-          fromAmount
+          fromAmount,
+          simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       ).processUniversalSwap();

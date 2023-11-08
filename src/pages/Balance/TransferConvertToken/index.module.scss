@@ -216,7 +216,7 @@
       gap: 10px;
 
       &.light {
-        background-color: #7E5CC5;
+        background-color: #7e5cc5;
       }
     }
   }
@@ -340,7 +340,7 @@
     }
 
     span {
-      color: #F0B90B;
+      color: #f0b90b;
     }
   }
 }
@@ -352,11 +352,13 @@
   border: 1.5px solid #5a5270;
   z-index: 1;
 
+  &_chain {
+    display: flex;
+    align-items: center;
+  }
   &.light {
     background: #efefef;
     border-color: none;
-
-
   }
 
   border-radius: 8px;
@@ -364,7 +366,6 @@
 
   li {
     padding: 12px 24px 12px 24px;
-
   }
 
   li:hover {
