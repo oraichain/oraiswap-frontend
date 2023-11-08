@@ -174,12 +174,6 @@ const Balance: React.FC<BalanceProps> = () => {
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
-      // TODO: hardcode check case USDC oraichain -> USDC noble
-      if (from.cosmosBased && filterNetwork !== 'noble-1') {
-        await handleTransferIBC(from, newToToken, fromAmount);
-        return;
-      }
-
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
       // has to switch network to the correct chain id on evm since users can swap between network tokens
       if (!window.Metamask.isTron(from.chainId) && !from.cosmosBased) {
