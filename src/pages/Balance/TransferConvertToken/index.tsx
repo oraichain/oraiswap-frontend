@@ -127,7 +127,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       if (token.chainId === 'kawaii_6886-1') {
         // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
         if (filterNetwork === 'Oraichain') {
-          return await onClickTransfer(convertAmount);
+          return await onClickTransfer(convertAmount, filterNetwork);
         }
         await convertKwt(convertAmount, token);
         return;
@@ -137,7 +137,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         evmChains.find((chain) => chain.chainId === token.chainId) ||
         (token.chainId === 'Oraichain' && filterNetwork === 'kawaii_6886-1')
       ) {
-        await onClickTransfer(convertAmount);
+        await onClickTransfer(convertAmount, filterNetwork);
         return;
       }
       await onClickTransfer(convertAmount, filterNetwork);
