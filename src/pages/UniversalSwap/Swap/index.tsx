@@ -265,11 +265,11 @@ const SwapComponent: React.FC<{
   // minimum receive after slippage
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      averageRatio.amount,
-      toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        averageRatio.amount,
+        toAmount(fromAmountToken, fromTokenInfoData!.decimals).toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = useWarningSlippage({ minimumReceive, simulatedAmount: simulateData?.amount });
 
@@ -283,7 +283,9 @@ const SwapComponent: React.FC<{
               placement="bottom-end"
               visible={visible}
               setVisible={setVisible}
-              content={<SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} />}
+              content={
+                <SlippageModal userSlippage={userSlippage} setVisible={setVisible} setUserSlippage={setUserSlippage} />
+              }
             />
             <button className={cx('btn')} onClick={refreshBalances}>
               <RefreshImg />
