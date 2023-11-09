@@ -51,7 +51,11 @@ export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, s
             isChosen: indexChosenOption === OPTIONS_SLIPPAGE.length
           })}
           onClick={() => {
-            setIndexChosenOption(OPTIONS_SLIPPAGE.length);
+            // use prev input as slippage.
+            if (manualSlippage) {
+              setIndexChosenOption(OPTIONS_SLIPPAGE.length);
+              setUserSlippage(manualSlippage);
+            }
           }}
         >
           <NumberFormat
@@ -67,11 +71,11 @@ export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, s
             onValueChange={({ floatValue }: NumberFormatValues) => {
               // if user clear input, change slippage to default config.
               if (floatValue === undefined) {
-                setIndexChosenOption(DEFAULT_INFDEX_SLIPPAGE_OPTION);
                 setUserSlippage(DEFAULT_SLIPPAGE);
+                setIndexChosenOption(DEFAULT_INFDEX_SLIPPAGE_OPTION);
               } else {
                 setUserSlippage(floatValue);
-                indexChosenOption === DEFAULT_INFDEX_SLIPPAGE_OPTION && setIndexChosenOption(OPTIONS_SLIPPAGE.length);
+                indexChosenOption !== OPTIONS_SLIPPAGE.length && setIndexChosenOption(OPTIONS_SLIPPAGE.length);
               }
               setManualSlippage(floatValue);
             }}
