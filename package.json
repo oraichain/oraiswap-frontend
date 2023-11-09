@@ -108,5 +108,6 @@
   },
   "engines": {
     "node": "^18 || ^20"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }
