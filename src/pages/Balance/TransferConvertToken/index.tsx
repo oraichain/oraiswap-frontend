@@ -1,7 +1,18 @@
+import {
+  ChainIdEnum,
+  CustomChainInfo,
+  findToTokenOnOraiBridge,
+  GAS_ESTIMATION_BRIDGE_DEFAULT,
+  NetworkChainId,
+  ORAI,
+  toDisplay,
+  TokenItemType
+} from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import classNames from 'classnames';
 import Input from 'components/Input';
 import Loader from 'components/Loader';
@@ -9,27 +20,16 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { evmChains } from 'config/chainInfos';
-import {
-  CustomChainInfo,
-  findToTokenOnOraiBridge,
-  GAS_ESTIMATION_BRIDGE_DEFAULT,
-  NetworkChainId,
-  ORAI,
-  TokenItemType,
-  ChainIdEnum
-} from '@oraichain/oraidex-common';
+import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { generateError, reduceString } from 'libs/utils';
+import useTokenFee from 'hooks/useTokenFee';
+import { reduceString } from 'libs/utils';
+import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import copy from 'copy-to-clipboard';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import useTokenFee from 'hooks/useTokenFee';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -149,7 +149,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
-  const network = bridgeNetworks.find((n) => n.chainId == filterNetwork);
+  const network = bridgeNetworks.find((n) => n.chainId === filterNetwork);
   const displayTransferConvertButton = () => {
     const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
     if (network) return buttonName + network.chainName;
@@ -158,15 +158,15 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const to = findToTokenOnOraiBridge(token, filterNetwork);
   let remoteTokenDenomFrom;
-  if (token && Object.values(token).length) {
-    remoteTokenDenomFrom = token.prefix + token.contractAddress;
-  }
-  const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
   let remoteTokenDenomTo;
-  if (to && Object.values(to).length) {
-    remoteTokenDenomTo = to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress;
-  }
+
+  if (token) remoteTokenDenomFrom = token.prefix + token.contractAddress;
+  if (to) remoteTokenDenomTo = to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress;
+
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
+
+  // we just use calculate fee for bridge.
   const bridgeFee = fromTokenFee || toTokenFee;
 
   return (
