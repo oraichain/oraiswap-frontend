@@ -79,6 +79,7 @@
       border-radius: 4px;
       padding: 6px 14px;
       margin: 0 4px;
+      border: 1px solid transparent;
 
       .input {
         max-width: 40px;
@@ -96,7 +97,7 @@
     }
 
     .isChosen {
-      border: 1px solid $brown;
+      border-color: $brown;
       opacity: 1;
     }
   }
