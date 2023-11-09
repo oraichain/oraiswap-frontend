@@ -16,8 +16,10 @@ interface ModalProps {
 }
 
 export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, setVisible }) => {
-  const [indexChosenOption, setIndexChosenOption] = useState(OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE));
+  const DEFAULT_INFDEX_SLIPPAGE_OPTION = OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE);
+  const [indexChosenOption, setIndexChosenOption] = useState(DEFAULT_INFDEX_SLIPPAGE_OPTION);
   const [theme] = useConfigReducer('theme');
+  const [manualSlippage, setManualSlippage] = useState(DEFAULT_SLIPPAGE);
 
   return (
     <div className={cx('setting', `${theme}-modal`)}>
@@ -56,15 +58,24 @@ export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, s
             className={cx('input')}
             thousandSeparator
             decimalScale={6}
+            placeholder={`${DEFAULT_SLIPPAGE}`}
             isAllowed={(values) => {
               const { floatValue } = values;
               // allow !floatValue to let user can clear their input
               return !floatValue || (floatValue >= 0 && floatValue <= 100);
             }}
             onValueChange={({ floatValue }: NumberFormatValues) => {
-              setUserSlippage(floatValue ?? 0);
+              // if user clear input, change slippage to default config.
+              if (floatValue === undefined) {
+                setIndexChosenOption(DEFAULT_INFDEX_SLIPPAGE_OPTION);
+                setUserSlippage(DEFAULT_SLIPPAGE);
+              } else {
+                setUserSlippage(floatValue);
+                indexChosenOption === DEFAULT_INFDEX_SLIPPAGE_OPTION && setIndexChosenOption(OPTIONS_SLIPPAGE.length);
+              }
+              setManualSlippage(floatValue);
             }}
-            value={userSlippage}
+            value={manualSlippage}
           />
           %
         </div>
