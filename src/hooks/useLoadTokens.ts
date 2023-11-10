@@ -197,7 +197,7 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
 
 async function loadKawaiiSubnetAmount(dispatch: Dispatch, injAddress: string) {
   if (!injAddress) return;
-  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'injective-1');
+  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
   loadNativeBalance(dispatch, injAddress, kawaiiInfo);
 
   const kwtSubnetAddress = getEvmAddress(injAddress);
