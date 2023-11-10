@@ -3,7 +3,6 @@ import cn from 'classnames/bind';
 import React, { useEffect, useState, useContext } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
-import classNames from 'classnames';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as AddWalletIcon } from 'assets/icons/Add.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
