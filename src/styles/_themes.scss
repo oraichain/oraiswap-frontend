@@ -56,6 +56,7 @@ $themes: (
     'svg-fill-color': #bdc3d3,
     'hr-color': 1px solid #2d2938,
     'accent-1': #03a727,
+    'neutral-9': #979995,
     'neutral-8': #979995,
     'neutral-7': #fbfbfb,
     'neutral-6': #232521,
@@ -88,7 +89,10 @@ $themes: (
     'primary-surface-default-dark': #92e54c,
     'primary-surface-default-subtle': #111900,
     'primary-surface-default-light': #e5f7d6,
-    'neutral-text-text-dropdown': #f7f7f7
+    'neutral-text-text-dropdown': #f7f7f7,
+    'neutral-surface-bg-section-3': #31332e,
+    'neutral-surface-bg-section-hover': #494949,
+    'neutral-surface-bg-section-active': #494949
   ),
   light: (
     'text-color': #272b30,
@@ -125,6 +129,7 @@ $themes: (
     'svg-fill-color': #777e90,
     'hr-color': 1px solid #cccdd0,
     'accent-1': #03a727,
+    'neutral-9': #686a66,
     'neutral-8': #686868,
     'neutral-7': #fbfbfb,
     'neutral-6': #f7f7f7,
@@ -157,6 +162,9 @@ $themes: (
     'primary-surface-default-dark': #2f5711,
     'primary-surface-default-subtle': #eef9e5,
     'primary-surface-default-light': #e5f7d6,
-    'neutral-text-text-dropdown': #232521
+    'neutral-text-text-dropdown': #232521,
+    'neutral-surface-bg-section-3': #efefef,
+    'neutral-surface-bg-section-hover': #dfe0de,
+    'neutral-surface-bg-section-active': #efefef
   )
 );

@@ -379,6 +379,30 @@ const SwapComponent: React.FC<{
                 </div>
               </div>
             )}
+            <div className={cx('coeff')}>
+              {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
+                <button
+                  className={cx(`${coe === coeff && 'is-active'}`)}
+                  key={coeff}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (coeff === coe) {
+                      setCoe(0);
+                      setSwapAmount([0, 0]);
+                      return;
+                    }
+                    setCoe(coeff);
+                    if (type === 'max') {
+                      onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
+                    } else {
+                      onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
+                    }
+                  }}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <div className={cx('swap-icon')}>
@@ -426,31 +450,11 @@ const SwapComponent: React.FC<{
                 searchTokenName={searchTokenName}
               />
             )}
+
+            <div className={cx('ratio')}>
+              {`1 ${originalFromToken?.name} ≈ ${averageRatio?.displayAmount || '0'} ${originalToToken?.name}`}
+            </div>
           </div>
-        </div>
-        <div className={cx('coeff')}>
-          {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
-            <button
-              className={cx(`${coe === coeff && 'is-active'}`)}
-              key={coeff}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (coeff === coe) {
-                  setCoe(0);
-                  setSwapAmount([0, 0]);
-                  return;
-                }
-                setCoe(coeff);
-                if (type === 'max') {
-                  onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
-                } else {
-                  onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
-                }
-              }}
-            >
-              {text}
-            </button>
-          ))}
         </div>
 
         {(() => {
