@@ -111,10 +111,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
+  padding-bottom: 10px;
 
   @include theme() {
-    color: theme-get('neutral-8');
+    color: theme-get('neutral-9');
   }
 
   font-size: 14px;
@@ -123,7 +123,7 @@
 
 .input-swap-fee {
   @include theme() {
-    color: theme-get('neutral-8');
+    color: theme-get('neutral-9');
   }
 
   padding-top: 6px;
