@@ -91,12 +91,12 @@ const Menu: React.FC = () => {
   const menuList = (
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'SWAP', setLink)}
-      {renderLink('https://legacy-v2.oraidex.io/', 'BRIDGE', () => { }, true)}
+      {renderLink('https://legacy-v2.oraidex.io/', 'BRIDGE', () => {}, true)}
       {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
-      {renderLink('coming-soon', 'FUTURES', () => { }, true)}
-      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-      {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('coming-soon', 'FUTURES', () => {}, true)}
+      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+      {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
     </div>
   );
   return (
@@ -113,7 +113,7 @@ const Menu: React.FC = () => {
             <ConnectWallet />
           </div>
 
-          <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
+          {/* <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
             {menuList}
             <div className={classNames(styles.connect_wallet_wrapper)}>
               <button
@@ -123,7 +123,7 @@ const Menu: React.FC = () => {
                 {theme === 'dark' ? <Light /> : <Dark />}
               </button>
             </div>
-          </div>
+          </div> */}
         </>
       ) : (
         <div className={classNames(styles.menu)}>
@@ -132,12 +132,12 @@ const Menu: React.FC = () => {
           </Link>
           {menuList}
           <div className={classNames(styles.connect_wallet_wrapper)}>
-            <button
+            {/* <button
               className={classNames(styles.menu_theme, styles.active, styles[theme])}
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
               {theme === 'dark' ? <Light /> : <Dark />}
-            </button>
+            </button> */}
 
             <span>
               <ConnectWallet />

@@ -1,9 +1,9 @@
 import cn from 'classnames/bind';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
-
+import classNames from 'classnames';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as AddWalletIcon } from 'assets/icons/Add.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
@@ -13,13 +13,15 @@ import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
-import useConfigReducer from 'hooks/useConfigReducer';
+import { ReactComponent as Light } from 'assets/icons/dark-light.svg';
 import { QRGeneratorInfo } from '../QRGenerator';
 import { reduceString } from 'libs/utils';
 import styles from './index.module.scss';
-import TokenBalance from 'components/TokenBalance';
+import { ThemeContext } from 'context/theme-context';
 import { WalletItem } from '../';
 import { isMobile } from '@walletconnect/browser-utils';
+import ToggleSwitch from 'components/ToggleSwitch';
+
 const cx = cn.bind(styles);
 
 const MyWallets: React.FC<{
@@ -39,7 +41,7 @@ const MyWallets: React.FC<{
   toggleShowNetworks,
   wallets
 }) => {
-  const [theme] = useConfigReducer('theme');
+  const { theme, setTheme } = useContext(ThemeContext);
 
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
 
@@ -82,6 +84,21 @@ const MyWallets: React.FC<{
   return (
     <div className={cx('my_wallets_container', theme)}>
       <div className={cx('wallet_wrapper')}>
+        <div className={cx('toggle_mode')}>
+          <div className={cx('toggle_mode_icon')}>
+            <Light />
+            <span className={cx('text')}>{'DARK MODE'}</span>
+          </div>
+          <ToggleSwitch
+            small={true}
+            id="toggle-mode"
+            checked={theme === 'dark'}
+            onChange={() => {
+              setTheme(theme === 'dark' ? 'light' : 'dark');
+            }}
+          />
+        </div>
+
         {wallets.map((wallet, index) => {
           return (
             <div key={index} className={cx('wallet_container')}>
@@ -138,7 +155,7 @@ const MyWallets: React.FC<{
                             <>
                               <div
                                 className={cx('copy')}
-                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
+                                onClick={e => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
                               >
                                 {copiedAddressCoordinates.networkId === network.chainId &&
                                 copiedAddressCoordinates.walletId === wallet.id ? (

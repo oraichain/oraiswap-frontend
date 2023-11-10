@@ -15,6 +15,25 @@
     height: 360px;
     overflow-y: scroll;
 
+    .toggle_mode {
+      justify-content: space-between;
+      display: flex;
+      padding: 16px 0;
+      align-items: center;
+      .toggle_mode_icon {
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+      }
+      .text {
+        padding-left: 6px;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 100%;
+        color: #979797;
+      }
+    }
+
     .wallet_container {
       margin-bottom: 10px;
       border-radius: 8px;
