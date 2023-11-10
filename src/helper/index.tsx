@@ -26,6 +26,8 @@ export interface Tokens {
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
 }
+export const ledgerChainIds: { [key: number]: NetworkChainId } = { 60: 'injective-1', 118: 'Oraichain' };
+
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
@@ -240,11 +242,11 @@ export const genAddressCosmos = (info, address60, address118) => {
 
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
-  const injAddress = await window.Keplr.getKeplrAddr('injective-1');
-  if (!injAddress) return { listAddressCosmos };
+  const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(ledgerChainIds[60]), 'oraie');
+  if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
-    const { cosmosAddress } = genAddressCosmos(info, injAddress, oraiAddr);
+    const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
     listAddressCosmos = {
       ...listAddressCosmos,
       [info.chainId]: cosmosAddress

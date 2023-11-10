@@ -209,7 +209,7 @@ export const initClient = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
+      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'injective-1'] as NetworkChainId[]) {
         try {
           await window.Keplr.suggestChain(networkId);
         } catch (error) {
