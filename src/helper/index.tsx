@@ -223,7 +223,7 @@ export const switchWalletTron = async () => {
   };
 };
 
-const getAddress = (addr, prefix: string) => {
+export const getAddress = (addr, prefix: string) => {
   const { data } = fromBech32(addr);
   return toBech32(prefix, data);
 };

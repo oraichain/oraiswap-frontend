@@ -3,7 +3,7 @@ import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { genAddressCosmos, handleCheckWallet } from 'helper';
+import { genAddressCosmos, getAddress, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
@@ -198,9 +198,10 @@ async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: Cu
 async function loadKawaiiSubnetAmount(dispatch: Dispatch, injAddress: string) {
   if (!injAddress) return;
   const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
-  loadNativeBalance(dispatch, injAddress, kawaiiInfo);
+  const kwtAddress = getAddress(injAddress, 'oraie');
+  loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
 
-  const kwtSubnetAddress = getEvmAddress(injAddress);
+  const kwtSubnetAddress = getEvmAddress(kwtAddress);
   const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
   let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
   // update amounts
