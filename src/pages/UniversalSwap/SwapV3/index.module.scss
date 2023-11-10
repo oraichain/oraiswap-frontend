@@ -133,11 +133,16 @@
     padding-top: 12px;
     padding-bottom: 14px;
     font-size: 14px;
+    gap: 8px;
 
     button {
       border-radius: 99px;
-      width: 24%;
-      padding: 14px;
+      display: flex;
+      height: 35px;
+      padding: 13px;
+      justify-content: center;
+      align-items: center;
+      flex: 1 0 0;
 
       @include theme() {
         color: theme-get('neutral-text-text-dropdown');
@@ -271,7 +276,9 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
 
     .token {
       cursor: pointer;

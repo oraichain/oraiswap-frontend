@@ -1,7 +1,6 @@
 // @ts-nocheck
-import { BigDecimal } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
 import { transform } from '@babel/core';
-import { toDisplay } from '@oraichain/oraidex-common';
 
 describe('operator overloading', () => {
   it('binary expression', () => {
