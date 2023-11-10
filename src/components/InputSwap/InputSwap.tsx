@@ -21,8 +21,8 @@ export default function InputSwap({ Icon, setIsSelectFrom, token, amount, onChan
         <div className={cx('token')} onClick={() => setIsSelectFrom(true)}>
           {Icon && <Icon className={cx('logo')} />}
           <div className={cx('token-info')}>
-            <span className={cx('token-symbol')}>{token && token.name}</span>
-            <span className={cx('token-org')}>{token && token.org}</span>
+            <span className={cx('token-symbol')}>{token?.name}</span>
+            <span className={cx('token-org')}>{token?.org}</span>
           </div>
           <div className={cx('arrow-down')} />
         </div>
