@@ -5,7 +5,6 @@ import {
   HIGH_GAS_PRICE,
   KWT_SCAN,
   MULTIPLIER,
-  ORAI,
   TRON_SCAN,
   WalletType,
   ChainIdEnum
@@ -21,7 +20,7 @@ import { collectWallet } from 'libs/cosmjs';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
-import { fromBech32, toBech32 } from '@cosmjs/encoding'
+import { fromBech32, toBech32 } from '@cosmjs/encoding';
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
@@ -76,7 +75,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -163,6 +162,7 @@ export const switchWallet = (type: WalletType) => {
 };
 
 export const isUnlockMetamask = async () => {
+  if (!window.ethereum._metamask) return false;
   const isMetamask = !!window?.ethereum?.isMetaMask;
   if (isMetamask && !!window.ethereum._metamask) {
     const isUnlock = await window.ethereum._metamask.isUnlocked();
@@ -225,23 +225,23 @@ export const switchWalletTron = async () => {
 
 const getAddress = (addr, prefix: string) => {
   const { data } = fromBech32(addr);
-  return toBech32(prefix, data)
-}
+  return toBech32(prefix, data);
+};
 
 export const genAddressCosmos = (info, address60, address118) => {
   const mapAddress = {
     60: address60,
     118: address118
-  }
+  };
   const addr = mapAddress[info.bip44.coinType || 118];
-  const cosmosAddress = getAddress(addr, info.bech32Config.bech32PrefixAccAddr)
-  return { cosmosAddress }
-}
+  const cosmosAddress = getAddress(addr, info.bech32Config.bech32PrefixAccAddr);
+  return { cosmosAddress };
+};
 
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
   const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
-  if (!kwtAddress) return { listAddressCosmos }
+  if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
     const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);

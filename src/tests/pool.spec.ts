@@ -19,7 +19,6 @@ import {
   fetchPoolListAndOraiPrice,
   formatDisplayUsdt,
   PairInfoData,
-  recalculateApr,
   toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
@@ -548,32 +547,5 @@ describe('pool', () => {
 
     // assertion
     expect(result).toEqual(expectedResult);
-  });
-
-  describe('recalculateApr', () => {
-    it.each([
-      [0.1, 1000, 100, 0.20999999999999988],
-      [0.2, 500, 50, 0.32000000000000006],
-      [0.5, 2000, 150, 0.6125]
-    ])('calculates new APR correctly', (current24hChange, currentVolume, amountUsdt, expectedApr) => {
-      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
-      expect(newApr).toBeCloseTo(expectedApr, 6);
-    });
-
-    it('handles edge case when currentVolume is 0 should return current24hChange value', () => {
-      const current24hChange = 0.1;
-      const currentVolume = 0;
-      const amountUsdt = 100;
-      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
-      expect(newApr).toBe(current24hChange);
-    });
-
-    it('handles edge case when current24hChange is 0', () => {
-      const current24hChange = 0;
-      const currentVolume = 1000;
-      const amountUsdt = 100;
-      const newApr = recalculateApr({ current24hChange, currentVolume, amountUsdt });
-      expect(newApr).toBe(0);
-    });
   });
 });

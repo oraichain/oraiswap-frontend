@@ -16,7 +16,7 @@
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
     "@oraichain/oraidex-contracts-sdk": "^1.0.24",
-    "@oraichain/oraidex-universal-swap": "^1.0.27",
+    "@oraichain/oraidex-universal-swap": "^1.0.30",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.47.0",
     "@tanstack/react-query": "^4.32.6",
@@ -108,5 +108,6 @@
   },
   "engines": {
     "node": "^18 || ^20"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }
