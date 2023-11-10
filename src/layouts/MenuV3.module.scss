@@ -90,13 +90,37 @@
   flex-direction: column;
   justify-content: flex-start;
   border-radius: 6px;
-  border: 1px solid #dfe0de;
+
   padding: 16px 13px 16px 16px;
-  color: #232521;
+  color: $white-color;
+  background-color: $dropdown-bg-color-dark;
+  border: 1px solid $dropdown-border-color-dark;
+
+  .menu_item {
+    display: flex;
+    height: 48px;
+    padding: 0px 6px;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 8px;
+
+    &:hover {
+      background: $dropdown-bg-color-hover-dark;
+    }
+  }
+
+  &.light {
+    color: $dropdown-color-light;
+    background-color: $white-color;
+    border: 1px solid $dropdown-border-color-light;
+
+    .menu_item:hover {
+      background: $dropdown-bg-color-hover-light;
+    }
+  }
 }
-.light {
-  background-color: #fff;
-}
+
 .menu_list {
   display: flex;
 

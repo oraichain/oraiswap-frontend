@@ -91,6 +91,8 @@ const Menu: React.FC = () => {
   const ToggleIcon = open ? CloseIcon : MenuIcon;
   const darkTheme = theme === 'dark';
 
+  console.log('theme', theme);
+
   const menuList = (
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'SWAP', setLink)}
@@ -121,7 +123,7 @@ const Menu: React.FC = () => {
             visible={otherActive}
             setVisible={() => setOtherActive(!otherActive)}
             content={
-              <div className={classNames(styles.menu_others_list, styles.light, styles[theme])}>
+              <div className={classNames(styles.menu_others_list, styles[theme])}>
                 {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
                 {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
               </div>
