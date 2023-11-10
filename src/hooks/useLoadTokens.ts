@@ -58,13 +58,13 @@ const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
   if (oraiAddress) {
     clearTimeout(timer[oraiAddress]);
-    const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(ledgerChainIds[60]), 'oraie');
+    const kawaiiAddress = getAddress(await window.Keplr.getKeplrAddr(ledgerChainIds[60]), 'oraie');
     timer[oraiAddress] = setTimeout(async () => {
       await Promise.all([
-        loadTokensCosmos(dispatch, kwtAddress, oraiAddress),
+        loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
         loadCw20Balance(dispatch, oraiAddress),
         // different cointype but also require keplr connected by checking oraiAddress
-        loadKawaiiSubnetAmount(dispatch, kwtAddress)
+        loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
       ]);
     }, 2000);
   }
