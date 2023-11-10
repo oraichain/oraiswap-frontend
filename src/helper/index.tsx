@@ -7,7 +7,8 @@ import {
   MULTIPLIER,
   TRON_SCAN,
   WalletType,
-  ChainIdEnum
+  ChainIdEnum,
+  BigDecimal
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
@@ -161,14 +162,12 @@ export const switchWallet = (type: WalletType) => {
   return false;
 };
 
-export const isUnlockMetamask = async () => {
-  if (!window.ethereum._metamask) return false;
-  const isMetamask = !!window?.ethereum?.isMetaMask;
-  if (isMetamask && !!window.ethereum._metamask) {
-    const isUnlock = await window.ethereum._metamask.isUnlocked();
-    return isUnlock;
-  }
+export const isUnlockMetamask = async (): Promise<boolean> => {
+  const ethereum = window.ethereum;
+  if (!ethereum || !ethereum.isMetaMask || !ethereum._metamask) return false;
+  return await window.ethereum._metamask.isUnlocked();
 };
+
 export const isEmptyObject = (value: object) => {
   if (!!value === false) return true;
   if (typeof value === 'object') {

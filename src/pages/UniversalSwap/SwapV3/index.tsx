@@ -187,7 +187,8 @@ const SwapComponent: React.FC<{
     routerClient
   );
 
-  //TODO: Need to fix after migrating contract ( AIRI/USDC)
+  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC), update later after migrate contract
+  const INIT_AMOUNT = 1000;
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
@@ -195,7 +196,7 @@ const SwapComponent: React.FC<{
     originalFromToken,
     originalToToken,
     routerClient,
-    1000
+    INIT_AMOUNT
   );
 
   const relayerFee = useRelayerFee();
@@ -215,14 +216,16 @@ const SwapComponent: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);
 
-  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData.decimals);
+  const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
+
   const minimumReceive = averageRatio?.amount
     ? calculateMinReceive(
-      (BigInt(averageRatio.amount) / 1000n).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -255,7 +258,8 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          simulatePrice: averageRatio && (BigInt(averageRatio.amount) / 1000n).toString(),
+          // @ts-ignore
+          simulatePrice: averageRatio && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
           relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
@@ -460,8 +464,8 @@ const SwapComponent: React.FC<{
               <div className={cx('title')}>
                 <span> Expected Output</span>
               </div>
-              <div className={cx('value')} >
-                ≈ {(simulateData && simulateData.displayAmount) || '0'} {originalToToken && originalToToken.name}
+              <div className={cx('value')}>
+                ≈ {simulateData?.displayAmount || '0'} {originalToToken.name}
               </div>
             </div>
           }
@@ -473,8 +477,8 @@ const SwapComponent: React.FC<{
               <TokenBalance
                 balance={{
                   amount: minimumReceive,
-                  decimals: originalFromToken?.decimals,
-                  denom: originalToToken?.name
+                  decimals: originalFromToken.decimals,
+                  denom: originalToToken.name
                 }}
                 decimalScale={truncDecimals}
               />
