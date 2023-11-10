@@ -111,7 +111,7 @@ const SwapComponent: React.FC<{
   };
 
   const onChangePercent = (amount: bigint) => {
-    const displayAmount = toDisplay(amount, originalFromToken?.decimals);
+    const displayAmount = toDisplay(amount, originalFromToken.decimals);
     setSwapAmount([displayAmount, toAmountToken]);
   };
 
@@ -323,9 +323,8 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon =
-    theme === 'light' ? originalFromToken?.IconLight || originalFromToken?.Icon : originalFromToken?.Icon;
-  const ToIcon = theme === 'light' ? originalToToken?.IconLight || originalToToken?.Icon : originalToToken?.Icon;
+  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
+  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
 
   return (
     <LoadingBox loading={loadingRefresh}>
@@ -452,7 +451,7 @@ const SwapComponent: React.FC<{
             )}
 
             <div className={cx('ratio')}>
-              {`1 ${originalFromToken?.name} ≈ ${averageRatio?.displayAmount || '0'} ${originalToToken?.name}`}
+              {`1 ${originalFromToken.name} ≈ ${averageRatio?.displayAmount || '0'} ${originalToToken.name}`}
             </div>
           </div>
         </div>
@@ -499,8 +498,8 @@ const SwapComponent: React.FC<{
             <TokenBalance
               balance={{
                 amount: minimumReceive,
-                decimals: originalFromToken?.decimals,
-                denom: originalToToken?.name
+                decimals: originalFromToken.decimals,
+                denom: originalToToken.name
               }}
               decimalScale={truncDecimals}
             />
