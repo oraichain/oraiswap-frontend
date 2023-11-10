@@ -432,7 +432,9 @@ const SwapComponent: React.FC<{
             )}
 
             <div className={cx('ratio')}>
-              {`1 ${originalFromToken.name} ≈ ${averageRatio?.displayAmount || '0'} ${originalToToken.name}`}
+              {`1 ${originalFromToken.name} ≈ ${
+                averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+              } ${originalToToken.name}`}
             </div>
           </div>
         </div>
