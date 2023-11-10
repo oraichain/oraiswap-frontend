@@ -75,7 +75,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -240,11 +240,11 @@ export const genAddressCosmos = (info, address60, address118) => {
 
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
-  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
-  if (!kwtAddress) return { listAddressCosmos };
+  const injAddress = await window.Keplr.getKeplrAddr('injective-1');
+  if (!injAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
-    const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
+    const { cosmosAddress } = genAddressCosmos(info, injAddress, oraiAddr);
     listAddressCosmos = {
       ...listAddressCosmos,
       [info.chainId]: cosmosAddress
