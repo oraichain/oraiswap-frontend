@@ -76,6 +76,11 @@ export default function InputSwapV3({
           onChange={() => {
             setCoe(0);
           }}
+          isAllowed={(values) => {
+            const { floatValue } = values;
+            // allow !floatValue to let user can clear their input
+            return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+          }}
           onValueChange={({ floatValue }) => {
             onChangeAmount && onChangeAmount(floatValue);
           }}
