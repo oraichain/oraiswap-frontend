@@ -308,217 +308,219 @@ const SwapComponent: React.FC<{
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
 
   return (
-    <LoadingBox loading={loadingRefresh}>
-      <div className={cx('swap-box')}>
-        <div className={cx('header')}>
-          <div className={cx('title')}>Universal Swap & Bridge</div>
-          <TooltipIcon
-            placement="bottom-end"
-            visible={visible}
-            setVisible={setVisible}
-            content={
-              <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
-            }
-          />
-          <button className={cx('btn')} onClick={refreshBalances}>
-            <RefreshImg />
-          </button>
-        </div>
-        <div className={cx('from')}>
-          <div className={cx('input-wrapper')}>
-            <InputSwap
-              balance={fromTokenBalance}
-              originalToken={originalFromToken}
-              prices={prices}
-              Icon={FromIcon}
-              setIsSelectFrom={setIsSelectFrom}
-              token={originalFromToken}
-              amount={fromAmountToken}
-              onChangeAmount={onChangeFromAmount}
-              tokenFee={fromTokenFee}
-              setCoe={setCoe}
+    <div className={cx('swap-box-wrapper')}>
+      <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
+        <div className={cx('swap-box')}>
+          <div className={cx('header')}>
+            <div className={cx('title')}>Universal Swap & Bridge</div>
+            <TooltipIcon
+              placement="bottom-end"
+              visible={visible}
+              setVisible={setVisible}
+              content={
+                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
+              }
             />
-            {isSelectFrom && (
-              <SelectTokenModalV2
-                close={() => setIsSelectFrom(false)}
+            <button className={cx('btn')} onClick={refreshBalances}>
+              <RefreshImg />
+            </button>
+          </div>
+          <div className={cx('from')}>
+            <div className={cx('input-wrapper')}>
+              <InputSwap
+                balance={fromTokenBalance}
+                originalToken={originalFromToken}
                 prices={prices}
-                items={filteredFromTokens}
-                amounts={amounts}
-                setToken={(denom) => {
-                  setSwapTokens([denom, toTokenDenom]);
-                }}
-                setSearchTokenName={setSearchTokenName}
-                searchTokenName={searchTokenName}
+                Icon={FromIcon}
+                setIsSelectFrom={setIsSelectFrom}
+                token={originalFromToken}
+                amount={fromAmountToken}
+                onChangeAmount={onChangeFromAmount}
+                tokenFee={fromTokenFee}
+                setCoe={setCoe}
               />
-            )}
-            {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
-            {!fromTokenFee && !toTokenFee && isWarningSlippage && (
-              <div className={cx('impact-warning')}>
+              {isSelectFrom && (
+                <SelectTokenModalV2
+                  close={() => setIsSelectFrom(false)}
+                  prices={prices}
+                  items={filteredFromTokens}
+                  amounts={amounts}
+                  setToken={(denom) => {
+                    setSwapTokens([denom, toTokenDenom]);
+                  }}
+                  setSearchTokenName={setSearchTokenName}
+                  searchTokenName={searchTokenName}
+                />
+              )}
+              {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
+              {!fromTokenFee && !toTokenFee && isWarningSlippage && (
+                <div className={cx('impact-warning')}>
+                  <div className={cx('title')}>
+                    <span>Current slippage exceed configuration!</span>
+                  </div>
+                </div>
+              )}
+              <div className={cx('coeff')}>
+                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
+                  <button
+                    className={cx(`${coe === coeff && 'is-active'}`)}
+                    key={coeff}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (coeff === coe) {
+                        setCoe(0);
+                        setSwapAmount([0, 0]);
+                        return;
+                      }
+                      setCoe(coeff);
+                      if (type === 'max') {
+                        onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
+                      } else {
+                        onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
+                      }
+                    }}
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className={cx('swap-icon')}>
+            <div className={cx('wrap-img')}>
+              <img
+                src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
+                onClick={() => {
+                  // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
+                  // because non-evm token cannot be swapped to evm token with no Oraichain pool
+                  if (
+                    isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
+                    !isEvmNetworkNativeSwapSupported(toToken.chainId)
+                  )
+                    return;
+                  setSwapTokens([toTokenDenom, fromTokenDenom]);
+                  setSwapAmount([toAmountToken, fromAmountToken]);
+                }}
+                alt="ant"
+              />
+            </div>
+          </div>
+          <div className={cx('to')}>
+            <div className={cx('input-wrapper')}>
+              <InputSwap
+                balance={toTokenBalance}
+                originalToken={originalToToken}
+                disable={true}
+                prices={prices}
+                Icon={ToIcon}
+                setIsSelectFrom={setIsSelectTo}
+                token={originalToToken}
+                amount={toAmountToken}
+                tokenFee={toTokenFee}
+              />
+              {isSelectTo && (
+                <SelectTokenModalV2
+                  close={() => setIsSelectTo(false)}
+                  prices={prices}
+                  items={filteredToTokens}
+                  amounts={amounts}
+                  setToken={(denom) => {
+                    setSwapTokens([fromTokenDenom, denom]);
+                  }}
+                  setSearchTokenName={setSearchTokenName}
+                  searchTokenName={searchTokenName}
+                />
+              )}
+
+              <div className={cx('ratio')}>
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
+              </div>
+            </div>
+          </div>
+
+          {(() => {
+            const disabledSwapBtn =
+              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+
+            let disableMsg: string;
+            if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
+            if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+            return (
+              <button
+                className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
+                onClick={handleSubmit}
+                disabled={disabledSwapBtn}
+              >
+                {swapLoading && <Loader width={35} height={35} />}
+                {/* hardcode check minimum tron */}
+                {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+                  <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+                ) : (
+                  <span>{disableMsg || 'Swap'}</span>
+                )}
+              </button>
+            );
+          })()}
+
+          <div className={cx('detail')}>
+            {
+              <div className={cx('row')}>
                 <div className={cx('title')}>
-                  <span>Current slippage exceed configuration!</span>
+                  <span> Expected Output</span>
+                </div>
+                <div className={cx('value')}>
+                  ≈ {simulateData?.displayAmount || '0'} {originalToToken.name}
                 </div>
               </div>
-            )}
-            <div className={cx('coeff')}>
-              {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
-                <button
-                  className={cx(`${coe === coeff && 'is-active'}`)}
-                  key={coeff}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (coeff === coe) {
-                      setCoe(0);
-                      setSwapAmount([0, 0]);
-                      return;
-                    }
-                    setCoe(coeff);
-                    if (type === 'max') {
-                      onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
-                    } else {
-                      onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
-                    }
-                  }}
-                >
-                  {text}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className={cx('swap-icon')}>
-          <div className={cx('wrap-img')}>
-            <img
-              src={theme === 'light' ? SwitchLightImg : SwitchDarkImg}
-              onClick={() => {
-                // prevent switching sides if the from token has no pool on Oraichain while the to token is a non-evm token
-                // because non-evm token cannot be swapped to evm token with no Oraichain pool
-                if (
-                  isSupportedNoPoolSwapEvm(fromToken.coinGeckoId) &&
-                  !isEvmNetworkNativeSwapSupported(toToken.chainId)
-                )
-                  return;
-                setSwapTokens([toTokenDenom, fromTokenDenom]);
-                setSwapAmount([toAmountToken, fromAmountToken]);
-              }}
-              alt="ant"
-            />
-          </div>
-        </div>
-        <div className={cx('to')}>
-          <div className={cx('input-wrapper')}>
-            <InputSwap
-              balance={toTokenBalance}
-              originalToken={originalToToken}
-              disable={true}
-              prices={prices}
-              Icon={ToIcon}
-              setIsSelectFrom={setIsSelectTo}
-              token={originalToToken}
-              amount={toAmountToken}
-              tokenFee={toTokenFee}
-            />
-            {isSelectTo && (
-              <SelectTokenModalV2
-                close={() => setIsSelectTo(false)}
-                prices={prices}
-                items={filteredToTokens}
-                amounts={amounts}
-                setToken={(denom) => {
-                  setSwapTokens([fromTokenDenom, denom]);
-                }}
-                setSearchTokenName={setSearchTokenName}
-                searchTokenName={searchTokenName}
-              />
-            )}
-
-            <div className={cx('ratio')}>
-              {`1 ${originalFromToken.name} ≈ ${
-                averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-              } ${originalToToken.name}`}
-            </div>
-          </div>
-        </div>
-
-        {(() => {
-          const disabledSwapBtn =
-            swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
-
-          let disableMsg: string;
-          if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
-          if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
-          return (
-            <button
-              className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
-              onClick={handleSubmit}
-              disabled={disabledSwapBtn}
-            >
-              {swapLoading && <Loader width={35} height={35} />}
-              {/* hardcode check minimum tron */}
-              {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-                <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
-              ) : (
-                <span>{disableMsg || 'Swap'}</span>
-              )}
-            </button>
-          );
-        })()}
-
-        <div className={cx('detail')}>
-          {
+            }
             <div className={cx('row')}>
               <div className={cx('title')}>
-                <span> Expected Output</span>
-              </div>
-              <div className={cx('value')}>
-                ≈ {simulateData?.displayAmount || '0'} {originalToToken.name}
-              </div>
-            </div>
-          }
-          <div className={cx('row')}>
-            <div className={cx('title')}>
-              <span>Minimum Received after slippage ( {userSlippage}% )</span>
-            </div>
-            <div className={cx('value')}>
-              <TokenBalance
-                balance={{
-                  amount: minimumReceive,
-                  decimals: originalFromToken.decimals,
-                  denom: originalToToken.name
-                }}
-                decimalScale={truncDecimals}
-              />
-            </div>
-          </div>
-
-          {!!relayerFeeToken && (
-            <div className={cx('row')}>
-              <div className={cx('title')}>
-                <span>Relayer Fee</span>
+                <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
                 <TokenBalance
                   balance={{
-                    amount: relayerFeeToken.toString(),
-                    // decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                    decimals: RELAYER_DECIMAL,
-                    denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
+                    amount: minimumReceive,
+                    decimals: originalFromToken.decimals,
+                    denom: originalToToken.name
                   }}
                   decimalScale={truncDecimals}
                 />
               </div>
             </div>
-          )}
-          {!fromTokenFee && !toTokenFee && (
-            <div className={cx('row')}>
-              <div className={cx('title')}>
-                <span>Tax rate</span>
+
+            {!!relayerFeeToken && (
+              <div className={cx('row')}>
+                <div className={cx('title')}>
+                  <span>Relayer Fee</span>
+                </div>
+                <div className={cx('value')}>
+                  <TokenBalance
+                    balance={{
+                      amount: relayerFeeToken.toString(),
+                      // decimals: relayerFeeInfo[relayerFeeToken.prefix],
+                      decimals: RELAYER_DECIMAL,
+                      denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
+                    }}
+                    decimalScale={truncDecimals}
+                  />
+                </div>
               </div>
-              <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
-            </div>
-          )}
+            )}
+            {!fromTokenFee && !toTokenFee && (
+              <div className={cx('row')}>
+                <div className={cx('title')}>
+                  <span>Tax rate</span>
+                </div>
+                <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </LoadingBox>
+      </LoadingBox>
+    </div>
   );
 };
 

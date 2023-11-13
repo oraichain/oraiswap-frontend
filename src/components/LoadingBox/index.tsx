@@ -9,12 +9,13 @@ const LoadingBox: React.FC<{
   children: React.ReactElement | React.ReactNode;
   styles?: CSSProperties;
   theme?: string;
-}> = ({ loading, children, styles, theme }) => {
+  className?: string;
+}> = ({ loading, children, styles, theme, className }) => {
   return (
     <>
       {loading ? (
         <div style={styles} className={cx('loading-wrap')}>
-          <BlocLoaderDex open={true} theme={theme} />
+          <BlocLoaderDex open={true} theme={theme} classNameLoading={className} />
           {children}
         </div>
       ) : (
