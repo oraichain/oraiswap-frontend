@@ -1,7 +1,6 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { ReactComponent as Dark } from 'assets/icons/dark.svg';
-import { ReactComponent as Light } from 'assets/icons/light.svg';
+import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
@@ -13,12 +12,16 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MenuV3.module.scss';
+import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 
 const Menu: React.FC = () => {
   const location = useLocation();
   const [link, setLink] = useState('/');
+  const [otherActive, setOtherActive] = useState(false);
   const { theme, setTheme } = useContext(ThemeContext);
   const [open, setOpen] = useState(false);
+
+  console.log('theme', theme);
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
@@ -88,17 +91,49 @@ const Menu: React.FC = () => {
   const ToggleIcon = open ? CloseIcon : MenuIcon;
   const darkTheme = theme === 'dark';
 
+  console.log('theme', theme);
+
   const menuList = (
     <div className={classNames(styles.menu_list)}>
       {renderLink('/universalswap', 'SWAP', setLink)}
-      {renderLink('https://legacy-v2.oraidex.io/', 'BRIDGE', () => { }, true)}
+      {renderLink('https://legacy-v2.oraidex.io/', 'BRIDGE', () => {}, true)}
       {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
-      {renderLink('coming-soon', 'FUTURES', () => { }, true)}
-      {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-      {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('coming-soon', 'FUTURES', () => {}, true)}
+      {mobileMode ? (
+        <>
+          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
+        </>
+      ) : (
+        <>
+          <div
+            onClick={() => {
+              setOtherActive(!otherActive);
+            }}
+            className={classNames(styles.menu_item, { [styles.active]: otherActive }, styles[theme], styles.spin)}
+          >
+            <span className={classNames(styles.menu_item_text, { [styles.active]: otherActive }, styles[theme])}>
+              {'OTHERS'}
+              <DownArrowIcon />
+            </span>
+          </div>
+          <TooltipContainer
+            placement="bottom-end"
+            visible={otherActive}
+            setVisible={() => setOtherActive(!otherActive)}
+            content={
+              <div className={classNames(styles.menu_others_list, styles[theme])}>
+                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
+              </div>
+            }
+          />
+        </>
+      )}
     </div>
   );
+
   return (
     <>
       {mobileMode ? (
@@ -116,12 +151,12 @@ const Menu: React.FC = () => {
           <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
             {menuList}
             <div className={classNames(styles.connect_wallet_wrapper)}>
-              <button
+              {/* <button
                 className={classNames(styles.menu_theme, styles.active, styles[theme])}
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               >
                 {theme === 'dark' ? <Light /> : <Dark />}
-              </button>
+              </button> */}
             </div>
           </div>
         </>
@@ -132,13 +167,12 @@ const Menu: React.FC = () => {
           </Link>
           {menuList}
           <div className={classNames(styles.connect_wallet_wrapper)}>
-            <button
+            {/* <button
               className={classNames(styles.menu_theme, styles.active, styles[theme])}
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
               {theme === 'dark' ? <Light /> : <Dark />}
-            </button>
-
+            </button> */}
             <span>
               <ConnectWallet />
             </span>
