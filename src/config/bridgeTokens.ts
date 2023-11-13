@@ -99,7 +99,8 @@ export const swapFromTokens = flattenTokens.filter(
     token.chainId !== 'osmosis-1' &&
     token.chainId !== 'kawaii_6886-1' &&
     token.coinGeckoId !== 'injective-protocol' &&
-    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
+    token.chainId !== 'injective-1' && // hardcode this temporary until we have injective pool on Oraichain
+    token.chainId !== 'noble-1'
 );
 // universal swap. We dont support kwt & milky & injective for simplicity. We also skip OraiBridge tokens because users dont care about them
 export const swapToTokens = flattenTokens.filter(
@@ -108,5 +109,6 @@ export const swapToTokens = flattenTokens.filter(
     token.coinGeckoId !== 'milky-token' &&
     token.chainId !== 'oraibridge-subnet-2' &&
     token.coinGeckoId !== 'injective-protocol' &&
-    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
+    token.chainId !== 'injective-1' && // hardcode this temporary until we have injective pool on Oraichain &&
+    token.chainId !== 'noble-1'
 );

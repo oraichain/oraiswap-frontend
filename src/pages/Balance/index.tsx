@@ -41,7 +41,8 @@ import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } f
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
-interface BalanceProps {}
+const EVM_CHAIN_ID: NetworkChainId[] = ['0x38', '0x01', '0x2b6653dc', '0x1ae6']
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -49,7 +50,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useConfigReducer('filterNetwork');
+  const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
@@ -124,6 +125,11 @@ const Balance: React.FC<BalanceProps> = () => {
     processTxResult(fromToken.rpc, result);
   };
 
+  useEffect(() => {
+    setTokenBridge([undefined, undefined]);
+  }, [filterNetworkUI])
+
+
   const onClickTransfer = async (
     fromAmount: number,
     from: TokenItemType,
@@ -159,35 +165,43 @@ const Balance: React.FC<BalanceProps> = () => {
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
-      if (from.cosmosBased) {
-        await handleTransferIBC(from, to, fromAmount);
-        return;
-      }
-      const latestOraiAddress = await window.Keplr.getKeplrAddr();
-      // has to switch network to the correct chain id on evm since users can swap between network tokens
-      if (!window.Metamask.isTron(from.chainId)) {
-        await window.Metamask.switchNetwork(from.chainId);
-      }
 
-      // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
-      // to is Oraibridge tokens
-      // or other token that have same coingeckoId that show in at least 2 chain.
       let newToToken = to;
       if (filterNetwork) {
+        // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
         newToToken = findToTokenOnOraiBridge(from, filterNetwork);
-        if (!newToToken) {
+        // ORAICHAIN -> COSMOS(INJ,NOBLE,COSMOS,ATOM) (TO: TOKEN COSMOS)
+        // EVM -> ORAICHAIN || COSMOS -> ORAICHAIN  (TO: TOKEN ORAICHAIN)
+        if (!EVM_CHAIN_ID.includes(filterNetwork)) {
           newToToken = cosmosTokens.find((t) => t.chainId === filterNetwork && t.coinGeckoId === from.coinGeckoId);
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
+
+      // TODO: hardcode check case USDC oraichain -> USDC noble
+      const isNotNobleChain = filterNetwork !== 'noble-1';
+      if (from.cosmosBased && isNotNobleChain) {
+        await handleTransferIBC(from, newToToken, fromAmount);
+        return;
+      }
+      // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
+      // to is Oraibridge tokens
+      // or other token that have same coingeckoId that show in at least 2 chain.
+      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      // has to switch network to the correct chain id on evm since users can swap between network tokens
+      if (EVM_CHAIN_ID.filter(evm => evm !== '0x2b6653dc').includes(filterNetwork)) {
+        await window.Metamask.switchNetwork(from.chainId);
+      }
+
       result = await new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
-          fromAmount
+          fromAmount,
+          simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       ).processUniversalSwap();
@@ -236,7 +250,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const network = networks.find((n) => n.chainId == filterNetwork) ?? networks[0];
+  const network = networks.find((n) => n.chainId == filterNetworkUI) ?? networks[0];
 
   return (
     <Content nonBackground>
@@ -299,7 +313,7 @@ const Balance: React.FC<BalanceProps> = () => {
         <LoadingBox loading={loadingRefresh}>
           <div className={styles.tokens}>
             <div className={styles.tokens_form}>
-              {getFilterTokens(filterNetwork).map((t: TokenItemType) => {
+              {getFilterTokens(filterNetworkUI).map((t: TokenItemType) => {
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
                 let usd = getUsd(amount, t, prices);
@@ -316,7 +330,7 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
-                    active={(from && from.denom === t.denom) || (to && to.denom === t.denom)}
+                    active={from?.denom === t.denom || to?.denom === t.denom}
                     token={t}
                     theme={theme}
                     onClick={() => onClickToken(t)}
@@ -349,7 +363,7 @@ const Balance: React.FC<BalanceProps> = () => {
           type="network"
           items={networks}
           setToken={(chainId) => {
-            setFilterNetwork(chainId);
+            setFilterNetworkUI(chainId);
           }}
         />
       </div>

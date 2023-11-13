@@ -25,6 +25,7 @@ import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
+import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -203,6 +204,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: '0x1ae6',
     Icon: KwtIcon,
     IconLight: KwtIcon
+  },
+  {
+    chainId: 'noble-1',
+    Icon: NobleIcon,
+    IconLight: NobleIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -333,7 +339,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usdc',
       type: 'cw20',
       contractAddress: USDC_CONTRACT,
-      bridgeTo: ['0x01'],
+      bridgeTo: ['0x01', 'noble-1'],
       coinDecimals: 6,
       Icon: UsdcIcon
     },
@@ -665,6 +671,62 @@ export const chainInfos: CustomChainInfo[] = [
         IconLight: OraiLightIcon
       }
     ]
+  },
+  {
+    rpc: 'https://noble-rpc.polkachu.com',
+    rest: 'https://noble-api.polkachu.com',
+    chainId: 'noble-1',
+    chainName: 'Noble',
+    networkType: 'cosmos',
+    bip44: {
+      coinType: 118
+    },
+    bech32Config: defaultBech32Config('noble'),
+    features: ['stargate', 'ibc-transfer', 'no-legacy-stdTx', 'ibc-go'],
+    Icon: NobleIcon,
+    IconLight: NobleIcon,
+    currencies: [
+      {
+        coinDenom: 'USDC',
+        coinMinimalDenom: 'uusdc',
+        coinDecimals: 6,
+        coinGeckoId: 'usd-coin',
+        coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/USDCoin.png',
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.03
+        },
+        bridgeTo: ['Oraichain'],
+        Icon: UsdcIcon,
+        IconLight: UsdcIcon
+      }
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: 'USDC',
+        coinMinimalDenom: 'uusdc',
+        coinDecimals: 6,
+        coinGeckoId: 'usd-coin',
+        coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/USDCoin.png',
+        gasPriceStep: {
+          low: 0,
+          average: 0.025,
+          high: 0.03
+        }
+      }
+    ],
+    stakeCurrency: {
+      coinDecimals: 6,
+      coinDenom: 'STAKE',
+      coinMinimalDenom: 'ustake',
+      coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/stake.png'
+    },
+    chainSymbolImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/stake.png',
+    txExplorer: {
+      name: 'Mintscan',
+      txUrl: 'https://www.mintscan.io/noble/txs/{txHash}'
+    }
   },
   {
     rpc: 'https://rpc-cosmos.oraidex.io',
