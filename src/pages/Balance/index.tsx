@@ -10,7 +10,7 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType } from '@oraichain/oraidex-common';
+import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType, evmChains } from '@oraichain/oraidex-common';
 import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -41,7 +41,8 @@ import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } f
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 
-const EVM_CHAIN_ID: NetworkChainId[] = ['0x38', '0x01', '0x2b6653dc', '0x1ae6']
+const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
+
 interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -191,7 +192,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // or other token that have same coingeckoId that show in at least 2 chain.
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
       // has to switch network to the correct chain id on evm since users can swap between network tokens
-      if (EVM_CHAIN_ID.filter(evm => evm !== '0x2b6653dc').includes(filterNetwork)) {
+      if (filterNetwork !== '0x2b6653dc' && EVM_CHAIN_ID.includes(filterNetwork)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
 
