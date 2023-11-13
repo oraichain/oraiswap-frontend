@@ -192,7 +192,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // or other token that have same coingeckoId that show in at least 2 chain.
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
       // has to switch network to the correct chain id on evm since users can swap between network tokens
-      if (filterNetwork !== '0x2b6653dc' && EVM_CHAIN_ID.includes(filterNetwork)) {
+      if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
 
