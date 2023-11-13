@@ -256,7 +256,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             onClick={async (e) => {
                               e.stopPropagation();
                               setFilterNetwork(net.chainId);
-                              await getAddressTransfer(network);
+                              await getAddressTransfer(net);
                               setIsOpen(false);
                             }}
                           >
