@@ -81,20 +81,6 @@ export default function InputSwapV3({
           }}
         />
       </div>
-      <div className={cx('input-swap-balance')}>
-        <div>
-          <TokenBalance
-            balance={{
-              amount: balance,
-              decimals: originalToken?.decimals,
-              denom: originalToken?.symbol || token?.name || ''
-            }}
-            prefix="Balance: "
-            decimalScale={6}
-          />
-        </div>
-        <div>≈ ${!amount || !prices[originalToken?.coinGeckoId] ? 0 : (prices[originalToken?.coinGeckoId] * amount).toFixed(6)}</div>
-      </div>
       {!!tokenFee && (
         <div className={cx('input-swap-fee')}>
           <div>Fee: {tokenFee}%</div>
