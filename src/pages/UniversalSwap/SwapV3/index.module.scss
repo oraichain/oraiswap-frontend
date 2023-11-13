@@ -2,9 +2,18 @@
 @import 'src/styles/variables';
 @import 'src/styles/themes';
 
+.swap-box-wrapper {
+  border-radius: 24px;
+  position: sticky;
+  top: 125px;
+
+  .custom-loader-root {
+    border-radius: 24px;
+  }
+}
+
 .swap-box {
   margin: auto;
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,28 +121,46 @@
       font-weight: 500;
       font-size: 24px;
     }
+
+    .ratio {
+      @include theme() {
+        color: theme-get('neutral-9');
+      }
+
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 150%;
+      letter-spacing: 0.013px;
+      padding-top: 13px;
+    }
   }
 
   .coeff {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding-top: 16px;
+    padding-top: 12px;
+    padding-bottom: 14px;
     font-size: 14px;
+    gap: 8px;
 
     button {
-      border-radius: 8px;
-      width: 24%;
-      padding: 14px;
+      border-radius: 99px;
+      display: flex;
+      height: 35px;
+      padding: 13px;
+      justify-content: center;
+      align-items: center;
+      flex: 1 0 0;
 
       @include theme() {
         color: theme-get('neutral-text-text-dropdown');
-        background-color: theme-get('neutral-surface-bg-section');
+        background-color: theme-get('neutral-surface-bg-section-3');
       }
 
       &:hover {
         @include theme() {
-          background-color: theme-get('neutral-surface-bg-dropdown-hover');
+          background-color: theme-get('neutral-surface-bg-section-hover');
           opacity: 1;
         }
       }
@@ -143,7 +170,7 @@
       @include theme() {
         color: theme-get('sea-stone-800');
         border: 1px solid theme-get('sea-stone-800');
-        background-color: theme-get('neutral-surface-bg-dropdown-hover');
+        background-color: theme-get('neutral-surface-bg-section-active');
       }
     }
   }
@@ -302,7 +329,7 @@
   .impact-warning {
     .title {
       span {
-        color: rgb(255, 171, 0);
+        color: #e01600;
       }
     }
   }
@@ -387,7 +414,7 @@
     }
   }
 
-  border-radius: 20px;
+  border-radius: 99px;
   padding: 16px;
   font-style: normal;
   font-weight: 600;

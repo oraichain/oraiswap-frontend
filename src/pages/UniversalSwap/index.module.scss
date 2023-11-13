@@ -11,10 +11,12 @@
     height: 420px;
     padding-top: 10px;
     transition: all 1s ease;
+
     &.hidden {
       height: 0;
     }
   }
+
   .swap-col {
     &.w60 {
       width: 60%;
@@ -31,6 +33,7 @@
     padding: 0;
     display: flex;
     flex-direction: column-reverse;
+
     .swap-col {
       &.w60 {
         width: 100%;
