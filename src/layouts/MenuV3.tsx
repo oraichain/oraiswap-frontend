@@ -6,31 +6,27 @@ import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import classNames from 'classnames';
 import ConnectWallet from 'components/ConnectWallet';
+import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { ThemeContext } from 'context/theme-context';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MenuV3.module.scss';
-import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 
 const Menu: React.FC = () => {
   const location = useLocation();
   const [link, setLink] = useState('/');
   const [otherActive, setOtherActive] = useState(false);
-  const { theme, setTheme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const [open, setOpen] = useState(false);
-
-  console.log('theme', theme);
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
     setOpen(false);
   });
 
-  const handleToggle = () => {
-    setOpen(!open);
-  };
+  const handleToggle = () => setOpen(!open);
 
   useEffect(() => {
     setLink(location.pathname);
@@ -51,6 +47,7 @@ const Menu: React.FC = () => {
         </span>
       );
     }
+
     if (externalLink)
       return (
         <a
@@ -90,8 +87,6 @@ const Menu: React.FC = () => {
   const mobileMode = isMobile();
   const ToggleIcon = open ? CloseIcon : MenuIcon;
   const darkTheme = theme === 'dark';
-
-  console.log('theme', theme);
 
   const menuList = (
     <div className={classNames(styles.menu_list)}>
@@ -150,14 +145,6 @@ const Menu: React.FC = () => {
 
           <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
             {menuList}
-            <div className={classNames(styles.connect_wallet_wrapper)}>
-              {/* <button
-                className={classNames(styles.menu_theme, styles.active, styles[theme])}
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? <Light /> : <Dark />}
-              </button> */}
-            </div>
           </div>
         </>
       ) : (
@@ -167,12 +154,6 @@ const Menu: React.FC = () => {
           </Link>
           {menuList}
           <div className={classNames(styles.connect_wallet_wrapper)}>
-            {/* <button
-              className={classNames(styles.menu_theme, styles.active, styles[theme])}
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-              {theme === 'dark' ? <Light /> : <Dark />}
-            </button> */}
             <span>
               <ConnectWallet />
             </span>
