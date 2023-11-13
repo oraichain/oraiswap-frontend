@@ -10,6 +10,7 @@ import { PoolInfoResponse } from 'types/pool';
 import styles from './style.module.scss';
 import { Pairs } from 'config/pools';
 import { isEqual } from 'lodash';
+import { Button } from 'components/Button';
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -29,8 +30,9 @@ const LIST_FILTER_POOL = [
 
 type FilterProps = {
   setFilteredPools: React.Dispatch<React.SetStateAction<PoolInfoResponse[]>>;
+  setIsOpenNewTokenModal: (status: boolean) => void
 };
-export const Filter: FC<FilterProps> = ({ setFilteredPools }) => {
+export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal }) => {
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const [searchValue, setSearchValue] = useState('');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -93,7 +95,7 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools }) => {
         </div>
       </div>
 
-      {/* <Button type='primary-sm' onClick={() => console.log('ok')}>New Pool</Button> */}
+      {/* <Button type='primary-sm' onClick={() => setIsOpenNewTokenModal(true)}>New Pool</Button> */}
     </div>
   );
 };

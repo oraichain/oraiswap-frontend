@@ -64,7 +64,7 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingAssetInfo
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount ||
-          '0'
+        '0'
         : 0;
       const totalSupply = pool.totalSupply;
       const lpPrice = pool.totalSupply ? pool.totalLiquidity / Number(totalSupply) : 0;
@@ -72,7 +72,7 @@ const Pools: React.FC<{}> = () => {
 
       const earned = stakingAssetInfo
         ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt ||
-          0
+        0
         : 0;
 
       const [baseDenom, quoteDenom] = [
@@ -128,7 +128,7 @@ const Pools: React.FC<{}> = () => {
       <div className={styles.pools}>
         <Header />
         <div>
-          <Filter setFilteredPools={setFilteredPools} />
+          <Filter setFilteredPools={setFilteredPools} setIsOpenNewTokenModal={setIsOpenNewTokenModal} />
           {mobileMode ? (
             <ListPoolsMobile poolTableData={poolTableData} generateIcon={generateIcon} />
           ) : (
