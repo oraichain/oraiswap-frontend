@@ -38,6 +38,20 @@ export default function InputSwapV3({
 }: InputSwapProps) {
   return (
     <>
+      <div className={cx('input-swap-balance')}>
+        <div>
+          <TokenBalance
+            balance={{
+              amount: balance,
+              decimals: originalToken?.decimals,
+              denom: originalToken?.symbol || token?.name || ''
+            }}
+            prefix="Balance: "
+            decimalScale={6}
+          />
+        </div>
+        <div>≈ ${!amount ? 0 : (prices?.[originalToken?.coinGeckoId] * amount).toFixed(6)}</div>
+      </div>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
           <div className={cx('left')}>
