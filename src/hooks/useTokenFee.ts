@@ -18,7 +18,7 @@ export default function useTokenFee(
 
   useEffect(() => {
     let fee = 0;
-    if (!remoteTokenDenom) return;
+    if (!remoteTokenDenom || !feeConfig) return;
 
     // since we have supported evm swap, tokens that are on the same supported evm chain id
     // don't have any token fees (because they are not bridged to Oraichain)
@@ -47,7 +47,7 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     () => {
       return handleSimulateSwap({
         originalFromInfo: oraiToken,
-        originalToInfo: originalToToken,
+        originalToInfo: originalFromToken,
         originalAmount: relayerFeeInOrai,
         routerClient
       });
@@ -64,14 +64,10 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
   // get relayer fee in ORAI
   useEffect(() => {
-    if (!originalFromToken || !originalToToken) return;
-
+    if (!originalFromToken || !originalToToken || !feeConfig) return;
     const { relayer_fees: relayerFees } = feeConfig;
     const relayerFeeInOrai = relayerFees.reduce((acc, cur) => {
-      if (
-        originalFromToken.chainId !== originalToToken.chainId &&
-        (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-      ) {
+      if (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix) {
         return +cur.amount + acc;
       }
       return acc;
