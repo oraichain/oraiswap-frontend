@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import { TokenItemType } from '@oraichain/oraidex-common';
+import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
+import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { TokenInfo } from 'types/token';
-import { SimulateResponse, handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
-import { OraiswapRouterReadOnlyInterface } from '@oraichain/oraidex-contracts-sdk';
 
 /**
  * Simulate ratio between fromToken & toToken
@@ -40,7 +40,9 @@ export const useSimulate = (
   );
 
   useEffect(() => {
-    setSwapAmount([fromAmountToken, Number(simulateData?.displayAmount)]);
+    // initAmount used for simulate averate ratio
+    const fromAmount = initAmount ?? fromAmountToken;
+    setSwapAmount([fromAmount, Number(simulateData?.displayAmount)]);
   }, [simulateData, fromAmountToken, fromTokenInfoData, toTokenInfoData]);
 
   return { simulateData, fromAmountToken, toAmountToken, setSwapAmount };
