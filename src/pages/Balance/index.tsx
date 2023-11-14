@@ -49,6 +49,7 @@ import {
   transferIbcCustom
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
+import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
@@ -68,7 +69,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
 
-  // state redux
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
@@ -210,10 +210,12 @@ const Balance: React.FC<BalanceProps> = () => {
       if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
-
+      const latestEvmAddress = await window.Metamask.getEthAddress();
+      checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
+      checkEvmAddress(newToToken.chainId, latestEvmAddress, tronAddress);
       result = await new UniversalSwapHandler(
         {
-          sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
+          sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
