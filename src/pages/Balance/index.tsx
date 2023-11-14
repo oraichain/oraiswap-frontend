@@ -40,6 +40,7 @@ import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
+import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
@@ -195,8 +196,9 @@ const Balance: React.FC<BalanceProps> = () => {
       if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
-
       const latestEvmAddress = await window.Metamask.getEthAddress();
+      checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
+      checkEvmAddress(newToToken.chainId, latestEvmAddress, tronAddress);
       result = await new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
