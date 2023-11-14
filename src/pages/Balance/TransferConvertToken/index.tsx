@@ -24,7 +24,7 @@ import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useTokenFee from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
@@ -51,12 +51,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [filterNetwork, setFilterNetwork] = useState<NetworkChainId>();
+  const [toNetworkChainId, setToNetworkChainId] = useState<NetworkChainId>();
   const [isOpen, setIsOpen] = useState(false);
   const [chainInfo] = useConfigReducer('chainInfo');
   const [theme] = useConfigReducer('theme');
   const [addressTransfer, setAddressTransfer] = useState('');
   const { data: prices } = useCoinGeckoPrices();
+
   useEffect(() => {
     if (chainInfo) {
       setConvertAmount([undefined, 0]);
@@ -64,9 +65,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   }, [chainInfo]);
 
   useEffect(() => {
-    const chainDefault = bridgeNetworks?.[0].chainId;
-    setFilterNetwork(chainDefault);
-    const findNetwork = networks.find((net) => net.chainId == chainDefault);
+    const defaultToChainId = bridgeNetworks[0]?.chainId;
+    setToNetworkChainId(defaultToChainId);
+
+    const findNetwork = networks.find((net) => net.chainId === defaultToChainId);
     getAddressTransfer(findNetwork);
   }, [token.chainId]);
 
@@ -90,7 +92,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network: CustomChainInfo) => {
     let address: string = '';
     try {
-      if (network.networkType == 'evm') {
+      if (network.networkType === 'evm') {
         if (network.chainId === '0x2b6653dc') {
           // TODO: Check owallet mobile
           if (isMobile()) {
@@ -126,8 +128,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // if on the same kwt network => we convert between native & erc20 tokens
       if (token.chainId === 'kawaii_6886-1') {
         // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
-        if (filterNetwork === 'Oraichain') {
-          return await onClickTransfer(convertAmount, filterNetwork);
+        if (toNetworkChainId === 'Oraichain') {
+          return await onClickTransfer(convertAmount, toNetworkChainId);
         }
         await convertKwt(convertAmount, token);
         return;
@@ -135,12 +137,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
       if (
         evmChains.find((chain) => chain.chainId === token.chainId) ||
-        (token.chainId === 'Oraichain' && filterNetwork === 'kawaii_6886-1')
+        (token.chainId === 'Oraichain' && toNetworkChainId === 'kawaii_6886-1')
       ) {
-        await onClickTransfer(convertAmount, filterNetwork);
+        await onClickTransfer(convertAmount, toNetworkChainId);
         return;
       }
-      await onClickTransfer(convertAmount, filterNetwork);
+      await onClickTransfer(convertAmount, toNetworkChainId);
       return;
     } catch (error) {
       console.log({ error });
@@ -149,14 +151,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
-  const network = bridgeNetworks.find((n) => n.chainId === filterNetwork);
-  const displayTransferConvertButton = () => {
-    const buttonName = filterNetwork === token.chainId ? 'Convert to ' : 'Transfer to ';
-    if (network) return buttonName + network.chainName;
-    return buttonName;
-  };
-
-  const to = findToTokenOnOraiBridge(token, filterNetwork);
+  const network = bridgeNetworks.find((n) => n.chainId === toNetworkChainId);
+  const to = findToTokenOnOraiBridge(token, toNetworkChainId);
   let remoteTokenDenomFrom;
   let remoteTokenDenomTo;
 
@@ -165,9 +161,40 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
-
   // we just use calculate fee for bridge.
   const bridgeFee = fromTokenFee || toTokenFee;
+  const relayerFeeTokenFee = useRelayerFeeToken(token, to);
+
+  const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
+  const renderBridgeFee = () => {
+    return (
+      <div className={styles.bridgeFee}>
+        Bridge fee: <span>{bridgeFee}% </span>
+        {relayerFeeTokenFee > 0 ? (
+          <div className={styles.relayerFee}>
+            - Relayer fee:{' '}
+            <span>
+              {' '}
+              {relayerFeeTokenFee} {token.name}{' '}
+            </span>
+          </div>
+        ) : null}{' '}
+        - Received amount:
+        <span>
+          {' '}
+          {receivedAmount.toFixed(6)} {token.name}
+        </span>
+      </div>
+    );
+  };
+
+  const renderTransferConvertButton = () => {
+    let buttonName = toNetworkChainId === token.chainId ? 'Convert to ' : 'Transfer to ';
+    if (network) buttonName += network.chainName;
+
+    if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
+    return buttonName;
+  };
 
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
@@ -255,7 +282,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             key={net.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              setFilterNetwork(net.chainId);
+                              setToNetworkChainId(net.chainId);
                               await getAddressTransfer(net);
                               setIsOpen(false);
                             }}
@@ -300,9 +327,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
                 className={classNames(styles.amount, styles[theme])}
               />
-              {/* <div style={{ paddingTop: 8 }}>
-                <TokenBalance balance={convertUsd} className={styles.balanceDescription} prefix="~$" decimalScale={2} />
-              </div> */}
             </div>
 
             <div className={styles.balanceFromGroup}>
@@ -332,26 +356,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             </div>
           </div>
         </div>
-        <div className={styles.bridgeFee}>
-          Bridge fee: <span>{bridgeFee}%</span> - Received amount:
-          <span>
-            {' '}
-            {convertAmount ? (convertAmount * (1 - bridgeFee / 100)).toFixed(6) : 0} {token.name}
-          </span>
-        </div>
+        {renderBridgeFee()}
       </div>
       <div className={styles.transferTab}>
         {(() => {
           if (listedTokens.length > 0 || evmChains.find((chain) => chain.chainId === token.chainId)) {
             return (
               <button
-                disabled={transferLoading || !addressTransfer}
+                disabled={transferLoading || !addressTransfer || receivedAmount < 0}
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >
                 {transferLoading && <Loader width={20} height={20} />}
                 <span>
-                  <strong>{displayTransferConvertButton()}</strong>
+                  <strong>{renderTransferConvertButton()}</strong>
                 </span>
               </button>
             );

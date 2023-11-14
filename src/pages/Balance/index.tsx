@@ -48,6 +48,7 @@ import {
   transferIBCKwt,
   transferIbcCustom
 } from './helpers';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
@@ -60,7 +61,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
-  // state
+  // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [, setTxHash] = useState('');
@@ -78,6 +79,7 @@ const Balance: React.FC<BalanceProps> = () => {
   // custom hooks
   const loadTokenAmounts = useLoadTokens();
   const { data: prices } = useCoinGeckoPrices();
+  useGetFeeConfig();
 
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);

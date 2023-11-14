@@ -224,15 +224,16 @@ const SwapComponent: React.FC<{
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
 
-  const minimumReceive = averageRatio?.amount
-    ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-    : '0';
+  const minimumReceive =
+    averageRatio && averageRatio.amount
+      ? calculateMinReceive(
+          // @ts-ignore
+          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
+      : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
@@ -264,8 +265,9 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          // @ts-ignore
-          simulatePrice: averageRatio && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          simulatePrice:
+            // @ts-ignore
+            averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
           relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
