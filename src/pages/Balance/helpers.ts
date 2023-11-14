@@ -9,12 +9,14 @@ import {
   TokenItemType,
   ibcInfos,
   ibcInfosOld,
-  oraichain2oraib
+  oraichain2oraib,
+  BigDecimal,
+  GAS_ESTIMATION_BRIDGE_DEFAULT
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { getNetworkGasPrice } from 'helper';
+import { feeEstimate, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
@@ -448,4 +450,34 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
     transferMsgs
   );
   return result;
+};
+
+export const calcMaxAmount = ({
+  maxAmount,
+  token,
+  coeff
+}: {
+  maxAmount: number;
+  token: TokenItemType;
+  coeff: number;
+}) => {
+  if (token) return maxAmount;
+
+  let finalAmount = maxAmount;
+
+  const feeCurrencyOfToken = token.feeCurrencies?.find((e) => e.coinMinimalDenom === token.denom);
+  if (feeCurrencyOfToken) {
+    const useFeeEstimate = feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
+
+    if (coeff === 1) {
+      finalAmount = useFeeEstimate > finalAmount ? 0 : new BigDecimal(finalAmount).sub(useFeeEstimate).toNumber();
+    } else {
+      finalAmount =
+        useFeeEstimate > new BigDecimal(maxAmount).sub(new BigDecimal(finalAmount).mul(coeff)).toNumber()
+          ? 0
+          : finalAmount;
+    }
+  }
+
+  return finalAmount;
 };

@@ -21,7 +21,7 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
-import { feeEstimate, filterChainBridge, networks } from 'helper';
+import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee from 'hooks/useTokenFee';
@@ -30,6 +30,7 @@ import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
+import { calcMaxAmount } from '../helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -312,16 +313,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   className={classNames(styles.balanceBtn, styles[theme])}
                   onClick={(event) => {
                     event.stopPropagation();
-                    // hardcode estimate fee oraichain
-                    let finalAmount = maxAmount;
-                    if (token?.denom === ORAI) {
-                      const useFeeEstimate = feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
-                      if (coeff === 1) {
-                        finalAmount = useFeeEstimate > finalAmount ? 0 : finalAmount - useFeeEstimate;
-                      } else {
-                        finalAmount = useFeeEstimate > maxAmount - finalAmount * coeff ? 0 : finalAmount;
-                      }
-                    }
+                    const finalAmount = calcMaxAmount({
+                      maxAmount,
+                      token,
+                      coeff
+                    });
 
                     setConvertAmount([finalAmount * coeff, amountDetail.usd * coeff]);
                   }}

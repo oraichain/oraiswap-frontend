@@ -44,7 +44,7 @@ import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -129,8 +129,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   useEffect(() => {
     setTokenBridge([undefined, undefined]);
-  }, [filterNetworkUI])
-
+  }, [filterNetworkUI]);
 
   const onClickTransfer = async (
     fromAmount: number,
@@ -334,10 +333,14 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
-                    active={from?.denom === t.denom || to?.denom === t.denom}
+                    active={from?.denom === t.denom}
                     token={t}
                     theme={theme}
-                    onClick={() => onClickToken(t)}
+                    onClick={() => {
+                      if (t.denom !== from?.denom) {
+                        onClickToken(t);
+                      }
+                    }}
                     onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
                       await onClickTransfer(fromAmount, from, to, filterNetwork);
                     }}

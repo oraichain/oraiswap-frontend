@@ -83,7 +83,28 @@ export const getNetworkGasPrice = async (): Promise<number> => {
 //hardcode fee
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
-  return (gasDefault * MULTIPLIER * HIGH_GAS_PRICE) / 10 ** tokenInfo?.decimals;
+
+  return new BigDecimal(MULTIPLIER)
+    .mul(tokenInfo.feeCurrencies[0].gasPriceStep.high)
+    .mul(gasDefault)
+    .div(10 ** tokenInfo.decimals)
+    .toNumber();
+};
+
+export const subNumber = (number1: number, number2: number) => {
+  return new BigDecimal(number1).sub(number2).toNumber();
+};
+
+export const mulNumber = (number1: number, number2: number) => {
+  return new BigDecimal(number1).mul(number2).toNumber();
+};
+
+export const divNumber = (number1: number, number2: number) => {
+  return new BigDecimal(number1).div(number2).toNumber();
+};
+
+export const addNumber = (number1: number, number2: number) => {
+  return new BigDecimal(number1).add(number2).toNumber();
 };
 
 export const handleCheckWallet = async () => {
