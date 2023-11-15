@@ -19,7 +19,7 @@ import Content from 'layouts/Content';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
@@ -41,10 +41,11 @@ import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } f
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   const [searchParams] = useSearchParams();
@@ -66,6 +67,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setTokenBridge([undefined, undefined])
+  });
+
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
@@ -315,7 +321,7 @@ const Balance: React.FC<BalanceProps> = () => {
         <br />
         <LoadingBox loading={loadingRefresh}>
           <div className={styles.tokens}>
-            <div className={styles.tokens_form}>
+            <div className={styles.tokens_form} ref={ref}>
               {getFilterTokens(filterNetworkUI).map((t: TokenItemType) => {
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
