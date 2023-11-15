@@ -53,7 +53,7 @@ import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -150,7 +150,7 @@ const Balance: React.FC<BalanceProps> = () => {
     fromAmount: number,
     from: TokenItemType,
     to: TokenItemType,
-    filterNetwork?: NetworkChainId
+    toNetworkChainId?: NetworkChainId
   ) => {
     await handleCheckWallet();
     // disable send amount < 0
@@ -160,60 +160,70 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const tokenAmount = amounts[from.denom];
+
+    // get & check balance
+    const initFromBalance = amounts[from.denom];
     const subAmounts = getSubAmountDetails(amounts, from);
     const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
-    const fromBalance = from && tokenAmount ? subAmount + BigInt(tokenAmount) : BigInt(0);
+    const fromBalance = from && initFromBalance ? subAmount + BigInt(initFromBalance) : BigInt(0);
     if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Your balance is insufficient to make this transfer'
       });
       return;
     }
+
     displayToast(TToastType.TX_BROADCASTING);
     try {
       let result: DeliverTxResponse | string | any;
+
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
-        if (!!from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
         else result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
 
       let newToToken = to;
-      if (filterNetwork) {
+      if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        newToToken = findToTokenOnOraiBridge(from, filterNetwork);
-        // ORAICHAIN -> COSMOS(INJ,NOBLE,COSMOS,ATOM) (TO: TOKEN COSMOS)
-        // EVM -> ORAICHAIN || COSMOS -> ORAICHAIN  (TO: TOKEN ORAICHAIN)
-        if (!EVM_CHAIN_ID.includes(filterNetwork)) {
-          newToToken = cosmosTokens.find((t) => t.chainId === filterNetwork && t.coinGeckoId === from.coinGeckoId);
+        newToToken = findToTokenOnOraiBridge(from, toNetworkChainId);
+
+        // Other chain -> COSMOS
+        //  - ORAICHAIN -> COSMOS(INJ,NOBLE,COSMOS,ATOM) (TO: TOKEN COSMOS)
+        //  - EVM -> ORAICHAIN || COSMOS -> ORAICHAIN  (TO: TOKEN ORAICHAIN)
+        if (!EVM_CHAIN_ID.includes(toNetworkChainId)) {
+          newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
+
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
       // TODO: hardcode check case USDC oraichain -> USDC noble
-      const isNotNobleChain = filterNetwork !== 'noble-1';
-      if (from.cosmosBased && isNotNobleChain) {
-        await handleTransferIBC(from, newToToken, fromAmount);
-        return;
+      const isToNobleChain = toNetworkChainId === 'noble-1';
+      if (from.cosmosBased && !isToNobleChain) {
+        return await handleTransferIBC(from, newToToken, fromAmount);
       }
+
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
-      // has to switch network to the correct chain id on evm since users can swap between network tokens
+
+      // switch network for metamask, exclude TRON
       if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
         await window.Metamask.switchNetwork(from.chainId);
       }
+
       const latestEvmAddress = await window.Metamask.getEthAddress();
+      // TODO: need to get latest tron address if cached
       checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
-      checkEvmAddress(newToToken.chainId, latestEvmAddress, tronAddress);
-      const universalSwapHandler = await new UniversalSwapHandler(
+
+      const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
@@ -222,23 +232,17 @@ const Balance: React.FC<BalanceProps> = () => {
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
-      )
+      );
+
       const toAddress = await universalSwapHandler.getUniversalSwapToAddress(newToToken.chainId, {
         metamaskAddress: latestEvmAddress,
         tronAddress: tronAddress
       });
-      const { swapRoute, universalSwapType } = addOraiBridgeRoute(
-        latestOraiAddress,
-        from,
-        newToToken,
-        toAddress
-      );
-      if (!isNotNobleChain) {
-        result = await universalSwapHandler.swapAndTransferToOtherNetworks(universalSwapType);
-      } else {
-        result = await universalSwapHandler.transferEvmToIBC(swapRoute);
-      }
-      console.log('result on click transfer: ', result);
+      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken, toAddress);
+
+      if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
+      else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
+
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex);
@@ -254,7 +258,7 @@ const Balance: React.FC<BalanceProps> = () => {
           return false;
         }
         if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
-        return token.chainId == chainId;
+        return token.chainId === chainId;
       })
       .sort((a, b) => {
         return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
