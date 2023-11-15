@@ -38,7 +38,7 @@ import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
 import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } from '@oraichain/oraidex-common';
-import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
+import { UniversalSwapHandler, isSupportedNoPoolSwapEvm, addOraiBridgeRoute } from '@oraichain/oraidex-universal-swap';
 import Metamask from 'libs/metamask';
 import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
@@ -199,7 +199,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const latestEvmAddress = await window.Metamask.getEthAddress();
       checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
       checkEvmAddress(newToToken.chainId, latestEvmAddress, tronAddress);
-      result = await new UniversalSwapHandler(
+      const universalSwapHandler = await new UniversalSwapHandler(
         {
           sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
@@ -208,7 +208,22 @@ const Balance: React.FC<BalanceProps> = () => {
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
-      ).processUniversalSwap();
+      )
+      const toAddress = await universalSwapHandler.getUniversalSwapToAddress(newToToken.chainId, {
+        metamaskAddress: latestEvmAddress,
+        tronAddress: tronAddress
+      });
+      const { swapRoute, universalSwapType } = addOraiBridgeRoute(
+        latestOraiAddress,
+        from,
+        newToToken,
+        toAddress
+      );
+      if (!isNotNobleChain) {
+        result = await universalSwapHandler.swapAndTransferToOtherNetworks(universalSwapType);
+      } else {
+        result = await universalSwapHandler.transferEvmToIBC(swapRoute);
+      }
       console.log('result on click transfer: ', result);
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
