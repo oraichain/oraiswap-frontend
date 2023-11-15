@@ -43,7 +43,7 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const oraiToken = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
 
   const { data: relayerFeeAmount } = useQuery(
-    ['simulate-relayer-data', originalFromToken, originalToToken],
+    ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],
     () => {
       return handleSimulateSwap({
         originalFromInfo: oraiToken,

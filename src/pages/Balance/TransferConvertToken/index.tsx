@@ -1,12 +1,12 @@
 import {
   ChainIdEnum,
   CustomChainInfo,
-  findToTokenOnOraiBridge,
   GAS_ESTIMATION_BRIDGE_DEFAULT,
   NetworkChainId,
   ORAI,
   toDisplay,
-  TokenItemType
+  TokenItemType,
+  flattenTokens
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
@@ -151,18 +151,22 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     }
   };
 
-  const network = bridgeNetworks.find((n) => n.chainId === toNetworkChainId);
-  const to = findToTokenOnOraiBridge(token, toNetworkChainId);
+  // get token fee & relayer fee
+  const toNetwork = bridgeNetworks.find((n) => n.chainId === toNetworkChainId);
+  const to = flattenTokens.find((t) => t.coinGeckoId === token.coinGeckoId && t.chainId === toNetworkChainId);
+
   let remoteTokenDenomFrom;
   let remoteTokenDenomTo;
 
   if (token) remoteTokenDenomFrom = token.prefix + token.contractAddress;
-  if (to) remoteTokenDenomTo = to.chainId === ChainIdEnum.OraiBridge ? to.denom : to.prefix + to.contractAddress;
+  if (to) remoteTokenDenomTo = to.prefix + to.contractAddress;
 
+  // token fee
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
   const toTokenFee = useTokenFee(remoteTokenDenomTo);
-  // we just use calculate fee for bridge.
-  const bridgeFee = fromTokenFee || toTokenFee;
+
+  // bridge fee & relayer fee
+  const bridgeFee = fromTokenFee + toTokenFee;
   const relayerFeeTokenFee = useRelayerFeeToken(token, to);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
@@ -190,7 +194,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const renderTransferConvertButton = () => {
     let buttonName = toNetworkChainId === token.chainId ? 'Convert to ' : 'Transfer to ';
-    if (network) buttonName += network.chainName;
+    if (toNetwork) buttonName += toNetwork.chainName;
 
     if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
     return buttonName;
@@ -250,20 +254,20 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                 }}
               >
                 <div className={styles.search_box}>
-                  {network && (
+                  {toNetwork && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div className={styles.search_logo}>
                         {theme === 'light' ? (
-                          network.IconLight ? (
-                            <network.IconLight width={44} height={44} />
+                          toNetwork.IconLight ? (
+                            <toNetwork.IconLight width={44} height={44} />
                           ) : (
-                            <network.Icon width={44} height={44} />
+                            <toNetwork.Icon width={44} height={44} />
                           )
                         ) : (
-                          <network.Icon width={44} height={44} />
+                          <toNetwork.Icon width={44} height={44} />
                         )}
                       </div>
-                      <span className={classNames(styles.search_text, styles[theme])}>{network.chainName}</span>
+                      <span className={classNames(styles.search_text, styles[theme])}>{toNetwork.chainName}</span>
                     </div>
                   )}
                   {bridgeNetworks.length > 1 && (
