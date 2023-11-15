@@ -188,7 +188,13 @@ const SwapComponent: React.FC<{
   );
 
   // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC), update later after migrate contract
-  const INIT_AMOUNT = 1000;
+  const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
+  const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
+
+  const INIT_SIMULATE_AIRI_TO_USDC = 1000;
+  const INIT_SIMULATE_FROM_USDC = 10;
+  const INIT_AMOUNT = isFromAiriToUsdc ? INIT_SIMULATE_AIRI_TO_USDC : isFromUsdc ? INIT_SIMULATE_FROM_USDC : 1;
+
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,
@@ -218,15 +224,16 @@ const SwapComponent: React.FC<{
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
 
-  const minimumReceive = averageRatio?.amount
-    ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-    : '0';
+  const minimumReceive =
+    averageRatio && averageRatio.amount
+      ? calculateMinReceive(
+          // @ts-ignore
+          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
+      : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const handleSubmit = async () => {
@@ -258,8 +265,9 @@ const SwapComponent: React.FC<{
           fromAmount: fromAmountToken,
           simulateAmount: simulateData.amount,
           userSlippage,
-          // @ts-ignore
-          simulatePrice: averageRatio && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          simulatePrice:
+            // @ts-ignore
+            averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
           relayerFee
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
