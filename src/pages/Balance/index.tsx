@@ -189,7 +189,7 @@ const Balance: React.FC<BalanceProps> = () => {
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        newToToken = findToTokenOnOraiBridge(from, toNetworkChainId);
+        newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
 
         const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
         if (isBridgeToCosmosNetwork) {
