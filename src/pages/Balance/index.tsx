@@ -1,4 +1,15 @@
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
+import {
+  KWT_SCAN,
+  NetworkChainId,
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  TokenItemType,
+  evmChains,
+  findToTokenOnOraiBridge,
+  toAmount,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
+import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
@@ -6,16 +17,16 @@ import classNames from 'classnames';
 import CheckBox from 'components/CheckBox';
 import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType, evmChains } from '@oraichain/oraidex-common';
 import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
+import Metamask from 'libs/metamask';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
@@ -25,21 +36,19 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
+import KwtModal from './KwtModal';
+import StuckOraib from './StuckOraib';
+import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
+import TokenItem from './TokenItem';
 import {
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
   moveOraibToOraichain,
-  transferIbcCustom,
-  transferIBCKwt
+  transferIBCKwt,
+  transferIbcCustom
 } from './helpers';
-import KwtModal from './KwtModal';
-import StuckOraib from './StuckOraib';
-import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
-import TokenItem from './TokenItem';
-import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } from '@oraichain/oraidex-common';
-import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
-import Metamask from 'libs/metamask';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
 import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 
@@ -48,29 +57,34 @@ const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
+  // hook
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
-  const [oraiAddress] = useConfigReducer('address');
-  const [theme] = useConfigReducer('theme');
-  const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
-  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+  const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
-  const loadTokenAmounts = useLoadTokens();
-  const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
+
+  // state internal
+  const [loadingRefresh, setLoadingRefresh] = useState(false);
+  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [, setTxHash] = useState('');
-
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
+  const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
 
-  const { data: prices } = useCoinGeckoPrices();
-
+  const [theme] = useConfigReducer('theme');
+  const [oraiAddress] = useConfigReducer('address');
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined])
   });
+
+  // custom hooks
+  const loadTokenAmounts = useLoadTokens();
+  const { data: prices } = useCoinGeckoPrices();
+  useGetFeeConfig();
 
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
@@ -83,6 +97,10 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log(error);
     });
   }, []);
+
+  useEffect(() => {
+    setTokenBridge([undefined, undefined]);
+  }, [filterNetworkUI]);
 
   const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
@@ -132,10 +150,6 @@ const Balance: React.FC<BalanceProps> = () => {
     const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
     processTxResult(fromToken.rpc, result);
   };
-
-  useEffect(() => {
-    setTokenBridge([undefined, undefined]);
-  }, [filterNetworkUI]);
 
   const onClickTransfer = async (
     fromAmount: number,
@@ -239,8 +253,6 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const totalUsd = getTotalUsd(amounts, prices);
 
-  const navigate = useNavigate();
-
   // Move oraib2oraichain
   const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
   const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading);
@@ -259,8 +271,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const network = networks.find((n) => n.chainId == filterNetworkUI) ?? networks[0];
-
+  const network = networks.find((n) => n.chainId === filterNetworkUI) ?? networks[0];
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>

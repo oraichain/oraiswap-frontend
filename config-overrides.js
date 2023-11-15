@@ -33,7 +33,7 @@ const fixBabelRules = (config) => {
         rule.test = /\.(jsx|ts|tsx)$/;
 
         rule.options.plugins.push([
-          path.resolve('./plugins/operator-overloading.js'),
+          '@oraichain/operator-overloading',
           {
             classNames: ['BigDecimal']
           }
