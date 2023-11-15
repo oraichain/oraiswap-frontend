@@ -53,7 +53,7 @@ import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -233,6 +233,9 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
+
+      // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
+      // so we use this func just for Noble, and handleTransferIBC for other.
       if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
       else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
 
