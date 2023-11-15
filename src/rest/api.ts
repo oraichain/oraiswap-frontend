@@ -48,6 +48,7 @@ import {
   toTokenInfo
 } from '@oraichain/oraidex-common';
 import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
+import { ConfigResponse, RelayerFeeResponse } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -358,13 +359,22 @@ async function fetchTaxRate(): Promise<TaxRateResponse> {
   }
 }
 
-async function fetchRelayerFee(): Promise<any> {
+async function fetchRelayerFee(): Promise<RelayerFeeResponse[]> {
   const ics20Contract = new CwIcs20LatestQueryClient(window.client, IBC_WASM_CONTRACT);
   try {
     const { relayer_fees } = await ics20Contract.config();
     return relayer_fees;
   } catch (error) {
     throw new Error(`Error when query Relayer Fee using oracle: ${error}`);
+  }
+}
+
+export async function fetchFeeConfig(): Promise<ConfigResponse> {
+  const ics20Contract = new CwIcs20LatestQueryClient(window.client, IBC_WASM_CONTRACT);
+  try {
+    return await ics20Contract.config();
+  } catch (error) {
+    throw new Error(`Error when query fee config using oracle: ${error}`);
   }
 }
 
