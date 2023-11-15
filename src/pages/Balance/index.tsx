@@ -191,10 +191,8 @@ const Balance: React.FC<BalanceProps> = () => {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
         newToToken = findToTokenOnOraiBridge(from, toNetworkChainId);
 
-        // Other chain -> COSMOS
-        //  - ORAICHAIN -> COSMOS(INJ,NOBLE,COSMOS,ATOM) (TO: TOKEN COSMOS)
-        //  - EVM -> ORAICHAIN || COSMOS -> ORAICHAIN  (TO: TOKEN ORAICHAIN)
-        if (!EVM_CHAIN_ID.includes(toNetworkChainId)) {
+        const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
+        if (isBridgeToCosmosNetwork) {
           newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
