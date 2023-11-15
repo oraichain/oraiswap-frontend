@@ -53,7 +53,7 @@ import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -234,12 +234,7 @@ const Balance: React.FC<BalanceProps> = () => {
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
 
-      const toAddress = await universalSwapHandler.getUniversalSwapToAddress(newToToken.chainId, {
-        metamaskAddress: latestEvmAddress,
-        tronAddress: tronAddress
-      });
-      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken, toAddress);
-
+      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
       if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
       else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
 
