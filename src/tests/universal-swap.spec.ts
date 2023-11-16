@@ -1,4 +1,12 @@
-import { CoinGeckoId, NetworkChainId } from '@oraichain/oraidex-common';
+import {
+  CoinGeckoId,
+  NetworkChainId,
+  GAS_ESTIMATION_SWAP_DEFAULT,
+  GAS_ESTIMATION_BRIDGE_DEFAULT,
+  AIRI_BSC_CONTRACT,
+  flattenTokens
+} from '@oraichain/oraidex-common';
+import { calcMaxAmount } from 'pages/Balance/helpers';
 import {
   SwapDirection,
   SwapType,
@@ -62,4 +70,49 @@ describe('universal-swap', () => {
       expect(result).toEqual(expectedResult);
     }
   );
+
+  it.each([
+    [
+      'estimate universal swap native orai ( oraichain ) when select 100%',
+      100,
+      1,
+      flattenTokens.find((cosmos) => cosmos.chainId === 'Oraichain' && cosmos.denom === 'orai'),
+      GAS_ESTIMATION_SWAP_DEFAULT,
+      99.993504
+    ],
+    [
+      'estimate universal bridge native inj ( injective ) when select 25%',
+      100,
+      0.25,
+      flattenTokens.find((cosmos) => cosmos.chainId === 'injective-1' && cosmos.denom === 'inj'),
+      GAS_ESTIMATION_BRIDGE_DEFAULT,
+      25
+    ],
+    [
+      'estimate universal bridge native inj ( injective ) when select 100%',
+      100,
+      1,
+      flattenTokens.find((cosmos) => cosmos.chainId === 'injective-1' && cosmos.denom === 'inj'),
+      GAS_ESTIMATION_BRIDGE_DEFAULT,
+      99.984
+    ],
+    [
+      'estimate universal swap airi ( bnb chain ) when select 100%',
+      100,
+      1,
+      flattenTokens.find((cosmos) => cosmos.chainId === '0x38' && cosmos.contractAddress === AIRI_BSC_CONTRACT),
+      GAS_ESTIMATION_SWAP_DEFAULT,
+      100
+    ]
+  ])('calc-max-amount-fee', (_, fromBalance, coeff, originalFromToken, gasEstimate, expectedResult) => {
+    const result = calcMaxAmount({
+      maxAmount: fromBalance * coeff,
+      token: originalFromToken,
+      coeff,
+      gas: gasEstimate
+    });
+    console.log({ result });
+
+    expect(result).toEqual(expectedResult);
+  });
 });

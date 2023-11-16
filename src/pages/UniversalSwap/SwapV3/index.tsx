@@ -382,15 +382,13 @@ const SwapComponent: React.FC<{
                         setSwapAmount([0, 0]);
                         return;
                       }
-
                       const finalAmount = calcMaxAmount({
-                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals) * coeff,
+                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
                         token: originalFromToken,
                         coeff,
                         gas: GAS_ESTIMATION_SWAP_DEFAULT
                       });
-
-                      onChangePercent(toAmount(finalAmount, originalFromToken.decimals));
+                      onChangePercent(toAmount(finalAmount * coeff, originalFromToken.decimals));
                       setCoe(coeff);
                     }}
                   >
