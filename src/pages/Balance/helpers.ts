@@ -461,11 +461,12 @@ export const calcMaxAmount = ({
   token: TokenItemType;
   coeff: number;
 }) => {
-  if (token) return maxAmount;
+  if (!token) return maxAmount;
 
   let finalAmount = maxAmount;
 
   const feeCurrencyOfToken = token.feeCurrencies?.find((e) => e.coinMinimalDenom === token.denom);
+
   if (feeCurrencyOfToken) {
     const useFeeEstimate = feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
 
