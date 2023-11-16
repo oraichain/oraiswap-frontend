@@ -10,7 +10,8 @@ import {
   network,
   toAmount,
   toDisplay,
-  truncDecimals
+  truncDecimals,
+  GAS_ESTIMATION_SWAP_DEFAULT
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient, Uint128 } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -57,6 +58,7 @@ import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 import Metamask from 'libs/metamask';
+import { calcMaxAmount } from 'pages/Balance/helpers';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -227,12 +229,12 @@ const SwapComponent: React.FC<{
   const minimumReceive =
     averageRatio && averageRatio.amount
       ? calculateMinReceive(
-          // @ts-ignore
-          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-          fromAmountTokenBalance.toString(),
-          userSlippage,
-          originalFromToken.decimals
-        )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -369,7 +371,7 @@ const SwapComponent: React.FC<{
                 </div>
               )}
               <div className={cx('coeff')}>
-                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
+                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
                   <button
                     className={cx(`${coe === coeff && 'is-active'}`)}
                     key={coeff}
@@ -381,11 +383,14 @@ const SwapComponent: React.FC<{
                         return;
                       }
                       setCoe(coeff);
-                      if (type === 'max') {
-                        onChangePercent(fromTokenBalance - BigInt(originalFromToken.maxGas ?? 0));
-                      } else {
-                        onChangePercent((fromTokenBalance * BigInt(coeff * 1e6)) / BigInt(1e6));
-                      }
+
+                      const finalAmount = calcMaxAmount({
+                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
+                        token: originalFromToken,
+                        coeff,
+                        gas: GAS_ESTIMATION_SWAP_DEFAULT
+                      });
+                      onChangePercent(toAmount(finalAmount, originalFromToken.decimals))
                     }}
                   >
                     {text}
@@ -441,9 +446,8 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>
