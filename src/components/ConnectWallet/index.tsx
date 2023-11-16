@@ -1,43 +1,43 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import cn from 'classnames/bind';
+import { FC, useEffect, useState } from 'react';
 
-import { Button } from 'components/Button';
-import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
-import useConfigReducer from 'hooks/useConfigReducer';
-import styles from './index.module.scss';
-import MyWallets from './MyWallet';
-import QRGeneratorModal, { QRGeneratorInfo } from './QRGenerator';
-import Connected from './Connected';
-import ChooseWalletModal from './ChooseWallet';
-import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveConnect } from 'hooks/useMetamask';
-import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
-import { evmChains } from 'config/chainInfos';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import {
-  cosmosNetworks,
-  tronNetworks,
-  isEmptyObject,
-  getStorageKey,
-  keplrCheck,
-  owalletCheck,
-  isUnlockMetamask,
-  sleep,
-  switchWalletCosmos,
-  getListAddressCosmos,
-  switchWalletTron
-} from 'helper';
-import { network } from 'config/networks';
+import { CustomChainInfo, WalletType } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
+import KeplrImage from 'assets/images/keplr.png';
 import MetamaskImage from 'assets/images/metamask.png';
 import OwalletImage from 'assets/images/owallet-logo.png';
-import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
-import DisconnectModal from './Disconnect';
+import { Button } from 'components/Button';
+import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 import LoadingBox from 'components/LoadingBox';
-import { isMobile } from '@walletconnect/browser-utils';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { evmChains } from 'config/chainInfos';
+import { network } from 'config/networks';
+import {
+  cosmosNetworks,
+  getListAddressCosmos,
+  getStorageKey,
+  isEmptyObject,
+  isUnlockMetamask,
+  keplrCheck,
+  owalletCheck,
+  sleep,
+  switchWalletCosmos,
+  switchWalletTron,
+  tronNetworks
+} from 'helper';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
+import { useInactiveConnect } from 'hooks/useMetamask';
+import ChooseWalletModal from './ChooseWallet';
+import Connected from './Connected';
+import DisconnectModal from './Disconnect';
+import MyWallets from './MyWallet';
+import QRGeneratorModal, { QRGeneratorInfo } from './QRGenerator';
+import styles from './index.module.scss';
 const cx = cn.bind(styles);
 
-interface ModalProps { }
+interface ModalProps {}
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   KEPLR = 'KEPLR',
@@ -78,7 +78,7 @@ export enum CONNECT_STATUS {
   DONE = 'DONE',
   ERROR = 'ERROR'
 }
-const ConnectWallet: FC<ModalProps> = ({ }) => {
+const ConnectWallet: FC<ModalProps> = () => {
   const [theme] = useConfigReducer('theme');
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
@@ -89,13 +89,13 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [oraiAddress, setOraiAddress] = useState('');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
-  const [address, setAddress] = useConfigReducer('address');
+  const [address] = useConfigReducer('address');
 
   const OwalletInfo = {
     id: 2,
-    name: isMobile() ? 'Owallet' : (walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet'),
-    code: isMobile() ? WALLET_TYPES.OWALLET : (walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET),
-    icon: isMobile() ? OwalletImage : (walletTypeStore === 'keplr' ? KeplrImage : OwalletImage),
+    name: isMobile() ? 'Owallet' : walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet',
+    code: isMobile() ? WALLET_TYPES.OWALLET : walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
+    icon: isMobile() ? OwalletImage : walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
     totalUsd: 0,
     isOpen: false,
     isConnect: !!isEmptyObject(cosmosAddress) === false,
@@ -108,7 +108,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
         return item;
       }
     })
-  }
+  };
 
   let walletInit = [
     {
@@ -150,9 +150,8 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           })
         ]
       }
-    ]
+    ];
   }
-
 
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
@@ -162,6 +161,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
   const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
+
   const connectMetamask = async () => {
     try {
       const isMetamask = !!window.ethereum.isMetaMask;
@@ -186,7 +186,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     }
   };
 
-  const isConnected = !!metamaskAddress || !!tronAddress || !!isEmptyObject(cosmosAddress) === false;
+  const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
 
   useEffect(() => {
     (async () => {
@@ -197,8 +197,9 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     })();
     setWalletTypeStore(walletType);
   }, []);
+
   useEffect(() => {
-    if (!!address) {
+    if (address) {
       (async () => {
         if (walletTypeStore === 'owallet') {
           await connectDetectOwallet();
@@ -207,9 +208,8 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
         }
       })();
     }
-
-    return () => { };
   }, [address]);
+
   const disconnectMetamask = async () => {
     try {
       setMetamaskAddress(undefined);
@@ -226,7 +226,6 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       return item;
     });
     setWallets(walletData);
-    return () => { };
   }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
@@ -272,6 +271,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       window.Keplr.disconnect();
       setCosmosAddress({});
       setOraiAddress('');
+      // TODO: dispatch reset balance cosmos
     } catch (ex) {
       console.log(ex);
     }
@@ -286,6 +286,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     await requestMethod(WALLET_TYPES.METAMASK, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
+
   const startKeplr = async () => {
     if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.KEPLR && isCheckKeplr) {
       setConnectStatus(CONNECT_STATUS.DONE);
@@ -294,6 +295,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
+
   const startOwallet = async () => {
     if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.OWALLET && isCheckOwallet) {
       setConnectStatus(CONNECT_STATUS.DONE);
@@ -302,6 +304,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
+
   const startTron = async () => {
     if (!!tronAddress) {
       setConnectStatus(CONNECT_STATUS.DONE);
@@ -310,6 +313,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     await requestMethod(WALLET_TYPES.TRON, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
+
   const handleConnectWallet = async (cb) => {
     try {
       setConnectStatus(CONNECT_STATUS.PROCESSING);
@@ -326,9 +330,11 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const connectDetectOwallet = async () => {
     await connectKeplr('owallet');
   };
+
   const connectDetectKeplr = async () => {
     await connectKeplr('keplr');
   };
+
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     setWalletTypeActive(walletType);
     switch (walletType) {
@@ -380,6 +386,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     });
     setWallets(walletsModified);
   };
+
   const checkAddressByWalletType = (walletType: WALLET_TYPES) => {
     if (walletType === WALLET_TYPES.METAMASK) {
       return metamaskAddress;
@@ -389,16 +396,19 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       return oraiAddress;
     }
   };
+
   const handleDisconnectWallet = (walletType) => {
     setIsShowDisconnect(true);
     setIsShowMyWallet(false);
     setWalletTypeActive(walletType);
   };
+
   const approveDisconnectWallet = async (walletType) => {
     await requestMethod(walletType, METHOD_WALLET_TYPES.DISCONNECT);
     setIsShowDisconnect(false);
     setIsShowMyWallet(true);
   };
+
   return (
     <div className={cx('connect-wallet-container', theme)}>
       {!isConnected ? (
@@ -459,6 +469,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           address={checkAddressByWalletType(walletTypeActive)}
         />
       ) : null}
+
       {isShowDisconnect && !isMobile() && (
         <DisconnectModal
           close={() => {
@@ -470,6 +481,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           address={checkAddressByWalletType(walletTypeActive)}
         />
       )}
+
       {QRUrlInfo.url ? (
         <QRGeneratorModal
           url={QRUrlInfo.url}
