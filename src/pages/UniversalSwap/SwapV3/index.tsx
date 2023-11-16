@@ -371,7 +371,7 @@ const SwapComponent: React.FC<{
                 </div>
               )}
               <div className={cx('coeff')}>
-                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text]) => (
+                {AMOUNT_BALANCE_ENTRIES.map(([coeff, text, type]) => (
                   <button
                     className={cx(`${coe === coeff && 'is-active'}`)}
                     key={coeff}
@@ -382,15 +382,16 @@ const SwapComponent: React.FC<{
                         setSwapAmount([0, 0]);
                         return;
                       }
-                      setCoe(coeff);
 
                       const finalAmount = calcMaxAmount({
-                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals),
+                        maxAmount: toDisplay(fromTokenBalance, originalFromToken.decimals) * coeff,
                         token: originalFromToken,
                         coeff,
                         gas: GAS_ESTIMATION_SWAP_DEFAULT
                       });
-                      onChangePercent(toAmount(finalAmount, originalFromToken.decimals))
+
+                      onChangePercent(toAmount(finalAmount, originalFromToken.decimals));
+                      setCoe(coeff);
                     }}
                   >
                     {text}
