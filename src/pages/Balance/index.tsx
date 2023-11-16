@@ -30,7 +30,7 @@ import Metamask from 'libs/metamask';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
@@ -50,10 +50,11 @@ import {
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -75,6 +76,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setTokenBridge([undefined, undefined])
+  });
 
   // custom hooks
   const loadTokenAmounts = useLoadTokens();
@@ -342,7 +347,7 @@ const Balance: React.FC<BalanceProps> = () => {
         <br />
         <LoadingBox loading={loadingRefresh}>
           <div className={styles.tokens}>
-            <div className={styles.tokens_form}>
+            <div className={styles.tokens_form} ref={ref}>
               {getFilterTokens(filterNetworkUI).map((t: TokenItemType) => {
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
@@ -360,10 +365,14 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
-                    active={from?.denom === t.denom || to?.denom === t.denom}
+                    active={from?.denom === t.denom}
                     token={t}
                     theme={theme}
-                    onClick={() => onClickToken(t)}
+                    onClick={() => {
+                      if (t.denom !== from?.denom) {
+                        onClickToken(t);
+                      }
+                    }}
                     onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
                       await onClickTransfer(fromAmount, from, to, filterNetwork);
                     }}
