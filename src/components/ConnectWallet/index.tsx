@@ -35,6 +35,7 @@ import DisconnectModal from './Disconnect';
 import MyWallets from './MyWallet';
 import QRGeneratorModal, { QRGeneratorInfo } from './QRGenerator';
 import styles from './index.module.scss';
+import { useResetBalance } from './useResetBalance';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
@@ -161,6 +162,9 @@ const ConnectWallet: FC<ModalProps> = () => {
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
   const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
+
+  // TODO: use this func to reset balance
+  const { handleResetBalance } = useResetBalance();
 
   const connectMetamask = async () => {
     try {
