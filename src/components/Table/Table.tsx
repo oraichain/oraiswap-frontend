@@ -98,6 +98,13 @@ export const Table = <T extends object>({
       return;
     }
 
+    if (sort[sortField] === SortType.ASC) {
+      setSort(() => {
+        return { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
+      });
+      return;
+    }
+
     setSort(() => {
       return { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
     });
