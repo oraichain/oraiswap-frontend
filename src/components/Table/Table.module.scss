@@ -43,6 +43,37 @@
     }
   }
 
+  &_header_sorter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    svg {
+      display: none;
+      vertical-align: sub;
+    }
+
+    &.active_sort {
+      svg {
+        display: block;
+      }
+    }
+
+    &:hover {
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+
+        svg {
+          display: block;
+
+          path {
+            fill: theme-get('neutral-text-text-token-name');
+          }
+        }
+      }
+    }
+  }
+
   tbody {
     tr {
       display: flex;

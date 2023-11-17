@@ -1,5 +1,9 @@
-import bg_claim_btn from 'assets/images/bg_claim_btn.png';
-import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
+import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
+import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
+import bg_claim_btn from 'assets/images/bg_claim_btn.svg';
+import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -9,11 +13,10 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import { useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { getStatisticData, useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
-import { ORAI_INFO, toDecimal, ORAI, toDisplay, CW20_DECIMALS, USDT_CONTRACT } from '@oraichain/oraidex-common';
-import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
+import { PoolTableData } from 'pages/Pools/indexV3';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -39,7 +42,7 @@ export const useGetOraiPrice = () => {
   return oraiPrice;
 };
 
-export const Header: FC = () => {
+export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
   const theme = useTheme();
   const [address] = useConfigReducer('address');
   const { totalStaked, totalEarned } = useGetMyStake({
@@ -49,6 +52,37 @@ export const Header: FC = () => {
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({ stakerAddr: address });
 
   const [claimLoading, setClaimLoading] = useState(false);
+
+  const [filterDay, setFilterDay] = useState(30);
+  const statisticData = getStatisticData(dataSource);
+
+  // TODO: get data statistic changed (suffix) by api
+  const liquidityData = [
+    {
+      name: 'Orai Price',
+      Icon: theme === 'light' ? OraiLightIcon : OraiIcon,
+      suffix: -2.25,
+      value: oraiPrice,
+      isNegative: true,
+      decimal: 2
+    },
+    {
+      name: 'Volume',
+      Icon: null,
+      suffix: 3.93,
+      value: statisticData.volume,
+      isNegative: false,
+      decimal: 2
+    },
+    {
+      name: 'Total Liquidity',
+      Icon: null,
+      suffix: 5.25,
+      value: statisticData.totalLiquidity,
+      isNegative: false,
+      decimal: 2
+    }
+  ];
 
   const handleClaimAllRewards = async () => {
     setClaimLoading(true);
@@ -88,47 +122,94 @@ export const Header: FC = () => {
   const disabledClaimBtn = !totalRewardInfoData?.reward_infos?.some((info) => +info.pending_reward > 0) || claimLoading;
   return (
     <div className={styles.header}>
-      <div className={styles.header_data}>
-        <div className={styles.header_data_item}>
-          <span className={styles.header_data_name}>ORAI Price</span>
-          <br />
-          <span className={styles.header_data_value}>
-            <TokenBalance balance={oraiPrice} className={styles.header_data_value} decimalScale={2} />
-          </span>
-        </div>
-        <div className={styles.header_data_item}>
-          <span className={styles.header_data_name}>Total Staked LP</span>
-          <br />
-          <TokenBalance
-            balance={toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)}
-            prefix="$"
-            className={styles.header_data_value}
-            decimalScale={4}
-          />
-        </div>
-        <div className={styles.header_data_item}>
-          <span className={styles.header_data_name}>Total Earned (30D)</span>
-          <br />
-          <TokenBalance
-            balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
-            prefix="$"
-            className={styles.header_data_value}
-            decimalScale={4}
-          />
+      <div className={styles.header_title}>
+        <span className={styles.header_title_text}>POOLS</span>
+        <div className={styles.filter_day_wrapper}>
+          {[1, 7, 30].map((e) => {
+            return (
+              <button
+                key={'day-key-' + e}
+                className={`${styles.filter_day}${' '}${e === filterDay ? styles.active : ''}`}
+                onClick={() => setFilterDay(e)}
+              >
+                {e}D
+              </button>
+            );
+          })}
         </div>
       </div>
-      <div className={styles.header_claim_reward}>
-        <div className={styles.claim_reward_bg}>
-          <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+      <div className={styles.header_liquidity}>
+        {liquidityData.map((e) => (
+          <div key={e.name} className={styles.header_liquidity_item}>
+            <span className={styles.header_liquidity_item_title}>{e.name}</span>
+            <div className={styles.header_liquidity_item_info}>
+              {e.Icon && (
+                <div className={styles.liq_prefix}>
+                  <e.Icon />
+                </div>
+              )}
+              <TokenBalance balance={e.value} prefix="$" className={styles.liq_value} decimalScale={e.decimal || 6} />
+              {/* <TokenBalance
+                balance={e.suffix}
+                prefix={e.isNegative ? '' : '+'}
+                suffix="%"
+                className={`${styles.liq_suffix}${' '}${e.isNegative ? styles.negative : ''}`}
+                decimalScale={2}
+              /> */}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={styles.header_claimable}>
+        <div className={styles.header_data}>
+          <div className={styles.header_data_item}>
+            <span className={styles.header_data_name}>Total Staked LP</span>
+            <br />
+            <TokenBalance
+              balance={toDisplay(BigInt(Math.trunc(totalStaked)), CW20_DECIMALS)}
+              prefix="$"
+              className={styles.header_data_value}
+              decimalScale={4}
+            />
+            {/* &nbsp;
+            <TokenBalance
+              balance={-0.2}
+              suffix="%"
+              className={styles.header_data_change}
+              decimalScale={2}
+            /> */}
+          </div>
+          <div className={styles.header_data_item}>
+            <span className={styles.header_data_name}>Total Earned</span>
+            <br />
+            <TokenBalance
+              balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
+              prefix="$"
+              className={styles.header_data_value}
+              decimalScale={4}
+            />
+          </div>
+          <div className={styles.header_data_item}>
+            <span className={styles.header_data_name}>Total Claimable Rewards</span>
+            <br />
+            <span className={styles.header_data_value}>
+              <TokenBalance balance={12.32455} prefix="+$" className={styles.header_data_value} decimalScale={6} />
+            </span>
+          </div>
         </div>
-        <Button
-          type="primary-sm"
-          disabled={disabledClaimBtn}
-          onClick={() => handleClaimAllRewards()}
-          icon={claimLoading ? <Loader width={20} height={20} /> : null}
-        >
-          Claim All Rewards
-        </Button>
+        <div className={styles.header_claim_reward}>
+          <div className={styles.claim_reward_bg}>
+            <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+          </div>
+          <Button
+            type="primary-sm"
+            disabled={disabledClaimBtn}
+            onClick={() => handleClaimAllRewards()}
+            icon={claimLoading ? <Loader width={20} height={20} /> : null}
+          >
+            Claim All Rewards
+          </Button>
+        </div>
       </div>
     </div>
   );

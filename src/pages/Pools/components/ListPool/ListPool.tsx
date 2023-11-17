@@ -50,30 +50,37 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       name: 'My Staked LP',
       width: '12%',
       align: 'left',
-      accessor: (data) => <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
+      sortField: 'myStakedLP',
+      accessor: (data) => (
+        <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
+      )
     },
     earned: {
       name: 'Earned',
       width: '10%',
       align: 'left',
+      sortField: 'earned',
       accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
     },
     fee7Days: {
       name: 'Fee (7D)',
       width: '10%',
       align: 'right',
+      sortField: 'fee7Days',
       accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.fee7Days))}</span>
     },
     volume24Hour: {
       name: 'Volume (24H)',
       width: '12%',
       align: 'right',
+      sortField: 'volume24Hour',
       accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.volume24Hour))}</span>
     },
     totalLiquidity: {
       name: 'Liquidity',
       width: '22%',
       align: 'right',
+      sortField: 'totalLiquidity',
       accessor: (data) => (
         <div className={styles.liquidity}>
           <span style={{ marginRight: 15 }}>
@@ -112,7 +119,12 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
     <div className={styles.listpools}>
       <div className={styles.listpools_list}>
         {poolTableData.length > 0 ? (
-          <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
+          <Table
+            headers={headers}
+            data={poolTableData}
+            handleClickRow={handleClickRow}
+            defaultSorted="totalLiquidity"
+          />
         ) : (
           <FallbackEmptyData />
         )}
