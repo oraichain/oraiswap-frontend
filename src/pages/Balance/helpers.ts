@@ -452,14 +452,17 @@ export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenIt
   return result;
 };
 
+// TODO: write testcases
 export const calcMaxAmount = ({
   maxAmount,
   token,
-  coeff
+  coeff,
+  gas = GAS_ESTIMATION_BRIDGE_DEFAULT
 }: {
   maxAmount: number;
   token: TokenItemType;
   coeff: number;
+  gas?: number;
 }) => {
   if (!token) return maxAmount;
 
@@ -468,7 +471,7 @@ export const calcMaxAmount = ({
   const feeCurrencyOfToken = token.feeCurrencies?.find((e) => e.coinMinimalDenom === token.denom);
 
   if (feeCurrencyOfToken) {
-    const useFeeEstimate = feeEstimate(token, GAS_ESTIMATION_BRIDGE_DEFAULT);
+    const useFeeEstimate = feeEstimate(token, gas);
 
     if (coeff === 1) {
       finalAmount = useFeeEstimate > finalAmount ? 0 : new BigDecimal(finalAmount).sub(useFeeEstimate).toNumber();
