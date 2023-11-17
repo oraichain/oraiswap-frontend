@@ -22,18 +22,22 @@
         display: flex;
         flex: 1;
         align-items: flex-start;
-        justify-content: space-between;
-            width: 100%;
-        max-width: 70%;
+        width: 100%;
         flex-wrap: wrap;
 
-        @include small-mobile() {
-            max-width: unset;
-        }
 
 
         .assetEarning {
 
+            margin-right: 100px;
+
+            @include mobile() {
+                margin-right: 50px;
+            }
+
+            @include small-mobile () {
+                margin-right: 0px;
+            }
             .title {
                 @include theme() {
                     color: theme-get('primary-surface-default');
@@ -87,6 +91,10 @@
 
                 .amount {
                     margin-bottom: 0;
+                }
+
+                &.single {
+                    width: 50%;
                 }
             }
         }

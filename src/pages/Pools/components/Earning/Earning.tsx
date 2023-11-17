@@ -11,7 +11,7 @@ import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
-import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -32,6 +32,11 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const [stakingToken, setStakingToken] = useState<TokenItemType>();
   const [actionLoading, setActionLoading] = useState(false);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
+  const { myStakes } = useGetMyStake({
+    stakerAddress: address,
+    pairDenoms: poolUrl
+  });
+
   const { info } = poolDetailData;
   const xOCH_PRICE = 0.4;
 
@@ -159,18 +164,12 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   };
   const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.amount !== 0n);
 
-  // TODO: Total earned
-  const totalEarned =
-    pendingRewards.length <= 0
-      ? 0
-      : pendingRewards.reduce((acc, cur) => {
-          return acc + getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
-        }, 0);
+  const totalEarned = myStakes[0]?.earnAmountInUsdt || 0;
 
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
-        <div className={styles.assetEarning}>
+        <div className={`${styles.assetEarning}${' '}${pendingRewards.length === 1 ? styles.single : ''}`}>
           <div className={styles.title}>
             <span>Total Earned</span>
           </div>
