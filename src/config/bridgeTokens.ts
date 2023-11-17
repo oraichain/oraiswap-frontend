@@ -89,24 +89,21 @@ export const kawaiiTokens = uniqBy(
   (c) => c.denom
 );
 
+const notAllowSwapCoingeckoIds = ['kawaii-islands', 'milky-token', 'injective-protocol'];
 // universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
+const notAllowSwapFromChainIds = [
+  'kawaii_6886-1',
+  'osmosis-1',
+  'cosmoshub-4',
+  'oraibridge-subnet-2',
+  'injective-1',
+  'noble-1'
+];
 export const swapFromTokens = flattenTokens.filter(
-  (token) =>
-    token.coinGeckoId !== 'kawaii-islands' &&
-    token.coinGeckoId !== 'milky-token' &&
-    token.chainId !== 'oraibridge-subnet-2' &&
-    token.chainId !== 'cosmoshub-4' &&
-    token.chainId !== 'osmosis-1' &&
-    token.chainId !== 'kawaii_6886-1' &&
-    token.coinGeckoId !== 'injective-protocol' &&
-    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
+  (token) => !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) && !notAllowSwapFromChainIds.includes(token.chainId)
 );
 // universal swap. We dont support kwt & milky & injective for simplicity. We also skip OraiBridge tokens because users dont care about them
+const notAllowSwapToChainIds = ['oraibridge-subnet-2', 'injective-1', 'noble-1'];
 export const swapToTokens = flattenTokens.filter(
-  (token) =>
-    token.coinGeckoId !== 'kawaii-islands' &&
-    token.coinGeckoId !== 'milky-token' &&
-    token.chainId !== 'oraibridge-subnet-2' &&
-    token.coinGeckoId !== 'injective-protocol' &&
-    token.chainId !== 'injective-1' // hardcode this temporary until we have injective pool on Oraichain
+  (token) => !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) && !notAllowSwapToChainIds.includes(token.chainId)
 );

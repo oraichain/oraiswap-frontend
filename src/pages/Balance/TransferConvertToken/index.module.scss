@@ -1,3 +1,4 @@
+@import 'src/styles/variables';
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
 
@@ -216,7 +217,7 @@
       gap: 10px;
 
       &.light {
-        background-color: #7E5CC5;
+        background-color: $blue-color;
       }
     }
   }
@@ -340,8 +341,13 @@
     }
 
     span {
-      color: #F0B90B;
+      color: $spanish-yellow;
     }
+  }
+
+  .relayerFee {
+    display: inline-flex;
+    gap: 2px;
   }
 }
 
@@ -352,11 +358,14 @@
   border: 1.5px solid #5a5270;
   z-index: 1;
 
+  &_chain {
+    display: flex;
+    align-items: center;
+  }
+
   &.light {
     background: #efefef;
     border-color: none;
-
-
   }
 
   border-radius: 8px;
@@ -364,7 +373,6 @@
 
   li {
     padding: 12px 24px 12px 24px;
-
   }
 
   li:hover {

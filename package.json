@@ -16,7 +16,7 @@
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
     "@oraichain/oraidex-contracts-sdk": "^1.0.24",
-    "@oraichain/oraidex-universal-swap": "^1.0.30",
+    "@oraichain/oraidex-universal-swap": "^1.0.32",
     "@reduxjs/toolkit": "^1.9.3",
     "@sentry/react": "^7.47.0",
     "@tanstack/react-query": "^4.32.6",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@babel/runtime": "^7.18.6",
+    "@oraichain/babel-plugin-operator-overloading": "^1.0.2",
     "@ethersproject/providers": "^5.0.10",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/types": "^0.11.38",
