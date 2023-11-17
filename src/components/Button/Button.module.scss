@@ -49,3 +49,28 @@
     color: theme-get('neutral-text-text-token-name');
   }
 }
+
+.secondary-sm {
+  background-color: transparent;
+  border: 1px solid;
+  padding: 8px 16px;
+  border-radius: 99px;
+  height: 36px;
+
+  @include theme() {
+    border-color: theme-get('neutral-text-text-token-name');
+    color: theme-get('neutral-text-text-token-name');
+
+    svg {
+      path {
+        fill: theme-get('neutral-text-text-token-name');
+      }
+    }
+  }
+
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 150%;
+
+  white-space: nowrap;
+}

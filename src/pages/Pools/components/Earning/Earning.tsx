@@ -158,42 +158,61 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     );
   };
   const disabledClaim = actionLoading || !pendingRewards.some((pendingReward) => pendingReward.amount !== 0n);
+
+  // TODO: Total earned
+  const totalEarned =
+    pendingRewards.length <= 0
+      ? 0
+      : pendingRewards.reduce((acc, cur) => {
+          return acc + getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
+        }, 0);
+
   return (
     <section className={styles.earning}>
       <div className={styles.earningLeft}>
+        <div className={styles.assetEarning}>
+          <div className={styles.title}>
+            <span>Total Earned</span>
+          </div>
+          <div className={styles.amount}>
+            <TokenBalance balance={totalEarned} prefix="$" decimalScale={4} />
+          </div>
+        </div>
         {pendingRewards.length > 0 &&
-          pendingRewards.map((pendingReward, idx) => {
-            return (
-              <div className={styles.assetEarning} key={idx}>
-                <div className={styles.title}>
-                  {generateIcon(pendingReward)}
-                  <span>{pendingReward.denom.toUpperCase()} Earning</span>
+          pendingRewards
+            .sort((a, b) => a.denom.localeCompare(b.denom))
+            .map((pendingReward, idx) => {
+              return (
+                <div className={styles.assetEarning} key={idx}>
+                  <div className={styles.title}>
+                    {generateIcon(pendingReward)}
+                    <span>{pendingReward.denom.toUpperCase()} Earning</span>
+                  </div>
+                  <div className={styles.amount}>
+                    <TokenBalance
+                      balance={getUsd(
+                        pendingReward.amount,
+                        pendingReward,
+                        cachePrices,
+                        pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
+                      )}
+                      prefix="$"
+                      decimalScale={4}
+                    />
+                  </div>
+                  <div className={styles.amountOrai}>
+                    <TokenBalance
+                      balance={{
+                        amount: pendingReward.amount,
+                        denom: pendingReward?.denom.toUpperCase(),
+                        decimals: 6
+                      }}
+                      decimalScale={6}
+                    />
+                  </div>
                 </div>
-                <div className={styles.amount}>
-                  <TokenBalance
-                    balance={getUsd(
-                      pendingReward.amount,
-                      pendingReward,
-                      cachePrices,
-                      pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
-                    )}
-                    prefix="~$"
-                    decimalScale={4}
-                  />
-                </div>
-                <div className={styles.amountOrai}>
-                  <TokenBalance
-                    balance={{
-                      amount: pendingReward.amount,
-                      denom: pendingReward?.denom.toUpperCase(),
-                      decimals: 6
-                    }}
-                    decimalScale={6}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
       </div>
 
       <div className={styles.claim}>
@@ -203,13 +222,13 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
           disabled={disabledClaim}
           icon={actionLoading ? <Loader width={20} height={20} /> : null}
         >
-          Claim Your Earned
+          Claim Rewards
         </Button>
-        <div className={styles.earnMore}>
+        {/* <div className={styles.earnMore}>
           <div>
             Add more liquidity to earn more <DownIcon className={styles.downIcon} />
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
