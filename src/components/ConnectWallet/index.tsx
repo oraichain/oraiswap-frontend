@@ -170,11 +170,11 @@ const ConnectWallet: FC<ModalProps> = () => {
         const isUnlock = await isUnlockMetamask();
         if (!isUnlock) {
           displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-          throw Error('Please unlock Metamask wallet');
+          throw new Error('Please unlock Metamask wallet');
         }
       } else if (!isCheckOwallet && !isMetamask) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
-        throw Error('Please install Metamask wallet');
+        throw new Error('Please install Metamask wallet');
       }
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum || !window.ethereum.chainId) {
@@ -183,7 +183,7 @@ const ConnectWallet: FC<ModalProps> = () => {
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
-      throw Error('Connect Metamask failed');
+      throw new Error('Connect Metamask failed');
     }
   };
   const disconnectMetamask = () => setMetamaskAddress(undefined);
