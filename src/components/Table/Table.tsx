@@ -51,6 +51,28 @@ export const sortDataSource = <T extends object>(data: T[], sort: Record<keyof T
   });
 };
 
+const getCustomStyleByColumnKey = <T extends object>(headers: TableHeaderProps<T>, key: string) => {
+  return {
+    width: headers[key].width,
+    textAlign: headers[key].align,
+    padding: headers[key].padding
+  };
+};
+
+const getCustomClassOfHeader = <T extends object>(sortField: keyof T, sortOrder: SortType) => {
+  let className = '';
+
+  if (sortField) {
+    className = className + styles.table_header_sorter;
+
+    if (sortOrder) {
+      className = className + ' ' + styles.active_sort;
+    }
+  }
+
+  return className;
+};
+
 export const Table = <T extends object>({
   defaultSorted,
   headers,
@@ -76,13 +98,6 @@ export const Table = <T extends object>({
       return;
     }
 
-    if (sort[sortField] === SortType.ASC) {
-      setSort(() => {
-        return { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
-      });
-      return;
-    }
-
     setSort(() => {
       return { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
     });
@@ -97,20 +112,21 @@ export const Table = <T extends object>({
       <thead>
         <tr style={stylesColumn}>
           {Object.keys(headers).map((key, index) => {
+            const { sortField } = headers[key];
+            const sortOrder = sort[headers[key].sortField];
+            const customStyle = getCustomStyleByColumnKey(headers, key);
+            const customClass = getCustomClassOfHeader(sortField, sortOrder);
+
             return (
               <th
                 scope="col"
                 key={index}
-                style={{ width: headers[key].width, textAlign: headers[key].align, padding: headers[key].padding }}
+                style={customStyle}
                 onClick={() => handleClickSort(headers[key])}
-                className={`${headers[key].sortField ? styles.table_header_sorter : ''}${' '}${
-                  sort[headers[key].sortField] ? styles.active_sort : ''
-                }`}
+                className={customClass}
               >
                 {headers[key].name} &nbsp;
-                {headers[key].sortField && (
-                  <span>{sort[headers[key].sortField] === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}</span>
-                )}
+                {sortField && <span>{sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}</span>}
               </th>
             );
           })}
@@ -121,11 +137,9 @@ export const Table = <T extends object>({
           return (
             <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>
               {Object.keys(headers).map((key, index) => {
+                const customStyle = getCustomStyleByColumnKey(headers, key);
                 return (
-                  <td
-                    key={index}
-                    style={{ width: headers[key].width, textAlign: headers[key].align, padding: headers[key].padding }}
-                  >
+                  <td key={index} style={customStyle}>
                     {headers[key].accessor(datum)}
                   </td>
                 );
