@@ -1,6 +1,5 @@
 import cn from 'classnames/bind';
 import { FC, useEffect, useState } from 'react';
-
 import { CustomChainInfo, WalletType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import KeplrImage from 'assets/images/keplr.png';
@@ -187,8 +186,7 @@ const ConnectWallet: FC<ModalProps> = () => {
       throw Error('Connect Metamask failed');
     }
   };
-
-  const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
+  const disconnectMetamask = () => setMetamaskAddress(undefined);
 
   useEffect(() => {
     (async () => {
@@ -212,15 +210,8 @@ const ConnectWallet: FC<ModalProps> = () => {
     }
   }, [address]);
 
-  const disconnectMetamask = async () => {
-    try {
-      setMetamaskAddress(undefined);
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
   useEffect(() => {
-    const walletData = walletInit.map((item, index) => {
+    const walletData = walletInit.map((item) => {
       if (item.code === walletTypeActive) {
         item.isOpen = true;
         return item;
@@ -238,7 +229,7 @@ const ConnectWallet: FC<ModalProps> = () => {
     } catch (ex) {
       let msg = typeof ex.message === 'string' ? ex.message : JSON.stringify(ex);
       displayToast(TToastType.TRONLINK_FAILED, { message: msg });
-      throw Error(msg);
+      throw new Error(msg);
     }
   };
 
@@ -281,12 +272,11 @@ const ConnectWallet: FC<ModalProps> = () => {
 
   const startMetamask = async () => {
     const isUnlock = await isUnlockMetamask();
-    if (!!isUnlock && !!metamaskAddress) {
+    if (isUnlock && metamaskAddress) {
       setConnectStatus(CONNECT_STATUS.DONE);
       return;
     }
     await requestMethod(WALLET_TYPES.METAMASK, METHOD_WALLET_TYPES.CONNECT);
-    return;
   };
 
   const startKeplr = async () => {
@@ -295,7 +285,6 @@ const ConnectWallet: FC<ModalProps> = () => {
       return;
     }
     await requestMethod(WALLET_TYPES.KEPLR, METHOD_WALLET_TYPES.CONNECT);
-    return;
   };
 
   const startOwallet = async () => {
@@ -304,16 +293,14 @@ const ConnectWallet: FC<ModalProps> = () => {
       return;
     }
     await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
-    return;
   };
 
   const startTron = async () => {
-    if (!!tronAddress) {
+    if (tronAddress) {
       setConnectStatus(CONNECT_STATUS.DONE);
       return;
     }
     await requestMethod(WALLET_TYPES.TRON, METHOD_WALLET_TYPES.CONNECT);
-    return;
   };
 
   const handleConnectWallet = async (cb) => {
@@ -322,20 +309,14 @@ const ConnectWallet: FC<ModalProps> = () => {
       await sleep(2000);
       await cb();
       setConnectStatus(CONNECT_STATUS.DONE);
-      return;
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:350 ~ handleConnectWal ~ error:', error);
       setConnectStatus(CONNECT_STATUS.ERROR);
     }
   };
 
-  const connectDetectOwallet = async () => {
-    await connectKeplr('owallet');
-  };
-
-  const connectDetectKeplr = async () => {
-    await connectKeplr('keplr');
-  };
+  const connectDetectOwallet = async () => await connectKeplr('owallet');
+  const connectDetectKeplr = async () => await connectKeplr('keplr');
 
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     setWalletTypeActive(walletType);
@@ -346,7 +327,7 @@ const ConnectWallet: FC<ModalProps> = () => {
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
           await handleConnectWallet(connectMetamask);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-          await disconnectMetamask();
+          disconnectMetamask();
         }
         break;
       case WALLET_TYPES.OWALLET:
@@ -410,6 +391,8 @@ const ConnectWallet: FC<ModalProps> = () => {
     setIsShowDisconnect(false);
     setIsShowMyWallet(true);
   };
+
+  const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
 
   return (
     <div className={cx('connect-wallet-container', theme)}>

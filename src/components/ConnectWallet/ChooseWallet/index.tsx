@@ -1,5 +1,5 @@
 import cn from 'classnames/bind';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 
 import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -41,7 +41,6 @@ const ChooseWalletModal: React.FC<{
 }> = ({ close, connectToWallet, connectStatus, cancel, tryAgain, address }) => {
   const [theme] = useConfigReducer('theme');
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const isMetamask = !!window?.ethereum?.isMetaMask;
   const vs = window?.keplr?.version;
   const isCheckKeplr = !!vs && keplrCheck('keplr');
@@ -59,7 +58,7 @@ const ChooseWalletModal: React.FC<{
     { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
   ];
 
-  const content = useMemo(() => {
+  const content = () => {
     if (connectStatus === CONNECT_STATUS.SELECTING) {
       return (
         <div className={cx('wallets_wrapper')}>
@@ -91,7 +90,7 @@ const ChooseWalletModal: React.FC<{
     } else {
       return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;
     }
-  }, [connectStatus]);
+  };
 
   return (
     <Modal
@@ -108,7 +107,7 @@ const ChooseWalletModal: React.FC<{
             <CloseIcon />
           </div>
         </div>
-        {content}
+        {content()}
       </div>
     </Modal>
   );
