@@ -84,10 +84,13 @@ const ConnectWallet: FC<ModalProps> = () => {
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
+  const [oraiAddress, setOraiAddress] = useState('');
+
+  // address
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const [oraiAddress, setOraiAddress] = useState('');
+
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [address] = useConfigReducer('address');
@@ -99,15 +102,13 @@ const ConnectWallet: FC<ModalProps> = () => {
     icon: isMobile() ? OwalletImage : walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
     totalUsd: 0,
     isOpen: false,
-    isConnect: !!isEmptyObject(cosmosAddress) === false,
+    isConnect: !isEmptyObject(cosmosAddress),
     networks: cosmosNetworks.map((item: any, index) => {
-      if (!!isEmptyObject(cosmosAddress) === false) {
-        item.address = cosmosAddress[item.chainId];
-        return item;
-      } else {
-        item.address = undefined;
-        return item;
-      }
+      const refinedAddress = !isEmptyObject(cosmosAddress) && cosmosAddress[item.chainId];
+      return {
+        ...item,
+        address: refinedAddress
+      };
     })
   };
 
@@ -160,11 +161,8 @@ const ConnectWallet: FC<ModalProps> = () => {
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   const [walletTypeActive, setWalletTypeActive] = useState(null);
-  const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
-  const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
-
-  // TODO: use this func to reset balance
-  const { handleResetBalance } = useResetBalance();
+  const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck('keplr');
+  const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck('owallet');
 
   const connectMetamask = async () => {
     try {
