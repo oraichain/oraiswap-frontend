@@ -41,9 +41,7 @@ const MyWallets: React.FC<{
   wallets
 }) => {
   const { theme, setTheme } = useContext(ThemeContext);
-
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
-
   const [copiedAddressCoordinates, setCopiedAddressCoordinates] = useState<{ networkId: string; walletId: number }>({
     networkId: '',
     walletId: 0
@@ -116,12 +114,6 @@ const MyWallets: React.FC<{
                 </div>
                 <div className={cx('info')}>
                   <div className={cx('name')}>{wallet.name}</div>
-
-                  {/* {wallet.isConnect && !!wallet.address && (
-                    <div>
-                      <TokenBalance balance={wallet.totalUsd} className={cx('money')} decimalScale={2} />
-                    </div>
-                  )} */}
                 </div>
                 <div className={cx('control')} onClick={() => toggleShowNetworks(wallet.id)}>
                   {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
@@ -154,7 +146,7 @@ const MyWallets: React.FC<{
                             <>
                               <div
                                 className={cx('copy')}
-                                onClick={e => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
+                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
                               >
                                 {copiedAddressCoordinates.networkId === network.chainId &&
                                 copiedAddressCoordinates.walletId === wallet.id ? (
