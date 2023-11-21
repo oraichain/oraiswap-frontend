@@ -78,7 +78,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
       name: 'Total Liquidity',
       Icon: null,
       suffix: 5.25,
-      value: statisticData.totalLiquidity,
+      value: toDisplay(parseInt(statisticData.totalLiquidity.toString()).toString()),
       isNegative: false,
       decimal: 2
     }
