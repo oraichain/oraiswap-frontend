@@ -7,8 +7,7 @@ import {
   MULTIPLIER,
   TRON_SCAN,
   WalletType,
-  ChainIdEnum,
-  BigDecimal
+  ChainIdEnum
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
