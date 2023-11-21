@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { ORAI } from '@oraichain/oraidex-common';
+import { ORAI, toDisplay } from '@oraichain/oraidex-common';
 import {
   AssetInfo,
   OraiswapStakingQueryClient,
@@ -22,6 +22,7 @@ import { fetchRewardPerSecInfo } from 'rest/api';
 import axios from 'rest/request';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
+import { PoolTableData } from './indexV3';
 
 // Fetch Reward
 export const useFetchCacheReward = (pairs: PairInfo[]) => {
@@ -280,4 +281,22 @@ export const useGetRewardInfo = ({ stakerAddr, assetInfo: stakingAssetInfo }: Re
   );
 
   return { totalRewardInfoData, refetchRewardInfo };
+};
+
+export const getStatisticData = (data: PoolTableData[]) => {
+  const statisticData = data.reduce(
+    (acc, curr) => {
+      acc.volume = acc.volume + toDisplay(curr.volume24Hour);
+      acc.totalLiquidity = acc.totalLiquidity + curr.totalLiquidity;
+
+      return acc;
+    },
+    {
+      volume: 0,
+      totalLiquidity: 0,
+      totalClaimable: 0
+    }
+  );
+
+  return statisticData;
 };
