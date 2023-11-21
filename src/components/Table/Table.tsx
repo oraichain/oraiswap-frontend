@@ -1,7 +1,7 @@
 import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { compareNumber } from 'helper';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import styles from './Table.module.scss';
 
 export type HeaderDataType<T extends object> = {
@@ -53,7 +53,7 @@ export const sortDataSource = <T extends object>(data: T[], sort: Record<keyof T
         }
 
         // @ts-ignore
-        return CoefficientBySort[sortOrder] * b[sortField].localeCompare(a[sortField]);
+        return CoefficientBySort[sortOrder] * a[sortField].localeCompare(b[sortField]);
     }
 
     return 0;
@@ -94,8 +94,6 @@ export const Table = <T extends object>({
   const [sort, setSort] = useState<Record<keyof T, SortType>>({
     [defaultSorted]: SortType.DESC
   } as Record<keyof T, SortType>);
-
-  const [dataSource, setDataSource] = useState(data);
 
   const handleClickSort = (column: HeaderDataType<T>, data: T[]) => {
     const sortField = column.sortField || null;
@@ -143,7 +141,7 @@ export const Table = <T extends object>({
         </tr>
       </thead>
       <tbody>
-        {data.map((datum, index) => {
+        {sortDataSource(data, sort).map((datum, index) => {
           return (
             <tr style={stylesColumn} key={index} onClick={(event) => handleClickRow && handleClickRow(event, datum)}>
               {Object.keys(headers).map((key, index) => {
