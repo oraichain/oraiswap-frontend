@@ -47,10 +47,10 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@oraichain/babel-plugin-operator-overloading": "^1.0.2",
     "@ethersproject/providers": "^5.0.10",
     "@keplr-wallet/common": "^0.10.5",
     "@keplr-wallet/types": "^0.11.38",
+    "@oraichain/babel-plugin-operator-overloading": "^1.0.2",
     "@oraichain/common-contracts-build": "1.0.34",
     "@oraichain/cw-simulate": "^2.8.71",
     "@oraichain/oraidex-contracts-build": "^1.0.20",
