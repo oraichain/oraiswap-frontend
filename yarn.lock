@@ -2891,9 +2891,9 @@
     shx "^0.3.4"
 
 "@oraichain/oraidex-common@^1.0.34":
-  version "1.0.36"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.36.tgz#1d0e886b280332d498e2abcdd63a5b6458fe3aeb"
-  integrity sha512-F/DjJhxJ6X5iAtrNuZMV5HionaLu1szD5qm9r0vWtc5jWuQUn6ffy4fyJ1eUwgHX906VCT9QK8xtryDTv1BXOA==
+  version "1.0.37"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.37.tgz#3e3164400debdac81cfa1d15b1537313a7c9f3ab"
+  integrity sha512-lQSCZ2vtSTWLDgaQzXSG8R2IOTxJpEam3PmOQIJmBSTAxXF4AyKh4NYYpqi+XPVPpgYuIhUAd3XBRRE3yLb08A==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     ethers "^5.0.15"
