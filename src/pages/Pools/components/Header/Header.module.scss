@@ -13,6 +13,11 @@
     flex-wrap: wrap;
     margin-bottom: 16px;
 
+    // TODO: disable when has filter day
+    @include mobile() {
+      display: none;
+    }
+
     &_text {
       @include mobile() {
         display: none;
@@ -237,7 +242,7 @@
 
   @include small-mobile() {
     // flex-direction: column;
-    padding: 16px 24px;
+    padding: 16px 0px;
 
     &_data {
       flex-wrap: wrap;

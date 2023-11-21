@@ -124,7 +124,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
     <div className={styles.header}>
       <div className={styles.header_title}>
         <span className={styles.header_title_text}>POOLS</span>
-        <div className={styles.filter_day_wrapper}>
+        {/* <div className={styles.filter_day_wrapper}>
           {[1, 7, 30].map((e) => {
             return (
               <button
@@ -136,7 +136,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
               </button>
             );
           })}
-        </div>
+        </div> */}
       </div>
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (

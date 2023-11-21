@@ -110,15 +110,78 @@
 
       div {
         display: flex;
-        align-items: center;
+        flex: 1;
+        align-items: flex-start;
+        width: 100%;
+        flex-wrap: wrap;
 
-        .downIcon {
-          @include theme() {
-            path {
-              stroke: theme-get('primary-surface-default');
+        .assetEarning {
+          margin-right: 100px;
+
+          @include mobile() {
+            margin-right: 50px;
+          }
+
+          @include small-mobile() {
+            margin-right: 0px;
+          }
+          .title {
+            @include theme() {
+              color: theme-get('primary-surface-default');
             }
 
-            margin-left: 4px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 150%;
+            white-space: nowrap;
+          }
+
+          .amount {
+            @include theme() {
+              color: theme-get('primary-surface-default');
+            }
+
+            margin: 12px 0 16px 0;
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 120%;
+          }
+
+          .amountOrai {
+            @include theme() {
+              color: theme-get('neutral-text-body');
+            }
+
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 150%;
+          }
+        }
+
+        @include small-mobile() {
+          flex: 1;
+          width: 100%;
+          margin-bottom: 24px;
+
+          .assetEarning {
+            width: 50%;
+          }
+
+          .assetEarning:first-child {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 24px;
+
+            .amount {
+              margin-bottom: 0;
+            }
+
+            &.single {
+              width: 50%;
+            }
           }
         }
       }

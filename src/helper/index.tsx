@@ -26,6 +26,8 @@ export interface Tokens {
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
 }
+
+export type DecimalLike = string | number | bigint | BigDecimal;
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
@@ -88,6 +90,10 @@ export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
     .mul(gasDefault)
     .div(10 ** tokenInfo.decimals)
     .toNumber();
+};
+
+export const compareNumber = (coeff: number, number1: DecimalLike, number2: DecimalLike) => {
+  return new BigDecimal(coeff).mul(new BigDecimal(number1).sub(number2)).toNumber();
 };
 
 export const subNumber = (number1: number, number2: number) => {
