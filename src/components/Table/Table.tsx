@@ -28,6 +28,18 @@ export enum SortType {
   // NONE = null
 }
 
+export enum AlignType {
+  RIGHT = 'right',
+  LEFT = 'left',
+  CENTER = 'center'
+}
+
+export const ClassByAlign = {
+  [AlignType.RIGHT]: styles.justify_end,
+  [AlignType.LEFT]: styles.justify_start,
+  [AlignType.CENTER]: styles.justify_center
+};
+
 const CoefficientBySort = {
   [SortType.ASC]: 1,
   [SortType.DESC]: -1
@@ -70,7 +82,15 @@ const getCustomStyleByColumnKey = <T extends object>(headers: TableHeaderProps<T
   };
 };
 
-const getCustomClassOfHeader = <T extends object>(sortField: keyof T, sortOrder: SortType) => {
+const getCustomClassOfHeader = <T extends object>({
+  sortField,
+  sortOrder,
+  align
+}: {
+  sortField: keyof T;
+  sortOrder: SortType;
+  align;
+}) => {
   let className = '';
 
   if (sortField) {
@@ -79,6 +99,10 @@ const getCustomClassOfHeader = <T extends object>(sortField: keyof T, sortOrder:
     if (sortOrder) {
       className = className + ' ' + styles.active_sort;
     }
+  }
+
+  if (align) {
+    className = className + ' ' + ClassByAlign[align];
   }
 
   return className;
@@ -121,9 +145,10 @@ export const Table = <T extends object>({
         <tr style={stylesColumn}>
           {Object.keys(headers).map((key, index) => {
             const { sortField } = headers[key];
+            const align = headers[key].align;
             const sortOrder = sort[headers[key].sortField];
             const customStyle = getCustomStyleByColumnKey(headers, key);
-            const customClass = getCustomClassOfHeader(sortField, sortOrder);
+            const customClass = getCustomClassOfHeader({ sortField, sortOrder, align });
 
             return (
               <th
@@ -134,7 +159,7 @@ export const Table = <T extends object>({
                 className={customClass}
               >
                 {headers[key].name} &nbsp;
-                {sortField && <span>{sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}</span>}
+                {!sortField ? null : sortOrder === SortType.ASC ? <SortUpIcon /> : <SortDownIcon />}
               </th>
             );
           })}

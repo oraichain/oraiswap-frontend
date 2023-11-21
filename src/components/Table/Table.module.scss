@@ -45,9 +45,21 @@
 
   &_header_sorter {
     display: flex;
-    justify-content: center;
     align-items: center;
     cursor: pointer;
+
+    &.justify_end {
+      justify-content: flex-end;
+    }
+
+    &.justify_start {
+      justify-content: flex-start;
+    }
+
+    &.justify_center {
+      justify-content: center;
+    }
+
     svg {
       display: none;
       vertical-align: sub;
