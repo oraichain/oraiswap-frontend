@@ -216,15 +216,19 @@ const Balance: React.FC<BalanceProps> = () => {
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
-
+      const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
+      const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
       // switch network for metamask, exclude TRON
-      if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
+      if (isFromEvmNotTron) {
         await window.Metamask.switchNetwork(from.chainId);
       }
 
-      const latestEvmAddress = await window.Metamask.getEthAddress();
+      let latestEvmAddress = metamaskAddress;
       // TODO: need to get latest tron address if cached
-      checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
+      if (isFromEvmNotTron || isToNetworkEvmNotTron) {
+        latestEvmAddress = await window.Metamask.getEthAddress();
+        checkEvmAddress(from.chainId, latestEvmAddress, tronAddress);
+      }
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
@@ -238,7 +242,6 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
-
       // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
       // so we use this func just for Noble, and handleTransferIBC for other.
       if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble

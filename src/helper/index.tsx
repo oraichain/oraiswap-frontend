@@ -2,7 +2,6 @@ import {
   BSC_SCAN,
   CosmosChainId,
   ETHEREUM_SCAN,
-  HIGH_GAS_PRICE,
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
@@ -76,7 +75,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
