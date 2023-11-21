@@ -37,7 +37,7 @@ import styles from './index.module.scss';
 import { useResetBalance } from './useResetBalance';
 const cx = cn.bind(styles);
 
-interface ModalProps {}
+interface ModalProps { }
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   KEPLR = 'KEPLR',
@@ -83,16 +83,15 @@ const ConnectWallet: FC<ModalProps> = () => {
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
-  const [oraiAddress, setOraiAddress] = useState('');
 
   // address
+  const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
 
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
-  const [address] = useConfigReducer('address');
 
   const OwalletInfo = {
     id: 2,
@@ -162,7 +161,7 @@ const ConnectWallet: FC<ModalProps> = () => {
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck('keplr');
   const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck('owallet');
-
+  const { handleResetBalance } = useResetBalance()
   const connectMetamask = async () => {
     try {
       const isMetamask = !!window.ethereum.isMetaMask;
@@ -186,7 +185,6 @@ const ConnectWallet: FC<ModalProps> = () => {
       throw new Error('Connect Metamask failed');
     }
   };
-  const disconnectMetamask = () => setMetamaskAddress(undefined);
 
   useEffect(() => {
     (async () => {
@@ -199,7 +197,7 @@ const ConnectWallet: FC<ModalProps> = () => {
   }, []);
 
   useEffect(() => {
-    if (address) {
+    if (oraiAddress) {
       (async () => {
         if (walletTypeStore === 'owallet') {
           await connectDetectOwallet();
@@ -208,7 +206,16 @@ const ConnectWallet: FC<ModalProps> = () => {
         }
       })();
     }
-  }, [address]);
+  }, [oraiAddress]);
+
+  const disconnectMetamask = async () => {
+    try {
+      setMetamaskAddress(undefined);
+      handleResetBalance(['metamask']);
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
 
   useEffect(() => {
     const walletData = walletInit.map((item) => {
@@ -234,11 +241,12 @@ const ConnectWallet: FC<ModalProps> = () => {
   };
 
   const disconnectTronLink = async () => {
+    // TronLink => reset Tron
     try {
       setTronAddress(undefined);
-
       // remove account storage tron owallet
       localStorage.removeItem('tronWeb.defaultAddress');
+      handleResetBalance(['tron'])
     } catch (ex) {
       console.log(ex);
     }
@@ -249,10 +257,10 @@ const ConnectWallet: FC<ModalProps> = () => {
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ oraiAddress });
-      setOraiAddress(oraiAddress);
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+      const oraichainAddress = await window.Keplr.getKeplrAddr();
+      loadTokenAmounts({ oraiAddress: oraichainAddress });
+      setOraiAddress(oraichainAddress);
+      const { listAddressCosmos } = await getListAddressCosmos(oraichainAddress);
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -261,10 +269,11 @@ const ConnectWallet: FC<ModalProps> = () => {
 
   const disconnectKeplr = async () => {
     try {
-      window.Keplr.disconnect();
+      // window.Keplr.disconnect();
+      const walletCosmosType = walletType ?? 'owallet';
+      handleResetBalance([walletCosmosType])
       setCosmosAddress({});
       setOraiAddress('');
-      // TODO: dispatch reset balance cosmos
     } catch (ex) {
       console.log(ex);
     }

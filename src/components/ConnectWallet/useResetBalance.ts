@@ -25,7 +25,6 @@ export const useResetBalance = () => {
         break;
       case 'owallet':
         updatedAmounts = resetBalanceCosmos();
-        console.log({ updatedAmounts });
         break;
       case 'metamask':
         updatedAmounts = resetBalanceMetamask();
