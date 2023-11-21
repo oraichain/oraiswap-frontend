@@ -1,6 +1,7 @@
 import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
-import { ReactNode, useEffect, useState } from 'react';
+import { compareNumber } from 'helper';
+import { ReactNode, useState } from 'react';
 import styles from './Table.module.scss';
 
 export type HeaderDataType<T extends object> = {
@@ -35,20 +36,30 @@ const CoefficientBySort = {
 export const sortDataSource = <T extends object>(data: T[], sort: Record<keyof T, SortType>) => {
   const [sortField, sortOrder] = Object.entries(sort)[0];
 
-  return data.sort((a, b) => {
+  const sortedData = data.sort((a, b) => {
     const typeCheck = typeof a[sortField];
+
     switch (typeCheck) {
       case 'number':
       case 'bigint':
         // @ts-ignore
-        return CoefficientBySort[sortOrder] * (b[sortField] - a[sortField]);
+        return compareNumber(CoefficientBySort[sortOrder], a[sortField], b[sortField]);
       case 'string':
+        const isStringNumber = !isNaN(Number(a[sortField]));
+
+        if (isStringNumber) {
+          // @ts-ignore
+          return compareNumber(CoefficientBySort[sortOrder], a[sortField], b[sortField]);
+        }
+
         // @ts-ignore
         return CoefficientBySort[sortOrder] * b[sortField].localeCompare(a[sortField]);
     }
 
     return 0;
   });
+
+  return sortedData;
 };
 
 const getCustomStyleByColumnKey = <T extends object>(headers: TableHeaderProps<T>, key: string) => {
@@ -84,28 +95,27 @@ export const Table = <T extends object>({
     [defaultSorted]: SortType.DESC
   } as Record<keyof T, SortType>);
 
-  const handleClickSort = (column: HeaderDataType<T>) => {
+  const [dataSource, setDataSource] = useState(data);
+
+  const handleClickSort = (column: HeaderDataType<T>, data: T[]) => {
     const sortField = column.sortField || null;
 
     if (!sortField) {
       return;
     }
 
+    let newSort = { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
+
     if (sort[sortField] === SortType.DESC) {
-      setSort(() => {
-        return { [sortField]: SortType.ASC } as Record<keyof T, SortType>;
-      });
+      newSort = { [sortField]: SortType.ASC } as Record<keyof T, SortType>;
+      setSort(newSort);
+      sortDataSource(data, newSort);
       return;
     }
 
-    setSort(() => {
-      return { [sortField]: SortType.DESC } as Record<keyof T, SortType>;
-    });
+    setSort(newSort);
+    sortDataSource(data, newSort);
   };
-
-  useEffect(() => {
-    sortDataSource(data, sort);
-  }, [sort, data]);
 
   return (
     <table className={styles.table}>
@@ -120,9 +130,9 @@ export const Table = <T extends object>({
             return (
               <th
                 scope="col"
-                key={index}
+                key={`${index}-${sortOrder}`}
                 style={customStyle}
-                onClick={() => handleClickSort(headers[key])}
+                onClick={() => handleClickSort(headers[key], data)}
                 className={customClass}
               >
                 {headers[key].name} &nbsp;
