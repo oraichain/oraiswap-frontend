@@ -159,8 +159,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   let remoteTokenDenomFrom;
   let remoteTokenDenomTo;
 
-  if (token) remoteTokenDenomFrom = token.prefix + token.contractAddress;
-  if (to) remoteTokenDenomTo = to.prefix + to.contractAddress;
+  if (token) remoteTokenDenomFrom = token.contractAddress ? token.prefix + token.contractAddress : token.denom;
+  if (to) remoteTokenDenomTo = to.contractAddress ? to.prefix + to.contractAddress : to.denom;
 
   // token fee
   const fromTokenFee = useTokenFee(remoteTokenDenomFrom);
