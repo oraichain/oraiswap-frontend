@@ -11,13 +11,13 @@ import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
-import { useGetMyStake, useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetPoolDetail, useGetRewardInfo, xOCH_PRICE } from 'pages/Pools/hookV3';
 import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import styles from './Earning.module.scss';
-import { TokenItemType, ORAI } from '@oraichain/oraidex-common';
+import { TokenItemType, ORAI, toDisplay, CW20_DECIMALS } from '@oraichain/oraidex-common';
 
 type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
@@ -38,7 +38,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   });
 
   const { info } = poolDetailData;
-  const xOCH_PRICE = 0.4;
 
   useEffect(() => {
     if (!poolDetailData) return;
@@ -65,24 +64,28 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const setNewReward = async () => {
     const rewardPerSecInfoData = JSON.parse(info.rewardPerSec);
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
-
+    // unit LP
     const totalRewardPerSec = rewardPerSecInfoData.assets
-      .map((a) => BigInt(a.amount))
+      .map((asset) => BigInt(asset.amount))
       .reduce((a, b) => a + b, BigInt(0));
 
     const result = rewardPerSecInfoData.assets
-      .filter((p) => parseInt(p.amount))
-      .map(async (r) => {
+      .filter((asset) => parseInt(asset.amount))
+      .map(async (asset) => {
         const pendingWithdraw = BigInt(
-          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, r.info))?.amount ?? 0
+          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
         );
 
-        const amount = (totalRewardAmount * BigInt(r.amount)) / totalRewardPerSec + pendingWithdraw;
+        const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
+        let token =
+          'token' in asset.info
+            ? cw20TokenMap[asset.info.token.contract_addr]
+            : tokenMap[asset.info.native_token.denom];
 
-        let token = 'token' in r.info ? cw20TokenMap[r.info.token.contract_addr] : tokenMap[r.info.native_token.denom];
-        if (!token && 'token' in r.info && r.info?.token?.contract_addr) {
+        // only for atom/scatom pool
+        if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
           const tokenInfo = await fetchTokenInfo({
-            contractAddress: r.info.token.contract_addr,
+            contractAddress: asset.info.token.contract_addr,
             name: '',
             org: 'Oraichain',
             denom: '',
@@ -174,7 +177,11 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
             <span>Total Earned</span>
           </div>
           <div className={styles.amount}>
-            <TokenBalance balance={totalEarned} prefix="$" decimalScale={4} />
+            <TokenBalance
+              balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
+              prefix="$"
+              decimalScale={4}
+            />
           </div>
         </div>
         {pendingRewards.length > 0 &&

@@ -13,7 +13,13 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import { getStatisticData, useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import {
+  getStatisticData,
+  useGetMyStake,
+  useGetPools,
+  useGetRewardInfo,
+  useGetTotalClaimable
+} from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 import { PoolTableData } from 'pages/Pools/indexV3';
@@ -55,6 +61,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
 
   const [filterDay, setFilterDay] = useState(30);
   const statisticData = getStatisticData(dataSource);
+  const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
   // TODO: get data statistic changed (suffix) by api
   const liquidityData = [
@@ -193,7 +200,12 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
             <span className={styles.header_data_name}>Total Claimable Rewards</span>
             <br />
             <span className={styles.header_data_value}>
-              <TokenBalance balance={12.32455} prefix="+$" className={styles.header_data_value} decimalScale={6} />
+              <TokenBalance
+                balance={totalClaimable}
+                prefix="+$"
+                className={styles.header_data_value}
+                decimalScale={6}
+              />
             </span>
           </div>
         </div>

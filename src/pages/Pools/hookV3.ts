@@ -14,15 +14,16 @@ import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import isEqual from 'lodash/isEqual';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
 import { updateLpPools } from 'reducer/token';
-import { fetchRewardPerSecInfo } from 'rest/api';
+import { fetchRewardPerSecInfo, fetchTokenInfo } from 'rest/api';
 import axios from 'rest/request';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
 import { PoolTableData } from './indexV3';
+import { getUsd } from 'libs/utils';
 
 // Fetch Reward
 export const useFetchCacheReward = (pairs: PairInfo[]) => {
@@ -299,4 +300,93 @@ export const getStatisticData = (data: PoolTableData[]) => {
   );
 
   return statisticData;
+};
+
+export const getTotalClaimable = async ({ poolTableData, totalRewardInfoData }) => {
+  const promiseRes = [];
+
+  poolTableData.map(async (e) => {
+    const rewardPerSecInfoData = JSON.parse(e.rewardPerSec);
+    const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
+
+    // unit LP
+    const totalRewardPerSec = rewardPerSecInfoData.assets
+      .map((asset) => BigInt(asset.amount))
+      .reduce((a, b) => a + b, BigInt(0));
+
+    const results = rewardPerSecInfoData.assets
+      .filter((asset) => parseInt(asset.amount))
+      .map(async (asset) => {
+        const pendingWithdraw = BigInt(
+          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
+        );
+
+        const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
+
+        let token =
+          'token' in asset.info
+            ? cw20TokenMap[asset.info.token.contract_addr]
+            : tokenMap[asset.info.native_token.denom];
+
+        // only for atom/scatom pool
+        if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
+          const tokenInfo = await fetchTokenInfo({
+            contractAddress: asset.info.token.contract_addr,
+            name: '',
+            org: 'Oraichain',
+            denom: '',
+            Icon: undefined,
+            chainId: 'Oraichain',
+            rpc: '',
+            decimals: 0,
+            coinGeckoId: 'scatom',
+            cosmosBased: undefined
+          });
+
+          token = {
+            ...tokenInfo,
+            denom: tokenInfo?.symbol
+          };
+        }
+        return {
+          ...token,
+          amount,
+          pendingWithdraw
+        };
+      });
+
+    promiseRes.push(...results);
+  });
+
+  const res = await Promise.all(promiseRes);
+
+  return res;
+};
+
+export const xOCH_PRICE = 0.4;
+
+export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => {
+  const [cachePrices] = useConfigReducer('coingecko');
+  const [totalClaim, setTotalClaim] = useState();
+
+  useEffect(() => {
+    (async () => {
+      if (totalRewardInfoData) {
+        const res = await getTotalClaimable({ poolTableData, totalRewardInfoData });
+        const total = res.reduce((acc, cur) => {
+          const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
+
+          acc = acc + eachBalance;
+
+          return acc;
+        }, 0);
+
+        if (res) {
+          setTotalClaim(total);
+        }
+      }
+    })();
+  }, [totalRewardInfoData, poolTableData, cachePrices]);
+
+  return totalClaim;
 };
