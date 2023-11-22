@@ -322,7 +322,6 @@ export const getTotalClaimable = async ({ poolTableData, totalRewardInfoData }) 
         );
 
         const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
-        console.log({ amount });
 
         let token =
           'token' in asset.info
