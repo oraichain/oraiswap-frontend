@@ -2,140 +2,198 @@
 @import 'src/styles/mixins';
 
 .earning {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    border-radius: 12px;
-    border: 1px solid $primary-text-link;
-    padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1px solid $primary-text-link;
+  padding: 24px 40px;
 
-    @include theme() {
-        background-color: theme-get('primary-surface-default-subtle');
+  @include theme() {
+    background-color: theme-get('primary-surface-default-subtle');
+  }
+
+  @include small-mobile() {
+    flex-wrap: wrap;
+    padding: 24px 16px;
+  }
+
+  .earningLeft {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    width: 100%;
+    flex-wrap: wrap;
+
+    .assetEarning {
+      margin-right: 100px;
+
+      @include mobile() {
+        margin-right: 50px;
+      }
+
+      @include small-mobile() {
+        margin-right: 0px;
+      }
+      .title {
+        @include theme() {
+          color: theme-get('primary-surface-default');
+        }
+
+        height: 24px;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 150%;
+        white-space: nowrap;
+      }
+
+      .amount {
+        @include theme() {
+          color: theme-get('primary-surface-default');
+        }
+
+        margin: 12px 0 16px 0;
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 120%;
+      }
+
+      .amountOrai {
+        @include theme() {
+          color: theme-get('neutral-text-body');
+        }
+
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 150%;
+      }
     }
 
     @include small-mobile() {
-        flex-wrap: wrap;
-        padding: 24px 16px;
-    }
+      flex: 1;
+      width: 100%;
+      margin-bottom: 24px;
 
-    .earningLeft {
+      .assetEarning {
+        width: 50%;
+      }
+
+      .assetEarning:first-child {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 24px;
+
+        .amount {
+          margin-bottom: 0;
+        }
+
+        &.single {
+          width: 50%;
+        }
+      }
+    }
+  }
+
+  .claim {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .earnMore {
+      margin-top: 15px;
+
+      @include theme() {
+        color: theme-get('primary-surface-default');
+      }
+
+      div {
         display: flex;
         flex: 1;
         align-items: flex-start;
         width: 100%;
         flex-wrap: wrap;
 
-
-
         .assetEarning {
+          margin-right: 100px;
 
-            margin-right: 100px;
+          @include mobile() {
+            margin-right: 50px;
+          }
 
-            @include mobile() {
-                margin-right: 50px;
+          @include small-mobile() {
+            margin-right: 0px;
+          }
+          .title {
+            @include theme() {
+              color: theme-get('primary-surface-default');
             }
 
-            @include small-mobile () {
-                margin-right: 0px;
-            }
-            .title {
-                @include theme() {
-                    color: theme-get('primary-surface-default');
-                }
+            height: 24px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 150%;
+            white-space: nowrap;
+          }
 
-                height: 24px;
-                display: flex;
-                align-items: center;
-                font-size: 16px;
-                font-weight: 400;
-                line-height: 150%;
-                white-space: nowrap;
-
+          .amount {
+            @include theme() {
+              color: theme-get('primary-surface-default');
             }
 
-            .amount {
-                @include theme() {
-                    color: theme-get('primary-surface-default');
-                }
+            margin: 12px 0 16px 0;
+            font-size: 32px;
+            font-weight: 500;
+            line-height: 120%;
+          }
 
-                margin: 12px 0 16px 0;
-                font-size: 32px;
-                font-weight: 500;
-                line-height: 120%;
+          .amountOrai {
+            @include theme() {
+              color: theme-get('neutral-text-body');
             }
 
-            .amountOrai {
-                @include theme() {
-                    color: theme-get('neutral-text-body');
-                }
-
-                font-size: 16px;
-                font-weight: 500;
-                line-height: 150%;
-            }
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 150%;
+          }
         }
 
         @include small-mobile() {
-            flex: 1;
+          flex: 1;
+          width: 100%;
+          margin-bottom: 24px;
+
+          .assetEarning {
+            width: 50%;
+          }
+
+          .assetEarning:first-child {
             width: 100%;
+            margin-right: 0;
             margin-bottom: 24px;
 
-            .assetEarning {
-                width: 50%;
+            .amount {
+              margin-bottom: 0;
             }
 
-            .assetEarning:first-child {
-                width: 100%;
-                margin-right: 0;
-                margin-bottom: 24px;
-
-                .amount {
-                    margin-bottom: 0;
-                }
-
-                &.single {
-                    width: 50%;
-                }
+            &.single {
+              width: 50%;
             }
+          }
         }
+      }
     }
 
-    .claim {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+    @include small-mobile() {
+      width: 100%;
+      align-items: center;
 
-        .earnMore {
-            margin-top: 15px;
-
-            @include theme() {
-                color: theme-get('primary-surface-default');
-            }
-
-            div {
-                display: flex;
-                align-items: center;
-
-                .downIcon {
-                    @include theme() {
-                        path {
-                            stroke: theme-get('primary-surface-default');
-                        }
-
-                        margin-left: 4px;
-                    }
-                }
-            }
-        }
-
-        @include small-mobile() {
-            width: 100%;
-            align-items: center;
-
-            button {
-                width: 100%;
-            }
-        }
+      button {
+        width: 100%;
+      }
     }
-
+  }
 }

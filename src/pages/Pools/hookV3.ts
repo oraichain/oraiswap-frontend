@@ -175,7 +175,6 @@ export type GetStakedByUserQuery = {
 export type StakeByUserResponse = {
   stakingAssetDenom: string;
   earnAmountInUsdt: number;
-  stakingAmountInUsdt: number;
 };
 
 const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {

@@ -74,7 +74,7 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
 export const getNetworkGasPrice = async (): Promise<number> => {
   try {
     const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
-    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == network.chainId);
+    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId === network.chainId);
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
@@ -239,7 +239,7 @@ export const switchWalletTron = async () => {
       });
       // throw error when not connected
       if (code !== 200) {
-        throw Error(message);
+        throw new Error(message);
       }
     }
     tronAddress = window.tronWeb.defaultAddress.base58;

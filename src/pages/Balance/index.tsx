@@ -49,8 +49,8 @@ import {
   transferIbcCustom
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
-import { checkEvmAddress } from 'pages/UniversalSwap/helpers';
 import useOnClickOutside from 'hooks/useOnClickOutside';
+import * as Sentry from '@sentry/react';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
@@ -251,6 +251,10 @@ const Balance: React.FC<BalanceProps> = () => {
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex);
+      // Add log sentry Oraichain -> Noble-1
+      if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
+        Sentry.captureException(`${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress}`)
+      }
     }
   };
 

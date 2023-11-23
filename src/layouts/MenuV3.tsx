@@ -93,12 +93,12 @@ const Menu: React.FC = () => {
       {renderLink('/universalswap', 'SWAP', setLink)}
       {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
-      {renderLink('coming-soon', 'FUTURES', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('coming-soon', 'FUTURES', () => {}, true)}
       {mobileMode ? (
         <>
-          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
         </>
       ) : (
         <>
@@ -119,8 +119,8 @@ const Menu: React.FC = () => {
             setVisible={() => setOtherActive(!otherActive)}
             content={
               <div className={classNames(styles.menu_others_list, styles[theme])}>
-                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => {}, true)}
               </div>
             }
           />
@@ -148,15 +148,13 @@ const Menu: React.FC = () => {
           </div>
         </>
       ) : (
-        <div className={classNames(styles.menu)}>
+        <div className={styles.menu}>
           <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
             <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
           </Link>
           {menuList}
-          <div className={classNames(styles.connect_wallet_wrapper)}>
-            <span>
-              <ConnectWallet />
-            </span>
+          <div className={styles.connect_wallet_wrapper}>
+            <ConnectWallet />
           </div>
         </div>
       )}
