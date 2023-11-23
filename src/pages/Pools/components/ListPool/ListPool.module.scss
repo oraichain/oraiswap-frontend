@@ -160,6 +160,12 @@
   }
 }
 
+.text_number {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
 .liquidity {
   display: flex;
   align-items: center;

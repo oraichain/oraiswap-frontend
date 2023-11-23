@@ -384,6 +384,16 @@ export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
   return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
 };
 
+export const formatDisplayClaimable = (amount: number | string, dp = 2): string => {
+  const validatedAmount = validateNumber(amount);
+  if (validatedAmount < 1) {
+    const displayValue = toFixedIfNecessary(amount.toString(), 4);
+    return !displayValue ? '0' : `+$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+  }
+
+  return `+$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;
+};
+
 export const toFixedIfNecessary = (value: string, dp: number): number => {
   return +parseFloat(value).toFixed(dp);
 };
