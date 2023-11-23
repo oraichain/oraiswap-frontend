@@ -7,6 +7,12 @@
     height: 100%;
     max-width: 90%;
 
+    @include ultra_desktop_max() {
+        max-width: 100%;
+        padding: 0;
+        margin: 24px 0;
+    }
+
     @include mobile() {
         max-width: 100%;
         padding: 0;
