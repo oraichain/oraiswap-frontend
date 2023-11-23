@@ -1,7 +1,7 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { ORAI, toDisplay } from '@oraichain/oraidex-common';
+import { ORAI, parseAssetInfo, toDisplay } from '@oraichain/oraidex-common';
 import {
   AssetInfo,
   OraiswapStakingQueryClient,
@@ -13,17 +13,18 @@ import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getUsd } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RewardPoolType } from 'reducer/config';
 import { updateLpPools } from 'reducer/token';
 import { fetchRewardPerSecInfo, fetchTokenInfo } from 'rest/api';
 import axios from 'rest/request';
+import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
 import { PoolTableData } from './indexV3';
-import { getUsd } from 'libs/utils';
 
 // Fetch Reward
 export const useFetchCacheReward = (pairs: PairInfo[]) => {
@@ -197,6 +198,8 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
       refetchOnWindowFocus: true,
       enabled: !!stakerAddress,
       staleTime: 5 * 60 * 1000
+      // cacheTime: 5 * 60 * 1000,
+      // initialData: []
     }
   );
 
@@ -224,7 +227,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
   return {
     totalStaked,
     totalEarned,
-    myStakes
+    myStakes: myStakes || []
   };
 };
 
@@ -306,8 +309,13 @@ export const getTotalClaimable = async ({ poolTableData, totalRewardInfoData }) 
   const promiseRes = [];
 
   poolTableData.map(async (e) => {
+    const stakingAssetInfo = Pairs.getStakingAssetInfo([JSON.parse(e.firstAssetInfo), JSON.parse(e.secondAssetInfo)]);
     const rewardPerSecInfoData = JSON.parse(e.rewardPerSec);
-    const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
+
+    const currentPoolReward = totalRewardInfoData?.reward_infos?.find(
+      (reward) => parseAssetInfo(reward.asset_info) === parseAssetInfo(stakingAssetInfo)
+    );
+    const totalRewardAmount = BigInt(currentPoolReward?.pending_reward ?? 0);
 
     // unit LP
     const totalRewardPerSec = rewardPerSecInfoData.assets
@@ -368,11 +376,25 @@ export const xOCH_PRICE = 0.4;
 export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => {
   const [cachePrices] = useConfigReducer('coingecko');
   const [totalClaim, setTotalClaim] = useState();
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
+
+  const isPoolWithLiquidity = (pool: PoolInfoResponse) => {
+    const liquidityAddress = pool?.liquidityAddr;
+    return parseInt(lpPools[liquidityAddress]?.balance) > 0;
+  };
+
+  const findBondAmount = (pool: PoolInfoResponse) => {
+    const assetInfo = Pairs.getStakingAssetInfo([JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)]);
+    const rewardInfo = totalRewardInfoData?.reward_infos.find(({ asset_info }) => isEqual(asset_info, assetInfo));
+    return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
+  };
+
+  const myPools = poolTableData.filter((pool) => isPoolWithLiquidity(pool) || findBondAmount(pool) > 0);
 
   useEffect(() => {
     (async () => {
       if (totalRewardInfoData) {
-        const res = await getTotalClaimable({ poolTableData, totalRewardInfoData });
+        const res = await getTotalClaimable({ poolTableData: myPools, totalRewardInfoData });
         const total = res.reduce((acc, cur) => {
           const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
 
@@ -386,6 +408,7 @@ export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => 
         }
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalRewardInfoData, poolTableData, cachePrices]);
 
   return totalClaim;

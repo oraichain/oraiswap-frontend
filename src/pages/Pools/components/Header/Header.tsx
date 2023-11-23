@@ -204,7 +204,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
                 balance={totalClaimable}
                 prefix="+$"
                 className={styles.header_data_value}
-                decimalScale={6}
+                decimalScale={4}
               />
             </span>
           </div>
