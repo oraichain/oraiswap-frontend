@@ -1,6 +1,6 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
-import TVChartContainer from 'components/TVChartContainer/TVChartContainer';
+import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import Content from 'layouts/Content';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -10,8 +10,10 @@ import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useSelector } from 'react-redux';
-import { selectChartDataLength } from 'reducer/tradingSlice';
+import { selectChartDataLength, selectCurrentToken } from 'reducer/tradingSlice';
 import { DuckDb } from 'libs/duckdb';
+import useTheme from 'hooks/useTheme';
+import { PAIRS_CHART } from 'config/pools';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -21,6 +23,8 @@ const Swap: React.FC = () => {
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
   const chartDataLength = useSelector(selectChartDataLength);
+  const theme = useTheme();
+  const currentPair = useSelector(selectCurrentToken);
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
 
@@ -42,9 +46,9 @@ const Swap: React.FC = () => {
                 {chartDataLength > 0 && (
                   <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
                 )}
-                <div className={cx('tv-chart', hideChart || chartDataLength == 0 ? 'hidden' : '')}>
+                <div className={cx('tv-chart', hideChart || chartDataLength === 0 ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
-                  <TVChartContainer />
+                  <TVChartContainer theme={theme} currentPair={currentPair} pairsChart={PAIRS_CHART} />
                 </div>
               </>
             )}
