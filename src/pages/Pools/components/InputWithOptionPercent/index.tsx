@@ -23,6 +23,8 @@ const InputWithOptionPercent: FC<{
   showIcon?: boolean;
   hasPath?: boolean;
   isFocus?: boolean;
+  prefixText?: string;
+  amountInUsdt?: number;
 }> = ({
   setAmountFromPercent,
   onValueChange,
@@ -35,7 +37,9 @@ const InputWithOptionPercent: FC<{
   apr,
   showIcon = false,
   hasPath = false,
-  isFocus = true
+  isFocus = true,
+  prefixText = 'Balance: ',
+  amountInUsdt = 0
 }) => {
   const { data: prices } = useCoinGeckoPrices();
   const [chosenOption, setChosenOption] = useState(-1);
@@ -54,10 +58,10 @@ const InputWithOptionPercent: FC<{
           <TokenBalance
             balance={{
               amount: totalAmount || BigInt(0),
-              denom: token?.symbol,
+              denom: token?.symbol || token?.name || '',
               decimals: token?.decimals
             }}
-            prefix="LP Token Balance: "
+            prefix={prefixText}
             decimalScale={6}
           />
         </div>
@@ -97,7 +101,18 @@ const InputWithOptionPercent: FC<{
             }}
           />
           <div className={cx('amount-usd', theme)}>
-            <TokenBalance balance={getUsd(value, token || {}, prices)} decimalScale={2} />
+            <TokenBalance
+              balance={
+                amountInUsdt
+                  ? {
+                      amount: BigInt(Math.trunc(amountInUsdt)),
+                      decimals: CW20_DECIMALS
+                    }
+                  : getUsd(value, token || {}, prices)
+              }
+              decimalScale={2}
+              prefix="~$"
+            />
           </div>
         </div>
       </div>

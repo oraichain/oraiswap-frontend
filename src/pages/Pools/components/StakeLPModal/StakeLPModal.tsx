@@ -125,6 +125,7 @@ export const StakeLPModal: FC<ModalProps> = ({
           setAmountFromPercent={setBondAmount}
           totalAmount={lpTokenBalance}
           apr={toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}
+          amountInUsdt={bondAmountInUsdt}
         />
         {(() => {
           let disableMsg: string;
