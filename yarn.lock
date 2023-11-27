@@ -2890,12 +2890,24 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
+"@oraichain/oraidex-common-ui@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.3.tgz#fd5ccf414952e7ded657af927c9d8f0223137ee7"
+  integrity sha512-SA4U3whyhsN7XMZSA3VdkSaCZyA7ZhOYIlNXV1R+XxXoUhGzoxbuh7q0QSKmY/CaLWecj/O3XgxmJt5nohBFWA==
+  dependencies:
+    axios "^0.26.1"
+    axios-extensions "^3.1.3"
+    react "^18.2.0"
+    react-dom "^18.2.0"
+    react-use "^17.4.0"
+
 "@oraichain/oraidex-common@^1.0.34":
-  version "1.0.36"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.36.tgz#1d0e886b280332d498e2abcdd63a5b6458fe3aeb"
-  integrity sha512-F/DjJhxJ6X5iAtrNuZMV5HionaLu1szD5qm9r0vWtc5jWuQUn6ffy4fyJ1eUwgHX906VCT9QK8xtryDTv1BXOA==
+  version "1.0.39"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.39.tgz#ba865627f364995eb446b110bfdb025827bc25ff"
+  integrity sha512-LzAlLNUX9ESDX2ZJUXeobZQeFh+A2Rcqnj26yW1pf0XSoUETY0j1f6poNY18eGSuSu6WSTrpgPq8JldrV6OKqg==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
+    "@keplr-wallet/types" "^0.11.38"
     ethers "^5.0.15"
 
 "@oraichain/oraidex-contracts-build@^1.0.20":

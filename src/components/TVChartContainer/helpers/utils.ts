@@ -1,8 +1,6 @@
 import { CHART_PERIODS } from './constants';
 import { Bar } from './types';
 import { pairsChart } from '../config';
-import { PairToken } from 'reducer/type';
-import { TokenItemType } from '@oraichain/oraidex-common';
 
 export function getObjectKeyFromValue(value, object) {
   return Object.keys(object).find((key) => object[key] === value);
@@ -85,34 +83,3 @@ export function roundTime(timeIn: Date, interval: number): number {
   const dateOut = Math.round(timeIn.getTime() / roundTo) * roundTo;
   return dateOut / 1000;
 }
-
-export const generateNewSymbol = (
-  fromToken: TokenItemType,
-  toToken: TokenItemType,
-  currentPair: PairToken
-): PairToken | null => {
-  let newTVPair: PairToken = { ...currentPair };
-  // example: ORAI/ORAI
-  if (fromToken.name === toToken.name) {
-    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
-    newTVPair.info = '';
-    return newTVPair;
-  }
-
-  const findedPair = pairsChart.find((p) => p.symbols.includes(fromToken.name) && p.symbols.includes(toToken.name));
-  if (!findedPair) {
-    // this case when user click button reverse swap flow  of pair NOT in pool.
-    // return null to prevent re-call api of this pair.
-    if (currentPair.symbol.split('/').includes(fromToken.name) && currentPair.symbol.split('/').includes(toToken.name))
-      return null;
-    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
-    newTVPair.info = '';
-  } else {
-    // this case when user click button reverse swap flow of pair in pool.
-    // return null to prevent re-call api of this pair.
-    if (findedPair.symbol === currentPair.symbol) return null;
-    newTVPair.symbol = findedPair.symbol;
-    newTVPair.info = findedPair.info;
-  }
-  return newTVPair;
-};
