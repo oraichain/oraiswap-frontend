@@ -15,7 +15,7 @@
     "@oraichain/common-contracts-sdk": "^1.0.31",
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
-    "@oraichain/oraidex-common-ui": "^1.0.2",
+    "@oraichain/oraidex-common-ui": "^1.0.3",
     "@oraichain/oraidex-contracts-sdk": "^1.0.24",
     "@oraichain/oraidex-universal-swap": "^1.0.32",
     "@reduxjs/toolkit": "^1.9.3",

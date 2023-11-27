@@ -2890,10 +2890,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common-ui@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.2.tgz#8ce9db593a46e5495da5684731df7886cadeda3d"
-  integrity sha512-5jLcC51ICA6Fe6HKDPxgkIV90D+lzlQbWlLQgA2lagZPEfUATWPJlntnpIy2K7jXMiO7I2NVHfKr2ufSHn6vgA==
+"@oraichain/oraidex-common-ui@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.3.tgz#fd5ccf414952e7ded657af927c9d8f0223137ee7"
+  integrity sha512-SA4U3whyhsN7XMZSA3VdkSaCZyA7ZhOYIlNXV1R+XxXoUhGzoxbuh7q0QSKmY/CaLWecj/O3XgxmJt5nohBFWA==
   dependencies:
     axios "^0.26.1"
     axios-extensions "^3.1.3"
