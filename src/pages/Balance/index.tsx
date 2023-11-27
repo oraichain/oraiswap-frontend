@@ -21,7 +21,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
+import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -253,7 +253,8 @@ const Balance: React.FC<BalanceProps> = () => {
       handleErrorTransaction(ex);
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
-        Sentry.captureException(`${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress}`)
+        const errorMsg = handleErrorMsg(ex);
+        Sentry.captureException(`${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`)
       }
     }
   };
