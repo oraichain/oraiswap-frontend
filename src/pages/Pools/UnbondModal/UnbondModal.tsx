@@ -3,7 +3,7 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { ORAI } from '@oraichain/oraidex-common';
+import { ORAI, parseTokenInfo } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import CosmJs from 'libs/cosmjs';
@@ -55,11 +55,12 @@ const UnbondModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const { info: assetInfo } = parseTokenInfo(assetToken);
       const msg = generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        assetToken
+        assetInfo
       });
       const result = await CosmJs.execute({
         address: msg.contractAddress,

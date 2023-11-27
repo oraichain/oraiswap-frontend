@@ -4,7 +4,7 @@ import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from '@oraichain/oraidex-common';
-import { ORAI } from '@oraichain/oraidex-common';
+import { ORAI, parseTokenInfo } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -58,13 +58,13 @@ const BondingModal: FC<ModalProps> = ({
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress('Oraichain');
-
+      let { info: assetInfo } = parseTokenInfo(assetToken);
       const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpToken: lpTokenInfoData.contractAddress!,
-        assetToken
+        lpAddress: lpTokenInfoData.contractAddress!,
+        assetInfo
       });
 
       const result = await CosmJs.execute({

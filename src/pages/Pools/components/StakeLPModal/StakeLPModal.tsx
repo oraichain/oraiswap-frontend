@@ -16,7 +16,7 @@ import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgsV3, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './StakeLPModal.module.scss';
@@ -72,7 +72,7 @@ export const StakeLPModal: FC<ModalProps> = ({
     try {
       const oraiAddress = await handleCheckAddress('Oraichain');
       // generate bonding msg
-      const msg = generateMiningMsgsV3({
+      const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),

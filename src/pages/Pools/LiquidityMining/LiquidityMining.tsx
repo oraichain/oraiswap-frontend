@@ -5,7 +5,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
-import { ORAI, TokenItemType } from '@oraichain/oraidex-common';
+import { ORAI, TokenItemType, parseTokenInfo } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { Asset, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
@@ -123,11 +123,12 @@ const LiquidityMining: React.FC<LiquidityMiningProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const { info: assetInfo } = parseTokenInfo(assetToken);
       const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        assetToken: assetToken
-      } as WithdrawMining);
+        assetInfo
+      });
 
       const result = await CosmJs.execute({
         address: msg.contractAddress,

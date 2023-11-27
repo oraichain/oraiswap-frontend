@@ -15,9 +15,9 @@ import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
+import { Type, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import styles from './Earning.module.scss';
-import { TokenItemType, ORAI } from '@oraichain/oraidex-common';
+import { TokenItemType, ORAI, parseTokenInfo } from '@oraichain/oraidex-common';
 
 type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
@@ -114,11 +114,12 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      const { info: assetInfo } = parseTokenInfo(stakingToken);
       const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        assetToken: stakingToken
-      } as WithdrawMining);
+        assetInfo
+      });
 
       const result = await CosmJs.execute({
         address: msg.contractAddress,

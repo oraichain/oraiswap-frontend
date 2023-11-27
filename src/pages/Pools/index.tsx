@@ -28,22 +28,6 @@ export type PoolTableData = PoolInfoResponse & {
   quoteToken: TokenItemType;
 };
 
-export enum KeyFilterPool {
-  my_pool = 'my_pool',
-  all_pool = 'all_pool'
-}
-
-const LIST_FILTER_POOL = [
-  {
-    key: KeyFilterPool.all_pool,
-    text: 'All Pools'
-  },
-  {
-    key: KeyFilterPool.my_pool,
-    text: 'My Pools'
-  }
-];
-
 const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);

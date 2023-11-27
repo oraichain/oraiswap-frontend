@@ -251,28 +251,10 @@ async function fetchTokenAllowance(tokenAddr: string, walletAddr: string, spende
   return BigInt(data.allowance);
 }
 
-async function fetchRewardInfo(
-  stakerAddr: string,
-  assetToken: TokenItemType
-): Promise<OraiswapStakingTypes.RewardInfoResponse> {
-  const { info: assetInfo } = parseTokenInfo(assetToken);
-  const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.rewardInfo({ assetInfo, stakerAddr });
-  return data;
-}
-
 async function fetchRewardPerSecInfo(assetToken: TokenItemType): Promise<OraiswapStakingTypes.RewardsPerSecResponse> {
   const { info: assetInfo } = parseTokenInfo(assetToken);
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
   const data = await stakingContract.rewardsPerSec({ assetInfo });
-
-  return data;
-}
-
-async function fetchStakingPoolInfo(assetToken: TokenItemType): Promise<OraiswapStakingTypes.PoolInfoResponse> {
-  const { info: assetInfo } = parseTokenInfo(assetToken);
-  const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.poolInfo({ assetInfo });
 
   return data;
 }
@@ -550,63 +532,7 @@ export type UnbondLiquidity = {
   assetToken: TokenInfo;
 };
 
-function generateMiningMsgs(data: BondMining | WithdrawMining | UnbondLiquidity): ExecuteInstruction {
-  const { type, sender, ...params } = data;
-  let funds: Coin[] | null;
-  // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
-  let contractAddr = network.router;
-  let input: JsonObject;
-  switch (type) {
-    case Type.BOND_LIQUIDITY: {
-      const bondMsg = params as BondMining;
-      // currently only support cw20 token pool
-      let { info: asset_info } = parseTokenInfo(bondMsg.assetToken);
-      input = {
-        send: {
-          contract: network.staking,
-          amount: bondMsg.amount.toString(),
-          msg: toBinary({
-            bond: {
-              asset_info
-            }
-          }) // withdraw liquidity msg in base64 : {"withdraw_liquidity":{}}
-        }
-      };
-      contractAddr = bondMsg.lpToken;
-      break;
-    }
-    case Type.WITHDRAW_LIQUIDITY_MINING: {
-      const msg = params as WithdrawMining;
-      let { info: asset_info } = parseTokenInfo(msg.assetToken);
-      input = { withdraw: { asset_info } };
-      contractAddr = network.staking;
-      break;
-    }
-    case Type.UNBOND_LIQUIDITY:
-      const unbondMsg = params as UnbondLiquidity;
-      let { info: unbond_asset } = parseTokenInfo(unbondMsg.assetToken);
-      input = {
-        unbond: {
-          asset_info: unbond_asset,
-          amount: unbondMsg.amount.toString()
-        }
-      };
-      contractAddr = network.staking;
-      break;
-    default:
-      break;
-  }
-
-  const msg: ExecuteInstruction = {
-    contractAddress: contractAddr,
-    msg: input,
-    funds
-  };
-
-  return msg;
-}
-
-function generateMiningMsgsV3(data: MiningLP): ExecuteInstruction {
+function generateMiningMsgs(data: MiningLP): ExecuteInstruction {
   const { type, sender, ...params } = data;
   let funds: Coin[] | null;
   // for withdraw & provide liquidity methods, we need to interact with the oraiswap pair contract
@@ -823,11 +749,8 @@ export {
   generateContractMessages,
   fetchPoolInfoAmount,
   fetchTokenAllowance,
-  generateMiningMsgs,
   generateConvertMsgs,
-  fetchRewardInfo,
   fetchRewardPerSecInfo,
-  fetchStakingPoolInfo,
   fetchDistributionInfo,
   fetchTaxRate,
   getSubAmountDetails,
@@ -838,5 +761,5 @@ export {
   generateMoveOraib2OraiMessages,
   getPairAmountInfo,
   fetchRelayerFee,
-  generateMiningMsgsV3
+  generateMiningMsgs
 };
