@@ -125,6 +125,8 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
           setAmountFromPercent={setUnbondAmount}
           totalAmount={totalBondAmount}
           apr={toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}
+          prefixText="Staked LP Balance: "
+          amountInUsdt={unbondAmountInUsdt}
         />
         {(() => {
           let disableMsg: string;

@@ -119,6 +119,8 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
           token={lpTokenInfoData}
           setAmountFromPercent={setLpAmountBurn}
           totalAmount={lpTokenBalance}
+          prefixText="Token Balance: "
+          amountInUsdt={lpAmountBurnUsdt}
         />
 
         <div className={cx('detail')}>
