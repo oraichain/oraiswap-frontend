@@ -1,6 +1,54 @@
 @import 'src/styles/themes';
 @import 'src/styles/mixins';
 
+
+.pool_detail {
+  max-width: 90%;
+  margin: 40px auto 0;
+
+  @media screen and (max-width: 1200px) {
+    max-width: 95%;
+  }
+
+  @include small-mobile {
+    margin-top: 85px;
+  }
+
+  .back {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border-bottom: 2px;
+    margin-bottom: 16px;
+    width: fit-content;
+
+    .backIcon {
+      @include theme() {
+        path {
+          stroke: theme-get('neutral-text-text-token-name');
+        }
+      }
+    }
+
+    span {
+      margin-left: 5px;
+      border-bottom: 2px solid transparent;
+
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+
+        &:hover {
+          border-color: theme-get('neutral-text-text-token-name');
+        }
+      }
+    }
+  }
+}
+
 .pool-detail {
   padding: 40px;
 

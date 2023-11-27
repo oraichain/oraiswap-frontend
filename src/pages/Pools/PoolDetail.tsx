@@ -1,444 +1,87 @@
-import cn from 'classnames/bind';
-import Pie from 'components/Pie';
-import { Pairs } from 'config/pools';
-import Content from 'layouts/Content';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  fetchPairInfo,
-  fetchRewardInfo,
-  fetchRewardPerSecInfo,
-  fetchStakingPoolInfo,
-  fetchTokenInfo,
-  getPairAmountInfo
-} from 'rest/api';
-import BondingModal from './BondingModal/BondingModal';
-import LiquidityModal from './LiquidityModal/LiquidityModal';
-import styles from './PoolDetail.module.scss';
-
-import { useQuery } from '@tanstack/react-query';
-import TokenBalance from 'components/TokenBalance';
-import { oraichainTokens } from 'config/bridgeTokens';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
+import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { getUsd } from 'libs/utils';
+import Content from 'layouts/Content';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCacheLpPools, fetchMyPairsData } from './helpers';
+import { useNavigate, useParams } from 'react-router-dom';
+import { updateLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
-import LiquidityMining from './LiquidityMining/LiquidityMining';
-import UnbondModal from './UnbondModal/UnbondModal';
-import { ReactComponent as LpTokenIcon } from 'assets/icons/lp_token.svg';
-import { network } from 'config/networks';
-import { useFetchAllPairs } from './hooks';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { updateBondLpPools, updateLpPools } from 'reducer/token';
+import { PoolInfoResponse } from 'types/pool';
+import styles from './PoolDetail.module.scss';
+import { Earning } from './components/Earning';
+import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
+import { OverviewPool } from './components/OverviewPool';
+import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
+import { useGetPairInfo } from './hooks/useGetPairInfo';
 
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { TokenItemType, toDecimal } from '@oraichain/oraidex-common';
-const cx = cn.bind(styles);
-
-interface PoolDetailProps {}
-
-const PoolDetail: React.FC<PoolDetailProps> = () => {
+const PoolDetailV3: React.FC = () => {
   let { poolUrl } = useParams();
-
-  const [isOpenLiquidityModal, setIsOpenLiquidityModal] = useState(false);
-  const [isOpenBondingModal, setIsOpenBondingModal] = useState(false);
-  const [isOpenUnbondModal, setIsOpenUnbondModal] = useState(false);
-  const [address] = useConfigReducer('address');
-  const [cachedApr] = useConfigReducer('apr');
-  const [theme] = useConfigReducer('theme');
-  const { data: prices } = useCoinGeckoPrices();
-  const [assetToken, setAssetToken] = useState<TokenItemType>();
-  const pairs = useFetchAllPairs();
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [address] = useConfigReducer('address');
+  const lpPools = useSelector((state: RootState) => state.token.lpPools);
+  const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
+  const lpTokenBalance = BigInt(poolDetailData.info ? lpPools[poolDetailData.info?.liquidityAddr]?.balance || '0' : 0);
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
-  const setCachedBondLpPools = (payload: BondLpPoolDetails) => dispatch(updateBondLpPools(payload));
+  const pools = useGetPools();
+  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
+  const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
+  const queryClient = useQueryClient();
 
-  const getPairInfo = async () => {
-    if (!poolUrl) return;
-    const pairRawData = poolUrl.split('_');
-    const tokenTypes = pairRawData.map((raw) =>
-      oraichainTokens.find((token) => token.denom === raw || token.contractAddress === raw)
-    );
-    let isPairExist = true;
-    let info: PairInfo;
-    try {
-      info = await fetchPairInfo([tokenTypes[0], tokenTypes[1]]);
-    } catch (error) {
-      console.log('error getting pair info in pool details: ', error);
-      isPairExist = false;
-    }
-    if (!isPairExist) return;
-    return {
-      info,
-      token1: tokenTypes[0],
-      token2: tokenTypes[1],
-      apr: cachedApr?.[info.contract_addr] ?? 0
-    };
-  };
-
-  const fetchCachedLpTokenAll = async () => {
-    const lpTokenData = await fetchCacheLpPools(
-      pairs,
+  const refetchAllLpPools = useCallback(async () => {
+    if (pools.length === 0) return;
+    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+    const lpTokenData = await fetchLpPoolsFromContract(
+      lpAddresses,
       address,
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  };
+  }, [pools]);
 
-  const fetchCachedBondLpTokenAll = async () => {
-    const bonLpTokenData = await fetchMyPairsData(
-      pairs,
-      address,
-      new MulticallQueryClient(window.client, network.multicall),
-      'bond'
-    );
-    setCachedBondLpPools(bonLpTokenData);
-  };
+  const onLiquidityChange = useCallback(
+    (amountLpInUsdt = 0) => {
+      refetchPairAmountInfo();
+      refetchLpTokenInfoData();
+      refetchAllLpPools();
+      loadTokenAmounts({ oraiAddress: address });
 
-  const onBondingAction = () => {
-    refetchRewardInfo();
-    refetchPairAmountInfo();
-    fetchCachedLpTokenAll();
-    fetchCachedBondLpTokenAll();
-    loadTokenAmounts({ oraiAddress: address });
-  };
-
-  const { data: pairInfoData } = useQuery(['pair-info', poolUrl], () => getPairInfo(), {
-    refetchOnWindowFocus: false
-  });
-
-  let { data: pairAmountInfoData, refetch: refetchPairAmountInfo } = useQuery(
-    ['pair-amount-info', pairInfoData],
-    () => {
-      return getPairAmountInfo(pairInfoData.token1, pairInfoData.token2);
+      // Update in an immutable way.
+      const queryKey = ['pool-detail', poolUrl];
+      queryClient.setQueryData(queryKey, (oldPoolDetail: PoolInfoResponse) => {
+        const updatedTotalLiquidity = oldPoolDetail.totalLiquidity + amountLpInUsdt;
+        return {
+          ...oldPoolDetail,
+          totalLiquidity: updatedTotalLiquidity
+        };
+      });
     },
-    {
-      enabled: !!pairInfoData,
-      refetchOnWindowFocus: false,
-      refetchInterval: 15000
-    }
+    [address, pools]
   );
 
-  const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData.info.liquidity_token]?.balance ?? '0' : 0);
-
-  const { data: lpTokenInfoData } = useQuery(
-    ['token-info', pairInfoData],
-    () =>
-      fetchTokenInfo({
-        contractAddress: pairInfoData?.info.liquidity_token
-      } as TokenItemType),
-    {
-      enabled: !!pairInfoData,
-      refetchOnWindowFocus: false
-    }
-  );
-
-  const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', address, pairInfoData, assetToken],
-    () => fetchRewardInfo(address, assetToken!),
-    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
-  );
-
-  const { data: rewardPerSecInfoData } = useQuery(
-    ['reward-per-sec-info', address, pairInfoData, assetToken],
-    async () => {
-      let t = await fetchRewardPerSecInfo(assetToken!);
-      return t.assets;
-    },
-    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
-  );
-
-  const { data: stakingPoolInfoData } = useQuery(
-    ['staking-pool-info', address, pairInfoData, assetToken],
-    () => fetchStakingPoolInfo(assetToken!),
-    { enabled: !!address && !!assetToken, refetchOnWindowFocus: false }
-  );
-
-  useEffect(() => {
-    if (pairInfoData?.token1?.name === 'ORAI') {
-      setAssetToken(pairInfoData.token2);
-    } else if (!!pairInfoData) {
-      setAssetToken(pairInfoData.token1);
-    }
-  }, [pairInfoData]);
-
-  const Token1Icon =
-    theme === 'light' && pairInfoData?.token1?.IconLight ? pairInfoData?.token1?.IconLight : pairInfoData?.token1?.Icon;
-  const Token2Icon =
-    theme === 'light' && pairInfoData?.token2?.IconLight ? pairInfoData?.token2?.IconLight : pairInfoData?.token2?.Icon;
-
-  const token1Amount = BigInt(pairAmountInfoData?.token1Amount ?? 0);
-  const token2Amount = BigInt(pairAmountInfoData?.token2Amount ?? 0);
-
-  const lpTotalSupply = BigInt(lpTokenInfoData?.total_supply ?? 0);
-  const liquidity1 = lpTotalSupply === BigInt(0) ? BigInt(0) : (lpTokenBalance * token1Amount) / lpTotalSupply;
-  const liquidity2 = lpTotalSupply === BigInt(0) ? BigInt(0) : (lpTokenBalance * token2Amount) / lpTotalSupply;
-  const liquidityUsd = toDecimal(lpTokenBalance, lpTotalSupply) * (pairAmountInfoData?.tokenUsd ?? 0);
-
-  const rewardInfoFirst = totalRewardInfoData?.reward_infos[0];
-
-  const bondAmountUsd = rewardInfoFirst
-    ? toDecimal(BigInt(rewardInfoFirst?.bond_amount ?? 0), lpTotalSupply) * (pairAmountInfoData?.tokenUsd ?? 0)
-    : 0;
-
-  const ratio = pairAmountInfoData ? toDecimal(token1Amount, token2Amount) : 0;
   return (
     <Content nonBackground>
-      {!!pairInfoData ? (
-        <>
-          <div className={cx('pool-detail')}>
-            <div className={cx('header')}>
-              <div className={cx('token-info')}>
-                <div className={cx('logo')}>
-                  {Token1Icon! && <Token1Icon className={cx('token1')} />}
-                  {Token2Icon! && <Token2Icon className={cx('token2')} />}
-                </div>
-
-                <div className={cx('title')}>
-                  <div className={cx('name', theme)}>{`${pairInfoData.token1!.name}/${pairInfoData.token2!.name}`}</div>
-                  <TokenBalance
-                    balance={pairAmountInfoData?.tokenUsd}
-                    className={cx('value', theme)}
-                    decimalScale={2}
-                  />
-                </div>
-              </div>
-              {!!pairAmountInfoData && (
-                <div className={cx('des')}>
-                  <span>{`1 ${pairInfoData.token2!.name} ≈ `}</span>
-                  <span>
-                    {ratio} {pairInfoData.token1!.name}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className={cx('info')}>
-              {!!pairAmountInfoData && lpTokenInfoData && (
-                <div className={cx('row')}>
-                  <div className={cx('container', 'tokens')}>
-                    <div className={cx('available-tokens')}>
-                      <div className={cx('label')}>Available LP tokens</div>
-                      <Pie percent={50}>
-                        <div>
-                          <TokenBalance
-                            balance={{
-                              amount: lpTokenBalance,
-                              decimals: lpTokenInfoData.decimals,
-                              denom: lpTokenInfoData.symbol
-                            }}
-                            decimalScale={6}
-                            className={cx('amount', theme)}
-                          />
-                        </div>
-                        <TokenBalance balance={liquidityUsd} decimalScale={2} className={cx('amount-usd')} />
-                      </Pie>
-                    </div>
-                    <div className={cx('liquidity')}>
-                      <div className={cx('label')}>My liquidity</div>
-                      <div className={cx('liquidity_token')}>
-                        <div className={cx('liquidity_token_name')}>
-                          <span className={cx('mark')} style={{ background: '#ffd5ae' }}></span>
-                          <span className={cx('icon')}></span>
-                          <span className={cx('token-name', theme)}>{pairInfoData.token1?.name}</span>
-                        </div>
-                        <div className={cx('liquidity_token_value')}>
-                          <TokenBalance
-                            balance={{
-                              amount: liquidity1,
-                              decimals: pairInfoData.token1.decimals
-                            }}
-                            className={cx('amount', theme)}
-                            decimalScale={6}
-                          />
-                          <TokenBalance
-                            balance={getUsd(liquidity1, pairInfoData.token1, prices)}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
-                        </div>
-                      </div>
-                      <div className={cx('liquidity_token')}>
-                        <div className={cx('liquidity_token_name')}>
-                          <span className={cx('mark')} style={{ background: '#612FCA' }}></span>
-                          <span className={cx('icon')}></span>
-                          <span className={cx('token-name', theme)}>{pairInfoData.token2?.name}</span>
-                        </div>
-                        <div className={cx('liquidity_token_value')}>
-                          <TokenBalance
-                            balance={{
-                              amount: liquidity2,
-                              decimals: pairInfoData.token2.decimals
-                            }}
-                            className={cx('amount', theme)}
-                            decimalScale={6}
-                          />
-                          <TokenBalance
-                            balance={getUsd(liquidity2, pairInfoData.token2, prices)}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
-                        </div>
-                      </div>
-                      <button
-                        className={cx('btn')}
-                        style={{ marginTop: 30 }}
-                        onClick={() => setIsOpenLiquidityModal(true)}
-                      >
-                        Add/Remove Liquidity
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={cx('container', 'pool-catalyst')}>
-                    <div className={cx('label')}>Total liquidity</div>
-                    <div className={cx('content')}>
-                      <div className={cx('pool-catalyst_token')}>
-                        <div className={cx('pool-catalyst_token_name')}>
-                          {Token1Icon! && <Token1Icon className={cx('icon')} />}
-                          <span className={cx('token-name', theme)}>{pairInfoData.token1!.name}</span>
-                        </div>
-                        <div className={cx('pool-catalyst_token_value')}>
-                          <TokenBalance
-                            balance={{
-                              amount: pairAmountInfoData.token1Amount,
-                              decimals: pairInfoData.token1.decimals
-                            }}
-                            className={cx('amount', theme)}
-                            decimalScale={6}
-                          />
-                          <TokenBalance
-                            balance={pairAmountInfoData.tokenUsd / 2}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
-                        </div>
-                      </div>
-                      <div className={cx('pool-catalyst_token')}>
-                        <div className={cx('pool-catalyst_token_name')}>
-                          {Token2Icon! && <Token2Icon className={cx('icon')} />}
-                          <span className={cx('token-name', theme)}>{pairInfoData.token2?.name}</span>
-                        </div>
-                        <div className={cx('pool-catalyst_token_value')}>
-                          <TokenBalance
-                            balance={{
-                              amount: pairAmountInfoData.token2Amount,
-                              decimals: pairInfoData.token2.decimals
-                            }}
-                            className={cx('amount', theme)}
-                            decimalScale={6}
-                          />
-                          <TokenBalance
-                            balance={pairAmountInfoData.tokenUsd / 2}
-                            className={cx('amount-usd')}
-                            decimalScale={2}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <hr
-                      style={{
-                        borderTop: theme === 'light' ? '1px  solid #CCCDD0' : '1px  solid #2D2938',
-                        width: '100%'
-                      }}
-                    />
-                    <div className={cx('content')}>
-                      <div className={cx('pool-catalyst_token_lp')}>
-                        <div className={cx('pool-catalyst_token_name')}>
-                          <LpTokenIcon className={cx('icon')} />
-                          <span className={cx('token-name', theme)}>LP Token</span>
-                        </div>
-                        <div className={cx('pool-catalyst_token_value')}>
-                          <TokenBalance
-                            balance={{
-                              amount: lpTokenInfoData?.total_supply,
-                              decimals: lpTokenInfoData?.decimals
-                            }}
-                            className={cx('amount', theme)}
-                            decimalScale={6}
-                          />
-                          <TokenBalance balance={0} className={cx('amount-usd')} decimalScale={2} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {lpTokenInfoData && assetToken && (
-                <LiquidityMining
-                  setIsOpenBondingModal={setIsOpenBondingModal}
-                  lpTokenBalance={lpTokenBalance.toString()}
-                  rewardInfoFirst={rewardInfoFirst}
-                  lpTokenInfoData={lpTokenInfoData}
-                  setIsOpenUnbondModal={setIsOpenUnbondModal}
-                  pairAmountInfoData={pairAmountInfoData}
-                  assetToken={assetToken}
-                  onBondingAction={onBondingAction}
-                  totalRewardInfoData={totalRewardInfoData}
-                  rewardPerSecInfoData={rewardPerSecInfoData}
-                  stakingPoolInfoData={stakingPoolInfoData}
-                  apr={pairInfoData.apr}
-                  pairInfoData={pairInfoData.info}
-                />
-              )}
-            </div>
-          </div>
-          {isOpenLiquidityModal &&
-            pairAmountInfoData &&
-            lpTokenInfoData &&
-            pairInfoData.token1 &&
-            pairInfoData.token2 && (
-              <LiquidityModal
-                isOpen={isOpenLiquidityModal}
-                open={() => setIsOpenLiquidityModal(true)}
-                close={() => setIsOpenLiquidityModal(false)}
-                token1InfoData={pairInfoData.token1}
-                token2InfoData={pairInfoData.token2}
-                lpTokenInfoData={lpTokenInfoData}
-                lpTokenBalance={lpTokenBalance.toString()}
-                pairAmountInfoData={pairAmountInfoData}
-                refetchPairAmountInfo={refetchPairAmountInfo}
-                fetchCachedLpTokenAll={fetchCachedLpTokenAll}
-                fetchCachedBondLpTokenAll={fetchCachedBondLpTokenAll}
-                pairInfoData={pairInfoData.info}
-              />
-            )}
-          {isOpenBondingModal && lpTokenInfoData && lpTokenBalance > 0 && (
-            <BondingModal
-              isOpen={isOpenBondingModal}
-              open={() => setIsOpenBondingModal(true)}
-              close={() => setIsOpenBondingModal(false)}
-              lpTokenInfoData={lpTokenInfoData}
-              lpTokenBalance={lpTokenBalance.toString()}
-              liquidityValue={liquidityUsd}
-              assetToken={assetToken}
-              onBondingAction={onBondingAction}
-              apr={pairInfoData.apr}
-            />
-          )}
-          {isOpenUnbondModal && (
-            <UnbondModal
-              isOpen={isOpenUnbondModal}
-              open={() => setIsOpenUnbondModal(true)}
-              close={() => setIsOpenUnbondModal(false)}
-              bondAmount={rewardInfoFirst?.bond_amount ?? '0'}
-              bondAmountUsd={bondAmountUsd}
-              lpTokenInfoData={lpTokenInfoData}
-              assetToken={assetToken}
-              onBondingAction={onBondingAction}
-            />
-          )}
-        </>
-      ) : (
-        <></>
-      )}
+      <div className={styles.pool_detail}>
+        <div
+          className={styles.back}
+          onClick={() => {
+            navigate(`/pools`);
+          }}
+        >
+          <BackIcon className={styles.backIcon} />
+          <span>Back to all pools</span>
+        </div>
+        <OverviewPool poolDetailData={poolDetailData} />
+        <Earning onLiquidityChange={onLiquidityChange} />
+        <MyPoolInfo myLpBalance={lpTokenBalance} onLiquidityChange={onLiquidityChange} />
+      </div>
     </Content>
   );
 };
 
-export default PoolDetail;
+export default PoolDetailV3;
