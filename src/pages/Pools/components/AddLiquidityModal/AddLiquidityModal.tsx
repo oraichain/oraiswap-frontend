@@ -363,7 +363,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                     type="secondary"
                     disabled={disabled}
                   >
-                    {actionLoading && <Loader width={30} height={30} />}
+                    {actionLoading && <Loader width={22} height={22} />}
                     {'Deposit'}
                   </Button>
                   <Button
@@ -371,7 +371,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
                     type="primary"
                     disabled={disabled}
                   >
-                    {actionAllLoading && <Loader width={30} height={30} />}
+                    {actionAllLoading && <Loader width={22} height={22} />}
                     {'Deposit & Stake All'}
                   </Button>
                 </div>
