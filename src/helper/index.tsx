@@ -76,7 +76,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -136,7 +136,7 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
   return cosmosAddress;
 };
 
-export const handleErrorTransaction = (error: any) => {
+export const handleErrorMsg = (error: any) => {
   let finalError = '';
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
@@ -145,6 +145,11 @@ export const handleErrorTransaction = (error: any) => {
     else if (error?.message) finalError = String(error.message);
     else finalError = JSON.stringify(error);
   }
+  return finalError
+}
+
+export const handleErrorTransaction = (error: any) => {
+  const finalError = handleErrorMsg(error)
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
