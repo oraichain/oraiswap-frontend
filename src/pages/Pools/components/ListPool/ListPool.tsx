@@ -2,7 +2,7 @@ import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
-import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { PoolTableData } from 'pages/Pools/indexV3';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -55,12 +55,22 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
         <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
       )
     },
-    earned: {
-      name: 'Earned',
+    // earned: {
+    //   name: 'Earned',
+    //   width: '10%',
+    //   align: 'left',
+    //   sortField: 'earned',
+    //   accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
+    // },
+    claimable: {
+      name: 'Claimable',
       width: '10%',
       align: 'left',
-      sortField: 'earned',
-      accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
+      sortField: 'claimable',
+      accessor: (data) => {
+        const displayValue = formatDisplayClaimable(data.claimable);
+        return <span className={displayValue === '0' && styles.text_number}>{displayValue}</span>;
+      }
     },
     fee7Days: {
       name: 'Fee (7D)',
@@ -74,7 +84,10 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       width: '12%',
       align: 'right',
       sortField: 'volume24Hour',
-      accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.volume24Hour))}</span>
+      accessor: (data) => {
+        const value = toDisplay(data.volume24Hour);
+        return <span className={!value && styles.text_number}>{formatDisplayUsdt(value)}</span>;
+      }
     },
     totalLiquidity: {
       name: 'Liquidity',

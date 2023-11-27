@@ -13,7 +13,13 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import { getStatisticData, useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import {
+  getStatisticData,
+  useGetMyStake,
+  useGetPools,
+  useGetRewardInfo,
+  useGetTotalClaimable
+} from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 import { PoolTableData } from 'pages/Pools/indexV3';
@@ -55,6 +61,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
 
   const [filterDay, setFilterDay] = useState(30);
   const statisticData = getStatisticData(dataSource);
+  const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
   // TODO: get data statistic changed (suffix) by api
   const liquidityData = [
@@ -78,7 +85,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
       name: 'Total Liquidity',
       Icon: null,
       suffix: 5.25,
-      value: statisticData.totalLiquidity,
+      value: toDisplay(parseInt(statisticData.totalLiquidity.toString()).toString()),
       isNegative: false,
       decimal: 2
     }
@@ -124,7 +131,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
     <div className={styles.header}>
       <div className={styles.header_title}>
         <span className={styles.header_title_text}>POOLS</span>
-        <div className={styles.filter_day_wrapper}>
+        {/* <div className={styles.filter_day_wrapper}>
           {[1, 7, 30].map((e) => {
             return (
               <button
@@ -136,7 +143,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
               </button>
             );
           })}
-        </div>
+        </div> */}
       </div>
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (
@@ -193,7 +200,12 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
             <span className={styles.header_data_name}>Total Claimable Rewards</span>
             <br />
             <span className={styles.header_data_value}>
-              <TokenBalance balance={12.32455} prefix="+$" className={styles.header_data_value} decimalScale={6} />
+              <TokenBalance
+                balance={totalClaimable}
+                prefix="+$"
+                className={styles.header_data_value}
+                decimalScale={4}
+              />
             </span>
           </div>
         </div>

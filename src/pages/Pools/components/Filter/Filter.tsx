@@ -95,10 +95,10 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
             onSearch={(value) => setSearchValue(value)}
           />
         </div>
-        <Button type="secondary-sm" onClick={() => setIsOpenNewTokenModal(true)}>
+        {/* <Button type="secondary-sm" onClick={() => setIsOpenNewTokenModal(true)}>
           {theme === 'light' ? <IconAddLight /> : <IconAdd />}
           &nbsp; New Pool
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
