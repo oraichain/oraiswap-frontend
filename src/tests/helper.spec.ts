@@ -3,7 +3,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import { MILKYBSC_ORAICHAIN_DENOM, USDT_CONTRACT } from '@oraichain/oraidex-common';
 
 describe('should utils functions in libs/utils run exactly', () => {

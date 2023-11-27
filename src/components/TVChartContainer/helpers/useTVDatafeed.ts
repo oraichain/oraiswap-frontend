@@ -8,7 +8,7 @@ import {
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { selectCurrentToken, setChartDataLength, setChartTimeFrame } from 'reducer/tradingSlice';
+import { selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
 import { TVDataProvider } from './TVDataProvider';
 import { SUPPORTED_RESOLUTIONS } from './constants';
 import { pairsChart } from '../config';

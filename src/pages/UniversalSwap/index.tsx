@@ -9,8 +9,8 @@ import { TransactionProcess } from './Modals';
 import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
-import { useSelector } from 'react-redux';
-import { selectChartDataLength, selectCurrentToken } from 'reducer/tradingSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
 import { DuckDb } from 'libs/duckdb';
 import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
@@ -22,12 +22,11 @@ const Swap: React.FC = () => {
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
-  const chartDataLength = useSelector(selectChartDataLength);
   const theme = useTheme();
   const currentPair = useSelector(selectCurrentToken);
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
-
+  const dispatch = useDispatch();
   const initDuckdb = async () => {
     window.duckDb = await DuckDb.create();
   };
@@ -36,6 +35,10 @@ const Swap: React.FC = () => {
     if (!window.duckDb) initDuckdb();
   }, [window.duckDb]);
 
+  const handleChangeChartTimeFrame = (resolution: number) => {
+    dispatch(setChartTimeFrame(resolution));
+  };
+
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
@@ -43,12 +46,15 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                {chartDataLength > 0 && (
-                  <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
-                )}
-                <div className={cx('tv-chart', hideChart || chartDataLength === 0 ? 'hidden' : '')}>
+                <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
+                <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
-                  <TVChartContainer theme={theme} currentPair={currentPair} pairsChart={PAIRS_CHART} />
+                  <TVChartContainer
+                    theme={theme}
+                    currentPair={currentPair}
+                    pairsChart={PAIRS_CHART}
+                    setChartTimeFrame={handleChangeChartTimeFrame}
+                  />
                 </div>
               </>
             )}

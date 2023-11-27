@@ -27,12 +27,12 @@ import { TooltipIcon } from '../Modals/SettingTooltip';
 import SlippageModal from '../Modals/SlippageModal';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
 import { useWarningSlippage } from 'pages/UniversalSwap/Swap/hooks';
 import { calculateMinReceive, getPairSwapV2, toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { simulateSwap } from '@oraichain/oraidex-universal-swap';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 
 const cx = cn.bind(styles);
 

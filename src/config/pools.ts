@@ -1,31 +1,14 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { ORAI, PAIRS, TokenItemType, USDT_CONTRACT, parseAssetInfo } from '@oraichain/oraidex-common';
 import { flatten, uniq } from 'lodash';
 import { assetInfoMap } from './bridgeTokens';
-import {
-  ORAI,
-  PAIRS,
-  TokenItemType,
-  USDT_CONTRACT,
-  parseAssetInfo,
-  AIRI_CONTRACT,
-  ORAIX_CONTRACT,
-  OSMOSIS_ORAICHAIN_DENOM,
-  SCATOM_CONTRACT,
-  ATOM_ORAICHAIN_DENOM,
-  INJECTIVE_CONTRACT,
-  SCORAI_CONTRACT,
-  KWT_CONTRACT,
-  USDC_CONTRACT,
-  TRX_CONTRACT,
-  MILKY_CONTRACT
-} from '@oraichain/oraidex-common';
 
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
-import { network } from './networks';
-import { PairInfoExtend } from 'types/token';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { PairInfoExtend } from 'types/token';
+import { network } from './networks';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -108,66 +91,7 @@ export class Pairs {
   };
 }
 
-// TODO: just for test oraidex common ui package, remove later.
-export const TEMP_PAIRS = [
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: AIRI_CONTRACT } }],
-    symbols: ['AIRI', 'ORAI'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: ORAIX_CONTRACT } }],
-    symbols: ['ORAIX', 'ORAI'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: SCORAI_CONTRACT } }],
-    symbols: ['scORAI', 'ORAI']
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { native_token: { denom: ATOM_ORAICHAIN_DENOM } }],
-    symbols: ['ORAI', 'ATOM'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: USDT_CONTRACT } }],
-    symbols: ['ORAI', 'USDT'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: KWT_CONTRACT } }],
-    symbols: ['KWT', 'ORAI'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { native_token: { denom: OSMOSIS_ORAICHAIN_DENOM } }],
-    symbols: ['ORAI', 'OSMO'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ token: { contract_addr: MILKY_CONTRACT } }, { token: { contract_addr: USDT_CONTRACT } }],
-    symbols: ['MILKY', 'USDT'],
-    factoryV1: true
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: USDC_CONTRACT } }],
-    symbols: ['ORAI', 'USDC']
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: TRX_CONTRACT } }],
-    symbols: ['ORAI', 'WTRX']
-  },
-  {
-    asset_infos: [{ native_token: { denom: ATOM_ORAICHAIN_DENOM } }, { token: { contract_addr: SCATOM_CONTRACT } }],
-    symbols: ['scATOM', 'ATOM']
-  },
-  {
-    asset_infos: [{ native_token: { denom: ORAI } }, { token: { contract_addr: INJECTIVE_CONTRACT } }],
-    symbols: ['INJ', 'ORAI']
-  }
-];
-
-export const PAIRS_CHART = TEMP_PAIRS.map((pair) => {
+export const PAIRS_CHART = PAIRS.map((pair) => {
   const assets = pair.asset_infos.map((info) => {
     if ('native_token' in info) return info.native_token.denom;
     return info.token.contract_addr;

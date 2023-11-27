@@ -76,9 +76,7 @@ export type InfoAToken = {
 };
 
 export interface TradingState {
-  listToken: PairToken[];
   currentToken: PairToken | null;
-  chartDataLength: number;
   chartTimeFrame: number;
 }
 
