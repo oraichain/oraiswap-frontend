@@ -343,6 +343,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
 
           const disabled =
             actionLoading ||
+            actionAllLoading ||
             !token1 ||
             !token2 ||
             !pairInfoData ||

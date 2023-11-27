@@ -184,7 +184,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
                 type="primary"
                 disabled={disabled}
               >
-                {actionLoading && <Loader width={30} height={30} />}
+                {actionLoading && <Loader width={22} height={22} />}
                 {disableMsg || 'Confirm'}
               </Button>
             </div>

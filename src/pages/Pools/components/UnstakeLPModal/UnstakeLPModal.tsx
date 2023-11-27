@@ -137,7 +137,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
           return (
             <div className={cx('btn-confirm')}>
               <Button onClick={() => handleUnbond(unbondAmount)} type="primary" disabled={disabled}>
-                {actionLoading && <Loader width={30} height={30} />}
+                {actionLoading && <Loader width={22} height={22} />}
                 {disableMsg || 'Unstake'}
               </Button>
             </div>

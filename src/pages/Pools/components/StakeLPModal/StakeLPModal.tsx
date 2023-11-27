@@ -136,7 +136,7 @@ export const StakeLPModal: FC<ModalProps> = ({
           return (
             <div className={cx('btn-confirm')}>
               <Button onClick={() => handleBond(bondAmount)} type="primary" disabled={disabled}>
-                {actionLoading && <Loader width={30} height={30} />}
+                {actionLoading && <Loader width={22} height={22} />}
                 {disableMsg || 'Stake'}
               </Button>
             </div>
