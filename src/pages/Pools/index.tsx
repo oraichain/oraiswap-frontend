@@ -63,7 +63,7 @@ const Pools: React.FC<{}> = () => {
       ]);
 
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
-      const myStakedLP = stakingAssetInfo
+      const myStakedLP = pool.liquidityAddr
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))?.bond_amount ||
         '0'
         : 0;
