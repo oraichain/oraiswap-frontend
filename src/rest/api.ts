@@ -42,7 +42,6 @@ import {
   isFactoryV1,
   parseTokenInfo,
   toAmount,
-  toAssetInfo,
   toDecimal,
   toDisplay,
   toTokenInfo
@@ -99,14 +98,14 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
 }
 
 async function fetchAllRewardPerSecInfos(
-  tokens: TokenItemType[]
+  liquidityAddrs: string[]
 ): Promise<OraiswapStakingTypes.RewardsPerSecResponse[]> {
-  const queries = tokens.map((token) => {
+  const queries = liquidityAddrs.map((token) => {
     return {
       address: network.staking,
       data: toBinary({
         rewards_per_sec: {
-          asset_info: toAssetInfo(token)
+          staking_token: token
         }
       } as OraiswapStakingTypes.QueryMsg)
     };
@@ -119,13 +118,13 @@ async function fetchAllRewardPerSecInfos(
   return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
-async function fetchAllTokenAssetPools(tokens: TokenItemType[]): Promise<OraiswapStakingTypes.PoolInfoResponse[]> {
+async function fetchAllTokenAssetPools(tokens: string[]): Promise<OraiswapStakingTypes.PoolInfoResponse[]> {
   const queries = tokens.map((token) => {
     return {
       address: network.staking,
       data: toBinary({
         pool_info: {
-          asset_info: toAssetInfo(token)
+          staking_token: token
         }
       } as OraiswapStakingTypes.QueryMsg)
     };
@@ -253,27 +252,23 @@ async function fetchTokenAllowance(tokenAddr: string, walletAddr: string, spende
 
 async function fetchRewardInfo(
   stakerAddr: string,
-  assetToken: TokenItemType
+  stakingToken:string 
 ): Promise<OraiswapStakingTypes.RewardInfoResponse> {
-  const { info: assetInfo } = parseTokenInfo(assetToken);
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.rewardInfo({ assetInfo, stakerAddr });
+  const data = await stakingContract.rewardInfo({ stakingToken, stakerAddr });
   return data;
 }
 
-async function fetchRewardPerSecInfo(assetToken: TokenItemType): Promise<OraiswapStakingTypes.RewardsPerSecResponse> {
-  const { info: assetInfo } = parseTokenInfo(assetToken);
+async function fetchRewardPerSecInfo(stakingToken: string): Promise<OraiswapStakingTypes.RewardsPerSecResponse> {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.rewardsPerSec({ assetInfo });
+  const data = await stakingContract.rewardsPerSec({ stakingToken});
 
   return data;
 }
 
-async function fetchStakingPoolInfo(assetToken: TokenItemType): Promise<OraiswapStakingTypes.PoolInfoResponse> {
-  const { info: assetInfo } = parseTokenInfo(assetToken);
+async function fetchStakingPoolInfo(stakingToken: string): Promise<OraiswapStakingTypes.PoolInfoResponse> {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
-  const data = await stakingContract.poolInfo({ assetInfo });
-
+  const data = await stakingContract.poolInfo({ stakingToken});
   return data;
 }
 
