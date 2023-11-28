@@ -94,11 +94,11 @@ describe('Migrate staking contract', () => {
     await setupSimulateClient();
   }, 100000);
 
-  it.each(liquidAddrs)(`must have reward info for liquid address %s`, async (address) => {
-    const rewardInfoPerSec = await fetchRewardPerSecInfo(address);
-    const pool = await fetchStakingPoolInfo(address);
+  it.each(liquidAddrs)(`must have reward info for liquid address %s`, async (lpToken) => {
+    const rewardInfoPerSec = await fetchRewardPerSecInfo(lpToken);
+    const pool = await fetchStakingPoolInfo(lpToken);
     expect(rewardInfoPerSec).toBeDefined();
     expect(pool).toBeDefined();
-    expect(pool.staking_token).toBe(address);
+    expect(pool.staking_token).toBe(lpToken);
   });
 });
