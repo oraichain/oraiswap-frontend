@@ -2910,15 +2910,20 @@
     "@keplr-wallet/types" "^0.11.38"
     ethers "^5.0.15"
 
-"@oraichain/oraidex-contracts-build@^1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.20.tgz#4e54d96c34cfb28a8c16ecd0d82c7c839f9f9690"
-  integrity sha512-BaFFsoEmNC4PweyaTR5MQActVDh5UCeJWGbfEfEowquARj7Q/vWqCHYwj+MkYVz+zn0C3WUTErRZfHjoSbDbGQ==
+"@oraichain/oraidex-contracts-build@^1.0.22":
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz#70b765dd8ea3b500a77cc37e6a45ea9d75f0c5c4"
+  integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
 "@oraichain/oraidex-contracts-sdk@^1.0.24":
   version "1.0.24"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.24.tgz#6662b3e916bfe9bd256de0f4c463bd2630b9fae3"
   integrity sha512-FUzGli0ueR7VwD1oJPn0z1zZ0uSrBmuQS77Tkd3OasUvHoptCYkuY1CeeiFw7woQxHWhHpeS9RjH9K7JLLGhmQ==
+
+"@oraichain/oraidex-contracts-sdk@^1.0.26":
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.26.tgz#83c4c80185396a9c62d7ced4437bef7b178e0c37"
+  integrity sha512-Uai30rSSn7h46lBLFuVbW96ErXAWRxfvEP+CNm/TXyGIw8VRtTaebQAqldsbxzYwBVEYbwDwZMHRGQWrsJBkJg==
 
 "@oraichain/oraidex-universal-swap@^1.0.32":
   version "1.0.32"

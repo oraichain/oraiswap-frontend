@@ -72,8 +72,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
         } else {
           denom = p.asset_infos_raw?.[0];
         }
-        const assetToken = oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom);
-        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(assetToken)]);
+        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(p.liquidity_token)]);
         const reward = pairInfoRewardDataRaw.assets.reduce((acc, cur) => {
           let token =
             'token' in cur.info ? cw20TokenMap[cur.info.token.contract_addr] : tokenMap[cur.info.native_token.denom];

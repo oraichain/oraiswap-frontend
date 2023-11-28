@@ -11,12 +11,11 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgsV3, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './UnstakeLPModal.module.scss';
 import { toAmount, CW20_DECIMALS, ORAI, toDisplay } from '@oraichain/oraidex-common';
@@ -38,10 +37,10 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const stakingAssetInfo = useGetStakingAssetInfo();
+  const liquidityToken = poolDetail?.info?.liquidityAddr;
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    stakingToken: liquidityToken
   });
 
   const totalBondAmount =
@@ -72,14 +71,11 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msg = generateMiningMsgsV3({
+      const msg = generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpAddress: liquidityToken
       });
 
       const result = await CosmJs.execute({
