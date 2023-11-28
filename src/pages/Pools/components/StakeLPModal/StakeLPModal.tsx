@@ -1,27 +1,27 @@
+import { ORAI, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
 import { network } from 'config/networks';
+import { Pairs } from 'config/pools';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
-import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { generateMiningMsgs, Type } from 'rest/api';
 import { RootState } from 'store/configure';
+import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './StakeLPModal.module.scss';
-import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
-import { Pairs } from 'config/pools';
 
 const cx = cn.bind(styles);
 
@@ -110,56 +110,19 @@ export const StakeLPModal: FC<ModalProps> = ({
             </div>
           </div>
         </div>
-        <div className={cx('apr')}>Current APR: {toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}%</div>
-        <div className={cx('supply', theme)}>
-          <div className={cx('balance')}>
-            <div className={cx('amount', theme)}>
-              <TokenBalance
-                balance={{
-                  amount: lpTokenBalance,
-                  denom: lpTokenInfoData?.symbol,
-                  decimals: lpTokenInfoData?.decimals
-                }}
-                decimalScale={6}
-                prefix="Balance: "
-              />
-            </div>
-            <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance / BigInt(2))}>
-                Half
-              </Button>
-              <Button type="primary-sm" onClick={() => setBondAmount(lpTokenBalance)}>
-                Max
-              </Button>
-            </div>
-          </div>
-          <div className={cx('input')}>
-            <div className={cx('input-amount')}>
-              <NumberFormat
-                className={cx('amount', theme)}
-                thousandSeparator
-                decimalScale={6}
-                placeholder={'0'}
-                allowNegative={false}
-                value={bondAmount === null ? '' : toDisplay(bondAmount, lpTokenInfoData.decimals)}
-                onValueChange={({ floatValue }) => {
-                  if (floatValue === undefined) setBondAmount(null);
-                  else setBondAmount(toAmount(floatValue, lpTokenInfoData.decimals));
-                }}
-              />
-              <div className={cx('amount-usd', theme)}>
-                <TokenBalance
-                  balance={{
-                    amount: BigInt(Math.trunc(bondAmountInUsdt || 0)),
-                    decimals: lpTokenInfoData?.decimals
-                  }}
-                  prefix="~$"
-                  decimalScale={2}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+
+        <InputWithOptionPercent
+          onValueChange={({ floatValue }) => {
+            if (floatValue === undefined) setBondAmount(null);
+            else setBondAmount(toAmount(floatValue, lpTokenInfoData?.decimals));
+          }}
+          value={bondAmount}
+          token={lpTokenInfoData}
+          setAmountFromPercent={setBondAmount}
+          totalAmount={lpTokenBalance}
+          apr={toFixedIfNecessary(pairInfoData?.apr.toString() || '0', 2)}
+          amountInUsdt={bondAmountInUsdt}
+        />
         {(() => {
           let disableMsg: string;
           if (bondAmount <= 0) disableMsg = 'Enter an amount';
@@ -169,7 +132,7 @@ export const StakeLPModal: FC<ModalProps> = ({
           return (
             <div className={cx('btn-confirm')}>
               <Button onClick={() => handleBond(bondAmount)} type="primary" disabled={disabled}>
-                {actionLoading && <Loader width={30} height={30} />}
+                {actionLoading && <Loader width={22} height={22} />}
                 {disableMsg || 'Stake'}
               </Button>
             </div>

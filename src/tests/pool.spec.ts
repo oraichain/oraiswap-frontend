@@ -506,5 +506,9 @@ describe.skip('pool', () => {
 
     // assertion
     expect(result).toEqual(expectedResult);
+
+    // if totalShare is falsy
+    payload.totalShare = NaN;
+    expect(estimateShare(payload)).toEqual(0);
   });
 });

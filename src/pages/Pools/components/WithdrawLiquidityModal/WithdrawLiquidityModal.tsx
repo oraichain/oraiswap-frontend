@@ -1,4 +1,4 @@
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
+import { CW20_DECIMALS, ORAI, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -13,14 +13,13 @@ import CosmJs from 'libs/cosmjs';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useGetPoolDetail } from 'pages/Pools/hookV3';
 import { FC, useState } from 'react';
-import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { generateContractMessages, Type } from 'rest/api';
 import { RootState } from 'store/configure';
+import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './WithdrawLiquidityModal.module.scss';
-import { toAmount, CW20_DECIMALS, ORAI, toDisplay } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 
@@ -42,6 +41,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
   const [chosenWithdrawPercent, setChosenWithdrawPercent] = useState(-1);
   const [lpAmountBurn, setLpAmountBurn] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isFocus, setIsFocus] = useState(true);
 
   const lpTokenBalance = BigInt(pairInfoData ? lpPools[pairInfoData?.liquidityAddr]?.balance ?? '0' : 0);
   const token1Amount = BigInt(pairAmountInfoData?.token1Amount || 0);
@@ -109,88 +109,29 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
             </div>
           </div>
         </div>
-        <div className={cx('supply', theme)}>
-          <div className={cx('balance')}>
-            <div className={cx('amount', theme)}>
-              <TokenBalance
-                balance={{
-                  amount: lpTokenBalance,
-                  denom: lpTokenInfoData?.symbol,
-                  decimals: lpTokenInfoData?.decimals
-                }}
-                prefix="LP Token Balance: "
-                decimalScale={6}
-              />
-            </div>
-          </div>
-          <div className={cx('input')}>
-            <div className={cx('input-amount')}>
-              <NumberFormat
-                className={cx('amount', theme)}
-                thousandSeparator
-                decimalScale={6}
-                placeholder={'0'}
-                value={lpAmountBurn === null ? '' : toDisplay(lpAmountBurn, lpTokenInfoData?.decimals)}
-                onValueChange={({ floatValue }) => {
-                  if (floatValue === undefined) setLpAmountBurn(null);
-                  else setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals));
-                }}
-              />
-              <div className={cx('amount-usd', theme)}>
-                <TokenBalance
-                  balance={{
-                    amount: BigInt(Math.trunc(lpAmountBurnUsdt)),
-                    decimals: lpTokenInfoData?.decimals
-                  }}
-                  prefix="~$"
-                  decimalScale={2}
-                />
-              </div>
-            </div>
-          </div>
-          <div className={cx('options')}>
-            {[25, 50, 75, 100].map((option, idx) => (
-              <div
-                className={cx('item', theme, {
-                  isChosen: chosenWithdrawPercent === idx
-                })}
-                key={idx}
-                onClick={() => {
-                  onChangeWithdrawPercent(option);
-                  setChosenWithdrawPercent(idx);
-                }}
-              >
-                {option}%
-              </div>
-            ))}
-            <div
-              className={cx('item', theme, 'manual-option', {
-                isChosen: chosenWithdrawPercent === 4
-              })}
-              onClick={() => setChosenWithdrawPercent(4)}
-            >
-              <input
-                placeholder="0.00"
-                type={'number'}
-                className={cx('input', theme)}
-                onChange={(event) => {
-                  onChangeWithdrawPercent(+event.target.value);
-                }}
-              />
-              %
-            </div>
-          </div>
-        </div>
+
+        <InputWithOptionPercent
+          onValueChange={({ floatValue }) => {
+            if (floatValue === undefined) setLpAmountBurn(null);
+            else setLpAmountBurn(toAmount(floatValue, lpTokenInfoData?.decimals));
+          }}
+          value={lpAmountBurn}
+          token={lpTokenInfoData}
+          setAmountFromPercent={setLpAmountBurn}
+          totalAmount={lpTokenBalance}
+          prefixText="Token Balance: "
+          amountInUsdt={lpAmountBurnUsdt}
+        />
 
         <div className={cx('detail')}>
-          <div className={cx('arrow-down', theme)}>
+          {/* <div className={cx('arrow-down', theme)}>
             <div className={cx('inner-arrow', theme)}>
               <ArrowDownIcon />
             </div>
-          </div>
+          </div> */}
           <div className={cx('row', theme)}>
             <div className={cx('row-title')}>
-              <span>Received</span>
+              <span>Receive</span>
             </div>
             <div className={cx('row-amount')}>
               <div className={cx('token')}>
@@ -243,7 +184,7 @@ export const WithdrawLiquidityModal: FC<ModalProps> = ({
                 type="primary"
                 disabled={disabled}
               >
-                {actionLoading && <Loader width={30} height={30} />}
+                {actionLoading && <Loader width={22} height={22} />}
                 {disableMsg || 'Confirm'}
               </Button>
             </div>
