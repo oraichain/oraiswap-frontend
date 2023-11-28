@@ -17,7 +17,6 @@ import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
 import {
   PairInfoData,
-  fetchAprResult,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairsData,
@@ -41,23 +40,6 @@ export const useFetchAllPairs = () => {
   }, []);
 
   return cachedPairInfoExtend;
-};
-
-// Fetch APR
-export const useFetchApr = (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const [cachedApr, setCachedApr] = useConfigReducer('apr');
-
-  const fetchApr = async () => {
-    const cachedApr = await fetchAprResult(pairs, pairInfos, prices);
-    setCachedApr(cachedApr);
-  };
-
-  useEffect(() => {
-    if (!pairInfos.length) return;
-    fetchApr();
-  }, [pairInfos]);
-
-  return [cachedApr];
 };
 
 // Fetch Reward

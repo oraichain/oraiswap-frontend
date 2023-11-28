@@ -42,7 +42,6 @@ import {
   isFactoryV1,
   parseTokenInfo,
   toAmount,
-  toAssetInfo,
   toDecimal,
   toDisplay,
   toTokenInfo
@@ -96,46 +95,6 @@ async function fetchTokenInfos(tokens: TokenItemType[]): Promise<TokenInfo[]> {
     console.log('error fetching token infos: ', error);
   }
   return tokenInfos;
-}
-
-async function fetchAllRewardPerSecInfos(pairs: PairInfo[]): Promise<OraiswapStakingTypes.RewardsPerSecResponse[]> {
-  const queries = pairs.map((pair) => {
-    return {
-      address: network.staking,
-      data: toBinary({
-        rewards_per_sec: {
-          staking_token: pair.liquidity_token
-        }
-      } as OraiswapStakingTypes.QueryMsg)
-    };
-  });
-  const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.tryAggregate({
-    queries
-  });
-  // aggregate no trybbb
-  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
-}
-
-async function fetchAllTokenAssetPools(pairs: PairInfo[]): Promise<OraiswapStakingTypes.PoolInfoResponse[]> {
-  const queries = pairs.map((pair) => {
-    return {
-      address: network.staking,
-      data: toBinary({
-        pool_info: {
-          staking_token: pair.liquidity_token
-        }
-      } as OraiswapStakingTypes.QueryMsg)
-    };
-  });
-
-  const multicall = new MulticallQueryClient(window.client, network.multicall);
-  const res = await multicall.tryAggregate({
-    queries
-  });
-
-  // aggregate no try
-  return res.return_data.map((data) => (data.success ? fromBinary(data.data) : undefined));
 }
 
 function parsePoolAmount(poolInfo: OraiswapPairTypes.PoolResponse, trueAsset: AssetInfo): bigint {
@@ -738,8 +697,6 @@ export {
   getSubAmountDetails,
   generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
-  fetchAllTokenAssetPools,
-  fetchAllRewardPerSecInfos,
   generateMoveOraib2OraiMessages,
   getPairAmountInfo,
   fetchRelayerFee,

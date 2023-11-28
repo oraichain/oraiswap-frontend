@@ -7,13 +7,7 @@ import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
-import {
-  fetchAllRewardPerSecInfos,
-  fetchAllTokenAssetPools,
-  fetchPoolInfoAmount,
-  fetchTokenInfos,
-  getPairAmountInfo
-} from 'rest/api';
+import { fetchPoolInfoAmount, getPairAmountInfo } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 import {
@@ -78,21 +72,6 @@ export const calculateAprResult = (
     };
   }, {});
   return aprResult;
-};
-
-// Fetch APR
-const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  try {
-    const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-      fetchTokenInfos(lpTokens),
-      fetchAllTokenAssetPools(pairs),
-      fetchAllRewardPerSecInfos(pairs)
-    ]);
-    return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
-  } catch (error) {
-    console.log({ error });
-  }
 };
 
 // Fetch Pair Info Data List
@@ -415,7 +394,6 @@ export const estimateShare = ({
 };
 
 export {
-  fetchAprResult,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairsData,

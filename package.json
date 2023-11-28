@@ -57,7 +57,7 @@
     "@oraichain/oraidex-contracts-build": "^1.0.22",
     "@sentry/webpack-plugin": "^1.20.0",
     "@types/classnames": "^2.2.10",
-    "@types/jest": "^26.0.14",
+    "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.182",
     "@types/node": "^18.15.11",
     "@types/react": "^18.0.34",
@@ -75,6 +75,7 @@
     "sass": "^1.65.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
+    "ts-jest": "^29.1.1",
     "typed-scss-modules": "^7.1.4",
     "typescript": "^5.1.6"
   },

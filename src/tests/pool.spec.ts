@@ -22,15 +22,7 @@ import {
   toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
-import {
-  fetchAllRewardPerSecInfos,
-  fetchAllTokenAssetPools,
-  fetchPoolInfoAmount,
-  fetchTokenInfos,
-  generateContractMessages,
-  ProvideQuery,
-  Type
-} from 'rest/api';
+import { fetchPoolInfoAmount, fetchTokenInfos, generateContractMessages, ProvideQuery, Type } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import {
   addLiquidity,
@@ -48,7 +40,6 @@ import { buildMultipleExecuteMessages, parseAssetInfo } from '@oraichain/oraidex
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
  */
-
 describe.skip('pool', () => {
   let usdtContractAddress = '',
     airiContractAddress = '';
@@ -274,39 +265,6 @@ describe.skip('pool', () => {
         expect(allLpTokenInfos[1].contractAddress).toBe(pairs[1].liquidity_token);
         expect(allLpTokenInfos[0].total_supply).toBe('0');
         expect(allLpTokenInfos[1].total_supply).toBe('10000000');
-      });
-
-      it('should fetch all token asset in pools correctly', async () => {
-        allTokenAssetInfos = await fetchAllTokenAssetPools(pairs);
-        // expect token asset info in pair has the required properties
-        for (const info of allTokenAssetInfos) {
-          expect(info).toHaveProperty('asset_info');
-          expect(info).toHaveProperty('staking_token');
-          expect(info).toHaveProperty('total_bond_amount');
-          expect(info).toHaveProperty('reward_index');
-          expect(info).toHaveProperty('pending_reward');
-          expect(info).toHaveProperty('migration_index_snapshot');
-          expect(info).toHaveProperty('migration_deprecated_staking_token');
-        }
-        expect(allTokenAssetInfos[0].staking_token).toBe(devAddress);
-        expect(allTokenAssetInfos[1].staking_token).toBe(devAddress);
-      });
-
-      it('should fetch all reward infos per second correctly', async () => {
-        allRewardPerSec = await fetchAllRewardPerSecInfos(pairs);
-        expect(allRewardPerSec[0].assets).toEqual([
-          { amount: constants.rewardPerSecAmount, info: { token: { contract_addr: airiContractAddress } } },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
-        ]);
-        expect(allRewardPerSec[1].assets).toEqual([
-          {
-            info: {
-              token: { contract_addr: usdtContractAddress }
-            },
-            amount: constants.rewardPerSecAmount
-          },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
-        ]);
       });
 
       it('should fetch apr correctly', () => {
