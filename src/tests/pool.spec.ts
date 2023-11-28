@@ -277,7 +277,7 @@ describe.skip('pool', () => {
       });
 
       it('should fetch all token asset in pools correctly', async () => {
-        allTokenAssetInfos = await fetchAllTokenAssetPools(assetTokens);
+        allTokenAssetInfos = await fetchAllTokenAssetPools(pairs);
         // expect token asset info in pair has the required properties
         for (const info of allTokenAssetInfos) {
           expect(info).toHaveProperty('asset_info');
@@ -293,7 +293,7 @@ describe.skip('pool', () => {
       });
 
       it('should fetch all reward infos per second correctly', async () => {
-        allRewardPerSec = await fetchAllRewardPerSecInfos(assetTokens);
+        allRewardPerSec = await fetchAllRewardPerSecInfos(pairs);
         expect(allRewardPerSec[0].assets).toEqual([
           { amount: constants.rewardPerSecAmount, info: { token: { contract_addr: airiContractAddress } } },
           { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
