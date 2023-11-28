@@ -5,6 +5,18 @@
 .toast_content {
   display: flex;
   justify-content: flex-start;
+
+  .info_icon {
+    svg > path {
+      // @include theme() {
+      //   fill: theme-get('basic-primary-surface-default');
+      // }
+
+      @include theme() {
+        fill: theme-get('warning-surface-default');
+      }
+    }
+  }
 }
 
 .toast_section {
@@ -46,7 +58,6 @@
           fill: theme-get('primary-surface-default-dark');
         }
       }
-
     }
   }
 
@@ -70,7 +81,6 @@
     color: $lavender-gray;
     padding-left: 6px;
     padding-right: 6px;
-
   }
 }
 
@@ -88,6 +98,5 @@
     color: $lavender-gray;
     padding-left: 6px;
     padding-right: 6px;
-
   }
 }

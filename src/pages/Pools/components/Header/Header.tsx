@@ -1,4 +1,5 @@
-import bg_claim_btn from 'assets/images/bg_claim_btn.png';
+// import bg_claim_btn from 'assets/images/bg_claim_btn.png';
+import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
 import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -119,7 +120,8 @@ export const Header: FC = () => {
       </div>
       <div className={styles.header_claim_reward}>
         <div className={styles.claim_reward_bg}>
-          <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+          {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
+          <img src={bg_claim_btn} alt="bg-claim-reward" />
         </div>
         <Button
           type="primary-sm"
