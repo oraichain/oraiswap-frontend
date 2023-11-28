@@ -22,3 +22,18 @@ export const useGetStakingAssetInfo = () => {
 
   return stakingAssetInfo;
 };
+
+export const useGetLiquidityToken = () => {
+  let { poolUrl } = useParams();
+  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
+  const { info } = poolDetail;
+
+  const [liquidityToken, setLiquidityToken] = useState<string>();
+
+  useEffect(() => {
+    if (!info) return;
+    setLiquidityToken(info?.liquidityAddr);
+  }, [info]);
+
+  return liquidityToken;
+};

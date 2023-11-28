@@ -17,7 +17,7 @@ import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgsV3, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -32,7 +32,6 @@ export const StakeLPModal: FC<ModalProps> = ({
   myLpBalance,
   myLpUsdt,
   onLiquidityChange,
-  assetToken
 }) => {
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
@@ -42,10 +41,10 @@ export const StakeLPModal: FC<ModalProps> = ({
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const stakingAssetInfo = useGetStakingAssetInfo();
+  const liquidityToken = poolDetail?.info?.liquidityAddr
   const { refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    stakingToken: liquidityToken
   });
   const [bondAmount, setBondAmount] = useState<bigint | null>(null);
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
@@ -69,17 +68,14 @@ export const StakeLPModal: FC<ModalProps> = ({
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+
       const oraiAddress = await handleCheckAddress('Oraichain');
       // generate bonding msg
-      const msg = generateMiningMsgsV3({
+      const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpAddress: lpTokenInfoData.contractAddress!,
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpAddress: liquidityToken
       });
 
       // execute msg

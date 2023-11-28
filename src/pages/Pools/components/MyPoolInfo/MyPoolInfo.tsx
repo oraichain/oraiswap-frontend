@@ -12,7 +12,6 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AddLiquidityModal } from '../AddLiquidityModal';
@@ -31,10 +30,10 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
 
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-  const stakingAssetInfo = useGetStakingAssetInfo();
+  const liquidityToken = poolDetail?.info?.liquidityAddr;
   const { totalRewardInfoData } = useGetRewardInfo({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    stakingToken: liquidityToken
   });
 
   const [modal, setModal] = useState<ModalPool>();
