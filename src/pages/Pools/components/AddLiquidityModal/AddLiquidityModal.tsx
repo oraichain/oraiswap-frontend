@@ -92,7 +92,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       totalBaseAmount: Number(totalBaseAmount),
       totalQuoteAmount: Number(totalQuoteAmount)
     });
-    setEstimatedShare(Math.trunc(share || 0));
+    setEstimatedShare(Math.trunc(share));
   }, [baseAmount, quoteAmount, lpTokenInfoData, totalBaseAmount, totalQuoteAmount]);
 
   useEffect(() => {

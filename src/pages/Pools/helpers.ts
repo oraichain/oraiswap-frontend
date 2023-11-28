@@ -419,7 +419,7 @@ export const estimateShare = ({
   totalBaseAmount: number;
   totalQuoteAmount: number;
 }): number => {
-  if (totalBaseAmount === 0 || totalQuoteAmount === 0) return 0;
+  if (totalBaseAmount === 0 || totalQuoteAmount === 0 || !totalShare) return 0;
 
   const share = Math.min(
     Number((baseAmount * totalShare) / totalBaseAmount),
