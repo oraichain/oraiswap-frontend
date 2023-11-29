@@ -7,7 +7,6 @@ import { Route, Routes } from 'react-router-dom';
 import Balance from 'pages/Balance';
 import Pools from 'pages/Pools/indexV3';
 import PoolDetail from 'pages/Pools/PoolDetailV3';
-import SwapV2 from 'pages/SwapV2/index';
 import UniversalSwap from 'pages/UniversalSwap/index';
 
 export default () => (
