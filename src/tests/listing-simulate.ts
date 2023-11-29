@@ -142,21 +142,12 @@ export async function addPairAndLpToken(factory: string, cw20ContractAddress: st
   // register asset to pool
   const staking = new OraiswapStakingClient(client, constants.devAddress, stakingContract);
   await staking.registerAsset({
-    assetInfo: {
-      token: {
-        contract_addr: cw20ContractAddress
-      }
-    },
     stakingToken: constants.devAddress
   });
 
   // add reward per sec to fetch
   await staking.updateRewardsPerSec({
-    assetInfo: {
-      token: {
-        contract_addr: cw20ContractAddress
-      }
-    },
+    stakingToken: constants.devAddress,
     assets: [
       {
         amount: constants.rewardPerSecAmount,

@@ -6,18 +6,16 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgsV3, Type } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import { RootState } from 'store/configure';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -25,15 +23,7 @@ import styles from './StakeLPModal.module.scss';
 
 const cx = cn.bind(styles);
 
-export const StakeLPModal: FC<ModalProps> = ({
-  isOpen,
-  close,
-  open,
-  myLpBalance,
-  myLpUsdt,
-  onLiquidityChange,
-  assetToken
-}) => {
+export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance, myLpUsdt, onLiquidityChange }) => {
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
@@ -42,10 +32,9 @@ export const StakeLPModal: FC<ModalProps> = ({
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const stakingAssetInfo = useGetStakingAssetInfo();
   const { refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    poolInfo: poolDetail.info
   });
   const [bondAmount, setBondAmount] = useState<bigint | null>(null);
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
@@ -66,20 +55,19 @@ export const StakeLPModal: FC<ModalProps> = ({
   };
 
   const handleBond = async (parsedAmount: bigint) => {
+    if (!poolDetail || !poolDetail.info)
+      return displayToast(TToastType.TX_FAILED, { message: 'Pool information does not exist' });
+
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const oraiAddress = await handleCheckAddress('Oraichain');
       // generate bonding msg
-      const msg = generateMiningMsgsV3({
+      const msg = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpAddress: lpTokenInfoData.contractAddress!,
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpAddress: poolDetail.info.liquidityAddr
       });
 
       // execute msg

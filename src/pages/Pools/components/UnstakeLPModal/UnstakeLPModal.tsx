@@ -13,10 +13,9 @@ import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Type, generateMiningMsgsV3 } from 'rest/api';
+import { generateMiningMsgs, Type } from 'rest/api';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './UnstakeLPModal.module.scss';
@@ -29,7 +28,6 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   const [address] = useConfigReducer('address');
 
   const [actionLoading, setActionLoading] = useState(false);
-  const [chosenOption, setChosenOption] = useState(-1);
   const [unbondAmount, setUnbondAmount] = useState<bigint | null>(null);
   const [unbondAmountInUsdt, setUnBondAmountInUsdt] = useState(0);
 
@@ -37,10 +35,9 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const stakingAssetInfo = useGetStakingAssetInfo();
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    poolInfo: poolDetail.info
   });
 
   const totalBondAmount =
@@ -55,30 +52,24 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
     setUnBondAmountInUsdt(unbondAmountInUsdt);
   }, [unbondAmount, totalBondAmount, lpPrice]);
 
-  const onChangeUnbondPercent = (percent: number) => {
-    const HUNDRED_PERCENT_IN_CW20_DECIMALS = 100000000;
-    setUnbondAmount((toAmount(percent, CW20_DECIMALS) * totalBondAmount) / BigInt(HUNDRED_PERCENT_IN_CW20_DECIMALS));
-  };
-
   const onUnbonedSuccess = () => {
     onLiquidityChange();
     refetchRewardInfo();
   };
 
   const handleUnbond = async (parsedAmount: bigint) => {
+    if (!poolDetail || !poolDetail.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     const oraiAddress = await handleCheckAddress('Oraichain');
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-      const msg = generateMiningMsgsV3({
+      const msg = generateMiningMsgs({
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpAddress: poolDetail.info.liquidityAddr
       });
 
       const result = await CosmJs.execute({

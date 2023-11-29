@@ -22,7 +22,7 @@ import { useSelector } from 'react-redux';
 import {
   generateContractMessages,
   generateConvertErc20Cw20Message,
-  generateMiningMsgsV3,
+  generateMiningMsgs,
   getSubAmountDetails,
   ProvideQuery,
   Type
@@ -201,7 +201,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   };
 
   const handleDepositAndStakeAll = async (amount1: bigint, amount2: bigint) => {
-    if (!pairInfoData) return;
+    if (!pairInfoData) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     setActionAllLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
 
@@ -233,15 +234,11 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
       } as ProvideQuery);
 
       // generate staking msg
-      const msgStake = generateMiningMsgsV3({
+      const msgStake = generateMiningMsgs({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: estimatedShare.toString(),
-        lpAddress: lpTokenInfoData.contractAddress!,
-        assetInfo: Pairs.getStakingAssetInfo([
-          JSON.parse(pairInfoData.firstAssetInfo),
-          JSON.parse(pairInfoData.secondAssetInfo)
-        ])
+        lpAddress: pairInfoData.liquidityAddr
       });
 
       const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
