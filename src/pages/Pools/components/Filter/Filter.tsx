@@ -51,7 +51,8 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
   };
 
   const findBondAmount = (pool: PoolInfoResponse) => {
-    const rewardInfo = totalRewardInfoData?.reward_infos.find(({ staking_token }) => isEqual(staking_token, pool.liquidityAddr));
+    if (!totalRewardInfoData) return 0
+    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) => isEqual(staking_token, pool.liquidityAddr));
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 
