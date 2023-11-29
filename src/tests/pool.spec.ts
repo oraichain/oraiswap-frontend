@@ -40,7 +40,7 @@ import { buildMultipleExecuteMessages, parseAssetInfo } from '@oraichain/oraidex
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
  */
-describe.skip('pool', () => {
+describe.only('pool', () => {
   let usdtContractAddress = '',
     airiContractAddress = '';
   let pairsData: PairDetails;

@@ -6,13 +6,11 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
 import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -25,14 +23,7 @@ import styles from './StakeLPModal.module.scss';
 
 const cx = cn.bind(styles);
 
-export const StakeLPModal: FC<ModalProps> = ({
-  isOpen,
-  close,
-  open,
-  myLpBalance,
-  myLpUsdt,
-  onLiquidityChange,
-}) => {
+export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance, myLpUsdt, onLiquidityChange }) => {
   let { poolUrl } = useParams();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const [theme] = useConfigReducer('theme');
@@ -64,12 +55,12 @@ export const StakeLPModal: FC<ModalProps> = ({
   };
 
   const handleBond = async (parsedAmount: bigint) => {
-    if (!poolDetail || !poolDetail.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+    if (!poolDetail || !poolDetail.info)
+      return displayToast(TToastType.TX_FAILED, { message: 'Pool information does not exist' });
 
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
-
       const oraiAddress = await handleCheckAddress('Oraichain');
       // generate bonding msg
       const msg = generateMiningMsgs({
