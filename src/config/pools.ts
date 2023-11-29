@@ -1,5 +1,5 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { ORAI, PAIRS, TokenItemType, USDT_CONTRACT, parseAssetInfo } from '@oraichain/oraidex-common';
+import { PAIRS, TokenItemType, USDT_CONTRACT, parseAssetInfo } from '@oraichain/oraidex-common';
 import { flatten, uniq } from 'lodash';
 import { assetInfoMap } from './bridgeTokens';
 
@@ -80,14 +80,6 @@ export class Pairs {
       this.getAllPairs(secondVersionWhiteListPairs, network.factory_v2, multicall)
     ]);
     return this.processFetchedAllPairInfos([...firstVersionAllPairs, ...secondVersionAllPairs]);
-  };
-
-  static getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
-    return parseAssetInfo(assetInfos[0]) === ORAI ? assetInfos[1] : assetInfos[0];
-  };
-
-  static getStakingInfoTokenItemTypeFromPairs = (pairs: PairInfo[]): TokenItemType[] => {
-    return pairs.map((p) => assetInfoMap[parseAssetInfo(this.getStakingAssetInfo(p.asset_infos))]);
   };
 }
 

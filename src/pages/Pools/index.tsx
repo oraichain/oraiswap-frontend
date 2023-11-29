@@ -10,7 +10,6 @@ import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward } from './hoo
 import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
-import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import isEqual from 'lodash/isEqual';
@@ -55,30 +54,24 @@ const Pools: React.FC<{}> = () => {
 
   const poolTableData: PoolTableData[] = filteredPools
     .map((pool) => {
-      // TODO POOLS: need check logic
-      const poolReward = cachedReward.find((item) => item.liquidity_token === pool.liquidityAddr);
-      const stakingAssetInfo = Pairs.getStakingAssetInfo([
-        JSON.parse(pool.firstAssetInfo),
-        JSON.parse(pool.secondAssetInfo)
-      ]);
+      const { liquidityAddr: stakingToken, totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
+      const poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
 
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
-      const myStakedLP = pool.liquidityAddr
-        ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))?.bond_amount ||
-        '0'
+      const myStakedLP = stakingToken
+        ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
+          '0'
         : 0;
-      const totalSupply = pool.totalSupply;
-      const lpPrice = pool.totalSupply ? pool.totalLiquidity / Number(totalSupply) : 0;
+      const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
 
-      const earned = stakingAssetInfo
-        ? myStakes.find((item) => item.stakingAssetDenom === parseAssetOnlyDenom(stakingAssetInfo))?.earnAmountInUsdt ||
-        0
+      const earned = stakingToken
+        ? myStakes.find((item) => item.stakingAssetDenom === stakingToken)?.earnAmountInUsdt || 0
         : 0;
 
       const [baseDenom, quoteDenom] = [
-        parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo)),
-        parseAssetOnlyDenom(JSON.parse(pool.secondAssetInfo))
+        parseAssetOnlyDenom(JSON.parse(firstAssetInfo)),
+        parseAssetOnlyDenom(JSON.parse(secondAssetInfo))
       ];
       const [baseToken, quoteToken] = [baseDenom, quoteDenom].map((denom) =>
         oraichainTokensWithIcon.find((token) => token.denom === denom || token.contractAddress === denom)

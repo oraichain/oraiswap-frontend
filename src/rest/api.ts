@@ -1,23 +1,7 @@
-import { BondLP, MiningLP, UnbondLP, WithdrawLP } from 'types/pool';
 import { ExecuteInstruction, JsonObject, fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { coin, Coin } from '@cosmjs/stargate';
-import { Uint128, MulticallQueryClient, CwIcs20LatestQueryClient } from '@oraichain/common-contracts-sdk';
-import {
-  OraiswapStakingQueryClient,
-  OraiswapRewarderQueryClient,
-  OraiswapPairQueryClient,
-  OraiswapRouterQueryClient,
-  OraiswapFactoryQueryClient,
-  OraiswapTokenQueryClient,
-  OraiswapPairTypes,
-  OraiswapRewarderTypes,
-  OraiswapStakingTypes,
-  OraiswapTokenTypes,
-  OraiswapOracleQueryClient,
-  AssetInfo,
-  PairInfo
-} from '@oraichain/oraidex-contracts-sdk';
-import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
+import { Coin, coin } from '@cosmjs/stargate';
+import { CwIcs20LatestQueryClient, MulticallQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
+import { ConfigResponse, RelayerFeeResponse } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   IBCInfo,
   IBC_WASM_CONTRACT,
@@ -25,20 +9,12 @@ import {
   MILKY_DENOM,
   ORAI,
   STABLE_DENOM,
-  TokenItemType
-} from '@oraichain/oraidex-common';
-import { network } from 'config/networks';
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import { ibcInfos, ibcInfosOld } from '@oraichain/oraidex-common';
-import isEqual from 'lodash/isEqual';
-import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
-import { PairInfoExtend, TokenInfo } from 'types/token';
-import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
-import { Long } from 'cosmjs-types/helpers';
-import {
+  TokenItemType,
   calculateTimeoutTimestamp,
   getSubAmountDetails,
   handleSentFunds,
+  ibcInfos,
+  ibcInfosOld,
   isFactoryV1,
   parseTokenInfo,
   toAmount,
@@ -46,8 +22,29 @@ import {
   toDisplay,
   toTokenInfo
 } from '@oraichain/oraidex-common';
+import {
+  AssetInfo,
+  OraiswapFactoryQueryClient,
+  OraiswapOracleQueryClient,
+  OraiswapPairQueryClient,
+  OraiswapPairTypes,
+  OraiswapRouterQueryClient,
+  OraiswapStakingQueryClient,
+  OraiswapStakingTypes,
+  OraiswapTokenQueryClient,
+  OraiswapTokenTypes,
+  PairInfo
+} from '@oraichain/oraidex-contracts-sdk';
+import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
-import { ConfigResponse, RelayerFeeResponse } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
+import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
+import { network } from 'config/networks';
+import { Long } from 'cosmjs-types/helpers';
+import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
+import isEqual from 'lodash/isEqual';
+import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
+import { BondLP, MiningLP, UnbondLP, WithdrawLP } from 'types/pool';
+import { PairInfoExtend, TokenInfo } from 'types/token';
 
 export enum Type {
   'TRANSFER' = 'Transfer',
@@ -219,12 +216,6 @@ async function fetchStakingPoolInfo(stakingToken: string): Promise<OraiswapStaki
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
   const data = await stakingContract.poolInfo({ stakingToken });
 
-  return data;
-}
-
-async function fetchDistributionInfo(stakingToken: string): Promise<OraiswapRewarderTypes.DistributionInfoResponse> {
-  const rewarderContract = new OraiswapRewarderQueryClient(window.client, network.rewarder);
-  const data = await rewarderContract.distributionInfo({ stakingToken });
   return data;
 }
 
@@ -682,23 +673,22 @@ async function getPairAmountInfo(
 }
 
 export {
-  fetchPairInfo,
   fetchCachedPairInfo,
+  fetchPairInfo,
+  fetchPoolInfoAmount,
+  fetchRelayerFee,
+  fetchRewardPerSecInfo,
+  fetchStakingPoolInfo,
+  fetchTaxRate,
+  fetchTokenAllowance,
   fetchTokenInfo,
   fetchTokenInfos,
   generateContractMessages,
-  fetchPoolInfoAmount,
-  fetchTokenAllowance,
-  generateConvertMsgs,
-  fetchRewardPerSecInfo,
-  fetchStakingPoolInfo,
-  fetchDistributionInfo,
-  fetchTaxRate,
-  getSubAmountDetails,
-  generateConvertErc20Cw20Message,
   generateConvertCw20Erc20Message,
+  generateConvertErc20Cw20Message,
+  generateConvertMsgs,
+  generateMiningMsgs,
   generateMoveOraib2OraiMessages,
   getPairAmountInfo,
-  fetchRelayerFee,
-  generateMiningMsgs
+  getSubAmountDetails
 };
