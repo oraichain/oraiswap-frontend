@@ -176,7 +176,9 @@ const ToastInfo: FunctionComponent<{
 
 const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <ChristmasFailed />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Transaction Failed</h6>
       <p>{message}</p>
@@ -186,7 +188,9 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 
 const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <ChristmasFailed />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Keplr failed</h6>
       <p>{message}</p>
@@ -196,7 +200,9 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) =
 
 const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <ChristmasFailed />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Metamask failed</h6>
       <p>{message}</p>
@@ -206,7 +212,9 @@ const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }
 
 const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <ChristmasFailed />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Tronlink failed</h6>
       <p>{message}</p>
@@ -222,7 +230,9 @@ const ToastTxSuccess: FunctionComponent<{
   linkPairAddress?: string;
 }> = ({ link, linkCw20Token, cw20Address, linkLpAddress, linkPairAddress }) => (
   <div className={styles.toast_content}>
-    <ChristmasSuccess />
+    <div className={styles.success_icon}>
+      <ChristmasSuccess />
+    </div>
     <section className={styles.toast_section}>
       <h6>Transaction Successful</h6>
       {cw20Address && (

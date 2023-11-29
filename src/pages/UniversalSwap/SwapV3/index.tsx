@@ -476,7 +476,7 @@ const SwapComponent: React.FC<{
                   onClick={handleSubmit}
                   disabled={disabledSwapBtn}
                 >
-                  {swapLoading && <Loader width={22} height={22} />}
+                  {swapLoading && <Loader width={24} height={24} />}
                   {/* hardcode check minimum tron */}
                   {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
                     <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
