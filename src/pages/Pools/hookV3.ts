@@ -276,7 +276,7 @@ export const fetchRewardInfoV3 = async (
 export const useGetRewardInfo = ({ stakerAddr, poolInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
     ['reward-info', stakerAddr, poolInfo],
-    () => fetchRewardInfoV3(stakerAddr, poolInfo.liquidityAddr),
+    () => fetchRewardInfoV3(stakerAddr, poolInfo?.liquidityAddr),
     { enabled: !!stakerAddr, refetchOnWindowFocus: true }
   );
 
