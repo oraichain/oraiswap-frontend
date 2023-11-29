@@ -34,10 +34,9 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const { info } = poolDetailData;
   const xOCH_PRICE = 0.4;
 
-  const liquidityToken = poolDetailData?.info?.liquidityAddr
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    stakingToken: liquidityToken
+    poolInfo: poolDetailData.info
   });
 
   useEffect(() => {
@@ -101,13 +100,15 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   };
 
   const handleClaimReward = async () => {
+    if (!poolDetailData || !poolDetailData.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        lpAddress: liquidityToken
+        lpAddress: poolDetailData.info.liquidityAddr
       } as WithdrawLP);
 
       const result = await CosmJs.execute({

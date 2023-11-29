@@ -41,10 +41,9 @@ export const StakeLPModal: FC<ModalProps> = ({
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const liquidityToken = poolDetail?.info?.liquidityAddr
   const { refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    stakingToken: liquidityToken
+    poolInfo: poolDetail.info
   });
   const [bondAmount, setBondAmount] = useState<bigint | null>(null);
   const [bondAmountInUsdt, setBondAmountInUsdt] = useState(0);
@@ -65,6 +64,8 @@ export const StakeLPModal: FC<ModalProps> = ({
   };
 
   const handleBond = async (parsedAmount: bigint) => {
+    if (!poolDetail || !poolDetail.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -75,7 +76,7 @@ export const StakeLPModal: FC<ModalProps> = ({
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpAddress: liquidityToken
+        lpAddress: poolDetail.info.liquidityAddr
       });
 
       // execute msg

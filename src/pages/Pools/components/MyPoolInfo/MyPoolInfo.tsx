@@ -30,10 +30,9 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
 
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-  const liquidityToken = poolDetail?.info?.liquidityAddr;
   const { totalRewardInfoData } = useGetRewardInfo({
     stakerAddr: address,
-    stakingToken: liquidityToken
+    poolInfo: poolDetail.info
   });
 
   const [modal, setModal] = useState<ModalPool>();

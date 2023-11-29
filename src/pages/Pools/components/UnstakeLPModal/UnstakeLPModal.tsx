@@ -35,10 +35,9 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const liquidityToken = poolDetail?.info?.liquidityAddr;
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
     stakerAddr: address,
-    stakingToken: liquidityToken
+    poolInfo: poolDetail.info
   });
 
   const totalBondAmount =
@@ -59,6 +58,8 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   };
 
   const handleUnbond = async (parsedAmount: bigint) => {
+    if (!poolDetail || !poolDetail.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     const oraiAddress = await handleCheckAddress('Oraichain');
 
     setActionLoading(true);
@@ -68,7 +69,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
         type: Type.UNBOND_LIQUIDITY,
         sender: oraiAddress,
         amount: parsedAmount.toString(),
-        lpAddress: liquidityToken
+        lpAddress: poolDetail.info.liquidityAddr
       });
 
       const result = await CosmJs.execute({

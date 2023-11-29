@@ -201,7 +201,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   };
 
   const handleDepositAndStakeAll = async (amount1: bigint, amount2: bigint) => {
-    if (!pairInfoData) return;
+    if (!pairInfoData) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
     setActionAllLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
 
@@ -237,7 +238,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         type: Type.BOND_LIQUIDITY,
         sender: oraiAddress,
         amount: estimatedShare.toString(),
-        lpAddress: pairInfoData?.liquidityAddr
+        lpAddress: pairInfoData.liquidityAddr
       });
 
       const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);

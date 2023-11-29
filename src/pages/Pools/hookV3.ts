@@ -257,6 +257,9 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
 export type RewardInfoQueryType = {
   stakerAddr: string;
   stakingToken?: string;
+  poolInfo?: {
+    liquidityAddr: string;
+  };
 };
 export const fetchRewardInfoV3 = async (
   stakerAddr: string,
@@ -271,10 +274,10 @@ export const fetchRewardInfoV3 = async (
   return data;
 };
 
-export const useGetRewardInfo = ({ stakerAddr, stakingToken }: RewardInfoQueryType) => {
+export const useGetRewardInfo = ({ stakerAddr, poolInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', stakerAddr, stakingToken],
-    () => fetchRewardInfoV3(stakerAddr, stakingToken),
+    ['reward-info', stakerAddr, poolInfo],
+    () => fetchRewardInfoV3(stakerAddr, poolInfo.liquidityAddr),
     { enabled: !!stakerAddr, refetchOnWindowFocus: true }
   );
 
