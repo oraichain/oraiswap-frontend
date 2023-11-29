@@ -478,9 +478,7 @@ function generateMiningMsgs(data: MiningLP): ExecuteInstruction {
           contract: network.staking,
           amount: bondMsgs.amount.toString(),
           msg: toBinary({
-            bond: {
-              staking_token: bondMsgs.lpAddress
-            }
+            bond: {}
           })
         }
       };
