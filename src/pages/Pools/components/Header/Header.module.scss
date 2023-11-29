@@ -2,101 +2,264 @@
 @import 'src/styles/themes';
 
 .header {
-    border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+
+  &_title {
+    width: 100%;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+
+    // TODO: disable when has filter day
+    @include mobile() {
+      display: none;
+    }
+
+    &_text {
+      @include mobile() {
+        display: none;
+      }
+    }
 
     @include theme() {
-        background-color: theme-get('neutral-6');
+      color: theme-get('neutral-text-text-token-name');
     }
+    text-align: center;
 
-    &_data {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 150%; /* 27px */
+
+    .filter_day_wrapper {
+      display: flex;
+      height: 36px;
+      padding: 4px;
+      align-items: center;
+      gap: 4px;
+      border-radius: 99px;
+      color: $neutron-text-body-light;
+
+      @include mobile() {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      @include theme() {
+        background: theme-get('neutral-border-border-default');
+      }
+
+      .filter_day {
         display: flex;
-        padding: 24px;
-
-        &_item {
-            margin-right: 100px;
-        }
-
-        &_name {
-            font-weight: 500;
-            font-size: 24px;
-            color: #777e90;
-
-            @media (max-width: 575px) {
-                font-size: 16px;
-            }
-
-            @include theme() {
-                color: theme-get('neutral-text-title');
-            }
-        }
-
-        &_value {
-            font-weight: 500;
-            font-size: 24px;
-
-            @media (max-width: 575px) {
-                font-size: 20px;
-            }
-
-            @include theme() {
-                color: theme-get('neutral-text-title');
-            }
-        }
-    }
-
-    &_claim_reward {
-        display: flex;
-        align-items: center;
+        padding: 0px 16px;
         justify-content: center;
-        padding: 0 30px;
-        margin-right: 24px;
-        position: relative;
+        align-items: center;
+        gap: 10px;
+        border-radius: 99px;
 
-        @include small-mobile() {
-            width: 100%;
-            margin-right: 0;
-            margin-top: 24px;
-            padding: 0;
+        width: 100%;
+        &.active {
+          background: $white-color;
+
+          @include theme() {
+            color: theme-get('neutral-text-text-btn-default');
+          }
         }
-
-        .claim_reward_bg {
-            position: absolute;
-            top: -5px;
-
-            @include small-mobile() {
-                display: none;
-            }
-        }
-
-        button {
-            z-index: 1;
-
-            @include small-mobile() {
-                width: 100%;
-                z-index: 0;
-            }
-        }
+      }
     }
+  }
+
+  &_liquidity {
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    margin-bottom: 16px;
+
+    @include mobile() {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    @include theme() {
+      background-color: theme-get('neutral-surface-bg-section');
+    }
+
+    &_item {
+      display: flex;
+      padding: 16px;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1 0 0;
+
+      color: $neutron-text-body-light;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%; /* 24px */
+
+      @include mobile() {
+        width: 100%;
+      }
+
+      &:nth-child(even) {
+        // odd
+        @include theme() {
+          background-color: theme-get('neutral-surface-bg-section-3');
+        }
+      }
+
+      &_info {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        align-self: stretch;
+
+        svg {
+          width: 18px;
+          height: 18px;
+        }
+
+        .liq_value {
+          font-size: 24px;
+          font-weight: 500;
+          line-height: 120%; /* 28.8px */
+          @include theme() {
+            color: theme-get('sea-stone-200');
+          }
+        }
+        .liq_suffix {
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 150%;
+          color: $success-color;
+
+          &.negative {
+            color: $error-color;
+          }
+        }
+      }
+    }
+  }
+
+  &_claimable {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 12px;
+    margin-bottom: 32px;
+    padding: 24px;
+    gap: 8px;
+
+    @include theme() {
+      border: 1px solid theme-get('primary-text-text-link');
+      background-color: theme-get('primary-surface-default-subtle');
+    }
+
+    @include mobile() {
+      flex-direction: column;
+    }
+  }
+
+  &_data {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1 0 0;
+
+    &_change {
+      color: $error-color;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%; /* 24px */
+    }
+
+    &_item {
+      margin-right: 100px;
+    }
+
+    &_name {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 150%;
+      white-space: nowrap;
+
+      @media (max-width: 575px) {
+        font-size: 16px;
+      }
+
+      @include theme() {
+        color: theme-get('primary-surface-default');
+      }
+    }
+
+    &_value {
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 120%;
+
+      @media (max-width: 575px) {
+        font-size: 14px;
+      }
+
+      @include theme() {
+        color: theme-get('primary-surface-default');
+      }
+    }
+  }
+
+  &_claim_reward {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 30px;
+    margin-right: 24px;
+    position: relative;
 
     @include small-mobile() {
-        flex-direction: column;
-        padding: 16px 24px;
-
-        &_data {
-            flex-wrap: wrap;
-            padding: 0;
-
-            &_item {
-                margin-right: 0;
-                width: 50%;
-            }
-
-            &_item:last-child {
-                margin-top: 24px;
-            }
-        }
+      width: 100%;
+      margin-right: 0;
+      margin-top: 24px;
+      padding: 0;
     }
+
+    .claim_reward_bg {
+      position: absolute;
+      top: -35px;
+
+      @include small-mobile() {
+        display: none;
+      }
+    }
+
+    button {
+      z-index: 1;
+
+      @include small-mobile() {
+        width: 100%;
+        z-index: 0;
+      }
+    }
+  }
+
+  @include small-mobile() {
+    // flex-direction: column;
+    padding: 16px 0px;
+
+    &_data {
+      flex-wrap: wrap;
+      padding: 0;
+      gap: 0px;
+      justify-content: space-between;
+
+      &_item {
+        margin-right: 0;
+        width: 40%;
+      }
+
+      &_item:last-child {
+        margin-top: 24px;
+        width: 100%;
+      }
+    }
+  }
 }

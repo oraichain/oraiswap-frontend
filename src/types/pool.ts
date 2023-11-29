@@ -35,7 +35,7 @@ export type PoolDetail = {
 
 export type BaseMining = {
   type: Type;
-  assetInfo: AssetInfo;
+  lpAddress: string;
   sender: string;
 };
 export type BondLP = BaseMining & {

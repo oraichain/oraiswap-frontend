@@ -2,8 +2,6 @@
 @import 'src/styles/themes';
 
 .listpools {
-  margin-top: 40px;
-
   .listpools_all {
     display: flex;
     justify-content: space-between;
@@ -98,7 +96,7 @@
   &_list {
     display: flex;
     gap: 35px;
-    margin-top: 35px;
+    margin-top: 16px;
     flex-wrap: wrap;
   }
 }
@@ -157,6 +155,12 @@
 }
 
 .earned {
+  @include theme() {
+    color: theme-get('neutral-text-body');
+  }
+}
+
+.text_number {
   @include theme() {
     color: theme-get('neutral-text-body');
   }

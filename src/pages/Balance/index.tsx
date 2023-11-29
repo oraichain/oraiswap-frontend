@@ -29,7 +29,6 @@ import Content from 'layouts/Content';
 import Metamask from 'libs/metamask';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -51,10 +50,11 @@ import {
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
+import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -78,7 +78,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
-    setTokenBridge([undefined, undefined])
+    setTokenBridge([undefined, undefined]);
   });
 
   // custom hooks
@@ -254,7 +254,9 @@ const Balance: React.FC<BalanceProps> = () => {
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
         const errorMsg = handleErrorMsg(ex);
-        Sentry.captureException(`${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`)
+        Sentry.captureException(
+          `${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`
+        );
       }
     }
   };
