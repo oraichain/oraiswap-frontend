@@ -24,7 +24,7 @@ import axios from 'rest/request';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
-import { PoolTableData } from './indexV3';
+import { PoolTableData } from './';
 
 // Fetch Reward
 export const useFetchCacheReward = (pairs: PairInfo[]) => {

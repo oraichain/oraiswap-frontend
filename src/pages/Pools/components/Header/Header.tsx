@@ -22,7 +22,7 @@ import {
 } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
-import { PoolTableData } from 'pages/Pools/indexV3';
+import { PoolTableData } from 'pages/Pools';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
