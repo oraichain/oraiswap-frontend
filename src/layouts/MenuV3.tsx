@@ -96,7 +96,7 @@ const Menu: React.FC = () => {
       {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
-      {renderLink('coming-soon', 'FUTURES', () => {}, true)}
+      {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
       {mobileMode ? (
         <>
           {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}

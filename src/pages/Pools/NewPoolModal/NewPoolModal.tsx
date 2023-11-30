@@ -8,7 +8,7 @@ import { TokenItemType } from '@oraichain/oraidex-common';
 import { Pairs } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { toDisplay } from '@oraichain/oraidex-common';
-import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
+import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { FC, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';

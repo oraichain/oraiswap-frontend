@@ -35,8 +35,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
         } else {
           denom = p.asset_infos_raw?.[0];
         }
-        const assetToken = oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom);
-        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(assetToken)]);
+        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(p.liquidity_token)]);
         const reward = pairInfoRewardDataRaw.assets.reduce((acc, cur) => {
           let token =
             'token' in cur.info ? cw20TokenMap[cur.info.token.contract_addr] : tokenMap[cur.info.native_token.denom];
@@ -172,7 +171,6 @@ export type GetStakedByUserQuery = {
 export type StakeByUserResponse = {
   stakingAssetDenom: string;
   earnAmountInUsdt: number;
-  stakingAmountInUsdt: number;
 };
 
 const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {
@@ -200,10 +198,10 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
 
   // calculate total staked of all pool
   const totalStaked = pools.reduce((accumulator, pool) => {
-    const { totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
-    const stakingAssetInfo = Pairs.getStakingAssetInfo([JSON.parse(firstAssetInfo), JSON.parse(secondAssetInfo)]);
-    const myStakedLP = stakingAssetInfo
-      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
+    const { totalSupply, totalLiquidity } = pool;
+    const myStakedLP = pool.liquidityAddr
+      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))
+          ?.bond_amount || '0'
       : 0;
 
     const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
@@ -257,25 +255,28 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
 
 export type RewardInfoQueryType = {
   stakerAddr: string;
-  assetInfo?: AssetInfo;
+  stakingToken?: string;
+  poolInfo?: {
+    liquidityAddr: string;
+  };
 };
 export const fetchRewardInfoV3 = async (
   stakerAddr: string,
-  assetInfo?: AssetInfo
+  stakingToken?: string
 ): Promise<OraiswapStakingTypes.RewardInfoResponse> => {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
   let payload: RewardInfoQueryType = {
     stakerAddr
   };
-  if (assetInfo) payload.assetInfo = assetInfo;
+  if (stakingToken) payload.stakingToken = stakingToken;
   const data = await stakingContract.rewardInfo(payload);
   return data;
 };
 
-export const useGetRewardInfo = ({ stakerAddr, assetInfo: stakingAssetInfo }: RewardInfoQueryType) => {
+export const useGetRewardInfo = ({ stakerAddr, poolInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', stakerAddr, stakingAssetInfo],
-    () => fetchRewardInfoV3(stakerAddr, stakingAssetInfo),
+    ['reward-info', stakerAddr, poolInfo],
+    () => fetchRewardInfoV3(stakerAddr, poolInfo?.liquidityAddr),
     { enabled: !!stakerAddr, refetchOnWindowFocus: true }
   );
 
