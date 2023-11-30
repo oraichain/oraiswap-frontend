@@ -2917,9 +2917,9 @@
     react-use "^17.4.0"
 
 "@oraichain/oraidex-common@^1.0.34":
-  version "1.0.42"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.42.tgz#ea669e946119915a9a4eef38011ed72f61154cf6"
-  integrity sha512-A988XFacPLxHxCEhD1SfxL2pJ549FWmdY2b7fSlCFYf9NB4tpwR6YnT5Dif5g6yW8ObwoPi541zWKd82tlshmQ==
+  version "1.0.43"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.43.tgz#3ce40dfd1cc33c129253fd59c8e227c05837c7fa"
+  integrity sha512-Xtp00JnVUl1Z4QarJE+Gw02TrHcxUmXzuynGN9g/x7HVL5NymzbB//PShlJ2VFhJfZXHCBaSBqDniIBLPoQ+GQ==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
