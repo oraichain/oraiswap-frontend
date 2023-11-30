@@ -6,7 +6,7 @@ import cn from 'classnames/bind';
 import InputSwap from 'components/InputSwap/InputSwap';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';

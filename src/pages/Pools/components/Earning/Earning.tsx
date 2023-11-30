@@ -11,13 +11,13 @@ import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
-import { useGetMyStake, useGetPoolDetail, useGetRewardInfo, xOCH_PRICE } from 'pages/Pools/hookV3';
-import { useGetStakingAssetInfo } from 'pages/Pools/hooks/useGetStakingAssetInfo';
+import { useGetMyStake, useGetPoolDetail, useGetRewardInfoDetail, xOCH_PRICE } from 'pages/Pools/hookV3';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Type, WithdrawMining, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
+import { Type, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import styles from './Earning.module.scss';
 import { TokenItemType, ORAI, toDisplay, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { WithdrawLP } from 'types/pool';
 
 type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
@@ -29,7 +29,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   const [address] = useConfigReducer('address');
   const [cachePrices] = useConfigReducer('coingecko');
   const [pendingRewards, setPendingRewards] = useState<TokenItemTypeExtended[]>([]);
-  const [stakingToken, setStakingToken] = useState<TokenItemType>();
   const [actionLoading, setActionLoading] = useState(false);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
   const { myStakes } = useGetMyStake({
@@ -39,19 +38,9 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
 
   const { info } = poolDetailData;
 
-  useEffect(() => {
-    if (!poolDetailData) return;
-    if (poolDetailData?.token1?.name === 'ORAI') {
-      setStakingToken(poolDetailData.token2);
-    } else {
-      setStakingToken(poolDetailData.token1);
-    }
-  }, [poolDetailData]);
-
-  const stakingAssetInfo = useGetStakingAssetInfo();
-  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
+  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfoDetail({
     stakerAddr: address,
-    assetInfo: stakingAssetInfo
+    poolInfo: poolDetailData.info
   });
 
   useEffect(() => {
@@ -119,14 +108,17 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   };
 
   const handleClaimReward = async () => {
+    if (!poolDetailData || !poolDetailData.info)
+      return displayToast(TToastType.TX_FAILED, { message: 'Pool information does not exist' });
+
     setActionLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
       const msg = generateMiningMsgs({
         type: Type.WITHDRAW_LIQUIDITY_MINING,
         sender: address,
-        assetToken: stakingToken
-      } as WithdrawMining);
+        lpAddress: poolDetailData.info.liquidityAddr
+      } as WithdrawLP);
 
       const result = await CosmJs.execute({
         address: msg.contractAddress,

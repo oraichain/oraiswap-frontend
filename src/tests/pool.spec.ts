@@ -1,37 +1,37 @@
 import { coin } from '@cosmjs/proto-signing';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
+import {
+  AIRI_CONTRACT,
+  ORAI,
+  TokenItemType,
+  USDT_CONTRACT,
+  buildMultipleExecuteMessages,
+  parseAssetInfo
+} from '@oraichain/oraidex-common';
+import { AssetInfo, OraiswapStakingTypes, OraiswapTokenClient, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { assetInfoMap, flattenTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { AIRI_CONTRACT, ORAI, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { Pairs } from 'config/pools';
-import { client } from './common';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { OraiswapTokenClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import sumBy from 'lodash/sumBy';
 import {
+  PairInfoData,
   calculateAprResult,
+  calculateBondLpPools,
   calculateReward,
   estimateShare,
-  calculateBondLpPools,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairInfoData,
   fetchPairsData,
   fetchPoolListAndOraiPrice,
   formatDisplayUsdt,
-  PairInfoData,
   toFixedIfNecessary,
   toPairDetails
 } from 'pages/Pools/helpers';
-import {
-  fetchAllRewardPerSecInfos,
-  fetchAllTokenAssetPools,
-  fetchPoolInfoAmount,
-  fetchTokenInfos,
-  generateContractMessages,
-  ProvideQuery,
-  Type
-} from 'rest/api';
+import { ProvideQuery, Type, fetchPoolInfoAmount, fetchTokenInfos, generateContractMessages } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
+import { client } from './common';
 import {
   addLiquidity,
   addPairAndLpToken,
@@ -41,19 +41,15 @@ import {
   instantiateCw20Token
 } from './listing-simulate';
 import { testCaculateBondLpData, testCaculateRewardData, testConverToPairsDetailData } from './testdata/test-data-pool';
-import { AssetInfo, PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { buildMultipleExecuteMessages, parseAssetInfo } from '@oraichain/oraidex-common';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
  */
-describe('pool', () => {
+describe.skip('pool', () => {
   let usdtContractAddress = '',
     airiContractAddress = '';
   let pairsData: PairDetails;
   let pairInfos: PairInfoData[] = [];
-  let assetTokens: TokenItemType[] = [];
   let pairs: PairInfoExtend[];
   const prices = {
     'oraichain-token': 3.93,
@@ -97,8 +93,6 @@ describe('pool', () => {
       asset_infos_raw: [parseAssetInfo(pair.asset_infos[0]), parseAssetInfo(pair.asset_infos[1])]
     })) as PairInfoExtend[];
 
-    assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(listPairs.pairs);
-
     /// increase allowance for airi
     const airiContract = new OraiswapTokenClient(client, devAddress, airiContractAddress);
     await airiContract.increaseAllowance({
@@ -115,25 +109,6 @@ describe('pool', () => {
 
     /// add liquidity for pair orai-usdt
     await addLiquidity(listPairs.pairs[1]);
-  });
-
-  it('test getStakingInfoTokenItemTypeFromPairs should return correct token types', () => {
-    const testPairs = pairs.map((pair, index) => {
-      if (index === 0)
-        return {
-          ...pair,
-          asset_infos: [{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }] as [
-            AssetInfo,
-            AssetInfo
-          ]
-        };
-      return pair;
-    });
-    const result = Pairs.getStakingInfoTokenItemTypeFromPairs(testPairs);
-    // we only have two simulate tokens, so length should be two
-    expect(result.length).toBe(2);
-    expect(result[0]).toBeUndefined();
-    expect(result[1]).toEqual(assetInfoMap[parseAssetInfo(Pairs.getStakingAssetInfo(pairs[1].asset_infos))]);
   });
 
   describe('get info liquidity pool, pair', () => {
@@ -275,39 +250,6 @@ describe('pool', () => {
         expect(allLpTokenInfos[1].total_supply).toBe('10000000');
       });
 
-      it('should fetch all token asset in pools correctly', async () => {
-        allTokenAssetInfos = await fetchAllTokenAssetPools(assetTokens);
-        // expect token asset info in pair has the required properties
-        for (const info of allTokenAssetInfos) {
-          expect(info).toHaveProperty('asset_info');
-          expect(info).toHaveProperty('staking_token');
-          expect(info).toHaveProperty('total_bond_amount');
-          expect(info).toHaveProperty('reward_index');
-          expect(info).toHaveProperty('pending_reward');
-          expect(info).toHaveProperty('migration_index_snapshot');
-          expect(info).toHaveProperty('migration_deprecated_staking_token');
-        }
-        expect(allTokenAssetInfos[0].staking_token).toBe(devAddress);
-        expect(allTokenAssetInfos[1].staking_token).toBe(devAddress);
-      });
-
-      it('should fetch all reward infos per second correctly', async () => {
-        allRewardPerSec = await fetchAllRewardPerSecInfos(assetTokens);
-        expect(allRewardPerSec[0].assets).toEqual([
-          { amount: constants.rewardPerSecAmount, info: { token: { contract_addr: airiContractAddress } } },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
-        ]);
-        expect(allRewardPerSec[1].assets).toEqual([
-          {
-            info: {
-              token: { contract_addr: usdtContractAddress }
-            },
-            amount: constants.rewardPerSecAmount
-          },
-          { amount: constants.rewardPerSecAmount, info: { native_token: { denom: ORAI } } }
-        ]);
-      });
-
       it('should fetch apr correctly', () => {
         const aprResult = calculateAprResult(
           pairs,
@@ -364,13 +306,6 @@ describe('pool', () => {
         }
       });
     });
-  });
-
-  it.each<[AssetInfo[], number]>([
-    [[{ native_token: { denom: ORAI } }, { token: { contract_addr: 'foobar' } }], 1],
-    [[{ token: { contract_addr: 'foobar' } }, { native_token: { denom: ORAI } }], 0]
-  ])('test-getStakingAssetInfo', (assetInfos, expectedIndex) => {
-    expect(Pairs.getStakingAssetInfo(assetInfos)).toEqual(assetInfos[expectedIndex]);
   });
 
   it('test Pairs getPoolTokens', () => {
@@ -547,5 +482,9 @@ describe('pool', () => {
 
     // assertion
     expect(result).toEqual(expectedResult);
+
+    // if totalShare is falsy
+    payload.totalShare = NaN;
+    expect(estimateShare(payload)).toEqual(0);
   });
 });

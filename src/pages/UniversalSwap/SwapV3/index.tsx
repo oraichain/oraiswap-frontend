@@ -28,7 +28,7 @@ import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
@@ -229,12 +229,12 @@ const SwapComponent: React.FC<{
   const minimumReceive =
     averageRatio && averageRatio.amount
       ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+          // @ts-ignore
+          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -445,8 +445,9 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>

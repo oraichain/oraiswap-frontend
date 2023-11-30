@@ -1,4 +1,5 @@
-import { oraichainTokens, swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
+import { Ratio } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   CoinGeckoId,
   CoinIcon,
@@ -7,17 +8,19 @@ import {
   ORAI_BRIDGE_EVM_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  TokenItemType,
   getTokenOnOraichain,
   getTokenOnSpecificChainId
 } from '@oraichain/oraidex-common';
-import { CwIcs20LatestQueryClient, Uint128 } from '@oraichain/common-contracts-sdk';
-import { generateError } from 'libs/utils';
-import { Ratio, TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import {
   isEvmNetworkNativeSwapSupported,
   isSupportedNoPoolSwapEvm,
   swapEvmRoutes
 } from '@oraichain/oraidex-universal-swap';
+import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
+import { PAIRS_CHART } from 'config/pools';
+import { generateError } from 'libs/utils';
+import { PairToken } from 'reducer/type';
 
 export enum SwapDirection {
   From,
@@ -178,4 +181,36 @@ export const getExplorerScan = (chainId: NetworkChainId) => {
     default:
       return 'https://scan.orai.io/txs';
   }
+};
+
+// generate TradingView pair base on from & to token in universal-swap
+export const generateNewSymbol = (
+  fromToken: TokenItemType,
+  toToken: TokenItemType,
+  currentPair: PairToken
+): PairToken | null => {
+  let newTVPair: PairToken = { ...currentPair };
+  // example: ORAI/ORAI
+  if (fromToken.name === toToken.name) {
+    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
+    newTVPair.info = '';
+    return newTVPair;
+  }
+
+  const findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
+  if (!findedPair) {
+    // this case when user click button reverse swap flow  of pair NOT in pool.
+    // return null to prevent re-call api of this pair.
+    if (currentPair.symbol.split('/').includes(fromToken.name) && currentPair.symbol.split('/').includes(toToken.name))
+      return null;
+    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
+    newTVPair.info = '';
+  } else {
+    // this case when user click button reverse swap flow of pair in pool.
+    // return null to prevent re-call api of this pair.
+    if (findedPair.symbol === currentPair.symbol) return null;
+    newTVPair.symbol = findedPair.symbol;
+    newTVPair.info = findedPair.info;
+  }
+  return newTVPair;
 };

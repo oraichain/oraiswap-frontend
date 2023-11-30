@@ -22,7 +22,7 @@ import {
 } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
-import { PoolTableData } from 'pages/Pools/indexV3';
+import { PoolTableData } from 'pages/Pools';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -101,7 +101,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
           (rewardInfo) =>
             ({
               contractAddress: network.staking,
-              msg: { withdraw: { asset_info: rewardInfo.asset_info } },
+              msg: { withdraw: { staking_token: rewardInfo.staking_token } },
               funds: null
             } as ExecuteInstruction)
         );

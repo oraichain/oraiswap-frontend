@@ -1,5 +1,6 @@
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/ic_arrow_down.svg';
+import { buildMultipleExecuteMessages, ORAI, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
+import ImgPairPath from 'assets/images/pair_path.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
@@ -17,11 +18,11 @@ import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
 import { useGetPoolDetail } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
-import NumberFormat from 'react-number-format';
 import { useSelector } from 'react-redux';
 import {
   generateContractMessages,
   generateConvertErc20Cw20Message,
+  generateMiningMsgs,
   getSubAmountDetails,
   ProvideQuery,
   Type
@@ -29,7 +30,9 @@ import {
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
-import { toAmount, ORAI, buildMultipleExecuteMessages, toDisplay } from '@oraichain/oraidex-common';
+
+import { Pairs } from 'config/pools';
+import InputWithOptionPercent from '../InputWithOptionPercent';
 
 const cx = cn.bind(styles);
 
@@ -40,6 +43,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   const [baseAmount, setBaseAmount] = useState<bigint | null>(null);
   const [quoteAmount, setQuoteAmount] = useState<bigint | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionAllLoading, setActionAllLoading] = useState(false);
   const [recentInput, setRecentInput] = useState(1);
   const [estimatedShare, setEstimatedShare] = useState(0);
 
@@ -92,7 +96,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   }, [baseAmount, quoteAmount, lpTokenInfoData, totalBaseAmount, totalQuoteAmount]);
 
   useEffect(() => {
-    if (recentInput === 1 && baseAmount > 0) {
+    if (recentInput === 1 && baseAmount > BigInt(0)) {
       setQuoteAmount((baseAmount * totalQuoteAmount) / totalBaseAmount);
     } else if (recentInput === 2 && quoteAmount > BigInt(0))
       setBaseAmount((quoteAmount * totalBaseAmount) / totalQuoteAmount);
@@ -196,6 +200,76 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     }
   };
 
+  const handleDepositAndStakeAll = async (amount1: bigint, amount2: bigint) => {
+    if (!pairInfoData) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+
+    setActionAllLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+
+    try {
+      const oraiAddress = await handleCheckAddress('Oraichain');
+
+      if (token1AllowanceToPair < amount1) {
+        await increaseAllowance('9'.repeat(30), token1!.contractAddress!, oraiAddress);
+        refetchToken1Allowance();
+      }
+      if (token2AllowanceToPair < amount2) {
+        await increaseAllowance('9'.repeat(30), token2!.contractAddress!, oraiAddress);
+        refetchToken2Allowance();
+      }
+
+      // hard copy of from & to token info data to prevent data from changing when calling the function
+      const firstTokenConverts = generateConvertErc20Cw20Message(amounts, token1, oraiAddress);
+      const secTokenConverts = generateConvertErc20Cw20Message(amounts, token2, oraiAddress);
+
+      const msg = generateContractMessages({
+        type: Type.PROVIDE,
+        sender: oraiAddress,
+        fromInfo: token1!,
+        toInfo: token2!,
+        fromAmount: amount1.toString(),
+        toAmount: amount2.toString(),
+        pair: pairInfoData.pairAddr
+        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
+      } as ProvideQuery);
+
+      // generate staking msg
+      const msgStake = generateMiningMsgs({
+        type: Type.BOND_LIQUIDITY,
+        sender: oraiAddress,
+        amount: estimatedShare.toString(),
+        lpAddress: pairInfoData.liquidityAddr
+      });
+
+      const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
+
+      const result = await CosmJs.executeMultiple({
+        msgs: [...messages, msgStake],
+        walletAddr: oraiAddress,
+        gasAmount: { denom: ORAI, amount: '0' }
+      });
+      console.log('result provide tx hash: ', result);
+
+      if (result) {
+        console.log('in correct result');
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+
+        const amountUsdt = Number(toAmount(getUsd(baseAmount, token1, prices) * 2));
+
+        if (typeof onLiquidityChange == 'function') {
+          onLiquidityChange(amountUsdt);
+        }
+      }
+    } catch (error) {
+      console.log('error in providing liquidity: ', error);
+      handleErrorTransaction(error);
+    } finally {
+      setActionAllLoading(false);
+    }
+  };
+
   const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
 
@@ -210,109 +284,38 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
             </div>
           </div>
         </div>
-        <div className={cx('supply', theme)}>
-          <div className={cx('balance')}>
-            <div className={cx('amount', theme)}>
-              <TokenBalance
-                balance={{
-                  amount: token1Balance.toString(),
-                  denom: token1?.name ?? '',
-                  decimals: token1?.decimals
-                }}
-                prefix="Balance: "
-                decimalScale={6}
-              />
-            </div>
-            <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance / BigInt(2))}>
-                Half
-              </Button>
-              <Button type="primary-sm" onClick={() => onChangeAmount1(token1Balance)}>
-                Max
-              </Button>
-            </div>
-          </div>
-          <div className={cx('input')}>
-            <div className={cx('token')}>
-              {Token1Icon && <Token1Icon className={cx('logo')} />}
-              <div className={cx('title', theme)}>
-                <div>{token1?.name}</div>
-                <div className={cx('des')}>Oraichain</div>
-              </div>
-            </div>
-            <div className={cx('input-amount')}>
-              <NumberFormat
-                className={cx('amount', theme)}
-                thousandSeparator
-                decimalScale={6}
-                placeholder={'0'}
-                value={baseAmount === null ? '' : toDisplay(baseAmount, token1.decimals)}
-                allowNegative={false}
-                onChange={(e: any) => {
-                  onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
-                }}
-              />
-              <div className={cx('amount-usd', theme)}>
-                <TokenBalance balance={getUsd(baseAmount, token1, prices)} decimalScale={2} />
-              </div>
-            </div>
-          </div>
+        <div className={cx('pair-path')}>
+          <img src={ImgPairPath} alt="pair_path" width={'100%'} height={'100%'} />
         </div>
 
-        <div className={cx('supply', theme)}>
-          <div className={cx('balance')}>
-            <div className={cx('amount', theme)}>
-              <TokenBalance
-                balance={{
-                  amount: token2Balance.toString(),
-                  denom: token2?.name ?? '',
-                  decimals: token2?.decimals
-                }}
-                prefix="Balance: "
-                decimalScale={6}
-              />
-            </div>
-            <div className={cx('btn-group')}>
-              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance / BigInt(2))}>
-                Half
-              </Button>
-              <Button type="primary-sm" onClick={() => onChangeAmount2(token2Balance)}>
-                Max
-              </Button>
-            </div>
-          </div>
-          <div className={cx('input')}>
-            <div className={cx('token')}>
-              {Token2Icon && <Token2Icon className={cx('logo')} />}
-              <div className={cx('title', theme)}>
-                <div>{token2?.name}</div>
-                <div className={cx('des')}>Oraichain</div>
-              </div>
-            </div>
-            <div className={cx('input-amount')}>
-              <NumberFormat
-                className={cx('amount', theme)}
-                thousandSeparator
-                decimalScale={6}
-                placeholder={'0'}
-                allowNegative={false}
-                value={quoteAmount === null ? '' : toDisplay(quoteAmount, token2.decimals)}
-                onChange={(e: any) => {
-                  onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
-                }}
-              />
-              <div className={cx('amount-usd', theme)}>
-                <TokenBalance balance={getUsd(quoteAmount, token2, prices)} decimalScale={2} />
-              </div>
-            </div>
-          </div>
-        </div>
+        <InputWithOptionPercent
+          TokenIcon={Token1Icon}
+          onChange={(e: any) => {
+            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+          }}
+          value={baseAmount}
+          token={token1}
+          setAmountFromPercent={onChangeAmount1}
+          totalAmount={token1Balance}
+          isFocus={recentInput === 1}
+          hasPath
+          showIcon
+        />
+
+        <InputWithOptionPercent
+          TokenIcon={Token2Icon}
+          value={quoteAmount}
+          onChange={(e: any) => {
+            onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+          }}
+          token={token2}
+          setAmountFromPercent={onChangeAmount2}
+          totalAmount={token2Balance}
+          isFocus={recentInput === 2}
+          hasPath
+          showIcon
+        />
         <div className={cx('detail')}>
-          <div className={cx('arrow-down', theme)}>
-            <div className={cx('inner-arrow', theme)}>
-              <ArrowDownIcon />
-            </div>
-          </div>
           <div className={cx('row', theme)}>
             <div className={cx('row-title')}>
               <span>Receive</span>
@@ -320,7 +323,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
             <div className={cx('row-amount')}>
               <TokenBalance
                 balance={{
-                  amount: estimatedShare.toString(),
+                  amount: estimatedShare.toString() || '0',
                   decimals: lpTokenInfoData?.decimals
                 }}
                 suffix=" LP"
@@ -337,6 +340,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
 
           const disabled =
             actionLoading ||
+            actionAllLoading ||
             !token1 ||
             !token2 ||
             !pairInfoData ||
@@ -345,10 +349,31 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
             !!disableMsg;
           return (
             <div className={cx('btn-confirm')}>
-              <Button onClick={() => handleAddLiquidity(baseAmount, quoteAmount)} type="primary" disabled={disabled}>
-                {actionLoading && <Loader width={30} height={30} />}
-                {disableMsg || 'Confirm'}
-              </Button>
+              {disableMsg ? (
+                <Button onClick={() => handleAddLiquidity(baseAmount, quoteAmount)} type="primary" disabled={disabled}>
+                  {actionLoading && <Loader width={30} height={30} />}
+                  {disableMsg || 'Confirm'}
+                </Button>
+              ) : (
+                <div className={cx('btn-group')}>
+                  <Button
+                    onClick={() => handleAddLiquidity(baseAmount, quoteAmount)}
+                    type="secondary"
+                    disabled={disabled}
+                  >
+                    {actionLoading && <Loader width={22} height={22} />}
+                    {'Deposit'}
+                  </Button>
+                  <Button
+                    onClick={() => handleDepositAndStakeAll(baseAmount, quoteAmount)}
+                    type="primary"
+                    disabled={disabled}
+                  >
+                    {actionAllLoading && <Loader width={22} height={22} />}
+                    {'Deposit & Stake All'}
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })()}

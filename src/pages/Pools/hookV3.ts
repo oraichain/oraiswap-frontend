@@ -1,17 +1,11 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { ORAI, parseAssetInfo, toDisplay } from '@oraichain/oraidex-common';
-import {
-  AssetInfo,
-  OraiswapStakingQueryClient,
-  OraiswapStakingTypes,
-  PairInfo
-} from '@oraichain/oraidex-contracts-sdk';
+import { ORAI, toDisplay } from '@oraichain/oraidex-common';
+import { OraiswapStakingQueryClient, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
@@ -24,7 +18,7 @@ import axios from 'rest/request';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import { PairInfoExtend } from 'types/token';
-import { PoolTableData } from './indexV3';
+import { PoolTableData } from './';
 
 // Fetch Reward
 export const useFetchCacheReward = (pairs: PairInfo[]) => {
@@ -38,8 +32,7 @@ export const useFetchCacheReward = (pairs: PairInfo[]) => {
         } else {
           denom = p.asset_infos_raw?.[0];
         }
-        const assetToken = oraichainTokens.find((token) => token.denom === denom || token.contractAddress === denom);
-        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(assetToken)]);
+        const [pairInfoRewardDataRaw] = await Promise.all([fetchRewardPerSecInfo(p.liquidity_token)]);
         const reward = pairInfoRewardDataRaw.assets.reduce((acc, cur) => {
           let token =
             'token' in cur.info ? cw20TokenMap[cur.info.token.contract_addr] : tokenMap[cur.info.native_token.denom];
@@ -175,7 +168,6 @@ export type GetStakedByUserQuery = {
 export type StakeByUserResponse = {
   stakingAssetDenom: string;
   earnAmountInUsdt: number;
-  stakingAmountInUsdt: number;
 };
 
 const getMyStake = async (queries: GetStakedByUserQuery): Promise<StakeByUserResponse[]> => {
@@ -205,10 +197,10 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
 
   // calculate total staked of all pool
   const totalStaked = pools.reduce((accumulator, pool) => {
-    const { totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
-    const stakingAssetInfo = Pairs.getStakingAssetInfo([JSON.parse(firstAssetInfo), JSON.parse(secondAssetInfo)]);
-    const myStakedLP = stakingAssetInfo
-      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.asset_info, stakingAssetInfo))?.bond_amount || '0'
+    const { totalSupply, totalLiquidity } = pool;
+    const myStakedLP = pool.liquidityAddr
+      ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))
+          ?.bond_amount || '0'
       : 0;
 
     const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
@@ -262,26 +254,41 @@ export const useGetPoolDetail = ({ pairDenoms }: { pairDenoms: string }) => {
 
 export type RewardInfoQueryType = {
   stakerAddr: string;
-  assetInfo?: AssetInfo;
+  stakingToken?: string;
+  poolInfo?: {
+    liquidityAddr: string;
+  };
 };
 export const fetchRewardInfoV3 = async (
   stakerAddr: string,
-  assetInfo?: AssetInfo
+  stakingToken?: string
 ): Promise<OraiswapStakingTypes.RewardInfoResponse> => {
   const stakingContract = new OraiswapStakingQueryClient(window.client, network.staking);
   let payload: RewardInfoQueryType = {
     stakerAddr
   };
-  if (assetInfo) payload.assetInfo = assetInfo;
+  if (stakingToken) payload.stakingToken = stakingToken;
   const data = await stakingContract.rewardInfo(payload);
   return data;
 };
 
-export const useGetRewardInfo = ({ stakerAddr, assetInfo: stakingAssetInfo }: RewardInfoQueryType) => {
+export const useGetRewardInfo = ({ stakerAddr, poolInfo }: RewardInfoQueryType) => {
   const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
-    ['reward-info', stakerAddr, stakingAssetInfo],
-    () => fetchRewardInfoV3(stakerAddr, stakingAssetInfo),
+    ['reward-info', stakerAddr, poolInfo],
+    () => fetchRewardInfoV3(stakerAddr, poolInfo?.liquidityAddr),
     { enabled: !!stakerAddr, refetchOnWindowFocus: true }
+  );
+
+  return { totalRewardInfoData, refetchRewardInfo };
+};
+
+export const useGetRewardInfoDetail = ({ stakerAddr, poolInfo }: RewardInfoQueryType) => {
+  const { data: totalRewardInfoData, refetch: refetchRewardInfo } = useQuery(
+    ['reward-info-detail', stakerAddr, poolInfo],
+    () => {
+      return fetchRewardInfoV3(stakerAddr, poolInfo.liquidityAddr);
+    },
+    { enabled: !!stakerAddr && !!poolInfo && !!poolInfo.liquidityAddr, refetchOnWindowFocus: true }
   );
 
   return { totalRewardInfoData, refetchRewardInfo };
@@ -306,14 +313,10 @@ export const getStatisticData = (data: PoolTableData[]) => {
 };
 
 export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
-  const stakingAssetInfo = Pairs.getStakingAssetInfo([
-    JSON.parse(pool.firstAssetInfo),
-    JSON.parse(pool.secondAssetInfo)
-  ]);
   const rewardPerSecInfoData = JSON.parse(pool.rewardPerSec);
 
-  const currentPoolReward = totalRewardInfoData?.reward_infos?.find(
-    (reward) => parseAssetInfo(reward.asset_info) === parseAssetInfo(stakingAssetInfo)
+  const currentPoolReward = totalRewardInfoData?.reward_infos?.find((reward) =>
+    isEqual(reward.staking_token, pool.liquidityAddr)
   );
   const totalRewardAmount = BigInt(currentPoolReward?.pending_reward ?? 0);
 
@@ -326,7 +329,7 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
     .filter((asset) => parseInt(asset.amount))
     .map(async (asset) => {
       const pendingWithdraw = BigInt(
-        totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
+        currentPoolReward?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
       );
 
       const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
@@ -406,8 +409,10 @@ export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => 
   };
 
   const findBondAmount = (pool: PoolInfoResponse) => {
-    const assetInfo = Pairs.getStakingAssetInfo([JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)]);
-    const rewardInfo = totalRewardInfoData?.reward_infos.find(({ asset_info }) => isEqual(asset_info, assetInfo));
+    if (!totalRewardInfoData) return 0;
+    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) =>
+      isEqual(staking_token, pool.liquidityAddr)
+    );
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 
@@ -438,16 +443,17 @@ export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => 
 
 export const useGetPoolsWithClaimableAmount = ({ poolTableData, totalRewardInfoData }) => {
   const [cachePrices] = useConfigReducer('coingecko');
-  const [listClaimable, setListClaimable] = useState([]);
+  const [listClaimable, setListClaimable] = useState<
+    {
+      liquidityAddr: string;
+      amountEachPool: number;
+    }[]
+  >([]);
   const promiseClaimAmounts = poolTableData.map(async (pool) => {
-    const stakingAssetInfo = Pairs.getStakingAssetInfo([
-      JSON.parse(pool.firstAssetInfo),
-      JSON.parse(pool.secondAssetInfo)
-    ]);
     const amountEachPool = await getClaimableAmountByPool({ pool, totalRewardInfoData, cachePrices });
 
     return {
-      assetInfo: stakingAssetInfo,
+      liquidityAddr: pool.liquidityAddr,
       amountEachPool: amountEachPool
     };
   });

@@ -1,14 +1,14 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { PAIRS, TokenItemType, USDT_CONTRACT, parseAssetInfo } from '@oraichain/oraidex-common';
 import { flatten, uniq } from 'lodash';
 import { assetInfoMap } from './bridgeTokens';
-import { ORAI, PAIRS, TokenItemType, USDT_CONTRACT } from '@oraichain/oraidex-common';
+
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AssetInfo } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 
-import { network } from './networks';
-import { PairInfoExtend } from 'types/token';
 import { PairInfo } from '@oraichain/oraidex-contracts-sdk';
-import { parseAssetInfo } from '@oraichain/oraidex-common';
+import { PairInfoExtend } from 'types/token';
+import { network } from './networks';
 
 export type PairMapping = {
   asset_infos: [AssetInfo, AssetInfo];
@@ -81,12 +81,17 @@ export class Pairs {
     ]);
     return this.processFetchedAllPairInfos([...firstVersionAllPairs, ...secondVersionAllPairs]);
   };
-
-  static getStakingAssetInfo = (assetInfos: AssetInfo[]): AssetInfo => {
-    return parseAssetInfo(assetInfos[0]) === ORAI ? assetInfos[1] : assetInfos[0];
-  };
-
-  static getStakingInfoTokenItemTypeFromPairs = (pairs: PairInfo[]): TokenItemType[] => {
-    return pairs.map((p) => assetInfoMap[parseAssetInfo(this.getStakingAssetInfo(p.asset_infos))]);
-  };
 }
+
+export const PAIRS_CHART = PAIRS.map((pair) => {
+  const assets = pair.asset_infos.map((info) => {
+    if ('native_token' in info) return info.native_token.denom;
+    return info.token.contract_addr;
+  });
+
+  return {
+    ...pair,
+    symbol: `${pair.symbols[0]}/${pair.symbols[1]}`,
+    info: `${assets[0]}-${assets[1]}`
+  };
+});

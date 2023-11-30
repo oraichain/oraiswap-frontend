@@ -26,9 +26,6 @@ import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
-import { setListToken } from 'reducer/tradingSlice';
-import { useDispatch } from 'react-redux';
-import { pairsChart } from 'components/TVChartContainer/config';
 import MenuV3 from './MenuV3';
 import Instruct from './Instruct';
 import './index.scss';
@@ -43,13 +40,6 @@ const App = () => {
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
   useTronEventListener();
-
-  const dispatch = useDispatch();
-
-  // init chart pairs
-  useEffect(() => {
-    dispatch(setListToken(pairsChart));
-  }, []);
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(

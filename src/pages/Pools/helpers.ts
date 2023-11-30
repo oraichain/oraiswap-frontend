@@ -1,27 +1,13 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
-import {
-  Cw20Coin,
-  Asset,
-  AssetInfo,
-  InstantiateMarketingInfo,
-  OraiswapPairTypes,
-  OraiswapStakingTypes,
-  PairInfo
-} from '@oraichain/oraidex-contracts-sdk';
+import { Cw20Coin, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { Asset, AssetInfo, OraiswapPairTypes, OraiswapStakingTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
 import { assetInfoMap, tokenMap, oraichainTokens } from 'config/bridgeTokens';
 import { ORAI, ORAIXOCH_INFO, SEC_PER_YEAR, STABLE_DENOM } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import isEqual from 'lodash/isEqual';
 import sumBy from 'lodash/sumBy';
-import {
-  fetchAllRewardPerSecInfos,
-  fetchAllTokenAssetPools,
-  fetchPoolInfoAmount,
-  fetchTokenInfos,
-  getPairAmountInfo
-} from 'rest/api';
+import { fetchPoolInfoAmount, getPairAmountInfo } from 'rest/api';
 import { PairInfoExtend, TokenInfo } from 'types/token';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 import {
@@ -34,6 +20,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { Pairs } from 'config/pools';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/Cw20Base.types';
 
 export type PairInfoData = {
   pair: PairInfoExtend;
@@ -85,22 +72,6 @@ export const calculateAprResult = (
     };
   }, {});
   return aprResult;
-};
-
-// Fetch APR
-const fetchAprResult = async (pairs: PairInfo[], pairInfos: PairInfoData[], prices: CoinGeckoPrices<string>) => {
-  const lpTokens = pairs.map((p) => ({ contractAddress: p.liquidity_token } as TokenItemType));
-  const assetTokens = Pairs.getStakingInfoTokenItemTypeFromPairs(pairs);
-  try {
-    const [allTokenInfo, allLpTokenAsset, allRewardPerSec] = await Promise.all([
-      fetchTokenInfos(lpTokens),
-      fetchAllTokenAssetPools(assetTokens),
-      fetchAllRewardPerSecInfos(assetTokens)
-    ]);
-    return calculateAprResult(pairs, pairInfos, prices, allTokenInfo, allLpTokenAsset, allRewardPerSec);
-  } catch (error) {
-    console.log({ error });
-  }
 };
 
 // Fetch Pair Info Data List
@@ -220,17 +191,11 @@ export const calculateBondLpPools = (pairs: PairInfo[], res: AggregateResult) =>
 
 const generateRewardInfoQueries = (pairs: PairInfoExtend[], stakerAddress: string) => {
   const queries = pairs.map((pair) => {
-    let assetToken = assetInfoMap[pair.asset_infos_raw[0]];
-    const firstParsedAssetInfo = parseAssetInfo(pair.asset_infos[0]);
-
-    // we implicitly set asset info of the pool as non-ORAI token. If the first asset info in the pair list is ORAI then we get the other asset info
-    if (firstParsedAssetInfo === ORAI) assetToken = assetInfoMap[pair.asset_infos_raw[1]];
-    const { info: assetInfo } = parseTokenInfo(assetToken);
     return {
       address: network.staking,
       data: toBinary({
         reward_info: {
-          asset_info: assetInfo,
+          staking_token: pair.liquidity_token,
           staker_addr: stakerAddress
         }
       })
@@ -429,7 +394,7 @@ export const estimateShare = ({
   totalBaseAmount: number;
   totalQuoteAmount: number;
 }): number => {
-  if (totalBaseAmount === 0 || totalQuoteAmount === 0) return 0;
+  if (totalBaseAmount === 0 || totalQuoteAmount === 0 || !totalShare) return 0;
 
   const share = Math.min(
     Number((baseAmount * totalShare) / totalBaseAmount),
@@ -439,7 +404,6 @@ export const estimateShare = ({
 };
 
 export {
-  fetchAprResult,
   fetchCacheLpPools,
   fetchMyPairsData,
   fetchPairsData,
