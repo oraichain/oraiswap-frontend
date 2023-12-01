@@ -150,10 +150,10 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (
           <div key={e.name} className={styles.header_liquidity_item}>
-            <span className={styles.header_liquidity_item_title}>{e.name}</span>
+            <span>{e.name}</span>
             <div className={styles.header_liquidity_item_info}>
               {e.Icon && (
-                <div className={styles.liq_prefix}>
+                <div>
                   <e.Icon />
                 </div>
               )}
