@@ -10,10 +10,11 @@ import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
+import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
 import { DuckDb } from 'libs/duckdb';
 import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
+import { useGetPriceChange } from 'pages/Pools/hookV3';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
@@ -23,7 +24,6 @@ const Swap: React.FC = () => {
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
   const mobileMode = isMobile();
   const theme = useTheme();
-  const currentPair = useSelector(selectCurrentToken);
   const [searchParams] = useSearchParams();
   let tab = searchParams.get('type');
   const dispatch = useDispatch();
@@ -39,6 +39,15 @@ const Swap: React.FC = () => {
     dispatch(setChartTimeFrame(resolution));
   };
 
+  // data token pair
+  const currentPair = useSelector(selectCurrentToken);
+  const tf = useSelector(selectChartTimeFrame);
+  const { priceChange } = useGetPriceChange({
+    base_denom: currentPair.info.split('-')[0],
+    quote_denom: currentPair.info.split('-')[1],
+    tf
+  });
+
   return (
     <Content nonBackground>
       <div className={cx('swap-container')}>
@@ -46,8 +55,10 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
-                <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
+                {!priceChange.isError && (
+                  <HeaderTab setHideChart={setHideChart} hideChart={hideChart} toTokenDenom={toTokenDenom} />
+                )}
+                <div className={cx('tv-chart', hideChart || priceChange.isError ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <TVChartContainer
                     theme={theme}
