@@ -133,7 +133,8 @@ export const useGetPriceChange = (params: { base_denom: string; quote_denom: str
       console.error('useGetPriceChange', e);
       return {
         price_change: 0,
-        price: 0
+        price: 0,
+        isError: true
       };
     }
   };
