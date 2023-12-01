@@ -1,4 +1,4 @@
-import { CW20_DECIMALS, ORAI, toAmount } from '@oraichain/oraidex-common';
+import { ORAI, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -6,16 +6,15 @@ import Loader from 'components/Loader';
 import Modal from 'components/Modal';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
-import { Pairs } from 'config/pools';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
-import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgs, Type } from 'rest/api';
+import { Type, generateMiningMsgs } from 'rest/api';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './UnstakeLPModal.module.scss';
@@ -35,7 +34,7 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({
+  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfoDetail({
     stakerAddr: address,
     poolInfo: poolDetail.info
   });
@@ -58,7 +57,8 @@ export const UnstakeLPModal: FC<ModalProps> = ({ isOpen, close, open, onLiquidit
   };
 
   const handleUnbond = async (parsedAmount: bigint) => {
-    if (!poolDetail || !poolDetail.info) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+    if (!poolDetail || !poolDetail.info)
+      return displayToast(TToastType.TX_FAILED, { message: 'Pool information does not exist' });
 
     const oraiAddress = await handleCheckAddress('Oraichain');
 

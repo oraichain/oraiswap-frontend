@@ -43,6 +43,49 @@
     }
   }
 
+  &_header_sorter {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &.justify_end {
+      justify-content: flex-end;
+    }
+
+    &.justify_start {
+      justify-content: flex-start;
+    }
+
+    &.justify_center {
+      justify-content: center;
+    }
+
+    svg {
+      display: none;
+      vertical-align: sub;
+    }
+
+    &.active_sort {
+      svg {
+        display: block;
+      }
+    }
+
+    &:hover {
+      @include theme() {
+        color: theme-get('neutral-text-text-token-name');
+
+        svg {
+          display: block;
+
+          path {
+            fill: theme-get('neutral-text-text-token-name');
+          }
+        }
+      }
+    }
+  }
+
   tbody {
     tr {
       display: flex;
