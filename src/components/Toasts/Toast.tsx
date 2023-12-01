@@ -3,6 +3,9 @@ import { ReactComponent as FailedIcon } from 'assets/icons/ic_failed_trans.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/ic_info_trans.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/ic_status_done.svg';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_toast.svg';
+import { ReactComponent as ChristmasFailed } from 'assets/images/christmas/toastfailed.svg';
+import { ReactComponent as ChristmasInfo } from 'assets/images/christmas/toastinfo-light.svg';
+import { ReactComponent as ChristmasSuccess } from 'assets/images/christmas/toastsuccess.svg';
 import Loader from 'components/Loader';
 import { reduceString } from 'libs/utils';
 import { toast, ToastOptions } from 'react-toastify';
@@ -157,7 +160,9 @@ const ToastInfo: FunctionComponent<{
   textLink: string;
 }> = ({ message, link, textLink }) => (
   <div className={styles.toast_content}>
-    <InfoIcon />
+    <div className={styles.info_icon}>
+      <ChristmasInfo />
+    </div>
     <section className={styles.toast_section}>
       <p>{message}</p>
       {link && (
@@ -171,7 +176,9 @@ const ToastInfo: FunctionComponent<{
 
 const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <FailedIcon />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Transaction Failed</h6>
       <p>{message}</p>
@@ -181,7 +188,9 @@ const ToastTxFailed: FunctionComponent<{ message: string }> = ({ message }) => (
 
 const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <FailedIcon />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Keplr failed</h6>
       <p>{message}</p>
@@ -191,7 +200,9 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) =
 
 const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <FailedIcon />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Metamask failed</h6>
       <p>{message}</p>
@@ -201,7 +212,9 @@ const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }
 
 const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({ message }) => (
   <div className={styles.toast_content}>
-    <FailedIcon />
+    <div className={styles.failed_icon}>
+      <ChristmasFailed />
+    </div>
     <section className={styles.toast_section}>
       <h6>Tronlink failed</h6>
       <p>{message}</p>
@@ -217,7 +230,9 @@ const ToastTxSuccess: FunctionComponent<{
   linkPairAddress?: string;
 }> = ({ link, linkCw20Token, cw20Address, linkLpAddress, linkPairAddress }) => (
   <div className={styles.toast_content}>
-    <SuccessIcon />
+    <div className={styles.success_icon}>
+      <ChristmasSuccess />
+    </div>
     <section className={styles.toast_section}>
       <h6>Transaction Successful</h6>
       {cw20Address && (

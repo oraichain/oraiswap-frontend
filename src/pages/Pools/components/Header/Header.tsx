@@ -1,9 +1,10 @@
+// import bg_claim_btn from 'assets/images/bg_claim_btn.png';
+import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
+// import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
 import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import bg_claim_btn from 'assets/images/bg_claim_btn.svg';
-import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -145,13 +146,14 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
           })}
         </div> */}
       </div>
+
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (
           <div key={e.name} className={styles.header_liquidity_item}>
-            <span className={styles.header_liquidity_item_title}>{e.name}</span>
+            <span>{e.name}</span>
             <div className={styles.header_liquidity_item_info}>
               {e.Icon && (
-                <div className={styles.liq_prefix}>
+                <div>
                   <e.Icon />
                 </div>
               )}
@@ -211,7 +213,8 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
         </div>
         <div className={styles.header_claim_reward}>
           <div className={styles.claim_reward_bg}>
-            <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+            {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
+            <img src={bg_claim_btn} alt="bg-claim-reward" />
           </div>
           <Button
             type="primary-sm"
