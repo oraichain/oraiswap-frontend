@@ -2917,9 +2917,9 @@
     react-use "^17.4.0"
 
 "@oraichain/oraidex-common@^1.0.34":
-  version "1.0.39"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.39.tgz#ba865627f364995eb446b110bfdb025827bc25ff"
-  integrity sha512-LzAlLNUX9ESDX2ZJUXeobZQeFh+A2Rcqnj26yW1pf0XSoUETY0j1f6poNY18eGSuSu6WSTrpgPq8JldrV6OKqg==
+  version "1.0.43"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.43.tgz#3ce40dfd1cc33c129253fd59c8e227c05837c7fa"
+  integrity sha512-Xtp00JnVUl1Z4QarJE+Gw02TrHcxUmXzuynGN9g/x7HVL5NymzbB//PShlJ2VFhJfZXHCBaSBqDniIBLPoQ+GQ==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
@@ -2940,10 +2940,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.26.tgz#83c4c80185396a9c62d7ced4437bef7b178e0c37"
   integrity sha512-Uai30rSSn7h46lBLFuVbW96ErXAWRxfvEP+CNm/TXyGIw8VRtTaebQAqldsbxzYwBVEYbwDwZMHRGQWrsJBkJg==
 
-"@oraichain/oraidex-universal-swap@^1.0.32":
-  version "1.0.32"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.32.tgz#166c6480058116e5a24df7fe581edeacd62f0924"
-  integrity sha512-oj9GPPHdtmh+2XQ2eWhwO+TZgP7LJ+ohAkBRrIV7T1T4ddeSf89BRx/2uRda1qKY/keaPvzCqRmEn9NjN4ev/Q==
+"@oraichain/oraidex-universal-swap@^1.0.33":
+  version "1.0.33"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.33.tgz#25d82e9f42d21573164c0d7377d787bae99e5f6e"
+  integrity sha512-nq0uJJxXn4B3yOlyKwbQugNjHkcl3OmnJTcLLdlrZgtfS6MbCDWhMYvCcCw0EDJC6Rc7PcvBPkOoODFea1SDgg==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.34"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"

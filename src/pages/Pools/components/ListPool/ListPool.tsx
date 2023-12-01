@@ -37,7 +37,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       width: '12%',
       accessor: (data) => (
         <div className={styles.apr}>
-          <div>{`${data.apr.toFixed(2)}%`}</div>
+          <div>{`${(data.apr || 0).toFixed(2)}%`}</div>
           <div className={styles.apr_reward}>
             {data.reward.map((asset) => (
               <span key={asset}>+{asset}</span>
