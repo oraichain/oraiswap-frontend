@@ -28,6 +28,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
           <span className={styles.symbols_name}>{data.symbols}</span>
         </div>
       ),
+      sortField: 'symbols',
       width: '22%',
       align: 'left'
     },
@@ -44,6 +45,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
           </div>
         </div>
       ),
+      sortField: 'apr',
       align: 'left'
     },
     my_stake: {
