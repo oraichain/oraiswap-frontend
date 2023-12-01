@@ -1,7 +1,7 @@
 import { ReactComponent as SortDownIcon } from 'assets/icons/down_icon.svg';
 import { ReactComponent as SortUpIcon } from 'assets/icons/up_icon.svg';
 import { compareNumber } from 'helper';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import styles from './Table.module.scss';
 
 export type HeaderDataType<T extends object> = {
@@ -25,7 +25,6 @@ export type TableProps<T extends object> = {
 export enum SortType {
   DESC = 'desc',
   ASC = 'asc'
-  // NONE = null
 }
 
 export enum AlignType {

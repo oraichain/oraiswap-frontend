@@ -190,8 +190,6 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
       refetchOnWindowFocus: true,
       enabled: !!stakerAddress,
       staleTime: 5 * 60 * 1000
-      // cacheTime: 5 * 60 * 1000,
-      // initialData: []
     }
   );
 

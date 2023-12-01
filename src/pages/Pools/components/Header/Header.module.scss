@@ -27,11 +27,13 @@
     @include theme() {
       color: theme-get('neutral-text-text-token-name');
     }
+
     text-align: center;
 
     font-size: 18px;
     font-weight: 600;
-    line-height: 150%; /* 27px */
+    line-height: 150%;
+    /* 27px */
 
     .filter_day_wrapper {
       display: flex;
@@ -60,6 +62,7 @@
         border-radius: 99px;
 
         width: 100%;
+
         &.active {
           background: $white-color;
 
@@ -96,13 +99,15 @@
       color: $neutron-text-body-light;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
 
       @include mobile() {
         width: 100%;
       }
 
       &:nth-child(even) {
+
         // odd
         @include theme() {
           background-color: theme-get('neutral-surface-bg-section-3');
@@ -123,11 +128,14 @@
         .liq_value {
           font-size: 24px;
           font-weight: 500;
-          line-height: 120%; /* 28.8px */
+          line-height: 120%;
+
+          /* 28.8px */
           @include theme() {
             color: theme-get('sea-stone-200');
           }
         }
+
         .liq_suffix {
           font-size: 16px;
           font-weight: 500;
@@ -170,7 +178,8 @@
       color: $error-color;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
     }
 
     &_item {
@@ -242,7 +251,6 @@
   }
 
   @include small-mobile() {
-    // flex-direction: column;
     padding: 16px 0px;
 
     &_data {

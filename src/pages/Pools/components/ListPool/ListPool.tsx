@@ -57,13 +57,6 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
         <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
       )
     },
-    // earned: {
-    //   name: 'Earned',
-    //   width: '10%',
-    //   align: 'left',
-    //   sortField: 'earned',
-    //   accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
-    // },
     claimable: {
       name: 'Claimable',
       width: '10%',

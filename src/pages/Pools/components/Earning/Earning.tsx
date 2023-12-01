@@ -222,11 +222,6 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
         >
           Claim Rewards
         </Button>
-        {/* <div className={styles.earnMore}>
-          <div>
-            Add more liquidity to earn more <DownIcon className={styles.downIcon} />
-          </div>
-        </div> */}
       </div>
     </section>
   );
