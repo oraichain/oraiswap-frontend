@@ -2,7 +2,7 @@ import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
-import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { PoolTableData } from 'pages/Pools';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
           <span className={styles.symbols_name}>{data.symbols}</span>
         </div>
       ),
+      sortField: 'symbols',
       width: '22%',
       align: 'left'
     },
@@ -36,7 +37,7 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       width: '12%',
       accessor: (data) => (
         <div className={styles.apr}>
-          <div>{`${data.apr.toFixed(2)}%`}</div>
+          <div>{`${(data.apr || 0).toFixed(2)}%`}</div>
           <div className={styles.apr_reward}>
             {data.reward.map((asset) => (
               <span key={asset}>+{asset}</span>
@@ -44,36 +45,50 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
           </div>
         </div>
       ),
+      sortField: 'apr',
       align: 'left'
     },
     my_stake: {
       name: 'My Staked LP',
       width: '12%',
       align: 'left',
-      accessor: (data) => <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
+      sortField: 'myStakedLP',
+      accessor: (data) => (
+        <span className={!data.myStakedLP && styles.my_stake_lp}>{formatDisplayUsdt(data.myStakedLP)}</span>
+      )
     },
-    earned: {
-      name: 'Earned',
+    claimable: {
+      name: 'Claimable',
       width: '10%',
       align: 'left',
-      accessor: (data) => <span className={!data.earned && styles.earned}>{formatDisplayUsdt(data.earned)}</span>
+      sortField: 'claimable',
+      accessor: (data) => {
+        const displayValue = formatDisplayClaimable(data.claimable);
+        return <span className={displayValue === '0' && styles.text_number}>{displayValue}</span>;
+      }
     },
     fee7Days: {
       name: 'Fee (7D)',
       width: '10%',
       align: 'right',
+      sortField: 'fee7Days',
       accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.fee7Days))}</span>
     },
     volume24Hour: {
       name: 'Volume (24H)',
       width: '12%',
       align: 'right',
-      accessor: (data) => <span>{formatDisplayUsdt(toDisplay(data.volume24Hour))}</span>
+      sortField: 'volume24Hour',
+      accessor: (data) => {
+        const value = toDisplay(data.volume24Hour);
+        return <span className={!value && styles.text_number}>{formatDisplayUsdt(value)}</span>;
+      }
     },
     totalLiquidity: {
       name: 'Liquidity',
       width: '22%',
       align: 'right',
+      sortField: 'totalLiquidity',
       accessor: (data) => (
         <div className={styles.liquidity}>
           <span style={{ marginRight: 15 }}>
@@ -112,7 +127,12 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
     <div className={styles.listpools}>
       <div className={styles.listpools_list}>
         {poolTableData.length > 0 ? (
-          <Table headers={headers} data={poolTableData} handleClickRow={handleClickRow} />
+          <Table
+            headers={headers}
+            data={poolTableData}
+            handleClickRow={handleClickRow}
+            defaultSorted="totalLiquidity"
+          />
         ) : (
           <FallbackEmptyData />
         )}

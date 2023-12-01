@@ -2,7 +2,7 @@
 @import 'src/styles/themes';
 
 .listpools {
-    margin-top: 40px;
+    // margin-top: 40px;
 
     .listpools_all {
         display: flex;
@@ -98,7 +98,7 @@
     &_list {
         display: flex;
         gap: 16px;
-        margin-top: 35px;
+        margin-top: 24px;
         flex-wrap: wrap;
     }
 }

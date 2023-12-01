@@ -16,13 +16,20 @@ import isEqual from 'lodash/isEqual';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
-import { useFetchLpPoolsV3, useGetMyStake, useGetPools, useGetRewardInfo } from './hookV3';
+import {
+  useFetchLpPoolsV3,
+  useGetMyStake,
+  useGetPools,
+  useGetPoolsWithClaimableAmount,
+  useGetRewardInfo
+} from './hookV3';
 import styles from './index.module.scss';
 
 export type PoolTableData = PoolInfoResponse & {
   reward: string[];
   myStakedLP: number;
   earned: number;
+  claimable: number;
   baseToken: TokenItemType;
   quoteToken: TokenItemType;
 };
@@ -50,6 +57,11 @@ const Pools: React.FC<{}> = () => {
     stakerAddr: address
   });
 
+  const listClaimableData = useGetPoolsWithClaimableAmount({
+    poolTableData: filteredPools,
+    totalRewardInfoData
+  });
+
   const [cachedReward] = useConfigReducer('rewardPools');
 
   const poolTableData: PoolTableData[] = filteredPools
@@ -60,9 +72,9 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-          '0'
+        '0'
         : 0;
-      const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
+      const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
 
       const earned = stakingToken
@@ -82,6 +94,9 @@ const Pools: React.FC<{}> = () => {
         symbols = symbols.split('/').reverse().join('/');
       }
 
+      // calc claimable of each pool
+      const claimableAmount = listClaimableData.find((e) => isEqual(e.liquidityAddr, stakingToken));
+
       return {
         ...pool,
         reward: poolReward?.reward ?? [],
@@ -89,7 +104,8 @@ const Pools: React.FC<{}> = () => {
         earned: toDisplay(BigInt(Math.trunc(earned)), CW20_DECIMALS),
         baseToken,
         quoteToken,
-        symbols
+        symbols,
+        claimable: claimableAmount?.amountEachPool || 0
       };
     })
     .sort((poolA, poolB) => {
@@ -120,7 +136,7 @@ const Pools: React.FC<{}> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <Header />
+        <Header dataSource={poolTableData} />
         <div>
           <Filter setFilteredPools={setFilteredPools} setIsOpenNewTokenModal={setIsOpenNewTokenModal} />
           {mobileMode ? (

@@ -10,7 +10,7 @@ import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -30,7 +30,7 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
 
   const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-  const { totalRewardInfoData } = useGetRewardInfo({
+  const { totalRewardInfoData } = useGetRewardInfoDetail({
     stakerAddr: address,
     poolInfo: poolDetail.info
   });

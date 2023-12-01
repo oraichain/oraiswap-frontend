@@ -4,18 +4,18 @@ import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import Modal from 'components/Modal';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
+import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail, useGetRewardInfo } from 'pages/Pools/hookV3';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { generateMiningMsgs, Type } from 'rest/api';
+import { Type, generateMiningMsgs } from 'rest/api';
 import { RootState } from 'store/configure';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 import { ModalProps } from '../MyPoolInfo/type';
@@ -32,7 +32,7 @@ export const StakeLPModal: FC<ModalProps> = ({ isOpen, close, open, myLpBalance,
   const { info: pairInfoData } = poolDetail;
   const { lpTokenInfoData } = useGetPairInfo(poolDetail);
 
-  const { refetchRewardInfo } = useGetRewardInfo({
+  const { refetchRewardInfo } = useGetRewardInfoDetail({
     stakerAddr: address,
     poolInfo: poolDetail.info
   });
