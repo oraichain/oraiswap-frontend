@@ -205,7 +205,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
           ?.bond_amount || '0'
       : 0;
 
-    const lpPrice = totalSupply ? totalLiquidity / Number(totalSupply) : 0;
+    const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
     const myStakeLPInUsdt = +myStakedLP * lpPrice;
     accumulator += myStakeLPInUsdt;
     return accumulator;
