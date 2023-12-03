@@ -1,29 +1,11 @@
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { Cw20Coin, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
+import { Cw20Coin } from '@oraichain/common-contracts-sdk';
 import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/Cw20Base.types';
-import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
 import {
-  TokenItemType,
   validateNumber
 } from '@oraichain/oraidex-common';
-import { Asset, AssetInfo, OraiswapPairTypes, PairInfo } from '@oraichain/oraidex-contracts-sdk';
+import { Asset, AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-import { PairInfoExtend } from 'types/token';
 
-export type PairInfoData = {
-  pair: PairInfoExtend;
-} & PairInfoDataRaw &
-  PoolInfo;
-
-export type PairInfoDataRaw = {
-  amount: number;
-  fromToken: TokenItemType;
-  toToken: TokenItemType;
-} & PoolInfo;
-
-type PairDetails = {
-  [key: string]: OraiswapPairTypes.PoolResponse;
-};
 
 export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
@@ -73,19 +55,6 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
       }
     };
   return { native_token: { denom } };
-};
-
-export const calculateLpPoolsV3 = (lpAddresses: string[], res: AggregateResult) => {
-  const lpTokenData = Object.fromEntries(
-    lpAddresses.map((lpAddress, ind) => {
-      const data = res.return_data[ind];
-      if (!data.success) {
-        return [lpAddress, {}];
-      }
-      return [lpAddress, fromBinary(data.data)];
-    })
-  );
-  return lpTokenData;
 };
 
 const isBigIntZero = (value: BigInt): boolean => {
