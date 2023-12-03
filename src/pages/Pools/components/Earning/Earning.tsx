@@ -11,7 +11,7 @@ import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { isEqual } from 'lodash';
-import { useGetMyStake, useGetPoolDetail, useGetRewardInfoDetail, xOCH_PRICE } from 'pages/Pools/hookV3';
+import { useGetMyStake, useGetPoolDetail, useGetRewardInfoDetail, xOCH_PRICE } from 'pages/Pools/hooks';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, fetchTokenInfo, generateMiningMsgs } from 'rest/api';

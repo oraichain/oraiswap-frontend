@@ -16,7 +16,7 @@ import { fetchTokenInfo, fetchRewardPerSecInfo } from 'rest/api';
 import axios from 'rest/request';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
-import { PoolTableData } from './';
+import { PoolTableData } from '..';
 import { parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { RewardPoolType } from 'reducer/config';
 

@@ -11,14 +11,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { updateLpPools } from 'reducer/token';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
-import styles from './PoolDetailV3.module.scss';
+import styles from './PoolDetail.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
-import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hookV3';
+import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hooks';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
 
-const PoolDetailV3: React.FC = () => {
+const PoolDetail: React.FC = () => {
   let { poolUrl } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -84,4 +84,4 @@ const PoolDetailV3: React.FC = () => {
   );
 };
 
-export default PoolDetailV3;
+export default PoolDetail;

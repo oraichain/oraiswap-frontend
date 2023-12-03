@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import SearchInput from 'components/SearchInput';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetPools, useGetRewardInfo } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
@@ -53,8 +53,10 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
   };
 
   const findBondAmount = (pool: PoolInfoResponse) => {
-    if (!totalRewardInfoData) return 0
-    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) => isEqual(staking_token, pool.liquidityAddr));
+    if (!totalRewardInfoData) return 0;
+    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) =>
+      isEqual(staking_token, pool.liquidityAddr)
+    );
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 

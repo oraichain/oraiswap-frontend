@@ -21,7 +21,7 @@ import {
   useGetPools,
   useGetPoolsWithClaimableAmount,
   useGetRewardInfo
-} from './hookV3';
+} from './hooks';
 import styles from './index.module.scss';
 
 export type PoolTableData = PoolInfoResponse & {

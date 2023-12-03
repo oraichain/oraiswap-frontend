@@ -10,7 +10,7 @@ import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hooks';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
