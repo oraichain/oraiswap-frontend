@@ -8,11 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './style.module.scss';
-import { Pairs } from 'config/pools';
 import { isEqual } from 'lodash';
-import { Button } from 'components/Button';
-import { ReactComponent as IconAddLight } from 'assets/icons/Add-icon-black-only.svg';
-import { ReactComponent as IconAdd } from 'assets/icons/Add.svg';
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',

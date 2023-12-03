@@ -30,8 +30,6 @@ import {
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
-
-import { Pairs } from 'config/pools';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 
 const cx = cn.bind(styles);

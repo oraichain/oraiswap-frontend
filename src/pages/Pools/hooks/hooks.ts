@@ -436,11 +436,9 @@ export const useGetPoolsWithClaimableAmount = ({ poolTableData, totalRewardInfoD
   return listClaimable;
 };
 
-
-
 /**
  * fetch reward asset for each pool, with unique key is staking token (also called liquidity address)
- * @param pairs 
+ * @param lpAddresses: list lp address of all pools 
  * @returns list reward. format: [{
  *   "reward": [
  *       "AIRI"
