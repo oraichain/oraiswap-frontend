@@ -5,7 +5,7 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward } from './hooks';
+import { useFetchAllPairs, useFetchCacheReward } from './hooks';
 
 import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -39,12 +39,12 @@ const Pools: React.FC<{}> = () => {
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
   const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
 
-  const pairs = useFetchAllPairs();
   const [address] = useConfigReducer('address');
   const theme = useTheme();
   const mobileMode = isMobile();
+
+  const pairs = useFetchAllPairs();
   useFetchCacheReward(pairs);
-  useFetchCachePairs(pairs);
 
   const pools = useGetPools();
   const lpAddresses = pools.map((pool) => pool.liquidityAddr);
@@ -72,7 +72,7 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-        '0'
+          '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
