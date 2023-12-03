@@ -5,8 +5,6 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-import { useFetchAllPairs, useFetchCacheReward } from './hooks';
-
 import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
@@ -17,6 +15,7 @@ import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
 import {
+  useFetchCacheRewardAssetForAllPools,
   useFetchLpPoolsV3,
   useGetMyStake,
   useGetPools,
@@ -43,11 +42,10 @@ const Pools: React.FC<{}> = () => {
   const theme = useTheme();
   const mobileMode = isMobile();
 
-  const pairs = useFetchAllPairs();
-  useFetchCacheReward(pairs);
-
   const pools = useGetPools();
   const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+
+  useFetchCacheRewardAssetForAllPools(lpAddresses);
   useFetchLpPoolsV3(lpAddresses);
 
   const { myStakes } = useGetMyStake({
