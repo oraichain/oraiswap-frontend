@@ -1,4 +1,5 @@
-import { ORAI, toAmount } from '@oraichain/oraidex-common';
+import { ORAI } from '@oraichain/oraidex-common/build/constant';
+import { toAmount } from '@oraichain/oraidex-common/build/helper';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -10,8 +11,9 @@ import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { toFixedIfNecessary } from 'pages/Pools/helpers';
-import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useGetPoolDetail } from 'pages/Pools/hooks/useGetPoolDetail';
+import { useGetRewardInfoDetail } from 'pages/Pools/hooks/useGetRewardInfo';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';

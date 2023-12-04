@@ -5,7 +5,6 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-import { useFetchAllPairs, useFetchCachePairs, useFetchCacheReward } from './hooks';
 
 import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -13,26 +12,18 @@ import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import isEqual from 'lodash/isEqual';
-import { PoolInfoResponse } from 'types/pool';
+import { PoolInfoResponse, PoolTableData } from 'types/pool';
 import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
-import {
-  useFetchLpPoolsV3,
-  useGetMyStake,
-  useGetPools,
-  useGetPoolsWithClaimableAmount,
-  useGetRewardInfo
-} from './hookV3';
-import styles from './index.module.scss';
 
-export type PoolTableData = PoolInfoResponse & {
-  reward: string[];
-  myStakedLP: number;
-  earned: number;
-  claimable: number;
-  baseToken: TokenItemType;
-  quoteToken: TokenItemType;
-};
+import { useFetchCacheReward } from './hooks/useFetchCacheReward';
+import { useFetchLpPoolsV3 } from './hooks/useFetchLpPool';
+import { useGetMyStake } from './hooks/useGetMyStake';
+import { useGetPoolsWithClaimableAmount } from './hooks/useGetPoolWithClaimableAmount';
+import { useGetPools } from './hooks/useGetPools';
+import { useGetRewardInfo } from './hooks/useGetRewardInfo';
+import { useFetchAllPairs, useFetchCachePairs } from './hooks/usePair';
+import styles from './index.module.scss';
 
 const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
@@ -72,7 +63,7 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-        '0'
+          '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;

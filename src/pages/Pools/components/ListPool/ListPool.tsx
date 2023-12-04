@@ -3,10 +3,9 @@ import { Button } from 'components/Button';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { PoolTableData } from 'pages/Pools';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PoolInfoResponse } from 'types/pool';
+import { PoolInfoResponse, PoolTableData } from 'types/pool';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import styles from './ListPool.module.scss';
 

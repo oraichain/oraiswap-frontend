@@ -1,8 +1,9 @@
 // import bg_claim_btn from 'assets/images/bg_claim_btn.png';
 import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
 // import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
-import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
-import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT } from '@oraichain/oraidex-common/build/constant';
+import { toDecimal, toDisplay } from '@oraichain/oraidex-common/build/helper';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { Button } from 'components/Button';
@@ -14,16 +15,14 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import {
-  getStatisticData,
-  useGetMyStake,
-  useGetPools,
-  useGetRewardInfo,
-  useGetTotalClaimable
-} from 'pages/Pools/hookV3';
+import { getStatisticData } from 'pages/Pools/helpers';
+import { useGetMyStake } from 'pages/Pools/hooks/useGetMyStake';
+import { useGetPools } from 'pages/Pools/hooks/useGetPools';
+import { useGetRewardInfo } from 'pages/Pools/hooks/useGetRewardInfo';
+import { useGetTotalClaimable } from 'pages/Pools/hooks/useGetTotalClaimable';
 import { FC, useEffect, useState } from 'react';
+import { PoolTableData } from 'types/pool';
 import styles from './Header.module.scss';
-import { PoolTableData } from 'pages/Pools';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();

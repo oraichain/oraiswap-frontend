@@ -1,5 +1,4 @@
-import { TokenItemType } from '@oraichain/oraidex-common';
-import { AssetInfo } from '@oraichain/oraidex-contracts-sdk';
+import { TokenItemType } from '@oraichain/oraidex-common/build/token';
 import { Type } from 'rest/api';
 
 export type PairInfoData = {
@@ -45,3 +44,12 @@ export type BondLP = BaseMining & {
 export type WithdrawLP = BaseMining;
 export type UnbondLP = BaseMining & { amount: number | string };
 export type MiningLP = BondLP | WithdrawLP | UnbondLP;
+
+export type PoolTableData = PoolInfoResponse & {
+  reward: string[];
+  myStakedLP: number;
+  earned: number;
+  claimable: number;
+  baseToken: TokenItemType;
+  quoteToken: TokenItemType;
+};

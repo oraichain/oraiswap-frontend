@@ -1,7 +1,7 @@
 import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
-import { PoolTableData } from 'pages/Pools';
+import { PoolTableData } from 'types/pool';
 import { useNavigate } from 'react-router-dom';
 import styles from './ItemPoolMobile.module.scss';
 

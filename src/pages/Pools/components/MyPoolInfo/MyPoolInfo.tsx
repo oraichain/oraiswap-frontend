@@ -1,3 +1,5 @@
+import { CW20_DECIMALS } from '@oraichain/oraidex-common/build/constant';
+import { toDisplay } from '@oraichain/oraidex-common/build/helper';
 import { ReactComponent as ArrowRightIcon } from 'assets/icons/ic_arrow_right.svg';
 import { ReactComponent as DepositIcon } from 'assets/icons/ic_deposit.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_stake.svg';
@@ -10,8 +12,9 @@ import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPoolDetail, useGetRewardInfoDetail } from 'pages/Pools/hookV3';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
+import { useGetPoolDetail } from 'pages/Pools/hooks/useGetPoolDetail';
+import { useGetRewardInfoDetail } from 'pages/Pools/hooks/useGetRewardInfo';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AddLiquidityModal } from '../AddLiquidityModal';
@@ -19,7 +22,6 @@ import { StakeLPModal } from '../StakeLPModal';
 import { UnstakeLPModal } from '../UnstakeLPModal';
 import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
-import { toDisplay, CW20_DECIMALS } from '@oraichain/oraidex-common';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint; onLiquidityChange: () => void };

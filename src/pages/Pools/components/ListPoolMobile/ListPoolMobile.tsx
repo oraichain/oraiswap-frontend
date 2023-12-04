@@ -2,7 +2,7 @@ import { TokenItemType } from '@oraichain/oraidex-common';
 import NoDataSvg from 'assets/images/NoDataPool.svg';
 import NoDataLightSvg from 'assets/images/NoDataPoolLight.svg';
 import useTheme from 'hooks/useTheme';
-import { PoolTableData } from 'pages/Pools';
+import { PoolTableData } from 'types/pool';
 import { useState } from 'react';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import { PoolMobileItem } from '../ItemPoolMobile';

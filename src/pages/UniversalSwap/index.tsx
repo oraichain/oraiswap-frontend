@@ -1,20 +1,20 @@
+import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
-import { TVChartContainer } from '@oraichain/oraidex-common-ui';
+import { PAIRS_CHART } from 'config/pools';
+import useTheme from 'hooks/useTheme';
 import Content from 'layouts/Content';
+import { DuckDb } from 'libs/duckdb';
+import { useGetPriceChange } from 'pages/Pools/hooks/useGetPriceChange';
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
 import { TransactionProcess } from './Modals';
 import SwapComponent from './SwapV3';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
-import { DuckDb } from 'libs/duckdb';
-import useTheme from 'hooks/useTheme';
-import { PAIRS_CHART } from 'config/pools';
-import { useGetPriceChange } from 'pages/Pools/hookV3';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
