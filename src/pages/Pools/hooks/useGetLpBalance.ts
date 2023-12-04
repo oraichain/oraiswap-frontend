@@ -7,7 +7,7 @@ export const useGetLpBalance = ({ info: pairInfoData }: PoolDetail) => {
   const [address] = useConfigReducer('address');
 
   const { data: lpBalanceInfoData, refetch: refetchLpBalanceInfoData } = useQuery(
-    ['liquidity-token', pairInfoData],
+    ['liquidity-token', address, pairInfoData],
     () => {
       return fetchLpBalance(address, pairInfoData.liquidityAddr);
     },
