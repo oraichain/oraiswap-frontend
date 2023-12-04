@@ -20,7 +20,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { FC, useState } from 'react';
 import { isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
-import { useGetMyStake } from 'pages/Pools/hookV3';
+import { useGetMyStake } from 'pages/Pools/hooks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import ToggleSwitch from 'components/ToggleSwitch';
 import { tokensIcon } from 'config/chainInfos';
@@ -52,12 +52,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     label?: string;
     balance?: number | string;
   }[] = [
-      {
-        src: WalletIcon,
-        label: 'Total balance',
-        balance: formatDisplayUsdt(totalUsd)
-      }
-    ];
+    {
+      src: WalletIcon,
+      label: 'Total balance',
+      balance: formatDisplayUsdt(totalUsd)
+    }
+  ];
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [
@@ -94,7 +94,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         usd += getUsd(subAmount, t, prices);
       }
       const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
-      const tokenIcon = tokensIcon.find(token => token.coinGeckoId === t.coinGeckoId);
+      const tokenIcon = tokensIcon.find((token) => token.coinGeckoId === t.coinGeckoId);
       return {
         asset: t.name,
         chain: t.org,
@@ -112,7 +112,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   const headers: TableHeaderProps<AssetInfoResponse> = {
     assets: {
       name: 'ASSET',
-      accessor: data => (
+      accessor: (data) => (
         <div className={styles.assets}>
           <div className={styles.left}>
             {theme === 'light' ? (
@@ -134,14 +134,14 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     price: {
       name: 'PRICE',
       width: '23%',
-      accessor: data => <div className={styles.price}>${Number(data.price.toFixed(6))}</div>,
+      accessor: (data) => <div className={styles.price}>${Number(data.price.toFixed(6))}</div>,
       align: 'left'
     },
     balance: {
       name: 'BALANCE',
       width: '23%',
       align: 'left',
-      accessor: data => (
+      accessor: (data) => (
         <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>
           {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))}{' '}
           <span className={cx('balance-assets')}>{data.asset}</span>
@@ -153,7 +153,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       width: '24%',
       align: 'left',
       padding: '0px 8px 0px 0px',
-      accessor: data => {
+      accessor: (data) => {
         return (
           <div className={styles.valuesColumn}>
             <div>

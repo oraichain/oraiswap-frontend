@@ -14,7 +14,7 @@ import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'red
 import { DuckDb } from 'libs/duckdb';
 import useTheme from 'hooks/useTheme';
 import { PAIRS_CHART } from 'config/pools';
-import { useGetPriceChange } from 'pages/Pools/hookV3';
+import { useGetPriceChange } from 'pages/Pools/hooks';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {

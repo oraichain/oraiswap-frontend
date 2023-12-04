@@ -11,7 +11,7 @@ import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import CosmJs from 'libs/cosmjs';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail } from 'pages/Pools/hooks';
 import { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';

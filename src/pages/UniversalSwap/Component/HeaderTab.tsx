@@ -2,7 +2,7 @@ import HideImg from 'assets/icons/hidden.svg';
 import ShowImg from 'assets/icons/show.svg';
 import christmasTree from 'assets/images/christmas/xmas3.svg';
 import cn from 'classnames/bind';
-import { useGetPriceChange } from 'pages/Pools/hookV3';
+import { useGetPriceChange } from 'pages/Pools/hooks';
 import { useSelector } from 'react-redux';
 import { selectChartTimeFrame, selectCurrentToken } from 'reducer/tradingSlice';
 import styles from './HeaderTab.module.scss';

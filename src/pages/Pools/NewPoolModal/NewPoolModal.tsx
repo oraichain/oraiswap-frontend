@@ -5,7 +5,7 @@ import Modal from 'components/Modal';
 import Pie from 'components/Pie';
 import TokenBalance from 'components/TokenBalance';
 import { TokenItemType } from '@oraichain/oraidex-common';
-import { Pairs } from 'config/pools';
+import { getPoolTokens } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { toDisplay } from '@oraichain/oraidex-common';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
@@ -34,15 +34,15 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [isSelectingToken, setIsSelectingToken] = useState<'token1' | 'token2' | null>(null);
   const [token1, setToken1] = useState<string | null>(null);
   const [token2, setToken2] = useState<string | null>(null);
-  const [listToken1Option, setListToken1Option] = useState<TokenItemType[]>(Pairs.getPoolTokens());
-  const [listToken2Option, setListToken2Option] = useState<TokenItemType[]>(Pairs.getPoolTokens());
+  const [listToken1Option, setListToken1Option] = useState<TokenItemType[]>(getPoolTokens());
+  const [listToken2Option, setListToken2Option] = useState<TokenItemType[]>(getPoolTokens());
   const [supplyToken1, setSupplyToken1] = useState(0);
   const [supplyToken2, setSupplyToken2] = useState(0);
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const tokenObj1 = Pairs.getPoolTokens().find((token) => token.denom === token1);
-  const tokenObj2 = Pairs.getPoolTokens().find((token) => token.denom === token2);
+  const tokenObj1 = getPoolTokens().find((token) => token.denom === token1);
+  const tokenObj2 = getPoolTokens().find((token) => token.denom === token2);
 
   const { data: token1InfoData } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
     enabled: !!tokenObj1
@@ -60,7 +60,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
 
   const getBalanceValue = (tokenSymbol: string | undefined, amount: number | string) => {
     if (!tokenSymbol) return 0;
-    const coingeckoId = Pairs.getPoolTokens().find((token) => token.name === tokenSymbol)?.coinGeckoId;
+    const coingeckoId = getPoolTokens().find((token) => token.name === tokenSymbol)?.coinGeckoId;
     const pricePer = prices[coingeckoId!] ?? 0;
 
     return pricePer * +amount;
@@ -406,7 +406,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         prices={prices}
         setToken={(token1: string) => {
           setToken1(token1);
-          setListToken2Option(Pairs.getPoolTokens().filter((t) => t.denom !== token1));
+          setListToken2Option(getPoolTokens().filter((t) => t.denom !== token1));
         }}
         amounts={amounts}
         items={listToken1Option}
@@ -419,7 +419,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         amounts={amounts}
         setToken={(token2: string) => {
           setToken2(token2);
-          setListToken1Option(Pairs.getPoolTokens().filter((t) => t.denom !== token2));
+          setListToken1Option(getPoolTokens().filter((t) => t.denom !== token2));
         }}
         items={listToken2Option}
       />

@@ -16,7 +16,7 @@ import { getUsd, toSumDisplay } from 'libs/utils';
 import { estimateShare } from 'pages/Pools/helpers';
 import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useTokenAllowance } from 'pages/Pools/hooks/useTokenAllowance';
-import { useGetPoolDetail } from 'pages/Pools/hookV3';
+import { useGetPoolDetail } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -30,8 +30,6 @@ import {
 import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
-
-import { Pairs } from 'config/pools';
 import InputWithOptionPercent from '../InputWithOptionPercent';
 
 const cx = cn.bind(styles);
@@ -201,7 +199,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   };
 
   const handleDepositAndStakeAll = async (amount1: bigint, amount2: bigint) => {
-    if (!pairInfoData) return displayToast(TToastType.TX_FAILED, { message: "Pool information does not exist" });
+    if (!pairInfoData) return displayToast(TToastType.TX_FAILED, { message: 'Pool information does not exist' });
 
     setActionAllLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
