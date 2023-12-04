@@ -2,17 +2,13 @@ import classNames from 'classnames';
 import SearchInput from 'components/SearchInput';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetPools, useGetRewardInfo } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './style.module.scss';
-import { Pairs } from 'config/pools';
 import { isEqual } from 'lodash';
-import { Button } from 'components/Button';
-import { ReactComponent as IconAddLight } from 'assets/icons/Add-icon-black-only.svg';
-import { ReactComponent as IconAdd } from 'assets/icons/Add.svg';
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -53,8 +49,10 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
   };
 
   const findBondAmount = (pool: PoolInfoResponse) => {
-    if (!totalRewardInfoData) return 0
-    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) => isEqual(staking_token, pool.liquidityAddr));
+    if (!totalRewardInfoData) return 0;
+    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) =>
+      isEqual(staking_token, pool.liquidityAddr)
+    );
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 

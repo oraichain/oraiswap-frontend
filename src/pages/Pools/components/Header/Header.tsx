@@ -1,6 +1,4 @@
-// import bg_claim_btn from 'assets/images/bg_claim_btn.png';
 import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
-// import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
 import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
@@ -20,7 +18,7 @@ import {
   useGetPools,
   useGetRewardInfo,
   useGetTotalClaimable
-} from 'pages/Pools/hookV3';
+} from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
 import { PoolTableData } from 'pages/Pools';
