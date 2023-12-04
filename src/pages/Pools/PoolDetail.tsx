@@ -9,7 +9,6 @@ import { OverviewPool } from './components/OverviewPool';
 import { useLiquidityPool } from './hooks/useLiquidityPool';
 
 const PoolDetail: FC = () => {
-  // let { poolUrl } = useParams();
   const navigate = useNavigate();
   const { poolDetailData, onLiquidityChange, lpTokenBalance } = useLiquidityPool();
 

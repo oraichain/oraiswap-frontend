@@ -26,7 +26,7 @@ export const useLiquidityPool = () => {
   const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetailData);
   const queryClient = useQueryClient();
 
-  const { lpBalanceInfoData } = useGetLpBalance(poolDetailData);
+  const { lpBalanceInfoData, refetchLpBalanceInfoData } = useGetLpBalance(poolDetailData);
   const lpTokenBalance = BigInt(lpBalanceInfoData?.balance || '0');
 
   const refetchAllLpPools = async () => {
@@ -43,6 +43,7 @@ export const useLiquidityPool = () => {
     (amountLpInUsdt = 0) => {
       refetchPairAmountInfo();
       refetchLpTokenInfoData();
+      refetchLpBalanceInfoData();
       refetchAllLpPools();
       loadTokenAmounts({ oraiAddress: address });
 
