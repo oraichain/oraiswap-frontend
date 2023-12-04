@@ -31,7 +31,7 @@ const PoolDetail: React.FC = () => {
   const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetailData);
   const queryClient = useQueryClient();
 
-  const { lpBalanceInfoData } = useGetLpBalance(poolDetailData);
+  const { lpBalanceInfoData, refetchLpBalanceInfoData } = useGetLpBalance(poolDetailData);
   const lpTokenBalance = BigInt(lpBalanceInfoData?.balance || '0');
 
   const refetchAllLpPools = async () => {
@@ -48,6 +48,7 @@ const PoolDetail: React.FC = () => {
     (amountLpInUsdt = 0) => {
       refetchPairAmountInfo();
       refetchLpTokenInfoData();
+      refetchLpBalanceInfoData();
       refetchAllLpPools();
       loadTokenAmounts({ oraiAddress: address });
 

@@ -6,8 +6,8 @@ import { PoolDetail } from 'types/pool';
 export const useGetLpBalance = ({ info: pairInfoData }: PoolDetail) => {
   const [address] = useConfigReducer('address');
 
-  const { data: lpBalanceInfoData } = useQuery(
-    ['liquidity-token', pairInfoData],
+  const { data: lpBalanceInfoData, refetch: refetchLpBalanceInfoData } = useQuery(
+    ['liquidity-token', address, pairInfoData],
     () => {
       return fetchLpBalance(address, pairInfoData.liquidityAddr);
     },
@@ -17,5 +17,5 @@ export const useGetLpBalance = ({ info: pairInfoData }: PoolDetail) => {
     }
   );
 
-  return { lpBalanceInfoData };
+  return { lpBalanceInfoData, refetchLpBalanceInfoData };
 };
