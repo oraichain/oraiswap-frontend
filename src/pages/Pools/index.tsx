@@ -5,7 +5,6 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-
 import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
@@ -17,29 +16,29 @@ import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
 
 import { useFetchCacheReward } from './hooks/useFetchCacheReward';
-import { useFetchLpPoolsV3 } from './hooks/useFetchLpPool';
+import { useFetchLpPools } from './hooks/useFetchLpPool';
 import { useGetMyStake } from './hooks/useGetMyStake';
 import { useGetPoolsWithClaimableAmount } from './hooks/useGetPoolWithClaimableAmount';
 import { useGetPools } from './hooks/useGetPools';
 import { useGetRewardInfo } from './hooks/useGetRewardInfo';
 import { useFetchAllPairs, useFetchCachePairs } from './hooks/usePair';
 import styles from './index.module.scss';
+import { useFetchCacheRewardAssetForAllPools } from './hooks/useFetchCacheRewardAssetForAllPools';
 
 const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
   const [isOpenNewTokenModal, setIsOpenNewTokenModal] = useState(false);
   const [filteredPools, setFilteredPools] = useState<PoolInfoResponse[]>([]);
 
-  const pairs = useFetchAllPairs();
   const [address] = useConfigReducer('address');
   const theme = useTheme();
   const mobileMode = isMobile();
-  useFetchCacheReward(pairs);
-  useFetchCachePairs(pairs);
 
   const pools = useGetPools();
   const lpAddresses = pools.map((pool) => pool.liquidityAddr);
-  useFetchLpPoolsV3(lpAddresses);
+
+  useFetchCacheRewardAssetForAllPools(lpAddresses);
+  useFetchLpPools(lpAddresses);
 
   const { myStakes } = useGetMyStake({
     stakerAddress: address

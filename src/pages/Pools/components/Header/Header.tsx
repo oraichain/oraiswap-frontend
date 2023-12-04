@@ -1,6 +1,4 @@
-// import bg_claim_btn from 'assets/images/bg_claim_btn.png';
 import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
-// import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.png';
 import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT } from '@oraichain/oraidex-common/build/constant';
 import { toDecimal, toDisplay } from '@oraichain/oraidex-common/build/helper';

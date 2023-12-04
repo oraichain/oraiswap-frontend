@@ -3,11 +3,11 @@ import { useState } from 'react';
 import styles from './NewTokenModal.module.scss';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import Input from 'components/Input';
-import { Pairs } from 'config/pools';
 import { ReactComponent as SuccessIcon } from 'assets/icons/success.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
 import { OraiswapTokenQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import CheckBox from 'components/CheckBox';
+import { getPoolTokens } from 'config/pools';
 
 const cx = cn.bind(styles);
 
@@ -67,7 +67,7 @@ export const ModalListToken = ({
                 const cw20Token = new OraiswapTokenQueryClient(window.client, contractAddr);
                 await cw20Token.tokenInfo();
 
-                const existContractAddress = [...Pairs.getPoolTokens(), ...tokensNew].find(
+                const existContractAddress = [...getPoolTokens(), ...tokensNew].find(
                   (e) => e.contractAddress === contractAddr
                 );
                 if (existContractAddress) return setIsAddToken(false);
@@ -93,18 +93,20 @@ export const ModalListToken = ({
           </div>
         </div>
         <AddTokenStatus status={isAddToken} />
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          paddingTop: 10
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            paddingTop: 10
+          }}
+        >
           <CheckBox radioBox label="Token" checked={!isToken} onCheck={() => isToken && setIsToken(false)} />
           <CheckBox radioBox label="Native Token" checked={isToken} onCheck={() => !isToken && setIsToken(true)} />
         </div>
         <div className={cx('list')}>
           <ul>
-            {[...Pairs.getPoolTokens(), ...tokensNew]
-              .filter(p => isToken ? !p.contractAddress : p.contractAddress)
+            {[...getPoolTokens(), ...tokensNew]
+              .filter((p) => (isToken ? !p.contractAddress : p.contractAddress))
               .filter((pair) => !allRewardSelect.includes(pair.denom))
               .map((t, index) => {
                 return (

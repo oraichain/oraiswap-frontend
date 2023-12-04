@@ -43,7 +43,7 @@ export const fetchLpPoolsFromContract = async (
 };
 
 // Fetch lp pools from contract
-export const useFetchLpPoolsV3 = (lpAddresses: string[]) => {
+export const useFetchLpPools = (lpAddresses: string[]) => {
   const dispatch = useDispatch();
   const [address] = useConfigReducer('address');
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));

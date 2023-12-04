@@ -20,7 +20,6 @@ export const useLiquidityPool = (poolUrl: string) => {
   const [address] = useConfigReducer('address');
   const pools = useGetPools();
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  console.log('poolUrl', poolUrl);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
   const lpTokenBalance = BigInt(poolDetailData.info ? lpPools[poolDetailData.info?.liquidityAddr]?.balance || '0' : 0);
   const loadTokenAmounts = useLoadTokens();

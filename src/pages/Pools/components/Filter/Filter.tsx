@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import SearchInput from 'components/SearchInput';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { useGetPools } from 'pages/Pools/hooks/useGetPools';
 import { useGetRewardInfo } from 'pages/Pools/hooks/useGetRewardInfo';
 import { FC, useEffect, useState } from 'react';
