@@ -219,6 +219,12 @@ async function fetchStakingPoolInfo(stakingToken: string): Promise<OraiswapStaki
   return data;
 }
 
+async function fetchLpBalance(stakerAddr: string, liquidityAddr: string): Promise<OraiswapTokenTypes.BalanceResponse> {
+  const tokenContract = new OraiswapTokenQueryClient(window.client, liquidityAddr);
+  const data = await tokenContract.balance({ address: stakerAddr });
+  return data;
+}
+
 function generateConvertErc20Cw20Message(
   amounts: AmountDetails,
   tokenInfo: TokenItemType,
@@ -681,6 +687,7 @@ export {
   fetchTokenAllowance,
   fetchTokenInfo,
   fetchTokenInfos,
+  fetchLpBalance,
   generateContractMessages,
   generateConvertCw20Erc20Message,
   generateConvertErc20Cw20Message,

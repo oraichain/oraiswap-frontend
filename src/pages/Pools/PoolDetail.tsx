@@ -6,10 +6,9 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateLpPools } from 'reducer/token';
-import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './PoolDetail.module.scss';
 import { Earning } from './components/Earning';
@@ -17,32 +16,33 @@ import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hooks';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
+import { useGetLpBalance } from './hooks/useGetLpBalance';
 
 const PoolDetail: React.FC = () => {
   let { poolUrl } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [address] = useConfigReducer('address');
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
-  const lpTokenBalance = BigInt(poolDetailData.info ? lpPools[poolDetailData.info?.liquidityAddr]?.balance || '0' : 0);
   const loadTokenAmounts = useLoadTokens();
   const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
   const pools = useGetPools();
-  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
-  const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
+  const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+  const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetailData);
   const queryClient = useQueryClient();
 
-  const refetchAllLpPools = useCallback(async () => {
-    if (pools.length === 0) return;
-    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
+  const { lpBalanceInfoData } = useGetLpBalance(poolDetailData);
+  const lpTokenBalance = BigInt(lpBalanceInfoData?.balance || '0');
+
+  const refetchAllLpPools = async () => {
+    if (lpAddresses.length === 0) return;
     const lpTokenData = await fetchLpPoolsFromContract(
       lpAddresses,
       address,
       new MulticallQueryClient(window.client, network.multicall)
     );
     setCachedLpPools(lpTokenData);
-  }, [pools]);
+  };
 
   const onLiquidityChange = useCallback(
     (amountLpInUsdt = 0) => {
