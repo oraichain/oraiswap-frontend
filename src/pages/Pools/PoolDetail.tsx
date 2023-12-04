@@ -1,70 +1,17 @@
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { useQueryClient } from '@tanstack/react-query';
 import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
-import { network } from 'config/networks';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { updateLpPools } from 'reducer/token';
-import { RootState } from 'store/configure';
-import { PoolInfoResponse } from 'types/pool';
+import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './PoolDetail.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
-import { useGetPairInfo } from './hooks/useGetPairInfo';
-import { useGetPoolDetail } from './hooks/useGetPoolDetail';
-import { useGetPools } from './hooks/useGetPools';
-import { fetchLpPoolsFromContract } from './hooks/useFetchLpPool';
+import { useLiquidityPool } from './hooks/useLiquidityPool';
 
-const PoolDetail: React.FC = () => {
-  let { poolUrl } = useParams();
+const PoolDetail: FC = () => {
+  // let { poolUrl } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [address] = useConfigReducer('address');
-  const lpPools = useSelector((state: RootState) => state.token.lpPools);
-  const poolDetailData = useGetPoolDetail({ pairDenoms: poolUrl });
-  const lpTokenBalance = BigInt(poolDetailData.info ? lpPools[poolDetailData.info?.liquidityAddr]?.balance || '0' : 0);
-  const loadTokenAmounts = useLoadTokens();
-  const setCachedLpPools = (payload: LpPoolDetails) => dispatch(updateLpPools(payload));
-  const pools = useGetPools();
-  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
-  const { refetchPairAmountInfo, refetchLpTokenInfoData } = useGetPairInfo(poolDetail);
-  const queryClient = useQueryClient();
-
-  const refetchAllLpPools = useCallback(async () => {
-    if (pools.length === 0) return;
-    const lpAddresses = pools.map((pool) => pool.liquidityAddr);
-    const lpTokenData = await fetchLpPoolsFromContract(
-      lpAddresses,
-      address,
-      new MulticallQueryClient(window.client, network.multicall)
-    );
-    setCachedLpPools(lpTokenData);
-  }, [pools]);
-
-  const onLiquidityChange = useCallback(
-    (amountLpInUsdt = 0) => {
-      refetchPairAmountInfo();
-      refetchLpTokenInfoData();
-      refetchAllLpPools();
-      loadTokenAmounts({ oraiAddress: address });
-
-      // Update in an immutable way.
-      const queryKey = ['pool-detail', poolUrl];
-      queryClient.setQueryData(queryKey, (oldPoolDetail: PoolInfoResponse) => {
-        const updatedTotalLiquidity = oldPoolDetail.totalLiquidity + amountLpInUsdt;
-        return {
-          ...oldPoolDetail,
-          totalLiquidity: updatedTotalLiquidity
-        };
-      });
-    },
-    [address, pools]
-  );
+  const { poolDetailData, onLiquidityChange, lpTokenBalance } = useLiquidityPool();
 
   return (
     <Content nonBackground>

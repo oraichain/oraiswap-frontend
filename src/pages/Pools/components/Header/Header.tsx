@@ -1,130 +1,29 @@
+import { CW20_DECIMALS } from '@oraichain/oraidex-common/build/constant';
+import { toDisplay } from '@oraichain/oraidex-common/build/helper';
 import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
-import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
-import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT } from '@oraichain/oraidex-common/build/constant';
-import { toDecimal, toDisplay } from '@oraichain/oraidex-common/build/helper';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { network } from 'config/networks';
-import { handleErrorTransaction } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useTheme from 'hooks/useTheme';
-import CosmJs from 'libs/cosmjs';
-import { getStatisticData } from 'pages/Pools/helpers';
-import { useGetMyStake } from 'pages/Pools/hooks/useGetMyStake';
-import { useGetPools } from 'pages/Pools/hooks/useGetPools';
-import { useGetRewardInfo } from 'pages/Pools/hooks/useGetRewardInfo';
+import { useClaimAllReward } from 'pages/Pools/hooks/useClaimAllReward';
 import { useGetTotalClaimable } from 'pages/Pools/hooks/useGetTotalClaimable';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { PoolTableData } from 'types/pool';
 import styles from './Header.module.scss';
 
-export const useGetOraiPrice = () => {
-  const pools = useGetPools();
-  const [oraiPrice, setOraiPrice] = useState(0);
-
-  useEffect(() => {
-    if (pools.length === 0) return;
-    const oraiUsdtPool = pools.find(
-      (pool) =>
-        pool.firstAssetInfo === JSON.stringify(ORAI_INFO) &&
-        pool.secondAssetInfo ===
-          JSON.stringify({
-            token: {
-              contract_addr: USDT_CONTRACT
-            }
-          })
-    );
-    if (!oraiUsdtPool) return;
-    const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
-    setOraiPrice(oraiPrice);
-  }, [pools]);
-
-  return oraiPrice;
-};
-
 export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
-  const theme = useTheme();
-  const [address] = useConfigReducer('address');
-  const { totalStaked, totalEarned } = useGetMyStake({
-    stakerAddress: address
-  });
-  const oraiPrice = useGetOraiPrice();
-  const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({ stakerAddr: address });
-
-  const [claimLoading, setClaimLoading] = useState(false);
+  const {
+    totalEarned,
+    totalStaked,
+    liquidityData,
+    claimLoading,
+    disabledClaimBtn,
+    totalRewardInfoData,
+    handleClaimAllRewards
+  } = useClaimAllReward(dataSource);
 
   const [filterDay, setFilterDay] = useState(30);
-  const statisticData = getStatisticData(dataSource);
   const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
-  // TODO: get data statistic changed (suffix) by api
-  const liquidityData = [
-    {
-      name: 'Orai Price',
-      Icon: theme === 'light' ? OraiLightIcon : OraiIcon,
-      suffix: -2.25,
-      value: oraiPrice,
-      isNegative: true,
-      decimal: 2
-    },
-    {
-      name: 'Volume',
-      Icon: null,
-      suffix: 3.93,
-      value: statisticData.volume,
-      isNegative: false,
-      decimal: 2
-    },
-    {
-      name: 'Total Liquidity',
-      Icon: null,
-      suffix: 5.25,
-      value: toDisplay(parseInt(statisticData.totalLiquidity.toString()).toString()),
-      isNegative: false,
-      decimal: 2
-    }
-  ];
-
-  const handleClaimAllRewards = async () => {
-    setClaimLoading(true);
-    displayToast(TToastType.TX_BROADCASTING);
-    try {
-      const msgs = totalRewardInfoData.reward_infos
-        .filter((rewardInfo) => rewardInfo.pending_reward !== '0')
-        .map(
-          (rewardInfo) =>
-            ({
-              contractAddress: network.staking,
-              msg: { withdraw: { staking_token: rewardInfo.staking_token } },
-              funds: null
-            } as ExecuteInstruction)
-        );
-
-      const result = await CosmJs.executeMultiple({
-        msgs,
-        walletAddr: address,
-        gasAmount: { denom: ORAI, amount: '0' }
-      });
-
-      if (result) {
-        displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${network.explorer}/txs/${result.transactionHash}`
-        });
-        refetchRewardInfo();
-      }
-    } catch (error) {
-      console.log('error when claim all reward: ', error);
-      handleErrorTransaction(error);
-    } finally {
-      setClaimLoading(false);
-    }
-  };
-
-  const disabledClaimBtn = !totalRewardInfoData?.reward_infos?.some((info) => +info.pending_reward > 0) || claimLoading;
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>
