@@ -53,3 +53,16 @@ export type PoolTableData = PoolInfoResponse & {
   baseToken: TokenItemType;
   quoteToken: TokenItemType;
 };
+export interface PoolModalProps {
+  className?: string;
+  isOpen: boolean;
+  close: () => void;
+  isCloseBtn?: boolean;
+  onLiquidityChange?: (amountLpInUsdt?: number) => void;
+  myLpUsdt?: bigint;
+  myLpBalance?: bigint;
+  pairDenoms?: string;
+  open?: () => void;
+  assetToken?: TokenItemType | any;
+  lpPrice?: number;
+}

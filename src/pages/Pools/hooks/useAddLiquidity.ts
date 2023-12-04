@@ -20,8 +20,12 @@ import { estimateShare } from '../helpers';
 import { useGetPairInfo } from './useGetPairInfo';
 import { useGetPoolDetail } from './useGetPoolDetail';
 import { useTokenAllowance } from './useTokenAllowance';
+import { PoolModalProps } from 'types/pool';
 
-export const useAddLiquidity = (pairDenoms: string, onLiquidityChange?: (amountLpInUsdt?: number) => void) => {
+export const useAddLiquidity = ({
+  pairDenoms,
+  onLiquidityChange
+}: Pick<PoolModalProps, 'pairDenoms' | 'onLiquidityChange'>) => {
   const { data: prices } = useCoinGeckoPrices();
 
   const poolDetail = useGetPoolDetail({ pairDenoms });

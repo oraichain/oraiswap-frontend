@@ -10,13 +10,9 @@ import { ReactComponent as WithdrawLightIcon } from 'assets/icons/ic_withdraw_li
 import img_coin from 'assets/images/img_coin.png';
 import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
-import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
-import { useGetPoolDetail } from 'pages/Pools/hooks/useGetPoolDetail';
-import { useGetRewardInfoDetail } from 'pages/Pools/hooks/useGetRewardInfo';
-import { FC, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useMyPoolInfo } from 'pages/Pools/hooks/useMyPoolInfo';
+import { FC, useState } from 'react';
 import { AddLiquidityModal } from '../AddLiquidityModal';
 import { StakeLPModal } from '../StakeLPModal';
 import { UnstakeLPModal } from '../UnstakeLPModal';
@@ -25,42 +21,12 @@ import styles from './MyPoolInfo.module.scss';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint; onLiquidityChange: () => void };
+
 export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const theme = useTheme();
-  const { poolUrl } = useParams();
-  const [address] = useConfigReducer('address');
-
-  const poolDetail = useGetPoolDetail({ pairDenoms: poolUrl });
-  const { lpTokenInfoData } = useGetPairInfo(poolDetail);
-  const { totalRewardInfoData } = useGetRewardInfoDetail({
-    stakerAddr: address,
-    poolInfo: poolDetail.info
-  });
-
   const [modal, setModal] = useState<ModalPool>();
-  const [lpBalance, setLpBalance] = useState({
-    myLiquidityInUsdt: 0n,
-    lpPrice: 0
-  });
+  const { poolUrl, lpBalance, totalBondAmount, totalBondAmountInUsdt } = useMyPoolInfo(myLpBalance);
 
-  // calculate LP price, my LP balance in usdt
-  useEffect(() => {
-    if (!poolDetail.info) return;
-    const totalSupply = lpTokenInfoData?.total_supply;
-    if (!totalSupply) return;
-
-    const lpPrice = poolDetail.info.totalLiquidity / Number(totalSupply);
-    if (!lpPrice) return;
-
-    const myLiquidityInUsdt = Number(myLpBalance) * lpPrice;
-    setLpBalance({
-      myLiquidityInUsdt: BigInt(Math.trunc(myLiquidityInUsdt)),
-      lpPrice
-    });
-  }, [lpTokenInfoData, myLpBalance, poolDetail.info]);
-
-  const totalBondAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.bond_amount || '0');
-  const totalBondAmountInUsdt = BigInt(Math.trunc(lpBalance.lpPrice ? Number(totalBondAmount) * lpBalance.lpPrice : 0));
   return (
     <section className={styles.myPoolInfo}>
       <div className={styles.liquidity}>

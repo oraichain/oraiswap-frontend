@@ -7,15 +7,15 @@ import Modal from 'components/Modal';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { FC } from 'react';
-import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
 
 import { useAddLiquidity } from 'pages/Pools/hooks/useAddLiquidity';
 import InputWithOptionPercent from '../InputWithOptionPercent';
+import { PoolModalProps } from 'types/pool';
 
 const cx = cn.bind(styles);
 
-export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityChange, pairDenoms }) => {
+export const AddLiquidityModal: FC<PoolModalProps> = ({ isOpen, close, onLiquidityChange, pairDenoms }) => {
   const [theme] = useConfigReducer('theme');
 
   const {
@@ -38,7 +38,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
     onChangeAmount2,
     handleAddLiquidity,
     handleDepositAndStakeAll
-  } = useAddLiquidity(pairDenoms, onLiquidityChange);
+  } = useAddLiquidity({ pairDenoms, onLiquidityChange });
 
   const Token1Icon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const Token2Icon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;

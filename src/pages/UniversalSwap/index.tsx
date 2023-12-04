@@ -5,7 +5,7 @@ import { PAIRS_CHART } from 'config/pools';
 import useTheme from 'hooks/useTheme';
 import Content from 'layouts/Content';
 import { DuckDb } from 'libs/duckdb';
-import { useGetPriceChange } from 'pages/Pools/hooks/useGetPriceChange';
+import { useGetPriceChange } from 'hooks/useGetPriceChange';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
