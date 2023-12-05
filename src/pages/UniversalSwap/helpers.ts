@@ -197,7 +197,18 @@ export const generateNewSymbol = (
     return newTVPair;
   }
 
-  const findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
+  let findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
+  // this case when pair NOT in pool
+  // start find pair
+  if (!findedPair) {
+    findedPair = PAIRS_CHART.find((p) => p.symbols[0] === fromToken.name || p.symbols[1] === fromToken.name);
+  }
+
+  if (!findedPair) {
+    findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) || p.symbol.includes(toToken.name));
+  }
+  // end find pair
+
   if (!findedPair) {
     // this case when user click button reverse swap flow  of pair NOT in pool.
     // return null to prevent re-call api of this pair.

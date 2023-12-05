@@ -18,7 +18,7 @@ import {
   truncDecimals,
   tokenMap
 } from '@oraichain/oraidex-common';
-import { flattenTokensWithIcon } from 'config/chainInfos';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -35,6 +35,27 @@ interface ModalProps {
   searchTokenName?: string;
 }
 
+interface GetIconInterface {
+  type: string;
+  chainId?: string;
+  coinGeckoId?: string;
+  isLightTheme: boolean;
+}
+
+const getIcon = ({ isLightTheme, type, chainId, coinGeckoId }: GetIconInterface) => {
+  let tokenOrNetworkIcon;
+  if (type === 'token') {
+    tokenOrNetworkIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+  } else {
+    tokenOrNetworkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+  }
+  return isLightTheme ? (
+    <tokenOrNetworkIcon.IconLight className={cx('logo')} />
+  ) : (
+    <tokenOrNetworkIcon.Icon className={cx('logo')} />
+  );
+};
+
 export const SelectTokenModalV2: FC<ModalProps> = ({
   type = 'token',
   close,
@@ -50,9 +71,12 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   const [isNetwork, setIsNetwork] = useState(false);
   const [networkFilter, setNetworkFilter] = useState('');
   let totalBalance = 0;
+  const isLightTheme = theme === 'light';
+  let itemIcon;
 
   const networkBalance = networks.map((item) => {
     const network = item as CustomChainInfo;
+    itemIcon = getIcon({ isLightTheme, type: 'network', chainId: item.chainId, coinGeckoId: '' });
     const key = network.chainId.toString();
     const title = network.chainName;
     const subAmounts = Object.fromEntries(
@@ -63,6 +87,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     totalBalance += +totalUsd;
     return {
       ...item,
+      ItemIcon: itemIcon,
       balance,
       title,
       key
@@ -70,7 +95,6 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   });
 
   const networksMap = {};
-
   let itemsFilter = (
     searchTokenName || networkFilter
       ? items.filter((item: TokenItemType) => {
@@ -82,9 +106,10 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       : items
   ).map((item: TokenItemType | CustomChainInfo) => {
     let key: string, title: string, balance: string, org: string;
-
+    let itemIcon;
     if (type === 'token') {
       const token = item as TokenItemType;
+      itemIcon = getIcon({ isLightTheme, type: 'token', coinGeckoId: token.coinGeckoId });
       key = token.denom;
       title = token.name;
       org = token.org;
@@ -102,6 +127,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     } else {
       const network = item as CustomChainInfo;
       key = network.chainId.toString();
+      itemIcon = getIcon({ isLightTheme, type: 'network', chainId: item.chainId });
       title = network.chainName;
       org = network.chainName;
       const subAmounts = Object.fromEntries(
@@ -109,29 +135,6 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       );
       const totalUsd = getTotalUsd(subAmounts, prices);
       balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
-    }
-
-    // TODO: need handle list icon
-    const isLightTheme = theme === 'light';
-    let itemIcon = isLightTheme ? (
-      item.IconLight ? (
-        <item.IconLight className={cx('logo')} />
-      ) : (
-        item.Icon && <item.Icon className={cx('logo')} />
-      )
-    ) : (
-      <item.Icon className={cx('logo')} />
-    );
-
-    // TODO: hardcode list icon oraichain need fix after listing v3
-    if (!item.Icon && item.chainId === 'Oraichain') {
-      const tokenItem = item as TokenItemType;
-      const itemTokenIcon = flattenTokensWithIcon.find((oraichainToken) => oraichainToken.denom === tokenItem.denom);
-      itemIcon = isLightTheme ? (
-        <itemTokenIcon.IconLight className={cx('logo')} />
-      ) : (
-        <itemTokenIcon.Icon className={cx('logo')} />
-      );
     }
     if (networksMap[item.chainId] === undefined) networksMap[item.chainId] = [];
     networksMap[item.chainId].push({ balance, key, title, chainId: item.chainId, org, itemIcon });
@@ -169,7 +172,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       ) : (
         <div className={cx('details')}>
           <img
-            src={theme === 'light' ? BackImg : BackImg}
+            src={BackImg}
             onClick={() => {
               isNetwork && setIsNetwork(false);
             }}
@@ -189,14 +192,14 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
             setIsNetwork(!isNetwork);
           }}
         >
-          <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+          <img src={NetworkImg} alt="network" />
           <div className={cx('all-network')}>
             <span className={cx(`${isNetwork ? 'detail' : ''}`)}>
               {networkFilter && !isNetwork ? networkFilter : 'All Networks'}
             </span>
             {isNetwork && <span className={cx('balance')}>${totalBalance?.toFixed(2)}</span>}
           </div>
-          {!isNetwork && <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />}
+          {!isNetwork && <img src={ArrowImg} alt="arrow" />}
         </div>
         {isNetwork && !networkFilter && <img src={CheckImg} alt="check" />}
       </div>
@@ -212,15 +215,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
                   setIsNetwork(false);
                 }}
               >
-                {theme === 'light' ? (
-                  item.IconLight ? (
-                    <item.IconLight className={cx('logo')} />
-                  ) : (
-                    <item.Icon className={cx('logo')} />
-                  )
-                ) : (
-                  <item.Icon className={cx('logo')} />
-                )}
+                {item.ItemIcon}
                 <div className={cx('grow')}>
                   <div>{item.title}</div>
                   <div className={cx('org')}>{item.balance}</div>

@@ -4,7 +4,12 @@ import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
-import { MILKYBSC_ORAICHAIN_DENOM, USDT_CONTRACT } from '@oraichain/oraidex-common';
+import {
+  MILKYBSC_ORAICHAIN_DENOM,
+  USDT_CONTRACT,
+  AIRI_CONTRACT,
+  OSMOSIS_ORAICHAIN_DENOM
+} from '@oraichain/oraidex-common';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -63,27 +68,30 @@ describe('should utils functions in libs/utils run exactly', () => {
 
   it.each<[string, string, string, PairToken, PairToken | null]>([
     [
-      'from-&-to-are-NOT-pair-in-pool-and-are-NOT-reversed',
-      'AIRI',
+      'from-&-to-are-NOT-pair-in-pool',
       'OSMO',
+      'AIRI',
       {
-        symbol: 'ORAI/USDT',
-        info: 'orai-usdt'
+        symbol: 'OSMO/AIRI',
+        info: ''
       },
       {
-        symbol: 'AIRI/OSMO',
-        info: ''
+        symbol: 'ORAI/OSMO',
+        info: `orai-${OSMOSIS_ORAICHAIN_DENOM}`
       }
     ],
     [
-      'from-&-to-are-NOT-pair-in-pool-and-are-reversed',
-      'OSMO',
+      'from-&-to-are-NOT-pair-in-pool',
       'AIRI',
+      'OSMO',
       {
         symbol: 'AIRI/OSMO',
         info: ''
       },
-      null
+      {
+        symbol: 'AIRI/ORAI',
+        info: `${AIRI_CONTRACT}-orai`
+      }
     ],
     [
       'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
