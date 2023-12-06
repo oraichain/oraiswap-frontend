@@ -191,15 +191,26 @@ export const generateNewSymbol = (
 ): PairToken | null => {
   let newTVPair: PairToken = { ...currentPair };
   // example: ORAI/ORAI
-  if (fromToken.name === toToken.name) {
-    newTVPair.symbol = `${fromToken.name}/${toToken.name}`;
-    newTVPair.info = '';
+  let findedPair;
+  const isFromTokenEqualToToken = fromToken.name === toToken.name;
+  const fromTokenIsOrai = fromToken.name === 'ORAI';
+  if (isFromTokenEqualToToken) {
+    const symbol = fromTokenIsOrai ? 'USDT' : 'ORAI';
+    findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(symbol));
+    if (!findedPair)
+      return {
+        ...newTVPair,
+        symbol: `${fromToken.name}/${toToken.name}`,
+        info: ''
+      };
+
+    newTVPair.symbol = findedPair.symbol;
+    newTVPair.info = findedPair.info;
     return newTVPair;
   }
 
-  let findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
+  findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(toToken.name));
   // this case when pair NOT in pool
-  // start find pair
   if (!findedPair) {
     findedPair = PAIRS_CHART.find((p) => p.symbols.includes(fromToken.name));
   }
@@ -207,7 +218,6 @@ export const generateNewSymbol = (
   if (!findedPair) {
     findedPair = PAIRS_CHART.find((p) => p.symbols.includes(toToken.name));
   }
-  // end find pair
 
   if (!findedPair) {
     // this case when user click button reverse swap flow  of pair NOT in pool.
