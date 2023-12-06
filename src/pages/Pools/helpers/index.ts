@@ -89,8 +89,12 @@ export const toFixedIfNecessary = (value: string, dp: number): number => {
 };
 
 // add `,` when split thounsand value.
-export const numberWithCommas = (x: number) => {
-  return x.toLocaleString();
+export const numberWithCommas = (
+  x: number,
+  locales: Intl.LocalesArgument = undefined,
+  options: Intl.NumberFormatOptions = {}
+) => {
+  return x.toLocaleString(locales, options);
 };
 
 /**

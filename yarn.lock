@@ -2916,10 +2916,10 @@
     react-dom "^18.2.0"
     react-use "^17.4.0"
 
-"@oraichain/oraidex-common@^1.0.34":
-  version "1.0.43"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.43.tgz#3ce40dfd1cc33c129253fd59c8e227c05837c7fa"
-  integrity sha512-Xtp00JnVUl1Z4QarJE+Gw02TrHcxUmXzuynGN9g/x7HVL5NymzbB//PShlJ2VFhJfZXHCBaSBqDniIBLPoQ+GQ==
+"@oraichain/oraidex-common@^1.0.44":
+  version "1.0.45"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.45.tgz#15ba8962e25e99ad0b3f5376f0a2d9ed87ae06e4"
+  integrity sha512-aaNXqWndvajzBN8rQXgyyi371D3GbDpYbg4ivvo6t2DkPJb5EfI8xYit0wHTfbjWHgRFdjUaJ24NzmaKpfBPpg==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
@@ -2940,12 +2940,12 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.26.tgz#83c4c80185396a9c62d7ced4437bef7b178e0c37"
   integrity sha512-Uai30rSSn7h46lBLFuVbW96ErXAWRxfvEP+CNm/TXyGIw8VRtTaebQAqldsbxzYwBVEYbwDwZMHRGQWrsJBkJg==
 
-"@oraichain/oraidex-universal-swap@^1.0.33":
-  version "1.0.33"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.33.tgz#25d82e9f42d21573164c0d7377d787bae99e5f6e"
-  integrity sha512-nq0uJJxXn4B3yOlyKwbQugNjHkcl3OmnJTcLLdlrZgtfS6MbCDWhMYvCcCw0EDJC6Rc7PcvBPkOoODFea1SDgg==
+"@oraichain/oraidex-universal-swap@^1.0.35":
+  version "1.0.35"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.35.tgz#4c4ae8cd1b1138b6f50887dbf3616f1dddf64c99"
+  integrity sha512-7zjkpCfQoQInoS5L4GcIADQWFrh348QfTN+Eckc75akuUllIClMwOBC5i1VuCHqYlXplRO7qjId0n9aUICYTwQ==
   dependencies:
-    "@oraichain/oraidex-common" "^1.0.34"
+    "@oraichain/oraidex-common" "^1.0.44"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"

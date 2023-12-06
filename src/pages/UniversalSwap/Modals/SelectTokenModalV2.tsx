@@ -18,7 +18,7 @@ import {
   truncDecimals,
   tokenMap
 } from '@oraichain/oraidex-common';
-import { flattenTokensWithIcon } from 'config/chainInfos';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -35,6 +35,24 @@ interface ModalProps {
   searchTokenName?: string;
 }
 
+interface GetIconInterface {
+  type: 'token' | 'network';
+  chainId?: string;
+  coinGeckoId?: string;
+  isLightTheme: boolean;
+}
+
+const getIcon = ({ isLightTheme, type, chainId, coinGeckoId }: GetIconInterface) => {
+  let tokenOrNetworkIcon;
+  if (type === 'token') {
+    tokenOrNetworkIcon = flattenTokensWithIcon.find((tokenWithIcon) => tokenWithIcon.coinGeckoId === coinGeckoId);
+  } else {
+    tokenOrNetworkIcon = chainIcons.find((chain) => chain.chainId === chainId);
+  }
+  if (isLightTheme) return <tokenOrNetworkIcon.IconLight className={cx('logo')} />;
+  return <tokenOrNetworkIcon.Icon className={cx('logo')} />;
+};
+
 export const SelectTokenModalV2: FC<ModalProps> = ({
   type = 'token',
   close,
@@ -48,43 +66,52 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
   const [isNetwork, setIsNetwork] = useState(false);
-  const [networkFilter, setNetworkFilter] = useState('');
+  const [searchTextChainName, setSearchTextChainName] = useState('');
   let totalBalance = 0;
+  const isLightTheme = theme === 'light';
 
   const networkBalance = networks.map((item) => {
     const network = item as CustomChainInfo;
+    const networkIcon = getIcon({ isLightTheme, type: 'network', chainId: item.chainId });
     const key = network.chainId.toString();
     const title = network.chainName;
     const subAmounts = Object.fromEntries(
-      Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
+      Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
     );
     const totalUsd = getTotalUsd(subAmounts, prices);
     const balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
     totalBalance += +totalUsd;
     return {
       ...item,
+      ItemIcon: networkIcon,
       balance,
       title,
       key
     };
   });
 
+  const checkSearchTokenAndNetworkSearch = (item: TokenItemType, tokenSearch: string, searchTextChainName: string) => {
+    if (tokenSearch && searchTextChainName)
+      return item.name.toLowerCase().includes(searchTokenName.toLowerCase()) && item.org === searchTextChainName;
+    if (tokenSearch) return item.name.toLowerCase().includes(searchTokenName.toLowerCase());
+    return item.org === searchTextChainName;
+  };
+
   const networksMap = {};
+  const isSearchTokenOrNetworkSearch = searchTokenName || searchTextChainName;
+  let itemsCheck = items;
+  if (isSearchTokenOrNetworkSearch) {
+    itemsCheck = items.filter((item: TokenItemType) =>
+      checkSearchTokenAndNetworkSearch(item, searchTokenName, searchTextChainName)
+    );
+  }
 
-  let itemsFilter = (
-    searchTokenName || networkFilter
-      ? items.filter((item: TokenItemType) => {
-        if (searchTokenName && networkFilter)
-          return item.name.toLowerCase().includes(searchTokenName.toLowerCase()) && item.org === networkFilter;
-        if (searchTokenName) return item.name.toLowerCase().includes(searchTokenName.toLowerCase());
-        return item.org === networkFilter;
-      })
-      : items
-  ).map((item: TokenItemType | CustomChainInfo) => {
+  itemsCheck.forEach((item: TokenItemType | CustomChainInfo) => {
     let key: string, title: string, balance: string, org: string;
-
+    let itemIcon;
     if (type === 'token') {
       const token = item as TokenItemType;
+      itemIcon = getIcon({ isLightTheme, type: 'token', coinGeckoId: token.coinGeckoId });
       key = token.denom;
       title = token.name;
       org = token.org;
@@ -102,6 +129,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     } else {
       const network = item as CustomChainInfo;
       key = network.chainId.toString();
+      itemIcon = getIcon({ isLightTheme, type: 'network', chainId: item.chainId });
       title = network.chainName;
       org = network.chainName;
       const subAmounts = Object.fromEntries(
@@ -110,45 +138,20 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       const totalUsd = getTotalUsd(subAmounts, prices);
       balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
     }
-
-    // TODO: need handle list icon
-    const isLightTheme = theme === 'light';
-    let itemIcon = isLightTheme ? (
-      item.IconLight ? (
-        <item.IconLight className={cx('logo')} />
-      ) : (
-        item.Icon && <item.Icon className={cx('logo')} />
-      )
-    ) : (
-      <item.Icon className={cx('logo')} />
-    );
-
-    // TODO: hardcode list icon oraichain need fix after listing v3
-    if (!item.Icon && item.chainId === 'Oraichain') {
-      const tokenItem = item as TokenItemType;
-      const itemTokenIcon = flattenTokensWithIcon.find((oraichainToken) => oraichainToken.denom === tokenItem.denom);
-      itemIcon = isLightTheme ? (
-        <itemTokenIcon.IconLight className={cx('logo')} />
-      ) : (
-        <itemTokenIcon.Icon className={cx('logo')} />
-      );
-    }
     if (networksMap[item.chainId] === undefined) networksMap[item.chainId] = [];
     networksMap[item.chainId].push({ balance, key, title, chainId: item.chainId, org, itemIcon });
-
-    return null;
   });
 
-  itemsFilter = [];
+  let itemsReverse = [];
 
   for (const key in networksMap) {
     if (Object.prototype.hasOwnProperty.call(networksMap, key)) {
       const prices = networksMap[key].sort((a, b) => b.balance - a.balance);
-      itemsFilter.push(prices);
+      itemsReverse.push(prices);
     }
   }
 
-  itemsFilter = itemsFilter.reverse().flat();
+  itemsReverse = itemsReverse.reverse().flat();
 
   useOnClickOutside(ref, () => {
     setSearchTokenName('');
@@ -169,7 +172,7 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
       ) : (
         <div className={cx('details')}>
           <img
-            src={theme === 'light' ? BackImg : BackImg}
+            src={BackImg}
             onClick={() => {
               isNetwork && setIsNetwork(false);
             }}
@@ -184,21 +187,21 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
           className={cx('right')}
           onClick={() => {
             if (isNetwork) {
-              setNetworkFilter('');
+              setSearchTextChainName('');
             }
             setIsNetwork(!isNetwork);
           }}
         >
-          <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
+          <img src={NetworkImg} alt="network" />
           <div className={cx('all-network')}>
             <span className={cx(`${isNetwork ? 'detail' : ''}`)}>
-              {networkFilter && !isNetwork ? networkFilter : 'All Networks'}
+              {searchTextChainName && !isNetwork ? searchTextChainName : 'All Networks'}
             </span>
             {isNetwork && <span className={cx('balance')}>${totalBalance?.toFixed(2)}</span>}
           </div>
-          {!isNetwork && <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />}
+          {!isNetwork && <img src={ArrowImg} alt="arrow" />}
         </div>
-        {isNetwork && !networkFilter && <img src={CheckImg} alt="check" />}
+        {isNetwork && !searchTextChainName && <img src={CheckImg} alt="check" />}
       </div>
       <div className={cx('options')}>
         {isNetwork &&
@@ -208,29 +211,21 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
                 className={cx('item')}
                 key={item.key}
                 onClick={() => {
-                  setNetworkFilter(item.title);
+                  setSearchTextChainName(item.title);
                   setIsNetwork(false);
                 }}
               >
-                {theme === 'light' ? (
-                  item.IconLight ? (
-                    <item.IconLight className={cx('logo')} />
-                  ) : (
-                    <item.Icon className={cx('logo')} />
-                  )
-                ) : (
-                  <item.Icon className={cx('logo')} />
-                )}
+                {item.ItemIcon}
                 <div className={cx('grow')}>
                   <div>{item.title}</div>
                   <div className={cx('org')}>{item.balance}</div>
                 </div>
-                <div>{networkFilter === item.chainName && <img src={CheckImg} alt="check" />}</div>
+                <div>{searchTextChainName === item.chainName && <img src={CheckImg} alt="check" />}</div>
               </div>
             );
           })}
         {!isNetwork &&
-          itemsFilter.map((item) => (
+          itemsReverse.map((item) => (
             <div
               className={cx('item')}
               key={item.key}

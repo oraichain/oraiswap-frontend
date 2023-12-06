@@ -70,7 +70,7 @@ const TabsNetwork: React.FC<{
       </div>
       <div className={cx('options')}>
         {networks && networks.map((item: CustomChainInfo) => {
-          const networkIcon = chainIcons.find(chain => chain.chainId === item.chainId)
+          const networkIcon = chainIcons.find(chainIcon => chainIcon.chainId === item.chainId)
           return (
             <div key={item.chainName}>
               <ItemNetwork
