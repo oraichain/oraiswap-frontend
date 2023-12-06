@@ -140,8 +140,6 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
     }
     if (networksMap[item.chainId] === undefined) networksMap[item.chainId] = [];
     networksMap[item.chainId].push({ balance, key, title, chainId: item.chainId, org, itemIcon });
-
-    return null;
   });
 
   let itemsReverse = [];
