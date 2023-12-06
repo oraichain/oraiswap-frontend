@@ -1,11 +1,8 @@
 import { Cw20Coin } from '@oraichain/common-contracts-sdk';
 import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/Cw20Base.types';
-import {
-  validateNumber
-} from '@oraichain/oraidex-common';
+import { validateNumber } from '@oraichain/oraidex-common';
 import { Asset, AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-
 
 export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
@@ -89,8 +86,12 @@ export const toFixedIfNecessary = (value: string, dp: number): number => {
 };
 
 // add `,` when split thounsand value.
-export const numberWithCommas = (x: number) => {
-  return x.toLocaleString();
+export const numberWithCommas = (
+  x: number,
+  locales: Intl.LocalesArgument = undefined,
+  options: Intl.NumberFormatOptions = {}
+) => {
+  return x.toLocaleString(locales, options);
 };
 
 /**
@@ -128,8 +129,4 @@ export const estimateShare = ({
   return share;
 };
 
-export {
-  generateMsgFrontierAddToken,
-  getInfoLiquidityPool,
-  isBigIntZero
-};
+export { generateMsgFrontierAddToken, getInfoLiquidityPool, isBigIntZero };
