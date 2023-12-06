@@ -197,6 +197,13 @@ export const generateNewSymbol = (
   if (isFromTokenEqualToToken) {
     const symbol = fromTokenIsOrai ? 'USDT' : 'ORAI';
     findedPair = PAIRS_CHART.find((p) => p.symbol.includes(fromToken.name) && p.symbol.includes(symbol));
+    if (!findedPair)
+      return {
+        ...newTVPair,
+        symbol: `${fromToken.name}/${toToken.name}`,
+        info: ''
+      };
+
     newTVPair.symbol = findedPair.symbol;
     newTVPair.info = findedPair.info;
     return newTVPair;
