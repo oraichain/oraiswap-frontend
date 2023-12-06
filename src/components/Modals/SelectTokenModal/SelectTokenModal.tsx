@@ -62,17 +62,17 @@ export const SelectTokenModal: FC<ModalProps> = ({
                 sumAmountDetails = { ...sumAmountDetails, ...subAmounts };
                 sumAmount = toSumDisplay(sumAmountDetails);
               }
-              tokenAndChainIcons = tokensIcon.find((tok) => tok.coinGeckoId === token.coinGeckoId);
+              tokenAndChainIcons = tokensIcon.find((tokenIcon) => tokenIcon.coinGeckoId === token.coinGeckoId);
               balance = sumAmount > 0 ? sumAmount.toFixed(truncDecimals) : '0';
             } else {
               const network = item as CustomChainInfo;
               key = network.chainId.toString();
               title = network.chainName;
               const subAmounts = Object.fromEntries(
-                Object.entries(amounts).filter(([denom]) => tokenMap?.[denom]?.chainId === network.chainId)
+                Object.entries(amounts).filter(([denom]) => tokenMap[denom] && tokenMap[denom].chainId === network.chainId)
               );
               const totalUsd = getTotalUsd(subAmounts, prices);
-              tokenAndChainIcons = chainIcons.find((tok) => tok.chainId === network.chainId);
+              tokenAndChainIcons = chainIcons.find((chainIcon) => chainIcon.chainId === network.chainId);
               balance = '$' + (totalUsd > 0 ? totalUsd.toFixed(2) : '0');
             }
             const icon =
