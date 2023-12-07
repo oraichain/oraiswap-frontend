@@ -68,10 +68,10 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         const isValidNetwork = !networkFilter || token.chainId === networkFilter;
         if (isValidNetwork) {
           const amount = BigInt(amounts[token.denom] ?? 0);
-          const subAmounts = token.contractAddress && token.evmDenoms ? getSubAmountDetails(amounts, token) : {};
-          const totalAmount =
-            amount +
-            (token.contractAddress && token.evmDenoms ? toAmount(toSumDisplay(subAmounts), token.decimals) : 0n);
+
+          const isHaveSubAmounts = token.contractAddress && token.evmDenoms;
+          const subAmounts = isHaveSubAmounts ? getSubAmountDetails(amounts, token) : {};
+          const totalAmount = amount + (isHaveSubAmounts ? toAmount(toSumDisplay(subAmounts), token.decimals) : 0n);
           const value = toDisplay(totalAmount.toString(), token.decimals) * (prices[token.coinGeckoId] || 0);
 
           const SMALL_BALANCE = 0.5;
