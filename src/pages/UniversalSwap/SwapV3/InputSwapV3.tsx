@@ -6,6 +6,7 @@ import ArrowImg from 'assets/icons/arrow_new.svg';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { TokenInfo } from 'types/token';
 import { CoinGeckoId, CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
+import { useGetPriceByUSDT } from './hooks/useGetPriceByUSDT';
 
 const cx = cn.bind(styles);
 
@@ -36,6 +37,8 @@ export default function InputSwapV3({
   originalToken,
   setCoe
 }: InputSwapProps) {
+  const { price } = useGetPriceByUSDT({ denom: originalToken.denom, contractAddress: originalToken.contractAddress });
+
   return (
     <>
       <div className={cx('input-swap-balance')}>
@@ -50,7 +53,7 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>≈ ${!amount ? 0 : (prices?.[originalToken?.coinGeckoId] * amount).toFixed(6)}</div>
+        <div>≈ ${!amount ? 0 : ((price || prices?.[originalToken?.coinGeckoId]) * amount).toFixed(6)}</div>
       </div>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
