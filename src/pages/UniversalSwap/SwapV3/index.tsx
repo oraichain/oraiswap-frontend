@@ -64,6 +64,7 @@ import christmasGift from 'assets/images/christmas/xmas2.svg';
 import snowRight from 'assets/images/christmas/snow-right.svg';
 import snowLeft from 'assets/images/christmas/snow-left.svg';
 import { numberWithCommas } from 'pages/Pools/helpers';
+import { useGetPriceByUSDT } from './hooks/useGetPriceByUSDT';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -215,6 +216,14 @@ const SwapComponent: React.FC<{
     INIT_AMOUNT
   );
 
+  const { price } = useGetPriceByUSDT({
+    denom: originalFromToken.denom,
+    contractAddress: originalFromToken.contractAddress
+  });
+  const isSwapToUSDT = originalToToken.denom === 'usdt';
+  const usdPrice = isSwapToUSDT ? averageRatio?.displayAmount / INIT_AMOUNT : price || 0;
+  const usdPriceShow = ((usdPrice || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+
   const relayerFee = useRelayerFee();
   const relayerFeeToken = relayerFee.reduce((acc, cur) => {
     if (
@@ -237,12 +246,12 @@ const SwapComponent: React.FC<{
   const minimumReceive =
     averageRatio && averageRatio.amount
       ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+          // @ts-ignore
+          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -360,6 +369,7 @@ const SwapComponent: React.FC<{
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
                 setCoe={setCoe}
+                usdPrice={usdPriceShow}
               />
               {isSelectFrom && (
                 <SelectTokenModalV2
@@ -441,6 +451,7 @@ const SwapComponent: React.FC<{
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                usdPrice={usdPriceShow}
               />
               {isSelectTo && (
                 <SelectTokenModalV2
@@ -457,8 +468,9 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -498,7 +510,11 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈ {simulateData?.displayAmount ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 }) : "0"} {originalToToken.name}
+                  ≈{' '}
+                  {simulateData?.displayAmount
+                    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
+                    : '0'}{' '}
+                  {originalToToken.name}
                 </div>
               </div>
             }

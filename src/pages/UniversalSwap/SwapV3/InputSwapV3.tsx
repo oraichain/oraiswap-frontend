@@ -22,6 +22,7 @@ interface InputSwapProps {
   disable?: boolean;
   originalToken?: TokenInfo;
   setCoe?: React.Dispatch<React.SetStateAction<number>>;
+  usdPrice: string;
 }
 
 export default function InputSwapV3({
@@ -35,10 +36,9 @@ export default function InputSwapV3({
   disable,
   prices,
   originalToken,
-  setCoe
+  setCoe,
+  usdPrice
 }: InputSwapProps) {
-  const { price } = useGetPriceByUSDT({ denom: originalToken.denom, contractAddress: originalToken.contractAddress });
-
   return (
     <>
       <div className={cx('input-swap-balance')}>
@@ -53,7 +53,7 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>≈ ${!amount ? 0 : ((price || prices?.[originalToken?.coinGeckoId]) * amount).toFixed(6)}</div>
+        <div>≈ ${!amount ? 0 : usdPrice}</div>
       </div>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>
