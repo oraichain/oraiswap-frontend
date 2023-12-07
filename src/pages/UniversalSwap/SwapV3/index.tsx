@@ -2,6 +2,7 @@ import {
   BigDecimal,
   CosmosChainId,
   DEFAULT_SLIPPAGE,
+  GAS_ESTIMATION_SWAP_DEFAULT,
   ORAI,
   TRON_DENOM,
   TokenItemType,
@@ -10,13 +11,11 @@ import {
   network,
   toAmount,
   toDisplay,
-  truncDecimals,
-  GAS_ESTIMATION_SWAP_DEFAULT
+  truncDecimals
 } from '@oraichain/oraidex-common';
-import { OraiswapRouterQueryClient, Uint128 } from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   UniversalSwapHandler,
-  getRoute,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
   isSupportedNoPoolSwapEvm
@@ -24,11 +23,14 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
+import snowLeft from 'assets/images/christmas/snow-left.svg';
+import snowRight from 'assets/images/christmas/snow-right.svg';
+import christmasBall from 'assets/images/christmas/xmas1.svg';
+import christmasGift from 'assets/images/christmas/xmas2.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
-import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
@@ -38,7 +40,10 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee from 'hooks/useTokenFee';
+import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
+import { calcMaxAmount } from 'pages/Balance/helpers';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentToken, setCurrentToken } from 'reducer/tradingSlice';
@@ -50,19 +55,12 @@ import {
   SwapDirection,
   checkEvmAddress,
   filterNonPoolEvmTokens,
-  getSwapType,
-  relayerFeeInfo
+  getSwapType
 } from '../helpers';
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
-import Metamask from 'libs/metamask';
-import { calcMaxAmount } from 'pages/Balance/helpers';
-import christmasBall from 'assets/images/christmas/xmas1.svg';
-import christmasGift from 'assets/images/christmas/xmas2.svg';
-import snowRight from 'assets/images/christmas/snow-right.svg';
-import snowLeft from 'assets/images/christmas/snow-left.svg';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
