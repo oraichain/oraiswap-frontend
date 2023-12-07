@@ -61,6 +61,7 @@ import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
+import { numberWithCommas } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -234,12 +235,12 @@ const SwapComponent: React.FC<{
   const minimumReceive =
     averageRatio && averageRatio.amount
       ? calculateMinReceive(
-          // @ts-ignore
-          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-          fromAmountTokenBalance.toString(),
-          userSlippage,
-          originalFromToken.decimals
-        )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -454,9 +455,8 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -496,7 +496,7 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈ {simulateData?.displayAmount || '0'} {originalToToken.name}
+                  ≈ {simulateData?.displayAmount ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 }) : "0"} {originalToToken.name}
                 </div>
               </div>
             }
