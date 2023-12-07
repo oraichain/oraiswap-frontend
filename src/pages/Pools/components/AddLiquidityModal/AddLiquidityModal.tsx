@@ -289,7 +289,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         <InputWithOptionPercent
           TokenIcon={Token1Icon}
           onChange={(e: any) => {
-            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
           }}
           value={baseAmount}
           token={token1}
