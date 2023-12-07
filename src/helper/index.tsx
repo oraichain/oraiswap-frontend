@@ -8,7 +8,8 @@ import {
   TRON_SCAN,
   WalletType,
   ChainIdEnum,
-  BigDecimal
+  BigDecimal,
+  COSMOS_CHAIN_ID_COMMON
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
@@ -254,7 +255,7 @@ export const switchWalletTron = async () => {
   };
 };
 
-const getAddress = (addr, prefix: string) => {
+export const getAddress = (addr, prefix: string) => {
   const { data } = fromBech32(addr);
   return toBech32(prefix, data);
 };
@@ -271,7 +272,7 @@ export const genAddressCosmos = (info, address60, address118) => {
 
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
-  const kwtAddress = await window.Keplr.getKeplrAddr('kawaii_6886-1');
+  const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
   if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
