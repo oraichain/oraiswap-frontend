@@ -106,7 +106,12 @@
       height: 165px;
       position: absolute;
       left: 20px;
-      top: 150px;
+      top: 165px;
+    }
+
+    .slippage-add-liquidity {
+      display: flex;
+      justify-content: flex-end;
     }
 
     .swap-icon {

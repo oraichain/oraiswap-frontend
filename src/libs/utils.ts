@@ -39,6 +39,7 @@ export const getUsd = (
   prices: CoinGeckoPrices<string>,
   pricesAmount?: number
 ): number => {
+  if (!tokenInfo || !tokenInfo.decimals) return 0;
   if (pricesAmount) {
     return toDisplay(amount, tokenInfo.decimals) * pricesAmount;
   }
