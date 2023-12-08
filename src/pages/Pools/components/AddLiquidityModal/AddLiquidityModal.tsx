@@ -61,7 +61,7 @@ export const AddLiquidityModal: FC<PoolModalProps> = ({ isOpen, close, onLiquidi
         <InputWithOptionPercent
           TokenIcon={Token1Icon}
           onChange={(e: any) => {
-            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
           }}
           value={baseAmount}
           token={token1}

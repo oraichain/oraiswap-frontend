@@ -1,7 +1,7 @@
 import { CW20_DECIMALS } from '@oraichain/oraidex-common/build/constant';
 import { getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common/build/helper';
 import { CoinIcon } from '@oraichain/oraidex-common/build/network';
-import { TokenItemType, tokenMap } from '@oraichain/oraidex-common/build/token';
+import { tokenMap } from '@oraichain/oraidex-common/build/token';
 import { isMobile } from '@walletconnect/browser-utils';
 import StakeIcon from 'assets/icons/stake.svg';
 import WalletIcon from 'assets/icons/wallet-v3.svg';
@@ -12,7 +12,7 @@ import { flattenTokens } from 'config/bridgeTokens';
 import { tokensIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useGetMyStake } from 'pages/Pools/hooks/useGetMyStake';
 import { FC, useState } from 'react';
@@ -65,43 +65,40 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
   }
 
   const data = flattenTokens
-    .filter((token: TokenItemType) => {
+    .reduce((result, token) => {
       // not display because it is evm map and no bridge to option, also no smart contract and is ibc native
-      if (!token.bridgeTo && !token.contractAddress) return false;
-      if (hideOtherSmallAmount && !toTotalDisplay(amounts, token)) {
-        return false;
+      if (token.bridgeTo || token.contractAddress) {
+        const isValidNetwork = !networkFilter || token.chainId === networkFilter;
+        if (isValidNetwork) {
+          const amount = BigInt(amounts[token.denom] ?? 0);
+
+          const isHaveSubAmounts = token.contractAddress && token.evmDenoms;
+          const subAmounts = isHaveSubAmounts ? getSubAmountDetails(amounts, token) : {};
+          const totalAmount = amount + (isHaveSubAmounts ? toAmount(toSumDisplay(subAmounts), token.decimals) : 0n);
+          const value = toDisplay(totalAmount.toString(), token.decimals) * (prices[token.coinGeckoId] || 0);
+
+          const SMALL_BALANCE = 0.5;
+          const isHide = hideOtherSmallAmount && value < SMALL_BALANCE;
+          if (isHide) return result;
+
+          const tokenIcon = tokensIcon.find((tIcon) => tIcon.coinGeckoId === token.coinGeckoId);
+          result.push({
+            asset: token.name,
+            chain: token.org,
+            icon: tokenIcon?.Icon,
+            iconLight: tokenIcon?.IconLight,
+            price: prices[token.coinGeckoId] || 0,
+            balance: toDisplay(totalAmount.toString(), token.decimals),
+            denom: token.denom,
+            value,
+            coeff: 0,
+            coeffType: 'increase'
+          });
+        }
       }
-      if (!networkFilter) return true;
-      return token.chainId === networkFilter;
-    })
-    .sort((a, b) => {
-      return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
-    })
-    .map((t: TokenItemType) => {
-      let amount = BigInt(amounts[t.denom] ?? 0);
-      let usd = getUsd(amount, t, prices);
-      let subAmounts: AmountDetails;
-      if (t.contractAddress && t.evmDenoms) {
-        subAmounts = getSubAmountDetails(amounts, t);
-        const subAmount = toAmount(toSumDisplay(subAmounts), t.decimals);
-        amount += subAmount;
-        usd += getUsd(subAmount, t, prices);
-      }
-      const value = toDisplay(amount.toString(), t.decimals) * prices[t.coinGeckoId] || 0;
-      const tokenIcon = tokensIcon.find((token) => token.coinGeckoId === t.coinGeckoId);
-      return {
-        asset: t.name,
-        chain: t.org,
-        icon: tokenIcon && tokenIcon.Icon,
-        iconLight: tokenIcon && tokenIcon.IconLight,
-        price: prices[t.coinGeckoId] || 0,
-        balance: toDisplay(amount.toString(), t.decimals),
-        denom: t.denom,
-        value: value,
-        coeff: 0,
-        coeffType: 'increase'
-      };
-    });
+      return result;
+    }, [])
+    .sort((a, b) => b.value - a.value);
 
   const headers: TableHeaderProps<AssetInfoResponse> = {
     assets: {
@@ -188,7 +185,6 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       <div>
         <Table
           headers={headers}
-          // @ts-ignore
           data={data}
           stylesColumn={{
             padding: '16px 0'
