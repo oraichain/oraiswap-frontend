@@ -10,8 +10,9 @@ import { FC } from 'react';
 import styles from './AddLiquidityModal.module.scss';
 
 import { useAddLiquidity } from 'pages/Pools/hooks/useAddLiquidity';
-import InputWithOptionPercent from '../InputWithOptionPercent';
+import { SlippageModal, TooltipIcon } from 'pages/UniversalSwap/Modals';
 import { PoolModalProps } from 'types/pool';
+import InputWithOptionPercent from '../InputWithOptionPercent';
 
 const cx = cn.bind(styles);
 
@@ -33,6 +34,10 @@ export const AddLiquidityModal: FC<PoolModalProps> = ({ isOpen, close, onLiquidi
     lpTokenInfoData,
     pairInfoData,
     estimatedShare,
+    userSlippage,
+    visible,
+    setUserSlippage,
+    setVisible,
     toAmount,
     onChangeAmount1,
     onChangeAmount2,
@@ -63,6 +68,16 @@ export const AddLiquidityModal: FC<PoolModalProps> = ({ isOpen, close, onLiquidi
           onChange={(e: any) => {
             onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
           }}
+          slippage={
+            <TooltipIcon
+              placement="bottom-end"
+              visible={visible}
+              setVisible={setVisible}
+              content={
+                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
+              }
+            />
+          }
           value={baseAmount}
           token={token1}
           setAmountFromPercent={onChangeAmount1}

@@ -17,7 +17,6 @@
     font-weight: 500;
     font-size: 14px;
     margin-bottom: 8px;
-
     @include mobile {
       font-size: 12px;
     }
@@ -25,7 +24,7 @@
     line-height: 150%;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     width: 100%;
 
     .amount {

@@ -1,4 +1,4 @@
-import { ORAI } from '@oraichain/oraidex-common/build/constant';
+import { DEFAULT_SLIPPAGE, ORAI } from '@oraichain/oraidex-common/build/constant';
 import { buildMultipleExecuteMessages, getSubAmountDetails, toAmount } from '@oraichain/oraidex-common/build/helper';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
@@ -16,11 +16,11 @@ import {
   generateMiningMsgs
 } from 'rest/api';
 import { RootState } from 'store/configure';
+import { PoolModalProps } from 'types/pool';
 import { estimateShare } from '../helpers';
 import { useGetPairInfo } from './useGetPairInfo';
 import { useGetPoolDetail } from './useGetPoolDetail';
 import { useTokenAllowance } from './useTokenAllowance';
-import { PoolModalProps } from 'types/pool';
 
 export const useAddLiquidity = ({
   pairDenoms,
@@ -31,6 +31,9 @@ export const useAddLiquidity = ({
   const poolDetail = useGetPoolDetail({ pairDenoms });
   const { token1, token2, info: pairInfoData } = poolDetail;
   const { lpTokenInfoData, pairAmountInfoData } = useGetPairInfo(poolDetail);
+
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [visible, setVisible] = useState(false);
 
   const [baseAmount, setBaseAmount] = useState<bigint | null>(null);
   const [quoteAmount, setQuoteAmount] = useState<bigint | null>(null);
@@ -157,8 +160,8 @@ export const useAddLiquidity = ({
         toInfo: token2!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.pairAddr
-        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
+        pair: pairInfoData.pairAddr,
+        slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
       const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
@@ -219,8 +222,8 @@ export const useAddLiquidity = ({
         toInfo: token2!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.pairAddr
-        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
+        pair: pairInfoData.pairAddr,
+        slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
       // generate staking msg
@@ -275,6 +278,10 @@ export const useAddLiquidity = ({
     lpTokenInfoData,
     pairInfoData,
     estimatedShare,
+    userSlippage,
+    visible,
+    setVisible,
+    setUserSlippage,
     toAmount,
     onChangeAmount1,
     onChangeAmount2,
