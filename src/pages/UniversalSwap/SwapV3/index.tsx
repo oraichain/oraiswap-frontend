@@ -244,6 +244,15 @@ const SwapComponent: React.FC<{
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
+  const minimumReceiveDisplay =
+    simulateData && simulateData.displayAmount
+      ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+      : 0;
+
+  const expectOutputDisplay = simulateData && simulateData.displayAmount
+    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
+    : 0
+
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
       return displayToast(TToastType.TX_FAILED, {
@@ -496,10 +505,8 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈
-                  {simulateData?.displayAmount
-                    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
-                    : '0'}
+                  ≈{' '}
+                  {expectOutputDisplay}{' '}
                   {originalToToken.name}
                 </div>
               </div>
@@ -509,14 +516,8 @@ const SwapComponent: React.FC<{
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
-                <TokenBalance
-                  balance={{
-                    amount: minimumReceive,
-                    decimals: originalFromToken.decimals,
-                    denom: originalToToken.name
-                  }}
-                  decimalScale={truncDecimals}
-                />
+                {Number(numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 }))}{' '}
+                {originalToToken.name}
               </div>
             </div>
 
