@@ -43,6 +43,7 @@ import useTokenFee from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
+import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -59,9 +60,9 @@ import {
 } from '../helpers';
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
+import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
-import { numberWithCommas } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -213,6 +214,13 @@ const SwapComponent: React.FC<{
     INIT_AMOUNT
   );
 
+  const { price } = useGetPriceByUSD({
+    denom: originalFromToken.denom,
+    contractAddress: originalFromToken.contractAddress,
+    cachePrices: prices
+  });
+  const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+
   const relayerFee = useRelayerFee();
   const relayerFeeToken = relayerFee.reduce((acc, cur) => {
     if (
@@ -235,12 +243,12 @@ const SwapComponent: React.FC<{
   const minimumReceive =
     averageRatio && averageRatio.amount
       ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+          // @ts-ignore
+          Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+          fromAmountTokenBalance.toString(),
+          userSlippage,
+          originalFromToken.decimals
+        )
       : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -350,7 +358,6 @@ const SwapComponent: React.FC<{
               <InputSwap
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
-                prices={prices}
                 Icon={FromIcon}
                 setIsSelectFrom={setIsSelectFrom}
                 token={originalFromToken}
@@ -358,6 +365,7 @@ const SwapComponent: React.FC<{
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
                 setCoe={setCoe}
+                usdPrice={usdPriceShow}
               />
               {isSelectFrom && (
                 <SelectTokenModalV2
@@ -433,12 +441,12 @@ const SwapComponent: React.FC<{
                 balance={toTokenBalance}
                 originalToken={originalToToken}
                 disable={true}
-                prices={prices}
                 Icon={ToIcon}
                 setIsSelectFrom={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                usdPrice={usdPriceShow}
               />
               {isSelectTo && (
                 <SelectTokenModalV2
@@ -455,8 +463,9 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -496,7 +505,11 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈ {simulateData?.displayAmount ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 }) : "0"} {originalToToken.name}
+                  ≈{' '}
+                  {simulateData?.displayAmount
+                    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
+                    : '0'}{' '}
+                  {originalToToken.name}
                 </div>
               </div>
             }
