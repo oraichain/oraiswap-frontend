@@ -1,12 +1,11 @@
-import styles from './InputSwap.module.scss';
-import cn from 'classnames/bind';
-import NumberFormat from 'react-number-format';
-import TokenBalance from 'components/TokenBalance';
-import ArrowImg from 'assets/icons/arrow_new.svg';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
-import { TokenInfo } from 'types/token';
 import { CoinGeckoId, CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
-import { useGetPriceByUSDT } from './hooks/useGetPriceByUSDT';
+import ArrowImg from 'assets/icons/arrow_new.svg';
+import cn from 'classnames/bind';
+import TokenBalance from 'components/TokenBalance';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import NumberFormat from 'react-number-format';
+import { TokenInfo } from 'types/token';
+import styles from './InputSwap.module.scss';
 
 const cx = cn.bind(styles);
 
