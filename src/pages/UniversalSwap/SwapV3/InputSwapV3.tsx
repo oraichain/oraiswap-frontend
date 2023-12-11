@@ -1,8 +1,7 @@
-import { CoinGeckoId, CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
+import { CoinIcon, TokenItemType } from '@oraichain/oraidex-common';
 import ArrowImg from 'assets/icons/arrow_new.svg';
 import cn from 'classnames/bind';
 import TokenBalance from 'components/TokenBalance';
-import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import NumberFormat from 'react-number-format';
 import { TokenInfo } from 'types/token';
 import styles from './InputSwap.module.scss';
@@ -14,7 +13,6 @@ interface InputSwapProps {
   setIsSelectFrom: (value: boolean) => void;
   token: TokenItemType;
   amount: number;
-  prices?: CoinGeckoPrices<CoinGeckoId>;
   tokenFee: number;
   onChangeAmount?: (amount: number | undefined) => void;
   balance: string | bigint;
@@ -33,7 +31,6 @@ export default function InputSwapV3({
   tokenFee,
   balance,
   disable,
-  prices,
   originalToken,
   setCoe,
   usdPrice
@@ -52,7 +49,7 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>≈ ${!amount ? 0 : usdPrice}</div>
+        <div>≈ ${amount ? usdPrice : 0}</div>
       </div>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>

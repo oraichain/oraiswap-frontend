@@ -15,7 +15,7 @@ interface ModalProps {
   userSlippage: number;
 }
 
-export const SlippageModal: FC<ModalProps> = ({ userSlippage, setUserSlippage, setVisible }) => {
+export const SlippageModal: FC<ModalProps> = ({ setUserSlippage, setVisible }) => {
   const DEFAULT_INFDEX_SLIPPAGE_OPTION = OPTIONS_SLIPPAGE.indexOf(DEFAULT_SLIPPAGE);
   const [indexChosenOption, setIndexChosenOption] = useState(DEFAULT_INFDEX_SLIPPAGE_OPTION);
   const [theme] = useConfigReducer('theme');

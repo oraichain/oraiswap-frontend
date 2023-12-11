@@ -1,4 +1,4 @@
-import { buildMultipleExecuteMessages, ORAI, toAmount } from '@oraichain/oraidex-common';
+import { buildMultipleExecuteMessages, ORAI, toAmount, DEFAULT_SLIPPAGE } from '@oraichain/oraidex-common';
 import { ReactComponent as CloseIcon } from 'assets/icons/ic_close_modal.svg';
 import ImgPairPath from 'assets/images/pair_path.svg';
 import cn from 'classnames/bind';
@@ -31,6 +31,7 @@ import { RootState } from 'store/configure';
 import { ModalProps } from '../MyPoolInfo/type';
 import styles from './AddLiquidityModal.module.scss';
 import InputWithOptionPercent from '../InputWithOptionPercent';
+import { SlippageModal, TooltipIcon } from 'pages/UniversalSwap/Modals';
 
 const cx = cn.bind(styles);
 
@@ -45,6 +46,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   const [recentInput, setRecentInput] = useState(1);
   const [estimatedShare, setEstimatedShare] = useState(0);
 
+  const [userSlippage, setUserSlippage] = useState(DEFAULT_SLIPPAGE);
+  const [visible, setVisible] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
 
   const poolDetail = useGetPoolDetail({ pairDenoms });
@@ -165,8 +168,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         toInfo: token2!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.pairAddr
-        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
+        pair: pairInfoData.pairAddr,
+        slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
       const messages = buildMultipleExecuteMessages(msg, ...firstTokenConverts, ...secTokenConverts);
@@ -227,8 +230,8 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         toInfo: token2!,
         fromAmount: amount1.toString(),
         toAmount: amount2.toString(),
-        pair: pairInfoData.pairAddr
-        // slippage: (userSlippage / 100).toString() // TODO: enable this again and fix in the case where the pool is empty
+        pair: pairInfoData.pairAddr,
+        slippage: (userSlippage / 100).toString()
       } as ProvideQuery);
 
       // generate staking msg
@@ -289,8 +292,18 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         <InputWithOptionPercent
           TokenIcon={Token1Icon}
           onChange={(e: any) => {
-            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
           }}
+          slippage={
+            <TooltipIcon
+              placement="bottom-end"
+              visible={visible}
+              setVisible={setVisible}
+              content={
+                <SlippageModal setVisible={setVisible} setUserSlippage={setUserSlippage} userSlippage={userSlippage} />
+              }
+            />
+          }
           value={baseAmount}
           token={token1}
           setAmountFromPercent={onChangeAmount1}
