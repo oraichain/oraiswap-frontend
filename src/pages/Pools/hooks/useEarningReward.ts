@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import { WithdrawLP } from 'types/pool';
+import { SCATOM_COINGECKO_ID } from '../constants';
 
 export type TokenItemTypeExtended = TokenItemType & {
   amount: bigint;
@@ -76,7 +77,7 @@ export const useEarningReward = ({ onLiquidityChange }: { onLiquidityChange: () 
             chainId: 'Oraichain',
             rpc: '',
             decimals: 0,
-            coinGeckoId: 'scatom',
+            coinGeckoId: SCATOM_COINGECKO_ID,
             cosmosBased: undefined
           });
 

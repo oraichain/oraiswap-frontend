@@ -18,6 +18,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { SCATOM_COINGECKO_ID, xOCH_PRICE } from 'pages/Pools/constants';
 
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
@@ -36,12 +37,12 @@ export const validateAddressCosmos = (bech32Address: string, prefix?: string): b
 export const getUsd = (
   amount: string | bigint,
   tokenInfo: TokenItemType,
-  prices: CoinGeckoPrices<string>,
-  pricesAmount?: number
+  prices: CoinGeckoPrices<string>
+  // pricesAmount?: number
 ): number => {
   if (!tokenInfo || !tokenInfo.decimals) return 0;
-  if (pricesAmount) {
-    return toDisplay(amount, tokenInfo.decimals) * pricesAmount;
+  if (tokenInfo.coinGeckoId === SCATOM_COINGECKO_ID) {
+    return toDisplay(amount, tokenInfo.decimals) * xOCH_PRICE;
   }
   return toDisplay(amount, tokenInfo.decimals) * (prices[tokenInfo.coinGeckoId] ?? 0);
 };

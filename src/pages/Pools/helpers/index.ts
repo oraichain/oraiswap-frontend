@@ -7,6 +7,7 @@ import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import isEqual from 'lodash/isEqual';
 import { fetchTokenInfo } from 'rest/api';
 import { PoolTableData } from 'types/pool';
+import { SCATOM_COINGECKO_ID } from '../constants';
 
 export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
@@ -186,7 +187,7 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
           chainId: 'Oraichain',
           rpc: '',
           decimals: 0,
-          coinGeckoId: 'scatom',
+          coinGeckoId: SCATOM_COINGECKO_ID,
           cosmosBased: undefined
         });
 

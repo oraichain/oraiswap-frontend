@@ -6,7 +6,6 @@ import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { getUsd } from 'libs/utils';
-import { xOCH_PRICE } from 'pages/Pools/constants';
 import { TokenItemTypeExtended, useEarningReward } from 'pages/Pools/hooks/useEarningReward';
 import styles from './Earning.module.scss';
 
@@ -62,12 +61,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
                   </div>
                   <div className={styles.amount}>
                     <TokenBalance
-                      balance={getUsd(
-                        pendingReward.amount,
-                        pendingReward,
-                        cachePrices,
-                        pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
-                      )}
+                      balance={getUsd(pendingReward.amount, pendingReward, cachePrices)}
                       prefix="$"
                       decimalScale={4}
                     />

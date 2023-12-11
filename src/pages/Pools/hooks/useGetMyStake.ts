@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import axios from 'rest/request';
+import { STALE_TIME } from '../constants';
 import { useGetPools } from './useGetPools';
 import { useGetRewardInfo } from './useGetRewardInfo';
 
@@ -35,7 +36,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
       placeholderData: [],
       refetchOnWindowFocus: true,
       enabled: !!stakerAddress,
-      staleTime: 5 * 60 * 1000
+      staleTime: STALE_TIME
     }
   );
 

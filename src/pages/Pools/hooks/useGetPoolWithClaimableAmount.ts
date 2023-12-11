@@ -1,7 +1,6 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { useEffect, useState } from 'react';
-import { xOCH_PRICE } from '../constants';
 import { getClaimableInfoByPool } from '../helpers';
 
 export const getClaimableAmountByPool = async ({ pool, totalRewardInfoData, cachePrices }) => {
@@ -10,7 +9,7 @@ export const getClaimableAmountByPool = async ({ pool, totalRewardInfoData, cach
   const res = await Promise.all(results);
 
   const total = res.reduce((acc, cur) => {
-    const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
+    const eachBalance = getUsd(cur.amount, cur, cachePrices);
 
     acc = acc + eachBalance;
 

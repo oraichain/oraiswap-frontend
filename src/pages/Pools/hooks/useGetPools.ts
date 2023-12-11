@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'rest/request';
 import { PoolInfoResponse } from 'types/pool';
+import { STALE_TIME } from '../constants';
 
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
   try {
@@ -16,7 +17,7 @@ export const useGetPools = () => {
   const { data: pools } = useQuery(['pools'], getPools, {
     refetchOnWindowFocus: true,
     placeholderData: [],
-    staleTime: 5 * 60 * 1000
+    staleTime: STALE_TIME
   });
   return pools;
 };

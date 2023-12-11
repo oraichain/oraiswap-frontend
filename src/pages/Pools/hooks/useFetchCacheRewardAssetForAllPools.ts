@@ -1,9 +1,10 @@
+import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useEffect } from 'react';
 import { RewardPoolType } from 'reducer/config';
 import { fetchRewardPerSecInfo } from 'rest/api';
+import { xOCH_TOKEN_NAME } from '../constants';
 import { parseAssetOnlyDenom } from '../helpers';
-import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
-import { useEffect } from 'react';
 
 /**
  * fetch reward asset for each pool, with unique key is staking token (also called liquidity address)
@@ -25,7 +26,6 @@ export const useFetchCacheRewardAssetForAllPools = (lpAddresses: string[]) => {
           const rewardDenom = parseAssetOnlyDenom(rewardAsset.info);
           const token = 'token' in rewardAsset.info ? cw20TokenMap[rewardDenom] : tokenMap[rewardDenom];
           // TODO: hardcode token reward xOCH
-          const xOCH_TOKEN_NAME = 'xOCH';
           return [...acc, token ? token.name : xOCH_TOKEN_NAME];
         }, []);
         return {

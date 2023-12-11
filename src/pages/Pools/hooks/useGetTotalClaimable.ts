@@ -46,7 +46,7 @@ export const useGetTotalClaimable = ({ poolTableData, totalRewardInfoData }) => 
       if (totalRewardInfoData) {
         const res = await getTotalClaimable({ poolTableData: myPools, totalRewardInfoData });
         const total = res.reduce((acc, cur) => {
-          const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);
+          const eachBalance = getUsd(cur.amount, cur, cachePrices);
 
           acc = acc + eachBalance;
 
