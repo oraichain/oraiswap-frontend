@@ -496,7 +496,11 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈ {simulateData?.displayAmount ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 }) : "0"} {originalToToken.name}
+                  ≈
+                  {simulateData?.displayAmount
+                    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
+                    : '0'}
+                  {originalToToken.name}
                 </div>
               </div>
             }
@@ -516,6 +520,13 @@ const SwapComponent: React.FC<{
               </div>
             </div>
 
+            {!userSlippage && (
+              <div className={cx('row')}>
+                <span className={cx('warning-slippage-0')}>
+                  That transaction may failed if configured slippage is 0%!
+                </span>
+              </div>
+            )}
             {!!relayerFeeToken && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
