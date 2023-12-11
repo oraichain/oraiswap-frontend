@@ -50,8 +50,7 @@ import {
   SwapDirection,
   checkEvmAddress,
   filterNonPoolEvmTokens,
-  getSwapType,
-  relayerFeeInfo
+  getSwapType
 } from '../helpers';
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
@@ -361,7 +360,6 @@ const SwapComponent: React.FC<{
               <InputSwap
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
-                prices={prices}
                 Icon={FromIcon}
                 setIsSelectFrom={setIsSelectFrom}
                 token={originalFromToken}
@@ -445,7 +443,6 @@ const SwapComponent: React.FC<{
                 balance={toTokenBalance}
                 originalToken={originalToToken}
                 disable={true}
-                prices={prices}
                 Icon={ToIcon}
                 setIsSelectFrom={setIsSelectTo}
                 token={originalToToken}
