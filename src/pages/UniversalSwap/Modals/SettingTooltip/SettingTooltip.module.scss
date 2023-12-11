@@ -1,61 +1,60 @@
-@import "src/styles/mixins";
-@import "src/styles/variables";
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
 
 .tooltip {
-    font-family: "IBM Plex Sans";
-    font-style: normal;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 150%;
-    text-align: center;
-    color: #ffffff;
-    border-radius: 8px;
-    margin-top: 10px;
-    transform: translateX(12px);
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+  text-align: center;
+  color: $white;
+  border-radius: 8px;
+  margin-top: 10px;
+  transform: translateX(12px);
 
-    article:not(:first-child) {
-        margin-top: 1em;
+  article:not(:first-child) {
+    margin-top: 1em;
+  }
+
+  :global {
+    .tippy-content {
+      padding: 0;
     }
 
-    :global {
-        .tippy-content {
-            padding: 0;
-        }
-
-        .tippy-arrow {
-            display: none;
-        }
+    .tippy-arrow {
+      display: none;
     }
+  }
 }
 
 .button {
-    @include flex;
-    cursor: pointer;
-    justify-content: flex-start;
+  @include flex;
+  cursor: pointer;
+  justify-content: flex-start;
 }
 
 /* with tooltip */
 .flex {
-    @include flex(flex-start);
-    display: inline-flex;
+  @include flex(flex-start);
+  display: inline-flex;
 }
-
 .icon {
-    color: fade-out($slate, 0.25);
-    cursor: pointer;
-    background: #191b21;
-    border-radius: 8px;
-    padding: 12px;
+  color: fade-out($slate, 0.25);
+  cursor: pointer;
+  background: $cultured;
+  border-radius: 8px;
+  padding: 12px;
 
-    @include theme() {
-        background-color: theme-get('bg-color-secondary');
-    }
+  @include theme() {
+    background-color: theme-get('bg-color-secondary');
+  }
 
-    svg {
-        path {
-            @include theme() {
-                fill: theme-get('svg-fill-color');
-            }
-        }
+  svg {
+    path {
+      @include theme() {
+        fill: theme-get('svg-fill-color');
+      }
     }
+  }
 }
