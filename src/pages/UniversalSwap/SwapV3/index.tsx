@@ -63,7 +63,7 @@ import christmasGift from 'assets/images/christmas/xmas2.svg';
 import snowRight from 'assets/images/christmas/snow-right.svg';
 import snowLeft from 'assets/images/christmas/snow-left.svg';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { useGetPriceByUSDT } from './hooks/useGetPriceByUSDT';
+import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -215,9 +215,10 @@ const SwapComponent: React.FC<{
     INIT_AMOUNT
   );
 
-  const { price } = useGetPriceByUSDT({
+  const { price } = useGetPriceByUSD({
     denom: originalFromToken.denom,
-    contractAddress: originalFromToken.contractAddress
+    contractAddress: originalFromToken.contractAddress,
+    cachePrices: prices
   });
   const isSwapToUSDT = originalToToken.denom === 'usdt';
   const usdPrice = isSwapToUSDT ? averageRatio?.displayAmount / INIT_AMOUNT : price || 0;
