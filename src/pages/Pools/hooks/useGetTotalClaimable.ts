@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
-import { xOCH_PRICE } from '../constants';
 import { getClaimableInfoByPool } from '../helpers';
 
 export const getTotalClaimable = async ({ poolTableData, totalRewardInfoData }) => {

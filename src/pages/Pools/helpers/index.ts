@@ -168,7 +168,7 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
       BigInt(0)
     );
 
-    const results: Promise<any> = rewardPerSecInfoData.assets
+    const results = rewardPerSecInfoData.assets
       .filter((asset) => parseInt(asset.amount))
       .map(async (asset) => {
         const pendingWithdraw = BigInt(
@@ -213,6 +213,6 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
   } catch (ex) {
     const errorMsg = handleErrorMsg(ex);
     Sentry.captureException(`ERROR: GetClaimableInfoByPool:: ${errorMsg}`);
-    return Promise.resolve([]);
+    return [];
   }
 };
