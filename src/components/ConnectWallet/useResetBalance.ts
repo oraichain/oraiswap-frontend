@@ -45,14 +45,14 @@ export const useResetBalance = () => {
   const resetBalanceMetamask = () => {
     const metamaskToken = flattenTokens.filter(
       (token) =>
-        token.chainId !== '0x2b6653dc' &&
+        token.chainId !== EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID &&
         Object.values(EVM_CHAIN_ID_COMMON).includes(token.chainId as EVM_CHAIN_ID_COMMON)
     );
     return Object.fromEntries(metamaskToken.map((t) => [t.denom, '0']));
   };
 
   const resetBalanceTron = () => {
-    const tronTokens = flattenTokens.filter((token) => token.chainId === '0x2b6653dc');
+    const tronTokens = flattenTokens.filter((token) => token.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID);
     return Object.fromEntries(tronTokens.map((t) => [t.denom, '0']));
   };
 
