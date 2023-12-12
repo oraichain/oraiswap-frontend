@@ -202,16 +202,12 @@ export const isUnlockMetamask = async (): Promise<boolean> => {
 };
 
 export const isEmptyObject = (value: object) => {
-  if (!!value === false) return true;
+  if (!value) return true;
   if (typeof value === 'object') {
     const entries = Object.entries(value);
-    if (entries?.length === 0) {
-      return true;
-    }
+    if (entries?.length === 0) return true;
     for (const key in value) {
-      if (value[key] !== undefined) {
-        return false;
-      }
+      if (value[key] !== undefined) return false;
     }
     return true;
   }
@@ -245,7 +241,7 @@ export const switchWalletTron = async () => {
       });
       // throw error when not connected
       if (code !== 200) {
-        throw Error(message);
+        throw new Error(message);
       }
     }
     tronAddress = window.tronWeb.defaultAddress.base58;

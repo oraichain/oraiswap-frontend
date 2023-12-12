@@ -35,6 +35,7 @@ import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
+import { useResetBalance } from './useResetBalance';
 const cx = cn.bind(styles);
 
 interface ModalProps { }
@@ -89,8 +90,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [oraiAddress, setOraiAddress] = useState('');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
-  const [address, setAddress] = useConfigReducer('address');
-
+  const { handleResetBalance } = useResetBalance()
   const OwalletInfo = {
     id: 2,
     name: isMobile() ? 'Owallet' : (walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet'),
@@ -98,9 +98,9 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     icon: isMobile() ? OwalletImage : (walletTypeStore === 'keplr' ? KeplrImage : OwalletImage),
     totalUsd: 0,
     isOpen: false,
-    isConnect: !!isEmptyObject(cosmosAddress) === false,
+    isConnect: !isEmptyObject(cosmosAddress),
     networks: cosmosNetworks.map((item: any, index) => {
-      if (!!isEmptyObject(cosmosAddress) === false) {
+      if (!isEmptyObject(cosmosAddress)) {
         item.address = cosmosAddress[item.chainId];
         return item;
       } else {
@@ -160,8 +160,8 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   const [walletTypeActive, setWalletTypeActive] = useState(null);
-  const isCheckKeplr = !!isEmptyObject(cosmosAddress) === false && keplrCheck('keplr');
-  const isCheckOwallet = !!isEmptyObject(cosmosAddress) === false && owalletCheck('owallet');
+  const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck('keplr');
+  const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck('owallet');
   const connectMetamask = async () => {
     try {
       const isMetamask = !!window.ethereum.isMetaMask;
@@ -169,11 +169,11 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
         const isUnlock = await isUnlockMetamask();
         if (!isUnlock) {
           displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-          throw Error('Please unlock Metamask wallet');
+          throw new Error('Please unlock Metamask wallet');
         }
       } else if (!isCheckOwallet && !isMetamask) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
-        throw Error('Please install Metamask wallet');
+        throw new Error('Please install Metamask wallet');
       }
       // if chain id empty, we switch to default network which is BSC
       if (!window.ethereum || !window.ethereum.chainId) {
@@ -182,11 +182,11 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       await connect();
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
-      throw Error('Connect Metamask failed');
+      throw new Error('Connect Metamask failed');
     }
   };
 
-  const isConnected = !!metamaskAddress || !!tronAddress || !!isEmptyObject(cosmosAddress) === false;
+  const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
 
   useEffect(() => {
     (async () => {
@@ -197,8 +197,9 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     })();
     setWalletTypeStore(walletType);
   }, []);
+
   useEffect(() => {
-    if (!!address) {
+    if (!!oraiAddress) {
       (async () => {
         if (walletTypeStore === 'owallet') {
           await connectDetectOwallet();
@@ -209,16 +210,17 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     }
 
     return () => { };
-  }, [address]);
+  }, [oraiAddress]);
   const disconnectMetamask = async () => {
     try {
       setMetamaskAddress(undefined);
+      handleResetBalance(['metamask']);
     } catch (ex) {
       console.log(ex);
     }
   };
   useEffect(() => {
-    const walletData = walletInit.map((item, index) => {
+    const walletData = walletInit.map((item) => {
       if (item.code === walletTypeActive) {
         item.isOpen = true;
         return item;
@@ -237,14 +239,14 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
     } catch (ex) {
       let msg = typeof ex.message === 'string' ? ex.message : JSON.stringify(ex);
       displayToast(TToastType.TRONLINK_FAILED, { message: msg });
-      throw Error(msg);
+      throw new Error(msg);
     }
   };
 
   const disconnectTronLink = async () => {
     try {
       setTronAddress(undefined);
-
+      handleResetBalance(['tron']);
       // remove account storage tron owallet
       localStorage.removeItem('tronWeb.defaultAddress');
     } catch (ex) {
@@ -270,6 +272,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const disconnectKeplr = async () => {
     try {
       window.Keplr.disconnect();
+      handleResetBalance(['keplr']);
       setCosmosAddress({});
       setOraiAddress('');
     } catch (ex) {
