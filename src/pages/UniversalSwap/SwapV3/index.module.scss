@@ -351,7 +351,7 @@
   .impact-warning {
     .title {
       span {
-        color: #e01600;
+        color: $warning-color;
       }
     }
   }
@@ -363,7 +363,7 @@
 
 .to {
   input.amount {
-    color: #505665;
+    color: $text-placeholder;
   }
 
   @include mobile {
@@ -450,7 +450,7 @@
 
   @include theme() {
     background-color: theme-get('primary-1');
-    color: #232521;
+    color: theme-get('neutral-text-text-btn-default');
   }
 
   &.disable {
@@ -471,7 +471,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #ffffff;
+  color: $white;
   cursor: pointer;
   margin: 16px 0;
 
@@ -507,6 +507,9 @@
     justify-content: space-between;
     align-items: center;
 
+    .warning-slippage-0 {
+      color: $warning-color;
+    }
     .title {
       width: 70%;
       display: flex;
