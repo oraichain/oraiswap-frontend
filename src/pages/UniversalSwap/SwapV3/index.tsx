@@ -43,6 +43,7 @@ import useTokenFee from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
+import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -59,9 +60,9 @@ import {
 } from '../helpers';
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
+import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
-import { numberWithCommas } from 'pages/Pools/helpers';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -213,6 +214,13 @@ const SwapComponent: React.FC<{
     INIT_AMOUNT
   );
 
+  const { price } = useGetPriceByUSD({
+    denom: originalFromToken.denom,
+    contractAddress: originalFromToken.contractAddress,
+    cachePrices: prices
+  });
+  const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+
   const relayerFee = useRelayerFee();
   const relayerFeeToken = relayerFee.reduce((acc, cur) => {
     if (
@@ -359,7 +367,6 @@ const SwapComponent: React.FC<{
               <InputSwap
                 balance={fromTokenBalance}
                 originalToken={originalFromToken}
-                prices={prices}
                 Icon={FromIcon}
                 setIsSelectFrom={setIsSelectFrom}
                 token={originalFromToken}
@@ -367,6 +374,7 @@ const SwapComponent: React.FC<{
                 onChangeAmount={onChangeFromAmount}
                 tokenFee={fromTokenFee}
                 setCoe={setCoe}
+                usdPrice={usdPriceShow}
               />
               {isSelectFrom && (
                 <SelectTokenModalV2
@@ -442,12 +450,12 @@ const SwapComponent: React.FC<{
                 balance={toTokenBalance}
                 originalToken={originalToToken}
                 disable={true}
-                prices={prices}
                 Icon={ToIcon}
                 setIsSelectFrom={setIsSelectTo}
                 token={originalToToken}
                 amount={toAmountToken}
                 tokenFee={toTokenFee}
+                usdPrice={usdPriceShow}
               />
               {isSelectTo && (
                 <SelectTokenModalV2
