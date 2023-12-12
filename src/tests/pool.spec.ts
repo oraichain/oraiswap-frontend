@@ -1,7 +1,14 @@
 import { ORAI, buildMultipleExecuteMessages } from '@oraichain/oraidex-common';
 import { flattenTokens } from 'config/bridgeTokens';
 import { getPoolTokens } from 'config/pools';
-import { estimateShare, formatDisplayUsdt, toFixedIfNecessary } from 'pages/Pools/helpers';
+import {
+  estimateShare,
+  formatDisplayClaimable,
+  formatDisplayUsdt,
+  getInfoLiquidityPool,
+  numberWithCommas,
+  toFixedIfNecessary
+} from 'pages/Pools/helpers';
 import { ProvideQuery, Type, generateContractMessages } from 'rest/api';
 import { constants } from './listing-simulate';
 
@@ -65,6 +72,54 @@ describe('pool', () => {
     ['1234567.111', '$1,234,567.11']
   ])('test formatDisplayUsdt should formats %s to %s', (input, expected) => {
     expect(formatDisplayUsdt(input)).toBe(expected);
+  });
+
+  it.each([
+    ['0', '0'],
+    ['0.001234', '+$0.0012'],
+    ['2', '+$2'],
+    ['2.1', '+$2.1'],
+    ['2.129', '+$2.13'],
+    ['1234567', '+$1,234,567'],
+    ['1234567.111', '+$1,234,567.11']
+  ])('test formatDisplayClaimable should formats %s to %s', (input, expected) => {
+    expect(formatDisplayClaimable(input)).toBe(expected);
+  });
+
+  it.each([
+    ['orai', undefined, { native_token: { denom: 'orai' } }],
+    [
+      'oraix',
+      'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge',
+      {
+        token: {
+          contract_addr: 'orai1lus0f0rhx8s03gdllx2n6vhkmf0536dv57wfge'
+        }
+      }
+    ], // ORAIX
+    [
+      'usdt',
+      'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh',
+      {
+        token: {
+          contract_addr: 'orai12hzjxfh77wl572gdzct2fxv2arxcwh6gykc7qh'
+        }
+      }
+    ] // USDT
+  ])('test-getInfoLiquidityPool', (denom, contract_addr, expected) => {
+    const lpInfo = getInfoLiquidityPool({ denom, contract_addr });
+    // assert
+    expect(lpInfo).toEqual(expected);
+  });
+
+  it.each([
+    [2.12345, '2.123'],
+    [2.1, '2.1'],
+    [2, '2'],
+    [21234.5, '21,234.5'],
+    [28988998.129, '28,988,998.129']
+  ])('test numberWithCommas should format %d to %s', (value, expected) => {
+    expect(numberWithCommas(value)).toEqual(expected);
   });
 
   it.each([
