@@ -239,27 +239,26 @@ const SwapComponent: React.FC<{
   }, [fromToken, toToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
-
-  const minimumReceive =
-    averageRatio && averageRatio.amount
-      ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-      : '0';
+  const isAverageRatio = averageRatio && averageRatio.amount;
+  const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
+  const minimumReceive = isAverageRatio
+    ? calculateMinReceive(
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
+    : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
-  const minimumReceiveDisplay =
-    simulateData && simulateData.displayAmount
-      ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
-      : 0;
+  const minimumReceiveDisplay = isSimulateDataDisplay
+    ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+    : 0;
 
-  const expectOutputDisplay = simulateData && simulateData.displayAmount
-    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
-    : 0
+  const expectOutputDisplay = isSimulateDataDisplay
+    ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
+    : 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -513,9 +512,7 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈{' '}
-                  {expectOutputDisplay}{' '}
-                  {originalToToken.name}
+                  ≈ {expectOutputDisplay} {originalToToken.name}
                 </div>
               </div>
             }
