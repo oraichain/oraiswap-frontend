@@ -87,7 +87,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const [oraiAddress, setOraiAddress] = useState('');
+  const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const { handleResetBalance } = useResetBalance()
@@ -259,10 +259,10 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ oraiAddress });
-      setOraiAddress(oraiAddress);
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+      const oraiAddr = await window.Keplr.getKeplrAddr();
+      loadTokenAmounts({ oraiAddress: oraiAddr });
+      setOraiAddress(oraiAddr);
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -274,7 +274,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       window.Keplr.disconnect();
       handleResetBalance(['keplr']);
       setCosmosAddress({});
-      setOraiAddress('');
+      setOraiAddress(undefined);
     } catch (ex) {
       console.log(ex);
     }

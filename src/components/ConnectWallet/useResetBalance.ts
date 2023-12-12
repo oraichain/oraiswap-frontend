@@ -1,4 +1,4 @@
-import { evmChains, WalletType, cosmosTokens, flattenTokens } from '@oraichain/oraidex-common';
+import { EVM_CHAIN_ID_COMMON, WalletType, cosmosTokens, flattenTokens } from '@oraichain/oraidex-common';
 import { useDispatch } from 'react-redux';
 import { updateAmounts } from 'reducer/token';
 
@@ -43,9 +43,10 @@ export const useResetBalance = () => {
   };
 
   const resetBalanceMetamask = () => {
-    const metamaskToken = flattenTokens.filter((token) =>
-      // @ts-ignore
-      evmChains.filter((chainId) => chainId !== '0x2b6653dc').includes(token.chainId)
+    const metamaskToken = flattenTokens.filter(
+      (token) =>
+        token.chainId !== '0x2b6653dc' &&
+        Object.values(EVM_CHAIN_ID_COMMON).includes(token.chainId as EVM_CHAIN_ID_COMMON)
     );
     return Object.fromEntries(metamaskToken.map((t) => [t.denom, '0']));
   };
