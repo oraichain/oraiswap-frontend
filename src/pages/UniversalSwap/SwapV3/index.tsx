@@ -39,7 +39,7 @@ import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTrans
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import useTokenFee from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
@@ -221,17 +221,7 @@ const SwapComponent: React.FC<{
   });
   const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
 
-  const relayerFee = useRelayerFee();
-  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
-    if (
-      originalFromToken.chainId !== originalToToken.chainId &&
-      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-    ) {
-      return +cur.amount + acc;
-    }
-    return acc;
-  }, 0);
-
+  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(originalFromToken, originalToToken);
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -253,7 +243,7 @@ const SwapComponent: React.FC<{
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+    ? new BigDecimal(simulateData.displayAmount - ((simulateData.displayAmount * userSlippage) / 100) - relayerFee).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -471,7 +461,7 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
                   } ${originalToToken.name}`}
               </div>
             </div>
@@ -506,16 +496,14 @@ const SwapComponent: React.FC<{
           })()}
 
           <div className={cx('detail')}>
-            {
-              <div className={cx('row')}>
-                <div className={cx('title')}>
-                  <span> Expected Output</span>
-                </div>
-                <div className={cx('value')}>
-                  ≈ {expectOutputDisplay} {originalToToken.name}
-                </div>
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> Expected Output</span>
               </div>
-            }
+              <div className={cx('value')}>
+                ≈ {expectOutputDisplay} {originalToToken.name}
+              </div>
+            </div>
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
@@ -539,15 +527,7 @@ const SwapComponent: React.FC<{
                   <span>Relayer Fee</span>
                 </div>
                 <div className={cx('value')}>
-                  <TokenBalance
-                    balance={{
-                      amount: relayerFeeToken.toString(),
-                      // decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                      decimals: RELAYER_DECIMAL,
-                      denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
-                    }}
-                    decimalScale={truncDecimals}
-                  />
+                  ≈ {relayerFee}{" "}{originalToToken.name}
                 </div>
               </div>
             )}
