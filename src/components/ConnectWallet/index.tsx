@@ -35,7 +35,7 @@ import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
-import { useResetBalance } from './useResetBalance';
+import { useResetBalance, Wallet } from './useResetBalance';
 const cx = cn.bind(styles);
 
 interface ModalProps { }
@@ -90,12 +90,12 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
-  const { handleResetBalance } = useResetBalance()
+  const { handleResetBalance } = useResetBalance();
   const OwalletInfo = {
     id: 2,
-    name: isMobile() ? 'Owallet' : (walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet'),
-    code: isMobile() ? WALLET_TYPES.OWALLET : (walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET),
-    icon: isMobile() ? OwalletImage : (walletTypeStore === 'keplr' ? KeplrImage : OwalletImage),
+    name: isMobile() ? 'Owallet' : walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet',
+    code: isMobile() ? WALLET_TYPES.OWALLET : walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
+    icon: isMobile() ? OwalletImage : walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
     totalUsd: 0,
     isOpen: false,
     isConnect: !isEmptyObject(cosmosAddress),
@@ -108,7 +108,17 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
         return item;
       }
     })
-  }
+  };
+
+  useEffect(() => {
+    if (!metamaskAddress || !tronAddress || !oraiAddress) {
+      let arrResetBalance: Wallet[] = [];
+      if (!metamaskAddress) arrResetBalance.push('metamask');
+      if (!tronAddress) arrResetBalance.push('tron');
+      if (!oraiAddress) arrResetBalance.push('keplr');
+      arrResetBalance.length && handleResetBalance(arrResetBalance);
+    }
+  }, [oraiAddress, tronAddress, metamaskAddress]);
 
   let walletInit = [
     {
@@ -150,9 +160,8 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
           })
         ]
       }
-    ]
+    ];
   }
-
 
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);

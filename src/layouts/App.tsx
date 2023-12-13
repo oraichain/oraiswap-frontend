@@ -142,12 +142,15 @@ const App = () => {
       } else if (isCheckKeplr) {
         setStorageKey('typeWallet', 'keplr' as WalletType);
       }
+      let metamaskAddr;
+      let tronAddr;
       // TODO: owallet get address tron
       if (!isMobile()) {
         if (window.tronWeb && window.tronLink) {
           await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
+          tronAddr = window.tronWeb?.defaultAddress?.base58;
           setTronAddress(window.tronWeb?.defaultAddress?.base58);
         }
         // TODO: owallet get address evm
@@ -157,7 +160,7 @@ const App = () => {
               method: 'eth_requestAccounts',
               params: []
             });
-
+            metamaskAddr = address;
             setMetamaskAddress(ethers.utils.getAddress(address));
           } catch (error) {
             if (error?.code === -32002) {
@@ -171,7 +174,11 @@ const App = () => {
 
       switchWallet(getStorageKey() as WalletType);
       const oraiAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ oraiAddress });
+      loadTokenAmounts({
+        oraiAddress,
+        metamaskAddress: metamaskAddr,
+        tronAddress: tronAddr
+      });
       setAddress(oraiAddress);
     } catch (error) {
       console.log('Error: ', error.message);
