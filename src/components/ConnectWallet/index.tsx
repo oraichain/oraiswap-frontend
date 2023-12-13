@@ -116,7 +116,7 @@ const ConnectWallet: FC<ModalProps> = ({ }) => {
       if (!metamaskAddress) arrResetBalance.push('metamask');
       if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
-      handleResetBalance(arrResetBalance);
+      arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
   }, [oraiAddress, tronAddress, metamaskAddress]);
 
