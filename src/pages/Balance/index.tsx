@@ -54,7 +54,7 @@ import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -250,7 +250,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      handleErrorTransaction(ex);
+      handleErrorTransaction(ex, {
+        name: from.name,
+        toNetwork: toNetworkChainId
+      });
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
         const errorMsg = handleErrorMsg(ex);

@@ -9,13 +9,14 @@ import {
   WalletType,
   ChainIdEnum,
   BigDecimal,
-  COSMOS_CHAIN_ID_COMMON
+  COSMOS_CHAIN_ID_COMMON,
+  evmChains
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos } from 'config/chainInfos';
+import { chainIcons, chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -27,6 +28,11 @@ export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
+}
+
+export interface InfoError {
+  name: string,
+  toNetwork: string
 }
 
 export type DecimalLike = string | number | bigint | BigDecimal;
@@ -143,20 +149,29 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
   return cosmosAddress;
 };
 
-export const handleErrorMsg = (error: any) => {
+const transferMsgError = (message: string, info?: InfoError) => {
+  let network, name;
+  if (info?.toNetwork) network = evmChains.find(evm => evm.chainId === info.toNetwork)?.chainName
+  if (info?.name) name = info.name
+
+  if (message.includes("Insufficient funds to redeem voucher")) return `Their is not enough ${name ?? ""} liquidity on the ${network ?? ""} bridge.`
+  return message
+}
+
+export const handleErrorMsg = (error: any, info?: InfoError) => {
   let finalError = '';
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
   } else {
-    if (error?.ex?.message) finalError = String(error.ex.message);
-    else if (error?.message) finalError = String(error.message);
+    if (error?.ex?.message) finalError = transferMsgError(error.ex.message, info);
+    else if (error?.message) finalError = transferMsgError(error.message, info);
     else finalError = JSON.stringify(error);
   }
   return finalError
 }
 
-export const handleErrorTransaction = (error: any) => {
-  const finalError = handleErrorMsg(error)
+export const handleErrorTransaction = (error: any, info?: InfoError) => {
+  const finalError = handleErrorMsg(error, info)
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
