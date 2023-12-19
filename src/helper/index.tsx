@@ -31,8 +31,8 @@ export interface Tokens {
 }
 
 export interface InfoError {
-  name: string,
-  toNetwork: string
+  tokenName: string,
+  chainName: string
 }
 
 export type DecimalLike = string | number | bigint | BigDecimal;
@@ -151,11 +151,11 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 
 const transferMsgError = (message: string, info?: InfoError) => {
   let network, name;
-  if (info?.toNetwork) network = evmChains.find(evm => evm.chainId === info.toNetwork)?.chainName
-  if (info?.name) name = info.name
+  if (info?.chainName) network = evmChains.find(evm => evm.chainId === info.chainName)?.chainName
+  if (info?.tokenName) name = info.tokenName
 
   if (message.includes("Insufficient funds to redeem voucher")) return `Their is not enough ${name ?? ""} liquidity on the ${network ?? ""} bridge.`
-  return message
+  return String(message)
 }
 
 export const handleErrorMsg = (error: any, info?: InfoError) => {
