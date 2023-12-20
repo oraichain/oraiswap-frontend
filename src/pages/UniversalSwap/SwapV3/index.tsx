@@ -241,18 +241,26 @@ const SwapComponent: React.FC<{
   }, [fromToken, toToken]);
 
   const fromAmountTokenBalance = fromTokenInfoData && toAmount(fromAmountToken, fromTokenInfoData!.decimals);
-
-  const minimumReceive =
-    averageRatio && averageRatio.amount
-      ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
-      : '0';
+  const isAverageRatio = averageRatio && averageRatio.amount;
+  const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
+  const minimumReceive = isAverageRatio
+    ? calculateMinReceive(
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
+    : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
+
+  const minimumReceiveDisplay = isSimulateDataDisplay
+    ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+    : 0;
+
+  const expectOutputDisplay = isSimulateDataDisplay
+    ? numberWithCommas(simulateData.displayAmount, undefined, { minimumFractionDigits: 6 })
+    : 0;
 
   const handleSubmit = async () => {
     if (fromAmountToken <= 0)
@@ -506,11 +514,7 @@ const SwapComponent: React.FC<{
                   <span> Expected Output</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈{' '}
-                  {simulateData?.displayAmount
-                    ? numberWithCommas(simulateData?.displayAmount, undefined, { minimumFractionDigits: 6 })
-                    : '0'}{' '}
-                  {originalToToken.name}
+                  ≈ {expectOutputDisplay} {originalToToken.name}
                 </div>
               </div>
             }
@@ -519,17 +523,18 @@ const SwapComponent: React.FC<{
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
-                <TokenBalance
-                  balance={{
-                    amount: minimumReceive,
-                    decimals: originalFromToken.decimals,
-                    denom: originalToToken.name
-                  }}
-                  decimalScale={truncDecimals}
-                />
+                {Number(numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 }))}{' '}
+                {originalToToken.name}
               </div>
             </div>
 
+            {!userSlippage && (
+              <div className={cx('row')}>
+                <span className={cx('warning-slippage-0')}>
+                  That transaction may failed if configured slippage is 0%!
+                </span>
+              </div>
+            )}
             {!!relayerFeeToken && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
