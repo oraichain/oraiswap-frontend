@@ -55,7 +55,7 @@ import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -134,7 +134,6 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      handleResetBalance(['metamask', 'keplr', 'tron', 'owallet']);
       await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
     } catch (err) {
       console.log({ err });

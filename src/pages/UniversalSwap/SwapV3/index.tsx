@@ -63,7 +63,6 @@ import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
-import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
 const cx = cn.bind(styles);
 const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
@@ -93,12 +92,10 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
-  const { handleResetBalance } = useResetBalance();
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      handleResetBalance(['metamask', 'keplr', 'tron', 'owallet']);
       await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
     } catch (err) {
       console.log({ err });
@@ -245,12 +242,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-      // @ts-ignore
-      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -473,8 +470,9 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
