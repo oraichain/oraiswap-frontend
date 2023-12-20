@@ -86,8 +86,9 @@ export const getNetworkGasPrice = async (): Promise<number> => {
 //hardcode fee
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
-
-  return new BigDecimal(MULTIPLIER)
+  const MULTIPLIER_ESTIMATE_OSMOSIS = 3.8;
+  const MULTIPLIER_FIX = tokenInfo.chainId === "osmosis-1" ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER
+  return new BigDecimal(MULTIPLIER_FIX)
     .mul(tokenInfo.feeCurrencies[0].gasPriceStep.high)
     .mul(gasDefault)
     .div(10 ** tokenInfo.decimals)
