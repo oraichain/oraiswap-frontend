@@ -35,7 +35,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
-import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { floatToPercent, getAddressTron, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -280,10 +280,10 @@ const SwapComponent: React.FC<{
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
       };
-
+      const lastestTronAddress = await getAddressTron();
       const univeralSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: lastestTronAddress },
           originalFromToken,
           originalToToken,
           fromAmount: fromAmountToken,

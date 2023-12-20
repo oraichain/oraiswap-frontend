@@ -143,6 +143,21 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
   return cosmosAddress;
 };
 
+export const getAddressTron = async (): Promise<string> => {
+  try {
+    if (isMobile()) {
+      const addressTronMobile = await window.tronLink.request({
+        method: 'tron_requestAccounts'
+      });
+      //@ts-ignore
+      return addressTronMobile?.base58;
+    }
+    return window?.tronWeb?.defaultAddress?.base58;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const handleErrorMsg = (error: any) => {
   let finalError = '';
   if (typeof error === 'string' || error instanceof String) {
