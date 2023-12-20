@@ -32,8 +32,8 @@ import './index.scss';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
-  const [, setTronAddress] = useConfigReducer('tronAddress');
-  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -142,13 +142,18 @@ const App = () => {
       } else if (isCheckKeplr) {
         setStorageKey('typeWallet', 'keplr' as WalletType);
       }
+      let metamaskAddr = undefined, tronAddr = undefined;
       // TODO: owallet get address tron
       if (!isMobile()) {
         if (window.tronWeb && window.tronLink) {
           await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
-          setTronAddress(window.tronWeb?.defaultAddress?.base58);
+          const base58Address = window.tronWeb?.defaultAddress?.base58;
+          if (base58Address && base58Address !== tronAddress) {
+            tronAddr = base58Address;
+            setTronAddress(base58Address);
+          }
         }
         // TODO: owallet get address evm
         if (window.ethereum) {
@@ -157,8 +162,10 @@ const App = () => {
               method: 'eth_requestAccounts',
               params: []
             });
-
-            setMetamaskAddress(ethers.utils.getAddress(address));
+            if (address && address !== metamaskAddress) {
+              metamaskAddr = address;
+              setMetamaskAddress(ethers.utils.getAddress(address));
+            }
           } catch (error) {
             if (error?.code === -32002) {
               displayToast(TToastType.METAMASK_FAILED, {
@@ -171,7 +178,11 @@ const App = () => {
 
       switchWallet(getStorageKey() as WalletType);
       const oraiAddress = await window.Keplr.getKeplrAddr();
-      loadTokenAmounts({ oraiAddress });
+      loadTokenAmounts({
+        oraiAddress,
+        metamaskAddress: metamaskAddr,
+        tronAddress: tronAddr
+      });
       setAddress(oraiAddress);
     } catch (error) {
       console.log('Error: ', error.message);

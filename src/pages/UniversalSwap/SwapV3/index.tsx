@@ -92,7 +92,6 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
-
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
@@ -243,12 +242,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-      // @ts-ignore
-      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
 
@@ -471,8 +470,9 @@ const SwapComponent: React.FC<{
               )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
