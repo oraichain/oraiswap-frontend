@@ -51,10 +51,11 @@ import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
+import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -77,6 +78,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const ref = useRef(null);
+  const { handleResetBalance } = useResetBalance();
+
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -131,6 +134,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
+      handleResetBalance(['metamask', 'keplr', 'tron', 'owallet']);
       await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress });
     } catch (err) {
       console.log({ err });
