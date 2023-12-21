@@ -470,8 +470,8 @@ export const useFetchCacheRewardAssetForAllPools = (lpAddresses: string[]) => {
 
   useEffect(() => {
     const isLpAddressesLength = lpAddresses?.length;
-    const isCacheReward = !cachedReward || !cachedReward.length || cachedReward.length < isLpAddressesLength;
-    if (isCacheReward && isLpAddressesLength > 0) {
+    const isNotCacheReward = !cachedReward || !cachedReward.length || cachedReward.length < isLpAddressesLength;
+    if (isNotCacheReward && isLpAddressesLength > 0) {
       fetchReward();
     }
   }, [lpAddresses, cachedReward]);
