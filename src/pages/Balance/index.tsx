@@ -50,6 +50,7 @@ import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
+import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
 interface BalanceProps { }
 
@@ -74,6 +75,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const ref = useRef(null);
+  const { handleResetBalance } = useResetBalance();
+
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });

@@ -10,6 +10,7 @@ import {
   AIRI_CONTRACT,
   OSMOSIS_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
+import { isEmptyObject } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -142,6 +143,18 @@ describe('should utils functions in libs/utils run exactly', () => {
     it('returns "0 seconds" for current timestamp', () => {
       const result = timeSince(Date.now());
       expect(result).toEqual('0 seconds');
+    });
+  });
+
+  describe('isEmptyObject', () => {
+    it.each<[string, object, boolean]>([
+      ['object-is-null', {}, true],
+      ['key-object-is-undefined', { test: undefined }, true],
+      ['key-object-have-value', { test: 'abc1234' }, false],
+      ['multi-key-object', { test: 'abc1234', test1: undefined }, false]
+    ])('test-isEmptyObject', (_caseName, input, expected) => {
+      const result = isEmptyObject(input);
+      expect(result).toEqual(expected);
     });
   });
 });

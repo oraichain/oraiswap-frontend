@@ -92,7 +92,6 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
-
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;

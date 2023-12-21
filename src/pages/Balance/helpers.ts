@@ -1,6 +1,6 @@
 import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coin } from '@cosmjs/proto-signing';
-import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
+import { DeliverTxResponse, GasPrice, StdFee } from '@cosmjs/stargate';
 import {
   CosmosChainId,
   IBCInfo,
@@ -177,7 +177,11 @@ export const transferIBCMultiple = async (
   const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
     gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
   });
-  const result = await client.signAndBroadcast(fromAddress, encodedMessages, 'auto');
+  // hardcode fix bug osmosis
+  let fee: 'auto' | number = 'auto';
+  const MULTIPLIER_OSMOSIS = 3;
+  if (fromChainId === 'osmosis-1') fee = MULTIPLIER_OSMOSIS;
+  const result = await client.signAndBroadcast(fromAddress, encodedMessages, fee);
   return result as DeliverTxResponse;
 };
 
