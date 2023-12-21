@@ -35,6 +35,8 @@ export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiB
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
+
+export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -79,7 +81,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -87,7 +89,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
   const MULTIPLIER_ESTIMATE_OSMOSIS = 3.8;
-  const MULTIPLIER_FIX = tokenInfo.chainId === "osmosis-1" ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER
+  const MULTIPLIER_FIX = tokenInfo.chainId === 'osmosis-1' ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER;
   return new BigDecimal(MULTIPLIER_FIX)
     .mul(tokenInfo.feeCurrencies[0].gasPriceStep.high)
     .mul(gasDefault)
@@ -153,11 +155,11 @@ export const handleErrorMsg = (error: any) => {
     else if (error?.message) finalError = String(error.message);
     else finalError = JSON.stringify(error);
   }
-  return finalError
-}
+  return finalError;
+};
 
 export const handleErrorTransaction = (error: any) => {
-  const finalError = handleErrorMsg(error)
+  const finalError = handleErrorMsg(error);
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
