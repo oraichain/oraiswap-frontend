@@ -101,6 +101,7 @@ const Menu: React.FC = () => {
         <>
           {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
           {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
+          {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
         </>
       ) : (
         <>
