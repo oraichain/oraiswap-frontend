@@ -46,7 +46,11 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
 
 // other chains, oraichain
 const otherChainTokens = flatten(
-  chainInfos.filter((chainInfo) => chainInfo.chainId !== 'Oraichain').map(getTokensFromNetwork)
+  chainInfos
+    .filter((chainInfo) => {
+      return chainInfo.chainId !== 'Oraichain' && chainInfo.chainId !== 'bitcoin';
+    })
+    .map(getTokensFromNetwork)
 );
 export const oraichainTokens: TokenItemType[] = getTokensFromNetwork(oraichainNetwork);
 
