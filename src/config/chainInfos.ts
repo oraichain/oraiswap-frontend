@@ -613,8 +613,8 @@ export const chainInfos: CustomChainInfo[] = [
 
   /// popular networks already included
   {
-    rpc: 'https://rpc.osmosis.zone/',
-    rest: 'https://lcd.osmosis.zone/',
+    rpc: 'https://osmosis.rpc.orai.io/',
+    rest: 'https://osmosis.lcd.orai.io/',
     chainId: 'osmosis-1',
     chainName: 'Osmosis',
     networkType: 'cosmos',
