@@ -3,8 +3,14 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
-import { generateNewSymbol } from 'components/TVChartContainer/helpers/utils';
-import { MILKYBSC_ORAICHAIN_DENOM, USDT_CONTRACT } from '@oraichain/oraidex-common';
+import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import {
+  MILKYBSC_ORAICHAIN_DENOM,
+  USDT_CONTRACT,
+  AIRI_CONTRACT,
+  OSMOSIS_ORAICHAIN_DENOM
+} from '@oraichain/oraidex-common';
+import { isEmptyObject } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -63,27 +69,30 @@ describe('should utils functions in libs/utils run exactly', () => {
 
   it.each<[string, string, string, PairToken, PairToken | null]>([
     [
-      'from-&-to-are-NOT-pair-in-pool-and-are-NOT-reversed',
-      'AIRI',
+      'from-&-to-are-NOT-pair-in-pool',
       'OSMO',
+      'AIRI',
       {
-        symbol: 'ORAI/USDT',
-        info: 'orai-usdt'
+        symbol: 'OSMO/AIRI',
+        info: ''
       },
       {
-        symbol: 'AIRI/OSMO',
-        info: ''
+        symbol: 'ORAI/OSMO',
+        info: `orai-${OSMOSIS_ORAICHAIN_DENOM}`
       }
     ],
     [
-      'from-&-to-are-NOT-pair-in-pool-and-are-reversed',
-      'OSMO',
+      'from-&-to-are-NOT-pair-in-pool',
       'AIRI',
+      'OSMO',
       {
         symbol: 'AIRI/OSMO',
         info: ''
       },
-      null
+      {
+        symbol: 'AIRI/ORAI',
+        info: `${AIRI_CONTRACT}-orai`
+      }
     ],
     [
       'from-&-to-are-pair-in-pool-and-are-NOT-reversed',
@@ -134,6 +143,18 @@ describe('should utils functions in libs/utils run exactly', () => {
     it('returns "0 seconds" for current timestamp', () => {
       const result = timeSince(Date.now());
       expect(result).toEqual('0 seconds');
+    });
+  });
+
+  describe('isEmptyObject', () => {
+    it.each<[string, object, boolean]>([
+      ['object-is-null', {}, true],
+      ['key-object-is-undefined', { test: undefined }, true],
+      ['key-object-have-value', { test: 'abc1234' }, false],
+      ['multi-key-object', { test: 'abc1234', test1: undefined }, false]
+    ])('test-isEmptyObject', (_caseName, input, expected) => {
+      const result = isEmptyObject(input);
+      expect(result).toEqual(expected);
     });
   });
 });

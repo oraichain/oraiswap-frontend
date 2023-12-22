@@ -1,4 +1,11 @@
-import { NetworkChainId, TokenItemType, getSubAmountDetails, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import {
+  NetworkChainId,
+  TokenItemType,
+  getSubAmountDetails,
+  toAmount,
+  toDisplay,
+  COSMOS_CHAIN_ID_COMMON
+} from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
@@ -32,6 +39,7 @@ export const getUsd = (
   prices: CoinGeckoPrices<string>,
   pricesAmount?: number
 ): number => {
+  if (!tokenInfo || !tokenInfo.decimals) return 0;
   if (pricesAmount) {
     return toDisplay(amount, tokenInfo.decimals) * pricesAmount;
   }
@@ -209,7 +217,11 @@ export const initClient = async () => {
     // suggest our chain
     if (keplr) {
       // always trigger suggest chain when users enter the webpage
-      for (const networkId of [network.chainId, 'oraibridge-subnet-2', 'kawaii_6886-1'] as NetworkChainId[]) {
+      for (const networkId of [
+        network.chainId,
+        COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
+        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
+      ] as NetworkChainId[]) {
         try {
           await window.Keplr.suggestChain(networkId);
         } catch (error) {

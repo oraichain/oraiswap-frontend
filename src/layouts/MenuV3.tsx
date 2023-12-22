@@ -2,8 +2,10 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
-import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
+// import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
+// import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
+import LogoFullImgDark from 'assets/images/christmas/logo.svg';
+import LogoFullImgLight from 'assets/images/christmas/logo-light.svg';
 import classNames from 'classnames';
 import ConnectWallet from 'components/ConnectWallet';
 import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
@@ -93,12 +95,13 @@ const Menu: React.FC = () => {
       {renderLink('/universalswap', 'SWAP', setLink)}
       {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => { }, true)}
-      {renderLink('coming-soon', 'FUTURES', () => { }, true)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
       {mobileMode ? (
         <>
-          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
+          {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
         </>
       ) : (
         <>
@@ -119,8 +122,9 @@ const Menu: React.FC = () => {
             setVisible={() => setOtherActive(!otherActive)}
             content={
               <div className={classNames(styles.menu_others_list, styles[theme])}>
-                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => { }, true)}
-                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX V2', () => { }, true)}
+                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
+                {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
               </div>
             }
           />

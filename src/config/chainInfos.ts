@@ -613,8 +613,8 @@ export const chainInfos: CustomChainInfo[] = [
 
   /// popular networks already included
   {
-    rpc: 'https://osmosis-rpc.polkachu.com',
-    rest: 'https://osmosis-api.polkachu.com',
+    rpc: 'https://osmosis.rpc.orai.io/',
+    rest: 'https://osmosis.lcd.orai.io/',
     chainId: 'osmosis-1',
     chainName: 'Osmosis',
     networkType: 'cosmos',
@@ -673,7 +673,7 @@ export const chainInfos: CustomChainInfo[] = [
     ]
   },
   {
-    rpc: 'https://noble-rpc.polkachu.com',
+    rpc: 'https://rpc.mainnet.noble.strange.love/',
     rest: 'https://noble-api.polkachu.com',
     chainId: 'noble-1',
     chainName: 'Noble',

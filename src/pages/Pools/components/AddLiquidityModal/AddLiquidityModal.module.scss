@@ -5,6 +5,7 @@
   max-width: 568px;
 
   .container {
+    position: relative;
     background-color: #121511;
 
     &.light {
@@ -100,197 +101,17 @@
       }
     }
 
-    .supply {
+    .pair-path {
+      width: 14px;
+      height: 165px;
+      position: absolute;
+      left: 20px;
+      top: 165px;
+    }
+
+    .slippage-add-liquidity {
       display: flex;
-      flex-direction: column;
-      padding: 16px 0;
-      width: 100%;
-      border-radius: 16px;
-
-      .balance {
-        font-style: normal;
-        font-weight: 500;
-        font-size: 14px;
-        margin-bottom: 16px;
-
-        @include mobile {
-          font-size: 12px;
-        }
-
-        line-height: 150%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-
-        .amount {
-          &.light {
-            span {
-              color: $neutral-text-describe;
-            }
-          }
-
-          span {
-            color: $neutral-text-body-on-section;
-          }
-        }
-
-        .btn-group {
-          display: flex;
-          align-items: center;
-        }
-
-        button:first-child {
-          margin-right: 8px;
-        }
-
-        .btn {
-          cursor: pointer;
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-          padding: 4px 6px;
-          background: #191b21;
-
-          &.light {
-            background: #efe6f8;
-          }
-
-          border-radius: 12px;
-          font-style: normal;
-          font-weight: 500;
-          font-size: 13px;
-
-          @include mobile {
-            font-size: 11px;
-          }
-
-          line-height: 100%;
-          /* identical to box height, or 13px */
-
-          /* Stroke/Primary */
-
-          color: #a871df;
-
-          &:hover {
-            background: #333642;
-          }
-
-          &.light:hover {
-            background: #efe6f8;
-          }
-        }
-
-        .active {
-          background: rgba(168, 113, 223, 0.3) !important;
-        }
-      }
-
-      .input {
-        width: 100%;
-        display: flex;
-        align-items: flex-start;
-        gap: 20px;
-        border-radius: 8px;
-        font-style: normal;
-        font-weight: 600;
-        font-size: 24px;
-        line-height: 100%;
-        text-align: center;
-        color: #ffffff;
-
-        .token {
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-
-          .logo {
-            width: 40px;
-            height: 40px;
-          }
-
-          .title {
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: 100%;
-            color: #ffffff;
-
-            &.light {
-              color: $light-text-color;
-            }
-
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 44px;
-
-            .des {
-              font-size: 14px;
-              font-style: normal;
-              font-weight: 500;
-              line-height: 100%;
-              color: #777e90;
-            }
-
-            .highlight {
-              font-style: normal;
-              font-weight: 600;
-              font-size: 14px;
-              line-height: 100%;
-              text-align: center;
-              color: #ffffff;
-              background: rgba(97, 47, 202, 0.7);
-              border-radius: 2px;
-              padding: 2px 6px;
-            }
-          }
-        }
-
-        .input-amount {
-          flex-grow: 1;
-          position: relative;
-        }
-
-        .amount {
-          width: 100%;
-          padding: 10px;
-          flex-grow: 1;
-          text-align: right;
-          background: $raisin-black;
-          border-radius: 8px;
-          height: 100%;
-          padding-bottom: 30px;
-          color: $neutral-surface-search;
-
-          &.light {
-            background: $neutral-surface-search;
-            color: $raisin-black;
-          }
-        }
-
-        .amount-usd {
-          text-align: right;
-          color: $neutral-text-body-on-section;
-          padding: 10px;
-          position: absolute;
-          right: 0;
-          bottom: 0;
-
-          &.light {
-            color: $neutral-text-describe;
-          }
-
-          font-size: 13px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 150%;
-          letter-spacing: 0.013px;
-        }
-      }
+      justify-content: flex-end;
     }
 
     .swap-icon {
@@ -306,7 +127,7 @@
     }
 
     .detail {
-      margin-top: 32px;
+      margin-top: 12px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -344,12 +165,13 @@
         padding: 24px 16px;
         border-radius: 8px;
 
-        background-color: #232521;
-        color: #f7f7f7;
+        color: $primary-surface-default;
+        border: 1px solid $primary-text-link;
+        background: $primary-surface-default-subtle;
 
         &.light {
-          color: #232521;
-          background-color: #f7f7f7;
+          color: $primary-surface-default-light;
+          background-color: $primary-surface-default-subtle-light;
         }
 
         .row-title {
@@ -374,7 +196,14 @@
 
       button {
         gap: 10px;
+        flex: 1;
+      }
+
+      .btn-group {
         width: 100%;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
       }
     }
   }

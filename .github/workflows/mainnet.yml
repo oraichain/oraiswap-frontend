@@ -4,9 +4,8 @@ name: Mainnet
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [main]
+  release:
+    types: [released]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -52,7 +51,7 @@ jobs:
           REACT_APP_SENTRY_ENVIRONMENT: production
           CI: false
       - name: Deploy to firebase
-        run: yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }} -m '${{ github.event.head_commit.message }}'
+        run: yarn firebase deploy --only hosting:oraiswap --token ${{ secrets.FIREBASE_TOKEN }}
       - name: Send discord message
         uses: appleboy/discord-action@master
         with:

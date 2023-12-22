@@ -1,4 +1,15 @@
 import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
+import {
+  KWT_SCAN,
+  NetworkChainId,
+  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
+  TokenItemType,
+  evmChains,
+  findToTokenOnOraiBridge,
+  toAmount,
+  tronToEthAddress
+} from '@oraichain/oraidex-common';
+import { UniversalSwapHandler, isSupportedNoPoolSwapEvm, addOraiBridgeRoute } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
@@ -6,65 +17,78 @@ import classNames from 'classnames';
 import CheckBox from 'components/CheckBox';
 import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { KWT_SCAN, ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX, TokenItemType, evmChains } from '@oraichain/oraidex-common';
-import { getTransactionUrl, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
+import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
+import Metamask from 'libs/metamask';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import SelectTokenModal from 'pages/SwapV2/Modals/SelectTokenModal';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
+import KwtModal from './KwtModal';
+import StuckOraib from './StuckOraib';
+import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
+import TokenItem from './TokenItem';
 import {
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
   moveOraibToOraichain,
-  transferIbcCustom,
-  transferIBCKwt
+  transferIBCKwt,
+  transferIbcCustom
 } from './helpers';
-import KwtModal from './KwtModal';
-import StuckOraib from './StuckOraib';
-import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
-import TokenItem from './TokenItem';
-import { toAmount, tronToEthAddress, NetworkChainId, findToTokenOnOraiBridge } from '@oraichain/oraidex-common';
-import { UniversalSwapHandler, isSupportedNoPoolSwapEvm } from '@oraichain/oraidex-universal-swap';
-import Metamask from 'libs/metamask';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import * as Sentry from '@sentry/react';
+import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
+import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
 const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
+  // hook
   const [searchParams] = useSearchParams();
   let tokenUrl = searchParams.get('token');
-  const [oraiAddress] = useConfigReducer('address');
-  const [theme] = useConfigReducer('theme');
-  const [loadingRefresh, setLoadingRefresh] = useState(false);
-  const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
-  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+  const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
-  const loadTokenAmounts = useLoadTokens();
-  const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
+
+  // state internal
+  const [loadingRefresh, setLoadingRefresh] = useState(false);
+  const [isSelectNetwork, setIsSelectNetwork] = useState(false);
   const [, setTxHash] = useState('');
-
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
+  const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
 
-  const { data: prices } = useCoinGeckoPrices();
-
+  const [theme] = useConfigReducer('theme');
+  const [oraiAddress] = useConfigReducer('address');
+  const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const ref = useRef(null);
+  const { handleResetBalance } = useResetBalance();
+
+  useOnClickOutside(ref, () => {
+    setTokenBridge([undefined, undefined]);
+  });
+
+  // custom hooks
+  const loadTokenAmounts = useLoadTokens();
+  const { data: prices } = useCoinGeckoPrices();
+  useGetFeeConfig();
+
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
@@ -76,6 +100,10 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log(error);
     });
   }, []);
+
+  useEffect(() => {
+    setTokenBridge([undefined, undefined]);
+  }, [filterNetworkUI]);
 
   const processTxResult = (rpc: string, result: DeliverTxResponse, customLink?: string) => {
     if (isDeliverTxFailure(result)) {
@@ -126,16 +154,11 @@ const Balance: React.FC<BalanceProps> = () => {
     processTxResult(fromToken.rpc, result);
   };
 
-  useEffect(() => {
-    setTokenBridge([undefined, undefined]);
-  }, [filterNetworkUI])
-
-
   const onClickTransfer = async (
     fromAmount: number,
     from: TokenItemType,
     to: TokenItemType,
-    filterNetwork?: NetworkChainId
+    toNetworkChainId?: NetworkChainId
   ) => {
     await handleCheckWallet();
     // disable send amount < 0
@@ -145,71 +168,99 @@ const Balance: React.FC<BalanceProps> = () => {
       });
       return;
     }
-    const tokenAmount = amounts[from.denom];
+
+    // get & check balance
+    const initFromBalance = amounts[from.denom];
     const subAmounts = getSubAmountDetails(amounts, from);
     const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
-    const fromBalance = from && tokenAmount ? subAmount + BigInt(tokenAmount) : BigInt(0);
+    const fromBalance = from && initFromBalance ? subAmount + BigInt(initFromBalance) : BigInt(0);
     if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Your balance is insufficient to make this transfer'
       });
       return;
     }
+
     displayToast(TToastType.TX_BROADCASTING);
     try {
       let result: DeliverTxResponse | string | any;
+
       // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
       if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
         // convert erc20 to native ==> ORAICHAIN
-        if (!!from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
         else result = await transferIBCKwt(from, to, fromAmount, amounts);
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
 
       let newToToken = to;
-      if (filterNetwork) {
+      if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        newToToken = findToTokenOnOraiBridge(from, filterNetwork);
-        // ORAICHAIN -> COSMOS(INJ,NOBLE,COSMOS,ATOM) (TO: TOKEN COSMOS)
-        // EVM -> ORAICHAIN || COSMOS -> ORAICHAIN  (TO: TOKEN ORAICHAIN)
-        if (!EVM_CHAIN_ID.includes(filterNetwork)) {
-          newToToken = cosmosTokens.find((t) => t.chainId === filterNetwork && t.coinGeckoId === from.coinGeckoId);
+        newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
+
+        const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
+        if (isBridgeToCosmosNetwork) {
+          newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
+
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
       // TODO: hardcode check case USDC oraichain -> USDC noble
-      const isNotNobleChain = filterNetwork !== 'noble-1';
-      if (from.cosmosBased && isNotNobleChain) {
-        await handleTransferIBC(from, newToToken, fromAmount);
-        return;
+      const isToNobleChain = toNetworkChainId === 'noble-1';
+      if (from.cosmosBased && !isToNobleChain) {
+        return await handleTransferIBC(from, newToToken, fromAmount);
       }
+
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const latestOraiAddress = await window.Keplr.getKeplrAddr();
-      // has to switch network to the correct chain id on evm since users can swap between network tokens
-      if (from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId)) {
+
+      const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
+      const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
+      // switch network for metamask, exclude TRON
+      if (isFromEvmNotTron) {
         await window.Metamask.switchNetwork(from.chainId);
       }
 
-      result = await new UniversalSwapHandler(
+      let latestEvmAddress = metamaskAddress;
+      // TODO: need to get latest tron address if cached
+      if (isFromEvmNotTron || isToNetworkEvmNotTron) {
+        latestEvmAddress = await window.Metamask.getEthAddress();
+      }
+
+      const universalSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: latestOraiAddress, evm: metamaskAddress, tron: tronAddress },
+          sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
-      ).processUniversalSwap();
-      console.log('result on click transfer: ', result);
+      );
+
+      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
+
+      // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
+      // so we use this func just for Noble, and handleTransferIBC for other.
+      if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
+      else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
+
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex);
+      // Add log sentry Oraichain -> Noble-1
+      if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
+        const errorMsg = handleErrorMsg(ex);
+        Sentry.captureException(
+          `${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`
+        );
+      }
     }
   };
 
@@ -222,7 +273,7 @@ const Balance: React.FC<BalanceProps> = () => {
           return false;
         }
         if (isSupportedNoPoolSwapEvm(token.coinGeckoId)) return false;
-        return token.chainId == chainId;
+        return token.chainId === chainId;
       })
       .sort((a, b) => {
         return toTotalDisplay(amounts, b) * prices[b.coinGeckoId] - toTotalDisplay(amounts, a) * prices[a.coinGeckoId];
@@ -230,8 +281,6 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const totalUsd = getTotalUsd(amounts, prices);
-
-  const navigate = useNavigate();
 
   // Move oraib2oraichain
   const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
@@ -251,8 +300,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const network = networks.find((n) => n.chainId == filterNetworkUI) ?? networks[0];
-
+  const network = networks.find((n) => n.chainId === filterNetworkUI) ?? networks[0];
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -313,7 +361,7 @@ const Balance: React.FC<BalanceProps> = () => {
         <br />
         <LoadingBox loading={loadingRefresh}>
           <div className={styles.tokens}>
-            <div className={styles.tokens_form}>
+            <div className={styles.tokens_form} ref={ref}>
               {getFilterTokens(filterNetworkUI).map((t: TokenItemType) => {
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
@@ -331,10 +379,14 @@ const Balance: React.FC<BalanceProps> = () => {
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
                     subAmounts={subAmounts}
-                    active={from?.denom === t.denom || to?.denom === t.denom}
+                    active={from?.denom === t.denom}
                     token={t}
                     theme={theme}
-                    onClick={() => onClickToken(t)}
+                    onClick={() => {
+                      if (t.denom !== from?.denom) {
+                        onClickToken(t);
+                      }
+                    }}
                     onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
                       await onClickTransfer(fromAmount, from, to, filterNetwork);
                     }}

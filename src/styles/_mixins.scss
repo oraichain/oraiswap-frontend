@@ -1,6 +1,12 @@
 @import 'src/styles/variables';
 @import 'src/styles/themes';
 
+@mixin ultra_desktop_max {
+  @media (min-width: ($breakpoint-lg)) and (max-width: $breakpoint_ultra_desktop_max) {
+    @content;
+  }
+}
+
 @mixin desktop {
   @media (min-width: ($breakpoint)) {
     @content;
@@ -51,9 +57,7 @@
 }
 
 @mixin theme() {
-
-  @each $theme,
-  $map in $themes {
+  @each $theme, $map in $themes {
     $theme-map: $map !global;
 
     :global(.#{$theme}) & {

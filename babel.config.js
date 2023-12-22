@@ -3,7 +3,7 @@ module.exports = function (api) {
   return {
     plugins: [
       [
-        './plugins/operator-overloading',
+        '@oraichain/operator-overloading',
         {
           classNames: ['BigDecimal']
         }

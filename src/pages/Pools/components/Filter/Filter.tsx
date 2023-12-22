@@ -2,15 +2,13 @@ import classNames from 'classnames';
 import SearchInput from 'components/SearchInput';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
-import { useGetPools, useGetRewardInfo } from 'pages/Pools/hookV3';
+import { useGetPools, useGetRewardInfo } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './style.module.scss';
-import { Pairs } from 'config/pools';
 import { isEqual } from 'lodash';
-import { Button } from 'components/Button';
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
@@ -30,7 +28,7 @@ const LIST_FILTER_POOL = [
 
 type FilterProps = {
   setFilteredPools: React.Dispatch<React.SetStateAction<PoolInfoResponse[]>>;
-  setIsOpenNewTokenModal: (status: boolean) => void
+  setIsOpenNewTokenModal: (status: boolean) => void;
 };
 export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal }) => {
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
@@ -51,8 +49,10 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
   };
 
   const findBondAmount = (pool: PoolInfoResponse) => {
-    const assetInfo = Pairs.getStakingAssetInfo([JSON.parse(pool.firstAssetInfo), JSON.parse(pool.secondAssetInfo)]);
-    const rewardInfo = totalRewardInfoData?.reward_infos.find(({ asset_info }) => isEqual(asset_info, assetInfo));
+    if (!totalRewardInfoData) return 0;
+    const rewardInfo = totalRewardInfoData.reward_infos.find(({ staking_token }) =>
+      isEqual(staking_token, pool.liquidityAddr)
+    );
     return rewardInfo ? parseInt(rewardInfo.bond_amount) : 0;
   };
 
@@ -74,28 +74,30 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
 
   return (
     <div className={styles.pool_filter}>
-      <div className={styles.pool_filter_left}>
-        <div className={styles.pool_filter_list}>
-          {LIST_FILTER_POOL.map((item) => (
-            <div
-              key={item.key}
-              className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
-              onClick={() => setTypeFilter(item.key)}
-            >
-              {item.text}
-            </div>
-          ))}
-        </div>
+      <div className={styles.pool_filter_list}>
+        {LIST_FILTER_POOL.map((item) => (
+          <div
+            key={item.key}
+            className={classNames(item.key === typeFilter ? styles.filter_active : null, styles.filter_item)}
+            onClick={() => setTypeFilter(item.key)}
+          >
+            {item.text}
+          </div>
+        ))}
+      </div>
+      <div className={styles.pool_filter_right}>
         <div className={styles.pool_search}>
           <SearchInput
             theme={theme}
-            placeholder="Search by address or asset name"
+            placeholder="Search by address, asset, type"
             onSearch={(value) => setSearchValue(value)}
           />
         </div>
+        {/* <Button type="secondary-sm" onClick={() => setIsOpenNewTokenModal(true)}>
+          {theme === 'light' ? <IconAddLight /> : <IconAdd />}
+          &nbsp; New Pool
+        </Button> */}
       </div>
-
-      {/* <Button type='primary-sm' onClick={() => setIsOpenNewTokenModal(true)}>New Pool</Button> */}
     </div>
   );
 };
