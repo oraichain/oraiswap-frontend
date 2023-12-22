@@ -22,6 +22,7 @@ export interface ConfigState {
   address: string;
   metamaskAddress: string | null;
   tronAddress: string | null;
+  btcAddress: string | null;
   cosmosAddress: { [key: string]: string };
   chainId: string;
   chainInfo: ChainInfoType;
@@ -45,6 +46,7 @@ export interface ConfigState {
 const initialState: ConfigState = {
   address: '',
   metamaskAddress: '',
+  btcAddress: '',
   tronAddress: '',
   walletTypeStore: 'owallet',
   cosmosAddress: {},

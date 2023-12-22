@@ -5,6 +5,7 @@ import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { chainInfos } from 'config/chainInfos';
+import Bitcoin from 'libs/bitcoin';
 
 // polyfill
 Tendermint37Client.detectVersion = () => {};
@@ -24,6 +25,7 @@ window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
 window.Keplr = new Keplr();
+window.Bitcoin = new Bitcoin();
 window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');

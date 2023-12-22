@@ -9,6 +9,7 @@ import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
 import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 import { DuckDb } from 'libs/duckdb';
 import { Class } from '@oraichain/common-contracts-sdk/build/CwIcs721Bridge.types';
+import Bitcoin, { IBitcoin } from 'libs/bitcoin';
 
 declare global {
   type AmountDetails = { [denom: string]: string };
@@ -114,6 +115,7 @@ declare global {
     Keystation: any;
     Wallet: Wallet;
     Keplr: Keplr;
+    Bitcoin: Bitcoin;
     tronWeb: _TronWeb;
     tronLink: TronLink;
     ethereum: MetaMaskEthereumProvider;
@@ -125,6 +127,7 @@ declare global {
     client: SigningCosmWasmClient;
     keplr: keplr;
     owallet: keplr;
+    bitcoin: IBitcoin;
     browser: Browser;
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
     duckDb: DuckDb;

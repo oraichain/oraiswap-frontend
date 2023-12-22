@@ -460,6 +460,46 @@ export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
   {
+    rest: 'https://blockstream.info/api',
+    rpc: 'https://blockstream.info/api',
+    chainId: 'bitcoin',
+    chainName: 'Bitcoin',
+    bip44: {
+      coinType: 0
+    },
+    coinType: 0,
+    Icon: OraiIcon,
+    IconLight: OraiLightIcon,
+    stakeCurrency: {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'btc',
+      coinDecimals: 8,
+      coinGeckoId: 'bitcoin',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+    },
+    bech32Config: defaultBech32Config('bc'),
+    networkType: 'bitcoin',
+    currencies: [
+      {
+        coinDenom: 'BTC',
+        coinMinimalDenom: 'btc',
+        coinDecimals: 8,
+        coinGeckoId: 'bitcoin',
+        coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+      }
+    ],
+    get feeCurrencies() {
+      return this.currencies;
+    },
+
+    features: ['isBtc'],
+    txExplorer: {
+      name: 'Bitcoin',
+      txUrl: 'https://blockstream.info/tx/{txHash}',
+      accountUrl: 'https://blockstream.info/address/{address}'
+    }
+  },
+  {
     rpc: 'https://bridge-v2.rpc.orai.io',
     rest: 'https://bridge-v2.lcd.orai.io',
     chainId: 'oraibridge-subnet-2',
