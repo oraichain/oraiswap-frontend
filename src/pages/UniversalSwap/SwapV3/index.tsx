@@ -61,11 +61,11 @@ import {
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
-import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
-const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
+// TODO: hardcode decimal relayerFee
+const RELAYER_DECIMAL = 6;
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -220,7 +220,10 @@ const SwapComponent: React.FC<{
   });
   const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
 
-  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(originalFromToken, originalToToken);
+  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
+    originalFromToken,
+    originalToToken
+  );
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -240,9 +243,16 @@ const SwapComponent: React.FC<{
     )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
+  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
+  const bridgeTokenFee =
+    simulateDisplayAmount && (fromTokenFee || toTokenFee)
+      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(simulateData.displayAmount - ((simulateData.displayAmount * userSlippage) / 100) - relayerFee).toNumber()
+    ? new BigDecimal(
+      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+    ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -265,7 +275,7 @@ const SwapComponent: React.FC<{
       const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const relayerFee = relayerFeeToken && {
+      const relayerFeeUniversal = relayerFeeToken && {
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
       };
@@ -281,7 +291,7 @@ const SwapComponent: React.FC<{
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-          relayerFee
+          relayerFee: relayerFeeUniversal
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
@@ -482,7 +492,7 @@ const SwapComponent: React.FC<{
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
-                {Number(numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 }))}{' '}
+                {numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}{' '}
                 {originalToToken.name}
               </div>
             </div>
@@ -500,7 +510,7 @@ const SwapComponent: React.FC<{
                   <span>Relayer Fee</span>
                 </div>
                 <div className={cx('value')}>
-                  ≈ {relayerFee}{" "}{originalToToken.name}
+                  ≈ {relayerFee} {originalToToken.name}
                 </div>
               </div>
             )}
