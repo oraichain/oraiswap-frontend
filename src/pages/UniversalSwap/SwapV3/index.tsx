@@ -374,19 +374,6 @@ const SwapComponent: React.FC<{
                 setCoe={setCoe}
                 usdPrice={usdPriceShow}
               />
-              {isSelectFrom && (
-                <SelectTokenModalV2
-                  close={() => setIsSelectFrom(false)}
-                  prices={prices}
-                  items={filteredFromTokens}
-                  amounts={amounts}
-                  setToken={(denom) => {
-                    setSwapTokens([denom, toTokenDenom]);
-                  }}
-                  setSearchTokenName={setSearchTokenName}
-                  searchTokenName={searchTokenName}
-                />
-              )}
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
               {!fromTokenFee && !toTokenFee && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
@@ -455,19 +442,6 @@ const SwapComponent: React.FC<{
                 tokenFee={toTokenFee}
                 usdPrice={usdPriceShow}
               />
-              {isSelectTo && (
-                <SelectTokenModalV2
-                  close={() => setIsSelectTo(false)}
-                  prices={prices}
-                  items={filteredToTokens}
-                  amounts={amounts}
-                  setToken={(denom) => {
-                    setSwapTokens([fromTokenDenom, denom]);
-                  }}
-                  setSearchTokenName={setSearchTokenName}
-                  searchTokenName={searchTokenName}
-                />
-              )}
 
               <div className={cx('ratio')}>
                 {`1 ${originalFromToken.name} ≈ ${
@@ -562,6 +536,36 @@ const SwapComponent: React.FC<{
           </div>
         </div>
       </LoadingBox>
+
+      {isSelectTo && (
+        <SelectTokenModalV2
+          close={() => setIsSelectTo(false)}
+          prices={prices}
+          items={filteredToTokens}
+          amounts={amounts}
+          setToken={(denom) => {
+            setSwapTokens([fromTokenDenom, denom]);
+          }}
+          setSearchTokenName={setSearchTokenName}
+          searchTokenName={searchTokenName}
+          title="Receive Token List"
+        />
+      )}
+
+      {isSelectFrom && (
+        <SelectTokenModalV2
+          close={() => setIsSelectFrom(false)}
+          prices={prices}
+          items={filteredFromTokens}
+          amounts={amounts}
+          setToken={(denom) => {
+            setSwapTokens([denom, toTokenDenom]);
+          }}
+          setSearchTokenName={setSearchTokenName}
+          searchTokenName={searchTokenName}
+          title="Pay Token List"
+        />
+      )}
     </div>
   );
 };

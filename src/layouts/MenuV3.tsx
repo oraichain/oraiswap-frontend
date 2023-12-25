@@ -32,7 +32,7 @@ const Menu: React.FC = () => {
 
   useEffect(() => {
     setLink(location.pathname);
-  }, []);
+  }, [location.pathname]);
 
   const renderLink = (to: string, title: string, onClick: any, externalLink = false) => {
     if (to === 'coming-soon') {
@@ -153,10 +153,13 @@ const Menu: React.FC = () => {
         </>
       ) : (
         <div className={classNames(styles.menu)}>
-          <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-            <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
-          </Link>
-          {menuList}
+          <div className={styles.menuLeft}>
+            <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
+              <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+            </Link>
+            <div className={styles.divider}></div>
+            {menuList}
+          </div>
           <div className={classNames(styles.connect_wallet_wrapper)}>
             <span>
               <ConnectWallet />
