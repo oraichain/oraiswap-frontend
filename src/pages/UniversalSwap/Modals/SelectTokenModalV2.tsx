@@ -1,24 +1,25 @@
+import {
+  CustomChainInfo,
+  TokenItemType,
+  getSubAmountDetails,
+  tokenMap,
+  truncDecimals
+} from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
+import ArrowImg from 'assets/icons/arrow_new.svg';
+import BackImg from 'assets/icons/back.svg';
+import CheckImg from 'assets/icons/check.svg';
+import NetworkImg from 'assets/icons/network.svg';
 import cn from 'classnames/bind';
 import SearchInput from 'components/SearchInput';
+import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
+import { networks } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import { getTotalUsd, toSumDisplay } from 'libs/utils';
 import { FC, useRef, useState } from 'react';
 import styles from './SelectTokenModalV2.module.scss';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import useConfigReducer from 'hooks/useConfigReducer';
-import NetworkImg from 'assets/icons/network.svg';
-import ArrowImg from 'assets/icons/arrow_new.svg';
-import CheckImg from 'assets/icons/check.svg';
-import BackImg from 'assets/icons/back.svg';
-import { networks } from 'helper';
-import {
-  TokenItemType,
-  CustomChainInfo,
-  getSubAmountDetails,
-  truncDecimals,
-  tokenMap
-} from '@oraichain/oraidex-common';
-import { chainIcons, flattenTokensWithIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 
@@ -33,6 +34,7 @@ interface ModalProps {
   type?: 'token' | 'network';
   setSearchTokenName: (tokenName: string) => void;
   searchTokenName?: string;
+  title?: string;
 }
 
 interface GetIconInterface {
@@ -61,8 +63,10 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   prices,
   amounts,
   setSearchTokenName,
-  searchTokenName
+  searchTokenName,
+  title = 'Token List'
 }) => {
+  const mobileMode = isMobile();
   const ref = useRef(null);
   const [theme] = useConfigReducer('theme');
   const [isNetwork, setIsNetwork] = useState(false);
@@ -159,90 +163,94 @@ export const SelectTokenModalV2: FC<ModalProps> = ({
   });
 
   return (
-    <div ref={ref} className={cx('select')}>
-      {!isNetwork ? (
-        <div className={cx('title')}>
-          <SearchInput
-            isBorder
-            placeholder="Search Token"
-            defaultValue={searchTokenName}
-            onSearch={(tokenName) => setSearchTokenName(tokenName.toUpperCase())}
-          />
-        </div>
-      ) : (
-        <div className={cx('details')}>
-          <img
-            src={BackImg}
-            onClick={() => {
-              isNetwork && setIsNetwork(false);
-            }}
-          />
-          <div className={cx('network')}>Select network</div>
-          <div />
-        </div>
-      )}
-      <div className={cx('label')}>
-        {!isNetwork && <div className={cx('left')}>Token List</div>}
-        <div
-          className={cx('right')}
-          onClick={() => {
-            if (isNetwork) {
-              setSearchTextChainName('');
-            }
-            setIsNetwork(!isNetwork);
-          }}
-        >
-          <img src={NetworkImg} alt="network" />
-          <div className={cx('all-network')}>
-            <span className={cx(`${isNetwork ? 'detail' : ''}`)}>
-              {searchTextChainName && !isNetwork ? searchTextChainName : 'All Networks'}
-            </span>
-            {isNetwork && <span className={cx('balance')}>${totalBalance?.toFixed(2)}</span>}
+    <div className={cx(!mobileMode ? 'select-wrapper' : 'select-mobile-wrapper')}>
+      <div ref={ref} className={cx('select')}>
+        {!isNetwork ? (
+          <div className={cx('title')}>
+            <div className={cx('title-content')}>{title}</div>
+            <SearchInput
+              style={{ background: 'transparent' }}
+              isBorder
+              placeholder="Search Token"
+              defaultValue={searchTokenName}
+              onSearch={(tokenName) => setSearchTokenName(tokenName.toUpperCase())}
+            />
           </div>
-          {!isNetwork && <img src={ArrowImg} alt="arrow" />}
+        ) : (
+          <div className={cx('details')}>
+            <img
+              src={BackImg}
+              onClick={() => {
+                isNetwork && setIsNetwork(false);
+              }}
+            />
+            <div className={cx('network')}>Select network</div>
+            <div />
+          </div>
+        )}
+        <div className={cx('label')}>
+          {!isNetwork && <div className={cx('left')}>Token List</div>}
+          <div
+            className={cx('right')}
+            onClick={() => {
+              if (isNetwork) {
+                setSearchTextChainName('');
+              }
+              setIsNetwork(!isNetwork);
+            }}
+          >
+            <img src={NetworkImg} alt="network" />
+            <div className={cx('all-network')}>
+              <span className={cx(`${isNetwork ? 'detail' : ''}`)}>
+                {searchTextChainName && !isNetwork ? searchTextChainName : 'All Networks'}
+              </span>
+              {isNetwork && <span className={cx('balance')}>${totalBalance?.toFixed(2)}</span>}
+            </div>
+            {!isNetwork && <img src={ArrowImg} alt="arrow" />}
+          </div>
+          {isNetwork && !searchTextChainName && <img src={CheckImg} alt="check" />}
         </div>
-        {isNetwork && !searchTextChainName && <img src={CheckImg} alt="check" />}
-      </div>
-      <div className={cx('options')}>
-        {isNetwork &&
-          networkBalance?.map((item) => {
-            return (
+        <div className={cx('options')}>
+          {isNetwork &&
+            networkBalance?.map((item) => {
+              return (
+                <div
+                  className={cx('item')}
+                  key={item.key}
+                  onClick={() => {
+                    setSearchTextChainName(item.title);
+                    setIsNetwork(false);
+                  }}
+                >
+                  {item.ItemIcon}
+                  <div className={cx('grow')}>
+                    <div>{item.title}</div>
+                    <div className={cx('org')}>{item.balance}</div>
+                  </div>
+                  <div>{searchTextChainName === item.chainName && <img src={CheckImg} alt="check" />}</div>
+                </div>
+              );
+            })}
+          {!isNetwork &&
+            itemsReverse.map((item) => (
               <div
                 className={cx('item')}
                 key={item.key}
                 onClick={() => {
-                  setSearchTextChainName(item.title);
-                  setIsNetwork(false);
+                  setToken(item.key);
+                  setSearchTokenName('');
+                  close();
                 }}
               >
-                {item.ItemIcon}
+                {item.itemIcon}
                 <div className={cx('grow')}>
                   <div>{item.title}</div>
-                  <div className={cx('org')}>{item.balance}</div>
+                  <div className={cx('org')}>{item.org}</div>
                 </div>
-                <div>{searchTextChainName === item.chainName && <img src={CheckImg} alt="check" />}</div>
+                <div>{item.balance}</div>
               </div>
-            );
-          })}
-        {!isNetwork &&
-          itemsReverse.map((item) => (
-            <div
-              className={cx('item')}
-              key={item.key}
-              onClick={() => {
-                setToken(item.key);
-                setSearchTokenName('');
-                close();
-              }}
-            >
-              {item.itemIcon}
-              <div className={cx('grow')}>
-                <div>{item.title}</div>
-                <div className={cx('org')}>{item.org}</div>
-              </div>
-              <div>{item.balance}</div>
-            </div>
-          ))}
+            ))}
+        </div>
       </div>
     </div>
   );

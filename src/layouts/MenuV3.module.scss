@@ -8,7 +8,7 @@
   position: fixed;
   width: 100%;
   top: 0;
-  z-index: 2;
+  z-index: 999;
 
   .logo {
     display: flex;
@@ -121,10 +121,24 @@
   }
 }
 
+.menuLeft {
+  display: flex;
+  align-items: center;
+
+  .divider {
+    @include theme() {
+      border: 1px solid theme-get('neutral-border-border-bold');
+    }
+    margin: 0 7px 0 24px;
+    height: 40px;
+  }
+}
+
 .menu_list {
   display: flex;
 
   .menu_item {
+    white-space: nowrap;
     box-sizing: border-box;
     position: relative;
     vertical-align: middle;
