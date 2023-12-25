@@ -49,6 +49,7 @@ const ChooseWalletModal: React.FC<{
   const isTron = !!window.tronLink;
   const WALLETS: WalletItem[] = [
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
+    { name: 'Bitcoin', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.BITCOIN },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },

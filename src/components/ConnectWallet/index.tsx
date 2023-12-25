@@ -213,8 +213,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectBitcoin = async () => {
     try {
       const btcAddress = await window.Bitcoin.getAddress();
-      setBtcAddress(btcAddress);
       console.log('🚀 ~ file: index.tsx:215 ~ connectBitcoin ~ btcAddress:', btcAddress);
+      setBtcAddress(btcAddress);
+      loadTokenAmounts({ btcAddress });
     } catch (ex) {
       console.log('error in connecting metamask: ', ex);
       // throw new Error('Connect Metamask failed');
@@ -452,6 +453,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return tronAddress;
     } else if (walletType === WALLET_TYPES.KEPLR || walletType === WALLET_TYPES.OWALLET) {
       return oraiAddress;
+    } else if (walletType === WALLET_TYPES.BITCOIN) {
+      return btcAddress;
     }
   };
   const handleDisconnectWallet = (walletType) => {

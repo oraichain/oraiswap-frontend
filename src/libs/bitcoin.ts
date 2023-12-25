@@ -128,7 +128,7 @@ export default class Bitcoin extends BitcoinWallet {
     }
   }
 
-  async getAddress(chainId: BtcChainId = ChainIdEnum.Bitcoin): Promise<string | undefined> {
+  async getAddress(chainId: BtcChainId = ChainIdEnum.BitcoinTestnet): Promise<string | undefined> {
     // not support network.chainId (Oraichain)
     // chainId = chainId ?? network.chainId;
     // const token = cosmosTokens.find((token) => token.chainId === chainId);

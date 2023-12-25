@@ -1,7 +1,9 @@
+import { ReactNode } from 'react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import TransferConvertToken from '../TransferConvertToken';
+
 import { TokenItemType } from '@oraichain/oraidex-common';
 interface TokenItemProps {
   token: TokenItemType;
@@ -43,6 +45,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
           ) : (
             <token.Icon className={styles.tokenIcon} />
           )}
+
           <div className={styles.tokenInfo}>
             <div className={classNames(styles.tokenName, styles[theme])}>{token.name}</div>
           </div>

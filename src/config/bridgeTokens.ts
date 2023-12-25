@@ -48,7 +48,7 @@ export const getTokensFromNetwork = (network: CustomChainInfo): TokenItemType[] 
 const otherChainTokens = flatten(
   chainInfos
     .filter((chainInfo) => {
-      return chainInfo.chainId !== 'Oraichain' && chainInfo.chainId !== 'bitcoin';
+      return chainInfo.chainId !== 'Oraichain';
     })
     .map(getTokensFromNetwork)
 );
@@ -85,6 +85,10 @@ export const evmTokens = uniqBy(
       // !token.contractAddress &&
       token.denom && !token.cosmosBased && token.coinGeckoId && token.chainId !== 'kawaii_6886-1'
   ),
+  (c) => c.denom
+);
+export const btcTokens = uniqBy(
+  flattenTokens.filter((token) => token.chainId === 'bitcoinTestnet'),
   (c) => c.denom
 );
 
