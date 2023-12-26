@@ -39,7 +39,7 @@ import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTrans
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import useTokenFee from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
@@ -61,11 +61,11 @@ import {
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
-import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
-const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
+// TODO: hardcode decimal relayerFee
+const RELAYER_DECIMAL = 6;
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -220,17 +220,10 @@ const SwapComponent: React.FC<{
   });
   const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
 
-  const relayerFee = useRelayerFee();
-  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
-    if (
-      originalFromToken.chainId !== originalToToken.chainId &&
-      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-    ) {
-      return +cur.amount + acc;
-    }
-    return acc;
-  }, 0);
-
+  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
+    originalFromToken,
+    originalToToken
+  );
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -242,17 +235,24 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
+  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
+  const bridgeTokenFee =
+    simulateDisplayAmount && (fromTokenFee || toTokenFee)
+      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+    ? new BigDecimal(
+      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+    ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -275,7 +275,7 @@ const SwapComponent: React.FC<{
       const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const relayerFee = relayerFeeToken && {
+      const relayerFeeUniversal = relayerFeeToken && {
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
       };
@@ -291,7 +291,7 @@ const SwapComponent: React.FC<{
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-          relayerFee
+          relayerFee: relayerFeeUniversal
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
@@ -444,9 +444,8 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -480,22 +479,20 @@ const SwapComponent: React.FC<{
           })()}
 
           <div className={cx('detail')}>
-            {
-              <div className={cx('row')}>
-                <div className={cx('title')}>
-                  <span> Expected Output</span>
-                </div>
-                <div className={cx('value')}>
-                  ≈ {expectOutputDisplay} {originalToToken.name}
-                </div>
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> Expected Output</span>
               </div>
-            }
+              <div className={cx('value')}>
+                ≈ {expectOutputDisplay} {originalToToken.name}
+              </div>
+            </div>
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
-                {Number(numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 }))}{' '}
+                {numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}{' '}
                 {originalToToken.name}
               </div>
             </div>
@@ -513,15 +510,7 @@ const SwapComponent: React.FC<{
                   <span>Relayer Fee</span>
                 </div>
                 <div className={cx('value')}>
-                  <TokenBalance
-                    balance={{
-                      amount: relayerFeeToken.toString(),
-                      // decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                      decimals: RELAYER_DECIMAL,
-                      denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
-                    }}
-                    decimalScale={truncDecimals}
-                  />
+                  ≈ {relayerFee} {originalToToken.name}
                 </div>
               </div>
             )}

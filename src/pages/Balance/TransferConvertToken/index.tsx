@@ -168,7 +168,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
-  const relayerFeeTokenFee = useRelayerFeeToken(token, to);
+  const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
   const renderBridgeFee = () => {
