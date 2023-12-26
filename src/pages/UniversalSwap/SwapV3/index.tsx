@@ -3,7 +3,6 @@ import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
-  ORAI,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -32,14 +31,13 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
 import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
+import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
@@ -92,6 +90,7 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+  useGetFeeConfig();
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
