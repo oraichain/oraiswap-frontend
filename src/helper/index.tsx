@@ -255,6 +255,7 @@ export const switchWalletTron = async () => {
 };
 
 export const getAddress = (addr, prefix: string) => {
+  if (!addr) return '';
   const { data } = fromBech32(addr);
   return toBech32(prefix, data);
 };
@@ -272,7 +273,6 @@ export const genAddressCosmos = (info, address60, address118) => {
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
   const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
-  if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
     const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
