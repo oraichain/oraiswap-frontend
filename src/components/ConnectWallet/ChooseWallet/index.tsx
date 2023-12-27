@@ -50,6 +50,12 @@ const ChooseWalletModal: React.FC<{
   const WALLETS: WalletItem[] = [
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
+    {
+      name: 'Metamask Leap Snap',
+      icon: MetamaskIcon,
+      isActive: isMetamask,
+      walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
+    },
     { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
     { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
@@ -87,6 +93,7 @@ const ChooseWalletModal: React.FC<{
     } else if (connectStatus === CONNECT_STATUS.PROCESSING) {
       return <ConnectProcessing cancel={cancel} walletName={walletSelected.name} />;
     } else if (connectStatus === CONNECT_STATUS.DONE) {
+      console.log('🚀 ~ file: index.tsx:97 ~ content ~ address:', address);
       return <ConnectProgressDone cancel={cancel} address={address} />;
     } else {
       return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;

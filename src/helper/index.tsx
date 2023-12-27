@@ -24,6 +24,7 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
+import { leapSnapId } from './constants';
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
@@ -282,6 +283,47 @@ export const getListAddressCosmos = async (oraiAddr) => {
       ...listAddressCosmos,
       [info.chainId]: cosmosAddress
     };
+  }
+  return { listAddressCosmos };
+};
+export const getAddressByChainId = async (chainId) => {
+  let address = await window.Keplr.getKeplrAddr(chainId);
+  if (!address) {
+    address = await getAddressBySnap(chainId);
+  }
+  return address;
+};
+export const getAddressBySnap = async (chainId) => {
+  const { bech32Address } = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId: leapSnapId,
+      request: {
+        method: 'getKey',
+        params: {
+          chainId: chainId
+        }
+      }
+    }
+  });
+  if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
+  return bech32Address;
+};
+export const getListAddressCosmosByLeapSnap = async () => {
+  let listAddressCosmos = {};
+  const cosmosNetworksFilter = cosmosNetworks.filter(
+    (item, index) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
+  );
+
+  for (const info of cosmosNetworksFilter) {
+    if (!info) continue;
+    try {
+      const cosmosAddress = await getAddressBySnap(info.chainId);
+      console.log('🚀 ~ file: index.tsx:314 ~ getListAddressCosmosByLeapSnap ~ cosmosAddress:', cosmosAddress);
+      listAddressCosmos[info.chainId] = cosmosAddress;
+    } catch (error) {
+      console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);
+    }
   }
   return { listAddressCosmos };
 };
