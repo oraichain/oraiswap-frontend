@@ -9,6 +9,7 @@ import {
   WalletType,
   ChainIdEnum,
   BigDecimal,
+  evmChains,
   COSMOS_CHAIN_ID_COMMON
 } from '@oraichain/oraidex-common';
 
@@ -31,6 +32,7 @@ export interface Tokens {
 
 export type DecimalLike = string | number | bigint | BigDecimal;
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
@@ -255,6 +257,7 @@ export const switchWalletTron = async () => {
 };
 
 export const getAddress = (addr, prefix: string) => {
+  if (!addr) return '';
   const { data } = fromBech32(addr);
   return toBech32(prefix, data);
 };
@@ -272,7 +275,6 @@ export const genAddressCosmos = (info, address60, address118) => {
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
   const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
-  if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
     const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);

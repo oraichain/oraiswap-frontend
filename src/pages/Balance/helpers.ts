@@ -1,6 +1,6 @@
 import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coin } from '@cosmjs/proto-signing';
-import { DeliverTxResponse, GasPrice, StdFee } from '@cosmjs/stargate';
+import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
 import {
   CosmosChainId,
   IBCInfo,
@@ -11,7 +11,13 @@ import {
   ibcInfosOld,
   oraichain2oraib,
   BigDecimal,
-  GAS_ESTIMATION_BRIDGE_DEFAULT
+  GAS_ESTIMATION_BRIDGE_DEFAULT,
+  buildMultipleExecuteMessages,
+  calculateTimeoutTimestamp,
+  getEncodedExecuteContractMsgs,
+  parseTokenInfo,
+  toAmount,
+  MULTIPLIER_ESTIMATE_OSMOSIS
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -20,13 +26,6 @@ import { feeEstimate, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import {
-  buildMultipleExecuteMessages,
-  calculateTimeoutTimestamp,
-  getEncodedExecuteContractMsgs,
-  parseTokenInfo,
-  toAmount
-} from '@oraichain/oraidex-common';
 import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
 import { Long } from 'cosmjs-types/helpers';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
@@ -179,8 +178,7 @@ export const transferIBCMultiple = async (
   });
   // hardcode fix bug osmosis
   let fee: 'auto' | number = 'auto';
-  const MULTIPLIER_OSMOSIS = 3;
-  if (fromChainId === 'osmosis-1') fee = MULTIPLIER_OSMOSIS;
+  if (fromChainId === 'osmosis-1') fee = MULTIPLIER_ESTIMATE_OSMOSIS;
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, fee);
   return result as DeliverTxResponse;
 };
