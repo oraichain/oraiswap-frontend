@@ -53,6 +53,7 @@ const ChooseWalletModal: React.FC<{
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
+    { name: 'Metamask Snap', icon: PhantomIcon, isActive: isMetamask, walletType: WALLET_TYPES.SNAP },
     { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
     { name: 'Ledger', icon: LedgerIcon, walletType: WALLET_TYPES.LEDGER },
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },

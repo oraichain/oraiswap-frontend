@@ -47,6 +47,7 @@ export enum WALLET_TYPES {
   TRON = 'TRON',
   BITCOIN = 'BITCOIN',
   PHANTOM = 'PHANTOM',
+  SNAP = 'SNAP',
   LEDGER = 'LEDGER',
   GOOGLE = 'GOOGLE',
   APPLE = 'APPLE',
@@ -434,11 +435,27 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           await disconnectTronLink();
         }
         break;
+      case WALLET_TYPES.SNAP:
+        connectSnap();
+        break;
       default:
         break;
     }
   };
+  const connectSnap = async () => {
+    try {
+      const result = await window.ethereum.request({
+        method: 'wallet_requestSnaps',
+        params: {
+          'npm:@oraichain/metamask-oraichain-snap-test': {}
+        }
+      });
 
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const toggleShowNetworks = (id: number) => {
     const walletsModified = wallets.map((w) => {
       if (w.id === id) w.isOpen = !w.isOpen;
