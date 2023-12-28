@@ -142,9 +142,9 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
 };
 
 export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
-  const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
+  const cosmosAddress = getAddressCosmosByChainId(chainId);
   if (!cosmosAddress) {
-    throw new Error('Please login both metamask and keplr!');
+    throw new Error('Please login both metamask and keplr1!');
   }
   return cosmosAddress;
 };
@@ -286,12 +286,35 @@ export const getListAddressCosmos = async (oraiAddr) => {
   }
   return { listAddressCosmos };
 };
-export const getAddressByChainId = async (chainId) => {
-  let address = await window.Keplr.getKeplrAddr(chainId);
-  if (!address) {
-    address = await getAddressBySnap(chainId);
+export const getAddressCosmosByChainId = async (chainId) => {
+  const keplr = await window.Keplr.getKeplr();
+  if (keplr) {
+    return await window.Keplr.getKeplrAddr(chainId);
   }
-  return address;
+  return await getAddressBySnap(chainId);
+};
+export const suggestChainCosmosByChainInfo = async (chainInfo) => {
+  const keplr = await window.Keplr.getKeplr();
+  if (keplr) {
+    await window.Keplr.suggestChain(chainInfo);
+  }
+  await suggestChainBySnap(chainInfo);
+};
+export const suggestChainBySnap = async (chainInfo) => {
+  const rs = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId: leapSnapId,
+      request: {
+        method: 'suggestChain',
+        params: {
+          chainInfo
+        }
+      }
+    }
+  });
+  console.log('🚀 ~ file: index.tsx:309 ~ suggestChainBySnap ~ rs:', rs);
+  return rs;
 };
 export const getAddressBySnap = async (chainId) => {
   const { bech32Address } = await window.ethereum.request({

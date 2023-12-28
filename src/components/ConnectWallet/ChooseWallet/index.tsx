@@ -41,7 +41,6 @@ const ChooseWalletModal: React.FC<{
 }> = ({ close, connectToWallet, connectStatus, cancel, tryAgain, address }) => {
   const [theme] = useConfigReducer('theme');
   const [walletSelected, setWalletSelected] = useState<WalletItem>();
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const isMetamask = !!window?.ethereum?.isMetaMask;
   const vs = window?.keplr?.version;
   const isCheckKeplr = !!vs && keplrCheck('keplr');

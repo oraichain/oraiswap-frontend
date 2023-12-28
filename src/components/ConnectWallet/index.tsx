@@ -215,10 +215,16 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   useEffect(() => {
     if (!!oraiAddress) {
       (async () => {
-        if (walletTypeStore === 'owallet') {
-          await connectDetectOwallet();
+        const isKeplr = await window.Keplr.getKeplr();
+        if (isKeplr) {
+          if (walletTypeStore === 'owallet') {
+            await connectDetectOwallet();
+          } else {
+            await connectDetectKeplr();
+          }
         } else {
-          await connectDetectKeplr();
+          await connectMetamaskLeapSnap();
+          return;
         }
       })();
     }
@@ -274,6 +280,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddr = await window.Keplr.getKeplrAddr();
+      console.log('🚀 ~ file: index.tsx:277 ~ connectKeplr ~ oraiAddr:', oraiAddr);
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
       const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
@@ -371,30 +378,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           [leapSnapId]: {}
         }
       });
-      if (result[leapSnapId].enabled) {
+      if (result?.[leapSnapId].enabled) {
         // alert('ok');
         console.log('ok');
 
         const bech32Address = await getAddressBySnap(network.chainId);
-
+        console.log('🚀 ~ file: index.tsx:379 ~ connectMetamaskLeapSnap ~ bech32Address:', bech32Address);
         loadTokenAmounts({ oraiAddress: bech32Address });
         setOraiAddress(bech32Address);
-
-        // // const chainSupport = ['Oraichain','']
-        // // console.log('🚀 ~ file: index.tsx:386 ~ connectMetamaskLeapSnap ~ rs:', rs);
-
         const { listAddressCosmos } = await getListAddressCosmosByLeapSnap();
-        // const rs = await window.ethereum.request({
-        //   method: 'wallet_invokeSnap',
-        //   params: {
-        //     snapId: leapSnapId,
-        //     request: {
-        //       method: 'getSupportedChains'
-        //     }
-        //   }
-        // });
-        // console.log('🚀 ~ file: index.tsx:379 ~ connectMetamaskLeapSnap ~ rs:', rs);
-        // console.log('🚀 ~ file: index.tsx:380 ~ connectMetamaskLeapSnap ~ listAddressCosmos:', listAddressCosmos);
         setCosmosAddress(listAddressCosmos);
       }
       console.log(result);
