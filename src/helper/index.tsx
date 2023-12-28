@@ -293,12 +293,18 @@ export const getAddressCosmosByChainId = async (chainId) => {
   }
   return await getAddressBySnap(chainId);
 };
-export const suggestChainCosmosByChainInfo = async (chainInfo) => {
+export const suggestChainCosmosByChainId = async (chainId) => {
   const keplr = await window.Keplr.getKeplr();
   if (keplr) {
-    await window.Keplr.suggestChain(chainInfo);
+    await window.Keplr.suggestChain(chainId);
   }
-  await suggestChainBySnap(chainInfo);
+  // const chainInfo = chainInfos.find((chainInfo) => {
+  //   return chainInfo.chainId === network.chainId;
+  // });
+
+  // console.log('🚀 ~ file: index.tsx:304 ~ chainInfo ~ chainInfo:', chainInfo);
+  // await suggestChainBySnap(chainInfo);
+  return;
 };
 export const suggestChainBySnap = async (chainInfo) => {
   const rs = await window.ethereum.request({
@@ -332,6 +338,7 @@ export const getAddressBySnap = async (chainId) => {
   if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
   return bech32Address;
 };
+
 export const getListAddressCosmosByLeapSnap = async () => {
   let listAddressCosmos = {};
   const cosmosNetworksFilter = cosmosNetworks.filter(

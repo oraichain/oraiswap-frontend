@@ -12,8 +12,9 @@ import ChooseWalletModal from './ChooseWallet';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
-import { evmChains } from 'config/chainInfos';
+import { chainInfos, evmChains } from 'config/chainInfos';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
 import {
   cosmosNetworks,
   tronNetworks,
@@ -27,7 +28,8 @@ import {
   getListAddressCosmos,
   switchWalletTron,
   getListAddressCosmosByLeapSnap,
-  getAddressBySnap
+  getAddressBySnap,
+  suggestChainCosmosByChainId
 } from 'helper';
 import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
@@ -39,6 +41,8 @@ import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
 import { leapSnapId } from 'helper/constants';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
@@ -381,7 +385,35 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       if (result?.[leapSnapId].enabled) {
         // alert('ok');
         console.log('ok');
+        const wallet = new CosmjsOfflineSigner(network.chainId);
+        console.log('🚀 ~ file: index.tsx:388 ~ connectMetamaskLeapSnap ~ wallet:', wallet);
+        const accounts = await wallet.getAccounts();
+        console.log('🚀 ~ file: index.tsx:389 ~ connectMetamaskLeapSnap ~ accounts:', accounts);
+        window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+          gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+        });
+        // console.log('🚀 ~ file: index.tsx:395 ~ connectMetamaskLeapSnap ~ network:', network);
+        // const chainInfo = chainInfos.find((chainInfo) => {
+        //   return chainInfo.chainId === network.chainId;
+        // });
+        // chainInfos.map(()=>{
 
+        // })
+        // console.log('🚀 ~ file: index.tsx:310 ~ chainInfoNotIcon ~ chainInfoNotIcon:', chainInfoNotIcon);
+        // console.log('🚀 ~ file: index.tsx:399 ~ chainInfo ~ chainInfo:', chainInfo);
+        // // console.log('🚀 ~ file: index.tsx:397 ~ connectMetamaskLeapSnap ~ chainInfo:', chainInfo);
+        // // await window.ethereum.request({
+        // //   method: 'wallet_invokeSnap',
+        // //   params: {
+        // //     snapId: leapSnapId,
+        // //     request: {
+        // //       method: 'suggestChain',
+        // //       params: {
+        // //         chainInfo: chainInfoWithIcon
+        // //       }
+        // //     }
+        // //   }
+        // // });
         const bech32Address = await getAddressBySnap(network.chainId);
         console.log('🚀 ~ file: index.tsx:379 ~ connectMetamaskLeapSnap ~ bech32Address:', bech32Address);
         loadTokenAmounts({ oraiAddress: bech32Address });

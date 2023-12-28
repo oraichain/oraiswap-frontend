@@ -22,7 +22,7 @@ import {
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { feeEstimate, getAddressCosmosByChainId, getNetworkGasPrice, suggestChainCosmosByChainInfo } from 'helper';
+import { feeEstimate, getAddressCosmosByChainId, getNetworkGasPrice, suggestChainCosmosByChainId } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
@@ -74,9 +74,9 @@ export const transferIBCKwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await suggestChainCosmosByChainInfo(toToken.chainId);
+  await suggestChainCosmosByChainId(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainInfo(fromToken.chainId);
+  await suggestChainCosmosByChainId(fromToken.chainId);
   const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
   const toAddress = await getAddressCosmosByChainId(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr1!');
@@ -124,9 +124,9 @@ export const convertTransferIBCErc20Kwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty!');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await suggestChainCosmosByChainInfo(toToken.chainId);
+  await suggestChainCosmosByChainId(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainInfo(fromToken.chainId);
+  await suggestChainCosmosByChainId(fromToken.chainId);
   const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
   const toAddress = await getAddressCosmosByChainId(toToken.chainId);
   if (!fromAddress || !toAddress) throw generateError('Please login keplr2!');
@@ -300,9 +300,9 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
-  await suggestChainCosmosByChainInfo(toToken.chainId);
+  await suggestChainCosmosByChainId(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainInfo(fromToken.chainId);
+  await suggestChainCosmosByChainId(fromToken.chainId);
   // check address
   const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
   const toAddress = await getAddressCosmosByChainId(toToken.chainId);
