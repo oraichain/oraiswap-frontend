@@ -252,7 +252,8 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
-        chainName: toNetworkChainId
+        chainName: toNetworkChainId,
+        from
       });
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {

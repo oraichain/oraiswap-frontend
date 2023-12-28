@@ -330,7 +330,8 @@ const SwapComponent: React.FC<{
       console.log({ error });
       handleErrorTransaction(error, {
         tokenName: originalToToken.name,
-        chainName: originalToToken.chainId
+        chainName: originalToToken.chainId,
+        from: originalFromToken
       });
     } finally {
       setSwapLoading(false);
