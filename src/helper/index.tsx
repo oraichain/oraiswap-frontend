@@ -298,19 +298,7 @@ export const getAddressCosmosByChainId = async (chainId) => {
   }
   return await getAddressBySnap(chainId);
 };
-export const suggestChainCosmosByChainId = async (chainId) => {
-  const keplr = await window.Keplr.getKeplr();
-  if (keplr) {
-    await window.Keplr.suggestChain(chainId);
-  }
-  // const chainInfo = chainInfos.find((chainInfo) => {
-  //   return chainInfo.chainId === network.chainId;
-  // });
 
-  // console.log('🚀 ~ file: index.tsx:304 ~ chainInfo ~ chainInfo:', chainInfo);
-  // await suggestChainBySnap(chainInfo);
-  return;
-};
 export const suggestChainBySnap = async (chainInfo) => {
   const rs = await window.ethereum.request({
     method: 'wallet_invokeSnap',
@@ -360,7 +348,7 @@ type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'Icon
   bech32Config: Bech32Config;
 };
 
-export const chainInfoWithoutIcon: ChainInfoWithoutIcons[] = (chainInfos as any).map((info) => {
+export const chainInfoWithoutIcon: ChainInfoWithoutIcons[] = ([...chainInfos] as any).map((info) => {
   if (info.Icon) delete info.Icon;
   if (info.IconLight) delete info.IconLight;
   const currenciesWithoutIcons = info.currencies.map((currency) => {
@@ -395,7 +383,6 @@ export const getListAddressCosmosByLeapSnap = async () => {
     if (!info) continue;
     try {
       const cosmosAddress = await getAddressBySnap(info.chainId);
-      console.log('🚀 ~ file: index.tsx:314 ~ getListAddressCosmosByLeapSnap ~ cosmosAddress:', cosmosAddress);
       listAddressCosmos[info.chainId] = cosmosAddress;
     } catch (error) {
       console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);

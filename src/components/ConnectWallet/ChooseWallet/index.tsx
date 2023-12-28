@@ -6,6 +6,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
+import { ReactComponent as MetamaskLeapIcon } from 'assets/images/leap-cosmos-logo.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as LedgerIcon } from 'assets/icons/ledger.svg';
@@ -50,8 +51,8 @@ const ChooseWalletModal: React.FC<{
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     {
-      name: 'Metamask Leap Snap',
-      icon: MetamaskIcon,
+      name: 'Leap Snap',
+      icon: MetamaskLeapIcon,
       isActive: isMetamask,
       walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
     },

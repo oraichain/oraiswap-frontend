@@ -32,6 +32,7 @@ import {
 } from 'helper';
 import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
+import LeapImage from 'assets/images/leap-cosmos-logo.svg';
 import OwalletImage from 'assets/images/owallet-logo.png';
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
@@ -39,6 +40,7 @@ import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
+import { leapWalletType } from 'helper/constants';
 
 const cx = cn.bind(styles);
 
@@ -96,11 +98,29 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const { handleResetBalance } = useResetBalance();
+  const checkWallet = (type: 'name' | 'icon' | 'walletType' = 'name') => {
+    if (isMobile() || walletTypeStore === 'owallet') {
+      if (type === 'icon') return OwalletImage;
+      if (type === 'walletType') return WALLET_TYPES.OWALLET;
+      return 'Owallet';
+    }
+    if (walletTypeStore === 'keplr') {
+      if (type === 'icon') return KeplrImage;
+      if (type === 'walletType') return WALLET_TYPES.KEPLR;
+      return 'Keplr';
+    }
+    if (walletTypeStore === leapWalletType) {
+      if (type === 'icon') return LeapImage;
+      if (type === 'walletType') return WALLET_TYPES.METAMASK_LEAP_SNAP;
+      return 'Metamask Leap Snap';
+    }
+  };
+
   const OwalletInfo = {
     id: 2,
-    name: isMobile() ? 'Owallet' : walletTypeStore === 'keplr' ? 'Keplr' : 'Owallet',
-    code: isMobile() ? WALLET_TYPES.OWALLET : walletTypeStore === 'keplr' ? WALLET_TYPES.KEPLR : WALLET_TYPES.OWALLET,
-    icon: isMobile() ? OwalletImage : walletTypeStore === 'keplr' ? KeplrImage : OwalletImage,
+    name: checkWallet(),
+    code: checkWallet('walletType'),
+    icon: checkWallet('icon'),
     totalUsd: 0,
     isOpen: false,
     isConnect: !isEmptyObject(cosmosAddress),
@@ -169,6 +189,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   }
 
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
+  console.log('🚀 ~ file: index.tsx:172 ~ walletInit:', walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
@@ -216,17 +237,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   useEffect(() => {
     if (!!oraiAddress) {
       (async () => {
-        const isKeplr = await window.Keplr.getKeplr();
-        const isSnap = await getSnap();
-        if (isKeplr) {
-          if (walletTypeStore === 'owallet') {
-            await connectDetectOwallet();
-          } else if (walletTypeStore === 'keplr') {
-            await connectDetectKeplr();
-          }
-        } else if (isSnap) {
+        if (walletTypeStore === 'owallet') {
+          await connectDetectOwallet();
+        } else if (walletTypeStore === 'keplr') {
+          await connectDetectKeplr();
+        } else if (walletTypeStore === leapWalletType) {
           await connectDetectLeapSnap();
-          return;
         }
       })();
     }
@@ -280,12 +296,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     try {
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
-      await window.Keplr.suggestChain(network.chainId);
+
       const oraiAddr = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
       const { listAddressCosmos } =
-        type === 'leapSnap' ? await getListAddressCosmosByLeapSnap() : await getListAddressCosmos(oraiAddr);
+        type === leapWalletType ? await getListAddressCosmosByLeapSnap() : await getListAddressCosmos(oraiAddr);
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -377,7 +393,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     if (!isSnap) {
       await connectSnap();
     } else {
-      await connectKeplr('leapSnap');
+      await connectKeplr(leapWalletType);
     }
   };
 
