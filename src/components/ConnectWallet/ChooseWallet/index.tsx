@@ -92,7 +92,6 @@ const ChooseWalletModal: React.FC<{
     } else if (connectStatus === CONNECT_STATUS.PROCESSING) {
       return <ConnectProcessing cancel={cancel} walletName={walletSelected.name} />;
     } else if (connectStatus === CONNECT_STATUS.DONE) {
-      console.log('🚀 ~ file: index.tsx:97 ~ content ~ address:', address);
       return <ConnectProgressDone cancel={cancel} address={address} />;
     } else {
       return <ConnectError cancel={cancel} handleTryAgain={() => tryAgain(walletSelected.walletType)} />;
