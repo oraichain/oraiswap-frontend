@@ -22,7 +22,7 @@ import {
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { feeEstimate, getAddressCosmosByChainId, getNetworkGasPrice, suggestChainCosmosByChainId } from 'helper';
+import { feeEstimate, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
@@ -74,12 +74,12 @@ export const transferIBCKwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await suggestChainCosmosByChainId(toToken.chainId);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainId(fromToken.chainId);
-  const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
-  const toAddress = await getAddressCosmosByChainId(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr1!');
+  await window.Keplr.suggestChain(fromToken.chainId);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
   var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
 
@@ -124,12 +124,12 @@ export const convertTransferIBCErc20Kwt = async (
   if (transferAmount === 0) throw generateError('Transfer amount is empty!');
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
-  await suggestChainCosmosByChainId(toToken.chainId);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainId(fromToken.chainId);
-  const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
-  const toAddress = await getAddressCosmosByChainId(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr2!');
+  await window.Keplr.suggestChain(fromToken.chainId);
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
   const nativeToken = kawaiiTokens.find(
     (token) =>
       token.bridgeTo &&
@@ -300,13 +300,13 @@ export const transferIbcCustom = async (
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
   if (transferAmount === 0) throw generateError('Transfer amount is empty');
-  await suggestChainCosmosByChainId(toToken.chainId);
+  await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
-  await suggestChainCosmosByChainId(fromToken.chainId);
+  await window.Keplr.suggestChain(fromToken.chainId);
   // check address
-  const fromAddress = await getAddressCosmosByChainId(fromToken.chainId);
-  const toAddress = await getAddressCosmosByChainId(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr3!');
+  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
+  const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
   if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
@@ -408,7 +408,7 @@ export const broadcastConvertTokenTx = async (
 ): Promise<ExecuteResult> => {
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress) throw generateError('Please login both metamask and Keplr2!');
+  if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
   let msg: ExecuteInstruction;
   if (type === 'nativeToCw20') {
     msg = generateConvertMsgs({

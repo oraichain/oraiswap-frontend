@@ -4,9 +4,8 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { network } from 'config/networks';
-import { suggestChainCosmosByChainId } from 'helper';
-import { getSnap, connectSnap } from '@leapwallet/cosmos-snap-provider';
 import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
 export type clientType = 'cosmwasm' | 'injective';
 
@@ -16,7 +15,8 @@ const collectWallet = async (chainId: string) => {
   if (keplr) {
     // use keplr instead
     return await keplr.getOfflineSignerAuto(chainId);
-  } else if (snapInstalled) {
+  }
+  if (snapInstalled) {
     return new CosmjsOfflineSigner(chainId);
   }
   if (!keplr && !snapInstalled) {
@@ -65,22 +65,22 @@ class CosmJs {
     memo?: string;
   }) {
     try {
-      // const keplr = await window.Keplr.getKeplr();
-      // if (!keplr) throw new Error('You need to install Keplr to execute the contract');
-      // if (await window.Keplr.getKeplr()) {
-      await suggestChainCosmosByChainId(network.chainId);
-      const result = await window.client.execute(
-        data.walletAddr,
-        data.address,
-        data.handleMsg,
-        'auto',
-        data.memo,
-        data.funds
-      );
-      return result;
-      // } else {
-      //   throw new Error('You need to install Keplr to execute the contract');
-      // }
+      const keplr = await window.Keplr.getKeplr();
+      const isEnableLeapSnap = await getSnap();
+      if (keplr || isEnableLeapSnap) {
+        await window.Keplr.suggestChain(network.chainId);
+        const result = await window.client.execute(
+          data.walletAddr,
+          data.address,
+          data.handleMsg,
+          'auto',
+          data.memo,
+          data.funds
+        );
+        return result;
+      } else {
+        throw new Error('You need to install Keplr to execute the contract');
+      }
     } catch (error) {
       console.log('error in executing contract: ' + error);
       throw error;
@@ -96,16 +96,18 @@ class CosmJs {
     memo?: string;
   }) {
     try {
-      // if (await window.Keplr.getKeplr()) {
-      await suggestChainCosmosByChainId(network.chainId);
-      const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
-      return {
-        logs: result?.logs,
-        transactionHash: result.transactionHash
-      };
-      // } else {
-      //   throw new Error('You need to install Keplr to execute the contract');
-      // }
+      const keplr = await window.Keplr.getKeplr();
+      const isEnableLeapSnap = await getSnap();
+      if (keplr || isEnableLeapSnap) {
+        await window.Keplr.suggestChain(network.chainId);
+        const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
+        return {
+          logs: result?.logs,
+          transactionHash: result.transactionHash
+        };
+      } else {
+        throw new Error('You need to install Keplr to execute the contract');
+      }
     } catch (error) {
       console.log('error in executing contract: ' + error);
       throw error;

@@ -25,6 +25,9 @@ import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { leapSnapId } from './constants';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { Bech32Config } from '@keplr-wallet/types';
+
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
@@ -223,7 +226,9 @@ export const isEmptyObject = (value: object) => {
 export const switchWalletCosmos = async (type: WalletType) => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
-  if (!(await window.Keplr.getKeplr())) {
+  const isKeplr = await window.Keplr.getKeplr();
+  const isLeapSnap = await getSnap();
+  if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
   const wallet = await collectWallet(network.chainId);
@@ -323,22 +328,63 @@ export const suggestChainBySnap = async (chainInfo) => {
   return rs;
 };
 export const getAddressBySnap = async (chainId) => {
-  const { bech32Address } = await window.ethereum.request({
+  const rs = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
       snapId: leapSnapId,
       request: {
-        method: 'getKey',
-        params: {
-          chainId: chainId
-        }
+        method: 'getSupportedChains'
       }
     }
   });
-  if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
-  return bech32Address;
+  if (rs?.[chainId]) {
+    const { bech32Address } = await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: leapSnapId,
+        request: {
+          method: 'getKey',
+          params: {
+            chainId: chainId
+          }
+        }
+      }
+    });
+    if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
+    return bech32Address;
+  }
 };
 
+type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
+  currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
+  bech32Config: Bech32Config;
+};
+
+export const chainInfoWithoutIcon: ChainInfoWithoutIcons[] = (chainInfos as any).map((info) => {
+  if (info.Icon) delete info.Icon;
+  if (info.IconLight) delete info.IconLight;
+  const currenciesWithoutIcons = info.currencies.map((currency) => {
+    const { Icon, IconLight, ...currencyWithoutIcons } = currency;
+    return currencyWithoutIcons;
+  });
+
+  if (info?.stakeCurrency?.Icon) delete info?.stakeCurrency?.Icon;
+  if (info?.stakeCurrency?.IconLight) delete info?.stakeCurrency?.IconLight;
+
+  const feeCurrenciesWithoutIcons =
+    info?.feeCurrencies &&
+    info.feeCurrencies.map((feeCurrency) => {
+      if (feeCurrency?.Icon) delete feeCurrency?.Icon;
+      if (feeCurrency?.IconLight) delete feeCurrency?.IconLight;
+      return feeCurrency;
+    });
+
+  return {
+    ...info,
+    currencies: currenciesWithoutIcons,
+    feeCurrencies: feeCurrenciesWithoutIcons
+  };
+});
 export const getListAddressCosmosByLeapSnap = async () => {
   let listAddressCosmos = {};
   const cosmosNetworksFilter = cosmosNetworks.filter(

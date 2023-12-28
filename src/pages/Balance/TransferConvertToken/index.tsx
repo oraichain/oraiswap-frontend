@@ -21,7 +21,7 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
-import { feeEstimate, filterChainBridge, getAddressCosmosByChainId, networks, subNumber } from 'helper';
+import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
@@ -109,7 +109,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await getAddressCosmosByChainId(network.chainId);
+        address = await window.Keplr.getKeplrAddr(network.chainId);
       }
     } catch (error) {
       console.log({

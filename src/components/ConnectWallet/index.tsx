@@ -14,7 +14,7 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
+import { CosmjsOfflineSigner, connectSnap, getSnap } from '@leapwallet/cosmos-snap-provider';
 import {
   cosmosNetworks,
   tronNetworks,
@@ -28,8 +28,7 @@ import {
   getListAddressCosmos,
   switchWalletTron,
   getListAddressCosmosByLeapSnap,
-  getAddressBySnap,
-  suggestChainCosmosByChainId
+  getAddressBySnap
 } from 'helper';
 import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
@@ -40,7 +39,7 @@ import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
-import { leapSnapId } from 'helper/constants';
+
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 const cx = cn.bind(styles);
@@ -220,14 +219,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     if (!!oraiAddress) {
       (async () => {
         const isKeplr = await window.Keplr.getKeplr();
+        const isSnap = await getSnap();
         if (isKeplr) {
           if (walletTypeStore === 'owallet') {
             await connectDetectOwallet();
-          } else {
+          } else if (walletTypeStore === 'keplr') {
             await connectDetectKeplr();
           }
-        } else {
-          await connectMetamaskLeapSnap();
+        } else if (isSnap) {
+          await connectDetectLeapSnap();
           return;
         }
       })();
@@ -284,10 +284,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await switchWalletCosmos(type);
       await window.Keplr.suggestChain(network.chainId);
       const oraiAddr = await window.Keplr.getKeplrAddr();
-      console.log('🚀 ~ file: index.tsx:277 ~ connectKeplr ~ oraiAddr:', oraiAddr);
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
+      const { listAddressCosmos } =
+        type === 'leapSnap' ? await getListAddressCosmosByLeapSnap() : await getListAddressCosmos(oraiAddr);
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -296,7 +296,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const disconnectMetamaskLeapSnap = async () => {
     try {
-      // handleResetBalance(['keplr']);
+      handleResetBalance(['keplr']);
       setCosmosAddress({});
       setOraiAddress(undefined);
     } catch (ex) {
@@ -374,58 +374,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectDetectKeplr = async () => {
     await connectKeplr('keplr');
   };
-  const connectMetamaskLeapSnap = async () => {
-    try {
-      const result = await window.ethereum.request({
-        method: 'wallet_requestSnaps',
-        params: {
-          [leapSnapId]: {}
-        }
-      });
-      if (result?.[leapSnapId].enabled) {
-        // alert('ok');
-        console.log('ok');
-        const wallet = new CosmjsOfflineSigner(network.chainId);
-        console.log('🚀 ~ file: index.tsx:388 ~ connectMetamaskLeapSnap ~ wallet:', wallet);
-        const accounts = await wallet.getAccounts();
-        console.log('🚀 ~ file: index.tsx:389 ~ connectMetamaskLeapSnap ~ accounts:', accounts);
-        window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-          gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-        });
-        // console.log('🚀 ~ file: index.tsx:395 ~ connectMetamaskLeapSnap ~ network:', network);
-        // const chainInfo = chainInfos.find((chainInfo) => {
-        //   return chainInfo.chainId === network.chainId;
-        // });
-        // chainInfos.map(()=>{
-
-        // })
-        // console.log('🚀 ~ file: index.tsx:310 ~ chainInfoNotIcon ~ chainInfoNotIcon:', chainInfoNotIcon);
-        // console.log('🚀 ~ file: index.tsx:399 ~ chainInfo ~ chainInfo:', chainInfo);
-        // // console.log('🚀 ~ file: index.tsx:397 ~ connectMetamaskLeapSnap ~ chainInfo:', chainInfo);
-        // // await window.ethereum.request({
-        // //   method: 'wallet_invokeSnap',
-        // //   params: {
-        // //     snapId: leapSnapId,
-        // //     request: {
-        // //       method: 'suggestChain',
-        // //       params: {
-        // //         chainInfo: chainInfoWithIcon
-        // //       }
-        // //     }
-        // //   }
-        // // });
-        const bech32Address = await getAddressBySnap(network.chainId);
-        console.log('🚀 ~ file: index.tsx:379 ~ connectMetamaskLeapSnap ~ bech32Address:', bech32Address);
-        loadTokenAmounts({ oraiAddress: bech32Address });
-        setOraiAddress(bech32Address);
-        const { listAddressCosmos } = await getListAddressCosmosByLeapSnap();
-        setCosmosAddress(listAddressCosmos);
-      }
-      console.log(result);
-    } catch (error) {
-      console.log(error);
+  const connectDetectLeapSnap = async () => {
+    const isSnap = await getSnap();
+    if (!isSnap) {
+      await connectSnap();
+    } else {
+      await connectKeplr('leapSnap');
     }
   };
+
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     setWalletTypeActive(walletType);
     switch (walletType) {
@@ -442,7 +399,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         if (method === METHOD_WALLET_TYPES.START) {
           await startMetamaskLeapSnap();
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          await handleConnectWallet(connectMetamaskLeapSnap);
+          await handleConnectWallet(connectDetectLeapSnap);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
           await disconnectMetamaskLeapSnap();
         }
