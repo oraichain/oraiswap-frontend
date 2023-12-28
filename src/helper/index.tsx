@@ -34,7 +34,6 @@ export interface Tokens {
 export interface InfoError {
   tokenName: string,
   chainName: string,
-  from?: TokenItemType
 }
 
 export type DecimalLike = string | number | bigint | BigDecimal;
