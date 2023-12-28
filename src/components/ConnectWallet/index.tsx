@@ -276,7 +276,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
 
-  const connectKeplr = async (type: WalletType | 'leapSnap') => {
+  const connectKeplr = async (type: any) => {
     try {
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
