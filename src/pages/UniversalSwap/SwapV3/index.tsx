@@ -328,7 +328,10 @@ const SwapComponent: React.FC<{
       }
     } catch (error) {
       console.log({ error });
-      handleErrorTransaction(error);
+      handleErrorTransaction(error, {
+        tokenName: originalToToken.name,
+        chainName: originalToToken.chainId,
+      });
     } finally {
       setSwapLoading(false);
     }

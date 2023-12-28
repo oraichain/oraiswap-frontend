@@ -9,14 +9,15 @@ import {
   WalletType,
   ChainIdEnum,
   BigDecimal,
+  COSMOS_CHAIN_ID_COMMON,
   evmChains,
-  COSMOS_CHAIN_ID_COMMON
+  cosmosChains
 } from '@oraichain/oraidex-common';
 
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos } from 'config/chainInfos';
+import { chainIcons, chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -28,6 +29,11 @@ export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
   bridgeTo?: Array<NetworkChainId>;
+}
+
+export interface InfoError {
+  tokenName: string,
+  chainName: string,
 }
 
 export type DecimalLike = string | number | bigint | BigDecimal;
@@ -146,20 +152,33 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
   return cosmosAddress;
 };
 
-export const handleErrorMsg = (error: any) => {
+const transferMsgError = (message: string, info?: InfoError) => {
+  if (message.includes("invalid hash")) return `Transation was not included to block`
+  if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
+  if (message.includes("account sequence mismatch")) return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`
+
+  const network = info?.chainName ? [...evmChains, ...cosmosChains].find(evm => evm.chainId === info.chainName)?.chainName : "";
+  if (message.includes("Insufficient funds to redeem voucher")) return `Insufficient ${info?.tokenName ?? ""} liquidity on ${network} Bridge`
+  if (message.includes("user rejected transaction")) return `${network} tokens bridging rejected`;
+  if (message.includes("Cannot read property")) return `There has been a mistake on the development side causing this issue: ${message}. Please notify the team to fix this bug asap!`
+  if (message.includes("is smaller than") && message.includes("insufficient funds")) return `Your wallet does not have enough ${info?.tokenName ?? ""}  funds to execute this transaction.`
+  return String(message)
+}
+
+export const handleErrorMsg = (error: any, info?: InfoError) => {
   let finalError = '';
   if (typeof error === 'string' || error instanceof String) {
     finalError = error as string;
   } else {
-    if (error?.ex?.message) finalError = String(error.ex.message);
-    else if (error?.message) finalError = String(error.message);
+    if (error?.ex?.message) finalError = transferMsgError(error.ex.message, info);
+    else if (error?.message) finalError = transferMsgError(error.message, info);
     else finalError = JSON.stringify(error);
   }
   return finalError
 }
 
-export const handleErrorTransaction = (error: any) => {
-  const finalError = handleErrorMsg(error)
+export const handleErrorTransaction = (error: any, info?: InfoError) => {
+  const finalError = handleErrorMsg(error, info)
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
