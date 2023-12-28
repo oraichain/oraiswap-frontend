@@ -40,8 +40,6 @@ import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
 
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
 const cx = cn.bind(styles);
 
 interface ModalProps {}
