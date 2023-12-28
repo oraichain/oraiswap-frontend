@@ -162,7 +162,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
     const { totalSupply, totalLiquidity } = pool;
     const myStakedLP = pool.liquidityAddr
       ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))
-        ?.bond_amount || '0'
+          ?.bond_amount || '0'
       : 0;
 
     const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
@@ -173,9 +173,9 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
 
   const totalEarned = myStakes
     ? myStakes.reduce((total, current) => {
-      total += current.earnAmountInUsdt;
-      return total;
-    }, 0)
+        total += current.earnAmountInUsdt;
+        return total;
+      }, 0)
     : 0;
 
   return {
@@ -438,7 +438,7 @@ export const useGetPoolsWithClaimableAmount = ({ poolTableData, totalRewardInfoD
 
 /**
  * fetch reward asset for each pool, with unique key is staking token (also called liquidity address)
- * @param lpAddresses: list lp address of all pools 
+ * @param lpAddresses: list lp address of all pools
  * @returns list reward. format: [{
  *   "reward": [
  *       "AIRI"
@@ -451,13 +451,12 @@ export const useFetchCacheRewardAssetForAllPools = (lpAddresses: string[]) => {
   const fetchReward = async () => {
     let rewardAll: RewardPoolType[] = await Promise.all(
       lpAddresses.map(async (lpAddress) => {
-        const rewardPerSecInfo = await fetchRewardPerSecInfo(lpAddress)
+        const rewardPerSecInfo = await fetchRewardPerSecInfo(lpAddress);
         const reward = rewardPerSecInfo.assets.reduce((acc, rewardAsset) => {
-          const rewardDenom = parseAssetOnlyDenom(rewardAsset.info)
-          const token =
-            'token' in rewardAsset.info ? cw20TokenMap[rewardDenom] : tokenMap[rewardDenom];
+          const rewardDenom = parseAssetOnlyDenom(rewardAsset.info);
+          const token = 'token' in rewardAsset.info ? cw20TokenMap[rewardDenom] : tokenMap[rewardDenom];
           // TODO: hardcode token reward xOCH
-          const xOCH_TOKEN_NAME = 'xOCH'
+          const xOCH_TOKEN_NAME = 'xOCH';
           return [...acc, token ? token.name : xOCH_TOKEN_NAME];
         }, []);
         return {
@@ -470,10 +469,12 @@ export const useFetchCacheRewardAssetForAllPools = (lpAddresses: string[]) => {
   };
 
   useEffect(() => {
-    if (!cachedReward || !cachedReward.length || cachedReward.length < lpAddresses?.length) {
+    const isLpAddressesLength = lpAddresses?.length;
+    const isNotCacheReward = !cachedReward || !cachedReward.length || cachedReward.length < isLpAddressesLength;
+    if (isNotCacheReward && isLpAddressesLength > 0) {
       fetchReward();
     }
-  }, [lpAddresses]);
+  }, [lpAddresses, cachedReward]);
 
   return [cachedReward];
 };

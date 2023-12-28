@@ -37,6 +37,7 @@ export interface InfoError {
 
 export type DecimalLike = string | number | bigint | BigDecimal;
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
 export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
@@ -92,8 +93,9 @@ export const getNetworkGasPrice = async (): Promise<number> => {
 //hardcode fee
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
-
-  return new BigDecimal(MULTIPLIER)
+  const MULTIPLIER_ESTIMATE_OSMOSIS = 3.8;
+  const MULTIPLIER_FIX = tokenInfo.chainId === "osmosis-1" ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER
+  return new BigDecimal(MULTIPLIER_FIX)
     .mul(tokenInfo.feeCurrencies[0].gasPriceStep.high)
     .mul(gasDefault)
     .div(10 ** tokenInfo.decimals)
@@ -217,16 +219,12 @@ export const isUnlockMetamask = async (): Promise<boolean> => {
 };
 
 export const isEmptyObject = (value: object) => {
-  if (!!value === false) return true;
+  if (!value) return true;
   if (typeof value === 'object') {
     const entries = Object.entries(value);
-    if (entries?.length === 0) {
-      return true;
-    }
+    if (entries?.length === 0) return true;
     for (const key in value) {
-      if (value[key] !== undefined) {
-        return false;
-      }
+      if (value[key] !== undefined) return false;
     }
     return true;
   }
@@ -260,7 +258,7 @@ export const switchWalletTron = async () => {
       });
       // throw error when not connected
       if (code !== 200) {
-        throw Error(message);
+        throw new Error(message);
       }
     }
     tronAddress = window.tronWeb.defaultAddress.base58;
@@ -271,6 +269,7 @@ export const switchWalletTron = async () => {
 };
 
 export const getAddress = (addr, prefix: string) => {
+  if (!addr) return '';
   const { data } = fromBech32(addr);
   return toBech32(prefix, data);
 };
@@ -288,7 +287,6 @@ export const genAddressCosmos = (info, address60, address118) => {
 export const getListAddressCosmos = async (oraiAddr) => {
   let listAddressCosmos = {};
   const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
-  if (!kwtAddress) return { listAddressCosmos };
   for (const info of cosmosNetworks) {
     if (!info) continue;
     const { cosmosAddress } = genAddressCosmos(info, kwtAddress, oraiAddr);
