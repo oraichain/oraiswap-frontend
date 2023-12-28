@@ -6,17 +6,26 @@ import { cosmosTokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
+import { getSnap, connectSnap } from '@leapwallet/cosmos-snap-provider';
+import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
 
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await window.Keplr.getKeplr();
-    if (!keplr) {
+    const snapInstalled = await getSnap();
+    if (keplr) {
+      // use keplr instead
+      return await keplr.getOfflineSignerAuto(chainId);
+    } else if (snapInstalled) {
+      console.log('🚀 ~ file: keplr.ts:24 ~ Keplr ~ createCosmosSigner ~ chainId:', chainId);
+      return new CosmjsOfflineSigner(chainId);
+    }
+
+    if (!keplr && !snapInstalled) {
       throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
     }
-    // use keplr instead
-    return await keplr.getOfflineSignerAuto(chainId);
   }
 
   typeWallet: WalletType;

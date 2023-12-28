@@ -2926,8 +2926,10 @@
     react-dom "^18.2.0"
     react-use "^17.4.0"
 
-"@oraichain/oraidex-common@file:../oraidex-sdk/packages/oraidex-common":
-  version "1.0.50"
+"@oraichain/oraidex-common@^1.0.45":
+  version "1.0.51"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.51.tgz#e68f0795ca3cc0a88f758bc95a8bc4ae36849663"
+  integrity sha512-fw0wzpz62g/fwgGbOkWxGzpozzCHNXD0A8GwKovZby5HSjVz328SeU6SZs93R2kZGRy9pvO1BfTIOTZdveMDxQ==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
@@ -2948,11 +2950,12 @@
   resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.26.tgz"
   integrity sha512-Uai30rSSn7h46lBLFuVbW96ErXAWRxfvEP+CNm/TXyGIw8VRtTaebQAqldsbxzYwBVEYbwDwZMHRGQWrsJBkJg==
 
-"@oraichain/oraidex-universal-swap@file:../oraidex-sdk/packages/universal-swap":
+"@oraichain/oraidex-universal-swap@1.0.40":
   version "1.0.40"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.40.tgz#7669a957a1be9786b7a786b9a9b9d30e16de1941"
+  integrity sha512-M9QGY0CJTl5qjTf2CMGtan5Rkh+1y/1se7hvoDMhmZor5pxQ6ub5IgWRP1HkU8g0Bg+dmLsqhx22wzh+zL/eHQ==
   dependencies:
-    "@leapwallet/cosmos-snap-provider" "0.1.25"
-    "@oraichain/oraidex-common" "file:../oraidex-sdk/packages/oraidex-common"
+    "@oraichain/oraidex-common" "^1.0.45"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
