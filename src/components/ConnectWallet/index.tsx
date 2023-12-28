@@ -98,7 +98,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const { handleResetBalance } = useResetBalance();
-  const checkWallet = (type: 'name' | 'icon' | 'walletType' = 'name') => {
+  const checkWallet = (type: 'name' | 'icon' | 'walletType' = 'name'): any => {
     if (isMobile() || walletTypeStore === 'owallet') {
       if (type === 'icon') return OwalletImage;
       if (type === 'walletType') return WALLET_TYPES.OWALLET;
@@ -296,7 +296,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     try {
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
-
+      // await window.Keplr.suggestChain(network.chainId);
       const oraiAddr = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
