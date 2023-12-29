@@ -86,10 +86,12 @@ export default class Keplr extends CosmosWallet {
     } else if (isLeapSnap) {
       const chainInfo: ChainInfoLeap = chainInfoWithoutIcon().find((chainInfo) => chainInfo.chainId === chainId);
 
-      // do nothing without chainInfo
-      if (!chainInfo) return;
+      // // do nothing without chainInfo
+      if (!chainInfo || chainInfo.bip44.coinType !== 118) return;
       const rs = await getChainSupported();
-      if (rs?.[chainId]) {
+      console.log('🚀 ~ file: keplr.ts:92 ~ Keplr ~ suggestChain ~ rs:', rs);
+
+      if (!rs?.[chainId]) {
         await suggestChainLeap(chainInfo, { force: true });
       }
     }

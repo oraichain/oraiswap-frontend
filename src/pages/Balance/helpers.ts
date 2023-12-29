@@ -78,7 +78,7 @@ export const transferIBCKwt = async (
   await window.Keplr.suggestChain(fromToken.chainId);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr2!');
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
 
   var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
 
@@ -128,7 +128,7 @@ export const convertTransferIBCErc20Kwt = async (
   await window.Keplr.suggestChain(fromToken.chainId);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr1!');
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
   const nativeToken = kawaiiTokens.find(
     (token) =>
       token.bridgeTo &&
@@ -305,7 +305,7 @@ export const transferIbcCustom = async (
   // check address
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr3!');
+  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
   if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
 
   let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
