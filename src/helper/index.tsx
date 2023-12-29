@@ -36,8 +36,8 @@ export interface Tokens {
 }
 
 export interface InfoError {
-  tokenName: string,
-  chainName: string,
+  tokenName: string;
+  chainName: string;
 }
 
 export type DecimalLike = string | number | bigint | BigDecimal;
@@ -159,17 +159,23 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 };
 
 const transferMsgError = (message: string, info?: InfoError) => {
-  if (message.includes("invalid hash")) return `Transation was not included to block`
+  if (message.includes('invalid hash')) return `Transation was not included to block`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
-  if (message.includes("account sequence mismatch")) return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`
+  if (message.includes('account sequence mismatch'))
+    return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`;
 
-  const network = info?.chainName ? [...evmChains, ...cosmosChains].find(evm => evm.chainId === info.chainName)?.chainName : "";
-  if (message.includes("Insufficient funds to redeem voucher")) return `Insufficient ${info?.tokenName ?? ""} liquidity on ${network} Bridge`
-  if (message.includes("user rejected transaction")) return `${network} tokens bridging rejected`;
-  if (message.includes("Cannot read property")) return `There has been a mistake on the development side causing this issue: ${message}. Please notify the team to fix this bug asap!`
-  if (message.includes("is smaller than") && message.includes("insufficient funds")) return `Your wallet does not have enough ${info?.tokenName ?? ""}  funds to execute this transaction.`
-  return String(message)
-}
+  const network = info?.chainName
+    ? [...evmChains, ...cosmosChains].find((evm) => evm.chainId === info.chainName)?.chainName
+    : '';
+  if (message.includes('Insufficient funds to redeem voucher'))
+    return `Insufficient ${info?.tokenName ?? ''} liquidity on ${network} Bridge`;
+  if (message.includes('user rejected transaction')) return `${network} tokens bridging rejected`;
+  if (message.includes('Cannot read property'))
+    return `There has been a mistake on the development side causing this issue: ${message}. Please notify the team to fix this bug asap!`;
+  if (message.includes('is smaller than') && message.includes('insufficient funds'))
+    return `Your wallet does not have enough ${info?.tokenName ?? ''}  funds to execute this transaction.`;
+  return String(message);
+};
 
 export const handleErrorMsg = (error: any, info?: InfoError) => {
   let finalError = '';
@@ -184,7 +190,7 @@ export const handleErrorMsg = (error: any, info?: InfoError) => {
 };
 
 export const handleErrorTransaction = (error: any, info?: InfoError) => {
-  const finalError = handleErrorMsg(error, info)
+  const finalError = handleErrorMsg(error, info);
   displayToast(TToastType.TX_FAILED, {
     message: finalError
   });
@@ -322,6 +328,7 @@ export const getChainSupported = async () => {
   });
 };
 export const getAddressBySnap = async (chainId) => {
+  await window.Keplr.suggestChain(chainId);
   const rs = await getChainSupported();
   if (rs?.[chainId]) {
     const { bech32Address } = await window.ethereum.request({

@@ -54,7 +54,14 @@ export default class Keplr extends CosmosWallet {
       feeCurrencies: FeeCurrency[];
     }>
   > {
-    return this.keplr.getChainInfosWithoutEndpoints();
+    const isSnap = await getSnap();
+    const isKeplr = await this.getKeplr();
+    if (isKeplr) return this.keplr.getChainInfosWithoutEndpoints();
+
+    if (isSnap) {
+      const chainSp = await getChainSupported();
+      return Object.values(chainSp);
+    }
   }
 
   async suggestChain(chainId: string) {
@@ -90,9 +97,10 @@ export default class Keplr extends CosmosWallet {
       if (!chainInfo || chainInfo.bip44.coinType !== 118) return;
       const rs = await getChainSupported();
       console.log('🚀 ~ file: keplr.ts:92 ~ Keplr ~ suggestChain ~ rs:', rs);
-
-      if (!rs?.[chainId]) {
+      if (!rs?.[chainId] || !rs?.[chainId]?.networkType) {
         await suggestChainLeap(chainInfo, { force: true });
+        const rs = await getChainSupported();
+        console.log('🚀 ~ file: keplr.ts:95 ~ Keplr ~ suggestChain ~ rs:', rs);
       }
     }
   }

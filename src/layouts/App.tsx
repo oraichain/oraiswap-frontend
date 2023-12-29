@@ -36,7 +36,7 @@ const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-
+  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
@@ -109,16 +109,17 @@ const App = () => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
+  }, []);
+  useEffect(() => {
     (async () => {
-      const typeWallet = getStorageKey();
-      if (typeWallet !== leapWalletType || isMobile()) {
+      if (walletTypeStore !== leapWalletType || isMobile()) {
         window.addEventListener('keplr_keystorechange', keplrHandler);
       }
     })();
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
-  }, []);
+  }, [walletTypeStore]);
 
   const keplrGasPriceCheck = async () => {
     try {
@@ -190,8 +191,8 @@ const App = () => {
           }
         }
       }
-      console.log('🚀 ~ file: App.tsx:180 ~ keplrHandler ~ getStorageKey():', typeWallet);
-      switchWallet(typeWallet as WalletType);
+
+      switchWallet(walletTypeStore as WalletType);
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({
