@@ -37,7 +37,7 @@ describe('operator overloading', () => {
     const totalStaked = '1289123.45678';
     const decimals = 6;
     const display = toDisplay(BigInt(Math.trunc(totalStaked)), decimals);
-    const displayBigDecimal = new BigDecimal(totalStaked) / 10 ** decimals;
-    console.log(display, displayBigDecimal.toNumber());
+    // const displayBigDecimal = new BigDecimal(totalStaked) / 10 ** decimals;
+    // console.log(display, displayBigDecimal.toNumber());
   });
 });

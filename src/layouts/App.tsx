@@ -29,12 +29,14 @@ import { ethers } from 'ethers';
 import MenuV3 from './MenuV3';
 import Instruct from './Instruct';
 import './index.scss';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { leapWalletType } from 'helper/constants';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-
+  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
@@ -107,15 +109,21 @@ const App = () => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
-    window.addEventListener('keplr_keystorechange', keplrHandler);
+  }, []);
+  useEffect(() => {
+    (async () => {
+      if (walletTypeStore !== leapWalletType || isMobile()) {
+        window.addEventListener('keplr_keystorechange', keplrHandler);
+      }
+    })();
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
-  }, []);
+  }, [walletTypeStore]);
 
   const keplrGasPriceCheck = async () => {
     try {
-      const gasPrice = await getNetworkGasPrice();
+      const gasPrice = await getNetworkGasPrice(network.chainId);
       if (!gasPrice) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
@@ -135,14 +143,22 @@ const App = () => {
       if (!keplr) {
         return displayInstallWallet();
       }
-      const vs = window?.keplr?.version;
-      const isCheckKeplr = !!vs && keplrCheck('keplr');
-      if (checkVersionWallet()) {
-        setStorageKey('typeWallet', 'owallet');
-      } else if (isCheckKeplr) {
-        setStorageKey('typeWallet', 'keplr' as WalletType);
+      const typeWallet = getStorageKey();
+      const isSnap = await getSnap();
+      if (!typeWallet) {
+        const vs = window?.keplr?.version;
+        const isCheckKeplr = !!vs && keplrCheck('keplr');
+        if (checkVersionWallet()) {
+          setStorageKey('typeWallet', 'owallet');
+        } else if (isCheckKeplr) {
+          setStorageKey('typeWallet', 'keplr' as WalletType);
+        } else if (isSnap) {
+          setStorageKey('typeWallet', leapWalletType);
+        }
       }
-      let metamaskAddr = undefined, tronAddr = undefined;
+
+      let metamaskAddr = undefined,
+        tronAddr = undefined;
       // TODO: owallet get address tron
       if (!isMobile()) {
         if (window.tronWeb && window.tronLink) {
@@ -176,7 +192,8 @@ const App = () => {
         }
       }
 
-      switchWallet(getStorageKey() as WalletType);
+      switchWallet(walletTypeStore as WalletType);
+
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({
         oraiAddress,

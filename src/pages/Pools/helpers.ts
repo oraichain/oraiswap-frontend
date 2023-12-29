@@ -91,9 +91,11 @@ export const numberWithCommas = (
   locales: Intl.LocalesArgument = undefined,
   options: Intl.NumberFormatOptions = {}
 ) => {
+  if (isNegative(x)) return '0';
   return x.toLocaleString(locales, options);
 };
 
+export const isNegative = (number) => number <= 0;
 /**
  * Estmate LP share when provide liquidity pool
  * @param baseAmount input base amount

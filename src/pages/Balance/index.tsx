@@ -4,7 +4,6 @@ import {
   NetworkChainId,
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
-  evmChains,
   findToTokenOnOraiBridge,
   toAmount,
   tronToEthAddress
@@ -21,7 +20,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks } from 'helper';
+import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks, EVM_CHAIN_ID } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -53,9 +52,7 @@ import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
-const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
-
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -253,7 +250,10 @@ const Balance: React.FC<BalanceProps> = () => {
 
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
-      handleErrorTransaction(ex);
+      handleErrorTransaction(ex, {
+        tokenName: from.name,
+        chainName: toNetworkChainId,
+      });
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
         const errorMsg = handleErrorMsg(ex);

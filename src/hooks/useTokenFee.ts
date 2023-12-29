@@ -1,7 +1,15 @@
-import { NetworkChainId, TokenItemType, network, oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
+import {
+  NetworkChainId,
+  TokenItemType,
+  network,
+  oraichainTokens,
+  toDisplay,
+  toAmount
+} from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
+import { EVM_CHAIN_ID } from 'helper';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFeeConfig } from 'reducer/token';
@@ -47,7 +55,7 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     () => {
       return handleSimulateSwap({
         originalFromInfo: oraiToken,
-        originalToInfo: originalFromToken,
+        originalToInfo: originalToToken,
         originalAmount: relayerFeeInOrai,
         routerClient
       });
@@ -65,17 +73,23 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   // get relayer fee in ORAI
   useEffect(() => {
     if (!originalFromToken || !originalToToken || !feeConfig) return;
+    const isFromChainIdEvm = EVM_CHAIN_ID.includes(originalFromToken.chainId);
+    const isToChainIdEvm = EVM_CHAIN_ID.includes(originalToToken.chainId);
+    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) return;
     const { relayer_fees: relayerFees } = feeConfig;
     const relayerFeeInOrai = relayerFees.reduce((acc, cur) => {
-      if (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix) {
-        return +cur.amount + acc;
-      }
+      const isFromToPrefix = cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix;
+      if (isFromToPrefix) return +cur.amount + acc;
       return acc;
     }, 0);
     setRelayerFeeInOrai(toDisplay(relayerFeeInOrai.toString()));
   }, [feeConfig, originalFromToken, originalToToken]);
 
-  return relayerFee;
+  return {
+    relayerFee,
+    relayerFeeInOraiToDisplay: relayerFeeInOrai,
+    relayerFeeInOraiToAmount: toAmount(relayerFeeInOrai)
+  };
 };
 
 export const useGetFeeConfig = () => {
