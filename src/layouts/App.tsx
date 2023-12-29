@@ -29,6 +29,8 @@ import { ethers } from 'ethers';
 import MenuV3 from './MenuV3';
 import Instruct from './Instruct';
 import './index.scss';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { leapWalletType } from 'helper/constants';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -107,7 +109,12 @@ const App = () => {
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
     keplrHandler();
-    window.addEventListener('keplr_keystorechange', keplrHandler);
+    (async () => {
+      const typeWallet = getStorageKey();
+      if (typeWallet !== leapWalletType || isMobile()) {
+        window.addEventListener('keplr_keystorechange', keplrHandler);
+      }
+    })();
     return () => {
       window.removeEventListener('keplr_keystorechange', keplrHandler);
     };
@@ -135,7 +142,8 @@ const App = () => {
       if (!keplr) {
         return displayInstallWallet();
       }
-      const typeWallet = getStorageKey('typeWallet');
+      const typeWallet = getStorageKey();
+      const isSnap = await getSnap();
       if (!typeWallet) {
         const vs = window?.keplr?.version;
         const isCheckKeplr = !!vs && keplrCheck('keplr');
@@ -143,6 +151,8 @@ const App = () => {
           setStorageKey('typeWallet', 'owallet');
         } else if (isCheckKeplr) {
           setStorageKey('typeWallet', 'keplr' as WalletType);
+        } else if (isSnap) {
+          setStorageKey('typeWallet', leapWalletType);
         }
       }
 
@@ -180,8 +190,8 @@ const App = () => {
           }
         }
       }
-      console.log('🚀 ~ file: App.tsx:180 ~ keplrHandler ~ getStorageKey():', getStorageKey());
-      switchWallet(getStorageKey() as WalletType);
+      console.log('🚀 ~ file: App.tsx:180 ~ keplrHandler ~ getStorageKey():', typeWallet);
+      switchWallet(typeWallet as WalletType);
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({
