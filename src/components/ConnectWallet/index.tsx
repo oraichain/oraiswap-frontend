@@ -110,9 +110,9 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return 'Keplr';
     }
     if (walletTypeStore === leapWalletType) {
-      if (type === 'icon') return LeapImage;
+      if (type === 'icon') return MetamaskImage;
       if (type === 'walletType') return WALLET_TYPES.METAMASK_LEAP_SNAP;
-      return 'Metamask Leap Snap';
+      return 'Metamask (Leap Snap)';
     }
   };
 
