@@ -304,6 +304,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
+      throw Error(error);
     }
   };
 
