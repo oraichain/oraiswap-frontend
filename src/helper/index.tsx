@@ -88,12 +88,12 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
 
 export const getNetworkGasPrice = async (chainId): Promise<number> => {
   try {
-    const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints();
+    const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints(chainId);
     const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == chainId);
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
