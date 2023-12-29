@@ -145,9 +145,9 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
 };
 
 export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
-  const cosmosAddress = getAddressCosmosByChainId(chainId);
+  const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
   if (!cosmosAddress) {
-    throw new Error('Please login both metamask and keplr1!');
+    throw new Error('Please login both metamask and keplr!');
   }
   return cosmosAddress;
 };
@@ -291,32 +291,8 @@ export const getListAddressCosmos = async (oraiAddr) => {
   }
   return { listAddressCosmos };
 };
-export const getAddressCosmosByChainId = async (chainId) => {
-  const keplr = await window.Keplr.getKeplr();
-  if (keplr) {
-    return await window.Keplr.getKeplrAddr(chainId);
-  }
-  return await getAddressBySnap(chainId);
-};
-
-export const suggestChainBySnap = async (chainInfo) => {
-  const rs = await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-      snapId: leapSnapId,
-      request: {
-        method: 'suggestChain',
-        params: {
-          chainInfo
-        }
-      }
-    }
-  });
-  console.log('🚀 ~ file: index.tsx:309 ~ suggestChainBySnap ~ rs:', rs);
-  return rs;
-};
-export const getAddressBySnap = async (chainId) => {
-  const rs = await window.ethereum.request({
+export const getChainSupported = async () => {
+  return await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
       snapId: leapSnapId,
@@ -325,6 +301,9 @@ export const getAddressBySnap = async (chainId) => {
       }
     }
   });
+};
+export const getAddressBySnap = async (chainId) => {
+  const rs = await getChainSupported();
   if (rs?.[chainId]) {
     const { bech32Address } = await window.ethereum.request({
       method: 'wallet_invokeSnap',
@@ -347,32 +326,46 @@ type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'Icon
   currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
   bech32Config: Bech32Config;
 };
+const checkErrorObj = (info) => {
+  if (info?.Icon && info?.IconLight) {
+    const { Icon, IconLight, ...data } = info;
+    return data;
+  } else if (info?.Icon && !info?.IconLight) {
+    const { Icon, ...data } = info;
+    return data;
+  } else if (!info?.Icon && info?.IconLight) {
+    const { IconLight, ...data } = info;
+    return data;
+  }
+  return info;
+};
+export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
+  let chainInfoData = [...chainInfos];
+  return (chainInfoData as any).map((info) => {
+    const infoWithoutIcon = checkErrorObj(info);
 
-export const chainInfoWithoutIcon: ChainInfoWithoutIcons[] = ([...chainInfos] as any).map((info) => {
-  if (info.Icon) delete info.Icon;
-  if (info.IconLight) delete info.IconLight;
-  const currenciesWithoutIcons = info.currencies.map((currency) => {
-    const { Icon, IconLight, ...currencyWithoutIcons } = currency;
-    return currencyWithoutIcons;
-  });
-
-  if (info?.stakeCurrency?.Icon) delete info?.stakeCurrency?.Icon;
-  if (info?.stakeCurrency?.IconLight) delete info?.stakeCurrency?.IconLight;
-
-  const feeCurrenciesWithoutIcons =
-    info?.feeCurrencies &&
-    info.feeCurrencies.map((feeCurrency) => {
-      if (feeCurrency?.Icon) delete feeCurrency?.Icon;
-      if (feeCurrency?.IconLight) delete feeCurrency?.IconLight;
-      return feeCurrency;
+    const currenciesWithoutIcons = info.currencies.map((currency) => {
+      const currencyWithoutIcons = checkErrorObj(currency);
+      return currencyWithoutIcons;
     });
 
-  return {
-    ...info,
-    currencies: currenciesWithoutIcons,
-    feeCurrencies: feeCurrenciesWithoutIcons
-  };
-});
+    const stakeCurrencyyWithoutIcons = checkErrorObj(info.stakeCurrency);
+    const feeCurrenciesWithoutIcons =
+      info?.feeCurrencies &&
+      info.feeCurrencies.map((feeCurrency) => {
+        const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
+
+        return feeCurrencyyWithoutIcon;
+      });
+
+    return {
+      ...infoWithoutIcon,
+      currencies: currenciesWithoutIcons,
+      feeCurrencies: feeCurrenciesWithoutIcons,
+      stakeCurrency: stakeCurrencyyWithoutIcons
+    };
+  });
+};
 export const getListAddressCosmosByLeapSnap = async () => {
   let listAddressCosmos = {};
   const cosmosNetworksFilter = cosmosNetworks.filter(

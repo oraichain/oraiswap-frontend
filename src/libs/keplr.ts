@@ -10,7 +10,7 @@ import { getSnap, connectSnap, suggestChain as suggestChainLeap } from '@leapwal
 import { CosmjsOfflineSigner, ChainInfo as ChainInfoLeap } from '@leapwallet/cosmos-snap-provider';
 
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
-import { chainInfoWithoutIcon, getAddressBySnap } from 'helper';
+import { chainInfoWithoutIcon, getAddressBySnap, getChainSupported } from 'helper';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
@@ -84,11 +84,14 @@ export default class Keplr extends CosmosWallet {
         });
       }
     } else if (isLeapSnap) {
-      const chainInfo: ChainInfoLeap = chainInfoWithoutIcon.find((chainInfo) => chainInfo.chainId === chainId);
+      const chainInfo: ChainInfoLeap = chainInfoWithoutIcon().find((chainInfo) => chainInfo.chainId === chainId);
 
       // do nothing without chainInfo
       if (!chainInfo) return;
-      await suggestChainLeap(chainInfo, { force: true });
+      const rs = await getChainSupported();
+      if (rs?.[chainId]) {
+        await suggestChainLeap(chainInfo, { force: true });
+      }
     }
   }
 

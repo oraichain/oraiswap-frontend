@@ -189,7 +189,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   }
 
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
-  console.log('🚀 ~ file: index.tsx:172 ~ walletInit:', walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
   const connect = useInactiveConnect();
