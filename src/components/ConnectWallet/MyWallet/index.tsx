@@ -133,11 +133,15 @@ const MyWallets: React.FC<{
                     return (
                       <div key={'network' + index} className={cx('network_container')}>
                         <div>
-                          {theme === 'light'
-                            ? network.IconLight
-                              ? network.IconLight && <network.IconLight className={cx('icon')} />
-                              : network.Icon && <network.Icon className={cx('icon')} />
-                            : network.Icon && <network.Icon className={cx('icon')} />}
+                          {theme === 'light' ? (
+                            network.IconLight ? (
+                              <network.IconLight className={cx('icon')} />
+                            ) : (
+                              <network.Icon className={cx('icon')} />
+                            )
+                          ) : (
+                            <network.Icon className={cx('icon')} />
+                          )}
                         </div>
                         <div className={cx('info')}>
                           <div className={cx('name')}>{network.chainName}</div>
