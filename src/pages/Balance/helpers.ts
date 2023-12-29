@@ -53,13 +53,11 @@ export const transferIBC = async (data: {
     timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
     timeoutHeight: undefined
   };
-  const result = await transferIBCMultiple(
-    fromAddress,
-    fromToken.chainId as CosmosChainId,
-    fromToken.rpc,
-    fromToken.denom,
-    [transferMsg]
-  );
+  let feeDenom = fromToken.denom;
+  if (fromToken.denom.includes('ibc')) feeDenom = fromToken.prefix;
+  const result = await transferIBCMultiple(fromAddress, fromToken.chainId as CosmosChainId, fromToken.rpc, feeDenom, [
+    transferMsg
+  ]);
   return result;
 };
 
