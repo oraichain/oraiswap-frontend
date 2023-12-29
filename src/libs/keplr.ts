@@ -54,10 +54,15 @@ export default class Keplr extends CosmosWallet {
       feeCurrencies: FeeCurrency[];
     }>
   > {
+    // TODO: need check
     const isSnap = await getSnap();
     const isKeplr = await this.getKeplr();
+
+    if (isSnap) {
+      const rs = await getChainSupported();
+      return Object.values(rs);
+    }
     if (isKeplr) return this.keplr.getChainInfosWithoutEndpoints();
-    if (isSnap) return await getChainSupported();
   }
 
   async suggestChain(chainId: string) {

@@ -122,7 +122,7 @@ const App = () => {
 
   const keplrGasPriceCheck = async () => {
     try {
-      const gasPrice = await getNetworkGasPrice();
+      const gasPrice = await getNetworkGasPrice(network.chainId);
       if (!gasPrice) {
         displayToast(TToastType.TX_INFO, {
           message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
