@@ -392,6 +392,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     const isSnap = await getSnap();
     if (!isSnap) {
       await connectSnap();
+      throw Error('Please install Metamask Leap Snap!');
     } else {
       await connectKeplr(leapWalletType);
     }
