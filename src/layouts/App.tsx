@@ -139,10 +139,10 @@ const App = () => {
     try {
       console.log('Key store in Keplr is changed. You may need to refetch the account info.');
       // automatically update. If user is also using Oraichain wallet => dont update
-      const keplr = await window.Keplr.getKeplr();
-      if (!keplr) {
-        return displayInstallWallet();
-      }
+      // const keplr = await window.Keplr.getKeplr();
+      // if (!keplr) {
+      //   return displayInstallWallet();
+      // }
       const typeWallet = getStorageKey();
       const isSnap = await getSnap();
       if (!typeWallet) {
