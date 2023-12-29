@@ -59,7 +59,7 @@ const ChooseWalletModal: React.FC<{
     { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
     { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
-    { name: 'Ledger', icon: LedgerIcon, walletType: WALLET_TYPES.LEDGER },
+
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
     { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
     { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
