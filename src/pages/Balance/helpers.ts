@@ -58,8 +58,7 @@ export const transferIBC = async (data: {
     fromToken.chainId as CosmosChainId,
     fromToken.rpc,
     fromToken.denom,
-    [transferMsg],
-    fromToken.prefix
+    [transferMsg]
   );
   return result;
 };
@@ -163,8 +162,7 @@ export const transferIBCMultiple = async (
   fromChainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
-  messages: MsgTransfer[],
-  prefix?: string
+  messages: MsgTransfer[]
 ): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -173,7 +171,7 @@ export const transferIBCMultiple = async (
   const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
   const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${feeDenom}`)
   });
   // hardcode fix bug osmosis
   let fee: 'auto' | number = 'auto';

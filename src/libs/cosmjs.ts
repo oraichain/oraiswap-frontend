@@ -45,7 +45,7 @@ const getCosmWasmClient = async (
 export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
   switch (clientType) {
     case 'cosmwasm':
-      const { client } = await getCosmWasmClient({ signer, rpc });
+      const { client } = await getCosmWasmClient({ signer, rpc }, options);
       return client;
     case 'injective':
       const tmClient = await Tendermint37Client.connect(rpc);
