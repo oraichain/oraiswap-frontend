@@ -154,7 +154,7 @@ const MyWallets: React.FC<{
                             <>
                               <div
                                 className={cx('copy')}
-                                onClick={e => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
+                                onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
                               >
                                 {copiedAddressCoordinates.networkId === network.chainId &&
                                 copiedAddressCoordinates.walletId === wallet.id ? (

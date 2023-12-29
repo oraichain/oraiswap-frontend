@@ -16,8 +16,7 @@ import {
   calculateTimeoutTimestamp,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount,
-  MULTIPLIER_ESTIMATE_OSMOSIS
+  toAmount
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -54,14 +53,11 @@ export const transferIBC = async (data: {
     timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
     timeoutHeight: undefined
   };
-  const result = await transferIBCMultiple(
-    fromAddress,
-    fromToken.chainId as CosmosChainId,
-    fromToken.rpc,
-    fromToken.denom,
-    [transferMsg],
-    fromToken.prefix
-  );
+  let feeDenom = fromToken.denom;
+  if (fromToken.denom.includes('ibc')) feeDenom = fromToken.prefix;
+  const result = await transferIBCMultiple(fromAddress, fromToken.chainId as CosmosChainId, fromToken.rpc, feeDenom, [
+    transferMsg
+  ]);
   return result;
 };
 
@@ -164,8 +160,7 @@ export const transferIBCMultiple = async (
   fromChainId: CosmosChainId,
   rpc: string,
   feeDenom: string,
-  messages: MsgTransfer[],
-  prefix?: string
+  messages: MsgTransfer[]
 ): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
     typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
@@ -174,11 +169,11 @@ export const transferIBCMultiple = async (
   const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
   const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${prefix || feeDenom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromChainId)}${feeDenom}`)
   });
   // hardcode fix bug osmosis
   let fee: 'auto' | number = 'auto';
-  if (fromChainId === 'osmosis-1') fee = MULTIPLIER_ESTIMATE_OSMOSIS;
+  if (fromChainId === 'osmosis-1') fee = 3;
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, fee);
   return result as DeliverTxResponse;
 };
@@ -225,7 +220,7 @@ export const transferTokenErc20Cw20Map = async ({
   const { client } = await getCosmWasmClient(
     { rpc: fromToken.rpc, chainId: fromToken.chainId },
     {
-      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice()}${network.denom}`)
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromToken.chainId)}${network.denom}`)
     }
   );
   const result = await client.signAndBroadcast(
