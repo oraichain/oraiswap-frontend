@@ -25,6 +25,10 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
+import { leapSnapId } from './constants';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { Bech32Config } from '@keplr-wallet/types';
+
 export interface Tokens {
   denom?: string;
   chainId?: NetworkChainId;
@@ -43,6 +47,8 @@ export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiB
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
+
+// export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -87,7 +93,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -95,7 +101,7 @@ export const getNetworkGasPrice = async (): Promise<number> => {
 export const feeEstimate = (tokenInfo: TokenItemType, gasDefault: number) => {
   if (!tokenInfo) return 0;
   const MULTIPLIER_ESTIMATE_OSMOSIS = 3.8;
-  const MULTIPLIER_FIX = tokenInfo.chainId === "osmosis-1" ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER
+  const MULTIPLIER_FIX = tokenInfo.chainId === 'osmosis-1' ? MULTIPLIER_ESTIMATE_OSMOSIS : MULTIPLIER;
   return new BigDecimal(MULTIPLIER_FIX)
     .mul(tokenInfo.feeCurrencies[0].gasPriceStep.high)
     .mul(gasDefault)
@@ -174,8 +180,8 @@ export const handleErrorMsg = (error: any, info?: InfoError) => {
     else if (error?.message) finalError = transferMsgError(error.message, info);
     else finalError = JSON.stringify(error);
   }
-  return finalError
-}
+  return finalError;
+};
 
 export const handleErrorTransaction = (error: any, info?: InfoError) => {
   const finalError = handleErrorMsg(error, info)
@@ -239,7 +245,9 @@ export const isEmptyObject = (value: object) => {
 export const switchWalletCosmos = async (type: WalletType) => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
-  if (!(await window.Keplr.getKeplr())) {
+  const isKeplr = await window.Keplr.getKeplr();
+  const isLeapSnap = await getSnap();
+  if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
   const wallet = await collectWallet(network.chainId);
@@ -299,6 +307,98 @@ export const getListAddressCosmos = async (oraiAddr) => {
       ...listAddressCosmos,
       [info.chainId]: cosmosAddress
     };
+  }
+  return { listAddressCosmos };
+};
+export const getChainSupported = async () => {
+  return await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId: leapSnapId,
+      request: {
+        method: 'getSupportedChains'
+      }
+    }
+  });
+};
+export const getAddressBySnap = async (chainId) => {
+  const rs = await getChainSupported();
+  if (rs?.[chainId]) {
+    const { bech32Address } = await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId: leapSnapId,
+        request: {
+          method: 'getKey',
+          params: {
+            chainId: chainId
+          }
+        }
+      }
+    });
+    if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
+    return bech32Address;
+  }
+};
+
+type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
+  currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
+  bech32Config: Bech32Config;
+};
+const checkErrorObj = (info) => {
+  if (info?.Icon && info?.IconLight) {
+    const { Icon, IconLight, ...data } = info;
+    return data;
+  } else if (info?.Icon && !info?.IconLight) {
+    const { Icon, ...data } = info;
+    return data;
+  } else if (!info?.Icon && info?.IconLight) {
+    const { IconLight, ...data } = info;
+    return data;
+  }
+  return info;
+};
+export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
+  let chainInfoData = [...chainInfos];
+  return (chainInfoData as any).map((info) => {
+    const infoWithoutIcon = checkErrorObj(info);
+
+    const currenciesWithoutIcons = info.currencies.map((currency) => {
+      const currencyWithoutIcons = checkErrorObj(currency);
+      return currencyWithoutIcons;
+    });
+
+    const stakeCurrencyyWithoutIcons = checkErrorObj(info.stakeCurrency);
+    const feeCurrenciesWithoutIcons =
+      info?.feeCurrencies &&
+      info.feeCurrencies.map((feeCurrency) => {
+        const feeCurrencyyWithoutIcon = checkErrorObj(feeCurrency);
+
+        return feeCurrencyyWithoutIcon;
+      });
+
+    return {
+      ...infoWithoutIcon,
+      currencies: currenciesWithoutIcons,
+      feeCurrencies: feeCurrenciesWithoutIcons,
+      stakeCurrency: stakeCurrencyyWithoutIcons
+    };
+  });
+};
+export const getListAddressCosmosByLeapSnap = async () => {
+  let listAddressCosmos = {};
+  const cosmosNetworksFilter = cosmosNetworks.filter(
+    (item, index) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
+  );
+
+  for (const info of cosmosNetworksFilter) {
+    if (!info) continue;
+    try {
+      const cosmosAddress = await getAddressBySnap(info.chainId);
+      listAddressCosmos[info.chainId] = cosmosAddress;
+    } catch (error) {
+      console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);
+    }
   }
   return { listAddressCosmos };
 };

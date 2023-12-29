@@ -16,8 +16,7 @@ import {
   calculateTimeoutTimestamp,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount,
-  MULTIPLIER_ESTIMATE_OSMOSIS
+  toAmount
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -178,7 +177,7 @@ export const transferIBCMultiple = async (
   });
   // hardcode fix bug osmosis
   let fee: 'auto' | number = 'auto';
-  if (fromChainId === 'osmosis-1') fee = MULTIPLIER_ESTIMATE_OSMOSIS;
+  if (fromChainId === 'osmosis-1') fee = 3;
   const result = await client.signAndBroadcast(fromAddress, encodedMessages, fee);
   return result as DeliverTxResponse;
 };

@@ -135,14 +135,19 @@ const App = () => {
       if (!keplr) {
         return displayInstallWallet();
       }
-      const vs = window?.keplr?.version;
-      const isCheckKeplr = !!vs && keplrCheck('keplr');
-      if (checkVersionWallet()) {
-        setStorageKey('typeWallet', 'owallet');
-      } else if (isCheckKeplr) {
-        setStorageKey('typeWallet', 'keplr' as WalletType);
+      const typeWallet = getStorageKey('typeWallet');
+      if (!typeWallet) {
+        const vs = window?.keplr?.version;
+        const isCheckKeplr = !!vs && keplrCheck('keplr');
+        if (checkVersionWallet()) {
+          setStorageKey('typeWallet', 'owallet');
+        } else if (isCheckKeplr) {
+          setStorageKey('typeWallet', 'keplr' as WalletType);
+        }
       }
-      let metamaskAddr = undefined, tronAddr = undefined;
+
+      let metamaskAddr = undefined,
+        tronAddr = undefined;
       // TODO: owallet get address tron
       if (!isMobile()) {
         if (window.tronWeb && window.tronLink) {
@@ -175,8 +180,9 @@ const App = () => {
           }
         }
       }
-
+      console.log('🚀 ~ file: App.tsx:180 ~ keplrHandler ~ getStorageKey():', getStorageKey());
       switchWallet(getStorageKey() as WalletType);
+
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({
         oraiAddress,
