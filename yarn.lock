@@ -2878,7 +2878,7 @@
     "@cosmjs/crypto" "^0.31.0"
     "@cosmjs/encoding" "^0.31.0"
     "@kiruse/serde" "^0.8.0-rc.6"
-    "@oraichain/cosmwasm-vm-js" "^0.2.77"
+    "@oraichain/cosmwasm-vm-js" "^0.2.79"
     eventemitter3 "^5.0.0"
     protobufjs "^7.2.3"
     ts-results "^3.3.0"
@@ -2940,7 +2940,7 @@
   resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz"
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
-"@oraichain/oraidex-contracts-sdk@^1.0.24":
+"@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26":
   version "1.0.28"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
   integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
