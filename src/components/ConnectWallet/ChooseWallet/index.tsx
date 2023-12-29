@@ -26,7 +26,7 @@ import { keplrCheck, owalletCheck } from 'helper';
 const cx = cn.bind(styles);
 
 export interface WalletItem {
-  name: string;
+  name: any;
   icon: FunctionComponent;
   walletType: WALLET_TYPES;
   isActive?: boolean;
@@ -51,8 +51,12 @@ const ChooseWalletModal: React.FC<{
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     {
-      name: 'Leap Snap',
-      icon: MetamaskLeapIcon,
+      name: (
+        <span>
+          Metamask <br /> (Leap Snap)
+        </span>
+      ),
+      icon: MetamaskIcon,
       isActive: isMetamask,
       walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
     },
