@@ -51,11 +51,7 @@ const ChooseWalletModal: React.FC<{
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     {
-      name: (
-        <span>
-          Metamask <br /> (Leap Snap)
-        </span>
-      ),
+      name: 'Metamask (Leap Snap)',
       icon: MetamaskIcon,
       isActive: isMetamask,
       walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
@@ -88,7 +84,11 @@ const ChooseWalletModal: React.FC<{
                 <div className={cx('wallet_icon')}>
                   <wallet.icon />
                 </div>
-                <div className={cx('wallet_name')}>{wallet.name}</div>
+                {WALLET_TYPES.METAMASK_LEAP_SNAP === wallet.walletType ? (
+                  <div className={cx('wallet_name')}><span>Metamask <br /> (Leap Snap)</span></div>
+                ) : (
+                  <div className={cx('wallet_name')}>{wallet.name}</div>
+                )}
               </div>
             );
           })}
@@ -107,7 +107,7 @@ const ChooseWalletModal: React.FC<{
     <Modal
       isOpen={true}
       close={close}
-      open={() => {}}
+      open={() => { }}
       isCloseBtn={false}
       className={cx('choose_wallet_modal_container', theme)}
     >
