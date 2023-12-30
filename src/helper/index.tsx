@@ -131,7 +131,8 @@ export const addNumber = (number1: number, number2: number) => {
 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
-  if (!keplr) {
+  const isSnap = await getSnap();
+  if (!keplr && !isSnap) {
     return displayInstallWallet();
   }
 };
