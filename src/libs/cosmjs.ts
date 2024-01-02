@@ -4,17 +4,24 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { network } from 'config/networks';
-
+import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
-  if (!keplr) {
+  const snapInstalled = await getSnap();
+  if (keplr) {
+    // use keplr instead
+    return await keplr.getOfflineSignerAuto(chainId);
+  }
+  if (snapInstalled) {
+    return new CosmjsOfflineSigner(chainId);
+  }
+  if (!keplr && !snapInstalled) {
     throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
   }
-  // use keplr instead
-  return await keplr.getOfflineSignerAuto(chainId);
 };
 
 const getCosmWasmClient = async (
@@ -24,8 +31,9 @@ const getCosmWasmClient = async (
   const { chainId, rpc, signer } = config;
   const wallet = signer ?? (await collectWallet(chainId));
   const defaultAddress = (await wallet.getAccounts())[0];
-  const client = await cosmwasm.SigningCosmWasmClient.connectWithSigner(
-    rpc ?? (network.rpc as string),
+  const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
+  const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
+    tmClient,
     wallet,
     options ?? {
       gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
@@ -37,7 +45,7 @@ const getCosmWasmClient = async (
 export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
   switch (clientType) {
     case 'cosmwasm':
-      const { client } = await getCosmWasmClient({ signer, rpc });
+      const { client } = await getCosmWasmClient({ signer, rpc }, options);
       return client;
     case 'injective':
       const tmClient = await Tendermint37Client.connect(rpc);
@@ -57,7 +65,9 @@ class CosmJs {
     memo?: string;
   }) {
     try {
-      if (await window.Keplr.getKeplr()) {
+      const keplr = await window.Keplr.getKeplr();
+      const isEnableLeapSnap = await getSnap();
+      if (keplr || isEnableLeapSnap) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.execute(
           data.walletAddr,
@@ -86,7 +96,9 @@ class CosmJs {
     memo?: string;
   }) {
     try {
-      if (await window.Keplr.getKeplr()) {
+      const keplr = await window.Keplr.getKeplr();
+      const isEnableLeapSnap = await getSnap();
+      if (keplr || isEnableLeapSnap) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {

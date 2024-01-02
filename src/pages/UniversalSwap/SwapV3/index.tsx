@@ -3,7 +3,6 @@ import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
-  ORAI,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -32,14 +31,13 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
 import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import useTokenFee from 'hooks/useTokenFee';
+import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
 import { calcMaxAmount } from 'pages/Balance/helpers';
@@ -61,11 +59,11 @@ import {
 import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
-import { useRelayerFee } from './hooks/useRelayerFee';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);
-const RELAYER_DECIMAL = 6; // TODO: hardcode decimal relayerFee
+// TODO: hardcode decimal relayerFee
+const RELAYER_DECIMAL = 6;
 
 const SwapComponent: React.FC<{
   fromTokenDenom: string;
@@ -92,6 +90,7 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+  useGetFeeConfig();
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
@@ -220,17 +219,10 @@ const SwapComponent: React.FC<{
   });
   const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
 
-  const relayerFee = useRelayerFee();
-  const relayerFeeToken = relayerFee.reduce((acc, cur) => {
-    if (
-      originalFromToken.chainId !== originalToToken.chainId &&
-      (cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix)
-    ) {
-      return +cur.amount + acc;
-    }
-    return acc;
-  }, 0);
-
+  const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
+    originalFromToken,
+    originalToToken
+  );
   useEffect(() => {
     const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
@@ -242,17 +234,24 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
+  const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
+  const bridgeTokenFee =
+    simulateDisplayAmount && (fromTokenFee || toTokenFee)
+      ? (simulateDisplayAmount * fromTokenFee + simulateDisplayAmount * toTokenFee) / 100
+      : 0;
 
   const minimumReceiveDisplay = isSimulateDataDisplay
-    ? new BigDecimal(simulateData.displayAmount - (simulateData.displayAmount / 100) * userSlippage).toNumber()
+    ? new BigDecimal(
+      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+    ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -275,7 +274,7 @@ const SwapComponent: React.FC<{
       const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
-      const relayerFee = relayerFeeToken && {
+      const relayerFeeUniversal = relayerFeeToken && {
         relayerAmount: relayerFeeToken.toString(),
         relayerDecimals: RELAYER_DECIMAL
       };
@@ -291,7 +290,7 @@ const SwapComponent: React.FC<{
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-          relayerFee
+          relayerFee: relayerFeeUniversal
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
@@ -329,7 +328,10 @@ const SwapComponent: React.FC<{
       }
     } catch (error) {
       console.log({ error });
-      handleErrorTransaction(error);
+      handleErrorTransaction(error, {
+        tokenName: originalToToken.name,
+        chainName: originalToToken.chainId,
+      });
     } finally {
       setSwapLoading(false);
     }
@@ -374,19 +376,6 @@ const SwapComponent: React.FC<{
                 setCoe={setCoe}
                 usdPrice={usdPriceShow}
               />
-              {isSelectFrom && (
-                <SelectTokenModalV2
-                  close={() => setIsSelectFrom(false)}
-                  prices={prices}
-                  items={filteredFromTokens}
-                  amounts={amounts}
-                  setToken={(denom) => {
-                    setSwapTokens([denom, toTokenDenom]);
-                  }}
-                  setSearchTokenName={setSearchTokenName}
-                  searchTokenName={searchTokenName}
-                />
-              )}
               {/* !fromToken && !toTokenFee mean that this is internal swap operation */}
               {!fromTokenFee && !toTokenFee && isWarningSlippage && (
                 <div className={cx('impact-warning')}>
@@ -455,24 +444,10 @@ const SwapComponent: React.FC<{
                 tokenFee={toTokenFee}
                 usdPrice={usdPriceShow}
               />
-              {isSelectTo && (
-                <SelectTokenModalV2
-                  close={() => setIsSelectTo(false)}
-                  prices={prices}
-                  items={filteredToTokens}
-                  amounts={amounts}
-                  setToken={(denom) => {
-                    setSwapTokens([fromTokenDenom, denom]);
-                  }}
-                  setSearchTokenName={setSearchTokenName}
-                  searchTokenName={searchTokenName}
-                />
-              )}
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? (averageRatio.displayAmount / INIT_AMOUNT).toFixed(6) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -506,22 +481,20 @@ const SwapComponent: React.FC<{
           })()}
 
           <div className={cx('detail')}>
-            {
-              <div className={cx('row')}>
-                <div className={cx('title')}>
-                  <span> Expected Output</span>
-                </div>
-                <div className={cx('value')}>
-                  ≈ {expectOutputDisplay} {originalToToken.name}
-                </div>
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> Expected Output</span>
               </div>
-            }
+              <div className={cx('value')}>
+                ≈ {expectOutputDisplay} {originalToToken.name}
+              </div>
+            </div>
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span>Minimum Received after slippage ( {userSlippage}% )</span>
               </div>
               <div className={cx('value')}>
-                {Number(numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 }))}{' '}
+                {numberWithCommas(minimumReceiveDisplay, undefined, { minimumFractionDigits: 6 })}{' '}
                 {originalToToken.name}
               </div>
             </div>
@@ -539,15 +512,7 @@ const SwapComponent: React.FC<{
                   <span>Relayer Fee</span>
                 </div>
                 <div className={cx('value')}>
-                  <TokenBalance
-                    balance={{
-                      amount: relayerFeeToken.toString(),
-                      // decimals: relayerFeeInfo[relayerFeeToken.prefix],
-                      decimals: RELAYER_DECIMAL,
-                      denom: ORAI.toUpperCase() // TODO: later on we may change this to dynamic relay fee denom
-                    }}
-                    decimalScale={truncDecimals}
-                  />
+                  ≈ {relayerFee} {originalToToken.name}
                 </div>
               </div>
             )}
@@ -562,6 +527,36 @@ const SwapComponent: React.FC<{
           </div>
         </div>
       </LoadingBox>
+
+      {isSelectTo && (
+        <SelectTokenModalV2
+          close={() => setIsSelectTo(false)}
+          prices={prices}
+          items={filteredToTokens}
+          amounts={amounts}
+          setToken={(denom) => {
+            setSwapTokens([fromTokenDenom, denom]);
+          }}
+          setSearchTokenName={setSearchTokenName}
+          searchTokenName={searchTokenName}
+          title="Receive Token List"
+        />
+      )}
+
+      {isSelectFrom && (
+        <SelectTokenModalV2
+          close={() => setIsSelectFrom(false)}
+          prices={prices}
+          items={filteredFromTokens}
+          amounts={amounts}
+          setToken={(denom) => {
+            setSwapTokens([denom, toTokenDenom]);
+          }}
+          setSearchTokenName={setSearchTokenName}
+          searchTokenName={searchTokenName}
+          title="Pay Token List"
+        />
+      )}
     </div>
   );
 };

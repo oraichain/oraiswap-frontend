@@ -24,7 +24,7 @@ export interface IBitcoin {
   getKey(chainId: string): Promise<Key>;
 }
 
-export default class Bitcoin extends BitcoinWallet {
+export default class Bitcoin {
   //   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
   //     const keplr = await window.Keplr.getKeplr();
   //     if (!keplr) {
@@ -34,9 +34,9 @@ export default class Bitcoin extends BitcoinWallet {
   //     return await keplr.getOfflineSignerAuto(chainId);
   //   }
 
-  //   typeWallet: WalletType;
+  // typeWallet: WalletType;
   constructor() {
-    super();
+    // super();
     // this.typeWallet = type;
   }
 

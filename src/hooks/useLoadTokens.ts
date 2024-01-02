@@ -109,13 +109,14 @@ async function loadTokens(
 }
 
 async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddress: string) {
-  if (!kwtAddress || !oraiAddress) return;
+  if (!kwtAddress && !oraiAddress) return;
   await handleCheckWallet();
   const cosmosInfos = chainInfos.filter(
     (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
   );
   for (const chainInfo of cosmosInfos) {
     const { cosmosAddress } = genAddressCosmos(chainInfo, kwtAddress, oraiAddress);
+    if (!cosmosAddress) continue;
     loadNativeBalance(dispatch, cosmosAddress, chainInfo);
   }
 }
