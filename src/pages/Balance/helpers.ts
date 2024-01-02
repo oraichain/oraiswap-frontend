@@ -54,7 +54,8 @@ export const transferIBC = async (data: {
     timeoutHeight: undefined
   };
   let feeDenom = fromToken.denom;
-  if (fromToken.denom.includes('ibc')) feeDenom = fromToken.prefix;
+  // TODO: check native token ibc
+  if (fromToken.denom.includes('ibc/')) feeDenom = fromToken.prefix;
   const result = await transferIBCMultiple(fromAddress, fromToken.chainId as CosmosChainId, fromToken.rpc, feeDenom, [
     transferMsg
   ]);
