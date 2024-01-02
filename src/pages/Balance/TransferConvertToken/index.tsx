@@ -143,6 +143,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount, toNetworkChainId);
         return;
       }
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ toNetworkChainId:', toNetworkChainId);
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ convertAmount:', convertAmount);
       await onClickTransfer(convertAmount, toNetworkChainId);
       return;
     } catch (error) {

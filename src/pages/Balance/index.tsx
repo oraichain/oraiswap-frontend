@@ -20,7 +20,14 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks, EVM_CHAIN_ID } from 'helper';
+import {
+  getTransactionUrl,
+  handleErrorMsg,
+  handleCheckWallet,
+  handleErrorTransaction,
+  networks,
+  EVM_CHAIN_ID
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -52,7 +59,7 @@ import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -122,6 +129,8 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
       const toToken = findDefaultToToken(token);
+      console.log('🚀 ~ file: index.tsx:132 ~ findDefaultToToken(token):', findDefaultToToken(token));
+      console.log('🚀 ~ file: index.tsx:132 ~ token:', token);
       setTokenBridge([token, toToken]);
     },
     [otherChainTokens, oraichainTokens, from, to]
@@ -158,6 +167,8 @@ const Balance: React.FC<BalanceProps> = () => {
     toNetworkChainId?: NetworkChainId
   ) => {
     await handleCheckWallet();
+    console.log('🚀 ~ file: index.tsx:163 ~ to:', to);
+    console.log('🚀 ~ file: index.tsx:163 ~ from:', from);
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
@@ -252,7 +263,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
-        chainName: toNetworkChainId,
+        chainName: toNetworkChainId
       });
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {

@@ -381,7 +381,7 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: KwtIcon
     },
     {
-      coinDenom: 'oBTC',
+      coinDenom: 'BTC',
       coinGeckoId: 'bitcoin',
       coinMinimalDenom: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
       type: 'cw20',
@@ -509,7 +509,12 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         Icon: OraiIcon,
         coinGeckoId: 'bitcoin',
-        coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+        coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+        gasPriceStep: {
+          low: 0,
+          average: 0,
+          high: 0
+        }
       }
     ],
     get feeCurrencies() {
