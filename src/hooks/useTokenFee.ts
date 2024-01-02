@@ -82,6 +82,11 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
       if (isFromToPrefix) return +cur.amount + acc;
       return acc;
     }, 0);
+    if (!relayerFeeInOrai) {
+      setRelayerFeeAmount(0);
+      setRelayerFeeInOrai(0);
+      return;
+    }
     setRelayerFeeInOrai(toDisplay(relayerFeeInOrai.toString()));
   }, [feeConfig, originalFromToken, originalToToken]);
 
