@@ -2854,10 +2854,10 @@
     protobufjs "^6.10.2"
     secp256k1 "^4.0.2"
 
-"@oraichain/cosmwasm-vm-js@^0.2.77":
-  version "0.2.77"
-  resolved "https://registry.npmjs.org/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.77.tgz"
-  integrity sha512-jMZYOORGayJFOEx0DeZZk4sbWdV2zP+Iv+xVCZlnzX3bBXOCU3BGkysI/YWT+LWvM0B7bpZK1HCF6fYK7MI2Hw==
+"@oraichain/cosmwasm-vm-js@^0.2.79":
+  version "0.2.79"
+  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.79.tgz#a622447112afa0fc0ed2248f368f96d18f595199"
+  integrity sha512-GlXOg9qRRlxk+1IZKtj1w5t6DIRBOFl9+IH1/ofyTKCQaca2/yOAP1N1uzMlXxQsMBOvVKNNVfd/lQuUzjJ2gQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/crypto" "^0.31.0"
@@ -2944,6 +2944,11 @@
   version "1.0.28"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
   integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
+
+"@oraichain/oraidex-listing-contracts-sdk@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-listing-contracts-sdk/-/oraidex-listing-contracts-sdk-1.0.2.tgz#14c15f152f0a4d473371625fcaebe2b9d32f4939"
+  integrity sha512-G/dCfOJBz50Q8YV7aAlJC/dAxZvY6NGkeqHNju/K6GZTl5Lvt7vMn/JhGvqN7c8e7Y+smLnMmALsoTryPJVW1g==
 
 "@oraichain/oraidex-universal-swap@^1.0.41":
   version "1.0.41"
