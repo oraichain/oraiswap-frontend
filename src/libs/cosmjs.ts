@@ -3,7 +3,7 @@ import * as cosmwasm from '@cosmjs/cosmwasm-stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Coin, GasPrice } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
-// import { Stargate } from '@injectivelabs/sdk-ts';
+import { Stargate } from '@injectivelabs/sdk-ts';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { network } from 'config/networks';
 import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
@@ -48,9 +48,8 @@ export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clie
       const { client } = await getCosmWasmClient({ signer, rpc }, options);
       return client;
     case 'injective':
-      // const tmClient = await Tendermint37Client.connect(rpc);
-      return;
-    // return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
+      const tmClient = await Tendermint37Client.connect(rpc);
+      return Stargate.InjectiveSigningStargateClient.createWithSigner(tmClient as any, signer, options);
   }
 };
 
