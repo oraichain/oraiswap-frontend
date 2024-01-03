@@ -22,7 +22,7 @@ export class Keplr implements Wallet {
   async connect() {
     await this.suggestChain();
     await window.keplr.enable(config.chainId);
-    localStorage.setItem('nomic/wallet', 'keplr');
+    // localStorage.setItem('nomic/wallet', 'keplr');
     const key = await window.keplr.getKey(config.chainId);
     this.address = key.bech32Address;
     this.name = key.name;
@@ -57,91 +57,94 @@ export class Keplr implements Wallet {
   }
 
   async suggestChain() {
-    await window.keplr.experimentalSuggestChain({
-      chainId: 'Oraichain',
-      chainName: 'Oraichain',
-      rpc: 'https://rpc.orai.io',
-      rest: 'https://lcd.orai.io',
-      bip44: {
-        coinType: 118
-      },
-      bech32Config: {
-        bech32PrefixAccAddr: 'orai',
-        bech32PrefixAccPub: 'orai' + 'pub',
-        bech32PrefixValAddr: 'orai' + 'valoper',
-        bech32PrefixValPub: 'orai' + 'valoperpub',
-        bech32PrefixConsAddr: 'orai' + 'valcons',
-        bech32PrefixConsPub: 'orai' + 'valconspub'
-      },
-      currencies: [
-        {
-          coinDenom: 'orai',
-          coinMinimalDenom: 'orai',
-          coinDecimals: 6
-        }
-      ],
-      feeCurrencies: [
-        {
-          coinDenom: 'orai',
-          coinMinimalDenom: 'orai',
-          coinDecimals: 6,
-          gasPriceStep: {
-            low: 0.003,
-            average: 0.005,
-            high: 0.007
+    const keplr = await window.Keplr.getKeplr();
+    if (keplr) {
+      await window.keplr.experimentalSuggestChain({
+        chainId: 'Oraichain',
+        chainName: 'Oraichain',
+        rpc: 'https://rpc.orai.io',
+        rest: 'https://lcd.orai.io',
+        bip44: {
+          coinType: 118
+        },
+        bech32Config: {
+          bech32PrefixAccAddr: 'orai',
+          bech32PrefixAccPub: 'orai' + 'pub',
+          bech32PrefixValAddr: 'orai' + 'valoper',
+          bech32PrefixValPub: 'orai' + 'valoperpub',
+          bech32PrefixConsAddr: 'orai' + 'valcons',
+          bech32PrefixConsPub: 'orai' + 'valconspub'
+        },
+        currencies: [
+          {
+            coinDenom: 'orai',
+            coinMinimalDenom: 'orai',
+            coinDecimals: 6
           }
-        }
-      ],
-      stakeCurrency: {
-        coinDenom: 'orai',
-        coinMinimalDenom: 'orai',
-        coinDecimals: 6
-      },
-      features: ['stargate']
-    });
-
-    await window.keplr.experimentalSuggestChain({
-      chainId: config.chainId,
-      chainName: config.chainName,
-      rpc: config.rpcUrl,
-      rest: config.restUrl,
-      bip44: {
-        coinType: 118
-      },
-      bech32Config: {
-        bech32PrefixAccAddr: 'oraibtc',
-        bech32PrefixAccPub: 'oraibtc' + 'pub',
-        bech32PrefixValAddr: 'oraibtc' + 'valoper',
-        bech32PrefixValPub: 'oraibtc' + 'valoperpub',
-        bech32PrefixConsAddr: 'oraibtc' + 'valcons',
-        bech32PrefixConsPub: 'oraibtc' + 'valconspub'
-      },
-      currencies: [
-        {
-          coinDenom: 'oraibtc',
-          coinMinimalDenom: 'uoraibtc',
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: 'orai',
+            coinMinimalDenom: 'orai',
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 0.003,
+              average: 0.005,
+              high: 0.007
+            }
+          }
+        ],
+        stakeCurrency: {
+          coinDenom: 'orai',
+          coinMinimalDenom: 'orai',
           coinDecimals: 6
         },
-        {
-          coinDenom: 'usat',
-          coinMinimalDenom: 'usat',
-          coinDecimals: 14
-        }
-      ],
-      feeCurrencies: [
-        {
-          coinDenom: 'oraibtc',
-          coinMinimalDenom: 'uoraibtc',
-          coinDecimals: 6,
-          gasPriceStep: {
-            low: 0,
-            average: 0,
-            high: 0
+        features: ['stargate']
+      });
+
+      await window.keplr.experimentalSuggestChain({
+        chainId: config.chainId,
+        chainName: config.chainName,
+        rpc: config.rpcUrl,
+        rest: config.restUrl,
+        bip44: {
+          coinType: 118
+        },
+        bech32Config: {
+          bech32PrefixAccAddr: 'oraibtc',
+          bech32PrefixAccPub: 'oraibtc' + 'pub',
+          bech32PrefixValAddr: 'oraibtc' + 'valoper',
+          bech32PrefixValPub: 'oraibtc' + 'valoperpub',
+          bech32PrefixConsAddr: 'oraibtc' + 'valcons',
+          bech32PrefixConsPub: 'oraibtc' + 'valconspub'
+        },
+        currencies: [
+          {
+            coinDenom: 'oraibtc',
+            coinMinimalDenom: 'uoraibtc',
+            coinDecimals: 6
+          },
+          {
+            coinDenom: 'usat',
+            coinMinimalDenom: 'usat',
+            coinDecimals: 14
           }
-        }
-      ],
-      stakeCurrency: { coinDenom: 'oraibtc', coinMinimalDenom: 'uoraibtc', coinDecimals: 6 },
-      features: ['stargate']
-    });
+        ],
+        feeCurrencies: [
+          {
+            coinDenom: 'oraibtc',
+            coinMinimalDenom: 'uoraibtc',
+            coinDecimals: 6,
+            gasPriceStep: {
+              low: 0,
+              average: 0,
+              high: 0
+            }
+          }
+        ],
+        stakeCurrency: { coinDenom: 'oraibtc', coinMinimalDenom: 'uoraibtc', coinDecimals: 6 },
+        features: ['stargate']
+      });
+    }
   }
 }

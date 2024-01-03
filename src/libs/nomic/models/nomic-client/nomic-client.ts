@@ -48,12 +48,12 @@ export class NomicClient implements NomicClientInterface {
   }
 
   async getCurrentWallet(): Promise<Wallet | null> {
-    const currentWallet = localStorage.getItem('nomic/wallet');
+    // const currentWallet = localStorage.getItem('nomic/wallet');
 
-    if (currentWallet === 'keplr') {
-      const wallet = new Keplr();
-      return wallet;
-    }
+    // if (currentWallet === 'keplr') {
+    const wallet = new Keplr();
+    return wallet;
+    // }
 
     // else if (currentWallet === 'metamask') {
     //   const wallet = new Metamask();
@@ -481,7 +481,7 @@ export class NomicClient implements NomicClientInterface {
   public async init() {
     if (!this.initialized) {
       await init();
-      this.nomic = new OraiBtc(config.restUrl, config.chainId, process.env.NEXT_PUBLIC_APP_ENV);
+      this.nomic = new OraiBtc(config.restUrl, config.chainId, 'testnet');
       this.initialized = true;
     }
   }

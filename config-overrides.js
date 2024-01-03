@@ -105,12 +105,12 @@ module.exports = {
     //   );
     // }
 
-    config.plugins.push(
-      new webpack.DllReferencePlugin({
-        context: __dirname,
-        manifest
-      })
-    );
+    // config.plugins.push(
+    //   new webpack.DllReferencePlugin({
+    //     context: __dirname,
+    //     manifest
+    //   })
+    // );
     return config;
     // return rewiredEsbuild(config, env);
   },

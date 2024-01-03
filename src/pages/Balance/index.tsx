@@ -20,6 +20,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
+import init, { OraiBtc, DepositAddress } from '@oraichain/oraibtc-wasm';
 import {
   getTransactionUrl,
   handleErrorMsg,
@@ -35,7 +36,7 @@ import Content from 'layouts/Content';
 import Metamask from 'libs/metamask';
 import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
@@ -45,6 +46,7 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem from './TokenItem';
+import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   convertKwt,
   convertTransferIBCErc20Kwt,
@@ -58,6 +60,8 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
+import { NomicContext } from 'context/nomic-context';
+import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 
 interface BalanceProps {}
 
@@ -67,7 +71,7 @@ const Balance: React.FC<BalanceProps> = () => {
   let tokenUrl = searchParams.get('token');
   const navigate = useNavigate();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-
+  const nomic = useContext(NomicContext);
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
@@ -92,7 +96,45 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = useLoadTokens();
   const { data: prices } = useCoinGeckoPrices();
   useGetFeeConfig();
+  useEffect(() => {
+    async function init() {
+      try {
+        await nomic.init();
+        // setInitialized(true);
+        const wallet = await nomic.getCurrentWallet();
 
+        if (wallet && !wallet.connected) {
+          await wallet.connect();
+
+          nomic.wallet = wallet;
+          await nomic.build();
+        }
+        // await bitcoin.getBitcoinPrice();
+      } catch (error) {
+        console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
+      }
+    }
+    init();
+  }, []);
+  useEffect(() => {
+    if (!nomic.wallet?.address) return;
+
+    async function getAddress() {
+      if (nomic.depositAddress) {
+        return;
+      }
+
+      // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
+      await nomic.generateAddress(
+        `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
+      );
+    }
+
+    getAddress();
+  }, [nomic.wallet?.address, nomic.depositAddress]);
+  console.log('🚀 ~ file: index.tsx:135 ~ nomic.depositAddress:', nomic.depositAddress);
+  // console.log('🚀 ~ file: index.tsx:130 ~ nomic.wallet?.address:', nomic.wallet?.address);
+  console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
@@ -287,14 +329,26 @@ const Balance: React.FC<BalanceProps> = () => {
           amount: 1000,
           feeRate: 5
         };
-        try {
-          const rs = await window.Bitcoin.signAndBroadCast('bitcoinTestnet', dataRequest);
-          console.log('🚀 ~ file: index.tsx:291 ~ rs:', rs);
-        } catch (error) {
-          console.log('🚀 ~ file: index.tsx:294 ~ error:', error);
-        }
-        console.log('🚀 ~ file: index.tsx:212 ~ amounts:', amounts);
-        // processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
+        // try {
+        //   const getAddress = await (async () => {
+        //     if (nomic.depositAddress) {
+        //       return;
+        //     }
+
+        //     // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
+        //     await nomic.generateAddress(
+        //       `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
+        //     );
+        //   })();
+        //   // console.log(nomic.depositAddress.address)
+        //   console.log('🚀 ~ file: index.tsx:293 ~ nomic.depositAddress.address:', getAddress);
+        //   // const rs = await window.Bitcoin.signAndBroadCast('bitcoinTestnet', dataRequest);
+        //   // console.log('🚀 ~ file: index.tsx:291 ~ rs:', rs);
+        // } catch (error) {
+        //   console.log('🚀 ~ file: index.tsx:294 ~ error:', error);
+        // }
+        // console.log('🚀 ~ file: index.tsx:212 ~ amounts:', amounts);
+        // // processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
 
         return;
       }
