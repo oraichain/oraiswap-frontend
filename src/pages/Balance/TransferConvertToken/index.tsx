@@ -6,7 +6,9 @@ import {
   ORAI,
   toDisplay,
   TokenItemType,
-  flattenTokens
+  flattenTokens,
+  cosmosTokens,
+  tokenMap
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
@@ -18,7 +20,6 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
@@ -197,7 +198,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     let buttonName = toNetworkChainId === token.chainId ? 'Convert to ' : 'Transfer to ';
     if (toNetwork) buttonName += toNetwork.chainName;
 
-    if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
+    if (receivedAmount < 0) buttonName = 'Not enough amount to pay fee';
     return buttonName;
   };
 

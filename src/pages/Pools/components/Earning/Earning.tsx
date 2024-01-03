@@ -3,7 +3,6 @@ import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cw20TokenMap, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -16,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Type, fetchTokenInfo, generateMiningMsgs } from 'rest/api';
 import styles from './Earning.module.scss';
-import { TokenItemType, ORAI, toDisplay, CW20_DECIMALS } from '@oraichain/oraidex-common';
+import { TokenItemType, ORAI, toDisplay, CW20_DECIMALS, cw20TokenMap, tokenMap } from '@oraichain/oraidex-common';
 import { WithdrawLP } from 'types/pool';
 
 type TokenItemTypeExtended = TokenItemType & {

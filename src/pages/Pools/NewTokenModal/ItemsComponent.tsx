@@ -3,10 +3,9 @@ import styles from './NewTokenModal.module.scss';
 import Input from 'components/Input';
 import NumberFormat from 'react-number-format';
 import CheckBox from 'components/CheckBox';
-import { tokenMap } from 'config/bridgeTokens';
 import { ReactComponent as WalletIcon } from 'assets/icons/wallet1.svg';
 import { ReactComponent as TokensIcon } from 'assets/icons/tokens.svg';
-import { toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
 
 const cx = cn.bind(styles);
 

@@ -6,7 +6,6 @@ import {
   createTxIBCMsgTransfer
 } from '@oraichain/kawaiiverse-txs';
 import { createTxRaw } from '@tharsis/proto';
-import { kawaiiTokens } from 'config/bridgeTokens';
 
 import Long from 'long';
 import { collectWallet } from './cosmjs';
@@ -14,7 +13,7 @@ import { collectWallet } from './cosmjs';
 import { Coin, StargateClient } from '@cosmjs/stargate';
 import { OfflineDirectSigner } from '@keplr-wallet/types';
 import { chainInfos } from 'config/chainInfos';
-import { calculateTimeoutTimestamp, getEvmAddress } from '@oraichain/oraidex-common';
+import { calculateTimeoutTimestamp, getEvmAddress, kawaiiTokens } from '@oraichain/oraidex-common';
 
 async function getAccountInfo(accAddress: string) {
   const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');

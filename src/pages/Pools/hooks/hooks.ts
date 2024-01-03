@@ -1,10 +1,9 @@
 import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { MulticallQueryClient, MulticallReadOnlyInterface } from '@oraichain/common-contracts-sdk';
 import { AggregateResult } from '@oraichain/common-contracts-sdk/build/Multicall.types';
-import { toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay, cw20TokenMap, tokenMap, oraichainTokens } from '@oraichain/oraidex-common';
 import { OraiswapStakingQueryClient, OraiswapStakingTypes } from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { cw20TokenMap, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';

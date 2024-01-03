@@ -1,11 +1,10 @@
-import { CW20_DECIMALS, CoinIcon, getSubAmountDetails, toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, CoinIcon, getSubAmountDetails, toAmount, toDisplay, tokenMap, flattenTokens } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import StakeIcon from 'assets/icons/stake.svg';
 import WalletIcon from 'assets/icons/wallet-v3.svg';
 import cn from 'classnames/bind';
 import { Table, TableHeaderProps } from 'components/Table';
 import ToggleSwitch from 'components/ToggleSwitch';
-import { flattenTokens } from 'config/bridgeTokens';
 import { tokensIcon } from 'config/chainInfos';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -43,12 +42,12 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
     label?: string;
     balance?: number | string;
   }[] = [
-    {
-      src: WalletIcon,
-      label: 'Total balance',
-      balance: formatDisplayUsdt(totalUsd)
-    }
-  ];
+      {
+        src: WalletIcon,
+        label: 'Total balance',
+        balance: formatDisplayUsdt(totalUsd)
+      }
+    ];
 
   if (!networkFilter || networkFilter === 'Oraichain') {
     listAsset = [

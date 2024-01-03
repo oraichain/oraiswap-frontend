@@ -2,13 +2,12 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { genAddressCosmos, getAddress, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
 import { generateError } from '../libs/utils';
-import { COSMOS_CHAIN_ID_COMMON } from '@oraichain/oraidex-common';
+import { COSMOS_CHAIN_ID_COMMON, evmTokens, cosmosTokens, tokenMap, oraichainTokens } from '@oraichain/oraidex-common';
 import { Dispatch } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 

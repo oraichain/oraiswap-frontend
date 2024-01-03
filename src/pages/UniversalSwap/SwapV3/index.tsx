@@ -10,14 +10,16 @@ import {
   network,
   toAmount,
   toDisplay,
-  truncDecimals
+  truncDecimals,
+  tokenMap
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
   UniversalSwapHandler,
   isEvmNetworkNativeSwapSupported,
   isEvmSwappable,
-  isSupportedNoPoolSwapEvm
+  isSupportedNoPoolSwapEvm,
+  filterNonPoolEvmTokens,
 } from '@oraichain/oraidex-universal-swap';
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
@@ -31,7 +33,6 @@ import cn from 'classnames/bind';
 import Loader from 'components/Loader';
 import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
 import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -53,7 +54,6 @@ import {
   AMOUNT_BALANCE_ENTRIES,
   SwapDirection,
   checkEvmAddress,
-  filterNonPoolEvmTokens,
   getSwapType
 } from '../helpers';
 import InputSwap from './InputSwapV3';
@@ -454,11 +454,12 @@ const SwapComponent: React.FC<{
 
           {(() => {
             const disabledSwapBtn =
-              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance || minimumReceiveDisplay <= 0; // insufficent fund
 
             let disableMsg: string;
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+            if (relayerFee && bridgeTokenFee && minimumReceiveDisplay <= 0) disableMsg = 'Not enough amount to pay fee';
             return (
               <div className={cx('swap-btn-wrapper')}>
                 <img src={snowLeft} alt="snowLeft" className={cx('snow-left')} />

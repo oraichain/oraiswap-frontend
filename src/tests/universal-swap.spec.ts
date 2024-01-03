@@ -6,14 +6,9 @@ import {
   AIRI_BSC_CONTRACT,
   flattenTokens
 } from '@oraichain/oraidex-common';
+import { filterNonPoolEvmTokens } from '@oraichain/oraidex-universal-swap';
 import { calcMaxAmount } from 'pages/Balance/helpers';
-import {
-  SwapDirection,
-  SwapType,
-  checkEvmAddress,
-  filterNonPoolEvmTokens,
-  getSwapType
-} from 'pages/UniversalSwap/helpers';
+import { SwapDirection, SwapType, checkEvmAddress, getSwapType } from 'pages/UniversalSwap/helpers';
 
 describe('universal-swap', () => {
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([

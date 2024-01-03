@@ -7,11 +7,14 @@ import {
   buildMultipleExecuteMessages,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount
+  toAmount,
+  cosmosTokens,
+  CoinGeckoId,
+  NetworkChainId,
+  flattenTokens,
+  oraichainTokens
 } from '@oraichain/oraidex-common';
 import { getSourceReceiver } from '@oraichain/oraidex-universal-swap';
-import { cosmosTokens, flattenTokens, oraichainTokens } from 'config/bridgeTokens';
-import { CoinGeckoId, NetworkChainId } from '@oraichain/oraidex-common';
 import {
   BSC_SCAN,
   ETHEREUM_SCAN,

@@ -4,14 +4,14 @@ import {
   getSubAmountDetails,
   toAmount,
   toDisplay,
-  COSMOS_CHAIN_ID_COMMON
+  COSMOS_CHAIN_ID_COMMON,
+  tokenMap
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
-import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { WalletType } from '@oraichain/oraidex-common';
+import { WalletType, cosmosTokens } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';

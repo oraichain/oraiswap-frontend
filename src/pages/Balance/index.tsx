@@ -6,7 +6,9 @@ import {
   TokenItemType,
   findToTokenOnOraiBridge,
   toAmount,
-  tronToEthAddress
+  tronToEthAddress,
+  cosmosTokens,
+  tokens
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm, addOraiBridgeRoute } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -18,7 +20,6 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks, EVM_CHAIN_ID } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
