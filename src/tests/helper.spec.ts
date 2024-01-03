@@ -1,4 +1,3 @@
-import { oraichainTokens } from 'config/bridgeTokens';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
@@ -8,7 +7,8 @@ import {
   MILKYBSC_ORAICHAIN_DENOM,
   USDT_CONTRACT,
   AIRI_CONTRACT,
-  OSMOSIS_ORAICHAIN_DENOM
+  OSMOSIS_ORAICHAIN_DENOM,
+  oraichainTokens
 } from '@oraichain/oraidex-common';
 import { isEmptyObject } from 'helper';
 

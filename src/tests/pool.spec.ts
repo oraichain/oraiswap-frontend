@@ -1,18 +1,8 @@
-import {
-  ORAI,
-  buildMultipleExecuteMessages
-} from '@oraichain/oraidex-common';
-import { flattenTokens } from 'config/bridgeTokens';
+import { ORAI, buildMultipleExecuteMessages, flattenTokens } from '@oraichain/oraidex-common';
 import { getPoolTokens } from 'config/pools';
-import {
-  estimateShare,
-  formatDisplayUsdt,
-  toFixedIfNecessary
-} from 'pages/Pools/helpers';
+import { estimateShare, formatDisplayUsdt, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { ProvideQuery, Type, generateContractMessages } from 'rest/api';
-import {
-  constants
-} from './listing-simulate';
+import { constants } from './listing-simulate';
 
 /**
  * We use 2 pairs: ORAI/AIRI & ORAI/USDT for all test below.
@@ -27,7 +17,7 @@ describe('pool', () => {
         flattenTokens.find((t) => t.name === 'ORAI' && t.chainId === 'Oraichain'),
         flattenTokens.find((t) => t.name === 'USDT' && t.chainId === 'Oraichain')
       ];
-      const testPairContractAddr = "test-contract-addr"
+      const testPairContractAddr = 'test-contract-addr';
       const msg = generateContractMessages({
         type: Type.PROVIDE,
         sender: devAddress,
