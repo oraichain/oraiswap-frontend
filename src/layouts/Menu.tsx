@@ -1,54 +1,65 @@
-import { ReactComponent as BuyFiat } from 'assets/icons/buyfiat.svg';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
-import { ReactComponent as Dark } from 'assets/icons/dark.svg';
-import { ReactComponent as Light } from 'assets/icons/light.svg';
-import { ReactComponent as Faucet } from 'assets/icons/faucet.svg';
-import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import { ReactComponent as InfoIcon } from 'assets/icons/oraidex_info.svg';
-import { ReactComponent as Pools } from 'assets/icons/pool.svg';
-import { ReactComponent as UniversalSwap } from 'assets/icons/universal_swap.svg';
-import { ReactComponent as InternalSwap } from 'assets/icons/internal_swap.svg';
-import { ReactComponent as Wallet } from 'assets/icons/wallet.svg';
-import { ReactComponent as OrderBook } from 'assets/icons/orderbook.svg';
-import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
-import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
-import { ThemeContext } from 'context/theme-context';
-
 import { isMobile } from '@walletconnect/browser-utils';
-import RequireAuthButton from 'components/connect-wallet/RequireAuthButton';
-import React, { memo, ReactElement, useContext, useEffect, useState } from 'react';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
+import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
+import LogoFullImgDark from 'assets/images/christmas/logo.svg';
+import LogoFullImgLight from 'assets/images/christmas/logo-light.svg';
+import classNames from 'classnames';
+import ConnectWallet from 'components/ConnectWallet';
+import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { ThemeContext } from 'context/theme-context';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
-import classNames from 'classnames';
 
-const Menu: React.FC<{}> = React.memo((props) => {
+const Menu: React.FC = () => {
   const location = useLocation();
   const [link, setLink] = useState('/');
-  const { theme, setTheme } = useContext(ThemeContext);
+  const [otherActive, setOtherActive] = useState(false);
+  const { theme } = useContext(ThemeContext);
   const [open, setOpen] = useState(false);
 
-  const handleToggle = () => {
-    setOpen(!open);
-  };
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => {
+    setOpen(false);
+  });
+
+  const handleToggle = () => setOpen(!open);
 
   useEffect(() => {
     setLink(location.pathname);
-  }, []);
+  }, [location.pathname]);
 
-  const renderLink = (to: string, title: string, onClick: any, icon: ReactElement, externalLink = false) => {
+  const renderLink = (to: string, title: string, onClick: any, externalLink = false) => {
+    if (to === 'coming-soon') {
+      return (
+        <span
+          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
+          onClick={() => {
+            displayToast(TToastType.TX_INFO, {
+              message: `Coming soon!`
+            });
+          }}
+        >
+          <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
+        </span>
+      );
+    }
+
     if (externalLink)
       return (
         <a
           target="_blank"
           href={to}
-          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
           onClick={() => {
             setOpen(!open);
             onClick(to);
           }}
           rel="noreferrer"
         >
-          {icon}
           <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
         </a>
       );
@@ -59,9 +70,13 @@ const Menu: React.FC<{}> = React.memo((props) => {
           setOpen(!open);
           onClick(to);
         }}
-        className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+        className={classNames(
+          styles.menu_item,
+          { [styles.active]: !otherActive && (link.includes(to) || (link === '/' && to === '/universalswap')) },
+          styles[theme],
+          styles.spin
+        )}
       >
-        {icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
         </span>
@@ -72,74 +87,86 @@ const Menu: React.FC<{}> = React.memo((props) => {
   const mobileMode = isMobile();
   const ToggleIcon = open ? CloseIcon : MenuIcon;
   const darkTheme = theme === 'dark';
+
+  const menuList = (
+    <div className={classNames(styles.menu_list)}>
+      {renderLink('/universalswap', 'SWAP', setLink)}
+      {renderLink('/bridge', 'BRIDGE', setLink)}
+      {renderLink('/pools', 'POOLS', setLink)}
+      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
+      {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
+      {mobileMode ? (
+        <>
+          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
+          {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
+        </>
+      ) : (
+        <>
+          <div
+            onClick={() => {
+              setOtherActive(!otherActive);
+            }}
+            className={classNames(styles.menu_item, { [styles.active]: otherActive }, styles[theme], styles.spin)}
+          >
+            <span className={classNames(styles.menu_item_text, { [styles.active]: otherActive }, styles[theme])}>
+              {'OTHERS'}
+              <DownArrowIcon />
+            </span>
+          </div>
+          <TooltipContainer
+            placement="bottom-end"
+            visible={otherActive}
+            setVisible={() => setOtherActive(!otherActive)}
+            content={
+              <div className={classNames(styles.menu_others_list, styles[theme])}>
+                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
+                {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
+              </div>
+            }
+          />
+        </>
+      )}
+    </div>
+  );
+
   return (
     <>
-      {mobileMode && (
-        <div className={styles.logo}>
-          <Link to={'/'} onClick={() => setLink('/')}>
-            <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
-          </Link>
-          <ToggleIcon onClick={handleToggle} />
-        </div>
-      )}
-      <div className={classNames(styles.menu, { [styles.open]: open })}>
-        <div>
-          {!mobileMode && (
+      {mobileMode ? (
+        <>
+          <div className={styles.menuMobile}>
+            <div className={styles.logo}>
+              <ToggleIcon onClick={handleToggle} />
+              <Link to={'/'} onClick={() => setLink('/')}>
+                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+              </Link>
+            </div>
+            <ConnectWallet />
+          </div>
+
+          <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
+            {menuList}
+          </div>
+        </>
+      ) : (
+        <div className={classNames(styles.menu)}>
+          <div className={styles.menuLeft}>
             <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
               <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
             </Link>
-          )}
-          <div className={classNames(styles.menu_items)}>
-            <RequireAuthButton />
-            {renderLink('/bridge', 'Bridge', setLink, <Wallet />)}
-            {renderLink('/swap', 'Internal Swap', setLink, <InternalSwap />)}
-            {renderLink(
-              '/universalswap',
-              'Universal Swap',
-              setLink,
-              <UniversalSwap className={styles.universal_icon} />
-            )}
-            {renderLink('/pools', 'Pools', setLink, <Pools />)}
-            {renderLink('https://orderbook.oraidex.io/', 'Order Book', () => { }, <OrderBook />, true)}
-            {renderLink('https://info.oraidex.io/', 'Info', () => { }, <InfoIcon />, true)}
-            {renderLink('https://payment.orai.io/', 'Buy ORAI (Fiat)', () => { }, <BuyFiat />, true)}
-            {/* {renderLink('https://faucet.mainnet.orai.io/', 'Faucet', () => {}, <Faucet />, true)} */}
+            <div className={styles.divider}></div>
+            {menuList}
+          </div>
+          <div className={classNames(styles.connect_wallet_wrapper)}>
+            <span>
+              <ConnectWallet />
+            </span>
           </div>
         </div>
-
-        <div className={styles.menu_footer}>
-          {theme === 'dark' ? (
-            <button
-              className={classNames(styles.menu_theme, {
-                [styles.active]: theme === 'dark'
-              })}
-              onClick={() => {
-                setTheme('light');
-              }}
-            >
-              <Light style={{ width: 14, height: 14 }} />
-            </button>
-          ) : (
-            <button
-              className={classNames(
-                styles.menu_theme,
-                {
-                  [styles.active]: theme === 'light'
-                },
-                styles[theme]
-              )}
-              onClick={() => {
-                setTheme('dark');
-              }}
-            >
-              <Dark style={{ width: 14, height: 14 }} />
-            </button>
-          )}
-          <span>{/* © 2020 - 2023 Oraichain Foundation */}© 2022 Powered by Oraichain</span>
-        </div>
-      </div>
+      )}
     </>
   );
-});
+};
 
-export default memo(Menu);
+export default Menu;

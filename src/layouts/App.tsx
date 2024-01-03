@@ -7,15 +7,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import {
-  checkVersionWallet,
-  displayInstallWallet,
-  getNetworkGasPrice,
-  getStorageKey,
-  keplrCheck,
-  setStorageKey,
-  switchWallet
-} from 'helper';
+import { checkVersionWallet, getNetworkGasPrice, getStorageKey, keplrCheck, setStorageKey, switchWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -26,7 +18,7 @@ import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
-import MenuV3 from './MenuV3';
+import Menu from './Menu';
 import Instruct from './Instruct';
 import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
@@ -214,7 +206,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
-        <MenuV3 />
+        <Menu />
         {routes()}
         {!isMobile() && <Instruct />}
       </div>
