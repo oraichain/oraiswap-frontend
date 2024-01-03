@@ -167,8 +167,7 @@ const Balance: React.FC<BalanceProps> = () => {
     toNetworkChainId?: NetworkChainId
   ) => {
     await handleCheckWallet();
-    console.log('🚀 ~ file: index.tsx:163 ~ to:', to);
-    console.log('🚀 ~ file: index.tsx:163 ~ from:', from);
+
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
@@ -179,9 +178,12 @@ const Balance: React.FC<BalanceProps> = () => {
 
     // get & check balance
     const initFromBalance = amounts[from.denom];
+
     const subAmounts = getSubAmountDetails(amounts, from);
     const subAmount = toAmount(toSumDisplay(subAmounts), from.decimals);
+
     const fromBalance = from && initFromBalance ? subAmount + BigInt(initFromBalance) : BigInt(0);
+
     if (fromAmount <= 0 || toAmount(fromAmount, from.decimals) > fromBalance) {
       displayToast(TToastType.TX_FAILED, {
         message: 'Your balance is insufficient to make this transfer'
@@ -201,7 +203,101 @@ const Balance: React.FC<BalanceProps> = () => {
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
+      // [BTC Native] ==> ORAICHAIN
+      if (from.chainId === 'bitcoinTestnet' && to.chainId === 'Oraichain') {
+        // convert erc20 to native ==> ORAICHAIN
+        // if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
+        // else
+        // result = await transferIBCKwt(from, to, fromAmount, amounts);
+        console.log('🚀 ~ file: index.tsx:212 ~ fromAmount:', fromAmount);
+        const dataRequest = {
+          memo: '',
+          fee: {
+            gas: '200000',
+            amount: [
+              {
+                denom: 'btc',
+                amount: '3370'
+              }
+            ]
+          },
+          address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+          msgs: {
+            address: 'tb1q5elwk8lhnglqethvv78kemycdpjmpgeshlafgcmruh6hs65pkvvqmrhumx',
+            changeAddress: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+            amount: 1000,
+            message: '',
+            totalFee: 3370,
+            selectedCrypto: 'bitcoinTestnet',
+            confirmedBalance: 58958,
+            feeRate: 5
+          },
+          confirmedBalance: 58958,
+          utxos: [
+            {
+              address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+              path: "m/84'/1'/0'/0/0",
+              value: 100,
+              confirmations: -2542514,
+              blockHeight: 2542514,
+              txid: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
+              vout: 0,
+              tx_hash: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
+              tx_hash_big_endian: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
+              tx_output_n: 0
+            },
+            {
+              address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+              path: "m/84'/1'/0'/0/0",
+              value: 938,
+              confirmations: -2543486,
+              blockHeight: 2543486,
+              txid: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
+              vout: 2,
+              tx_hash: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
+              tx_hash_big_endian: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
+              tx_output_n: 2
+            },
+            {
+              address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+              path: "m/84'/1'/0'/0/0",
+              value: 10,
+              confirmations: -2569937,
+              blockHeight: 2569937,
+              txid: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              vout: 0,
+              tx_hash: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              tx_hash_big_endian: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              tx_output_n: 0
+            },
+            {
+              address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
+              path: "m/84'/1'/0'/0/0",
+              value: 57910,
+              confirmations: -2569937,
+              blockHeight: 2569937,
+              txid: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              vout: 1,
+              tx_hash: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              tx_hash_big_endian: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
+              tx_output_n: 1
+            }
+          ],
+          blacklistedUtxos: [],
+          amount: 1000,
+          feeRate: 5
+        };
+        try {
+          const rs = await window.Bitcoin.signAndBroadCast('bitcoinTestnet', dataRequest);
+          console.log('🚀 ~ file: index.tsx:291 ~ rs:', rs);
+        } catch (error) {
+          console.log('🚀 ~ file: index.tsx:294 ~ error:', error);
+        }
+        console.log('🚀 ~ file: index.tsx:212 ~ amounts:', amounts);
+        // processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
 
+        return;
+      }
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
@@ -213,7 +309,7 @@ const Balance: React.FC<BalanceProps> = () => {
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
-
+      console.log('🚀 ~ file: index.tsx:206 ~ toNetworkChainId:', toNetworkChainId);
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 

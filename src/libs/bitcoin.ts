@@ -140,4 +140,19 @@ export default class Bitcoin {
       console.log(ex, chainId);
     }
   }
+  async signAndBroadCast(
+    chainId: BtcChainId = ChainIdEnum.BitcoinTestnet,
+    data: object
+  ): Promise<{
+    rawTxHex: string;
+  }> {
+    try {
+      const bitcoin = await this.getBitcoin();
+      const rs = await bitcoin.signAndBroadcast(chainId, data);
+      console.log('🚀 ~ file: bitcoin.ts:152 ~ Bitcoin ~ rs:', rs);
+      return;
+    } catch (ex) {
+      console.log(ex, chainId);
+    }
+  }
 }

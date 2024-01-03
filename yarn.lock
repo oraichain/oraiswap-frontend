@@ -2915,6 +2915,11 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
+"@oraichain/oraibtc-wasm@0.7.7":
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-0.7.7.tgz#b208f85602e81dac73c354f186183f7a0159ac4f"
+  integrity sha512-8lCehNkbHITaQA6fR7QP5DtwXWK80AKjb5xsE3pxRDtJtKo5pC5ZeyX9oOe+m6Y4jyRVOyEJhbqRdTLUrLan3A==
+
 "@oraichain/oraidex-common-ui@^1.0.3":
   version "1.0.3"
   resolved "https://registry.npmjs.org/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.3.tgz"

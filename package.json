@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.31.0",
+    "@oraichain/oraibtc-wasm": "0.7.7",
     "@cosmjs/proto-signing": "^0.31.0",
     "@cosmjs/stargate": "^0.31.0",
     "@cosmjs/tendermint-rpc": "^0.31.0",
