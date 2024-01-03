@@ -1,6 +1,6 @@
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { AccountData } from '@cosmjs/proto-signing';
-// import { OraidexListingContractClient } from '@oraichain/oraidex-contracts-sdk';
+import { OraidexListingContractClient } from '@oraichain/oraidex-listing-contracts-sdk';
 import { ReactComponent as PlusIcon } from 'assets/icons/plus.svg';
 import { ReactComponent as RewardIcon } from 'assets/icons/reward.svg';
 import { ReactComponent as TrashIcon } from 'assets/icons/trash.svg';
@@ -140,75 +140,75 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const signFrontierListToken = async (client: SigningCosmWasmClient, address: AccountData) => {
     try {
       setIsLoading(true);
-      // const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
-      //   return {
-      //     amount: isReward?.value.toString(),
-      //     info: getInfoLiquidityPool(isReward)
-      //   };
-      // });
-      // const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
-      // // TODO: add more options for users like name, marketing, additional token rewards
-      // const mint = isMinter
-      //   ? {
-      //       minter,
-      //       cap: !!cap ? cap.toString() : null
-      //     }
-      //   : undefined;
+      const liquidityPoolRewardAssets = rewardTokens.map((isReward) => {
+        return {
+          amount: isReward?.value.toString(),
+          info: getInfoLiquidityPool(isReward)
+        };
+      });
+      const oraidexListing = new OraidexListingContractClient(client, address.address, network.oraidex_listing);
+      // TODO: add more options for users like name, marketing, additional token rewards
+      const mint = isMinter
+        ? {
+          minter,
+          cap: !!cap ? cap.toString() : null
+        }
+        : undefined;
 
-      // const initialBalances = isInitBalances
-      //   ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
-      //   : undefined;
+      const initialBalances = isInitBalances
+        ? initBalances.map((e) => ({ ...e, amount: e?.amount.toString() }))
+        : undefined;
 
-      // const pairAssetInfo = getInfoLiquidityPool({
-      //   contract_addr: !pairAssetType && pairAssetAddress,
-      //   denom: pairAssetType && pairAssetAddress
-      // });
+      const pairAssetInfo = getInfoLiquidityPool({
+        contract_addr: !pairAssetType && pairAssetAddress,
+        denom: pairAssetType && pairAssetAddress
+      });
 
-      // console.log('targeted asset info: ', targetedAssetInfo);
+      console.log('targeted asset info: ', targetedAssetInfo);
 
-      // let msg = generateMsgFrontierAddToken({
-      //   marketing,
-      //   symbol: tokenName,
-      //   liquidityPoolRewardAssets,
-      //   name,
-      //   initialBalances,
-      //   mint,
-      //   pairAssetInfo,
-      //   targetedAssetInfo: targetedAssetInfo
-      //     ? getInfoLiquidityPool({
-      //         contract_addr: !targetedAssetType && targetedAssetInfo,
-      //         denom: targetedAssetType && targetedAssetInfo
-      //       })
-      //     : undefined
-      // });
-      // // if users use their existing tokens to list, then we allow them to
-      // console.log('msg: ', msg);
+      let msg = generateMsgFrontierAddToken({
+        marketing,
+        symbol: tokenName,
+        liquidityPoolRewardAssets,
+        name,
+        initialBalances,
+        mint,
+        pairAssetInfo,
+        targetedAssetInfo: targetedAssetInfo
+          ? getInfoLiquidityPool({
+            contract_addr: !targetedAssetType && targetedAssetInfo,
+            denom: targetedAssetType && targetedAssetInfo
+          })
+          : undefined
+      });
+      // if users use their existing tokens to list, then we allow them to
+      console.log('msg: ', msg);
 
-      // const result = await oraidexListing.listToken(msg);
-      // if (result) {
-      //   const wasmAttributes = result.logs?.[0]?.events.filter((e) => e.type === 'wasm').flatMap((e) => e.attributes);
-      //   const cw20Address = wasmAttributes?.find((w) => w.key === 'cw20_address')?.value;
-      //   const lpAddress = wasmAttributes?.find((w) => w.key === 'liquidity_token_address')?.value;
-      //   const pairAddress = wasmAttributes?.find((w) => w.key === '"pair_contract_address"')?.value;
-      //   displayToast(
-      //     TToastType.TX_SUCCESSFUL,
-      //     cw20Address
-      //       ? {
-      //           customLink: `${network.explorer}/txs/${result.transactionHash}`,
-      //           linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
-      //           cw20Address: `${cw20Address}`
-      //         }
-      //       : {
-      //           customLink: `${network.explorer}/txs/${result.transactionHash}`,
-      //           linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
-      //           linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
-      //         },
-      //     {
-      //       autoClose: 100000000
-      //     }
-      //   );
-      //   close();
-      // }
+      const result = await oraidexListing.listToken(msg);
+      if (result) {
+        const wasmAttributes = result.logs?.[0]?.events.filter((e) => e.type === 'wasm').flatMap((e) => e.attributes);
+        const cw20Address = wasmAttributes?.find((w) => w.key === 'cw20_address')?.value;
+        const lpAddress = wasmAttributes?.find((w) => w.key === 'liquidity_token_address')?.value;
+        const pairAddress = wasmAttributes?.find((w) => w.key === '"pair_contract_address"')?.value;
+        displayToast(
+          TToastType.TX_SUCCESSFUL,
+          cw20Address
+            ? {
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkCw20Token: `${network.explorer}/smart-contract/${cw20Address}`,
+              cw20Address: `${cw20Address}`
+            }
+            : {
+              customLink: `${network.explorer}/txs/${result.transactionHash}`,
+              linkLpAddress: `${network.explorer}/smart-contract/${lpAddress}`,
+              linkPairAddress: `${network.explorer}/smart-contract/${pairAddress}`
+            },
+          {
+            autoClose: 100000000
+          }
+        );
+        close();
+      }
     } catch (error) {
       console.log('error listing token: ', error);
       handleErrorTransaction(error);
