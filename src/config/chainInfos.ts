@@ -15,6 +15,7 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+import { ReactComponent as BTCIcon } from 'assets/icons/bitcoin-btc-logo.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';
@@ -388,8 +389,8 @@ export const oraichainNetwork: CustomChainInfo = {
       contractAddress: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
       bridgeTo: ['bitcoinTestnet'],
       coinDecimals: 6,
-      Icon: OraiIcon,
-      IconLight: OraiLightIcon
+      Icon: BTCIcon,
+      IconLight: BTCIcon
     },
     {
       coinDenom: 'BEP20 MILKY',
@@ -490,8 +491,8 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 1
     },
     coinType: 1,
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon,
+    Icon: BTCIcon,
+    IconLight: BTCIcon,
     stakeCurrency: {
       coinDenom: 'BTC',
       coinMinimalDenom: 'btc',
@@ -507,7 +508,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinMinimalDenom: 'btc',
         coinDecimals: 8,
         bridgeTo: ['Oraichain'],
-        Icon: OraiIcon,
+        Icon: BTCIcon,
         coinGeckoId: 'bitcoin',
         coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
         gasPriceStep: {

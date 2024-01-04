@@ -5,8 +5,23 @@ const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-
+const fallback = {
+  fs: false,
+  tls: false,
+  net: false,
+  os: false,
+  url: false,
+  path: false,
+  assert: false,
+  querystring: false,
+  http: require.resolve('stream-http'),
+  crypto: require.resolve('crypto-browserify'),
+  stream: require.resolve('stream-browserify'),
+  buffer: require.resolve('buffer'),
+  https: require.resolve('https-browserify')
+};
 module.exports = {
+  fallback,
   webpack: function (config, env) {
     config.module.rules = [
       ...config.module.rules,
@@ -48,7 +63,13 @@ module.exports = {
     if (!fs.existsSync(vendorFileDest)) {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
-
+    config.plugins.push(
+      new webpack.DllReferencePlugin({
+        context: __dirname,
+        manifest,
+        scope: 'src'
+      })
+    );
     return config;
   },
   jest: (config) => {

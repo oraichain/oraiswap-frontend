@@ -16,7 +16,8 @@ import {
   calculateTimeoutTimestamp,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount
+  toAmount,
+  CustomChainInfo
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -33,6 +34,7 @@ import KawaiiverseJs from 'libs/kawaiiversejs';
 import { generateError } from 'libs/utils';
 import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages } from 'rest/api';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
+import axios from 'rest/request';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -482,4 +484,16 @@ export const calcMaxAmount = ({
   }
 
   return finalAmount;
+};
+
+export const getUtxos = async (address: string, baseUrl: string) => {
+  if (!address) throw Error('Address is not empty');
+  if (!baseUrl) throw Error('BaseUrl is not empty');
+  const { data } = await axios({
+    baseURL: baseUrl,
+    method: 'get',
+    url: `/address/${address}/utxo`
+  });
+  console.log('🚀 ~ file: helpers.ts:497 ~ getUtxos ~ data:', data);
+  return data;
 };

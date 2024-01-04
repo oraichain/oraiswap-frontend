@@ -25,6 +25,7 @@ import { network } from 'config/networks';
 import { ethers } from 'ethers';
 import axios from 'rest/request';
 import { reduce } from 'lodash';
+import { getUtxos } from 'pages/Balance/helpers';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -161,24 +162,16 @@ async function loadNativeEvmBalance(address: string, chain: CustomChainInfo) {
   }
 }
 async function loadNativeBtcBalance(address: string, chain: CustomChainInfo) {
-  try {
-    const { data } = await axios({
-      baseURL: chain.rest,
-      method: 'get',
-      url: `/address/${address}/utxo`
-    });
-    const total = reduce(
-      data,
-      function (sum, n) {
-        return sum + n.value;
-      },
-      0
-    );
-    console.log('🚀 ~ file: useLoadTokens.ts:173 ~ loadNativeBtcBalance ~ utxos:', total);
-    return total;
-  } catch (error) {
-    console.log('error load native evm balance: ', error);
-  }
+  const data = await getUtxos(address, chain.rest);
+  const total = reduce(
+    data,
+    function (sum, n) {
+      return sum + n.value;
+    },
+    0
+  );
+  console.log('🚀 ~ file: useLoadTokens.ts:173 ~ loadNativeBtcBalance ~ utxos:', total);
+  return total;
 }
 
 async function loadEvmEntries(
@@ -260,7 +253,6 @@ async function loadBtcAmounts(dispatch: Dispatch, btcAddress: string, chains: Cu
   const amountDetails = Object.fromEntries(
     flatten(await Promise.all(chains.map((chain) => loadBtcEntries(btcAddress, chain))))
   );
-  console.log('🚀 ~ file: useLoadTokens.ts:258 ~ loadBtcAmounts ~ amountDetails:', amountDetails);
 
   dispatch(updateAmounts(amountDetails));
 }
