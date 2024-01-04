@@ -60,6 +60,7 @@ import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import styles from './index.module.scss';
+import { tokensIcon } from 'config/chainInfos';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -337,8 +338,10 @@ const SwapComponent: React.FC<{
     }
   };
 
-  const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
-  const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+  const FromTokenIcon = tokensIcon.find((tIcon) => tIcon.coinGeckoId === originalFromToken.coinGeckoId);
+  const ToTokenIcon = tokensIcon.find((tIcon) => tIcon.coinGeckoId === originalToToken.coinGeckoId);
+  const FromIcon = theme === 'light' ? FromTokenIcon.IconLight : FromTokenIcon.Icon;
+  const ToIcon = theme === 'light' ? ToTokenIcon.IconLight : ToTokenIcon.Icon;
 
   return (
     <div className={cx('swap-box-wrapper')}>
