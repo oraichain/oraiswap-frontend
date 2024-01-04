@@ -50,9 +50,14 @@ import {
   convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
+  getUtxos,
   moveOraibToOraichain,
+  mapUtxos,
   transferIBCKwt,
-  transferIbcCustom
+  transferIbcCustom,
+  getFeeRate,
+  calculatorTotalFeeBtc,
+  BTC_SCAN
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -61,7 +66,7 @@ import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 import { NomicContext } from 'context/nomic-context';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
-
+import { BitcoinUnit } from 'bitcoin-units';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -84,6 +89,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
   const ref = useRef(null);
 
   useOnClickOutside(ref, () => {
@@ -130,7 +136,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     getAddress();
   }, [nomic.wallet?.address, nomic.depositAddress]);
-  console.log('🚀 ~ file: index.tsx:135 ~ nomic.depositAddress:', nomic.depositAddress);
+
   // console.log('🚀 ~ file: index.tsx:130 ~ nomic.wallet?.address:', nomic.wallet?.address);
   console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
   useEffect(() => {
@@ -245,111 +251,78 @@ const Balance: React.FC<BalanceProps> = () => {
       }
       // [BTC Native] ==> ORAICHAIN
       if (from.chainId === 'bitcoinTestnet' && to.chainId === 'Oraichain') {
+        const utxos = await getUtxos(btcAddress, from.rpc);
+        const feeRate = await getFeeRate({
+          url: from.rpc
+        });
+        console.log('🚀 ~ file: index.tsx:257 ~ feeRate:', feeRate);
+
+        console.log('🚀 ~ file: index.tsx:251 ~ utxos:', utxos);
+        const utxosMapped = mapUtxos({
+          utxos,
+          address: btcAddress,
+          path: "m/84'/0'/0'/0/0"
+        });
+        const totalFee = calculatorTotalFeeBtc({
+          utxos: utxosMapped.utxos,
+          message: '',
+          transactionFee: feeRate
+        });
+        console.log('🚀 ~ file: index.tsx:270 ~ totalFee:', totalFee);
+        console.log('🚀 ~ file: index.tsx:258 ~ utxosMapped:', utxosMapped);
         // convert erc20 to native ==> ORAICHAIN
         // if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
         // else
         // result = await transferIBCKwt(from, to, fromAmount, amounts);
         // console.log('🚀 ~ file: index.tsx:212 ~ fromAmount:', fromAmount);
+        console.log('🚀 ~ file: index.tsx:135 ~ nomic.depositAddress:', nomic.depositAddress.address);
+        const { address } = nomic.depositAddress;
+        if (!address) throw Error('Not found address OraiBtc');
+        const amount = new BitcoinUnit(fromAmount, 'BTC').to('satoshi').getValue();
+        console.log('🚀 ~ file: index.tsx:281 ~ amount:', amount);
 
-        // const dataRequest = {
-        //   memo: '',
-        //   fee: {
-        //     gas: '200000',
-        //     amount: [
-        //       {
-        //         denom: 'btc',
-        //         amount: '3370'
-        //       }
-        //     ]
-        //   },
-        //   address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //   msgs: {
-        //     address: 'tb1q5elwk8lhnglqethvv78kemycdpjmpgeshlafgcmruh6hs65pkvvqmrhumx',
-        //     changeAddress: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //     amount: 1000,
-        //     message: '',
-        //     totalFee: 3370,
-        //     selectedCrypto: 'bitcoinTestnet',
-        //     confirmedBalance: 58958,
-        //     feeRate: 5
-        //   },
-        //   confirmedBalance: 58958,
-        //   utxos: [
-        //     {
-        //       address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //       path: "m/84'/1'/0'/0/0",
-        //       value: 100,
-        //       confirmations: -2542514,
-        //       blockHeight: 2542514,
-        //       txid: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
-        //       vout: 0,
-        //       tx_hash: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
-        //       tx_hash_big_endian: '11208951d9e4f37e2cc1bee194b6ced7b1e9274b4a308e6a8c223b01097a5747',
-        //       tx_output_n: 0
-        //     },
-        //     {
-        //       address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //       path: "m/84'/1'/0'/0/0",
-        //       value: 938,
-        //       confirmations: -2543486,
-        //       blockHeight: 2543486,
-        //       txid: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
-        //       vout: 2,
-        //       tx_hash: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
-        //       tx_hash_big_endian: 'd0fdc85f60611f7fe864584d90562dd1592c2e2424ee7f3448d52aaa8a096f40',
-        //       tx_output_n: 2
-        //     },
-        //     {
-        //       address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //       path: "m/84'/1'/0'/0/0",
-        //       value: 10,
-        //       confirmations: -2569937,
-        //       blockHeight: 2569937,
-        //       txid: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       vout: 0,
-        //       tx_hash: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       tx_hash_big_endian: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       tx_output_n: 0
-        //     },
-        //     {
-        //       address: 'tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj',
-        //       path: "m/84'/1'/0'/0/0",
-        //       value: 57910,
-        //       confirmations: -2569937,
-        //       blockHeight: 2569937,
-        //       txid: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       vout: 1,
-        //       tx_hash: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       tx_hash_big_endian: 'e41647934a76afe77b96a3e655bbfbc8a5a2f46bb5144f355ab915bff29618c0',
-        //       tx_output_n: 1
-        //     }
-        //   ],
-        //   blacklistedUtxos: [],
-        //   amount: 1000,
-        //   feeRate: 5
-        // };
-        // try {
-        //   const getAddress = await (async () => {
-        //     if (nomic.depositAddress) {
-        //       return;
-        //     }
+        const dataRequest = {
+          memo: '',
+          fee: {
+            gas: '200000',
+            amount: [
+              {
+                denom: 'btc',
+                amount: `${totalFee}`
+              }
+            ]
+          },
+          address: btcAddress,
+          msgs: {
+            address: address,
+            changeAddress: btcAddress,
+            amount: amount,
+            message: '',
+            totalFee: totalFee,
+            selectedCrypto: from.chainId,
+            confirmedBalance: utxosMapped.balance,
+            feeRate: feeRate
+          },
+          confirmedBalance: utxosMapped.balance,
+          utxos: utxosMapped.utxos,
+          blacklistedUtxos: [],
+          amount: amount,
+          feeRate: feeRate
+        };
 
-        //     // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
-        //     await nomic.generateAddress(
-        //       `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
-        //     );
-        //   })();
-        //   // console.log(nomic.depositAddress.address)
-        console.log('🚀 ~ file: index.tsx:293 ~ nomic.depositAddress.address:', nomic.depositAddress?.address);
-        //   // const rs = await window.Bitcoin.signAndBroadCast('bitcoinTestnet', dataRequest);
-        //   // console.log('🚀 ~ file: index.tsx:291 ~ rs:', rs);
-        // } catch (error) {
-        //   console.log('🚀 ~ file: index.tsx:294 ~ error:', error);
-        // }
-        // console.log('🚀 ~ file: index.tsx:212 ~ amounts:', amounts);
-        // // processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
-
-        return;
+        try {
+          const rs = await window.Bitcoin.signAndBroadCast(from.chainId, dataRequest);
+          displayToast(TToastType.TX_SUCCESSFUL, {
+            customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+          });
+          console.log('🚀 ~ file: index.tsx:325 ~ rs:', rs);
+          setTxHash(rs.rawTxHex);
+          return;
+        } catch (error) {
+          displayToast(TToastType.TX_FAILED, {
+            message: JSON.stringify(error)
+          });
+        }
       }
       let newToToken = to;
       if (toNetworkChainId) {

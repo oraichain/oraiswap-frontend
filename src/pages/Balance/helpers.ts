@@ -35,7 +35,7 @@ import { generateError } from 'libs/utils';
 import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages } from 'rest/api';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 import axios from 'rest/request';
-
+import { script, opcodes } from 'bitcoinjs-lib';
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
   fromAddress: string;
@@ -494,6 +494,96 @@ export const getUtxos = async (address: string, baseUrl: string) => {
     method: 'get',
     url: `/address/${address}/utxo`
   });
-  console.log('🚀 ~ file: helpers.ts:497 ~ getUtxos ~ data:', data);
   return data;
 };
+export const mapUtxos = ({ utxos, address, path, currentBlockHeight = 0 }) => {
+  let balance = 0;
+  let utxosData = [];
+  if (!utxos || utxos?.length === 0) {
+    return {
+      balance,
+      utxos: utxosData
+    };
+  }
+  utxos.forEach((utxo) => {
+    balance = balance + Number(utxo.value);
+    const data = {
+      address: address, //Required
+      path: path, //Required
+      value: utxo.value, //Required
+      confirmations: currentBlockHeight - Number(utxo.status.block_height ?? 0), //Required
+      blockHeight: utxo.status.block_height ?? 0,
+      txid: utxo.txid, //Required (Same as tx_hash_big_endian)
+      vout: utxo.vout, //Required (Same as tx_output_n)
+      tx_hash: utxo.txid,
+      tx_hash_big_endian: utxo.txid,
+      tx_output_n: utxo.vout
+    };
+    utxosData.push(data);
+  });
+  return {
+    balance,
+    utxos: utxosData
+  };
+};
+const MIN_FEE_RATE = 5;
+export const getFeeRate = async ({ blocksWillingToWait = 2, url }) => {
+  if (!blocksWillingToWait) throw Error('blocksWillingToWait is not empty');
+  if (!url) throw Error('url is not empty');
+  const { data: feeRate } = await axios({
+    baseURL: url,
+    method: 'get',
+    url: `/fee-estimates`
+  });
+
+  const feeRateByBlock = feeRate?.[blocksWillingToWait];
+  if (!feeRateByBlock) {
+    throw Error('Not found Fee rate');
+  }
+  return feeRateByBlock > MIN_FEE_RATE ? feeRateByBlock : MIN_FEE_RATE;
+};
+
+const TX_EMPTY_SIZE = 4 + 1 + 1 + 4; //10
+const TX_INPUT_BASE = 32 + 4 + 1 + 4; // 41
+const TX_INPUT_PUBKEYHASH = 107;
+const TX_OUTPUT_BASE = 8 + 1; //9
+const TX_OUTPUT_PUBKEYHASH = 25;
+const inputBytes = (input) => {
+  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
+};
+const MIN_TX_FEE = 1000;
+const getFeeFromUtxos = (utxos, feeRate, data) => {
+  const inputSizeBasedOnInputs =
+    utxos.length > 0
+      ? utxos.reduce((a, x) => a + inputBytes(x), 0) + utxos.length // +1 byte for each input signature
+      : 0;
+  let sum =
+    TX_EMPTY_SIZE +
+    inputSizeBasedOnInputs +
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH +
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH;
+
+  if (data) {
+    sum += TX_OUTPUT_BASE + data.length;
+  }
+  const fee = sum * feeRate;
+  return fee > MIN_TX_FEE ? fee : MIN_TX_FEE;
+};
+const compileMemo = (memo) => {
+  const data = Buffer.from(memo, 'utf8'); // converts MEMO to buffer
+  return script.compile([opcodes.OP_RETURN, data]); // Compile OP_RETURN script
+};
+
+export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message = '' }) => {
+  if (message && message.length > 80) {
+    throw new Error('message too long, must not be longer than 80 chars.');
+  }
+  if (utxos.length === 0) return 0;
+  const feeRateWhole = Math.ceil(transactionFee);
+  const compiledMemo = message ? compileMemo(message) : null;
+  const fee = getFeeFromUtxos(utxos, feeRateWhole, compiledMemo);
+  return fee;
+};
+export const BTC_SCAN = 'https://blockstream.info/testnet';

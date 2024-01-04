@@ -149,8 +149,7 @@ export default class Bitcoin {
     try {
       const bitcoin = await this.getBitcoin();
       const rs = await bitcoin.signAndBroadcast(chainId, data);
-      console.log('🚀 ~ file: bitcoin.ts:152 ~ Bitcoin ~ rs:', rs);
-      return;
+      return rs;
     } catch (ex) {
       console.log(ex, chainId);
     }
