@@ -1,0 +1,87 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.countdownWrapper {
+  text-align: right;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 100%; /* 27px */
+
+  @include mobile {
+    font-size: 14px;
+  }
+
+  @include theme() {
+    color: theme-get('text-color');
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    svg {
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+  }
+
+  .countdown {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 100%;
+    margin-top: 12px;
+
+    @include mobile {
+      margin-top: 8px;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 60px;
+
+      margin-left: 12px;
+
+      .symbol {
+        color: #232521;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 100%;
+        margin-top: 10px;
+      }
+    }
+  }
+
+  .pie {
+    height: 28px;
+    width: 100%;
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+
+    .progress {
+      text-align: right;
+      height: 28px;
+      width: 28px;
+      border-radius: 99px;
+      //   background: conic-gradient(#232521 80%, #efefef 80%);
+    }
+  }
+  .button {
+    display: flex;
+    width: 100%;
+    margin-top: 40px;
+    margin-bottom: 24px;
+
+    button {
+      width: 100%;
+    }
+  }
+}
