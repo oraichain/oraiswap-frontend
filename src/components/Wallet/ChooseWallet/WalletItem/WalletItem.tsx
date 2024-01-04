@@ -1,10 +1,17 @@
 import { Button } from 'components/Button';
 import type { Wallet } from 'components/Wallet/ChooseWallet/ChooseWallet';
 import styles from './WalletItem.module.scss';
+import { ConnectStatus } from '../WalletByNetwork';
 
-export const WalletItem = ({ wallet }: { wallet: Wallet }) => {
+type WalletItemProps = {
+  wallet: Wallet;
+  setConnectStatus: React.Dispatch<React.SetStateAction<ConnectStatus>>;
+  connectStatus: ConnectStatus;
+};
+
+export const WalletItem = ({ wallet, connectStatus, setConnectStatus }: WalletItemProps) => {
   return (
-    <div className={styles.walletItem} onClick={async () => {}}>
+    <div className={styles.walletItem} onClick={() => setConnectStatus('confirming')}>
       <div className={styles.walletIcon}>
         <wallet.icon />
       </div>

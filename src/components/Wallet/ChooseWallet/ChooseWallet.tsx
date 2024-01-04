@@ -7,11 +7,12 @@ import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
+import { ReactComponent as NobleLightIcon } from 'assets/icons/noble_light.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OsmoLightIcon } from 'assets/icons/osmosis_light.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
-import { ReactComponent as MetamaskLeapIcon } from 'assets/images/leap-cosmos-logo.svg';
+import { ReactComponent as TronNetworkIcon } from 'assets/icons/tron.svg';
 import classNames from 'classnames';
 import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -51,7 +52,11 @@ const walletProvider: WalletProvider[] = [
         name: ''
       },
       {
-        icon: NobleIcon,
+        icon: NobleLightIcon,
+        name: ''
+      },
+      {
+        icon: KwtIcon,
         name: ''
       }
     ],
@@ -65,7 +70,7 @@ const walletProvider: WalletProvider[] = [
         name: 'Keplr'
       },
       {
-        icon: MetamaskLeapIcon,
+        icon: MetamaskIcon,
         name: 'Metamask (Leap Snap)'
       }
     ]
@@ -74,29 +79,15 @@ const walletProvider: WalletProvider[] = [
     networks: [
       {
         icon: EthIcon,
-        name: 'Ethereum'
+        name: ''
       },
       {
         icon: BnbIcon,
-        name: 'BNB Chain'
-      }
-    ],
-    wallets: [
-      {
-        icon: OwalletIcon,
-        name: 'Owallet'
+        name: ''
       },
-      {
-        icon: MetamaskIcon,
-        name: 'Metamask'
-      }
-    ]
-  },
-  {
-    networks: [
       {
         icon: KwtIcon,
-        name: 'Kawaiiverse'
+        name: ''
       }
     ],
     wallets: [
@@ -113,8 +104,8 @@ const walletProvider: WalletProvider[] = [
   {
     networks: [
       {
-        icon: TronIcon,
-        name: 'Tron Network'
+        icon: TronNetworkIcon,
+        name: ''
       }
     ],
     wallets: [
