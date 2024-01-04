@@ -2861,10 +2861,8 @@
     react-dom "^18.2.0"
     react-use "^17.4.0"
 
-"@oraichain/oraidex-common@^1.0.45":
+"@oraichain/oraidex-common@../oraidex-sdk/packages/oraidex-common", "@oraichain/oraidex-common@file:../oraidex-sdk/packages/oraidex-common":
   version "1.0.54"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.54.tgz#f62470888568d9e7f06048eaa1174e55b05dde5d"
-  integrity sha512-F+e/ve/XPLPPgnKm2PrqmfFs/tDu9b4oNrmQgu1xnioIYIOtsoT9eNSFbhumGYsjYStEds2bTZhZylkR3Xg+gA==
   dependencies:
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
@@ -2880,12 +2878,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
   integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
 
-"@oraichain/oraidex-universal-swap@^1.0.42":
+"@oraichain/oraidex-universal-swap@../oraidex-sdk/packages/universal-swap":
   version "1.0.42"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.42.tgz#b31653c87a5bedcd5baef89c8e3d7aa5039f2408"
-  integrity sha512-BDj5NRkI8Hr1vkjSRxuHAKhJMEolG1iyO2o1m0RAOACYrBegf+1cX0Q3m2Uwr9sYib9I73XEaFXo+R9XXLaL2w==
   dependencies:
-    "@oraichain/oraidex-common" "^1.0.45"
+    "@oraichain/oraidex-common" "file:../oraidex-sdk/packages/oraidex-common"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
