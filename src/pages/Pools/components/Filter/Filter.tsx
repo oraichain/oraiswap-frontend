@@ -9,6 +9,7 @@ import { RootState } from 'store/configure';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './style.module.scss';
 import { isEqual } from 'lodash';
+import { Button } from 'components/Button';
 
 export enum KeyFilterPool {
   my_pool = 'my_pool',
