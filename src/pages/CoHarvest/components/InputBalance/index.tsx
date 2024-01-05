@@ -56,6 +56,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false }: InputBalanceT
         {[0.25, 0.5, 0.75, 1].map((e) => {
           return (
             <button
+              key={e}
               className={`${styles.button} ${coeff === e ? styles.active : ''}`}
               onClick={(event) => {
                 event.stopPropagation();

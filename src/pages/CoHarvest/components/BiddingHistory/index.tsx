@@ -12,7 +12,7 @@ const BiddingHistory = () => {
         {listBidding?.length > 0 ? (
           listBidding.map((item, index) => {
             return (
-              <div className={styles.item}>
+              <div className={styles.item} key={item}>
                 <div className={styles.right}>
                   <div className={styles.percent}>{item} %</div>
                   <div className={styles.info}>
