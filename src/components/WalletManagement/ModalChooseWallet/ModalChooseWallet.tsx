@@ -6,7 +6,6 @@ import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
-import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
 import { ReactComponent as NobleLightIcon } from 'assets/icons/noble_light.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OsmoLightIcon } from 'assets/icons/osmosis_light.svg';
@@ -16,7 +15,7 @@ import { ReactComponent as TronNetworkIcon } from 'assets/icons/tron.svg';
 import classNames from 'classnames';
 import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
-import styles from './ChooseWallet.module.scss';
+import styles from './ModalChooseWallet.module.scss';
 import { WalletByNetwork } from './WalletByNetwork';
 export type Wallet = {
   icon: React.FunctionComponent<
@@ -121,7 +120,7 @@ const walletProvider: WalletProvider[] = [
   }
 ];
 
-export const ChooseWalletModal: React.FC<{
+export const ModalChooseWallet: React.FC<{
   close: () => void;
 }> = ({ close }) => {
   const [theme] = useConfigReducer('theme');
@@ -138,12 +137,12 @@ export const ChooseWalletModal: React.FC<{
       close={close}
       open={() => {}}
       isCloseBtn={false}
-      className={classNames(styles.choose_wallet_modal_container, styles[theme])}
+      className={classNames(styles.chooseWalletModalContainer, `${styles[theme]}`)}
     >
-      <div className={styles.choose_wallet_modal_wrapper}>
+      <div className={styles.chooseWalletModalWrapper}>
         <div className={styles.header}>
           <div>Connect to OraiDEX</div>
-          <div onClick={close} className={styles.close_icon}>
+          <div onClick={close} className={styles.closeIcon}>
             <CloseIcon />
           </div>
         </div>

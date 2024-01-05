@@ -1,5 +1,7 @@
-.choose_wallet_modal_container {
-  .choose_wallet_modal_wrapper {
+.chooseWalletModalContainer {
+  z-index: 1021;
+
+  .chooseWalletModalWrapper {
     width: 580px;
     background: #fff;
     display: flex;
@@ -20,7 +22,7 @@
       font-weight: 600;
       margin-bottom: 24px;
 
-      .close_icon {
+      .closeIcon {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -39,9 +41,9 @@
 }
 
 .dark {
-  .choose_wallet_modal_wrapper {
-    background: #121511;
+  .chooseWalletModalWrapper {
     color: #f7f7f7;
+    background: #121511;
 
     .wallets_wrapper {
       .wallet_item {

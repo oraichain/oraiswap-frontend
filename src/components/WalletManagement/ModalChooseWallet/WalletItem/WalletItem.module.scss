@@ -31,3 +31,13 @@
         line-height: 150%;
     }
 }
+
+.dark {
+    &:hover {
+        background-color: #494949;
+    }
+
+    .walletName {
+        color: #f7f7f7;
+    }
+}

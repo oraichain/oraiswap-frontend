@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { WalletProvider } from '../ChooseWallet';
+import { WalletProvider } from '../ModalChooseWallet';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
 import { Button } from 'components/Button';
+import useTheme from 'hooks/useTheme';
 
-export type ConnectStatus = 'init' | 'confirming' | 'failed' | 'success';
+export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
   const { networks, wallets, type } = walletProvider;
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
-
+  const theme = useTheme();
   const renderNetworkContent = () => {
     let content;
     switch (connectStatus) {
@@ -28,7 +29,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           </div>
         );
         break;
-      case 'confirming':
+      case 'confirming-switch':
         content = (
           <div className={styles.swithWallet}>
             <h4>Switch wallet?</h4>
@@ -37,7 +38,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button onClick={() => setConnectStatus('confirming')} type="primary">
+              <Button onClick={() => setConnectStatus('confirming-switch')} type="primary">
                 Switch
               </Button>
             </div>
@@ -53,8 +54,24 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button onClick={() => setConnectStatus('confirming')} type="primary">
+              <Button onClick={() => setConnectStatus('confirming-switch')} type="primary">
                 Try again
+              </Button>
+            </div>
+          </div>
+        );
+        break;
+      case 'confirming-disconnect':
+        content = (
+          <div className={styles.swithWallet}>
+            <h4>Disconnect wallet?</h4>
+            <div className={styles.switchText}>Are you sure you want to disconnect Owallet?</div>
+            <div className={styles.groupBtns}>
+              <Button onClick={() => setConnectStatus('init')} type="secondary">
+                Cancel
+              </Button>
+              <Button onClick={() => setConnectStatus('confirming-disconnect')} type="primary">
+                Disconnect
               </Button>
             </div>
           </div>
@@ -66,19 +83,21 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     return content;
   };
 
-  return (
-    <div className={`${styles.walletByNetwork} ${type === 'cosmos' ? styles.fullWitdth : null}`}>
-      <div className={styles.header}>
-        <div className={styles.networkIcons}>
-          {networks.map((network, index) => {
-            return (
-              <div className={styles.networkIcon} key={index}>
-                <network.icon />
-                {network.name ? <span style={{ marginLeft: '4px' }}>{network.name}</span> : null}
-              </div>
-            );
-          })}
+  const renderNetworkIcons = () => {
+    return networks.map((network) => {
+      return (
+        <div className={styles.networkIcon} key={network.name}>
+          <network.icon />
+          {network.name ? <span style={{ marginLeft: '4px' }}>{network.name}</span> : null}
         </div>
+      );
+    });
+  };
+
+  return (
+    <div className={`${styles.walletByNetwork} ${styles[theme]} ${type === 'cosmos' ? styles.fullWitdth : null}`}>
+      <div className={styles.header}>
+        <div className={styles.networkIcons}>{renderNetworkIcons()}</div>
       </div>
       <div className={styles.content}>{renderNetworkContent()}</div>
     </div>

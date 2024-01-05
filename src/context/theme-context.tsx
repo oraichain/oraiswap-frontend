@@ -8,7 +8,7 @@ export const ThemeContext = createContext<{
   setTheme: React.Dispatch<React.SetStateAction<Themes>>;
 }>({
   theme: 'light',
-  setTheme: () => { }
+  setTheme: () => {}
 });
 
 export const ThemeProvider = (props: React.PropsWithChildren<{}>) => {
