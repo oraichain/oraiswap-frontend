@@ -19,7 +19,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
-import { evmChains } from 'config/chainInfos';
+import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -362,7 +362,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          if (listedTokens.length > 0 || evmChains.find((chain) => chain.chainId === token.chainId)) {
+          console.log(token.chainId, btcChains, 'listedTokens');
+          if (
+            listedTokens.length > 0 ||
+            evmChains.find((chain) => chain.chainId === token.chainId) ||
+            btcChains.find((chain) => chain.chainId !== token.chainId)
+          ) {
             return (
               <button
                 disabled={transferLoading || !addressTransfer || receivedAmount < 0}

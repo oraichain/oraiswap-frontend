@@ -57,7 +57,8 @@ import {
   transferIbcCustom,
   getFeeRate,
   calculatorTotalFeeBtc,
-  BTC_SCAN
+  BTC_SCAN,
+  toAmountBTC
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -65,8 +66,10 @@ import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 import { NomicContext } from 'context/nomic-context';
-import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
+import { Decimal } from '@cosmjs/math';
+import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
 import { BitcoinUnit } from 'bitcoin-units';
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -175,8 +178,6 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
       const toToken = findDefaultToToken(token);
-      console.log('🚀 ~ file: index.tsx:132 ~ findDefaultToToken(token):', findDefaultToToken(token));
-      console.log('🚀 ~ file: index.tsx:132 ~ token:', token);
       setTokenBridge([token, toToken]);
     },
     [otherChainTokens, oraichainTokens, from, to]
@@ -255,9 +256,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const feeRate = await getFeeRate({
           url: from.rpc
         });
-        console.log('🚀 ~ file: index.tsx:257 ~ feeRate:', feeRate);
 
-        console.log('🚀 ~ file: index.tsx:251 ~ utxos:', utxos);
         const utxosMapped = mapUtxos({
           utxos,
           address: btcAddress,
@@ -268,18 +267,10 @@ const Balance: React.FC<BalanceProps> = () => {
           message: '',
           transactionFee: feeRate
         });
-        console.log('🚀 ~ file: index.tsx:270 ~ totalFee:', totalFee);
-        console.log('🚀 ~ file: index.tsx:258 ~ utxosMapped:', utxosMapped);
-        // convert erc20 to native ==> ORAICHAIN
-        // if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        // else
-        // result = await transferIBCKwt(from, to, fromAmount, amounts);
-        // console.log('🚀 ~ file: index.tsx:212 ~ fromAmount:', fromAmount);
-        console.log('🚀 ~ file: index.tsx:135 ~ nomic.depositAddress:', nomic.depositAddress.address);
+
         const { address } = nomic.depositAddress;
         if (!address) throw Error('Not found address OraiBtc');
         const amount = new BitcoinUnit(fromAmount, 'BTC').to('satoshi').getValue();
-        console.log('🚀 ~ file: index.tsx:281 ~ amount:', amount);
 
         const dataRequest = {
           memo: '',
@@ -315,14 +306,43 @@ const Balance: React.FC<BalanceProps> = () => {
           displayToast(TToastType.TX_SUCCESSFUL, {
             customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
           });
-          console.log('🚀 ~ file: index.tsx:325 ~ rs:', rs);
           setTxHash(rs.rawTxHex);
-          return;
         } catch (error) {
           displayToast(TToastType.TX_FAILED, {
             message: JSON.stringify(error)
           });
         }
+        return;
+      }
+      if (from.chainId === 'Oraichain' && to.chainId === 'bitcoinTestnet') {
+        const { address } = nomic.depositAddress;
+        if (!address) throw Error('Not found Orai BTC Address');
+        const DEFAULT_TIMEOUT = 60 * 60;
+
+        const amountInput = BigInt(Decimal.fromUserInput(toAmount(fromAmount, 6).toString(), 8).atomics.toString());
+
+        const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
+
+        const rs = await window.client.execute(
+          oraiAddress,
+          OBTCContractAddress,
+          {
+            send: {
+              contract: OraichainChain.source.port.split('.')[1],
+              amount,
+              msg: toBinary({
+                local_channel_id: OraichainChain.source.channelId,
+                remote_address: address,
+                remote_denom: OraichainChain.source.nBtcIbcDenom,
+                timeout: DEFAULT_TIMEOUT,
+                memo: btcAddress ? `withdraw:${btcAddress}` : ''
+              })
+            }
+          },
+          'auto'
+        );
+        console.log('🚀 ~ file: index.tsx:341 ~ rs:', rs);
+        return;
       }
       let newToToken = to;
       if (toNetworkChainId) {
@@ -335,7 +355,7 @@ const Balance: React.FC<BalanceProps> = () => {
         }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
-      console.log('🚀 ~ file: index.tsx:206 ~ toNetworkChainId:', toNetworkChainId);
+
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 

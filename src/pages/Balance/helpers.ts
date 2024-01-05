@@ -17,7 +17,8 @@ import {
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
   toAmount,
-  CustomChainInfo
+  CustomChainInfo,
+  validateNumber
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -587,3 +588,9 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 export const BTC_SCAN = 'https://blockstream.info/testnet';
+const truncDecimals = 8;
+const atomic = 10 ** truncDecimals;
+export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
+  const validatedAmount = validateNumber(amount);
+  return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
+};
