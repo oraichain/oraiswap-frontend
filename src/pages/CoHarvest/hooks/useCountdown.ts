@@ -8,14 +8,15 @@ export type CountDownType = {
   isEnd: boolean;
 };
 
-export const useCountdown = () => {
+export const useCountdown = (bidInfo) => {
   const [percent, setPercent] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(40000); // () => calcDiffTime(start, new Date())
+  const [timeRemaining, setTimeRemaining] = useState(129832); // () => calcDiffTime(start, new Date())
   const [isEnd, setIsEnd] = useState(false);
   const countdownRef = useRef(null);
-  const [start, end] = [new Date('12-27-2023'), new Date('12-29-2023')];
-
+  // const [start, end] = [new Date(Date.now()), new Date(bidInfo.end_time)];
+  const [start, end] = [new Date('01-05-2024'), new Date('01-07-2024')];
   useEffect(() => {
+    if (!bidInfo.round) return;
     const decrementTime = () => {
       setTimeRemaining((prev) => {
         const newRemain = prev - TIMER.MILLISECOND;
@@ -39,6 +40,7 @@ export const useCountdown = () => {
   }, []);
 
   useEffect(() => {
+    if (!bidInfo.round) return;
     const newPercent = calcPercent(start, end, timeRemaining);
     setPercent(() => newPercent);
   }, [timeRemaining, start, end]);

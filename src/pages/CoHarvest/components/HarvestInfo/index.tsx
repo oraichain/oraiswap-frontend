@@ -1,12 +1,19 @@
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import styles from './index.module.scss';
-import TokenBalance from 'components/TokenBalance';
 import CountDownTime from '../CountDownTime';
-import { CountDownType } from 'pages/CoHarvest/hooks/useCountdown';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { getUsd } from 'libs/utils';
+import { flattenTokens, toDisplay } from '@oraichain/oraidex-common';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
-const HarvestInfo = (props: CountDownType) => {
-  const { timeRemaining, percent, isEnd } = props;
+const HarvestInfo = (props: { poolValue: string, timeRemaining: number; percent: number; isEnd: boolean; round: number }) => {
+  const { timeRemaining, percent, isEnd, poolValue } = props;
+  const { data: prices } = useCoinGeckoPrices();
+
+  const USDC_TOKEN_INFO = flattenTokens.find(e => e.coinGeckoId === "usd-coin")
+  const amountUsd = getUsd(poolValue, USDC_TOKEN_INFO, prices);
+
   return (
     <div className={styles.harvestInfo}>
       <div className={styles.contentWrapper}>
@@ -19,16 +26,11 @@ const HarvestInfo = (props: CountDownType) => {
 
             <div className={styles.balance}>
               <UsdcIcon />
-              <TokenBalance
-                balance={{
-                  amount: '25495320000',
-                  denom: 'USDC',
-                  decimals: 6
-                }}
-                className={styles.token}
-              />
+              {toDisplay(poolValue)} USDC
             </div>
-            <TokenBalance balance={25495.32} className={styles.usd} />
+            <div className={styles.usd}>
+              {formatDisplayUsdt(amountUsd)}
+            </div>
           </div>
           <div className={styles.countdown}>
             <CountDownTime timeRemaining={timeRemaining} percent={percent} isEnd={isEnd} />

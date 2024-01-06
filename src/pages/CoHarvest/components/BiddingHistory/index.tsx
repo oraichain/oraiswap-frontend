@@ -1,36 +1,31 @@
 import TokenBalance from 'components/TokenBalance';
 import styles from './index.module.scss';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
+import { useGetHistoryBid } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { toDisplay } from '@oraichain/oraidex-common';
 
-const BiddingHistory = () => {
-  const listBidding = [5, 4, 3, 2, 1];
-
+const BiddingHistory = ({ round }) => {
+  const { historyBidPool, isLoading, refetchHistoryBidPool } = useGetHistoryBid(round);
   return (
     <div className={styles.biddingHistory}>
       <span className={styles.title}>Bidding History</span>
       <div className={styles.content}>
-        {listBidding?.length > 0 ? (
-          listBidding.map((item, index) => {
+        {historyBidPool?.length > 0 ? (
+          historyBidPool.sort((a, b) => (b.premium_slot - a.premium_slot)).map((item, index) => {
             return (
-              <div className={styles.item} key={item}>
+              <div className={styles.item} key={index}>
                 <div className={styles.right}>
-                  <div className={styles.percent}>{item} %</div>
+                  <div className={styles.percent}>{item.premium_slot} %</div>
                   <div className={styles.info}>
-                    <div className={styles.wallet}>{'orai12d...wvx01us'}</div>
-                    <div>{'Fed 01 2024 19:03:43'}</div>
+                    <div className={styles.wallet}>{item.bidder}</div>
+                    <div>{new Date(item.timestamp).toISOString()}</div>
                   </div>
                 </div>
-
                 <div className={styles.amount}>
-                  <TokenBalance
-                    balance={{
-                      amount: '125495320000',
-                      denom: 'ORAIX',
-                      decimals: 6
-                    }}
-                    className={styles.token}
-                  />
-                  <TokenBalance balance={25495.32} />
+                  <div className={styles.token}>
+                    {toDisplay(item.amount)} ORAIX
+                  </div>
+                  <TokenBalance balance={0} />
                 </div>
               </div>
             );

@@ -5,15 +5,15 @@ import styles from './index.module.scss';
 
 import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
-const BALANCE = '3129324000000';
 
 export type InputBalanceType = {
   amount: string | number;
   onChangeAmount: any;
+  balance: string;
   disable?: boolean;
 };
 
-const InputBalance = ({ amount, onChangeAmount, disable = false }: InputBalanceType) => {
+const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: InputBalanceType) => {
   const [coeff, setCoeff] = useState(0);
 
   return (
@@ -22,7 +22,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false }: InputBalanceT
         Balance:{' '}
         <TokenBalance
           balance={{
-            amount: BALANCE,
+            amount: balance,
             denom: 'ORAIX',
             decimals: 6
           }}
@@ -66,8 +66,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false }: InputBalanceT
                   return;
                 }
 
-                // console.log('first', e);
-                onChangeAmount(toDisplay(BALANCE, ORAIX_DECIMAL) * e);
+                onChangeAmount(toDisplay(balance, ORAIX_DECIMAL) * e);
                 setCoeff(e);
               }}
             >

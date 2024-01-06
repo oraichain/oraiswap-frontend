@@ -4,12 +4,8 @@ import { CountDownType } from 'pages/CoHarvest/hooks/useCountdown';
 import styles from './index.module.scss';
 
 const CountDownTime = ({ timeRemaining, percent, isEnd }: CountDownType) => {
-  // const { timeRemaining, percent, isEnd } = useCountdown();
-  // console.log('timeRemaining', timeRemaining);
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
-
   const fmtPercent = percent >= 100 ? 0 : percent;
-  // if (isEnd) return null;
 
   return (
     <div className={styles.countdownWrapper}>

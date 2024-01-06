@@ -16,7 +16,7 @@
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
     "@oraichain/oraidex-common-ui": "^1.0.3",
-    "@oraichain/oraidex-contracts-sdk": "^1.0.26",
+    "@oraichain/oraidex-contracts-sdk": "^1.0.30",
     "@oraichain/oraidex-universal-swap": "^1.0.41",
     "@leapwallet/cosmos-snap-provider": "0.1.25",
     "@reduxjs/toolkit": "^1.9.3",

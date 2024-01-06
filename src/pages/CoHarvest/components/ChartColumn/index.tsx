@@ -1,7 +1,7 @@
 import styles from './index.module.scss';
 
 export type ChartColumnType = {
-  percent: number;
+  percent: number | string;
   volume: number | string;
   interest: number | string;
 };

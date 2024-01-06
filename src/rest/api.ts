@@ -33,7 +33,9 @@ import {
   OraiswapStakingTypes,
   OraiswapTokenQueryClient,
   OraiswapTokenTypes,
-  PairInfo
+  PairInfo,
+  CoharvestBidPoolQueryClient,
+  CoharvestBidPoolTypes
 } from '@oraichain/oraidex-contracts-sdk';
 import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapOracle.types';
 import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
@@ -287,6 +289,16 @@ function generateConvertCw20Erc20Message(
     }
   }
   return [];
+}
+
+async function fetchRoundBid(): Promise<Number> {
+  const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
+  try {
+    const data = await coHavestBidPool.lastRoundId();
+    return data;
+  } catch (error) {
+    throw new Error(`Error when query Round bid using: ${error}`);
+  }
 }
 
 async function fetchTaxRate(): Promise<TaxRateResponse> {
@@ -695,5 +707,6 @@ export {
   generateMiningMsgs,
   generateMoveOraib2OraiMessages,
   getPairAmountInfo,
-  getSubAmountDetails
+  getSubAmountDetails,
+  fetchRoundBid
 };

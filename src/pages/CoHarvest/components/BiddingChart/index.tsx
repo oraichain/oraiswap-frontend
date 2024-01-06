@@ -2,8 +2,19 @@ import TokenBalance from 'components/TokenBalance';
 import styles from './index.module.scss';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import ChartColumn from '../ChartColumn';
-
-const BiddingChart = () => {
+import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { toDisplay } from '@oraichain/oraidex-common'
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { flattenTokens } from 'config/bridgeTokens';
+import { getUsd } from 'libs/utils';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+const BiddingChart = (props: { round: number, bidInfo }) => {
+  const { round, bidInfo } = props
+  const { data: prices } = useCoinGeckoPrices();
+  const totalBidAmount = bidInfo.total_bid_amount;
+  const USDC_TOKEN_INFO = flattenTokens.find(e => e.coinGeckoId === "oraidex")
+  const amountUsd = getUsd(totalBidAmount, USDC_TOKEN_INFO, prices);
+  const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round)
   return (
     <div className={styles.biddingChart}>
       <div className={styles.title}>
@@ -14,16 +25,13 @@ const BiddingChart = () => {
             <TooltipIcon />
           </div>
           <div className={styles.balance}>
-            <TokenBalance balance={25495.32} className={styles.usd} />
+            <div className={styles.usd}>
+              {formatDisplayUsdt(amountUsd)}
+            </div>
             {'('}
-            <TokenBalance
-              balance={{
-                amount: '25495320000',
-                denom: 'ORAIX',
-                decimals: 6
-              }}
-              className={styles.token}
-            />
+            <div className={styles.token}>
+              {toDisplay(totalBidAmount)} ORAIX
+            </div>
             {')'}
           </div>
         </div>
@@ -31,13 +39,13 @@ const BiddingChart = () => {
 
       <div className={styles.content}>
         <div className={styles.columnList}>
-          {[...new Array(25)].map((e, key) => (
+          {allBidPoolRound.map((e, key) => (
             <ChartColumn
               key={key}
               data={{
-                percent: Math.floor(Math.random() * 100),
-                volume: Math.floor(Math.random() * 3000),
-                interest: key + 1
+                percent: e.premium_rate,
+                volume: toDisplay(e.total_bid_amount),
+                interest: e.slot
               }}
             />
           ))}
