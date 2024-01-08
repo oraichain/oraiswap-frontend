@@ -452,7 +452,9 @@ export const oraichainNetwork: CustomChainInfo = {
       contractAddress: WETH_CONTRACT,
       bridgeTo: ['0x01'],
       coinDecimals: 6,
-      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+      Icon: EthIcon,
+      IconLight: EthIcon
     }
     // {
     //   coinDenom: 'ATOM-CW20',
