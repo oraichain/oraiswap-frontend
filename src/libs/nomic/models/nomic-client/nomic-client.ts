@@ -349,15 +349,8 @@ export class NomicClient implements NomicClientInterface {
     const chainInfo = await window.keplr.getKey(senderChain.chainId);
     const sourceAddr = chainInfo.bech32Address;
 
-    // const timeoutTimestampSeconds = Math.floor(
-    //   (Date.now() + 60 * 60 * 1000) / 1000
-    // );
-    // const timeoutTimestampNanoseconds = Long.fromNumber(
-    //   timeoutTimestampSeconds
-    // ).multiply(1000000000);
-
     const DEFAULT_TIMEOUT = 60 * 60;
-
+    if (!bitcoinAddress) throw Error('Not found your bitcoin Address');
     cosmJs.execute(
       sourceAddr,
       OBTCContractAddress,
@@ -370,7 +363,7 @@ export class NomicClient implements NomicClientInterface {
             remote_address: destinationAddress,
             remote_denom: senderChain.source.nBtcIbcDenom,
             timeout: DEFAULT_TIMEOUT,
-            memo: bitcoinAddress && bitcoinAddress.length > 0 ? `withdraw:${bitcoinAddress}` : ''
+            memo: `withdraw:${bitcoinAddress}`
           })
         }
       },
@@ -429,7 +422,20 @@ export class NomicClient implements NomicClientInterface {
       this.getNbtcBalance()
     ]);
   }
-
+  public async setRecoveryAddress(recovery_address: string) {
+    if (!this.wallet.address) {
+      return;
+    }
+    console.log(
+      '🚀 ~ file: nomic-client.ts:433 ~ NomicClient ~ setRecoveryAddress ~ recovery_address:',
+      recovery_address
+    );
+    console.log(
+      '🚀 ~ file: nomic-client.ts:434 ~ NomicClient ~ setRecoveryAddress ~ this.wallet.address:',
+      this.wallet.address
+    );
+    await this.nomic.setRecoveryAddress(this.wallet.address, recovery_address);
+  }
   public async generateAddress(destination?: string) {
     if (!this.wallet?.address) {
       return;

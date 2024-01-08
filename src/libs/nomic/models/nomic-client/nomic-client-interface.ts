@@ -61,6 +61,7 @@ export abstract class NomicClientInterface {
   getValueLocked: () => Promise<void>;
 
   claimIncomingIbc: () => Promise<void>;
+  setRecoveryAddress: (recovery_address: string) => Promise<void>;
   ibcTransferOut: (
     amount: bigint,
     denom: string,

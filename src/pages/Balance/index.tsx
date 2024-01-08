@@ -44,7 +44,7 @@ import styles from './Balance.module.scss';
 import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
-import TokenItem from './TokenItem';
+import TokenItem, { TokenItemProps } from './TokenItem';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   convertKwt,
@@ -70,6 +70,9 @@ import { Decimal } from '@cosmjs/math';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
 import { BitcoinUnit } from 'bitcoin-units';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
+import { TokenItemBtc } from './TokenItem/TokenItemBtc';
+import DepositBtcModal from './DepositBtcModal';
+import { config } from 'libs/nomic/config';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -82,6 +85,7 @@ const Balance: React.FC<BalanceProps> = () => {
   // state internal
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const [isSelectNetwork, setIsSelectNetwork] = useState(false);
+  const [isDepositBtcModal, setIsDepositBtcModal] = useState(false);
   const [, setTxHash] = useState('');
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
@@ -317,13 +321,18 @@ const Balance: React.FC<BalanceProps> = () => {
       if (from.chainId === 'Oraichain' && to.chainId === 'bitcoinTestnet') {
         const { address } = nomic.depositAddress;
         if (!address) throw Error('Not found Orai BTC Address');
+        const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+
+        console.log('🚀 ~ file: index.tsx:326 ~ destinationAddress:', destinationAddress);
         const DEFAULT_TIMEOUT = 60 * 60;
 
         const amountInput = BigInt(Decimal.fromUserInput(toAmount(fromAmount, 6).toString(), 8).atomics.toString());
 
         const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
+        if (!btcAddress) throw Error('Not found your bitcoin address!');
+        if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
 
-        const rs = await window.client.execute(
+        const result = (await window.client.execute(
           oraiAddress,
           OBTCContractAddress,
           {
@@ -332,16 +341,18 @@ const Balance: React.FC<BalanceProps> = () => {
               amount,
               msg: toBinary({
                 local_channel_id: OraichainChain.source.channelId,
-                remote_address: address,
+                remote_address: destinationAddress,
                 remote_denom: OraichainChain.source.nBtcIbcDenom,
                 timeout: DEFAULT_TIMEOUT,
-                memo: btcAddress ? `withdraw:${btcAddress}` : ''
+                memo: `withdraw:${btcAddress}`
               })
             }
           },
           'auto'
-        );
-        console.log('🚀 ~ file: index.tsx:341 ~ rs:', rs);
+        )) as any;
+        console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
+        processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+
         return;
       }
       let newToToken = to;
@@ -454,6 +465,7 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const network = networks.find((n) => n.chainId === filterNetworkUI) ?? networks[0];
+
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
@@ -526,8 +538,14 @@ const Balance: React.FC<BalanceProps> = () => {
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
+                const TokenItemELement: React.FC<TokenItemProps> =
+                  t.chainId === 'Oraichain' && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
+
                 return (
-                  <TokenItem
+                  <TokenItemELement
+                    onDepositBtc={() => {
+                      setIsDepositBtcModal(true);
+                    }}
                     className={classNames(styles.tokens_element, styles[theme])}
                     key={t.denom}
                     amountDetail={{ amount: amount.toString(), usd }}
@@ -571,6 +589,11 @@ const Balance: React.FC<BalanceProps> = () => {
           setToken={(chainId) => {
             setFilterNetworkUI(chainId);
           }}
+        />
+        <DepositBtcModal
+          isOpen={isDepositBtcModal}
+          open={() => setIsDepositBtcModal(true)}
+          close={() => setIsDepositBtcModal(false)}
         />
       </div>
     </Content>

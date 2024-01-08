@@ -1,11 +1,9 @@
-import { ReactNode } from 'react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import TransferConvertToken from '../TransferConvertToken';
-
 import { TokenItemType } from '@oraichain/oraidex-common';
-interface TokenItemProps {
+export interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };
   name?: string;
@@ -17,6 +15,7 @@ interface TokenItemProps {
   convertKwt?: any;
   subAmounts?: AmountDetails;
   theme?: string;
+  onDepositBtc?: Function;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({
@@ -45,7 +44,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
           ) : (
             <token.Icon className={styles.tokenIcon} />
           )}
-
           <div className={styles.tokenInfo}>
             <div className={classNames(styles.tokenName, styles[theme])}>{token.name}</div>
           </div>
