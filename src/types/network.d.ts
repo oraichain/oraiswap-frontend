@@ -12,6 +12,7 @@ export interface NetworkConfig {
   prefix: string;
   rewarder: string;
   converter: string;
+  bid_pool: string;
   oraidex_listing: string;
   multicall: string;
 }

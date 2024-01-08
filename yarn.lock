@@ -3002,10 +3002,15 @@
   resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz"
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
-"@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26":
-  version "1.0.28"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
-  integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
+"@oraichain/oraidex-contracts-sdk@^1.0.24":
+  version "1.0.30"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.30.tgz#af1aec3337a10888f7f4226ec920d8342bc15ba3"
+  integrity sha512-XImWj0Jxrg2Nn21VL3dvGD6WKDTv0juZjK6WPh0XuaTsZxUy/Wk79vRJNOCYjWDT7+lysy1ks8hVbvgRRBetAg==
+
+"@oraichain/oraidex-contracts-sdk@^1.0.31":
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
+  integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
 
 "@oraichain/oraidex-contracts-sdk@^1.0.30":
   version "1.0.31"
