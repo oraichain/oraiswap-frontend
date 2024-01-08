@@ -4,8 +4,8 @@ import BiddingChart from './components/BiddingChart';
 import BiddingHistory from './components/BiddingHistory';
 import HarvestInfo from './components/HarvestInfo';
 import { useCountdown } from './hooks/useCountdown';
-import styles from './index.module.scss';
 import { useGetBidding, useGetRound } from './hooks/useGetBidRound';
+import styles from './index.module.scss';
 
 const CoHarvest = () => {
   const mobileMode = isMobile();
@@ -23,7 +23,13 @@ const CoHarvest = () => {
               <Bidding round={round} isEnd={isEnd} />
             </div>
             <div className={styles.info}>
-              <HarvestInfo poolValue={poolValue} round={round} timeRemaining={timeRemaining} percent={percent} isEnd={isEnd} />
+              <HarvestInfo
+                poolValue={poolValue}
+                round={round}
+                timeRemaining={timeRemaining}
+                percent={percent}
+                isEnd={isEnd}
+              />
               <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
             </div>
           </div>
@@ -31,7 +37,13 @@ const CoHarvest = () => {
         </div>
       ) : (
         <div className={styles.auction}>
-          <HarvestInfo poolValue={poolValue} round={round} timeRemaining={timeRemaining} percent={percent} isEnd={isEnd} />
+          <HarvestInfo
+            poolValue={poolValue}
+            round={round}
+            timeRemaining={timeRemaining}
+            percent={percent}
+            isEnd={isEnd}
+          />
           <Bidding round={round} isEnd={isEnd} />
           <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
           <BiddingHistory round={round} />

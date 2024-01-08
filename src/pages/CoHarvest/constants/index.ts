@@ -6,3 +6,5 @@ export const TIMER = {
 };
 
 export const ORAIX_DECIMAL = 6;
+
+export const MONTHS_ARR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

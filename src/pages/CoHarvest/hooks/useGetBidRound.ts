@@ -1,3 +1,4 @@
+import { toDisplay } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { fetchRoundBid } from 'rest/api';
 import { useQuery } from '@tanstack/react-query';
@@ -47,7 +48,8 @@ export const useGetBidding = (round: number) => {
         total_distribution: '0',
         exchange_rate: '0',
         is_released: false,
-        actual_distributed: '0'
+        actual_distributed: '0',
+        num_bids_distributed: 0
       }
     },
     enabled: !!round
@@ -74,8 +76,22 @@ export const useGetAllBidPoolInRound = (round: number) => {
     placeholderData: [],
     enabled: !!round
   });
+  const sortedBidPoolRound = [...(allBidPoolRound || [])];
 
-  return { allBidPoolRound, isLoading, refetchAllBidPoolRound };
+  sortedBidPoolRound?.sort((a, b) => toDisplay(b.total_bid_amount) - toDisplay(a.total_bid_amount));
+
+  const maxTotalAmount = sortedBidPoolRound[0]?.total_bid_amount;
+
+  const formattedBidPoolRound = allBidPoolRound.map((bid) => {
+    const percentage = (toDisplay(bid.total_bid_amount) / toDisplay(maxTotalAmount)) * 100;
+
+    return {
+      ...bid,
+      percentage
+    };
+  });
+
+  return { allBidPoolRound: formattedBidPoolRound, isLoading, refetchAllBidPoolRound };
 };
 
 export const useGetPotentialReturn = (props: {

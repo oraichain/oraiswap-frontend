@@ -1,6 +1,7 @@
+import { Stargate } from '@injectivelabs/sdk-ts';
 import { useEffect, useRef, useState } from 'react';
 import { TIMER } from '../constants';
-import { calcPercent } from '../helpers';
+import { calcDiffTime, calcPercent } from '../helpers';
 
 export type CountDownType = {
   timeRemaining: number;
@@ -10,13 +11,21 @@ export type CountDownType = {
 
 export const useCountdown = (bidInfo) => {
   const [percent, setPercent] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(129832); // () => calcDiffTime(start, new Date())
   const [isEnd, setIsEnd] = useState(false);
   const countdownRef = useRef(null);
   // const [start, end] = [new Date(Date.now()), new Date(bidInfo.end_time)];
-  const [start, end] = [new Date('01-05-2024'), new Date('01-07-2024')];
+
+  const [start, setStart] = useState(bidInfo?.start_time);
+  const [end, setEnd] = useState(bidInfo?.end_time);
+  const [timeRemaining, setTimeRemaining] = useState(() => calcDiffTime(new Date().getTime(), end));
+
   useEffect(() => {
     if (!bidInfo.round) return;
+    setStart(bidInfo?.start_time);
+    setEnd(bidInfo?.end_time);
+    // when bidInfo round === 0 => time is in milliseconds and when round != 0 time is in seconds
+    setTimeRemaining(() => calcDiffTime(new Date().getTime(), bidInfo?.end_time * TIMER.MILLISECOND));
+
     const decrementTime = () => {
       setTimeRemaining((prev) => {
         const newRemain = prev - TIMER.MILLISECOND;
@@ -37,13 +46,13 @@ export const useCountdown = (bidInfo) => {
         clearInterval(countdownRef.current);
       }
     };
-  }, []);
+  }, [bidInfo]);
 
   useEffect(() => {
     if (!bidInfo.round) return;
     const newPercent = calcPercent(start, end, timeRemaining);
     setPercent(() => newPercent);
-  }, [timeRemaining, start, end]);
+  }, [timeRemaining, start, end, bidInfo]);
 
   return {
     timeRemaining,

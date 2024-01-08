@@ -1,3 +1,4 @@
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
 
 export type ChartColumnType = {
@@ -10,7 +11,7 @@ const ChartColumn = ({ data }: { data: ChartColumnType }) => {
   const { percent, volume, interest } = data;
   return (
     <div className={styles.chartColumn}>
-      <div className={styles.volume}>${volume}</div>
+      <div className={styles.volume}>{formatDisplayUsdt(volume, 3)}</div>
       <div className={styles.percentWrapper}>
         <div className={styles.percent} style={{ height: `${percent}%` }}></div>
       </div>

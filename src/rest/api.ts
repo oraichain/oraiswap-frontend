@@ -295,6 +295,7 @@ async function fetchRoundBid(): Promise<Number> {
   const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
   try {
     const data = await coHavestBidPool.lastRoundId();
+
     return data;
   } catch (error) {
     throw new Error(`Error when query Round bid using: ${error}`);

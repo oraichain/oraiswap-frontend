@@ -1,20 +1,23 @@
-import TokenBalance from 'components/TokenBalance';
-import styles from './index.module.scss';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import ChartColumn from '../ChartColumn';
-import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
-import { toDisplay } from '@oraichain/oraidex-common'
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { flattenTokens } from 'config/bridgeTokens';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getUsd } from 'libs/utils';
+import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-const BiddingChart = (props: { round: number, bidInfo }) => {
-  const { round, bidInfo } = props
+import { memo } from 'react';
+import ChartColumn from '../ChartColumn';
+import styles from './index.module.scss';
+const BiddingChart = (props: { round: number; bidInfo }) => {
+  const { round, bidInfo } = props;
   const { data: prices } = useCoinGeckoPrices();
   const totalBidAmount = bidInfo.total_bid_amount;
-  const USDC_TOKEN_INFO = flattenTokens.find(e => e.coinGeckoId === "oraidex")
+  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
   const amountUsd = getUsd(totalBidAmount, USDC_TOKEN_INFO, prices);
-  const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round)
+
+  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
+
   return (
     <div className={styles.biddingChart}>
       <div className={styles.title}>
@@ -25,13 +28,9 @@ const BiddingChart = (props: { round: number, bidInfo }) => {
             <TooltipIcon />
           </div>
           <div className={styles.balance}>
-            <div className={styles.usd}>
-              {formatDisplayUsdt(amountUsd)}
-            </div>
+            <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
             {'('}
-            <div className={styles.token}>
-              {toDisplay(totalBidAmount)} ORAIX
-            </div>
+            <div className={styles.token}>{toDisplay(totalBidAmount)} ORAIX</div>
             {')'}
           </div>
         </div>
@@ -43,8 +42,8 @@ const BiddingChart = (props: { round: number, bidInfo }) => {
             <ChartColumn
               key={key}
               data={{
-                percent: e.premium_rate,
-                volume: toDisplay(e.total_bid_amount),
+                percent: e.percentage,
+                volume: getUsd(e.total_bid_amount, ORAIX_TOKEN_INFO, prices),
                 interest: e.slot
               }}
             />
@@ -55,4 +54,4 @@ const BiddingChart = (props: { round: number, bidInfo }) => {
   );
 };
 
-export default BiddingChart;
+export default memo(BiddingChart);
