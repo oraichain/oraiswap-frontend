@@ -141,7 +141,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
             }
           }}
           icon={null}
-          disabled={isEnd || loading || !amount}
+          disabled={isEnd || loading || !amount || !Number(estimateReceive)}
         >
           {loading && <Loader width={22} height={22} />}&nbsp;Place a bid
         </Button>
