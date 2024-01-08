@@ -9,10 +9,14 @@
   gap: 8px;
 
   border-radius: 12px;
-  background: #fff;
+  @include theme {
+    background: theme-get('neutral-surface-bg');
+  }
 
   .title {
-    color: #686a66;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
 
     font-size: 14px;
     font-weight: 400;

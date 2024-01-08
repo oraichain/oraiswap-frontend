@@ -25,15 +25,9 @@
         flex-direction: column;
       }
 
-      //   @include theme() {
-      //     border: 1px solid theme-get('neutral-6');
-      //     background: theme-get('neutral-white');
-      //     box-shadow: theme-get('shadow-swap-box');
-      //   }
-
       border-radius: 24px;
       border: 2px solid #000;
-      background: #c9ff85;
+      background: $primary-banner-default;
 
       .value {
         display: flex;
@@ -45,9 +39,7 @@
       }
 
       .heading {
-        @include theme() {
-          color: theme-get('text-color');
-        }
+        color: $light-text-color;
 
         font-size: 16px;
         font-weight: 500;
@@ -87,7 +79,9 @@
       z-index: 0;
       border-radius: 24px;
       // theme
-      background: #000;
+      @include theme() {
+        background: theme-get('primary-surface-default-dark-2');
+      }
     }
   }
 }
