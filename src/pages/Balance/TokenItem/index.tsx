@@ -3,6 +3,7 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import TransferConvertToken from '../TransferConvertToken';
 import { TokenItemType } from '@oraichain/oraidex-common';
+import { tokensIcon } from 'config/chainInfos';
 interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };
@@ -28,6 +29,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
   subAmounts,
   theme
 }) => {
+  const tokenIcon = tokensIcon.find(tok => tok.coinGeckoId === token.coinGeckoId)
   return (
     <div
       className={classNames(styles.tokenWrapper, styles[theme], { [styles.active]: active }, className)}
@@ -38,10 +40,10 @@ const TokenItem: React.FC<TokenItemProps> = ({
     >
       <div className={styles.balanceAmountInfo}>
         <div className={styles.token}>
-          {token.Icon && token.IconLight && theme === 'light' ? (
-            <token.IconLight className={styles.tokenIcon} />
+          {theme === 'light' ? (
+            <tokenIcon.IconLight className={styles.tokenIcon} />
           ) : (
-            <token.Icon className={styles.tokenIcon} />
+            <tokenIcon.Icon className={styles.tokenIcon} />
           )}
           <div className={styles.tokenInfo}>
             <div className={classNames(styles.tokenName, styles[theme])}>{token.name}</div>
