@@ -9,7 +9,9 @@
   height: 350px;
 
   .volume {
-    color: #686a66;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
     font-size: 13px;
     font-weight: 400;
     line-height: 100%;
@@ -28,7 +30,10 @@
     gap: 8px;
     flex: 1 0 0;
     border-radius: 99px;
-    background: #f7f7f7;
+    @include theme {
+      background: theme-get('neutral-6');
+      color: theme-get('neutral-text-text-token-name');
+    }
 
     .percent {
       background: #5ea402;

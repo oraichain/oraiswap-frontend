@@ -12,9 +12,7 @@
     font-size: 14px;
   }
 
-  @include theme() {
-    color: theme-get('text-color');
-  }
+  color: $light-text-color;
 
   .title {
     display: flex;
@@ -50,7 +48,7 @@
       margin-left: 12px;
 
       .symbol {
-        color: #232521;
+        color: $dropdown-bg-color-hover-dark;
         font-size: 14px;
         font-weight: 500;
         line-height: 100%;

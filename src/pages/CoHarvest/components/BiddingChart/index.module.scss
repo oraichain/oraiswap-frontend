@@ -14,7 +14,9 @@
     flex-wrap: wrap;
 
     gap: 8px;
-    color: #494949;
+    @include theme {
+      color: theme-get('sea-stone-200');
+    }
 
     font-size: 18px;
     font-weight: 600;
@@ -42,7 +44,7 @@
       }
 
       .balance {
-        color: #979995;
+        color: $neutron-text-body-light;
         font-size: 18px;
         font-weight: 500;
         line-height: 150%;
@@ -52,7 +54,10 @@
         align-items: center;
 
         .usd {
-          color: #494949;
+          @include theme {
+            color: theme-get('sea-stone-200');
+          }
+
           font-size: 18px;
           font-weight: 600;
           line-height: 150%;
