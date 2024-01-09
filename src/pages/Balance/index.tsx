@@ -539,7 +539,7 @@ const Balance: React.FC<BalanceProps> = () => {
                   usd += getUsd(subAmount, t, prices);
                 }
                 const TokenItemELement: React.FC<TokenItemProps> =
-                  t.chainId === 'Oraichain' && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
+                  t.chainId === 'bitcoinTestnet' && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
 
                 return (
                   <TokenItemELement

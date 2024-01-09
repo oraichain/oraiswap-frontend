@@ -2,12 +2,69 @@ import classNames from 'classnames';
 import styles from './index.module.scss';
 
 import TokenItem, { TokenItemProps } from './index';
+import { ReactComponent as DepositBtcLight } from 'assets/images/deposit_btc.svg';
+import { ReactComponent as DepositBtcDark } from 'assets/images/btc-deposit-dark.svg';
+import { Button } from 'components/Button';
+import { useContext } from 'react';
+import { ThemeContext } from 'context/theme-context';
 
 export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props }) => {
+  const { theme } = useContext(ThemeContext);
   return (
-    <div>
+    <>
       <TokenItem {...props} />
-      <button onClick={() => onDepositBtc()}>Deposit</button>
-    </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: 16,
+          background: '#191b21',
+          borderRadius: 12,
+          marginTop: -15
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <div>{theme === 'light' ? <DepositBtcLight /> : <DepositBtcDark />}</div>
+          <div
+            style={{
+              paddingLeft: 16
+            }}
+          >
+            <p
+              style={{
+                fontFamily: 'IBM Plex Sans',
+                fontSize: 16,
+                fontWeight: 600
+              }}
+            >
+              Transfer BTC to Oraichain
+            </p>
+            <p
+              style={{
+                fontFamily: 'IBM Plex Sans',
+                color: '#979995'
+              }}
+            >
+              Deposit from CEX (Binance, Coinbase, KuCoin,...)
+            </p>
+          </div>
+        </div>
+        <div>
+          <Button
+            onClick={() => {
+              alert('ok');
+            }}
+            type="primary"
+          >
+            Deposit
+          </Button>
+        </div>
+      </div>
+    </>
   );
 };
