@@ -1,10 +1,15 @@
-import { toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay, BigDecimal } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { fetchRoundBid } from 'rest/api';
 import { useQuery } from '@tanstack/react-query';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { CoharvestBidPoolQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { CoharvestBidPoolQueryClient, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { network } from 'config/networks';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { getUsd } from 'libs/utils';
+import { flattenTokens } from 'config/bridgeTokens';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 export const useGetRound = () => {
   const [round, setRound] = useState(0);
@@ -112,6 +117,26 @@ export const useGetPotentialReturn = (props: {
     return data;
   };
 
+  const getListPotentialReturn = async ({ listBidHistories, exchangeRate }) => {
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+    const res = await multicall.aggregate({
+      queries: listBidHistories.map((bid) => ({
+        address: network.bid_pool,
+        data: toBinary({
+          estimate_amount_receive: {
+            bid_amount: bid.amount,
+            exchange_rate: exchangeRate,
+            round: bid.round,
+            slot
+          }
+        })
+      }))
+    });
+
+    return res;
+  };
+
   const {
     data: potentialReturn,
     isLoading,
@@ -125,7 +150,69 @@ export const useGetPotentialReturn = (props: {
     enabled: !!bidAmount && !!round
   });
 
-  return { potentialReturn, isLoading, refetchPotentialReturn };
+  return { potentialReturn, isLoading, refetchPotentialReturn, getListPotentialReturn };
+};
+
+export const useGetBidHistoryWithPotentialReturn = (props: { exchangeRate: string; listBidHistories: any[] }) => {
+  const { listBidHistories, exchangeRate } = props;
+  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+
+  const { data: prices } = useCoinGeckoPrices();
+
+  const getListPotentialReturn = async () => {
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+    const res = await multicall.aggregate({
+      queries: listBidHistories.map((bid) => ({
+        address: network.bid_pool,
+        data: toBinary({
+          estimate_amount_receive: {
+            bid_amount: bid.amount,
+            exchange_rate: exchangeRate,
+            round: bid.round,
+            slot: bid.premium_slot
+          }
+        })
+      }))
+    });
+    return listBidHistories.map((bid, ind) => {
+      if (!res.return_data[ind].success) {
+        return {
+          ...bid,
+          potentialReturnUSD: '0',
+          receive: '0',
+          residue_bid: '0'
+        };
+      }
+      const response = fromBinary(res.return_data[ind].data);
+
+      const estimateReceive = response?.receive || '0';
+      const estimateResidueBid = response?.residue_bid || '0';
+
+      const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
+      const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
+
+      const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
+      return {
+        ...bid,
+        potentialReturnUSD,
+        ...response
+      };
+    });
+  };
+
+  const {
+    data: listPotentialReturn,
+    isLoading,
+    refetch: refetchPotentialReturn
+  } = useQuery(['all-potential-return', listBidHistories], () => getListPotentialReturn(), {
+    refetchOnWindowFocus: false,
+    placeholderData: [],
+    enabled: !!listBidHistories
+  });
+
+  return { listPotentialReturn, isLoading, refetchPotentialReturn };
 };
 
 export const useGetHistoryBid = (round: number) => {

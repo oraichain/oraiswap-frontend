@@ -218,6 +218,10 @@
       line-height: 150%;
 
       .value {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
         .balance {
           display: flex;
           justify-content: flex-end;

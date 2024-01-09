@@ -1,32 +1,51 @@
-import { toDisplay, toAmount } from '@oraichain/oraidex-common';
+import { BigDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
-import TokenBalance from 'components/TokenBalance';
-import { TIMER } from 'pages/CoHarvest/constants';
+import { flattenTokens, tokenMap } from 'config/bridgeTokens';
+import { network } from 'config/networks';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { getUsd } from 'libs/utils';
+import { INIT_AMOUNT_SIMULATE, TIMER } from 'pages/CoHarvest/constants';
 import { dateFormat, shortenAddress } from 'pages/CoHarvest/helpers';
-import { useGetHistoryBid } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { useGetBidHistoryWithPotentialReturn, useGetHistoryBid } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
 import { memo } from 'react';
 import styles from './index.module.scss';
-import { RootState } from 'store/configure';
-import { useSelector } from 'react-redux';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { flattenTokens } from 'config/bridgeTokens';
-import { getUsd } from 'libs/utils';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
 
 const BiddingHistory = ({ round }) => {
-  const { historyBidPool, isLoading, refetchHistoryBidPool } = useGetHistoryBid(round);
-  const { data: prices } = useCoinGeckoPrices();
   const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+
+  const originalFromToken = tokenMap['oraix'];
+  const originalToToken = tokenMap['usdc'];
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+
+  const { simulateData: averageRatio } = useSimulate(
+    'simulate-average-data-co-harvest',
+    ORAIX_TOKEN_INFO,
+    USDC_TOKEN_INFO,
+    originalFromToken,
+    originalToToken,
+    routerClient,
+    INIT_AMOUNT_SIMULATE
+  );
+
+  const { data: prices } = useCoinGeckoPrices();
+  const { historyBidPool, isLoading, refetchHistoryBidPool } = useGetHistoryBid(round);
+  const { refetchPotentialReturn, listPotentialReturn } = useGetBidHistoryWithPotentialReturn({
+    listBidHistories: historyBidPool,
+    exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString()
+  });
 
   return (
     <div className={styles.biddingHistory}>
       <span className={styles.title}>Bidding History</span>
       <div className={styles.content}>
-        {historyBidPool?.length > 0 ? (
-          historyBidPool
+        {listPotentialReturn?.length > 0 ? (
+          listPotentialReturn
             .sort((a, b) => b.premium_slot - a.premium_slot)
             .map((item, index) => {
-              const amountUsd = getUsd(item.amount, ORAIX_TOKEN_INFO, prices);
               return (
                 <div className={styles.item} key={index}>
                   <div className={styles.right}>
@@ -38,7 +57,7 @@ const BiddingHistory = ({ round }) => {
                   </div>
                   <div className={styles.amount}>
                     <div className={styles.token}>{toDisplay(item.amount)} ORAIX</div>
-                    {formatDisplayUsdt(amountUsd)}
+                    {formatDisplayUsdt(item.potentialReturnUSD)}
                   </div>
                 </div>
               );

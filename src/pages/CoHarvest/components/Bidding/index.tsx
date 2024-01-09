@@ -1,6 +1,8 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { ORAIX_CONTRACT, toAmount, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
+import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -11,9 +13,14 @@ import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
-import { TIMER } from 'pages/CoHarvest/constants';
+import { INIT_AMOUNT_SIMULATE, TIMER } from 'pages/CoHarvest/constants';
 import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
-import { useGetAllBidPoolInRound, useGetHistoryBid, useGetPotentialReturn } from 'pages/CoHarvest/hooks/useGetBidRound';
+import {
+  useGetAllBidPoolInRound,
+  useGetBidding,
+  useGetHistoryBid,
+  useGetPotentialReturn
+} from 'pages/CoHarvest/hooks/useGetBidRound';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { memo, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -41,10 +48,11 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
   const [address] = useConfigReducer('address');
   const rangeDebounce = useDebounce(range, TIMER.MILLISECOND);
   const [loading, setLoading] = useState(false);
+  const [theme] = useConfigReducer('theme');
 
   const { refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
   const { refetchHistoryBidPool } = useGetHistoryBid(round);
-  const INIT_AMOUNT = 1000;
+  const { refetchBiddingInfo } = useGetBidding(round);
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data-co-harvest',
     ORAIX_TOKEN_INFO,
@@ -52,12 +60,12 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
     originalFromToken,
     originalToToken,
     routerClient,
-    INIT_AMOUNT
+    INIT_AMOUNT_SIMULATE
   );
 
   const { potentialReturn, refetchPotentialReturn } = useGetPotentialReturn({
     bidAmount: toAmount(amount).toString(),
-    exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT).toString(), // TODO: hardcode simulate test
+    exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString(), // TODO: hardcode simulate test
     round: round,
     slot: range
   });
@@ -70,6 +78,9 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
   const estimateResidueBid = potentialReturn?.residue_bid || '0';
 
   const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
+  const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
+
+  const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
 
   return (
     <div className={styles.bidding}>
@@ -91,11 +102,15 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
         <div className={styles.return}>
           <span>Potential return</span>
           <div className={styles.value}>
-            <div className={styles.usdReturn}>{formatDisplayUsdt(returnAmountUsd)}</div>
+            <div className={styles.usdReturn}>{formatDisplayUsdt(potentialReturnUSD)}</div>
             <div className={styles.balance}>
               {/* <div className={styles.token}>{formatDisplayUsdt(amountUsd)}</div> */}
               <UsdcIcon />
               <span>{toDisplay(estimateReceive)} USDC</span>
+            </div>
+            <div className={styles.balance}>
+              {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
+              <span>{toDisplay(estimateResidueBid)} ORAIX</span>
             </div>
           </div>
         </div>
@@ -129,6 +144,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
                 });
                 refetchAllBidPoolRound();
                 refetchHistoryBidPool();
+                refetchBiddingInfo();
               }
             } catch (error) {
               console.log({ error });
