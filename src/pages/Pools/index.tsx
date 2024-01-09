@@ -14,6 +14,7 @@ import isEqual from 'lodash/isEqual';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
 import { parseAssetOnlyDenom } from './helpers';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import {
   useFetchCacheRewardAssetForAllPools,
   useFetchLpPoolsV3,
@@ -111,10 +112,13 @@ const Pools: React.FC<{}> = () => {
     });
 
   const generateIcon = (baseToken: TokenItemType, quoteToken: TokenItemType): JSX.Element => {
-    const BaseTokenIcon = theme === 'light' ? baseToken.IconLight : baseToken.Icon;
-    const QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight : quoteToken.Icon;
+    let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
+
+    if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.IconLight : baseToken.Icon;
+    if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight : quoteToken.Icon;
+
     // TODO: hardcode reverse logo for ORAI/INJ, need to update later
-    if (baseToken.coinGeckoId === 'injective-protocol' && quoteToken.coinGeckoId === 'oraichain-token') {
+    if (baseToken?.coinGeckoId === 'injective-protocol' && quoteToken?.coinGeckoId === 'oraichain-token') {
       return (
         <div className={styles.symbols}>
           <QuoteTokenIcon className={styles.symbols_logo_left} />
