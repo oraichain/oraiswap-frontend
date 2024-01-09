@@ -12,12 +12,12 @@ import Modal from 'components/Modal';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { handleErrorTransaction } from 'helper';
-import useClickOutside from 'hooks/useClickOutSide';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { checkRegex, validateAddressCosmos } from 'libs/utils';
 import sumBy from 'lodash/sumBy';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import { generateMsgFrontierAddToken, getInfoLiquidityPool } from '../helpers';
 import { InitBalancesItems, RewardItems } from './ItemsComponent';
@@ -85,7 +85,8 @@ const NewTokenModal: FC<ModalProps> = ({ isOpen, close, open }) => {
     if (typeDelete) setTypeDelete('');
   };
 
-  const ref = useClickOutside(handleOutsideClick);
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => handleOutsideClick());
 
   const handleCreateToken = async () => {
     if (isMintNewToken && !checkRegex(tokenName))

@@ -32,6 +32,10 @@ module.exports = {
         }
       }
     ];
+    const isDevelopment = env === 'development';
+    fixBabelRules(config);
+
+
 
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
@@ -63,6 +67,28 @@ module.exports = {
     if (!fs.existsSync(vendorFileDest)) {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
+
+    if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
+      const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+      config.devtool = 'source-map';
+      config.plugins.push(
+        new SentryWebpackPlugin({
+          org: 'oraichain',
+          project: 'oraidex',
+
+          // Specify the directory containing build artifacts
+          include: './build',
+
+          // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
+          // and needs the `project:releases` and `org:read` scopes
+          authToken: process.env.SENTRY_AUTH_TOKEN
+
+          // Optionally uncomment the line below to override automatic release name detection
+          // release: process.env.RELEASE
+        })
+      );
+    }
+
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
