@@ -80,7 +80,12 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     if (!originalFromToken || !originalToToken || !feeConfig) return;
     const isFromChainIdEvm = EVM_CHAIN_ID.includes(originalFromToken.chainId);
     const isToChainIdEvm = EVM_CHAIN_ID.includes(originalToToken.chainId);
-    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) return;
+
+    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) {
+      setRelayerFeeAmount(0);
+      setRelayerFeeInOrai(0);
+      return;
+    }
     const { relayer_fees: relayerFees } = feeConfig;
     const relayerFeeInOrai = relayerFees.reduce((acc, cur) => {
       const isFromToPrefix = cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix;
