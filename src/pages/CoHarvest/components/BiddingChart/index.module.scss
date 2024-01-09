@@ -1,0 +1,78 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.biddingChart {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 8px;
+    @include theme {
+      color: theme-get('sea-stone-200');
+    }
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 150%; /* 27px */
+
+    .titleLeft {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .titleRight {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .subtitle {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        svg {
+          vertical-align: sub;
+        }
+      }
+
+      .balance {
+        color: $neutron-text-body-light;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 150%;
+
+        display: flex;
+        gap: 6px;
+        align-items: center;
+
+        .usd {
+          @include theme {
+            color: theme-get('sea-stone-200');
+          }
+
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+    }
+  }
+
+  .content {
+    overflow-x: auto;
+
+    .columnList {
+      display: flex;
+      justify-content: space-between;
+      min-width: 900px;
+    }
+  }
+}
