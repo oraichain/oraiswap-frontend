@@ -18,7 +18,7 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
           display: 'flex',
           justifyContent: 'space-between',
           padding: 16,
-          background: '#191b21',
+          background: theme === 'light' ? '#F7F7F7' : '#191b21',
           borderRadius: 12,
           marginTop: -15
         }}
@@ -39,7 +39,8 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
               style={{
                 fontFamily: 'IBM Plex Sans',
                 fontSize: 16,
-                fontWeight: 600
+                fontWeight: 600,
+                color: theme === 'light' ? '#232521' : '#F7F7F7'
               }}
             >
               Transfer BTC to Oraichain
@@ -47,7 +48,7 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
             <p
               style={{
                 fontFamily: 'IBM Plex Sans',
-                color: '#979995'
+                color: theme === 'light' ? '#686A66' : '#979995'
               }}
             >
               Deposit from CEX (Binance, Coinbase, KuCoin,...)
@@ -55,12 +56,7 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
           </div>
         </div>
         <div>
-          <Button
-            onClick={() => {
-              alert('ok');
-            }}
-            type="primary"
-          >
+          <Button onClick={() => onDepositBtc()} type="primary">
             Deposit
           </Button>
         </div>
