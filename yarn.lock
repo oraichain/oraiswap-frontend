@@ -1314,25 +1314,10 @@
     "@cosmjs/stream" "^0.30.1"
     xstream "^11.14.0"
 
-<<<<<<< HEAD
 "@cosmjs/json-rpc@^0.31.3":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/json-rpc/-/json-rpc-0.31.3.tgz#11e5cf0f6d9ab426dff470bb8d68d5d31cd6ab13"
   integrity sha512-7LVYerXjnm69qqYR3uA6LGCrBW2EO5/F7lfJxAmY+iII2C7xO3a0vAjMSt5zBBh29PXrJVS6c2qRP22W1Le2Wg==
-=======
-"@cosmjs/json-rpc@^0.31.0":
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/json-rpc/-/json-rpc-0.31.3.tgz#11e5cf0f6d9ab426dff470bb8d68d5d31cd6ab13"
-  integrity sha512-7LVYerXjnm69qqYR3uA6LGCrBW2EO5/F7lfJxAmY+iII2C7xO3a0vAjMSt5zBBh29PXrJVS6c2qRP22W1Le2Wg==
-  dependencies:
-    "@cosmjs/stream" "^0.31.3"
-    xstream "^11.14.0"
-
-"@cosmjs/json-rpc@^0.31.1":
-  version "0.31.1"
-  resolved "https://registry.npmjs.org/@cosmjs/json-rpc/-/json-rpc-0.31.1.tgz"
-  integrity sha512-gIkCj2mUDHAxvmJnHtybXtMLZDeXrkDZlujjzhvJlWsIuj1kpZbKtYqh+eNlfwhMkMMAlQa/y4422jDmizW+ng==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
   dependencies:
     "@cosmjs/stream" "^0.31.3"
     xstream "^11.14.0"
@@ -1344,24 +1329,10 @@
   dependencies:
     bn.js "^5.2.0"
 
-<<<<<<< HEAD
 "@cosmjs/math@^0.31.3":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.31.3.tgz#767f7263d12ba1b9ed2f01f68d857597839fd957"
   integrity sha512-kZ2C6glA5HDb9hLz1WrftAjqdTBb3fWQsRR+Us2HsjAYdeE6M3VdXMsYCP5M3yiihal1WDwAY2U7HmfJw7Uh4A==
-=======
-"@cosmjs/math@^0.31.0":
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.31.3.tgz#767f7263d12ba1b9ed2f01f68d857597839fd957"
-  integrity sha512-kZ2C6glA5HDb9hLz1WrftAjqdTBb3fWQsRR+Us2HsjAYdeE6M3VdXMsYCP5M3yiihal1WDwAY2U7HmfJw7Uh4A==
-  dependencies:
-    bn.js "^5.2.0"
-
-"@cosmjs/math@^0.31.1":
-  version "0.31.1"
-  resolved "https://registry.npmjs.org/@cosmjs/math/-/math-0.31.1.tgz"
-  integrity sha512-kiuHV6m6DSB8/4UV1qpFhlc4ul8SgLXTGRlYkYiIIP4l0YNeJ+OpPYaOlEgx4Unk2mW3/O2FWYj7Jc93+BWXng==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
   dependencies:
     bn.js "^5.2.0"
 
@@ -1401,27 +1372,10 @@
     ws "^7"
     xstream "^11.14.0"
 
-<<<<<<< HEAD
 "@cosmjs/socket@^0.31.3":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/socket/-/socket-0.31.3.tgz#52086380f4de2fc3514b90b0484b4b1c4c50e39e"
   integrity sha512-aqrDGGi7os/hsz5p++avI4L0ZushJ+ItnzbqA7C6hamFSCJwgOkXaOUs+K9hXZdX4rhY7rXO4PH9IH8q09JkTw==
-=======
-"@cosmjs/socket@^0.31.0":
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/socket/-/socket-0.31.3.tgz#52086380f4de2fc3514b90b0484b4b1c4c50e39e"
-  integrity sha512-aqrDGGi7os/hsz5p++avI4L0ZushJ+ItnzbqA7C6hamFSCJwgOkXaOUs+K9hXZdX4rhY7rXO4PH9IH8q09JkTw==
-  dependencies:
-    "@cosmjs/stream" "^0.31.3"
-    isomorphic-ws "^4.0.1"
-    ws "^7"
-    xstream "^11.14.0"
-
-"@cosmjs/socket@^0.31.1":
-  version "0.31.1"
-  resolved "https://registry.npmjs.org/@cosmjs/socket/-/socket-0.31.1.tgz"
-  integrity sha512-XTtEr+x3WGbqkzoGX0sCkwVqf5n+bBqDwqNgb+DWaBABQxHVRuuainrTVp0Yc91D3Iy2twLQzeBA9OrRxDSerw==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
   dependencies:
     "@cosmjs/stream" "^0.31.3"
     isomorphic-ws "^4.0.1"
@@ -1471,41 +1425,11 @@
   dependencies:
     xstream "^11.14.0"
 
-<<<<<<< HEAD
 "@cosmjs/stream@^0.31.3":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/stream/-/stream-0.31.3.tgz#53428fd62487ec08fc3886a50a3feeb8b2af2e66"
   integrity sha512-8keYyI7X0RjsLyVcZuBeNjSv5FA4IHwbFKx7H60NHFXszN8/MvXL6aZbNIvxtcIHHsW7K9QSQos26eoEWlAd+w==
-=======
-"@cosmjs/stream@^0.31.0", "@cosmjs/stream@^0.31.3":
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/stream/-/stream-0.31.3.tgz#53428fd62487ec08fc3886a50a3feeb8b2af2e66"
-  integrity sha512-8keYyI7X0RjsLyVcZuBeNjSv5FA4IHwbFKx7H60NHFXszN8/MvXL6aZbNIvxtcIHHsW7K9QSQos26eoEWlAd+w==
   dependencies:
-    xstream "^11.14.0"
-
-"@cosmjs/stream@^0.31.1":
-  version "0.31.1"
-  resolved "https://registry.npmjs.org/@cosmjs/stream/-/stream-0.31.1.tgz"
-  integrity sha512-xsIGD9bpBvYYZASajCyOevh1H5pDdbOWmvb4UwGZ78doGVz3IC3Kb9BZKJHIX2fjq9CMdGVJHmlM+Zp5aM8yZA==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
-  dependencies:
-    xstream "^11.14.0"
-
-"@cosmjs/tendermint-rpc@0.31.0":
-  version "0.31.0"
-  resolved "https://registry.yarnpkg.com/@cosmjs/tendermint-rpc/-/tendermint-rpc-0.31.0.tgz#df82f634ff08fc377dfdccea43a31d92b5b0eaf1"
-  integrity sha512-yo9xbeuI6UoEKIhFZ9g0dvUKLqnBzwdpEc/uldQygQc51j38gQVwFko+6sjmhieJqRYYvrYumcbJMiV6GFM9aA==
-  dependencies:
-    "@cosmjs/crypto" "^0.31.0"
-    "@cosmjs/encoding" "^0.31.0"
-    "@cosmjs/json-rpc" "^0.31.0"
-    "@cosmjs/math" "^0.31.0"
-    "@cosmjs/socket" "^0.31.0"
-    "@cosmjs/stream" "^0.31.0"
-    "@cosmjs/utils" "^0.31.0"
-    axios "^0.21.2"
-    readonly-date "^1.0.0"
     xstream "^11.14.0"
 
 "@cosmjs/tendermint-rpc@^0.30.1":
@@ -1545,22 +1469,10 @@
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.30.1.tgz#6d92582341be3c2ec8d82090253cfa4b7f959edb"
   integrity sha512-KvvX58MGMWh7xA+N+deCfunkA/ZNDvFLw4YbOmX3f/XBIkqrVY7qlotfy2aNb1kgp6h4B6Yc8YawJPDTfvWX7g==
 
-<<<<<<< HEAD
 "@cosmjs/utils@^0.31.3":
   version "0.31.3"
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.31.3.tgz#f97bbfda35ad69e80cd5c7fe0a270cbda16db1ed"
   integrity sha512-VBhAgzrrYdIe0O5IbKRqwszbQa7ZyQLx9nEQuHQ3HUplQW7P44COG/ye2n6AzCudtqxmwdX7nyX8ta1J07GoqA==
-=======
-"@cosmjs/utils@^0.31.0":
-  version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.31.3.tgz#f97bbfda35ad69e80cd5c7fe0a270cbda16db1ed"
-  integrity sha512-VBhAgzrrYdIe0O5IbKRqwszbQa7ZyQLx9nEQuHQ3HUplQW7P44COG/ye2n6AzCudtqxmwdX7nyX8ta1J07GoqA==
-
-"@cosmjs/utils@^0.31.1":
-  version "0.31.1"
-  resolved "https://registry.npmjs.org/@cosmjs/utils/-/utils-0.31.1.tgz"
-  integrity sha512-n4Se1wu4GnKwztQHNFfJvUeWcpvx3o8cWhSbNs9JQShEuB3nv3R5lqFBtDCgHZF/emFQAP+ZjF8bTfCs9UBGhA==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
 
 "@csstools/normalize.css@*":
   version "12.1.1"
@@ -2949,27 +2861,11 @@
     react-dom "^18.2.0"
     react-use "^17.4.0"
 
-<<<<<<< HEAD
 "@oraichain/oraidex-common@../oraidex-sdk/packages/oraidex-common", "@oraichain/oraidex-common@file:../oraidex-sdk/packages/oraidex-common":
   version "1.0.54"
-=======
-"@oraichain/oraidex-common@^1.0.45":
-  version "1.0.57"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.57.tgz#7e1a4eb2c5d6eac876fc1f0e81a66f8ae5792369"
-  integrity sha512-X47YpsdFavBXmwpK3wEphaazapguek+mZGbrOpmqd7CXyPs9nLvIbcgk2A777rm06SvO8qk/6hhMcCXkHVoy4w==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
   dependencies:
-    "@cosmjs/amino" "^0.31.0"
-    "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@cosmjs/crypto" "^0.31.0"
-    "@cosmjs/proto-signing" "^0.31.0"
-    "@cosmjs/stargate" "^0.31.0"
-    "@cosmjs/tendermint-rpc" "0.31.0"
     "@ethersproject/providers" "^5.0.10"
     "@keplr-wallet/types" "^0.11.38"
-    "@oraichain/oraidex-contracts-sdk" "^1.0.30"
-    bignumber.js "^9.0.1"
-    cosmjs-types "^0.8.0"
     ethers "^5.0.15"
 
 "@oraichain/oraidex-contracts-build@^1.0.22":
@@ -2982,20 +2878,8 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
   integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
 
-<<<<<<< HEAD
 "@oraichain/oraidex-universal-swap@../oraidex-sdk/packages/universal-swap":
   version "1.0.42"
-=======
-"@oraichain/oraidex-contracts-sdk@^1.0.30":
-  version "1.0.31"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
-  integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
-
-"@oraichain/oraidex-universal-swap@^1.0.48":
-  version "1.0.48"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.48.tgz#9a0602475d88a540b0c7e04c3f638ac2755bbfcd"
-  integrity sha512-cdAB71P2pYE2BDMh7bOUIM2U0Qgf9WpGzuz5yrKNf7PhX36o9FBVljuk5A6yyDMkK2G/Ifp6GqTRZQG7HNhfng==
->>>>>>> 88cfad978aa6a11befb9922ccb884d1f9ac3977c
   dependencies:
     "@oraichain/oraidex-common" "file:../oraidex-sdk/packages/oraidex-common"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"

@@ -33,9 +33,6 @@ module.exports = {
       }
     ];
     const isDevelopment = env === 'development';
-    fixBabelRules(config);
-
-
 
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
