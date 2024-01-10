@@ -145,7 +145,8 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
                 refetchAllBidPoolRound();
                 refetchHistoryBidPool();
                 refetchBiddingInfo();
-                setAmount(undefined);
+                // setAmount(undefined);
+                // setRange(1);
               }
             } catch (error) {
               console.log({ error });

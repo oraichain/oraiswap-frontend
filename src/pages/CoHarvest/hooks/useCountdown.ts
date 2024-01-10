@@ -40,6 +40,8 @@ export const useCountdown = (bidInfo) => {
         });
       };
       countdownRef.current = setInterval(decrementTime, TIMER.MILLISECOND);
+    } else {
+      setIsEnd(true);
     }
 
     return () => {
