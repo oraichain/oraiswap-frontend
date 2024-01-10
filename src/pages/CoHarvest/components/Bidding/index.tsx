@@ -74,8 +74,6 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
     refetchPotentialReturn();
   }, [rangeDebounce]);
 
-  console.log('test', amount);
-
   const estimateReceive = potentialReturn?.receive || '0';
   const estimateResidueBid = potentialReturn?.residue_bid || '0';
 

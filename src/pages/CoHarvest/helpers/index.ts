@@ -48,3 +48,10 @@ export function dateFormat(date) {
 export function shortenAddress(address: string) {
   return address.substring(0, 8) + '...' + address.substring(address.length - 7, address.length);
 }
+
+export const formatUTCDateString = (date) => {
+  const toDate = new Date(date);
+  const dateUtc = new Date(toDate.toUTCString().slice(0, -4));
+  // return dateUtc.toString(); // ignore the timezone
+  return new Date(date).toUTCString();
+};
