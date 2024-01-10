@@ -10,6 +10,7 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { getUsd } from 'libs/utils';
 import { flattenTokens } from 'config/bridgeTokens';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { BidStatus, TIMER } from '../constants';
 
 export const useGetRound = () => {
   const [round, setRound] = useState(0);
@@ -63,6 +64,43 @@ export const useGetBidding = (round: number) => {
   return { biddingInfo, isLoading, refetchBiddingInfo };
 };
 
+export const useGetBiddingFilter = (round: number) => {
+  const getBiddingInfo = async () => {
+    const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
+    const data = await coHavestBidPool.biddingInfo({
+      round
+    });
+    return data;
+  };
+
+  const {
+    data: biddingInfo,
+    isLoading,
+    refetch: refetchBiddingInfo
+  } = useQuery(['bidding-info-filter', round], () => getBiddingInfo(), {
+    refetchOnWindowFocus: false,
+    placeholderData: {
+      bid_info: {
+        round: 0,
+        start_time: Date.now(),
+        end_time: Date.now(),
+        total_bid_amount: '0',
+        total_bid_matched: '0'
+      },
+      distribution_info: {
+        total_distribution: '0',
+        exchange_rate: '0',
+        is_released: false,
+        actual_distributed: '0',
+        num_bids_distributed: 0
+      }
+    },
+    enabled: !!round
+  });
+
+  return { biddingInfo, isLoading, refetchBiddingInfo };
+};
+
 export const useGetAllBidPoolInRound = (round: number) => {
   const getAllBidPoolRound = async () => {
     const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
@@ -75,12 +113,14 @@ export const useGetAllBidPoolInRound = (round: number) => {
   const {
     data: allBidPoolRound,
     isLoading,
+    isFetching,
     refetch: refetchAllBidPoolRound
   } = useQuery(['all-bid-pool-round', round], () => getAllBidPoolRound(), {
     refetchOnWindowFocus: false,
     placeholderData: [],
     enabled: !!round
   });
+
   const sortedBidPoolRound = [...(allBidPoolRound || [])];
 
   sortedBidPoolRound?.sort((a, b) => toDisplay(b.total_bid_amount) - toDisplay(a.total_bid_amount));
@@ -96,7 +136,7 @@ export const useGetAllBidPoolInRound = (round: number) => {
     };
   });
 
-  return { allBidPoolRound: formattedBidPoolRound, isLoading, refetchAllBidPoolRound };
+  return { allBidPoolRound: formattedBidPoolRound, isLoading: isFetching, refetchAllBidPoolRound };
 };
 
 export const useGetPotentialReturn = (props: {
@@ -117,26 +157,6 @@ export const useGetPotentialReturn = (props: {
     return data;
   };
 
-  const getListPotentialReturn = async ({ listBidHistories, exchangeRate }) => {
-    const multicall = new MulticallQueryClient(window.client, network.multicall);
-
-    const res = await multicall.aggregate({
-      queries: listBidHistories.map((bid) => ({
-        address: network.bid_pool,
-        data: toBinary({
-          estimate_amount_receive: {
-            bid_amount: bid.amount,
-            exchange_rate: exchangeRate,
-            round: bid.round,
-            slot
-          }
-        })
-      }))
-    });
-
-    return res;
-  };
-
   const {
     data: potentialReturn,
     isLoading,
@@ -150,11 +170,15 @@ export const useGetPotentialReturn = (props: {
     enabled: !!bidAmount && !!round
   });
 
-  return { potentialReturn, isLoading, refetchPotentialReturn, getListPotentialReturn };
+  return { potentialReturn, isLoading, refetchPotentialReturn };
 };
 
-export const useGetBidHistoryWithPotentialReturn = (props: { exchangeRate: string; listBidHistories: any[] }) => {
-  const { listBidHistories, exchangeRate } = props;
+export const useGetBidHistoryWithPotentialReturn = (props: {
+  exchangeRate: string;
+  listBidHistories: any[];
+  biddingInfo: any;
+}) => {
+  const { listBidHistories, exchangeRate, biddingInfo } = props;
   const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
@@ -176,13 +200,16 @@ export const useGetBidHistoryWithPotentialReturn = (props: { exchangeRate: strin
         })
       }))
     });
+
     return listBidHistories.map((bid, ind) => {
+      // get potential return
       if (!res.return_data[ind].success) {
         return {
           ...bid,
           potentialReturnUSD: '0',
-          receive: '0',
-          residue_bid: '0'
+          estimate_receive: '0',
+          estimate_residue_bid: '0',
+          status: BidStatus.BIDDING
         };
       }
       const response = fromBinary(res.return_data[ind].data);
@@ -194,25 +221,52 @@ export const useGetBidHistoryWithPotentialReturn = (props: { exchangeRate: strin
       const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
 
       const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
+
+      // get status
+      const isRunningRound =
+        new Date().getTime() <= new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime();
+
+      let status = BidStatus.BIDDING;
+      let percent = 0;
+      if (isRunningRound) {
+        status = BidStatus.BIDDING;
+      } else if (estimateReceive === '0') {
+        status = BidStatus.DRAW;
+      } else {
+        status = BidStatus.WIN;
+        percent = new BigDecimal(new BigDecimal(bid.amount || '0').sub(estimateResidueBid))
+          .div(bid.amount)
+          .mul(100)
+          .toNumber();
+      }
+
       return {
         ...bid,
         potentialReturnUSD,
-        ...response
+        estimateReceive,
+        estimateResidueBid,
+        status,
+        percent
       };
     });
   };
 
   const {
     data: listPotentialReturn,
-    isLoading,
+    isFetching,
+    isRefetching,
     refetch: refetchPotentialReturn
-  } = useQuery(['all-potential-return', listBidHistories], () => getListPotentialReturn(), {
-    refetchOnWindowFocus: false,
-    placeholderData: [],
-    enabled: !!listBidHistories
-  });
+  } = useQuery(
+    ['all-potential-return', listBidHistories, biddingInfo.bid_info.end_time],
+    () => getListPotentialReturn(),
+    {
+      refetchOnWindowFocus: false,
+      placeholderData: [],
+      enabled: !!listBidHistories && !!biddingInfo.bid_info.end_time
+    }
+  );
 
-  return { listPotentialReturn, isLoading, refetchPotentialReturn };
+  return { listPotentialReturn, isLoading: isFetching, refetchPotentialReturn };
 };
 
 export const useGetHistoryBid = (round: number) => {
@@ -237,4 +291,98 @@ export const useGetHistoryBid = (round: number) => {
   });
 
   return { historyBidPool, isLoading, refetchHistoryBidPool };
+};
+
+export const useGetAllBids = (round: number, exchangeRate: string) => {
+  // const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  // const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+
+  // const { data: prices } = useCoinGeckoPrices();
+  const getHistoryBidPool = async () => {
+    const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
+    const data = await coHarvestBidPool.allBidInRound({
+      round,
+      // limit: 1000,
+      startAfter: null
+    });
+
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+    const res = await multicall.aggregate({
+      queries: data.map((bidId) => ({
+        address: network.bid_pool,
+        data: toBinary({
+          bid: {
+            idx: bidId
+          }
+        })
+      }))
+    });
+
+    return data.map((bid, ind) => {
+      if (!res.return_data[ind].success) {
+        return {
+          ...bid
+        };
+      }
+      const response = fromBinary(res.return_data[ind].data);
+      return response;
+    });
+
+    // const multicallPotential = await multicall.aggregate({
+    //   queries: dataList.map((bid) => ({
+    //     address: network.bid_pool,
+    //     data: toBinary({
+    //       estimate_amount_receive: {
+    //         bid_amount: bid.amount,
+    //         exchange_rate: exchangeRate,
+    //         round: bid.round,
+    //         slot: bid.premium_slot
+    //       }
+    //     })
+    //   }))
+    // });
+
+    // return dataList.map((bid, ind) => {
+    //   // get potential return
+    //   if (!multicallPotential.return_data[ind].success) {
+    //     return {
+    //       ...bid,
+    //       potentialReturnUSD: '0',
+    //       estimate_receive: '0',
+    //       estimate_residue_bid: '0',
+    //       status: BidStatus.BIDDING
+    //     };
+    //   }
+    //   const response = fromBinary(multicallPotential.return_data[ind].data);
+
+    //   const estimateReceive = response?.receive || '0';
+    //   const estimateResidueBid = response?.residue_bid || '0';
+
+    //   const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
+    //   const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
+
+    //   const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
+
+    //   return {
+    //     ...bid,
+    //     potentialReturnUSD,
+    //     estimateReceive,
+    //     estimateResidueBid
+    //   };
+    // });
+  };
+
+  const {
+    data: historyAllBidPool,
+    isLoading,
+    isFetching,
+    refetch: refetchAllHistoryBidPool
+  } = useQuery(['history-bid-pool-all', round], () => getHistoryBidPool(), {
+    refetchOnWindowFocus: false,
+    placeholderData: [],
+    enabled: !!round
+  });
+
+  return { historyAllBidPool, isLoading: isFetching, refetchAllHistoryBidPool };
 };

@@ -43,7 +43,10 @@
     }
 
     .symbol {
-      color: #c7c8c6;
+      // color: #c7c8c6;
+      @include theme {
+        color: theme-get('neutral-text-text-disabled');
+      }
       font-size: 20px;
       font-weight: 500;
       line-height: 150%; /* 30px */

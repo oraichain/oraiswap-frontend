@@ -69,6 +69,8 @@
   .content {
     overflow-x: auto;
 
+    min-height: 350px;
+
     .columnList {
       display: flex;
       justify-content: space-between;

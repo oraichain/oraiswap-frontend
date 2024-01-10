@@ -33,7 +33,7 @@ import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
   const [range, setRange] = useState(1);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState();
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const balance = amounts['oraix'];
@@ -46,7 +46,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
 
   const amountUsd = getUsd(toAmount(amount), ORAIX_TOKEN_INFO, prices);
   const [address] = useConfigReducer('address');
-  const rangeDebounce = useDebounce(range, TIMER.MILLISECOND);
+  const rangeDebounce = useDebounce(range, TIMER.HAFT_MILLISECOND);
   const [loading, setLoading] = useState(false);
   const [theme] = useConfigReducer('theme');
 
@@ -65,7 +65,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
 
   const { potentialReturn, refetchPotentialReturn } = useGetPotentialReturn({
     bidAmount: toAmount(amount).toString(),
-    exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString(), // TODO: hardcode simulate test
+    exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString(),
     round: round,
     slot: range
   });
@@ -73,6 +73,8 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
   useEffect(() => {
     refetchPotentialReturn();
   }, [rangeDebounce]);
+
+  console.log('test', amount);
 
   const estimateReceive = potentialReturn?.receive || '0';
   const estimateResidueBid = potentialReturn?.residue_bid || '0';
@@ -145,6 +147,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
                 refetchAllBidPoolRound();
                 refetchHistoryBidPool();
                 refetchBiddingInfo();
+                setAmount(undefined);
               }
             } catch (error) {
               console.log({ error });

@@ -5,6 +5,49 @@
 .biddingHistory {
   margin-top: 40px;
 
+  .tabWrapper {
+    display: flex;
+    height: 40px;
+    justify-content: space-between;
+    border-bottom: 1px solid;
+
+    margin-bottom: 24px;
+
+    @include theme {
+      border-color: theme-get('neutral-surface-bg-btn-disabled');
+    }
+
+    .tabTitle {
+      display: flex;
+      align-items: center;
+      flex: 1;
+
+      .title {
+        color: $neutron-text-body-light;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 150%;
+        padding: 0 10px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid;
+        border-color: transparent;
+
+        // width: 100%;
+        // max-width: 120px;
+        cursor: pointer;
+        white-space: nowrap;
+
+        &.active {
+          @include theme {
+            color: theme-get('neutral-text-text-dropdown');
+            border-color: theme-get('neutral-text-text-dropdown');
+          }
+        }
+      }
+    }
+  }
+
   .title {
     @include theme {
       color: theme-get('sea-stone-200');
@@ -14,128 +57,76 @@
     line-height: 150%; /* 24px */
   }
 
-  .content {
-    margin-top: 16px;
+  .round {
+    position: relative;
+    padding: 0 8px;
 
-    .item {
-      margin-bottom: 8px;
+    button {
       display: flex;
-      flex-wrap: wrap;
-      white-space: nowrap;
-
-      padding: 16px 24px;
-      justify-content: space-between;
+      width: 100%;
+      justify-content: flex-end;
       align-items: center;
+      gap: 6px;
 
-      border-radius: 12px;
-
-      gap: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 150%;
 
       @include theme {
-        background: theme-get('neutral-6');
-        // color: theme-get('neutral-text-text-token-name');
-        color: them-get('neutral-8');
-      }
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 100%;
-
-      @include small-mobile {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-      }
-
-      .right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        @include small-mobile {
-          flex-direction: row-reverse;
-          justify-content: space-between;
-          flex: 1;
-          width: 100%;
-        }
-
-        .percent {
-          display: flex;
-          width: 60px;
-          padding: 8px;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          border-radius: 99px;
-          border: 1px solid;
-
-          @include theme {
-            border-color: theme-get('primary-surface-default-dark');
-            background: theme-get('primary-surface-default-subtle');
-            color: theme-get('primary-surface-default-dark');
-          }
-          font-size: 16px;
-          font-weight: 500;
-          line-height: 1;
-        }
-
-        .info {
-          display: flex;
-          flex-direction: column;
-
-          .wallet {
-            @include theme {
-              color: theme-get('neutral-text-text-dropdown');
-            }
-            margin-bottom: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            line-height: 1;
-          }
-        }
-      }
-
-      .amount {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 12px;
-
-        @include small-mobile {
-          flex-direction: row;
-          align-items: flex-end;
-          flex-wrap: wrap;
-        }
-
-        .token {
-          @include theme {
-            color: theme-get('neutral-text-text-token-name');
-          }
-          font-size: 16px;
-          font-weight: 500;
-          line-height: 100%;
-        }
+        color: theme-get('neutral-9');
       }
     }
 
-    .nodata {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: #686a66;
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 150%; /* 21px */
-      border-radius: 12px;
+    .wrapperFilter {
+      position: relative;
+      bottom: 0;
+      // right: 0;
+      display: none;
+      transition: all ease-in-out 0.5s;
+      border-radius: 6px;
 
-      @include theme {
-        // color: them-get('neutral-8');
-      }
-
+      width: 150px;
       height: 200px;
-      span {
-        margin-top: 8px;
+      overflow-y: auto;
+      padding: 8px;
+
+      @include theme {
+        background: theme-get('bg-section-05');
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        justify-content: center;
+
+        @include theme {
+          color: theme-get('neutral-text-text-disabled');
+        }
+
+        &:hover {
+          // opacity: 0.7;
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+        }
+
+        &.active {
+          @include theme {
+            background: theme-get('neutral-surface-bg');
+            color: theme-get('neutral-9');
+          }
+        }
+      }
+
+      &.showFilter {
+        display: block;
       }
     }
+  }
+
+  .loadingDivWrapper {
+    border-radius: 24px;
+    background: rgba(79, 79, 79, 0.5);
   }
 }

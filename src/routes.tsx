@@ -31,7 +31,7 @@ export default () => (
       <Route path="/bridge" element={<Balance />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
-      <Route path="/Auction" element={<CoHarvest />} />
+      <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/pools/:poolUrl" element={<PoolDetail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

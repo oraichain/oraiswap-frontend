@@ -1,7 +1,7 @@
 import Tippy, { TippyProps } from '@tippyjs/react';
 import { ReactComponent as SettingImg } from 'assets/images/setting-icon.svg';
 import classNames from 'classnames';
-import React, { FC } from 'react';
+import React, { FC, ReactElement } from 'react';
 
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
@@ -23,6 +23,7 @@ const TooltipTippyProps: TippyProps = {
 interface Props extends TippyProps {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   visible: boolean;
+  icon?: ReactElement;
 }
 
 export const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
@@ -64,7 +65,7 @@ export const TooltipIcon: FC<Props> = ({ children, ...props }) => {
       {children}
       <div className={styles.icon}>
         <SettingTooltip {...props} visible={props.visible} setVisible={props.setVisible}>
-          <SettingImg />
+          {props.icon ? props.icon : <SettingImg />}
         </SettingTooltip>
       </div>
     </div>

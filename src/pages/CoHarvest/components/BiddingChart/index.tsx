@@ -36,6 +36,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
         </div>
       </div>
 
+      {/* <LoadingBox loading={isLoading}> */}
       <div className={styles.content}>
         <div className={styles.columnList}>
           {allBidPoolRound.map((e, key) => (
@@ -50,6 +51,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
           ))}
         </div>
       </div>
+      {/* </LoadingBox> */}
     </div>
   );
 };
