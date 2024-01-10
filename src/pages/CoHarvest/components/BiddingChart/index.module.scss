@@ -68,7 +68,9 @@
 
   .content {
     overflow-x: auto;
-
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
     min-height: 350px;
 
     .columnList {
