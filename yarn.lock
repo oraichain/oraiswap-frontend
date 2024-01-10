@@ -2980,9 +2980,9 @@
     react-use "^17.4.0"
 
 "@oraichain/oraidex-common@^1.0.45":
-  version "1.0.58"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.58.tgz#1c6671d61fa2923b526d853e4247cf0fb484622d"
-  integrity sha512-Mrg6lKHtvHHF5CnwUOZCM/7iR/UsB8Thb48SNGOuJnE9OFJcQByP4P232MAcus17r+TQ1qBGTeslK76Ye9bLmQ==
+  version "1.0.59"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.59.tgz#feb1714e7f5ee8442f208dc21eb7889ebe722ae0"
+  integrity sha512-D6u2sp9E7Nq2V7suxX2cf0G8Tx0BGzMVoDUoCaMHk0MFFDoFt8admek3DCpVDAXTjVAq1N5BMrnPdZbuOAZAKQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
