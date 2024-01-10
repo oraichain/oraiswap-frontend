@@ -212,19 +212,27 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
           status: BidStatus.BIDDING
         };
       }
+
       const response = fromBinary(res.return_data[ind].data);
 
-      const estimateReceive = response?.receive || '0';
-      const estimateResidueBid = response?.residue_bid || '0';
+      // get status
+      const isRunningRound =
+        !bid.is_distributed || // case: chưa chia reward
+        new Date().getTime() <= new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime(); // case: time now < time end
+
+      // console.log(
+      //   'isRunningRound',
+      //   new Date().getTime(),
+      //   new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime()
+      // );
+
+      const estimateReceive = isRunningRound ? response?.receive || '0' : bid.amount_received || '0';
+      const estimateResidueBid = isRunningRound ? response?.residue_bid || '0' : bid.residue_bid || '0';
 
       const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
       const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
 
       const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
-
-      // get status
-      const isRunningRound =
-        new Date().getTime() <= new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime();
 
       let status = BidStatus.BIDDING;
       let percent = 0;

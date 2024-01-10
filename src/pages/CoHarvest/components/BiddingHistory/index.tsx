@@ -61,6 +61,7 @@ const BiddingHistory = ({ round }) => {
     setShowFilter(false);
   });
 
+  // console.log('first', listPotentialReturn);
   return (
     <div className={styles.biddingHistory}>
       <div className={styles.tabWrapper}>
