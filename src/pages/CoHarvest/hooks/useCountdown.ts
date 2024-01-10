@@ -25,24 +25,26 @@ export const useCountdown = (bidInfo) => {
     setStart(bidInfo?.start_time);
     setEnd(bidInfo?.end_time);
     // when bidInfo round === 0 => time is in milliseconds and when round != 0 time is in seconds
-    if (bidInfo?.end_time > getTimeDateNow) {
-      setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
-      const decrementTime = () => {
-        setTimeRemaining((prev) => {
-          const newRemain = prev - TIMER.MILLISECOND;
-          if (newRemain <= 0) {
-            clearInterval(countdownRef.current);
-            countdownRef.current = null;
-            setIsEnd(true);
-            return 0;
-          }
-          return newRemain;
-        });
-      };
-      countdownRef.current = setInterval(decrementTime, TIMER.MILLISECOND);
-    } else {
-      setIsEnd(true);
-    }
+
+    console.log('first', bidInfo?.end_time > getTimeDateNow);
+    // if (bidInfo?.end_time > getTimeDateNow) {
+    setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
+    const decrementTime = () => {
+      setTimeRemaining((prev) => {
+        const newRemain = prev - TIMER.MILLISECOND;
+        if (newRemain <= 0) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+          setIsEnd(true);
+          return 0;
+        }
+        return newRemain;
+      });
+    };
+    countdownRef.current = setInterval(decrementTime, TIMER.MILLISECOND);
+    // } else {
+    //   setIsEnd(true);
+    // }
 
     return () => {
       if (countdownRef.current) {
