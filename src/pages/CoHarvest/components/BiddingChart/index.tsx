@@ -5,9 +5,12 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getUsd } from 'libs/utils';
 import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import ChartColumn from '../ChartColumn';
 import styles from './index.module.scss';
+import { TooltipIconBtn } from '../Tooltip';
+import useConfigReducer from 'hooks/useConfigReducer';
+
 const BiddingChart = (props: { round: number; bidInfo }) => {
   const { round, bidInfo } = props;
   const { data: prices } = useCoinGeckoPrices();
@@ -17,6 +20,9 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
 
   const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
   const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
+  const [visible, setVisible] = useState(false);
+
+  const [theme] = useConfigReducer('theme');
 
   return (
     <div className={styles.biddingChart}>
@@ -25,7 +31,16 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
         <div className={styles.titleRight}>
           <div className={styles.subtitle}>
             <span>Total Bid</span>
-            <TooltipIcon />
+            <TooltipIconBtn
+              placement="auto"
+              visible={visible}
+              setVisible={setVisible}
+              content={
+                <div className={`${styles.tooltip} ${styles[theme]}`}>
+                  Total amount of ORAIX currently allocated across all Co-Harvest interest levels
+                </div>
+              }
+            />
           </div>
           <div className={styles.balance}>
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>

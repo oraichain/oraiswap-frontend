@@ -46,7 +46,7 @@ const MyBidding = ({ list, isLoading }) => {
               {list
                 .sort((a, b) => b.premium_slot - a.premium_slot)
                 .map((item, index) => {
-                  const amountUsd = getUsd(toAmount(item.amount || '0'), ORAIX_TOKEN_INFO, prices);
+                  const amountUsd = getUsd(item.amount || '0', ORAIX_TOKEN_INFO, prices);
                   const Status = StatusIcon[item.status] || BiddingIcon;
 
                   return (

@@ -1,17 +1,31 @@
-import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { formatCountdownTime } from 'pages/CoHarvest/helpers';
+import { formatCountdownTime, formatUTCDateString } from 'pages/CoHarvest/helpers';
 import { CountDownType } from 'pages/CoHarvest/hooks/useCountdown';
+import { useState } from 'react';
+import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
+import useConfigReducer from 'hooks/useConfigReducer';
 
-const CountDownTime = ({ timeRemaining, percent, isEnd }: CountDownType) => {
+const CountDownTime = ({ timeRemaining, percent, isEnd, start, end }: CountDownType) => {
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
+  const [visible, setVisible] = useState(false);
   const fmtPercent = percent >= 100 ? 0 : percent;
+  const [theme] = useConfigReducer('theme');
 
   return (
     <div className={styles.countdownWrapper}>
       <div className={styles.title}>
         <span>Co-Harvest Ending In</span>
-        <TooltipIcon />
+        {/* <TooltipIcon /> */}
+        <TooltipIconBtn
+          placement="auto"
+          visible={visible}
+          setVisible={setVisible}
+          content={
+            <div className={`${styles.tooltip} ${styles[theme]}`}>
+              Current round period: {formatUTCDateString(start)} - {formatUTCDateString(end)}
+            </div>
+          }
+        />
       </div>
       <div className={styles.countdown}>
         <div className={styles.unit}>

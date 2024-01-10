@@ -7,6 +7,8 @@ export type CountDownType = {
   timeRemaining: number;
   percent: number;
   isEnd: boolean;
+  start: Date;
+  end: Date;
 };
 
 export const useCountdown = (bidInfo) => {
@@ -56,6 +58,8 @@ export const useCountdown = (bidInfo) => {
   return {
     timeRemaining,
     percent,
-    isEnd
+    isEnd,
+    start: new Date(start * TIMER.MILLISECOND),
+    end: new Date(end * TIMER.MILLISECOND)
   };
 };
