@@ -51,6 +51,7 @@ const fixBabelRules = (config) => {
 module.exports = {
   fallback,
   webpack: function (config, env) {
+    const isDevelopment = env === 'development';
     fixBabelRules(config);
 
     config.resolve.fallback = fallback;
@@ -85,7 +86,7 @@ module.exports = {
     }
 
     // if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
-    // const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+    //   const SentryWebpackPlugin = require('@sentry/webpack-plugin');
     //   config.devtool = 'source-map';
     //   config.plugins.push(
     //     new SentryWebpackPlugin({
@@ -100,7 +101,7 @@ module.exports = {
     //       authToken: process.env.SENTRY_AUTH_TOKEN,
 
     //       // Optionally uncomment the line below to override automatic release name detection
-    //       release: process.env.RELEASE
+    //       release: vendorHash
     //     })
     //   );
     // }

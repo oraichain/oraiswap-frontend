@@ -4,7 +4,8 @@ import {
   network,
   oraichainTokens,
   toDisplay,
-  toAmount
+  toAmount,
+  BigDecimal
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
@@ -46,17 +47,18 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const [relayerFeeInOrai, setRelayerFeeInOrai] = useState(0);
   const [relayerFee, setRelayerFeeAmount] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
-
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const oraiToken = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
 
+  const isWeth = originalToToken?.coinGeckoId === 'weth';
+  const CONSTANTS_ORAI_SIMULATE_WETH = 10;
   const { data: relayerFeeAmount } = useQuery(
     ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],
     () => {
       return handleSimulateSwap({
         originalFromInfo: oraiToken,
         originalToInfo: originalToToken,
-        originalAmount: relayerFeeInOrai,
+        originalAmount: isWeth ? CONSTANTS_ORAI_SIMULATE_WETH : relayerFeeInOrai,
         routerClient
       });
     },
@@ -67,7 +69,10 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
-    if (relayerFeeAmount) setRelayerFeeAmount(relayerFeeAmount.displayAmount);
+    if (relayerFeeAmount)
+      setRelayerFeeAmount(
+        new BigDecimal(relayerFeeAmount.displayAmount).div(isWeth ? CONSTANTS_ORAI_SIMULATE_WETH : 1).toNumber()
+      );
   }, [relayerFeeAmount]);
 
   // get relayer fee in ORAI
@@ -75,7 +80,12 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     if (!originalFromToken || !originalToToken || !feeConfig) return;
     const isFromChainIdEvm = EVM_CHAIN_ID.includes(originalFromToken.chainId);
     const isToChainIdEvm = EVM_CHAIN_ID.includes(originalToToken.chainId);
-    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) return;
+
+    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) {
+      setRelayerFeeAmount(0);
+      setRelayerFeeInOrai(0);
+      return;
+    }
     const { relayer_fees: relayerFees } = feeConfig;
     const relayerFeeInOrai = relayerFees.reduce((acc, cur) => {
       const isFromToPrefix = cur.prefix === originalFromToken.prefix || cur.prefix === originalToToken.prefix;
