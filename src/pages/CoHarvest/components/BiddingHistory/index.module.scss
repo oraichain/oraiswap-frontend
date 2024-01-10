@@ -63,6 +63,7 @@
   .round {
     position: relative;
     padding: 0 8px;
+    z-index: 23;
 
     button {
       display: flex;
@@ -82,11 +83,12 @@
 
     .wrapperFilter {
       position: relative;
-      bottom: 0;
+      // top: 0;
       // right: 0;
       display: none;
       transition: all ease-in-out 0.5s;
       border-radius: 6px;
+      border: 1px solid;
 
       width: 150px;
       height: 200px;
@@ -94,6 +96,7 @@
       padding: 8px;
 
       @include theme {
+        border-color: theme-get('neutral-border-border-bold');
         background: theme-get('bg-section-05');
       }
 

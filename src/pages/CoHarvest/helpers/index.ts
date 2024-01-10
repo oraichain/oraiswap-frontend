@@ -1,7 +1,8 @@
 import { MONTHS_ARR, TIMER } from '../constants';
 
 export const formatCountdownTime = (milliseconds: number) => {
-  const seconds = Math.floor(milliseconds / TIMER.MILLISECOND);
+  const formatMilliseconds = milliseconds < 0 ? 0 : milliseconds;
+  const seconds = Math.floor(formatMilliseconds / TIMER.MILLISECOND);
   const minutes = Math.floor(seconds / TIMER.SECOND);
   const hours = Math.floor(minutes / TIMER.MINUTE);
   const days = Math.floor(hours / TIMER.HOUR);
