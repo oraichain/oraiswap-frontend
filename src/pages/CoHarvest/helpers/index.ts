@@ -52,7 +52,7 @@ export function shortenAddress(address: string) {
 
 export const formatUTCDateString = (date) => {
   // Get the current date and time
-  const currentDate = new Date();
+  const currentDate = new Date(date);
 
   // Format the date to a string
   const formattedDate = new Intl.DateTimeFormat('en-US', {
