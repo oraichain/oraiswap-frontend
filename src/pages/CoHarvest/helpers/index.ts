@@ -50,8 +50,26 @@ export function shortenAddress(address: string) {
 }
 
 export const formatUTCDateString = (date) => {
-  const toDate = new Date(date);
-  const dateUtc = new Date(toDate.toUTCString().slice(0, -4));
-  // return dateUtc.toString(); // ignore the timezone
-  return new Date(date).toUTCString();
+  // Get the current date and time
+  const currentDate = new Date();
+
+  // Format the date to a string
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    timeZoneName: 'longOffset'
+  }).format(currentDate);
+
+  // Extract UTC offset
+  const utcOffset = Intl.DateTimeFormat('en-US', { timeZoneName: 'longOffset' })
+    .formatToParts(currentDate)
+    .find((part) => part.type === 'timeZoneName').value;
+
+  // Combine the formatted date and UTC offset
+  const result = `${formattedDate}`;
+
+  return result;
 };
