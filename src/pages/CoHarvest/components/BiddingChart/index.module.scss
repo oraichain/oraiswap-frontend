@@ -8,6 +8,11 @@
   flex-direction: column;
   gap: 24px;
 
+  @include mobile {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   .title {
     display: flex;
     align-items: center;

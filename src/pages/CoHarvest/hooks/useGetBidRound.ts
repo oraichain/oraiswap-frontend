@@ -257,12 +257,12 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
     isRefetching,
     refetch: refetchPotentialReturn
   } = useQuery(
-    ['all-potential-return', listBidHistories, biddingInfo.bid_info.end_time],
+    ['all-potential-return', listBidHistories, biddingInfo?.bid_info.end_time],
     () => getListPotentialReturn(),
     {
       refetchOnWindowFocus: false,
       placeholderData: [],
-      enabled: !!listBidHistories && !!biddingInfo.bid_info.end_time
+      enabled: !!listBidHistories && !!biddingInfo?.bid_info.end_time
     }
   );
 

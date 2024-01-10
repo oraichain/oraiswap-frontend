@@ -4,7 +4,10 @@
 
 .biddingHistory {
   margin-top: 40px;
-
+  @include mobile {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
   .tabWrapper {
     display: flex;
     height: 40px;
