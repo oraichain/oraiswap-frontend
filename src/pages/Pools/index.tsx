@@ -7,12 +7,8 @@ import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
 import {
   CW20_DECIMALS,
-  INJECTIVE_CONTRACT,
-  ORAI,
   TokenItemType,
   toDisplay,
-  USDC_CONTRACT,
-  ORAIX_CONTRACT
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
@@ -21,7 +17,7 @@ import useTheme from 'hooks/useTheme';
 import isEqual from 'lodash/isEqual';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
-import { parseAssetOnlyDenom } from './helpers';
+import { getSymbolPools, parseAssetOnlyDenom, reverseSymbolArr } from './helpers';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import {
   useFetchCacheRewardAssetForAllPools,
@@ -41,30 +37,6 @@ export type PoolTableData = PoolInfoResponse & {
   baseToken: TokenItemType;
   quoteToken: TokenItemType;
 };
-
-// TODO: hardcode reverse symbol for ORAI/INJ,USDC/ORAIX, need to update later
-const reverseSymbolArr = [
-  [
-    {
-      denom: INJECTIVE_CONTRACT,
-      coinGeckoId: 'injective-protocol'
-    },
-    {
-      denom: ORAI,
-      coinGeckoId: 'orai'
-    }
-  ],
-  [
-    {
-      denom: USDC_CONTRACT,
-      coinGeckoId: 'usd-coin'
-    },
-    {
-      denom: ORAIX_CONTRACT,
-      coinGeckoId: 'oraidex'
-    }
-  ]
-];
 
 const Pools: React.FC<{}> = () => {
   const [isOpenNewPoolModal, setIsOpenNewPoolModal] = useState(false);
@@ -94,13 +66,6 @@ const Pools: React.FC<{}> = () => {
   });
 
   const [cachedReward] = useConfigReducer('rewardPools');
-  const getSymbolPools = (baseDenom: string, quoteDenom: string, originalSymbols: string) => {
-    let symbols = originalSymbols;
-    if (reverseSymbolArr.some((item) => item[0].denom === baseDenom && item[1].denom === quoteDenom)) {
-      symbols = originalSymbols.split('/').reverse().join('/');
-    }
-    return symbols;
-  };
 
   const poolTableData: PoolTableData[] = filteredPools
     .map((pool) => {
