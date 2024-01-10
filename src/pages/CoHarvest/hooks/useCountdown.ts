@@ -24,6 +24,10 @@ export const useCountdown = (bidInfo) => {
     if (!bidInfo.round) return;
     setStart(bidInfo?.start_time);
     setEnd(bidInfo?.end_time);
+    // setStart(new Date('01-15-2024'));
+    // setEnd(new Date('01-27-2024'));
+    // setStart(new Date());
+    // setEnd(new Date());
     // when bidInfo round === 0 => time is in milliseconds and when round != 0 time is in seconds
 
     console.log('first', bidInfo?.end_time > getTimeDateNow);
