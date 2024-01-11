@@ -1,11 +1,11 @@
 import Tippy, { TippyProps } from '@tippyjs/react';
-import { ReactComponent as SettingImg } from 'assets/images/setting-icon.svg';
+import { ReactComponent as TooltipIconImg } from 'assets/icons/icon_tooltip.svg';
 import classNames from 'classnames';
 import React, { FC, ReactElement } from 'react';
 
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
-import styles from './SettingTooltip.module.scss';
+import styles from './index.module.scss';
 
 export const DefaultTippyProps: TippyProps = {
   animation: false,
@@ -26,7 +26,7 @@ interface Props extends TippyProps {
   icon?: ReactElement;
 }
 
-export const SettingTooltip: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
+export const TooltipInfo: FC<Props> = ({ className, children, setVisible, visible, ...props }) => {
   const hide = () => setVisible(false);
 
   const button = (
@@ -59,14 +59,14 @@ export const SettingTooltip: FC<Props> = ({ className, children, setVisible, vis
   );
 };
 
-export const TooltipIcon: FC<Props> = ({ children, ...props }) => {
+export const TooltipIconBtn: FC<Props> = ({ children, ...props }) => {
   return (
     <div className={styles.flex}>
       {children}
       <div className={styles.icon}>
-        <SettingTooltip {...props} visible={props.visible} setVisible={props.setVisible}>
-          {props.icon ? props.icon : <SettingImg />}
-        </SettingTooltip>
+        <TooltipInfo {...props} visible={props.visible} setVisible={props.setVisible}>
+          {props.icon ? props.icon : <TooltipIconImg />}
+        </TooltipInfo>
       </div>
     </div>
   );

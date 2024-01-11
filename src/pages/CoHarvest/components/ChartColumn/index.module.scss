@@ -1,0 +1,43 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.chartColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 350px;
+
+  .volume {
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: 0.013px;
+    writing-mode: vertical-lr;
+
+    height: 50px;
+  }
+
+  .percentWrapper {
+    display: flex;
+    flex-direction: column-reverse;
+    // height: 250px;
+
+    width: 12px;
+    gap: 8px;
+    flex: 1 0 0;
+    border-radius: 99px;
+    @include theme {
+      background: theme-get('neutral-6');
+      color: theme-get('neutral-text-text-token-name');
+    }
+
+    .percent {
+      background: #5ea402;
+      border-radius: 99px;
+    }
+  }
+}

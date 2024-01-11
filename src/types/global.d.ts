@@ -137,7 +137,7 @@ declare global {
   // extend Intl namespace
   namespace Intl {
     interface DateTimeFormat {
-      formatToJson(date: Date): Record<Intl.DateTimeFormatPartTypes, string>;
+      formatToJson(date: Date | number): Record<Intl.DateTimeFormatPartTypes, string>;
     }
   }
   namespace NodeJS {

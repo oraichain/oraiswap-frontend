@@ -1,0 +1,138 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.biddingHistory {
+  margin-top: 40px;
+  @include mobile {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .tabWrapper {
+    display: flex;
+    height: 40px;
+    justify-content: space-between;
+    border-bottom: 1px solid;
+
+    margin-bottom: 24px;
+
+    @include theme {
+      border-color: theme-get('neutral-surface-bg-btn-disabled');
+    }
+
+    .tabTitle {
+      display: flex;
+      align-items: center;
+      flex: 1;
+
+      .title {
+        color: $neutron-text-body-light;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 150%;
+        padding: 0 10px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid;
+        border-color: transparent;
+
+        // width: 100%;
+        // max-width: 120px;
+        cursor: pointer;
+        white-space: nowrap;
+
+        &.active {
+          @include theme {
+            color: theme-get('neutral-text-text-dropdown');
+            border-color: theme-get('neutral-text-text-dropdown');
+          }
+        }
+      }
+    }
+  }
+
+  .title {
+    @include theme {
+      color: theme-get('sea-stone-200');
+    }
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%; /* 24px */
+  }
+
+  .round {
+    position: relative;
+    padding: 0 8px;
+    z-index: 23;
+
+    button {
+      display: flex;
+      width: 100%;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 150%;
+
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+    }
+
+    .wrapperFilter {
+      position: relative;
+      // top: 0;
+      // right: 0;
+      display: none;
+      transition: all ease-in-out 0.5s;
+      border-radius: 6px;
+      border: 1px solid;
+
+      width: 150px;
+      height: 200px;
+      overflow-y: auto;
+      padding: 8px;
+
+      @include theme {
+        border-color: theme-get('neutral-border-border-bold');
+        background: theme-get('bg-section-05');
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        justify-content: center;
+
+        @include theme {
+          color: theme-get('neutral-text-text-disabled');
+        }
+
+        &:hover {
+          // opacity: 0.7;
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+        }
+
+        &.active {
+          @include theme {
+            background: theme-get('neutral-surface-bg');
+            color: theme-get('neutral-9');
+          }
+        }
+      }
+
+      &.showFilter {
+        display: block;
+      }
+    }
+  }
+
+  .loadingDivWrapper {
+    border-radius: 24px;
+    background: rgba(79, 79, 79, 0.5);
+  }
+}

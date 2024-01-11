@@ -2980,9 +2980,9 @@
     react-use "^17.4.0"
 
 "@oraichain/oraidex-common@^1.0.45":
-  version "1.0.57"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.57.tgz#7e1a4eb2c5d6eac876fc1f0e81a66f8ae5792369"
-  integrity sha512-X47YpsdFavBXmwpK3wEphaazapguek+mZGbrOpmqd7CXyPs9nLvIbcgk2A777rm06SvO8qk/6hhMcCXkHVoy4w==
+  version "1.0.60"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.60.tgz#4ed981d9e450e7bdd550a1ef36d6b04cd23065c7"
+  integrity sha512-O/YliUORofMrESffkhjISFKCR5JNSrVrh8CKH+dJ/ozisGvuZY9Q4En0JFKW+Sp8LN17Y8G0CuoCIucCsdRXkA==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
@@ -3002,12 +3002,7 @@
   resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz"
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
-"@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26":
-  version "1.0.28"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.28.tgz#1dd73dffb38c3942ca8a32196ec3b6cebf1972dd"
-  integrity sha512-21BUNfpLAwb8CIV05Xuqh8NozH8adn44hlx1GQunJRPgTjawcCNZi7eb2qIVAp1QdOSfxbPD/EKxE2HloFLVqA==
-
-"@oraichain/oraidex-contracts-sdk@^1.0.30":
+"@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26", "@oraichain/oraidex-contracts-sdk@^1.0.30":
   version "1.0.31"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
   integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
