@@ -18,8 +18,9 @@ const HarvestInfo = (props: {
   round: number;
   start: Date;
   end: Date;
+  isStarted: boolean;
 }) => {
-  const { timeRemaining, percent, isEnd, poolValue, start, end } = props;
+  const { timeRemaining, percent, isEnd, poolValue, start, end, isStarted } = props;
   const { data: prices } = useCoinGeckoPrices();
   const [visible, setVisible] = useState(false);
   const [theme] = useConfigReducer('theme');
@@ -54,7 +55,14 @@ const HarvestInfo = (props: {
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
           </div>
           <div className={styles.countdown}>
-            <CountDownTime start={start} end={end} timeRemaining={timeRemaining} percent={percent} isEnd={isEnd} />
+            <CountDownTime
+              start={start}
+              end={end}
+              timeRemaining={timeRemaining}
+              percent={percent}
+              isEnd={isEnd}
+              isStarted={isStarted}
+            />
           </div>
         </div>
         <div className={styles.shadow}></div>

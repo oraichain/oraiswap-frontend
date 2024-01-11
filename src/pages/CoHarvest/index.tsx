@@ -11,7 +11,7 @@ const CoHarvest = () => {
   const mobileMode = isMobile();
   const round = useGetRound();
   const { biddingInfo, isLoading, refetchBiddingInfo } = useGetBidding(round);
-  const { timeRemaining, percent, isEnd, start, end } = useCountdown(biddingInfo.bid_info);
+  const { timeRemaining, percent, isEnd, start, end, isStarted } = useCountdown(biddingInfo.bid_info);
   const poolValue = biddingInfo.distribution_info.total_distribution;
 
   return (
@@ -20,7 +20,7 @@ const CoHarvest = () => {
         <div className={styles.auction}>
           <div className={styles.top}>
             <div className={styles.bid}>
-              <Bidding round={round} isEnd={isEnd} />
+              <Bidding round={round} isEnd={isEnd} isStarted={isStarted} />
             </div>
             <div className={styles.info}>
               <HarvestInfo
@@ -31,6 +31,7 @@ const CoHarvest = () => {
                 isEnd={isEnd}
                 start={start}
                 end={end}
+                isStarted={isStarted}
               />
               <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
             </div>
@@ -47,8 +48,9 @@ const CoHarvest = () => {
             isEnd={isEnd}
             start={start}
             end={end}
+            isStarted={isStarted}
           />
-          <Bidding round={round} isEnd={isEnd} />
+          <Bidding round={round} isEnd={isEnd} isStarted={isStarted} />
           <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
           <BiddingHistory round={round} />
         </div>

@@ -74,3 +74,45 @@ export const formatUTCDateString = (date) => {
 
   return result;
 };
+
+export const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit'
+});
+
+export const timeFormatter = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
+export const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
+// extend formatToJson
+Intl.DateTimeFormat.prototype.formatToJson = function (date: Date | number) {
+  const _this = this as Intl.DateTimeFormat;
+  return Object.fromEntries(
+    _this
+      .formatToParts(typeof date === 'number' && date < 1000000000000 ? date * 1000 : date)
+      .filter((item) => item.type !== 'literal')
+      .map((item) => [item.type, item.value])
+  ) as Record<Intl.DateTimeFormatPartTypes, string>;
+};
+
+export function formatDate(date: Date | number) {
+  const obj = dateFormatter.formatToJson(date);
+  return `${obj.month} ${obj.day}, ${obj.year}`;
+}
+
+export function formatTime(date: Date | number) {
+  const obj = timeFormatter.formatToJson(date);
+  return `${obj.hour}:${obj.minute}:${obj.second}`; // ${obj.dayPeriod}
+}

@@ -31,7 +31,7 @@ import styles from './index.module.scss';
 import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
-const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
+const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; isStarted: boolean }) => {
   const [range, setRange] = useState(1);
   const [amount, setAmount] = useState();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -159,7 +159,7 @@ const Bidding = ({ isEnd, round }: { isEnd: boolean; round: number }) => {
             }
           }}
           icon={null}
-          disabled={isEnd || loading || !amount} // || !Number(estimateReceive)
+          disabled={!isStarted || isEnd || loading || !amount} // || !Number(estimateReceive)
         >
           {loading && <Loader width={22} height={22} />}&nbsp;Place a bid
         </Button>
