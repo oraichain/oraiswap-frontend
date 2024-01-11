@@ -1,14 +1,13 @@
-import { flattenTokens, toDisplay } from '@oraichain/oraidex-common';
-// import { ReactComponent as TooltipIconBtn } from 'assets/icons/icon_tooltip.svg';
+import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { memo, useState } from 'react';
 import CountDownTime from '../CountDownTime';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
 
 const HarvestInfo = (props: {
   poolValue: string;
@@ -25,7 +24,7 @@ const HarvestInfo = (props: {
   const [visible, setVisible] = useState(false);
   const [theme] = useConfigReducer('theme');
 
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
   const amountUsd = getUsd(poolValue, USDC_TOKEN_INFO, prices);
 
   return (
