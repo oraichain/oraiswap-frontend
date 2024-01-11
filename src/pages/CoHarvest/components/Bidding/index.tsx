@@ -1,13 +1,12 @@
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
-import { ORAIX_CONTRACT, toAmount, toDisplay, BigDecimal } from '@oraichain/oraidex-common';
-import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { BigDecimal, ORAIX_CONTRACT, oraichainTokens, toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
+import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -22,14 +21,13 @@ import {
   useGetPotentialReturn
 } from 'pages/CoHarvest/hooks/useGetBidRound';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
 import { memo, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
-import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
-import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 
 const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; isStarted: boolean }) => {
   const [range, setRange] = useState(1);
@@ -37,8 +35,8 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const balance = amounts['oraix'];
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
   const originalFromToken = tokenMap['oraix'];
   const originalToToken = tokenMap['usdc'];

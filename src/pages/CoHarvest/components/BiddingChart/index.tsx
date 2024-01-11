@@ -1,24 +1,22 @@
-import { toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
-import { flattenTokens } from 'config/bridgeTokens';
+import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { memo, useState } from 'react';
 import ChartColumn from '../ChartColumn';
-import styles from './index.module.scss';
 import { TooltipIconBtn } from '../Tooltip';
-import useConfigReducer from 'hooks/useConfigReducer';
+import styles from './index.module.scss';
 
 const BiddingChart = (props: { round: number; bidInfo }) => {
   const { round, bidInfo } = props;
   const { data: prices } = useCoinGeckoPrices();
   const totalBidAmount = bidInfo.total_bid_amount;
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const amountUsd = getUsd(totalBidAmount, USDC_TOKEN_INFO, prices);
 
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
   const [visible, setVisible] = useState(false);
 

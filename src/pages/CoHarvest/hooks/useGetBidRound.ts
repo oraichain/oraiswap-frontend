@@ -1,15 +1,14 @@
-import { toDisplay, BigDecimal } from '@oraichain/oraidex-common';
+import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
+import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
+import { BigDecimal, oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
+import { CoharvestBidPoolQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { useQuery } from '@tanstack/react-query';
+import { network } from 'config/networks';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { getUsd } from 'libs/utils';
 import { useEffect, useState } from 'react';
 import { fetchRoundBid } from 'rest/api';
-import { useQuery } from '@tanstack/react-query';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { CoharvestBidPoolQueryClient, OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import { network } from 'config/networks';
-import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
-import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
-import { getUsd } from 'libs/utils';
-import { flattenTokens } from 'config/bridgeTokens';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { BidStatus, TIMER } from '../constants';
 
 export const useGetRound = () => {
@@ -179,8 +178,8 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
   biddingInfo: any;
 }) => {
   const { listBidHistories, exchangeRate, biddingInfo } = props;
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
   const { data: prices } = useCoinGeckoPrices();
 
@@ -219,12 +218,6 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
       const isRunningRound =
         !bid.is_distributed || // case: chưa chia reward
         new Date().getTime() <= new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime(); // case: time now < time end
-
-      // console.log(
-      //   'isRunningRound',
-      //   new Date().getTime(),
-      //   new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime()
-      // );
 
       const estimateReceive = isRunningRound ? response?.receive || '0' : bid.amount_received || '0';
       const estimateResidueBid = isRunningRound ? response?.residue_bid || '0' : bid.residue_bid || '0';
@@ -302,10 +295,6 @@ export const useGetHistoryBid = (round: number) => {
 };
 
 export const useGetAllBids = (round: number, exchangeRate: string) => {
-  // const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
-  // const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
-
-  // const { data: prices } = useCoinGeckoPrices();
   const getHistoryBidPool = async () => {
     const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
     const data = await coHarvestBidPool.allBidInRound({
@@ -336,49 +325,6 @@ export const useGetAllBids = (round: number, exchangeRate: string) => {
       const response = fromBinary(res.return_data[ind].data);
       return response;
     });
-
-    // const multicallPotential = await multicall.aggregate({
-    //   queries: dataList.map((bid) => ({
-    //     address: network.bid_pool,
-    //     data: toBinary({
-    //       estimate_amount_receive: {
-    //         bid_amount: bid.amount,
-    //         exchange_rate: exchangeRate,
-    //         round: bid.round,
-    //         slot: bid.premium_slot
-    //       }
-    //     })
-    //   }))
-    // });
-
-    // return dataList.map((bid, ind) => {
-    //   // get potential return
-    //   if (!multicallPotential.return_data[ind].success) {
-    //     return {
-    //       ...bid,
-    //       potentialReturnUSD: '0',
-    //       estimate_receive: '0',
-    //       estimate_residue_bid: '0',
-    //       status: BidStatus.BIDDING
-    //     };
-    //   }
-    //   const response = fromBinary(multicallPotential.return_data[ind].data);
-
-    //   const estimateReceive = response?.receive || '0';
-    //   const estimateResidueBid = response?.residue_bid || '0';
-
-    //   const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
-    //   const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
-
-    //   const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
-
-    //   return {
-    //     ...bid,
-    //     potentialReturnUSD,
-    //     estimateReceive,
-    //     estimateResidueBid
-    //   };
-    // });
   };
 
   const {

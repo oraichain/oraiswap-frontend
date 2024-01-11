@@ -1,8 +1,7 @@
-import { BigDecimal } from '@oraichain/oraidex-common';
+import { BigDecimal, oraichainTokens, tokenMap } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import LoadingBox from 'components/LoadingBox';
-import { flattenTokens, tokenMap } from 'config/bridgeTokens';
 import { network } from 'config/networks';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { INIT_AMOUNT_SIMULATE, TAB_HISTORY } from 'pages/CoHarvest/constants';
@@ -19,8 +18,9 @@ import MyBidding from '../MyBidding';
 import styles from './index.module.scss';
 
 const BiddingHistory = ({ round }) => {
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
+
   const [filterRound, setFilterRound] = useState(round);
   const [showFilter, setShowFilter] = useState(false);
 

@@ -30,17 +30,7 @@ export const useCountdown = (bidInfo) => {
     setStart(bidInfo?.start_time);
     setEnd(bidInfo?.end_time);
 
-    // setStart(new Date('01-15-2024'));
-    // setEnd(new Date('01-27-2024'));
-    // when bidInfo round === 0 => time is in milliseconds and when round != 0 time is in seconds
-
-    // console.log('first', bidInfo?.end_time > getTimeDateNow);
-    // if (bidInfo?.end_time > getTimeDateNow) {
     setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
-
-    console.log('bidInfo?.start_time', bidInfo?.start_time);
-
-    console.log('isStarted', getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
     const decrementTime = () => {
@@ -56,9 +46,6 @@ export const useCountdown = (bidInfo) => {
       });
     };
     countdownRef.current = setInterval(decrementTime, TIMER.MILLISECOND);
-    // } else {
-    //   setIsEnd(true);
-    // }
 
     return () => {
       if (countdownRef.current) {
@@ -72,8 +59,6 @@ export const useCountdown = (bidInfo) => {
     const newPercent = calcPercent(start, end, timeRemaining);
     setPercent(() => newPercent);
 
-    // console.log('getTimeDateNow', isStarted, getTimeDateNow);
-
     if (getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND && !isStarted) {
       setIsStarted(true);
     }
@@ -86,7 +71,5 @@ export const useCountdown = (bidInfo) => {
     isEnd,
     start: new Date(start * TIMER.MILLISECOND),
     end: new Date(end * TIMER.MILLISECOND)
-    // start: new Date(start),
-    // end: new Date(end)
   };
 };

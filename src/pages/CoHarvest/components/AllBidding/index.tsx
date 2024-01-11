@@ -1,21 +1,18 @@
-import { flattenTokens, toDisplay } from '@oraichain/oraidex-common';
+import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as NoDataDark } from 'assets/images/nodata-bid-dark.svg';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { getUsd } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { dateFormat, shortenAddress } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
-import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
-import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
-import { getUsd } from 'libs/utils';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
 const AllBidding = ({ list, isLoading }) => {
   const [theme] = useConfigReducer('theme');
   const { data: prices } = useCoinGeckoPrices();
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
 
   if (isLoading) return <div className={styles.loadingDiv}></div>;
 
@@ -38,19 +35,6 @@ const AllBidding = ({ list, isLoading }) => {
                 <div className={styles.amount}>
                   <div className={styles.token}>{toDisplay(item.amount)} ORAIX</div>
                   {formatDisplayUsdt(amountUsd)}
-                  {/* <div>
-                    <UsdcIcon height={16} width={16} />
-                    {toDisplay(item.estimateReceive)} USDC
-                  </div>
-                  <div>
-                    {theme === 'light' ? (
-                      <OraiXLightIcon height={16} width={16} />
-                    ) : (
-                      <OraiXIcon height={16} width={16} />
-                    )}
-                    {toDisplay(item.estimateResidueBid)} ORAIX
-                  </div> */}
-                  {/* {formatDisplayUsdt(item.potentialReturnUSD)} */}
                 </div>
               </div>
             );

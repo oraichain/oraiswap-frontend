@@ -1,4 +1,4 @@
-import { flattenTokens, toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as BiddingIconLight } from 'assets/icons/bidding-icon-light.svg';
 import { ReactComponent as BiddingIcon } from 'assets/icons/bidding-icon.svg';
 import { ReactComponent as DrawIconLight } from 'assets/icons/draw-icon-light.svg';
@@ -17,8 +17,8 @@ import styles from './index.module.scss';
 const MyBidding = ({ list, isLoading }) => {
   const [theme] = useConfigReducer('theme');
   const { data: prices } = useCoinGeckoPrices();
-  const ORAIX_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = flattenTokens.find((e) => e.coinGeckoId === 'usd-coin');
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
   const StatusIcon = {
     [BidStatus.BIDDING]: theme === 'light' ? BiddingIconLight : BiddingIcon,
