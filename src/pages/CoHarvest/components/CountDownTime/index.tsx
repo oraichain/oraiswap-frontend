@@ -1,9 +1,9 @@
-import { dateFormat, formatCountdownTime, formatDate, formatTime, formatUTCDateString } from 'pages/CoHarvest/helpers';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { formatCountdownTime, formatDate, formatUTCDateString, getUTCTime } from 'pages/CoHarvest/helpers';
 import { CountDownType } from 'pages/CoHarvest/hooks/useCountdown';
 import { useState } from 'react';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
 
 const CountDownTime = ({ timeRemaining, percent, isEnd, start, end, isStarted }: CountDownType) => {
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
@@ -12,9 +12,11 @@ const CountDownTime = ({ timeRemaining, percent, isEnd, start, end, isStarted }:
   const [theme] = useConfigReducer('theme');
 
   const startDateStr = formatDate(start);
-  const startTimeStr = formatTime(start);
+  const startTimeStr = getUTCTime(start);
   // const startDateStr = dateFormat(start || new Date());
   // const startTimeStr = dateFormat(start || new Date());
+
+  console.log('tmien');
 
   return (
     <div className={styles.countdownWrapper}>

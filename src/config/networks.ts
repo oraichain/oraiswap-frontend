@@ -10,10 +10,10 @@ import {
   ORAIDEX_LISTING_CONTRACT,
   REWARDER_CONTRACT,
   ROUTER_V2_CONTRACT,
-  STAKING_CONTRACT
+  STAKING_CONTRACT,
+  ORAIDEX_BID_POOL_CONTRACT
 } from '@oraichain/oraidex-common';
 
-const ORAIDEX_BID_POOL_CONTRACT = 'orai1n98cqmqplfn0t8h4zkww2m7j0q0he9fhj7c5drvw38u807aeg7lq07xdka';
 export const network: CustomChainInfo & NetworkConfig = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,

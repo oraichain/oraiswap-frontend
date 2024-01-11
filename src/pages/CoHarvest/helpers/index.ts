@@ -116,3 +116,14 @@ export function formatTime(date: Date | number) {
   const obj = timeFormatter.formatToJson(date);
   return `${obj.hour}:${obj.minute}:${obj.second}`; // ${obj.dayPeriod}
 }
+
+export const getUTCTime = (date: Date | number) => {
+  const currentDate = new Date(date);
+  const utcHours = String(currentDate.getUTCHours()).padStart(2, '0');
+
+  const utcMinutes = String(currentDate.getUTCMinutes()).padStart(2, '0');
+
+  const utcSeconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
+
+  return `${utcHours}:${utcMinutes}:${utcSeconds}`;
+};
