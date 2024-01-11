@@ -270,7 +270,7 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
     {
       refetchOnWindowFocus: false,
       placeholderData: [],
-      enabled: !!listBidHistories && !!biddingInfo?.bid_info.end_time
+      enabled: !!listBidHistories && !!biddingInfo?.bid_info.end_time && !!biddingInfo?.round
     }
   );
 
