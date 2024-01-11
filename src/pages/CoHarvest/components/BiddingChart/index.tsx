@@ -27,7 +27,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
   return (
     <div className={styles.biddingChart}>
       <div className={styles.title}>
-        <span className={styles.titleLeft}>Bid Placed in Liquidations</span>
+        <span className={styles.titleLeft}>Bid Placed in Co-harvest</span>
         <div className={styles.titleRight}>
           <div className={styles.subtitle}>
             <span>Total Bid</span>

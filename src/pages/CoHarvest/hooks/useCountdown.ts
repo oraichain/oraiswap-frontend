@@ -38,6 +38,8 @@ export const useCountdown = (bidInfo) => {
     // if (bidInfo?.end_time > getTimeDateNow) {
     setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
 
+    console.log('bidInfo?.start_time', bidInfo?.start_time);
+
     console.log('isStarted', getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
@@ -72,7 +74,7 @@ export const useCountdown = (bidInfo) => {
 
     // console.log('getTimeDateNow', isStarted, getTimeDateNow);
 
-    if (getTimeDateNow >= start && !isStarted) {
+    if (getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND && !isStarted) {
       setIsStarted(true);
     }
   }, [timeRemaining, start, end, bidInfo]);
