@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
 
-const CountDownTime = ({ timeRemaining, percent, isEnd, start, end, isStarted }: CountDownType) => {
+const CountDownTime = ({ timeRemaining, percent, start, end, isStarted }: CountDownType) => {
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
   const [visible, setVisible] = useState(false);
   const fmtPercent = percent >= 100 ? 0 : percent;
@@ -13,10 +13,6 @@ const CountDownTime = ({ timeRemaining, percent, isEnd, start, end, isStarted }:
 
   const startDateStr = formatDate(start);
   const startTimeStr = getUTCTime(start);
-  // const startDateStr = dateFormat(start || new Date());
-  // const startTimeStr = dateFormat(start || new Date());
-
-  console.log('tmien');
 
   return (
     <div className={styles.countdownWrapper}>

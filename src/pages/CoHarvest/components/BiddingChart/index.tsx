@@ -17,7 +17,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
   const amountUsd = getUsd(totalBidAmount, USDC_TOKEN_INFO, prices);
 
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const { allBidPoolRound, isLoading, refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
+  const { allBidPoolRound } = useGetAllBidPoolInRound(round);
   const [visible, setVisible] = useState(false);
 
   const [theme] = useConfigReducer('theme');
@@ -49,7 +49,6 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
         </div>
       </div>
 
-      {/* <LoadingBox loading={isLoading}> */}
       <div className={styles.content}>
         <div className={styles.columnList}>
           {allBidPoolRound.map((e, key) => (
@@ -64,7 +63,6 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
           ))}
         </div>
       </div>
-      {/* </LoadingBox> */}
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { getUsd } from 'libs/utils';
 import { useEffect, useState } from 'react';
 import { fetchRoundBid } from 'rest/api';
 import { BidStatus, TIMER } from '../constants';
+import { Bid, BiddingInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
 export const useGetRound = () => {
   const [round, setRound] = useState(0);
@@ -148,10 +149,10 @@ export const useGetPotentialReturn = (props: {
   const getPotentialReturn = async () => {
     const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
     const data = await coHarvestBidPool.estimateAmountReceive({
-      bidAmount, // bidAmount: gia nhap
-      exchangeRate, // exchangeRate: 1 ORAX/USDC;
-      round, // round: lastRoundId;
-      slot // slot: %;
+      bidAmount,
+      exchangeRate,
+      round,
+      slot
     });
     return data;
   };
@@ -174,18 +175,16 @@ export const useGetPotentialReturn = (props: {
 
 export const useGetBidHistoryWithPotentialReturn = (props: {
   exchangeRate: string;
-  listBidHistories: any[];
-  biddingInfo: any;
+  listBidHistories: Bid[];
+  biddingInfo: BiddingInfoResponse;
 }) => {
   const { listBidHistories, exchangeRate, biddingInfo } = props;
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-
   const { data: prices } = useCoinGeckoPrices();
 
   const getListPotentialReturn = async () => {
     const multicall = new MulticallQueryClient(window.client, network.multicall);
-
     const res = await multicall.aggregate({
       queries: listBidHistories.map((bid) => ({
         address: network.bid_pool,
@@ -201,7 +200,6 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
     });
 
     return listBidHistories.map((bid, ind) => {
-      // get potential return
       if (!res.return_data[ind].success) {
         return {
           ...bid,
@@ -258,12 +256,12 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
     isRefetching,
     refetch: refetchPotentialReturn
   } = useQuery(
-    ['all-potential-return', listBidHistories, biddingInfo?.bid_info.end_time],
+    ['all-potential-return', listBidHistories, biddingInfo?.bid_info.end_time, biddingInfo?.bid_info.round],
     () => getListPotentialReturn(),
     {
       refetchOnWindowFocus: false,
       placeholderData: [],
-      enabled: !!listBidHistories && !!biddingInfo?.bid_info.end_time && !!biddingInfo?.round
+      enabled: !!listBidHistories?.length && !!biddingInfo?.bid_info.end_time && !!biddingInfo?.bid_info.round
     }
   );
 
