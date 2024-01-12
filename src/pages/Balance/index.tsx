@@ -107,45 +107,23 @@ const Balance: React.FC<BalanceProps> = () => {
   const loadTokenAmounts = useLoadTokens();
   const { data: prices } = useCoinGeckoPrices();
   useGetFeeConfig();
+
   useEffect(() => {
-    async function init() {
-      // try {
-      await nomic.init();
-      // setInitialized(true);
-      const wallet = await nomic.getCurrentWallet();
-
-      if (wallet && !wallet.connected) {
-        await wallet.connect();
-
-        nomic.wallet = wallet;
-        // await nomic.build();
-      }
-      // await bitcoin.getBitcoinPrice();
-      // } catch (error) {
-      //   console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
-      // }
-    }
-    init();
-  }, []);
-  useEffect(() => {
-    if (!nomic.wallet?.address) return;
-
     async function getAddress() {
-      if (nomic.depositAddress) {
-        return;
+      const isKeplrActive = await window.Keplr.getKeplr();
+      if (isKeplrActive) {
+        const address = await window.Keplr.getKeplrAddr(config.chainId as any);
+        await nomic.generateAddress(
+          `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(address).data)}`
+        );
       }
-
-      // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
-      await nomic.generateAddress(
-        `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
-      );
     }
 
     getAddress();
-  }, [nomic.wallet?.address, nomic.depositAddress]);
+  }, [nomic.depositAddress]);
 
   // console.log('🚀 ~ file: index.tsx:130 ~ nomic.wallet?.address:', nomic.wallet?.address);
-  console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
+  // console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();

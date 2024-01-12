@@ -12,7 +12,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
@@ -23,6 +23,7 @@ import Instruct from './Instruct';
 import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
+import { NomicContext } from 'context/nomic-context';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -33,6 +34,7 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
+  const nomic = useContext(NomicContext);
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -86,6 +88,7 @@ const App = () => {
 
   // clear persist storage when update version
   useEffect(() => {
+    nomic.init();
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
       localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);

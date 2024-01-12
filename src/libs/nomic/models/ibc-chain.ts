@@ -1,6 +1,6 @@
-import Nomic from 'assets/icons/logo.svg';
+import OraiBtc from 'assets/icons/btc-icon.svg';
 import { config } from '../config';
-import Orai from 'assets/icons/logo.svg';
+import Orai from 'assets/icons/btc-icon.svg';
 
 export interface ChainInfo {
   name: string;
@@ -26,7 +26,7 @@ export type IbcChain = ChainInfo & IbcInfo;
 
 export const OraiBtcSubnetChain: IbcChain = {
   name: 'OraiBtcSubnet',
-  logo: Nomic,
+  logo: OraiBtc,
   chainId: config.chainId,
   rpcEndpoint: config.rpcUrl,
   source: {

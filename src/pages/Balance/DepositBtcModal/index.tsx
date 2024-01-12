@@ -25,13 +25,13 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const [isCopied, setIsCopied] = useState(false);
   useEffect(() => {
     (async () => {
-      if (nomic?.depositAddress?.address) {
-        const url = await QRCode.toDataURL(nomic?.depositAddress?.address);
+      if (nomic.depositAddress?.address) {
+        const url = await QRCode.toDataURL(nomic.depositAddress?.address);
         setQrcodeUrl(url);
       }
     })();
     return () => {};
-  }, [nomic?.depositAddress?.address]);
+  }, [nomic.depositAddress?.address]);
   useEffect(() => {
     const TIMEOUT_COPY = 2000;
     let timeoutId;
