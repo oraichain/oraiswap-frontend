@@ -58,6 +58,9 @@
         gap: 6px;
         align-items: center;
 
+        @include mobile {
+          font-size: 16px;
+        }
         .usd {
           @include theme {
             color: theme-get('sea-stone-200');
