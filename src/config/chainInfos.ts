@@ -15,6 +15,7 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
+
 import { ReactComponent as BTCIcon } from 'assets/icons/btc-icon.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
@@ -87,8 +88,8 @@ export const tokensIcon: TokenIcon[] = [
   },
   {
     coinGeckoId: 'bitcoin',
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon
+    Icon: BTCIcon,
+    IconLight: BTCIcon
   },
   {
     coinGeckoId: 'airight',
@@ -175,8 +176,8 @@ export const chainIcons: ChainIcon[] = [
   },
   {
     chainId: 'bitcoinTestnet',
-    Icon: OraiIcon,
-    IconLight: OraiLightIcon
+    Icon: BTCIcon,
+    IconLight: BTCIcon
   },
   {
     chainId: 'kawaii_6886-1',
