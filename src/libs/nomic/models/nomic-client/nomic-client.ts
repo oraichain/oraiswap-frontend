@@ -46,7 +46,7 @@ export class NomicClient implements NomicClientInterface {
       if (destination) {
         const [channel, receiver] = destination.split('/', 2);
         try {
-          fromBech32(receiver);
+          // fromBech32(receiver);
           this.depositAddress = await this.nomic.generateDepositAddress(receiver, channel, address);
         } catch {}
       }

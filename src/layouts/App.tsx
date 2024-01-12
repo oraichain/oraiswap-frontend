@@ -28,6 +28,7 @@ import { NomicContext } from 'context/nomic-context';
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
@@ -190,10 +191,13 @@ const App = () => {
       switchWallet(walletTypeStore as WalletType);
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
+      const btcAddress = walletTypeStore === 'owallet' ? await window.Bitcoin.getAddress() : null;
+      setBtcAddress(btcAddress);
       loadTokenAmounts({
         oraiAddress,
         metamaskAddress: metamaskAddr,
-        tronAddress: tronAddr
+        tronAddress: tronAddr,
+        btcAddress
       });
       setAddress(oraiAddress);
     } catch (error) {

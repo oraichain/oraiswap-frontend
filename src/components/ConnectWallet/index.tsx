@@ -245,7 +245,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Owallet to get address bitcoin!' });
         return;
       }
-      console.log('🚀 ~ file: index.tsx:215 ~ connectBitcoin ~ btcAddress:', btcAddress);
+
       setBtcAddress(btcAddress);
       loadTokenAmounts({ btcAddress });
     } catch (ex) {

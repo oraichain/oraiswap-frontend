@@ -170,7 +170,7 @@ async function loadNativeBtcBalance(address: string, chain: CustomChainInfo) {
     },
     0
   );
-  console.log('🚀 ~ file: useLoadTokens.ts:173 ~ loadNativeBtcBalance ~ utxos:', total);
+
   return total;
 }
 
@@ -228,7 +228,7 @@ async function loadBtcEntries(
 ): Promise<[string, string][]> {
   try {
     const nativeBtc = btcTokens.find((t) => chain.chainId === t.chainId);
-    console.log('🚀 ~ file: useLoadTokens.ts:237 ~ nativeBtc:', nativeBtc);
+
     const nativeBalance = await loadNativeBtcBalance(address, chain);
     let entries: [string, string][] = [[nativeBtc.denom, nativeBalance.toString()]];
     return entries;
