@@ -1,8 +1,9 @@
 import { EVM_CHAIN_ID_COMMON, WalletType, cosmosTokens, flattenTokens } from '@oraichain/oraidex-common';
+import { btcTokens } from 'config/bridgeTokens';
 import { useDispatch } from 'react-redux';
 import { updateAmounts } from 'reducer/token';
 
-export type Wallet = WalletType | 'metamask' | 'tron';
+export type Wallet = WalletType | 'metamask' | 'tron' | 'bitcoin';
 export const useResetBalance = () => {
   const dispatch = useDispatch();
 
@@ -29,6 +30,9 @@ export const useResetBalance = () => {
       case 'metamask':
         updatedAmounts = resetBalanceMetamask();
         break;
+      case 'bitcoin':
+        updatedAmounts = resetBalanceBtc();
+        break;
       case 'tron':
         updatedAmounts = resetBalanceTron();
         break;
@@ -40,6 +44,9 @@ export const useResetBalance = () => {
 
   const resetBalanceCosmos = () => {
     return Object.fromEntries(cosmosTokens.map((t) => [t.denom, '0']));
+  };
+  const resetBalanceBtc = () => {
+    return Object.fromEntries(btcTokens.map((t) => [t.denom, '0']));
   };
 
   const resetBalanceMetamask = () => {

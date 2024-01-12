@@ -113,6 +113,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const isKeplrActive = await window.Keplr.getKeplr();
       if (isKeplrActive) {
         const address = await window.Keplr.getKeplrAddr(config.chainId as any);
+        if (!address) return;
         await nomic.generateAddress(
           `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(address).data)}`
         );

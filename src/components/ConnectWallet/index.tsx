@@ -142,14 +142,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!metamaskAddress || !tronAddress || !oraiAddress) {
+    if (!metamaskAddress || !tronAddress || !oraiAddress || !btcAddress) {
       let arrResetBalance: Wallet[] = [];
       if (!metamaskAddress) arrResetBalance.push('metamask');
       if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
+      if (!btcAddress) arrResetBalance.push('bitcoin');
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   let walletInit = [
     {
@@ -332,6 +333,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await switchWalletCosmos(type);
       // await window.Keplr.suggestChain(network.chainId);
       const oraiAddr = await window.Keplr.getKeplrAddr();
+      if (!oraiAddr) return;
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
       const { listAddressCosmos } =
@@ -365,7 +367,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const disconnectBitcoin = async () => {
     try {
       // window.Bitcoin.disconnect();
-
+      handleResetBalance(['bitcoin']);
       setBtcAddress('');
     } catch (ex) {
       console.log(ex);
