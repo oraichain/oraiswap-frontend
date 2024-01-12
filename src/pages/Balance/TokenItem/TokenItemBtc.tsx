@@ -20,7 +20,8 @@ export const TokenItemBtc: React.FC<TokenItemProps> = ({ onDepositBtc, ...props 
           padding: 16,
           background: theme === 'light' ? '#F7F7F7' : '#191b21',
           borderRadius: 12,
-          marginTop: -15
+          marginTop: -15,
+          alignItems: 'center'
         }}
       >
         <div

@@ -11,6 +11,7 @@ import { ReactComponent as BTCToken } from 'assets/images/token-btc.svg';
 import { NomicContext } from 'context/nomic-context';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
+import { Button } from 'components/Button';
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
@@ -24,11 +25,13 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const [isCopied, setIsCopied] = useState(false);
   useEffect(() => {
     (async () => {
-      const url = await QRCode.toDataURL(nomic.depositAddress.address);
-      setQrcodeUrl(url);
+      if (nomic?.depositAddress?.address) {
+        const url = await QRCode.toDataURL(nomic?.depositAddress?.address);
+        setQrcodeUrl(url);
+      }
     })();
     return () => {};
-  }, [nomic.depositAddress.address]);
+  }, [nomic?.depositAddress?.address]);
   useEffect(() => {
     const TIMEOUT_COPY = 2000;
     let timeoutId;
@@ -66,9 +69,17 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             alignItems: 'center'
           }}
         >
-          <span>Transfer BTC to Oraichain</span>
-          <button>
-            <CloseIcon />
+          <span
+            style={{
+              color: '#232521',
+              fontSize: 20,
+              fontWeight: 600
+            }}
+          >
+            Transfer BTC to Oraichain
+          </span>
+          <button onClick={close}>
+            <CloseIcon color="#232521" />
           </button>
         </div>
         <div
@@ -97,7 +108,10 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
                 margin: 8
               }}
               onClick={() => {
-                setIsCopied(true);
+                if (nomic?.depositAddress?.address) {
+                  copy(nomic?.depositAddress?.address);
+                  setIsCopied(true);
+                }
               }}
             >
               <span
@@ -112,13 +126,127 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             </button>
           </div>
 
-          <div>
-            <span>
+          <div
+            style={{
+              background: '#FFEDEB',
+              padding: 16,
+              borderRadius: 12,
+              margin: '16px 0px'
+            }}
+          >
+            {/* <CopyIcon /> */}
+            <span
+              style={{
+                color: '#E01600',
+                fontSize: 14
+              }}
+            >
               This address expires in 4 days; deposits sent after that will be lost. Transactions fail for deposit
               amounts below 0.00043713 BTC or exceeding 21 BTC
             </span>
           </div>
         </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            background: '#F7F7F7',
+            borderRadius: 12,
+            padding: 16
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              paddingRight: 20
+            }}
+          >
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              Expected transaction time:
+            </span>
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              Bitcoin Miner Fee:
+            </span>
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              Bridge Fee:
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              10 mins - 1.5 hours
+            </span>
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              0.00024285 BTC
+            </span>
+            <span
+              style={{
+                color: '#686A66',
+                fontSize: 14
+              }}
+            >
+              1%
+            </span>
+          </div>
+        </div>
+        <div
+          style={{
+            background: '#FFFDEB',
+            padding: 16,
+            borderRadius: 12,
+            marginTop: 16
+          }}
+        >
+          <span
+            style={{
+              fontSize: 14,
+              color: '#AD9C00'
+            }}
+          >
+            The Bitcoin Recovery address is necessary for retrieving Bitcoin in the event of an emergency disbursement.
+          </span>
+        </div>
+        <Button
+          onClick={close}
+          type="secondary-sm"
+          style={{
+            width: '100%',
+            marginTop: 24,
+            color: '#232521'
+          }}
+        >
+          Close
+        </Button>
       </div>
     </Modal>
   );

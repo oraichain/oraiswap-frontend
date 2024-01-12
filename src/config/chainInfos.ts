@@ -15,7 +15,7 @@ import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
 import { ReactComponent as KwtIcon } from 'assets/icons/kwt.svg';
 import { ReactComponent as MilkyIcon } from 'assets/icons/milky-token.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as BTCIcon } from 'assets/icons/bitcoin-btc-logo.svg';
+import { ReactComponent as BTCIcon } from 'assets/icons/btc-icon.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';

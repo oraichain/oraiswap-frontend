@@ -35,6 +35,8 @@ import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
 import LeapImage from 'assets/images/leap-cosmos-logo.svg';
 import OwalletImage from 'assets/images/owallet-logo.png';
+import BitcoinWallet from 'assets/images/image-btc.png';
+
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
@@ -178,7 +180,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       id: 4,
       name: 'Bitcoin',
       code: WALLET_TYPES.BITCOIN,
-      icon: OwalletImage,
+      icon: BitcoinWallet,
       totalUsd: 0,
       isOpen: false,
       isConnect: !!btcAddress,
@@ -239,6 +241,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectBitcoin = async () => {
     try {
       const btcAddress = await window.Bitcoin.getAddress();
+      if (!btcAddress) {
+        displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Owallet to get address bitcoin!' });
+        return;
+      }
       console.log('🚀 ~ file: index.tsx:215 ~ connectBitcoin ~ btcAddress:', btcAddress);
       setBtcAddress(btcAddress);
       loadTokenAmounts({ btcAddress });
