@@ -1,0 +1,99 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.inputBalance {
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  gap: 8px;
+
+  border-radius: 12px;
+  @include theme {
+    background: theme-get('neutral-surface-bg');
+  }
+
+  .title {
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%; /* 21px */
+    letter-spacing: 0.1px;
+  }
+
+  .input {
+    display: flex;
+    height: 56px;
+    padding: 12px 16px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 150%; /* 30px */
+    @include theme() {
+      color: theme-get('text-color');
+    }
+    input {
+      flex: 1;
+    }
+
+    .symbol {
+      // color: #c7c8c6;
+      @include theme {
+        color: theme-get('neutral-text-text-disabled');
+      }
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 150%; /* 30px */
+    }
+  }
+
+  .coeff {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    @include theme() {
+      color: theme-get('text-color');
+    }
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+
+    .button {
+      display: flex;
+      height: 40px;
+      padding: 0px 19px 0px 20px;
+      justify-content: center;
+      align-items: center;
+      flex: 1 0 0;
+      border-radius: 99px;
+
+      @include theme() {
+        color: theme-get('neutral-text-text-dropdown');
+        background-color: theme-get('neutral-surface-bg-section-3');
+      }
+
+      &:hover {
+        @include theme() {
+          background-color: theme-get('neutral-surface-bg-section-hover');
+          opacity: 1;
+        }
+      }
+
+      &.active {
+        @include theme() {
+          color: theme-get('sea-stone-800');
+          border: 1px solid theme-get('sea-stone-800');
+          background-color: theme-get('neutral-surface-bg-section-active');
+        }
+      }
+    }
+  }
+}

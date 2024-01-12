@@ -1,8 +1,32 @@
 import { Cw20Coin } from '@oraichain/common-contracts-sdk';
 import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/Cw20Base.types';
-import { validateNumber } from '@oraichain/oraidex-common';
+import { validateNumber, INJECTIVE_CONTRACT, ORAI, USDC_CONTRACT, ORAIX_CONTRACT } from '@oraichain/oraidex-common';
 import { Asset, AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+
+// TODO: hardcode reverse symbol for ORAI/INJ,USDC/ORAIX, need to update later
+export const reverseSymbolArr = [
+  [
+    {
+      denom: INJECTIVE_CONTRACT,
+      coinGeckoId: 'injective-protocol'
+    },
+    {
+      denom: ORAI,
+      coinGeckoId: 'orai'
+    }
+  ],
+  [
+    {
+      denom: USDC_CONTRACT,
+      coinGeckoId: 'usd-coin'
+    },
+    {
+      denom: ORAIX_CONTRACT,
+      coinGeckoId: 'oraidex'
+    }
+  ]
+];
 
 export type ListTokenJsMsg = {
   initialBalances?: Cw20Coin[];
@@ -52,6 +76,14 @@ const getInfoLiquidityPool = ({ denom, contract_addr }) => {
       }
     };
   return { native_token: { denom } };
+};
+
+const getSymbolPools = (baseDenom: string, quoteDenom: string, originalSymbols: string) => {
+  let symbols = originalSymbols;
+  if (reverseSymbolArr.some((item) => item[0].denom === baseDenom && item[1].denom === quoteDenom)) {
+    symbols = originalSymbols.split('/').reverse().join('/');
+  }
+  return symbols;
 };
 
 const isBigIntZero = (value: BigInt): boolean => {
@@ -131,4 +163,4 @@ export const estimateShare = ({
   return share;
 };
 
-export { generateMsgFrontierAddToken, getInfoLiquidityPool, isBigIntZero };
+export { generateMsgFrontierAddToken, getInfoLiquidityPool, isBigIntZero, getSymbolPools };

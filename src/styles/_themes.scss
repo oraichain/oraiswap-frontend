@@ -33,6 +33,8 @@ $primary-surface-default-subtle-light: #eef9e5;
 $primary-surface-default-light: #2f5711;
 $primary-surface-default: #92e54c;
 
+$primary-banner-default: #c9ff85;
+
 // for dark-light mode
 $themes: (
   dark: (
@@ -109,7 +111,10 @@ $themes: (
     'neutral-surface-bg-section-active': #494949,
     'warning-surface-default': #e6cf00,
     'basic-primary-surface-default': #ffffff,
-    'primary-text-text-link': #78ca11
+    'primary-text-text-link': #78ca11,
+    'primary-surface-default-dark-2': #2f5711,
+    'bg-section-05': #1b1c1a,
+    'neutral-text-text-disabled': #494949
   ),
   light: (
     'text-color': #272b30,
@@ -185,6 +190,9 @@ $themes: (
     'neutral-surface-bg-section-active': #efefef,
     'warning-surface-default': #979995,
     'basic-primary-surface-default': #000000,
-    'primary-text-text-link': #5ea402
+    'primary-text-text-link': #5ea402,
+    'primary-surface-default-dark-2': #000,
+    'bg-section-05': #f7f7f7,
+    'neutral-text-text-disabled': #c7c8c6
   )
 );

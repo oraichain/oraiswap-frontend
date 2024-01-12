@@ -1,0 +1,117 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.biddingChart {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @include mobile {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 8px;
+    @include theme {
+      color: theme-get('sea-stone-200');
+    }
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 150%; /* 27px */
+
+    .titleLeft {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .titleRight {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .subtitle {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        svg {
+          vertical-align: sub;
+        }
+      }
+
+      .balance {
+        color: $neutron-text-body-light;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 150%;
+
+        display: flex;
+        gap: 6px;
+        align-items: center;
+
+        @include mobile {
+          font-size: 16px;
+        }
+        .usd {
+          @include theme {
+            color: theme-get('sea-stone-200');
+          }
+
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+    }
+  }
+
+  .content {
+    overflow-x: auto;
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    min-height: 350px;
+
+    .columnList {
+      display: flex;
+      justify-content: space-between;
+      min-width: 900px;
+    }
+  }
+}
+
+.tooltip {
+  color: #efefef;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  text-align: left;
+
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  border-color: #494949;
+  background: #121511;
+
+  /* Shadow/2 */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.light {
+  color: #494949;
+  border-color: #dfe0de;
+  background: #fff;
+  /* Shadow/2 */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+}

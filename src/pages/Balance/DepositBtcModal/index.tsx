@@ -236,14 +236,15 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             The Bitcoin Recovery address is necessary for retrieving Bitcoin in the event of an emergency disbursement.
           </span>
         </div>
+
         <Button
           onClick={close}
           type="secondary-sm"
-          style={{
-            width: '100%',
-            marginTop: 24,
-            color: '#232521'
-          }}
+          // style={{
+          //   width: '100%',
+          //   marginTop: 24,
+          //   color: '#232521'
+          // }}
         >
           Close
         </Button>

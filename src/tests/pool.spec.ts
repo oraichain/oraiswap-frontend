@@ -1,7 +1,14 @@
-import { ORAI, buildMultipleExecuteMessages } from '@oraichain/oraidex-common';
+import {
+  ORAI,
+  buildMultipleExecuteMessages,
+  INJECTIVE_CONTRACT,
+  USDC_CONTRACT,
+  ORAIX_CONTRACT,
+  WETH_CONTRACT
+} from '@oraichain/oraidex-common';
 import { flattenTokens } from 'config/bridgeTokens';
 import { getPoolTokens } from 'config/pools';
-import { estimateShare, formatDisplayUsdt, toFixedIfNecessary } from 'pages/Pools/helpers';
+import { estimateShare, formatDisplayUsdt, getSymbolPools, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { ProvideQuery, Type, generateContractMessages } from 'rest/api';
 import { constants } from './listing-simulate';
 
@@ -100,5 +107,14 @@ describe('pool', () => {
     // if totalShare is falsy
     payload.totalShare = NaN;
     expect(estimateShare(payload)).toEqual(0);
+  });
+
+  it.each<[string, string, string, string]>([
+    [INJECTIVE_CONTRACT, ORAI, 'INJ/ORAI', 'ORAI/INJ'],
+    [USDC_CONTRACT, ORAIX_CONTRACT, 'USDC/ORAIX', 'ORAIX/USDC'],
+    [ORAI, WETH_CONTRACT, 'ORAI/WETH', 'ORAI/WETH']
+  ])('test getSymbolPools', (baseDenom, quoteDenom, originalSymbols, expected) => {
+    const symbols = getSymbolPools(baseDenom, quoteDenom, originalSymbols);
+    expect(symbols).toEqual(expected);
   });
 });
