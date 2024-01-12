@@ -1,0 +1,272 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.bidding {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 24px;
+  @include theme {
+    background: theme-get('bg-section-05');
+  }
+
+  @include mobile() {
+    margin-top: 40px;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 150%;
+
+    @include mobile {
+      font-size: 14px;
+    }
+
+    @include theme() {
+      color: theme-get('text-color');
+    }
+  }
+
+  .content {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+
+    .interest {
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+
+      gap: 16px;
+      padding: 16px;
+      @include theme {
+        background: theme-get('neutral-surface-bg');
+      }
+
+      .interestTitle {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 150%;
+
+        @include theme() {
+          color: theme-get('text-color');
+        }
+      }
+
+      .range {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        input {
+          flex: 1;
+          height: 100px;
+
+          input[type='range' i]::-webkit-slider-container {
+            height: 20px;
+          }
+          &[type='range'] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            outline: none;
+            border-radius: 99px;
+
+            height: 6px;
+            @include theme {
+              background: theme-get('neutral-surface-bg-section-2');
+            }
+          }
+
+          &[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 32px;
+            width: 32px;
+            border-radius: 50%;
+            border: 4px solid;
+            @include theme {
+              background-color: theme-get('primary-text-text-link');
+              border-color: theme-get('neutral-white');
+            }
+
+            transition: 0.2s ease-in-out;
+          }
+
+          /* Thumb: Firefox */
+          &[type='range']::-moz-range-thumb {
+            height: 15px;
+            width: 15px;
+            border-radius: 50%;
+            border: 4px solid;
+            @include theme {
+              background-color: theme-get('primary-text-text-link');
+              border-color: theme-get('neutral-white');
+            }
+
+            transition: 0.2s ease-in-out;
+          }
+          /* Hover, active & focus Thumb: Webkit */
+
+          // &[type='range']::-webkit-slider-thumb:hover {
+          //   box-shadow: 0 0 0 10px rgba(255, 85, 0, 0.1);
+          // }
+          // &[type='range']:active::-webkit-slider-thumb {
+          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
+          // }
+          // &[type='range']:focus::-webkit-slider-thumb {
+          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
+          // }
+
+          // /* Hover, active & focus Thumb: Firfox */
+
+          // &[type='range']::-moz-range-thumb:hover {
+          //   box-shadow: 0 0 0 10px rgba(255, 85, 0, 0.1);
+          // }
+          // &[type='range']:active::-moz-range-thumb {
+          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
+          // }
+          // &[type='range']:focus::-moz-range-thumb {
+          //   box-shadow: 0 0 0 13px rgba(255, 85, 0, 0.2);
+          // }
+        }
+
+        div {
+          &:last-of-type {
+            display: flex;
+            height: 35px;
+            min-width: 75px;
+            padding: 8px 16px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 4px;
+
+            @include theme() {
+              background: theme-get('neutral-surface-bg-section-2');
+              color: theme-get('sea-stone-200'); // theme-get('text-color');
+            }
+
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 150%; /* 27px */
+          }
+        }
+      }
+
+      .explain {
+        @include theme {
+          color: theme-get('primary-text-text-link');
+        }
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%; /* 21px */
+      }
+    }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .bidValue {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+
+      @include theme() {
+        color: theme-get('text-color');
+      }
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%;
+
+      .usd {
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+
+    .return {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid;
+      @include theme() {
+        background: theme-get('primary-surface-default-subtle');
+        border-color: theme-get('primary-text-text-link');
+        color: theme-get('text-color');
+      }
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%;
+
+      .value {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .balance {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%;
+          gap: 4px;
+
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+        }
+
+        .usdReturn {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          @include theme {
+            color: theme-get('primary-surface-default-dark');
+          }
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+    }
+  }
+
+  .button {
+    width: 100%;
+
+    button {
+      width: 100%;
+
+      &:disabled {
+        @include theme {
+          color: theme-get('neutral-text-text-disabled');
+          background-color: theme-get('neutral-border-border-default');
+        }
+      }
+    }
+  }
+}

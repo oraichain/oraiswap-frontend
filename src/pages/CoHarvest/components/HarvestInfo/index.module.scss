@@ -1,0 +1,116 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.harvestInfo {
+  line-height: 100%;
+
+  .contentWrapper {
+    position: relative;
+    width: 100%;
+
+    .content {
+      position: relative;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      height: 100%;
+      width: calc(100% - 12px);
+      padding: 24px;
+
+      display: flex;
+      justify-content: space-between;
+
+      @include small-mobile {
+        flex-direction: column;
+      }
+
+      border-radius: 24px;
+      border: 2px solid #000;
+      background: $primary-banner-default;
+
+      .value {
+        display: flex;
+        flex-direction: column;
+        color: #232521;
+        font-size: 32px;
+        font-weight: 600;
+        line-height: 120%;
+      }
+
+      .heading {
+        display: flex;
+        align-items: center;
+        color: $light-text-color;
+
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 100%;
+
+        margin-bottom: 12px;
+
+        svg {
+          vertical-align: sub;
+          margin-left: 4px;
+        }
+      }
+
+      .balance {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        svg {
+          margin-right: 8px;
+        }
+      }
+
+      .usd {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 150%; /* 27px */
+      }
+    }
+
+    .shadow {
+      position: absolute;
+      right: 0;
+      top: 8px;
+      height: 100%;
+      width: calc(100% - 10px);
+      z-index: 0;
+      border-radius: 24px;
+      // theme
+      @include theme() {
+        background: theme-get('primary-surface-default-dark-2');
+      }
+    }
+  }
+}
+
+.tooltip {
+  color: #efefef;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%; /* 21px */
+  text-align: left;
+
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  border-color: #494949;
+  background: #121511;
+
+  /* Shadow/2 */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.light {
+  color: #494949;
+  border-color: #dfe0de;
+  background: #fff;
+  /* Shadow/2 */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+}

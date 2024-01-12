@@ -93,6 +93,7 @@ const Menu: React.FC = () => {
       {renderLink('/universalswap', 'SWAP', setLink)}
       {renderLink('/bridge', 'BRIDGE', setLink)}
       {renderLink('/pools', 'POOLS', setLink)}
+      {renderLink('/co-harvest', 'CO-HARVEST', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
       {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
       {mobileMode ? (
