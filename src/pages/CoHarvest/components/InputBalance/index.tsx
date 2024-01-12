@@ -19,15 +19,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: Inpu
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
-        Balance:{' '}
-        <TokenBalance
-          balance={{
-            amount: balance,
-            denom: 'ORAIX',
-            decimals: 6
-          }}
-          className={styles.token}
-        />
+        Balance: <span className={styles.token}>{toDisplay(balance)} ORAIX</span>
       </div>
       <div className={styles.input}>
         <NumberFormat
