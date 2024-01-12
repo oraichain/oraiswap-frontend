@@ -16,6 +16,17 @@ import {
 } from 'pages/UniversalSwap/helpers';
 
 describe('universal-swap', () => {
+  // it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
+  //   ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 5],
+  //   ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 22],
+  //   ['Oraichain', 'oraichain-token', 'orai', '', SwapDirection.To, 21],
+  //   ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 23],
+  //   ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 8],
+  //   ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
+  // ])('test-filterNonPoolEvmTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
+  //   const tokens = filterNonPoolEvmTokens(chainId, coinGeckoId, denom, searchTokenName, direction);
+  //   expect(tokens.length).toEqual(expectedLength);
+  // });
   // TODO: skip test version ether
   // it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
   //   ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 5],
