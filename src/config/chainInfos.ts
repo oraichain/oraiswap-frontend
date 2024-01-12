@@ -63,7 +63,8 @@ import {
   WRAP_BNB_CONTRACT,
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
-  WETH_CONTRACT
+  WETH_CONTRACT,
+  USDT_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -330,7 +331,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usdt',
       type: 'cw20',
       contractAddress: USDT_CONTRACT,
-      bridgeTo: ['0x38', '0x2b6653dc'],
+      bridgeTo: ['0x38', '0x2b6653dc', '0x01'],
       coinDecimals: 6,
       Icon: UsdtIcon
     },
@@ -533,6 +534,15 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'airight',
         Icon: AiriIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDT_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 6,
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'USDT',
@@ -826,6 +836,16 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'ethereum',
         Icon: EthIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: 'erc20_usdt',
+        contractAddress: USDT_ETH_CONTRACT,
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       }
     ]
   },
