@@ -10,8 +10,8 @@ class Config {
     this.chainId = 'oraibtc-subnet-1';
     this.chainName = 'OraiBtcSubnet';
     this.stakingUrl = '';
-    this.rpcUrl = 'https://oraibtc.rpc.orai.io';
-    this.restUrl = 'https://oraibtc.lcd.orai.io';
+    this.rpcUrl = 'https://btc.rpc.orai.io';
+    this.restUrl = 'https://btc.lcd.orai.io';
     this.relayerUrl = 'https://oraibtc.relayer.orai.io';
   }
 }

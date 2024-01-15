@@ -2909,10 +2909,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraibtc-wasm@^0.7.7":
-  version "0.7.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-0.7.7.tgz#b208f85602e81dac73c354f186183f7a0159ac4f"
-  integrity sha512-8lCehNkbHITaQA6fR7QP5DtwXWK80AKjb5xsE3pxRDtJtKo5pC5ZeyX9oOe+m6Y4jyRVOyEJhbqRdTLUrLan3A==
+"@oraichain/oraibtc-wasm@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-1.0.8.tgz#1c3c1f0211897d56498732426fccc1eae2c84315"
+  integrity sha512-u2/sOpuihXpfSdFbmUQGxtxd8u3/1AEEVpM15V0aqAqWbFtaZynX1a957Hc80tTXbpujmiUC0/0Ntgi+y03EpA==
 
 "@oraichain/oraidex-common-ui@^1.0.3":
   version "1.0.3"
