@@ -45,7 +45,6 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
-import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   convertKwt,
   convertTransferIBCErc20Kwt,
@@ -58,7 +57,10 @@ import {
   getFeeRate,
   calculatorTotalFeeBtc,
   BTC_SCAN,
-  toAmountBTC
+  toAmountBTC,
+  useGetInfoBtcDeposit,
+  useGetQRCode,
+  useInitNomic
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -72,8 +74,7 @@ import { BitcoinUnit } from 'bitcoin-units';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
-import { config } from 'libs/nomic/config';
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -100,6 +101,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const ref = useRef(null);
 
+  useInitNomic(nomic);
+  const { infoBTCDeposit } = useGetInfoBtcDeposit();
+  const { urlQRCode } = useGetQRCode(nomic);
+
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -109,28 +114,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const { data: prices } = useCoinGeckoPrices();
   useGetFeeConfig();
 
-  useEffect(() => {
-    async function getAddress() {
-      const isKeplrActive = await window.Keplr.getKeplr();
-      if (isKeplrActive && walletTypeStore === 'owallet') {
-        const address = await window.Keplr.getKeplrAddr(config.chainId as any);
-        console.log('🚀 ~ file: index.tsx:116 ~ getAddress ~ address:', address);
-        console.log(
-          '🚀 ~ file: index.tsx:121 ~ getAddress ~ OraiBtcSubnetChain.source.channelId:',
-          OraiBtcSubnetChain.source.channelId
-        );
-        if (!address) return;
-        await nomic.generateAddress(
-          `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(address).data)}`
-        );
-      }
-    }
-
-    getAddress();
-  }, [nomic.depositAddress, walletTypeStore]);
-
-  // console.log('🚀 ~ file: index.tsx:130 ~ nomic.wallet?.address:', nomic.wallet?.address);
-  // console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
   useEffect(() => {
     if (!tokenUrl) return setTokens(tokens);
     const _tokenUrl = tokenUrl.toUpperCase();
@@ -196,6 +179,105 @@ const Balance: React.FC<BalanceProps> = () => {
     processTxResult(fromToken.rpc, result);
   };
 
+  const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number) => {
+    const utxos = await getUtxos(btcAddress, fromToken.rpc);
+    const feeRate = await getFeeRate({
+      url: from.rpc
+    });
+
+    const utxosMapped = mapUtxos({
+      utxos,
+      address: btcAddress,
+      path: "m/84'/0'/0'/0/0"
+    });
+    const totalFee = calculatorTotalFeeBtc({
+      utxos: utxosMapped.utxos,
+      message: '',
+      transactionFee: feeRate
+    });
+
+    const { address } = nomic.depositAddress;
+    if (!address) throw Error('Not found address OraiBtc');
+    const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
+
+    const dataRequest = {
+      memo: '',
+      fee: {
+        gas: '200000',
+        amount: [
+          {
+            denom: 'btc',
+            amount: `${totalFee}`
+          }
+        ]
+      },
+      address: btcAddress,
+      msgs: {
+        address: address,
+        changeAddress: btcAddress,
+        amount: amount,
+        message: '',
+        totalFee: totalFee,
+        selectedCrypto: fromToken.chainId,
+        confirmedBalance: utxosMapped.balance,
+        feeRate: feeRate
+      },
+      confirmedBalance: utxosMapped.balance,
+      utxos: utxosMapped.utxos,
+      blacklistedUtxos: [],
+      amount: amount,
+      feeRate: feeRate
+    };
+
+    try {
+      const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId as any, dataRequest);
+      displayToast(TToastType.TX_SUCCESSFUL, {
+        customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+      });
+      setTxHash(rs.rawTxHex);
+    } catch (error) {
+      displayToast(TToastType.TX_FAILED, {
+        message: JSON.stringify(error)
+      });
+    }
+  };
+
+  const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number) => {
+    const { address } = nomic.depositAddress;
+    if (!address) throw Error('Not found Orai BTC Address');
+    const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+    const DEFAULT_TIMEOUT = 60 * 60;
+    const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
+    const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
+    if (!btcAddress) throw Error('Not found your bitcoin address!');
+    if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
+    const result = (await window.client.execute(
+      oraiAddress,
+      OBTCContractAddress,
+      {
+        send: {
+          contract: OraichainChain.source.port.split('.')[1],
+          amount,
+          msg: toBinary({
+            local_channel_id: OraichainChain.source.channelId,
+            remote_address: destinationAddress,
+            remote_denom: OraichainChain.source.nBtcIbcDenom,
+            timeout: DEFAULT_TIMEOUT,
+            memo: `withdraw:${btcAddress}`
+          })
+        }
+      },
+      'auto'
+    )) as any;
+    console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
+    processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
+  };
+
+  const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
+    if (isBTCToOraichain) return handleTransferBTCToOraichain(fromToken, transferAmount);
+    return handleTransferOraichainToBTC(fromToken, transferAmount);
+  };
+
   const onClickTransfer = async (
     fromAmount: number,
     from: TokenItemType,
@@ -239,107 +321,18 @@ const Balance: React.FC<BalanceProps> = () => {
         processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
         return;
       }
+
+      // TODO: hardcode check bitcoinTestnet need update later
       // [BTC Native] ==> ORAICHAIN
-      if ((from.chainId as any) === 'bitcoinTestnet' && to.chainId === 'Oraichain') {
-        const utxos = await getUtxos(btcAddress, from.rpc);
-        const feeRate = await getFeeRate({
-          url: from.rpc
+      const isBTCtoOraichain = (from.chainId as any) === 'bitcoinTestnet' && to.chainId === 'Oraichain';
+      const isOraichainToBTC = from.chainId === 'Oraichain' && (to.chainId as any) === 'bitcoinTestnet';
+      if (isBTCtoOraichain || isOraichainToBTC)
+        return handleTransferBTC({
+          isBTCToOraichain: isBTCtoOraichain,
+          fromToken: from,
+          transferAmount: fromAmount
         });
 
-        const utxosMapped = mapUtxos({
-          utxos,
-          address: btcAddress,
-          path: "m/84'/0'/0'/0/0"
-        });
-        const totalFee = calculatorTotalFeeBtc({
-          utxos: utxosMapped.utxos,
-          message: '',
-          transactionFee: feeRate
-        });
-
-        const { address } = nomic.depositAddress;
-        if (!address) throw Error('Not found address OraiBtc');
-        const amount = new BitcoinUnit(fromAmount, 'BTC').to('satoshi').getValue();
-
-        const dataRequest = {
-          memo: '',
-          fee: {
-            gas: '200000',
-            amount: [
-              {
-                denom: 'btc',
-                amount: `${totalFee}`
-              }
-            ]
-          },
-          address: btcAddress,
-          msgs: {
-            address: address,
-            changeAddress: btcAddress,
-            amount: amount,
-            message: '',
-            totalFee: totalFee,
-            selectedCrypto: from.chainId,
-            confirmedBalance: utxosMapped.balance,
-            feeRate: feeRate
-          },
-          confirmedBalance: utxosMapped.balance,
-          utxos: utxosMapped.utxos,
-          blacklistedUtxos: [],
-          amount: amount,
-          feeRate: feeRate
-        };
-
-        try {
-          const rs = await window.Bitcoin.signAndBroadCast(from.chainId as any, dataRequest);
-          displayToast(TToastType.TX_SUCCESSFUL, {
-            customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
-          });
-          setTxHash(rs.rawTxHex);
-        } catch (error) {
-          displayToast(TToastType.TX_FAILED, {
-            message: JSON.stringify(error)
-          });
-        }
-        return;
-      }
-      if (from.chainId === 'Oraichain' && (to.chainId as any) === 'bitcoinTestnet') {
-        const { address } = nomic.depositAddress;
-        if (!address) throw Error('Not found Orai BTC Address');
-        const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
-
-        console.log('🚀 ~ file: index.tsx:326 ~ destinationAddress:', destinationAddress);
-        const DEFAULT_TIMEOUT = 60 * 60;
-
-        const amountInput = BigInt(Decimal.fromUserInput(toAmount(fromAmount, 6).toString(), 8).atomics.toString());
-
-        const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
-        if (!btcAddress) throw Error('Not found your bitcoin address!');
-        if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
-
-        const result = (await window.client.execute(
-          oraiAddress,
-          OBTCContractAddress,
-          {
-            send: {
-              contract: OraichainChain.source.port.split('.')[1],
-              amount,
-              msg: toBinary({
-                local_channel_id: OraichainChain.source.channelId,
-                remote_address: destinationAddress,
-                remote_denom: OraichainChain.source.nBtcIbcDenom,
-                timeout: DEFAULT_TIMEOUT,
-                memo: `withdraw:${btcAddress}`
-              })
-            }
-          },
-          'auto'
-        )) as any;
-        console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
-        processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
-
-        return;
-      }
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
@@ -579,8 +572,11 @@ const Balance: React.FC<BalanceProps> = () => {
         />
         <DepositBtcModal
           isOpen={isDepositBtcModal}
+          infoBTCDeposit={infoBTCDeposit}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
+          urlQRCode={urlQRCode}
+          nomic={nomic}
         />
       </div>
     </Content>

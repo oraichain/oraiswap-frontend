@@ -58,14 +58,13 @@ const ChooseWalletModal: React.FC<{
       isActive: isMetamask,
       walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
     },
-    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
-    { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
-    { name: 'Metamask Snap', icon: PhantomIcon, isActive: isMetamask, walletType: WALLET_TYPES.SNAP },
     { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
+    { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
 
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
+    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
-    { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
+    // { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
   ];
 
   const content = useMemo(() => {
@@ -114,7 +113,7 @@ const ChooseWalletModal: React.FC<{
     <Modal
       isOpen={true}
       close={close}
-      open={() => {}}
+      open={() => { }}
       isCloseBtn={false}
       className={cx('choose_wallet_modal_container', theme)}
     >

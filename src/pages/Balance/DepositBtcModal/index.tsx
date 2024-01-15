@@ -2,8 +2,7 @@ import { FC, useContext, useEffect, useState } from 'react';
 import Modal from 'components/Modal';
 import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
-import classNames from 'classnames';
-import style from './index.module.scss';
+import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
@@ -12,26 +11,27 @@ import { NomicContext } from 'context/nomic-context';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
 import { Button } from 'components/Button';
+import { NomicClientInterface } from 'libs/nomic/models/nomic-client/nomic-client-interface';
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
+  urlQRCode: string;
+  infoBTCDeposit: {
+    index: number,
+    bridgeFeeRate: number,
+    minerFeeRate: number,
+    depositsEnabled: boolean,
+    threshold: any[]
+  };
+  nomic: NomicClientInterface
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit, urlQRCode, nomic }) => {
   const [theme] = useConfigReducer('theme');
-  const nomic = useContext(NomicContext);
-  const [qrcodeUrl, setQrcodeUrl] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
-  useEffect(() => {
-    (async () => {
-      if (nomic.depositAddress?.address) {
-        const url = await QRCode.toDataURL(nomic.depositAddress?.address);
-        setQrcodeUrl(url);
-      }
-    })();
-    return () => {};
-  }, [nomic.depositAddress?.address]);
+  const expiration = nomic?.depositAddress?.expiration ?? Date.now();
+
   useEffect(() => {
     const TIMEOUT_COPY = 2000;
     let timeoutId;
@@ -55,199 +55,59 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
           Set recovery address
         </button>
       </div> */}
-      <div
-        style={{
-          background: 'white',
-          padding: 24,
-          borderRadius: 12
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <span
-            style={{
-              color: '#232521',
-              fontSize: 20,
-              fontWeight: 600
-            }}
-          >
-            Transfer BTC to Oraichain
-          </span>
+      <div className={styles.deposit}>
+        <div className={styles.label}>
+          <span className={styles.title}>Transfer BTC to Oraichain</span>
           <button onClick={close}>
             <CloseIcon color="#232521" />
           </button>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}
-        >
-          <img src={qrcodeUrl} alt="Qr code" />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
+        <div className={styles.info}>
+          <img src={urlQRCode} alt="Qr code" />
+          <div className={styles.address}>
             <BTCToken />
             <button
-              style={{
-                background: '#F7F7F7',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '4px 8px',
-                borderRadius: 99,
-                margin: 8
-              }}
+              className={styles.copy}
               onClick={() => {
-                if (nomic?.depositAddress?.address) {
-                  copy(nomic?.depositAddress?.address);
+                if (urlQRCode) {
+                  copy(urlQRCode);
                   setIsCopied(true);
                 }
               }}
             >
-              <span
-                style={{
-                  paddingRight: 10,
-                  color: '#494949'
-                }}
-              >
-                {reduceString(nomic?.depositAddress?.address, 15, 15) ?? '...'}
-              </span>{' '}
+              <span>{reduceString(nomic?.depositAddress?.address, 15, 15) ?? '...'}</span>
               {isCopied ? <SuccessIcon width={20} height={20} /> : <CopyIcon />}
             </button>
           </div>
 
-          <div
-            style={{
-              background: '#FFEDEB',
-              padding: 16,
-              borderRadius: 12,
-              margin: '16px 0px'
-            }}
-          >
+          <div className={styles.error}>
             {/* <CopyIcon /> */}
-            <span
-              style={{
-                color: '#E01600',
-                fontSize: 14
-              }}
-            >
+            <span>
               This address expires in 4 days; deposits sent after that will be lost. Transactions fail for deposit
-              amounts below 0.00043713 BTC or exceeding 21 BTC
+              amounts exceeding 21 BTC
             </span>
           </div>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            background: '#F7F7F7',
-            borderRadius: 12,
-            padding: 16
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              paddingRight: 20
-            }}
-          >
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              Expected transaction time:
-            </span>
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              Bitcoin Miner Fee:
-            </span>
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              Bridge Fee:
-            </span>
+        <div className={styles.estimate}>
+          <div className={styles.timeMinerFee}>
+            <span className={styles.time}>Expected transaction time:</span>
+            <span className={styles.miner}>Bitcoin Miner Fee:</span>
+            <span className={styles.fee}>Bridge Fee:</span>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              10 mins - 1.5 hours
-            </span>
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              0.00024285 BTC
-            </span>
-            <span
-              style={{
-                color: '#686A66',
-                fontSize: 14
-              }}
-            >
-              1%
-            </span>
+          <div className={styles.value}>
+            <span>10 mins - 1.5 hours</span>
+            <span>{infoBTCDeposit.minerFeeRate} BTC</span>
+            <span>{infoBTCDeposit.bridgeFeeRate * 100}%</span>
           </div>
         </div>
-        <div
-          style={{
-            background: '#FFFDEB',
-            padding: 16,
-            borderRadius: 12,
-            marginTop: 16
-          }}
-        >
-          <span
-            style={{
-              fontSize: 14,
-              color: '#AD9C00'
-            }}
-          >
+        <div className={styles.warning}>
+          <span>
             The Bitcoin Recovery address is necessary for retrieving Bitcoin in the event of an emergency disbursement.
           </span>
         </div>
-
-        <Button
-          onClick={close}
-          type="secondary-sm"
-          // style={{
-          //   width: '100%',
-          //   marginTop: 24,
-          //   color: '#232521'
-          // }}
-        >
-          Close
-        </Button>
+        <div className={styles.btn} onClick={close}>
+          <div>Close</div>
+        </div>
       </div>
     </Modal>
   );

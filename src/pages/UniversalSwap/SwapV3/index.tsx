@@ -205,8 +205,8 @@ const SwapComponent: React.FC<{
     isFromAiriToUsdc || isFromOraixToUsdc || isToWETH
       ? INIT_SIMULATE_THOUNDSAND_AMOUNT
       : isFromUsdc
-      ? INIT_SIMULATE_TEN_AMOUNT
-      : 1;
+        ? INIT_SIMULATE_TEN_AMOUNT
+        : 1;
 
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -240,12 +240,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
@@ -256,8 +256,8 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-      ).toNumber()
+      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+    ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -452,9 +452,8 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>

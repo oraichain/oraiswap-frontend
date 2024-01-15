@@ -38,6 +38,12 @@ import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMov
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
 import axios from 'rest/request';
 import { script, opcodes } from 'bitcoinjs-lib';
+import { useQuery } from '@tanstack/react-query';
+import { config } from 'libs/nomic/config';
+import QRCode from 'qrcode';
+import { useEffect } from 'react';
+import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
+import { fromBech32, toBech32 } from '@cosmjs/encoding';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -589,10 +595,86 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   const fee = getFeeFromUtxos(utxos, feeRateWhole, compiledMemo);
   return fee;
 };
+
 export const BTC_SCAN = 'https://blockstream.info/testnet';
+// decimals BTC is 8
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;
 export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
+};
+
+export const useGetInfoBtcDeposit = () => {
+  const { data: infoBTCDeposit } = useQuery(
+    ['estimate-btc-deposit'],
+    async () => {
+      const resp = await fetch(`${config.relayerUrl}/sigset`);
+      const data = await resp.json();
+      return data;
+    },
+    {
+      placeholderData: {
+        index: 0,
+        bridgeFeeRate: 0,
+        minerFeeRate: 0,
+        depositsEnabled: true,
+        threshold: []
+      }
+    }
+  );
+  return { infoBTCDeposit };
+};
+
+export const useGetQRCode = (nomic) => {
+  console.log({ nomic: nomic?.depositAddress });
+
+  const { data: urlQRCode } = useQuery(
+    ['url-qr-code', nomic?.depositAddress?.address],
+    async () => {
+      const url = await QRCode.toDataURL(nomic.depositAddress.address);
+      return url;
+    },
+    {
+      placeholderData: '',
+      enabled: !!nomic?.depositAddress?.address
+    }
+  );
+
+  return { urlQRCode };
+};
+
+export const useInitNomic = (nomic) => {
+  useEffect(() => {
+    const initNomic = async () => {
+      try {
+        await nomic.init();
+        // setInitialized(true);
+        const wallet = await nomic.getCurrentWallet();
+        if (wallet && !wallet.connected) {
+          await wallet.connect();
+          nomic.wallet = wallet;
+          // await nomic.build();
+        }
+        // await bitcoin.getBitcoinPrice();
+      } catch (error) {
+        console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
+      }
+    };
+    initNomic();
+  }, []);
+
+  useEffect(() => {
+    if (!nomic.wallet?.address) return;
+    const getAddress = async () => {
+      if (nomic.depositAddress) {
+        return;
+      }
+      // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
+      await nomic.generateAddress(
+        `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
+      );
+    };
+    getAddress();
+  }, [nomic.wallet?.address, nomic.depositAddress]);
 };
