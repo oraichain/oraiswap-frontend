@@ -362,7 +362,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          console.log(token.chainId, btcChains, 'listedTokens');
           if (
             listedTokens.length > 0 ||
             evmChains.find((chain) => chain.chainId === token.chainId) ||
