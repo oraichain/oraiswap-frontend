@@ -80,8 +80,6 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
 
   const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
 
-  const insufficientFund = amount && amount > toDisplay(balance);
-
   return (
     <div className={styles.bidding}>
       <div className={styles.title}>Co-Harvest #{round}</div>
@@ -159,10 +157,9 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
             }
           }}
           icon={null}
-          disabled={!isStarted || isEnd || loading || !amount || insufficientFund} // || !Number(estimateReceive)
+          disabled={!isStarted || isEnd || loading || !amount} // || !Number(estimateReceive)
         >
-          {loading && <Loader width={22} height={22} />}&nbsp;
-          {insufficientFund ? 'Insufficient Funds' : 'Place a bid'}
+          {loading && <Loader width={22} height={22} />}&nbsp;Place a bid
         </Button>
       </div>
     </div>

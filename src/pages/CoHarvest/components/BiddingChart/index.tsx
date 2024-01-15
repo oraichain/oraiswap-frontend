@@ -8,7 +8,6 @@ import { memo, useState } from 'react';
 import ChartColumn from '../ChartColumn';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
-import { formatNumberKMB } from 'pages/CoHarvest/helpers';
 
 const BiddingChart = (props: { round: number; bidInfo }) => {
   const { round, bidInfo } = props;
@@ -57,7 +56,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
               key={key}
               data={{
                 percent: e.percentage,
-                volume: formatNumberKMB(getUsd(e.total_bid_amount, ORAIX_TOKEN_INFO, prices)),
+                volume: getUsd(e.total_bid_amount, ORAIX_TOKEN_INFO, prices),
                 interest: e.slot
               }}
             />

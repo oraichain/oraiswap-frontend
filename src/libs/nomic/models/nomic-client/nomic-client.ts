@@ -34,12 +34,12 @@ export class NomicClient implements NomicClientInterface {
 
       const btcAddress = await this.nomic.generateDepositAddress(address);
 
-      await this.nomic.broadcastDepositAddress(
-        address,
-        btcAddress.sigsetIndex,
-        [config.relayerUrl],
-        btcAddress.address
-      ); // (make sure this succeeds before showing the btc address to the user)
+      // await this.nomic.broadcastDepositAddress(
+      //   address,
+      //   btcAddress.sigsetIndex,
+      //   [config.relayerUrl],
+      //   btcAddress.address
+      // ); // (make sure this succeeds before showing the btc address to the user)
 
       if (destination) {
         const [channel, receiver] = destination.split('/', 2);
