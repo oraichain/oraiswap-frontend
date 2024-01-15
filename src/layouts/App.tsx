@@ -145,10 +145,13 @@ const App = () => {
         const vs = window?.keplr?.version;
         const isCheckKeplr = !!vs && keplrCheck('keplr');
         if (checkVersionWallet()) {
+          setWalletTypeStore('owallet');
           setStorageKey('typeWallet', 'owallet');
         } else if (isCheckKeplr) {
+          setWalletTypeStore('keplr');
           setStorageKey('typeWallet', 'keplr' as WalletType);
         } else if (isSnap) {
+          setWalletTypeStore(leapWalletType);
           setStorageKey('typeWallet', leapWalletType);
         }
       }

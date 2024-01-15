@@ -2664,54 +2664,6 @@
     bignumber.js "^9.1.2"
     long "^5.2.3"
 
-"@ledgerhq/devices@^8.2.0":
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-8.2.0.tgz#ef67bf49628252d1779acaa151b1a941acba790e"
-  integrity sha512-XROTW2gTmmuy+YPPDjdtKKTQ3mfxrPtKtV+a9QFbj8f5MnjVMV0Zpy1BIB4CyIMsVVi4z6+nI67auT7IlsM3SQ==
-  dependencies:
-    "@ledgerhq/errors" "^6.16.1"
-    "@ledgerhq/logs" "^6.12.0"
-    rxjs "^7.8.1"
-    semver "^7.3.5"
-
-"@ledgerhq/errors@^6.16.1":
-  version "6.16.1"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-6.16.1.tgz#df650a9ba105397dee2e8c0ceddf6931c5b25ede"
-  integrity sha512-4D4wKecGzQpIu7sx03Sg4uE1e8g1oZUndWgw9gw776H8h9ov9c5TxPaldTn2j6orPECAERViLf7LTO4L5pE2Cw==
-
-"@ledgerhq/hw-app-btc@^10.1.0":
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-app-btc/-/hw-app-btc-10.1.1.tgz#2ec167783800828dbb2241d25eba8d0fe40f2b65"
-  integrity sha512-0gOJkAgrbW5DkD5GoGEKgXo39TbkOKPb3DtDNCC9yjUL0bhv2RCioR89eQOTgvK1nuvZcSt9IP10bNHGh2YWAg==
-  dependencies:
-    "@ledgerhq/hw-transport" "^6.30.1"
-    "@ledgerhq/logs" "^6.12.0"
-    bip32-path "^0.4.2"
-    bitcoinjs-lib "^5.2.0"
-    bs58 "^4.0.1"
-    bs58check "^2.1.2"
-    invariant "^2.2.4"
-    ripemd160 "2"
-    semver "^7.3.5"
-    sha.js "2"
-    tiny-secp256k1 "1.1.6"
-    varuint-bitcoin "1.1.2"
-
-"@ledgerhq/hw-transport@^6.30.1":
-  version "6.30.1"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-6.30.1.tgz#fd3c825f41197aeaf705e3c066f82843eaf48cae"
-  integrity sha512-Xeeo4nt33g5Fsp3CdsPvcc2Uk7dwYeKRSlSFLWcYAAKprf/PmxgNekhke1eaNU/wLoeLOWhY2Cki8F8w9nLMdQ==
-  dependencies:
-    "@ledgerhq/devices" "^8.2.0"
-    "@ledgerhq/errors" "^6.16.1"
-    "@ledgerhq/logs" "^6.12.0"
-    events "^3.3.0"
-
-"@ledgerhq/logs@^6.12.0":
-  version "6.12.0"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-6.12.0.tgz#ad903528bf3687a44da435d7b2479d724d374f5d"
-  integrity sha512-ExDoj1QV5eC6TEbMdLUMMk9cfvNKhhv5gXol4SmULRVCx/3iyCPhJ74nsb3S0Vb+/f+XujBEj3vQn5+cwS0fNA==
-
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
@@ -2909,10 +2861,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraibtc-wasm@^0.7.7":
-  version "0.7.7"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-0.7.7.tgz#b208f85602e81dac73c354f186183f7a0159ac4f"
-  integrity sha512-8lCehNkbHITaQA6fR7QP5DtwXWK80AKjb5xsE3pxRDtJtKo5pC5ZeyX9oOe+m6Y4jyRVOyEJhbqRdTLUrLan3A==
+"@oraichain/oraibtc-wasm@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-1.0.8.tgz#1c3c1f0211897d56498732426fccc1eae2c84315"
+  integrity sha512-u2/sOpuihXpfSdFbmUQGxtxd8u3/1AEEVpM15V0aqAqWbFtaZynX1a957Hc80tTXbpujmiUC0/0Ntgi+y03EpA==
 
 "@oraichain/oraidex-common-ui@^1.0.3":
   version "1.0.3"
@@ -2924,22 +2876,6 @@
     react "^18.2.0"
     react-dom "^18.2.0"
     react-use "^17.4.0"
-
-"@oraichain/oraidex-common@../oraidex-sdk/packages/oraidex-common":
-  version "1.0.60"
-  dependencies:
-    "@cosmjs/amino" "^0.31.0"
-    "@cosmjs/cosmwasm-stargate" "^0.31.0"
-    "@cosmjs/crypto" "^0.31.0"
-    "@cosmjs/proto-signing" "^0.31.0"
-    "@cosmjs/stargate" "^0.31.0"
-    "@cosmjs/tendermint-rpc" "0.31.0"
-    "@ethersproject/providers" "^5.0.10"
-    "@keplr-wallet/types" "^0.11.38"
-    "@oraichain/oraidex-contracts-sdk" "^1.0.30"
-    bignumber.js "^9.0.1"
-    cosmjs-types "^0.8.0"
-    ethers "^5.0.15"
 
 "@oraichain/oraidex-common@^1.0.58":
   version "1.0.60"
@@ -2969,12 +2905,13 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
   integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
 
-"@oraichain/oraidex-universal-swap@../oraidex-sdk/packages/universal-swap":
+"@oraichain/oraidex-universal-swap@^1.0.50":
   version "1.0.50"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.50.tgz#c3aeb3ae774fd26d6d9c579663ec2528f8fd34af"
+  integrity sha512-0FNmNUYYGGuGUuRWthVqyxqTRH/kGT9SXE0FOvHG2tIas/4i/5UKlv6Es+u/qeSisQGEyoqr63p2tGmlvYHhLQ==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
-    "@xchainjs/xchain-bitcoin" "^0.23.7"
     bech32 "1.1.4"
     ethers "^5.0.15"
     tronweb "5.3.0"
@@ -4400,13 +4337,6 @@
   dependencies:
     tslib "^2.3.0"
 
-"@xchainjs/xchain-bitcoin@^0.23.7":
-  version "0.23.10"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bitcoin/-/xchain-bitcoin-0.23.10.tgz#6b57ccd48891d595f572e7b4f4dff46fe68425cd"
-  integrity sha512-UcTxcumx/UxndjBXj2cpSgjj9EU4ulaoga3FvXB0jnUTHnLoBdziQ0t1M8MRwDuInnLKwD5hxjO/wjhmMhChsg==
-  dependencies:
-    "@ledgerhq/hw-app-btc" "^10.1.0"
-
 "@xobotyi/scrollbar-width@^1.9.5":
   version "1.9.5"
   resolved "https://registry.yarnpkg.com/@xobotyi/scrollbar-width/-/scrollbar-width-1.9.5.tgz#80224a6919272f405b87913ca13b92929bdf3c4d"
@@ -5267,11 +5197,6 @@ bip174@^2.0.1:
   resolved "https://registry.yarnpkg.com/bip174/-/bip174-2.1.1.tgz#ef3e968cf76de234a546962bcf572cc150982f9f"
   integrity sha512-mdFV5+/v0XyNYXjBS6CQPLo9ekCx4gtKZFnJm5PMto7Fs9hTTDpkkzOB7/FtluRI6JbUUAu+snTYfJRgHLZbZQ==
 
-bip32-path@^0.4.2:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/bip32-path/-/bip32-path-0.4.2.tgz#5db0416ad6822712f077836e2557b8697c0c7c99"
-  integrity sha512-ZBMCELjJfcNMkz5bDuJ1WrYvjlhEF5k6mQ8vUr4N7MbVRsXei7ZOg8VhhwMfNiW68NWmLkgkc6WvTickrLGprQ==
-
 bip32@^2.0.4, bip32@^2.0.5, bip32@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/bip32/-/bip32-2.0.6.tgz#6a81d9f98c4cd57d05150c60d8f9e75121635134"
@@ -5311,7 +5236,7 @@ bitcoin-units@^1.0.0:
   dependencies:
     big.js "^6.1.6"
 
-bitcoinjs-lib@5.2.0, bitcoinjs-lib@^5.2.0:
+bitcoinjs-lib@5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/bitcoinjs-lib/-/bitcoinjs-lib-5.2.0.tgz#caf8b5efb04274ded1b67e0706960b93afb9d332"
   integrity sha512-5DcLxGUDejgNBYcieMIUfjORtUeNWl828VWLHJGVKZCb4zIS1oOySTUr0LGmcqJBQgTBz3bGbRQla4FgrdQEIQ==
@@ -5563,7 +5488,7 @@ bs-logger@0.x:
   dependencies:
     fast-json-stable-stringify "2.x"
 
-bs58@^4.0.0, bs58@^4.0.1:
+bs58@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/bs58/-/bs58-4.0.1.tgz#be161e76c354f6f788ae4071f63f34e8c4f0a42a"
   integrity sha512-Ok3Wdf5vOIlBrgCvTq96gBkJw+JUEzdBgyaza5HLtPm7yTHkjRy8+JzNyHF7BHa0bNWOQIp3m5YF0nnFcOIKLw==
@@ -9587,13 +9512,6 @@ interpret@^1.0.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
-
-invariant@^2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
-  integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
-  dependencies:
-    loose-envify "^1.0.0"
 
 ip-regex@^4.1.0:
   version "4.3.0"
@@ -14119,7 +14037,7 @@ rimraf@^3.0.0, rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
-ripemd160@2, ripemd160@^2.0.0, ripemd160@^2.0.1:
+ripemd160@^2.0.0, ripemd160@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-2.0.2.tgz#a1c1a6f624751577ba5d07914cbc92850585890c"
   integrity sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==
@@ -14183,7 +14101,7 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-rxjs@^7.4.0, rxjs@^7.5.5, rxjs@^7.8.0, rxjs@^7.8.1:
+rxjs@^7.4.0, rxjs@^7.5.5, rxjs@^7.8.0:
   version "7.8.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
   integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
@@ -14500,7 +14418,7 @@ setprototypeof@1.2.0:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-sha.js@2, sha.js@^2.4.0, sha.js@^2.4.11, sha.js@^2.4.8:
+sha.js@^2.4.0, sha.js@^2.4.11, sha.js@^2.4.8:
   version "2.4.11"
   resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
   integrity sha512-QMEp5B7cftE7APOjk5Y6xgrbWu+WkLVQwk8JNjZ8nKRciZaByEW6MubieAiToS7+dwvrjGhH8jRXz3MVd0AYqQ==
@@ -15454,7 +15372,7 @@ timers-ext@^0.1.7:
     es5-ext "~0.10.46"
     next-tick "1"
 
-tiny-secp256k1@1.1.6, tiny-secp256k1@^1.1.1, tiny-secp256k1@^1.1.3:
+tiny-secp256k1@^1.1.1, tiny-secp256k1@^1.1.3:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/tiny-secp256k1/-/tiny-secp256k1-1.1.6.tgz#7e224d2bee8ab8283f284e40e6b4acb74ffe047c"
   integrity sha512-FmqJZGduTyvsr2cF3375fqGHUovSwDi/QytexX1Se4BPuPZpTE5Ftp5fg+EFSuEf3lhZqgCRjEG3ydUQ/aNiwA==
@@ -16150,7 +16068,7 @@ validator@^13.7.0:
   resolved "https://registry.yarnpkg.com/validator/-/validator-13.11.0.tgz#23ab3fd59290c61248364eabf4067f04955fbb1b"
   integrity sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==
 
-varuint-bitcoin@1.1.2, varuint-bitcoin@^1.0.4:
+varuint-bitcoin@^1.0.4:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/varuint-bitcoin/-/varuint-bitcoin-1.1.2.tgz#e76c138249d06138b480d4c5b40ef53693e24e92"
   integrity sha512-4EVb+w4rx+YfVM32HQX42AbbT7/1f5zwAYhIujKXKk8NQK+JfRVl3pqT3hjNn/L+RstigmGGKVwHA/P0wgITZw==

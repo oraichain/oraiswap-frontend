@@ -103,7 +103,7 @@ async function loadTokens(
       loadBtcAmounts(
         dispatch,
         btcAddress,
-        chainInfos.filter((c) => c.chainId == 'bitcoinTestnet')
+        chainInfos.filter((c) => (c.chainId as any) == 'bitcoinTestnet')
       );
     }, 2000);
   }

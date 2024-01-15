@@ -97,6 +97,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
+  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const ref = useRef(null);
 
   useOnClickOutside(ref, () => {
@@ -111,8 +112,13 @@ const Balance: React.FC<BalanceProps> = () => {
   useEffect(() => {
     async function getAddress() {
       const isKeplrActive = await window.Keplr.getKeplr();
-      if (isKeplrActive) {
+      if (isKeplrActive && walletTypeStore === 'owallet') {
         const address = await window.Keplr.getKeplrAddr(config.chainId as any);
+        console.log('🚀 ~ file: index.tsx:116 ~ getAddress ~ address:', address);
+        console.log(
+          '🚀 ~ file: index.tsx:121 ~ getAddress ~ OraiBtcSubnetChain.source.channelId:',
+          OraiBtcSubnetChain.source.channelId
+        );
         if (!address) return;
         await nomic.generateAddress(
           `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(address).data)}`
@@ -121,7 +127,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
 
     getAddress();
-  }, [nomic.depositAddress]);
+  }, [nomic.depositAddress, walletTypeStore]);
 
   // console.log('🚀 ~ file: index.tsx:130 ~ nomic.wallet?.address:', nomic.wallet?.address);
   // console.log('🚀 ~ file: index.tsx:137 ~ nomic.wallet?.address:', nomic.wallet?.address);
@@ -234,7 +240,7 @@ const Balance: React.FC<BalanceProps> = () => {
         return;
       }
       // [BTC Native] ==> ORAICHAIN
-      if (from.chainId === 'bitcoinTestnet' && to.chainId === 'Oraichain') {
+      if ((from.chainId as any) === 'bitcoinTestnet' && to.chainId === 'Oraichain') {
         const utxos = await getUtxos(btcAddress, from.rpc);
         const feeRate = await getFeeRate({
           url: from.rpc
@@ -285,7 +291,7 @@ const Balance: React.FC<BalanceProps> = () => {
         };
 
         try {
-          const rs = await window.Bitcoin.signAndBroadCast(from.chainId, dataRequest);
+          const rs = await window.Bitcoin.signAndBroadCast(from.chainId as any, dataRequest);
           displayToast(TToastType.TX_SUCCESSFUL, {
             customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
           });
@@ -297,7 +303,7 @@ const Balance: React.FC<BalanceProps> = () => {
         }
         return;
       }
-      if (from.chainId === 'Oraichain' && to.chainId === 'bitcoinTestnet') {
+      if (from.chainId === 'Oraichain' && (to.chainId as any) === 'bitcoinTestnet') {
         const { address } = nomic.depositAddress;
         if (!address) throw Error('Not found Orai BTC Address');
         const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
@@ -518,7 +524,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   usd += getUsd(subAmount, t, prices);
                 }
                 const TokenItemELement: React.FC<TokenItemProps> =
-                  t.chainId === 'bitcoinTestnet' && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
+                  (t.chainId as any) === 'bitcoinTestnet' && (t?.coinGeckoId as any) === 'bitcoin'
+                    ? TokenItemBtc
+                    : TokenItem;
 
                 return (
                   <TokenItemELement

@@ -2,8 +2,6 @@ import init, { OraiBtc, DepositAddress } from '@oraichain/oraibtc-wasm';
 
 import { config } from '../../config';
 
-import { fromBech32, toBech32 } from '@cosmjs/encoding';
-
 import { NomicClientInterface } from './nomic-client-interface';
 
 export class NomicClient implements NomicClientInterface {

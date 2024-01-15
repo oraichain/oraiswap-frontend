@@ -66,7 +66,8 @@ import {
   WRAP_BNB_CONTRACT,
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
-  WETH_CONTRACT
+  WETH_CONTRACT,
+  USDT_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -87,7 +88,7 @@ export const tokensIcon: TokenIcon[] = [
     IconLight: UsdcIcon
   },
   {
-    coinGeckoId: 'bitcoin',
+    coinGeckoId: 'bitcoin' as any,
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -175,7 +176,7 @@ export const chainIcons: ChainIcon[] = [
     IconLight: OraiLightIcon
   },
   {
-    chainId: 'bitcoinTestnet',
+    chainId: 'bitcoinTestnet' as any,
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -343,7 +344,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usdt',
       type: 'cw20',
       contractAddress: USDT_CONTRACT,
-      bridgeTo: ['0x38', '0x2b6653dc'],
+      bridgeTo: ['0x38', '0x2b6653dc', '0x01'],
       coinDecimals: 6,
       Icon: UsdtIcon
     },
@@ -385,11 +386,11 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'BTC',
-      coinGeckoId: 'bitcoin',
+      coinGeckoId: 'bitcoin' as any,
       coinMinimalDenom: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
       type: 'cw20',
       contractAddress: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
-      bridgeTo: ['bitcoinTestnet'],
+      bridgeTo: ['bitcoinTestnet'] as any,
       coinDecimals: 6,
       Icon: BTCIcon,
       IconLight: BTCIcon
@@ -499,10 +500,10 @@ export const chainInfos: CustomChainInfo[] = [
   {
     rest: 'https://blockstream.info/testnet/api',
     rpc: 'https://blockstream.info/testnet/api',
-    chainId: ChainIdEnum.BitcoinTestnet,
-    chainName: 'Bitcoin Testnet',
+    chainId: ChainIdEnum.BitcoinTestnet as any,
+    chainName: 'Bitcoin Testnet' as any,
     bip44: {
-      coinType: 1
+      coinType: 1 as any
     },
     coinType: 1,
     Icon: BTCIcon,
@@ -515,15 +516,15 @@ export const chainInfos: CustomChainInfo[] = [
       coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
     },
     bech32Config: defaultBech32Config('tb'),
-    networkType: 'bitcoin',
+    networkType: 'bitcoin' as any,
     currencies: [
       {
         coinDenom: 'BTC',
         coinMinimalDenom: 'btc',
-        coinDecimals: 8,
+        coinDecimals: 8 as any,
         bridgeTo: ['Oraichain'],
         Icon: BTCIcon,
-        coinGeckoId: 'bitcoin',
+        coinGeckoId: 'bitcoin' as any,
         coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
         gasPriceStep: {
           low: 0,
@@ -604,6 +605,15 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'airight',
         Icon: AiriIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDT_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 6,
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'USDT',
@@ -897,6 +907,16 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'ethereum',
         Icon: EthIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: 'erc20_usdt',
+        contractAddress: USDT_ETH_CONTRACT,
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       }
     ]
   },
@@ -1049,4 +1069,4 @@ export const evmChains = chainInfos.filter(
   (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
 );
 
-export const btcChains = chainInfos.filter((c) => c.networkType === 'bitcoin');
+export const btcChains = chainInfos.filter((c) => c.networkType === ('bitcoin' as any));

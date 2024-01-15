@@ -27,6 +27,10 @@
     font-weight: 600;
     line-height: 150%; /* 27px */
 
+    @include mobile {
+      font-size: 14px;
+    }
+
     .titleLeft {
       flex: 1;
       display: flex;
@@ -59,8 +63,9 @@
         align-items: center;
 
         @include mobile {
-          font-size: 16px;
+          font-size: 13px;
         }
+
         .usd {
           @include theme {
             color: theme-get('sea-stone-200');
@@ -69,6 +74,10 @@
           font-size: 18px;
           font-weight: 600;
           line-height: 150%;
+
+          @include mobile {
+            font-size: 13px;
+          }
         }
       }
     }

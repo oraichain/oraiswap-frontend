@@ -1,12 +1,10 @@
-import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
-import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types';
-import { isMobile } from '@walletconnect/browser-utils';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos } from 'config/chainInfos';
-import { BtcChainId, ChainIdEnum, NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
+import { Key } from '@keplr-wallet/types';
+
+import { ChainIdEnum } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 export type BitcoinMode = 'core' | 'extension' | 'mobile-web' | 'walletconnect';
-import { CosmosChainId, BitcoinWallet } from '@oraichain/oraidex-common';
+// import { CosmosChainId, BitcoinWallet } from '@oraichain/oraidex-common';
+type BtcChainId = 'bitcoin' | 'bitcoinTestnet';
 export interface IBitcoin {
   readonly version: string;
   /**

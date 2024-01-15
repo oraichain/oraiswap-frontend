@@ -48,7 +48,7 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
-export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.BitcoinTestnet);
+export const bitcoinNetworks = chainInfos.filter((c) => (c.chainId as any) === ChainIdEnum.BitcoinTestnet);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
