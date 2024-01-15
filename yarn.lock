@@ -2905,15 +2905,10 @@
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
   integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
 
-<<<<<<< HEAD
 "@oraichain/oraidex-universal-swap@^1.0.50":
   version "1.0.50"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.50.tgz#c3aeb3ae774fd26d6d9c579663ec2528f8fd34af"
   integrity sha512-0FNmNUYYGGuGUuRWthVqyxqTRH/kGT9SXE0FOvHG2tIas/4i/5UKlv6Es+u/qeSisQGEyoqr63p2tGmlvYHhLQ==
-=======
-"@oraichain/oraidex-universal-swap@../oraidex-sdk/packages/universal-swap":
-  version "1.0.50"
->>>>>>> af95798626cb06db9924a46992a3c7281ee0847d
   dependencies:
     "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
