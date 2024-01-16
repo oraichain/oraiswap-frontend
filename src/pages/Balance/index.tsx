@@ -101,13 +101,10 @@ const Balance: React.FC<BalanceProps> = () => {
   // const { urlQRCode } = useGetQRCode(nomic);
   useEffect(() => {
     const getAddress = async () => {
-      if (nomic.depositAddress?.bitcoinAddress) {
-        return;
-      }
       await nomic.generateAddress();
     };
     getAddress();
-  }, [nomic.depositAddress?.bitcoinAddress]);
+  }, [oraiAddress]);
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -265,26 +262,30 @@ const Balance: React.FC<BalanceProps> = () => {
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
     if (!btcAddress) throw Error('Not found your bitcoin address!');
     if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
-    const result = (await window.client.execute(
-      oraiAddress,
-      OBTCContractAddress,
-      {
-        send: {
-          contract: OraichainChain.source.port.split('.')[1],
-          amount,
-          msg: toBinary({
-            local_channel_id: OraichainChain.source.channelId,
-            remote_address: destinationAddress,
-            remote_denom: OraichainChain.source.nBtcIbcDenom,
-            timeout: DEFAULT_TIMEOUT,
-            memo: `withdraw:${btcAddress}`
-          })
-        }
-      },
-      'auto'
-    )) as any;
-    console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
-    processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
+    try {
+      const result = (await window.client.execute(
+        oraiAddress,
+        OBTCContractAddress,
+        {
+          send: {
+            contract: OraichainChain.source.port.split('.')[1],
+            amount,
+            msg: toBinary({
+              local_channel_id: OraichainChain.source.channelId,
+              remote_address: destinationAddress,
+              remote_denom: OraichainChain.source.nBtcIbcDenom,
+              timeout: DEFAULT_TIMEOUT,
+              memo: `withdraw:${btcAddress}`
+            })
+          }
+        },
+        'auto'
+      )) as any;
+      console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
+      processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
+    } catch (error) {
+      console.log({});
+    }
   };
 
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
