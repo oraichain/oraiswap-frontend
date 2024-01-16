@@ -4,7 +4,7 @@ import { BigDecimal, oraichainTokens, toDisplay } from '@oraichain/oraidex-commo
 import { CoharvestBidPoolQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { network } from 'config/networks';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { useEffect, useState } from 'react';
@@ -177,11 +177,11 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
   exchangeRate: string;
   listBidHistories: Bid[];
   biddingInfo: BiddingInfoResponse;
+  prices: CoinGeckoPrices<string>;
 }) => {
-  const { listBidHistories, exchangeRate, biddingInfo } = props;
+  const { listBidHistories, exchangeRate, biddingInfo, prices } = props;
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-  const { data: prices } = useCoinGeckoPrices();
 
   const getListPotentialReturn = async () => {
     const multicall = new MulticallQueryClient(window.client, network.multicall);
@@ -219,9 +219,12 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
 
       const estimateReceive = isRunningRound ? response?.receive || '0' : bid.amount_received || '0';
       const estimateResidueBid = isRunningRound ? response?.residue_bid || '0' : bid.residue_bid || '0';
+      const pricesToken = isRunningRound
+        ? prices
+        : { oraidex: Number(biddingInfo.distribution_info.exchange_rate), 'usd-coin': prices['usd-coin'] };
 
-      const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
-      const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
+      const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, pricesToken);
+      const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, pricesToken);
 
       const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
 

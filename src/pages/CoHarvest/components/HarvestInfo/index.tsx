@@ -3,7 +3,7 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { memo, useState } from 'react';
 import CountDownTime from '../CountDownTime';
 import { TooltipIconBtn } from '../Tooltip';
@@ -49,7 +49,7 @@ const HarvestInfo = (props: {
 
             <div className={styles.balance}>
               <UsdcIcon />
-              {toDisplay(poolValue)} USDC
+              {numberWithCommas(toDisplay(poolValue))} USDC
             </div>
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
           </div>
