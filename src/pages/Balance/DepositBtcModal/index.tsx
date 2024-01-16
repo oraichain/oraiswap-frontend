@@ -16,17 +16,17 @@ interface ModalProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  urlQRCode: string;
-  infoBTCDeposit: {
-    index: number;
-    bridgeFeeRate: number;
-    minerFeeRate: number;
-    depositsEnabled: boolean;
-    threshold: any[];
-  };
+  // urlQRCode: string;
+  // infoBTCDeposit: {
+  //   index: number;
+  //   bridgeFeeRate: number;
+  //   minerFeeRate: number;
+  //   depositsEnabled: boolean;
+  //   threshold: any[];
+  // };
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const [theme] = useConfigReducer('theme');
   const [isCopied, setIsCopied] = useState(false);
   const [urlQRCode, setUrlQRCode] = useState(null);
