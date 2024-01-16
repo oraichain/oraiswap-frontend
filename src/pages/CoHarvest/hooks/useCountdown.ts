@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { TIMER } from '../constants';
 import { calcDiffTime, calcPercent } from '../helpers';
+import { BiddingInfo } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
+
+// export type CountDownType = {
+//   timeRemaining: number;
+//   percent: number;
+//   isEnd: boolean;
+//   start: Date;
+//   end: Date;
+//   isStarted: boolean;
+// };
 
 export type CountDownType = {
-  timeRemaining: number;
-  percent: number;
-  isEnd: boolean;
-  start: Date;
-  end: Date;
-  isStarted: boolean;
+  bidInfo: BiddingInfo;
+  onStart: () => void;
+  onEnd: () => void;
 };
 
-export const useCountdown = (bidInfo) => {
-  // // FAKE DATA
-  // bidInfo['start_time'] = new Date('2024-01-11T10:19:50.691Z').getTime();
-  // bidInfo['end_time'] = new Date('01-27-2024').getTime();
+export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
+  // // Mock DATA
+  // bidInfo['start_time'] = new Date('2024-01-12T11:29:10.691Z').getTime();
+  // bidInfo['end_time'] = new Date('2024-01-12T11:30:10.691Z').getTime();
 
   const [percent, setPercent] = useState(0);
   const [isEnd, setIsEnd] = useState(false);
@@ -33,6 +40,7 @@ export const useCountdown = (bidInfo) => {
     setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
+    // setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time));
     const decrementTime = () => {
       setTimeRemaining((prev) => {
         const newRemain = prev - TIMER.MILLISECOND;
@@ -40,6 +48,7 @@ export const useCountdown = (bidInfo) => {
           clearInterval(countdownRef.current);
           countdownRef.current = null;
           setIsEnd(true);
+          onEnd();
           return 0;
         }
         return newRemain;
@@ -60,7 +69,9 @@ export const useCountdown = (bidInfo) => {
     setPercent(() => newPercent);
 
     if (getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND && !isStarted) {
+      // if (getTimeDateNow >= bidInfo?.start_time && !isStarted) {
       setIsStarted(true);
+      onStart();
     }
   }, [timeRemaining, start, end, bidInfo]);
 
@@ -71,5 +82,7 @@ export const useCountdown = (bidInfo) => {
     isEnd,
     start: new Date(start * TIMER.MILLISECOND),
     end: new Date(end * TIMER.MILLISECOND)
+    // start: new Date(start),
+    // end: new Date(end)
   };
 };

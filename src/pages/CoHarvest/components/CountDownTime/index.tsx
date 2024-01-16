@@ -1,11 +1,16 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { formatCountdownTime, formatDate, formatUTCDateString, getUTCTime } from 'pages/CoHarvest/helpers';
-import { CountDownType } from 'pages/CoHarvest/hooks/useCountdown';
+import { CountDownType, useCountdown } from 'pages/CoHarvest/hooks/useCountdown';
 import { useState } from 'react';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
 
-const CountDownTime = ({ timeRemaining, percent, start, end, isStarted }: CountDownType) => {
+const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
+  const { timeRemaining, percent, isEnd, start, end, isStarted } = useCountdown({
+    bidInfo,
+    onStart,
+    onEnd
+  });
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
   const [visible, setVisible] = useState(false);
   const fmtPercent = percent >= 100 ? 0 : percent;

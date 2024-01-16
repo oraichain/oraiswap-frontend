@@ -8,18 +8,10 @@ import { memo, useState } from 'react';
 import CountDownTime from '../CountDownTime';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
+import { BiddingInfo } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
-const HarvestInfo = (props: {
-  poolValue: string;
-  timeRemaining: number;
-  percent: number;
-  isEnd: boolean;
-  round: number;
-  start: Date;
-  end: Date;
-  isStarted: boolean;
-}) => {
-  const { timeRemaining, percent, isEnd, poolValue, start, end, isStarted } = props;
+const HarvestInfo = (props: { poolValue: string; onEnd: () => void; onStart: () => void; bidInfo: BiddingInfo }) => {
+  const { poolValue, onEnd, onStart, bidInfo } = props;
   const { data: prices } = useCoinGeckoPrices();
   const [visible, setVisible] = useState(false);
   const [theme] = useConfigReducer('theme');
@@ -54,14 +46,7 @@ const HarvestInfo = (props: {
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
           </div>
           <div className={styles.countdown}>
-            <CountDownTime
-              start={start}
-              end={end}
-              timeRemaining={timeRemaining}
-              percent={percent}
-              isEnd={isEnd}
-              isStarted={isStarted}
-            />
+            <CountDownTime bidInfo={bidInfo} onEnd={onEnd} onStart={onStart} />
           </div>
         </div>
         <div className={styles.shadow}></div>

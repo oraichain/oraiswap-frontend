@@ -2968,13 +2968,14 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common-ui@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.3.tgz"
-  integrity sha512-SA4U3whyhsN7XMZSA3VdkSaCZyA7ZhOYIlNXV1R+XxXoUhGzoxbuh7q0QSKmY/CaLWecj/O3XgxmJt5nohBFWA==
+"@oraichain/oraidex-common-ui@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.4.tgz#5c55dd83cb4c5c1ec5563d32077daa68ccdd01ab"
+  integrity sha512-Y6CD+/J398iip2SC20BBl7+bo2lSbGqATb7P2mCW3W7iWOAVE/WyTdSdgKeBn3qH5prW8daSJygwyK+IILH6sg==
   dependencies:
     axios "^0.26.1"
     axios-extensions "^3.1.3"
+    date-fns "^3.2.0"
     react "^18.2.0"
     react-dom "^18.2.0"
     react-use "^17.4.0"
@@ -6726,6 +6727,11 @@ data-urls@^2.0.0:
     abab "^2.0.3"
     whatwg-mimetype "^2.3.0"
     whatwg-url "^8.0.0"
+
+date-fns@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.2.0.tgz#c97cf685b62c829aa4ecba554e4a51768cf0bffc"
+  integrity sha512-E4KWKavANzeuusPi0jUjpuI22SURAznGkx7eZV+4i6x2A+IZxAMcajgkvuDAU1bg40+xuhW1zRdVIIM/4khuIg==
 
 debug@2.6.9, debug@^2.6.0:
   version "2.6.9"
