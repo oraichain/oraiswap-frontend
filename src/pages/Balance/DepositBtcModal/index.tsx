@@ -80,8 +80,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             <button
               className={styles.copy}
               onClick={() => {
-                if (urlQRCode) {
-                  copy(urlQRCode);
+                if (nomic?.depositAddress?.bitcoinAddress) {
+                  copy(nomic?.depositAddress?.bitcoinAddress);
                   setIsCopied(true);
                 }
               }}
