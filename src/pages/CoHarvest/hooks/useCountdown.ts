@@ -3,15 +3,6 @@ import { TIMER } from '../constants';
 import { calcDiffTime, calcPercent } from '../helpers';
 import { BiddingInfo } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
-// export type CountDownType = {
-//   timeRemaining: number;
-//   percent: number;
-//   isEnd: boolean;
-//   start: Date;
-//   end: Date;
-//   isStarted: boolean;
-// };
-
 export type CountDownType = {
   bidInfo: BiddingInfo;
   onStart: () => void;
@@ -40,7 +31,6 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
     setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
-    // setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time));
     const decrementTime = () => {
       setTimeRemaining((prev) => {
         const newRemain = prev - TIMER.MILLISECOND;
@@ -69,7 +59,6 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
     setPercent(() => newPercent);
 
     if (getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND && !isStarted) {
-      // if (getTimeDateNow >= bidInfo?.start_time && !isStarted) {
       setIsStarted(true);
       onStart();
     }
@@ -82,7 +71,5 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
     isEnd,
     start: new Date(start * TIMER.MILLISECOND),
     end: new Date(end * TIMER.MILLISECOND)
-    // start: new Date(start),
-    // end: new Date(end)
   };
 };
