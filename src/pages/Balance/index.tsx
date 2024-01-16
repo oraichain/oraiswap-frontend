@@ -56,11 +56,7 @@ import {
   transferIbcCustom,
   getFeeRate,
   calculatorTotalFeeBtc,
-  BTC_SCAN,
-  toAmountBTC,
-  useGetInfoBtcDeposit,
-  useGetQRCode,
-  useInitNomic
+  BTC_SCAN
 } from './helpers';
 import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -74,7 +70,7 @@ import { BitcoinUnit } from 'bitcoin-units';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -101,10 +97,17 @@ const Balance: React.FC<BalanceProps> = () => {
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const ref = useRef(null);
 
-  useInitNomic(nomic);
-  const { infoBTCDeposit } = useGetInfoBtcDeposit();
-  const { urlQRCode } = useGetQRCode(nomic);
-
+  // const { infoBTCDeposit } = useGetInfoBtcDeposit();
+  // const { urlQRCode } = useGetQRCode(nomic);
+  useEffect(() => {
+    const getAddress = async () => {
+      if (nomic.depositAddress?.bitcoinAddress) {
+        return;
+      }
+      await nomic.generateAddress();
+    };
+    getAddress();
+  }, [nomic.depositAddress?.bitcoinAddress]);
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -196,7 +199,7 @@ const Balance: React.FC<BalanceProps> = () => {
       transactionFee: feeRate
     });
 
-    const { address } = nomic.depositAddress;
+    const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
 
@@ -243,9 +246,20 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number) => {
-    const { address } = nomic.depositAddress;
+    const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found Orai BTC Address');
     const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+    console.log({
+      oraiAddress,
+      destinationAddress,
+      OBTCContractAddress,
+      OraichainChain,
+      local_channel_id: OraichainChain.source.channelId,
+      remote_address: destinationAddress,
+      remote_denom: OraichainChain.source.nBtcIbcDenom,
+      memo: `withdraw:${btcAddress}`,
+      window: window.client
+    });
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
@@ -572,11 +586,10 @@ const Balance: React.FC<BalanceProps> = () => {
         />
         <DepositBtcModal
           isOpen={isDepositBtcModal}
-          infoBTCDeposit={infoBTCDeposit}
+          // infoBTCDeposit={infoBTCDeposit}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
-          urlQRCode={urlQRCode}
-          nomic={nomic}
+          // urlQRCode={urlQRCode}
         />
       </div>
     </Content>

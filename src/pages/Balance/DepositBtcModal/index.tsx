@@ -18,19 +18,30 @@ interface ModalProps {
   close: () => void;
   urlQRCode: string;
   infoBTCDeposit: {
-    index: number,
-    bridgeFeeRate: number,
-    minerFeeRate: number,
-    depositsEnabled: boolean,
-    threshold: any[]
+    index: number;
+    bridgeFeeRate: number;
+    minerFeeRate: number;
+    depositsEnabled: boolean;
+    threshold: any[];
   };
-  nomic: NomicClientInterface
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit, urlQRCode, nomic }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit }) => {
   const [theme] = useConfigReducer('theme');
   const [isCopied, setIsCopied] = useState(false);
-  const expiration = nomic?.depositAddress?.expiration ?? Date.now();
+  const [urlQRCode, setUrlQRCode] = useState(null);
+  const nomic = useContext(NomicContext);
+
+  const expiration = nomic?.depositAddress?.expirationTimeMs ?? Date.now();
+  useEffect(() => {
+    (async () => {
+      if (nomic?.depositAddress?.bitcoinAddress) {
+        const url = await QRCode.toDataURL(nomic.depositAddress.bitcoinAddress);
+        setUrlQRCode(url);
+      }
+    })();
+    return () => {};
+  }, [nomic?.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
     const TIMEOUT_COPY = 2000;
@@ -75,7 +86,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit, 
                 }
               }}
             >
-              <span>{reduceString(nomic?.depositAddress?.address, 15, 15) ?? '...'}</span>
+              <span>{reduceString(nomic?.depositAddress?.bitcoinAddress, 15, 15) ?? '...'}</span>
               {isCopied ? <SuccessIcon width={20} height={20} /> : <CopyIcon />}
             </button>
           </div>
@@ -96,8 +107,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, infoBTCDeposit, 
           </div>
           <div className={styles.value}>
             <span>10 mins - 1.5 hours</span>
-            <span>{infoBTCDeposit.minerFeeRate} BTC</span>
-            <span>{infoBTCDeposit.bridgeFeeRate * 100}%</span>
+            <span>{nomic?.depositAddress?.minerFeeRate} BTC</span>
+            <span>{nomic?.depositAddress?.bridgeFeeRate * 100}%</span>
           </div>
         </div>
         <div className={styles.warning}>

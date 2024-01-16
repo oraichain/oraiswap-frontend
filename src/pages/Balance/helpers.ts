@@ -627,8 +627,6 @@ export const useGetInfoBtcDeposit = () => {
 };
 
 export const useGetQRCode = (nomic) => {
-  console.log({ nomic: nomic?.depositAddress });
-
   const { data: urlQRCode } = useQuery(
     ['url-qr-code', nomic?.depositAddress?.address],
     async () => {
@@ -671,9 +669,7 @@ export const useInitNomic = (nomic) => {
         return;
       }
       // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
-      await nomic.generateAddress(
-        `${OraiBtcSubnetChain.source.channelId}/${toBech32('orai', fromBech32(nomic.wallet?.address).data)}`
-      );
+      await nomic.generateAddress();
     };
     getAddress();
   }, [nomic.wallet?.address, nomic.depositAddress]);

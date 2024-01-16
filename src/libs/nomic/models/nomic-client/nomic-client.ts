@@ -1,63 +1,49 @@
-import init, { OraiBtc, DepositAddress } from '@oraichain/oraibtc-wasm';
+// import init, { OraiBtc, DepositAddress } from '@oraichain/oraibtc-wasm';
+// import { generateDepositAddress, DepositOptions, DepositSuccess } from '@oraichain/orai-bitcoin';
 
-import { config } from '../../config';
+import { config as Config } from '../../config';
 
 import { NomicClientInterface } from './nomic-client-interface';
+import { OraiBtcSubnetChain } from '../ibc-chain';
+import { DepositSuccess, generateDepositAddress, DepositOptions } from '@oraichain/orai-bitcoin';
 
 export class NomicClient implements NomicClientInterface {
   readonly modifier = BigInt(1e6);
   readonly nbtcModifier = BigInt(1e14);
 
   initialized = false;
-  private nomic: OraiBtc;
 
-  public depositAddress: DepositAddress | null = null;
+  public depositAddress: DepositSuccess | null = null;
 
   public async setRecoveryAddress(recovery_address: string) {
+    // const isKeplrActive = await window.Keplr.getKeplr();
+    // if (isKeplrActive) {
+    //   const address = await window.Keplr.getKeplrAddr(config.chainId as any);
+    //   if (!address) {
+    //     return;
+    //   }
+    //   await this.nomic.setRecoveryAddress(address, recovery_address);
+    // }
+  }
+  public async generateAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();
     if (isKeplrActive) {
-      const address = await window.Keplr.getKeplrAddr(config.chainId as any);
-      if (!address) {
+      const sender = await window.Keplr.getKeplrAddr(Config.chainId as any);
+      const receiver = await window.Keplr.getKeplrAddr();
+      if (!sender || !receiver) {
         return;
       }
+      const config = {
+        relayers: ['https://oraibtc.relayer.orai.io'],
+        channel: OraiBtcSubnetChain.source.channelId, // ibc between oraibtc and orai chain
+        network: 'testnet',
+        receiver: receiver, // bech32 address of the depositing user,
+        sender: sender
+      } as DepositOptions;
 
-      await this.nomic.setRecoveryAddress(address, recovery_address);
-    }
-  }
-  public async generateAddress(destination?: string) {
-    const isKeplrActive = await window.Keplr.getKeplr();
-    if (isKeplrActive) {
-      const address = await window.Keplr.getKeplrAddr(config.chainId as any);
-      if (!address) {
-        return;
-      }
+      const btcAddressToDeposit = (await generateDepositAddress(config, false)) as DepositSuccess;
 
-      const btcAddress = await this.nomic.generateDepositAddress(address);
-
-      await this.nomic.broadcastDepositAddress(
-        address,
-        btcAddress.sigsetIndex,
-        [config.relayerUrl],
-        btcAddress.address
-      ); // (make sure this succeeds before showing the btc address to the user)
-
-      if (destination) {
-        const [channel, receiver] = destination.split('/', 2);
-        try {
-          // fromBech32(receiver);
-          this.depositAddress = await this.nomic.generateDepositAddress(receiver, channel, address);
-        } catch {}
-      }
-
-      if (!this.depositAddress) this.depositAddress = btcAddress;
-    }
-  }
-
-  public async init() {
-    if (!this.initialized) {
-      await init();
-      this.nomic = new OraiBtc(config.restUrl, config.chainId, 'testnet');
-      this.initialized = true;
+      this.depositAddress = btcAddressToDeposit;
     }
   }
 }
