@@ -732,8 +732,8 @@ export const chainInfos: CustomChainInfo[] = [
   },
   /// popular networks already included
   {
-    rpc: 'https://injective-rpc.polkachu.com',
-    rest: 'https://injective-lcd.quickapi.com',
+    rpc: 'https://injective.rpc.orai.io',
+    rest: 'https://injective.lcd.orai.io',
     chainId: 'injective-1',
     chainName: 'Injective',
     networkType: 'cosmos',
