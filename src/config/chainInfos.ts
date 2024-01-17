@@ -62,7 +62,9 @@ import {
   USDT_TRON_CONTRACT,
   WRAP_BNB_CONTRACT,
   WRAP_ETH_CONTRACT,
-  WRAP_TRON_TRX_CONTRACT
+  WRAP_TRON_TRX_CONTRACT,
+  WETH_CONTRACT,
+  USDT_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -329,7 +331,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usdt',
       type: 'cw20',
       contractAddress: USDT_CONTRACT,
-      bridgeTo: ['0x38', '0x2b6653dc'],
+      bridgeTo: ['0x38', '0x2b6653dc', '0x01'],
       coinDecimals: 6,
       Icon: UsdtIcon
     },
@@ -442,6 +444,18 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 6,
       Icon: InjIcon,
       IconLight: InjIcon
+    },
+    {
+      coinDenom: 'WETH',
+      coinGeckoId: 'weth',
+      coinMinimalDenom: 'weth',
+      type: 'cw20',
+      contractAddress: WETH_CONTRACT,
+      bridgeTo: ['0x01'],
+      coinDecimals: 6,
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+      Icon: EthIcon,
+      IconLight: EthIcon
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -505,12 +519,30 @@ export const chainInfos: CustomChainInfo[] = [
         Icon: UsdcIcon
       },
       {
+        coinDenom: 'WETH',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + WRAP_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 6,
+        coinGeckoId: 'weth',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: EthIcon
+      },
+      {
         coinDenom: 'AIRI',
         coinMinimalDenom: ORAI_BRIDGE_EVM_DENOM_PREFIX + AIRI_BSC_CONTRACT,
         bridgeNetworkIdentifier: '0x38',
         coinDecimals: 18,
         coinGeckoId: 'airight',
         Icon: AiriIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + USDT_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 6,
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       },
       {
         coinDenom: 'USDT',
@@ -639,8 +671,8 @@ export const chainInfos: CustomChainInfo[] = [
   },
   /// popular networks already included
   {
-    rpc: 'https://injective-rpc.polkachu.com',
-    rest: 'https://injective-lcd.quickapi.com',
+    rpc: 'https://injective.rpc.orai.io',
+    rest: 'https://injective.lcd.orai.io',
     chainId: 'injective-1',
     chainName: 'Injective',
     networkType: 'cosmos',
@@ -793,6 +825,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'weth',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: EthIcon
       },
       {
@@ -803,6 +836,16 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'ethereum',
         Icon: EthIcon
+      },
+      {
+        coinDenom: 'USDT',
+        coinMinimalDenom: 'erc20_usdt',
+        contractAddress: USDT_ETH_CONTRACT,
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'tether',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: UsdtIcon
       }
     ]
   },

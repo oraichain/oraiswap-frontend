@@ -129,6 +129,7 @@ const SwapComponent: React.FC<{
     toContractAddr: originalToToken.contractAddress
   });
 
+  console.log('first', fromTokenDenom);
   // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
   const fromToken = isEvmSwap
     ? tokenMap[fromTokenDenom]
@@ -194,13 +195,18 @@ const SwapComponent: React.FC<{
   // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, ORAIX/USDC), update later after migrate contract
   const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
   const isFromOraixToUsdc = originalFromToken.coinGeckoId === 'oraidex' && originalToToken.coinGeckoId === 'usd-coin';
+  const isToWETH = originalToToken.coinGeckoId === 'weth';
 
   const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
 
-  const INIT_SIMULATE_AIRI_TO_USDC = 1000;
-  const INIT_SIMULATE_FROM_USDC = 10;
+  const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
+  const INIT_SIMULATE_TEN_AMOUNT = 10;
   const INIT_AMOUNT =
-    isFromAiriToUsdc || isFromOraixToUsdc ? INIT_SIMULATE_AIRI_TO_USDC : isFromUsdc ? INIT_SIMULATE_FROM_USDC : 1;
+    isFromAiriToUsdc || isFromOraixToUsdc || isToWETH
+      ? INIT_SIMULATE_THOUNDSAND_AMOUNT
+      : isFromUsdc
+      ? INIT_SIMULATE_TEN_AMOUNT
+      : 1;
 
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
@@ -234,12 +240,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-      // @ts-ignore
-      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
@@ -250,8 +256,8 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-    ).toNumber()
+        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+      ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -330,7 +336,7 @@ const SwapComponent: React.FC<{
       console.log({ error });
       handleErrorTransaction(error, {
         tokenName: originalToToken.name,
-        chainName: originalToToken.chainId,
+        chainName: originalToToken.chainId
       });
     } finally {
       setSwapLoading(false);
@@ -446,8 +452,9 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>

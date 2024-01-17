@@ -79,6 +79,7 @@ export function filterNonPoolEvmTokens(
   let filteredToTokens = listTokens.filter(
     (token) => token.denom !== denom && token.name.toLowerCase().includes(searchTokenName.toLowerCase())
   );
+
   // special case for tokens not having a pool on Oraichain
   if (isSupportedNoPoolSwapEvm(coingeckoId)) {
     const swappableTokens = Object.keys(swapEvmRoutes[chainId]).map((key) => key.split('-')[1]);

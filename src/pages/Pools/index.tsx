@@ -5,7 +5,11 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-import { CW20_DECIMALS, INJECTIVE_CONTRACT, ORAI, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import {
+  CW20_DECIMALS,
+  TokenItemType,
+  toDisplay,
+} from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -13,7 +17,8 @@ import useTheme from 'hooks/useTheme';
 import isEqual from 'lodash/isEqual';
 import { PoolInfoResponse } from 'types/pool';
 import { Filter } from './components/Filter';
-import { parseAssetOnlyDenom } from './helpers';
+import { getSymbolPools, parseAssetOnlyDenom, reverseSymbolArr } from './helpers';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import {
   useFetchCacheRewardAssetForAllPools,
   useFetchLpPoolsV3,
@@ -70,7 +75,7 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-          '0'
+        '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
@@ -86,12 +91,7 @@ const Pools: React.FC<{}> = () => {
       const [baseToken, quoteToken] = [baseDenom, quoteDenom].map((denom) =>
         oraichainTokensWithIcon.find((token) => token.denom === denom || token.contractAddress === denom)
       );
-      // TODO: hardcode reverse symbol order for ORAI/INJ pools, need to update later
-      let { symbols } = pool;
-      if (baseDenom === INJECTIVE_CONTRACT && quoteDenom === ORAI) {
-        symbols = symbols.split('/').reverse().join('/');
-      }
-
+      const symbols = getSymbolPools(baseDenom, quoteDenom, pool.symbols);
       // calc claimable of each pool
       const claimableAmount = listClaimableData.find((e) => isEqual(e.liquidityAddr, stakingToken));
 
@@ -111,10 +111,16 @@ const Pools: React.FC<{}> = () => {
     });
 
   const generateIcon = (baseToken: TokenItemType, quoteToken: TokenItemType): JSX.Element => {
-    const BaseTokenIcon = theme === 'light' ? baseToken.IconLight : baseToken.Icon;
-    const QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight : quoteToken.Icon;
-    // TODO: hardcode reverse logo for ORAI/INJ, need to update later
-    if (baseToken.coinGeckoId === 'injective-protocol' && quoteToken.coinGeckoId === 'oraichain-token') {
+    let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
+
+    if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.IconLight : baseToken.Icon;
+    if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight : quoteToken.Icon;
+
+    // TODO: hardcode reverse logo for ORAI/INJ,USDC/ORAIX, need to update later
+    const isReverseLogo = reverseSymbolArr.some(
+      (item) => item[0].coinGeckoId === baseToken?.coinGeckoId && item[1].coinGeckoId === quoteToken?.coinGeckoId
+    );
+    if (isReverseLogo) {
       return (
         <div className={styles.symbols}>
           <QuoteTokenIcon className={styles.symbols_logo_left} />

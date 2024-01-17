@@ -22,18 +22,41 @@ const fallback = {
   https: require.resolve('https-browserify')
 };
 
+const fixBabelRules = (config) => {
+  // find first loader and use babel.config.js
+  let ruleInd = 0;
+  let firstRule = true;
+  const rules = config.module.rules[0].oneOf;
+  while (ruleInd < rules.length) {
+    const rule = rules[ruleInd];
+    if (rule.loader) {
+      if (firstRule) {
+        // ignore js and mjs and use just one
+        rule.test = /\.(jsx|ts|tsx)$/;
+
+        rule.options.plugins.push([
+          '@oraichain/operator-overloading',
+          {
+            classNames: ['BigDecimal']
+          }
+        ]);
+        firstRule = false;
+      } else {
+        rules.splice(ruleInd, 1);
+        continue;
+      }
+    }
+    ruleInd++;
+  }
+};
+
 module.exports = {
   fallback,
   webpack: function (config, env) {
-    config.module.rules = [
-      ...config.module.rules,
-      {
-        test: /\.m?js/,
-        resolve: {
-          fullySpecified: false
-        }
-      }
-    ];
+    const isDevelopment = env === 'development';
+    fixBabelRules(config);
+
+    config.resolve.fallback = fallback;
 
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
@@ -66,6 +89,27 @@ module.exports = {
     if (!fs.existsSync(vendorFileDest)) {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
+
+    // if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
+    //   const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+    //   config.devtool = 'source-map';
+    //   config.plugins.push(
+    //     new SentryWebpackPlugin({
+    //       org: 'oraichain',
+    //       project: 'oraidex',
+
+    //       // Specify the directory containing build artifacts
+    //       include: './build',
+
+    //       // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
+    //       // and needs the `project:releases` and `org:read` scopes
+    //       authToken: process.env.SENTRY_AUTH_TOKEN,
+
+    //       // Optionally uncomment the line below to override automatic release name detection
+    //       release: vendorHash
+    //     })
+    //   );
+    // }
 
     config.plugins.push(
       new webpack.DllReferencePlugin({
