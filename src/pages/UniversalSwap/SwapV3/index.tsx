@@ -129,7 +129,6 @@ const SwapComponent: React.FC<{
     toContractAddr: originalToToken.contractAddress
   });
 
-  console.log('first', fromTokenDenom);
   // if evm swappable then no need to get token on oraichain because we can swap on evm. Otherwise, get token on oraichain. If cannot find => fallback to original token
   const fromToken = isEvmSwap
     ? tokenMap[fromTokenDenom]

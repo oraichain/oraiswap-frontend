@@ -1,0 +1,89 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.competition {
+  z-index: 31;
+  width: 300px;
+  position: fixed;
+  bottom: 120px;
+  right: 40px;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 12px;
+  border: 1px solid;
+
+  @include theme {
+    border-color: theme-get('neutral-surface-bg-btn-disabled');
+    background: theme-get('neutral-surface-bg-modal');
+  }
+
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+  @include mobile {
+    visibility: hidden;
+  }
+
+  &.active {
+    visibility: visible;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+
+    .header {
+      @include theme {
+        color: theme-get('sea-stone-200');
+      }
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 150%;
+    }
+
+    .desc {
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%; /* 21px */
+    }
+
+    .btnGroup {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%;
+
+      button {
+        background-color: transparent;
+        padding: 8px 16px;
+        border-radius: 99px;
+        border: 1px solid;
+
+        @include theme {
+          color: theme-get('neutral-text-text-token-name');
+          border-color: theme-get('neutral-text-text-token-name');
+        }
+      }
+
+      a {
+        background-color: $primary-bg-btn;
+        @include theme {
+          color: theme-get('neutral-text-text-btn-default');
+        }
+        padding: 8px 16px;
+        border-radius: 99px;
+      }
+    }
+  }
+}
