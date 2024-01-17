@@ -13,13 +13,9 @@ import { BidStatus } from 'pages/CoHarvest/constants';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
 
-const MyBidding = ({ list, isLoading, isEnd, prices, biddingInfo }) => {
+const MyBidding = ({ list, isLoading }) => {
   const [theme] = useConfigReducer('theme');
-  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-  const pricesToken = isEnd
-    ? { oraidex: Number(biddingInfo.distribution_info.exchange_rate), 'usd-coin': prices['usd-coin'] }
-    : prices;
+
   const StatusIcon = {
     [BidStatus.BIDDING]: theme === 'light' ? BiddingIconLight : BiddingIcon,
     [BidStatus.WIN]: theme === 'light' ? WinIconLight : WinIcon,
@@ -46,14 +42,13 @@ const MyBidding = ({ list, isLoading, isEnd, prices, biddingInfo }) => {
               {list
                 .sort((a, b) => b.premium_slot - a.premium_slot)
                 .map((item, index) => {
-                  const amountUsd = getUsd(item.amount || '0', ORAIX_TOKEN_INFO, pricesToken);
                   const Status = StatusIcon[item.status] || BiddingIcon;
 
                   return (
                     <tr className={styles.item} key={index}>
                       <td className={styles.index}>{index + 1}</td>
                       <td className={styles.bid}>
-                        <div>{formatDisplayUsdt(amountUsd)}</div>
+                        <div>{formatDisplayUsdt(item.amountUSD)}</div>
                         {/* <div className={styles.detailPrice}>{toDisplay(item.amount || '0')} ORAIX</div> */}
                         <div className={styles.detailPrice}>{numberWithCommas(toDisplay(item.amount))} ORAIX</div>
                       </td>
@@ -69,8 +64,9 @@ const MyBidding = ({ list, isLoading, isEnd, prices, biddingInfo }) => {
                       </td>
                       <td className={styles.return}>
                         <div
-                          className={`${styles.returnValue} ${item.status !== BidStatus.BIDDING ? styles[item.status] : ''
-                            }`}
+                          className={`${styles.returnValue} ${
+                            item.status !== BidStatus.BIDDING ? styles[item.status] : ''
+                          }`}
                         >
                           ≈ {formatDisplayUsdt(item.potentialReturnUSD)}
                         </div>

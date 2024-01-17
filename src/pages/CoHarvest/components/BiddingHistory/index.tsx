@@ -48,10 +48,10 @@ const BiddingHistory = ({ round, isEnd }) => {
   }, [round]);
 
   const exchangeRate = new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString();
+  const { data: prices } = useCoinGeckoPrices();
   const { biddingInfo } = useGetBiddingFilter(filterRound);
   const { historyBidPool } = useGetHistoryBid(filterRound);
-  const { historyAllBidPool, isLoading: loadingAllBid } = useGetAllBids(filterRound, exchangeRate);
-  const { data: prices } = useCoinGeckoPrices();
+  const { historyAllBidPool, isLoading: loadingAllBid } = useGetAllBids(filterRound, biddingInfo, prices, exchangeRate);
   const { listPotentialReturn, isLoading: loadingMyBid } = useGetBidHistoryWithPotentialReturn({
     listBidHistories: historyBidPool,
     exchangeRate,
@@ -110,13 +110,13 @@ const BiddingHistory = ({ round, isEnd }) => {
         {activeTab === TAB_HISTORY.MY_BID && (
           <LoadingBox loading={loadingMyBid} className={styles.loadingDivWrapper}>
             {listPotentialReturn.length <= 0 ? null : <span className={styles.title}>Round #{filterRound}</span>}
-            <MyBidding biddingInfo={biddingInfo} list={listPotentialReturn} isEnd={isEnd} prices={prices} isLoading={loadingMyBid} />
+            <MyBidding list={listPotentialReturn} isLoading={loadingMyBid} />
           </LoadingBox>
         )}
         {activeTab === TAB_HISTORY.ALL_BID && (
           <LoadingBox loading={loadingAllBid} className={styles.loadingDivWrapper}>
             {historyAllBidPool.length <= 0 ? null : <span className={styles.title}>Round #{filterRound}</span>}
-            <AllBidding biddingInfo={biddingInfo} list={historyAllBidPool} isEnd={isEnd} prices={prices} isLoading={loadingAllBid} />
+            <AllBidding list={historyAllBidPool} isLoading={loadingAllBid} />
           </LoadingBox>
         )}
       </div>
