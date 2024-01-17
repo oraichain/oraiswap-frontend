@@ -10,20 +10,10 @@ import { ReactComponent as BTCToken } from 'assets/images/token-btc.svg';
 import { NomicContext } from 'context/nomic-context';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
-import { Button } from 'components/Button';
-import { NomicClientInterface } from 'libs/nomic/models/nomic-client/nomic-client-interface';
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  // urlQRCode: string;
-  // infoBTCDeposit: {
-  //   index: number;
-  //   bridgeFeeRate: number;
-  //   minerFeeRate: number;
-  //   depositsEnabled: boolean;
-  //   threshold: any[];
-  // };
 }
 
 const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
@@ -40,7 +30,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
         setUrlQRCode(url);
       }
     })();
-    return () => {};
+    return () => { };
   }, [nomic?.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
@@ -86,7 +76,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
                 }
               }}
             >
-              <span>{reduceString(nomic?.depositAddress?.bitcoinAddress, 15, 15) ?? '...'}</span>
+              <span>{reduceString(nomic?.depositAddress?.bitcoinAddress, 10, 10) ?? '...'}</span>
               {isCopied ? <SuccessIcon width={20} height={20} /> : <CopyIcon />}
             </button>
           </div>
