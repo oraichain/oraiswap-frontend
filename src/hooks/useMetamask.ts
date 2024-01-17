@@ -34,10 +34,6 @@ export function useEagerConnect() {
     }
   };
 
-  useEffect(() => {
-    connect();
-  }, [chainInfo, pathname]);
-
   return connect;
 }
 
