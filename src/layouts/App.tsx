@@ -34,7 +34,7 @@ const App = () => {
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
 
-  useTronEventListener();
+  // useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
