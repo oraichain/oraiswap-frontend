@@ -202,6 +202,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           ...tronNetworks.map((item: any) => {
             item.address = tronAddress;
             return item;
+          }),
+          ...bitcoinNetworks.map((item: any) => {
+            item.address = btcAddress;
+            return item;
           })
         ]
       }
