@@ -1,9 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import useConfigReducer from 'hooks/useConfigReducer';
-
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import useLoadTokens from './useLoadTokens';
 
 const loadAccounts = async (): Promise<string[]> => {
@@ -18,8 +16,6 @@ const loadAccounts = async (): Promise<string[]> => {
 };
 
 export function useEagerConnect() {
-  const { pathname } = useLocation();
-  const [chainInfo] = useConfigReducer('chainInfo');
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
 
