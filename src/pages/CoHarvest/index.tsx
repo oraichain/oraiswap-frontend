@@ -39,14 +39,14 @@ const CoHarvest = () => {
               <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
             </div>
           </div>
-          <BiddingHistory round={round} />
+          <BiddingHistory round={round} isEnd={isEnd} />
         </div>
       ) : (
         <div className={styles.auction}>
           <HarvestInfo poolValue={poolValue} bidInfo={biddingInfo.bid_info} onEnd={onEnd} onStart={onStart} />
           <Bidding round={round} isEnd={isEnd} isStarted={isStarted} />
           <BiddingChart bidInfo={biddingInfo.bid_info} round={round} />
-          <BiddingHistory round={round} />
+          <BiddingHistory round={round} isEnd={isEnd} />
         </div>
       )}
     </div>
