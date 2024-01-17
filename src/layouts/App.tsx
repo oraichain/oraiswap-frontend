@@ -28,12 +28,13 @@ const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
+  const [walletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-  useTronEventListener();
+
+  // useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
@@ -100,8 +101,8 @@ const App = () => {
 
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
-    keplrHandler();
   }, []);
+
   useEffect(() => {
     (async () => {
       if (walletTypeStore !== leapWalletType || isMobile()) {
@@ -123,18 +124,12 @@ const App = () => {
         });
       }
     } catch (error) {
-      console.log('Error: ', error);
+      console.log('Error keplrGasPriceCheck: ', error);
     }
   };
 
   const keplrHandler = async () => {
     try {
-      console.log('Key store in Keplr is changed. You may need to refetch the account info.');
-      // automatically update. If user is also using Oraichain wallet => dont update
-      // const keplr = await window.Keplr.getKeplr();
-      // if (!keplr) {
-      //   return displayInstallWallet();
-      // }
       const typeWallet = getStorageKey();
       const isSnap = await getSnap();
       if (!typeWallet) {
@@ -202,7 +197,6 @@ const App = () => {
     }
   };
 
-  // can use ether.js as well, but ether.js is better for nodejs
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
