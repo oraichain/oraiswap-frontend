@@ -23,10 +23,6 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
   const [timeRemaining, setTimeRemaining] = useState(() => calcDiffTime(getTimeDateNow, end));
   const [isStarted, setIsStarted] = useState(() => {
     const isStart = getTimeDateNow >= start;
-
-    if (isStart) {
-      onStart();
-    }
     return isStart;
   });
 
@@ -34,8 +30,15 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
     if (!bidInfo.round) return;
     setStart(bidInfo?.start_time);
     setEnd(bidInfo?.end_time);
+    setIsStarted(() => {
+      const isStart = getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND;
 
-    setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
+      if (isStart) {
+        onStart();
+      }
+
+      return isStart;
+    });
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
     const decrementTime = () => {
