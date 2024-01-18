@@ -275,56 +275,64 @@ export const getStatisticData = (data: PoolTableData[]) => {
 };
 
 export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
-  const rewardPerSecInfoData = JSON.parse(pool.rewardPerSec);
+  const rewardPerSecPool = pool.rewardPerSec || '{"assets": []}';
+  const rewardPerSecInfoData = JSON.parse(rewardPerSecPool);
 
   const currentPoolReward = totalRewardInfoData?.reward_infos?.find((reward) =>
     isEqual(reward.staking_token, pool.liquidityAddr)
   );
   const totalRewardAmount = BigInt(currentPoolReward?.pending_reward ?? 0);
 
+  const rewardPerSecInfoDataIsArray =
+    rewardPerSecInfoData.assets && Array.isArray(rewardPerSecInfoData.assets) && rewardPerSecInfoData.assets.length > 0;
+
   // unit LP
-  const totalRewardPerSec = rewardPerSecInfoData.assets
-    .map((asset) => BigInt(asset.amount))
-    .reduce((a, b) => a + b, BigInt(0));
+  const totalRewardPerSec =
+    rewardPerSecInfoDataIsArray &&
+    rewardPerSecInfoData.assets.map((asset) => BigInt(asset.amount)).reduce((a, b) => a + b, BigInt(0));
 
-  const results = rewardPerSecInfoData.assets
-    .filter((asset) => parseInt(asset.amount))
-    .map(async (asset) => {
-      const pendingWithdraw = BigInt(
-        currentPoolReward?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
-      );
+  const results =
+    rewardPerSecInfoDataIsArray &&
+    rewardPerSecInfoData.assets
+      .filter((asset) => parseInt(asset.amount))
+      .map(async (asset) => {
+        const pendingWithdraw = BigInt(
+          currentPoolReward?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
+        );
 
-      const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
+        const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
 
-      let token =
-        'token' in asset.info ? cw20TokenMap[asset.info.token.contract_addr] : tokenMap[asset.info.native_token.denom];
+        let token =
+          'token' in asset.info
+            ? cw20TokenMap[asset.info.token.contract_addr]
+            : tokenMap[asset.info.native_token.denom];
 
-      // only for atom/scatom pool
-      if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
-        const tokenInfo = await fetchTokenInfo({
-          contractAddress: asset.info.token.contract_addr,
-          name: '',
-          org: 'Oraichain',
-          denom: '',
-          Icon: undefined,
-          chainId: 'Oraichain',
-          rpc: '',
-          decimals: 0,
-          coinGeckoId: 'scatom',
-          cosmosBased: undefined
-        });
+        // only for atom/scatom pool
+        if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
+          const tokenInfo = await fetchTokenInfo({
+            contractAddress: asset.info.token.contract_addr,
+            name: '',
+            org: 'Oraichain',
+            denom: '',
+            Icon: undefined,
+            chainId: 'Oraichain',
+            rpc: '',
+            decimals: 0,
+            coinGeckoId: 'scatom',
+            cosmosBased: undefined
+          });
 
-        token = {
-          ...tokenInfo,
-          denom: tokenInfo?.symbol
+          token = {
+            ...tokenInfo,
+            denom: tokenInfo?.symbol
+          };
+        }
+        return {
+          ...token,
+          amount,
+          pendingWithdraw
         };
-      }
-      return {
-        ...token,
-        amount,
-        pendingWithdraw
-      };
-    });
+      });
 
   return results;
 };
@@ -411,9 +419,9 @@ export const useGetPoolsWithClaimableAmount = ({ poolTableData, totalRewardInfoD
       amountEachPool: number;
     }[]
   >([]);
+
   const promiseClaimAmounts = poolTableData.map(async (pool) => {
     const amountEachPool = await getClaimableAmountByPool({ pool, totalRewardInfoData, cachePrices });
-
     return {
       liquidityAddr: pool.liquidityAddr,
       amountEachPool: amountEachPool
