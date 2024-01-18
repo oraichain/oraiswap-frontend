@@ -21,7 +21,14 @@ export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
   const [start, setStart] = useState(bidInfo?.start_time);
   const [end, setEnd] = useState(bidInfo?.end_time);
   const [timeRemaining, setTimeRemaining] = useState(() => calcDiffTime(getTimeDateNow, end));
-  const [isStarted, setIsStarted] = useState(() => getTimeDateNow >= start);
+  const [isStarted, setIsStarted] = useState(() => {
+    const isStart = getTimeDateNow >= start;
+
+    if (isStart) {
+      onStart();
+    }
+    return isStart;
+  });
 
   useEffect(() => {
     if (!bidInfo.round) return;
