@@ -1,4 +1,4 @@
-// import init, { OraiBtc, DepositAddress } from '@oraichain/oraibtc-wasm';
+import init, { OraiBtc } from '@oraichain/oraibtc-wasm';
 // import { generateDepositAddress, DepositOptions, DepositSuccess } from '@oraichain/orai-bitcoin';
 
 import { config as Config } from '../../config';
@@ -14,16 +14,17 @@ export class NomicClient implements NomicClientInterface {
   initialized = false;
 
   public depositAddress: DepositSuccess | null = null;
+  private oraibtc: OraiBtc | null = null;
 
   public async setRecoveryAddress(recovery_address: string) {
-    // const isKeplrActive = await window.Keplr.getKeplr();
-    // if (isKeplrActive) {
-    //   const address = await window.Keplr.getKeplrAddr(config.chainId as any);
-    //   if (!address) {
-    //     return;
-    //   }
-    //   await this.nomic.setRecoveryAddress(address, recovery_address);
-    // }
+    const isKeplrActive = await window.Keplr.getKeplr();
+    if (isKeplrActive) {
+      const address = await window.Keplr.getKeplrAddr(Config.chainId as any);
+      if (!address || !recovery_address) {
+        return;
+      }
+      await this.oraibtc.setRecoveryAddress(address, recovery_address);
+    }
   }
   public async generateAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();
@@ -34,9 +35,9 @@ export class NomicClient implements NomicClientInterface {
         return;
       }
       const config = {
-        relayers: ['https://oraibtc.relayer.orai.io'],
+        relayers: [Config.relayerUrl],
         channel: OraiBtcSubnetChain.source.channelId, // ibc between oraibtc and orai chain
-        network: 'testnet',
+        network: process.env.REACT_APP_IS_ORAIBTC_TESTNET ? 'testnet' : 'bitcoin',
         receiver: receiver, // bech32 address of the depositing user,
         sender: sender
       } as DepositOptions;
@@ -45,5 +46,17 @@ export class NomicClient implements NomicClientInterface {
 
       this.depositAddress = btcAddressToDeposit;
     }
+  }
+  public async init() {
+    console.log(
+      '🚀 ~ NomicClient ~ init ~ process.env.REACT_APP_IS_ORAIBTC_TESTNET:',
+      process.env.REACT_APP_IS_ORAIBTC_TESTNET
+    );
+    await init();
+    this.oraibtc = new OraiBtc(
+      Config.rpcUrl,
+      Config.chainId,
+      process.env.REACT_APP_IS_ORAIBTC_TESTNET ? 'testnet' : 'bitcoin'
+    );
   }
 }

@@ -13,9 +13,9 @@ export abstract class NomicClientInterface {
 
   depositAddress: DepositSuccess | null = null;
 
-  // init: () => Promise<void>;
+  init: () => Promise<void>;
 
   generateAddress: (destination?: string) => Promise<void>;
 
-  // setRecoveryAddress: (recovery_address: string) => Promise<void>;
+  setRecoveryAddress: (recovery_address: string) => Promise<void>;
 }

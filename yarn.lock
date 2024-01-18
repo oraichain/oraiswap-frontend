@@ -2998,6 +2998,11 @@
     esbuild "^0.19.8"
     qr-code-styling "^1.6.0-rc.1"
 
+"@oraichain/oraibtc-wasm@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraibtc-wasm/-/oraibtc-wasm-1.0.8.tgz#1c3c1f0211897d56498732426fccc1eae2c84315"
+  integrity sha512-u2/sOpuihXpfSdFbmUQGxtxd8u3/1AEEVpM15V0aqAqWbFtaZynX1a957Hc80tTXbpujmiUC0/0Ntgi+y03EpA==
+
 "@oraichain/oraidex-common-ui@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.3.tgz#fd5ccf414952e7ded657af927c9d8f0223137ee7"
