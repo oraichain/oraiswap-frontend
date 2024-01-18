@@ -180,6 +180,9 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number) => {
+    console.log('🚀 ~ handleTransferBTCToOraichain ~ btcAddress:', btcAddress);
+    await nomic.setRecoveryAddress(btcAddress);
+
     const utxos = await getUtxos(btcAddress, fromToken.rpc);
     const feeRate = await getFeeRate({
       url: from.rpc
@@ -244,6 +247,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number) => {
     const { bitcoinAddress: address } = nomic.depositAddress;
+
     if (!address) throw Error('Not found Orai BTC Address');
     const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
     console.log({
