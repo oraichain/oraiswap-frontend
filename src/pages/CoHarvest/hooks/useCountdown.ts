@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { TIMER } from '../constants';
 import { calcDiffTime, calcPercent } from '../helpers';
+import { BiddingInfo } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
 export type CountDownType = {
-  timeRemaining: number;
-  percent: number;
-  isEnd: boolean;
-  start: Date;
-  end: Date;
-  isStarted: boolean;
+  bidInfo: BiddingInfo;
+  onStart: () => void;
+  onEnd: () => void;
 };
 
-export const useCountdown = (bidInfo) => {
-  // // FAKE DATA
-  // bidInfo['start_time'] = new Date('2024-01-11T10:19:50.691Z').getTime();
-  // bidInfo['end_time'] = new Date('01-27-2024').getTime();
+export const useCountdown = ({ bidInfo, onStart, onEnd }: CountDownType) => {
+  // // Mock DATA
+  // bidInfo['start_time'] = new Date('2024-01-12T11:29:10.691Z').getTime();
+  // bidInfo['end_time'] = new Date('2024-01-12T11:30:10.691Z').getTime();
 
   const [percent, setPercent] = useState(0);
   const [isEnd, setIsEnd] = useState(false);
@@ -23,14 +21,24 @@ export const useCountdown = (bidInfo) => {
   const [start, setStart] = useState(bidInfo?.start_time);
   const [end, setEnd] = useState(bidInfo?.end_time);
   const [timeRemaining, setTimeRemaining] = useState(() => calcDiffTime(getTimeDateNow, end));
-  const [isStarted, setIsStarted] = useState(() => getTimeDateNow >= start);
+  const [isStarted, setIsStarted] = useState(() => {
+    const isStart = getTimeDateNow >= start;
+    return isStart;
+  });
 
   useEffect(() => {
     if (!bidInfo.round) return;
     setStart(bidInfo?.start_time);
     setEnd(bidInfo?.end_time);
+    setIsStarted(() => {
+      const isStart = getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND;
 
-    setIsStarted(() => getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND);
+      if (isStart) {
+        onStart();
+      }
+
+      return isStart;
+    });
 
     setTimeRemaining(() => calcDiffTime(getTimeDateNow, bidInfo?.end_time * TIMER.MILLISECOND));
     const decrementTime = () => {
@@ -40,6 +48,7 @@ export const useCountdown = (bidInfo) => {
           clearInterval(countdownRef.current);
           countdownRef.current = null;
           setIsEnd(true);
+          onEnd();
           return 0;
         }
         return newRemain;
@@ -61,6 +70,7 @@ export const useCountdown = (bidInfo) => {
 
     if (getTimeDateNow >= bidInfo?.start_time * TIMER.MILLISECOND && !isStarted) {
       setIsStarted(true);
+      onStart();
     }
   }, [timeRemaining, start, end, bidInfo]);
 

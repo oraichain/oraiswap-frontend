@@ -16,8 +16,9 @@ import { memo, useEffect, useRef, useState } from 'react';
 import AllBidding from '../AllBidding';
 import MyBidding from '../MyBidding';
 import styles from './index.module.scss';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 
-const BiddingHistory = ({ round }) => {
+const BiddingHistory = ({ round, isEnd }) => {
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
@@ -47,13 +48,15 @@ const BiddingHistory = ({ round }) => {
   }, [round]);
 
   const exchangeRate = new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString();
+  const { data: prices } = useCoinGeckoPrices();
   const { biddingInfo } = useGetBiddingFilter(filterRound);
   const { historyBidPool } = useGetHistoryBid(filterRound);
-  const { historyAllBidPool, isLoading: loadingAllBid } = useGetAllBids(filterRound, exchangeRate);
+  const { historyAllBidPool, isLoading: loadingAllBid } = useGetAllBids(filterRound, biddingInfo, prices, exchangeRate);
   const { listPotentialReturn, isLoading: loadingMyBid } = useGetBidHistoryWithPotentialReturn({
     listBidHistories: historyBidPool,
     exchangeRate,
-    biddingInfo
+    biddingInfo,
+    prices
   });
 
   const ref = useRef(null);

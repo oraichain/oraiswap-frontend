@@ -23,6 +23,7 @@ import Instruct from './Instruct';
 import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
+import FutureCompetition from 'components/FutureCompetitionModal';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -203,6 +204,7 @@ const App = () => {
         <Menu />
         {routes()}
         {!isMobile() && <Instruct />}
+        {!isMobile() && <FutureCompetition />}
       </div>
     </ThemeProvider>
   );
