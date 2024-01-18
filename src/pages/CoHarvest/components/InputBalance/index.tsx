@@ -5,6 +5,7 @@ import styles from './index.module.scss';
 
 import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
+import { numberWithCommas } from 'pages/Pools/helpers';
 
 export type InputBalanceType = {
   amount: string | number;
@@ -19,7 +20,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: Inpu
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
-        Balance: <span className={styles.token}>{toDisplay(balance)} ORAIX</span>
+        Balance: <span className={styles.token}>{numberWithCommas(toDisplay(balance))} ORAIX</span>
       </div>
       <div className={styles.input}>
         <NumberFormat
