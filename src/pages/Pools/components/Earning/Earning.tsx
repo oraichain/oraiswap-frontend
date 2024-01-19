@@ -55,7 +55,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
     // unit LP
     const totalRewardPerSec = rewardPerSecInfoData.assets
-      ?.map((asset) => BigInt(asset.amount))
+      .map((asset) => BigInt(asset.amount))
       .reduce((a, b) => a + b, BigInt(0));
 
     const result = rewardPerSecInfoData.assets
