@@ -1,6 +1,5 @@
 import HideImg from 'assets/icons/hidden.svg';
 import ShowImg from 'assets/icons/show.svg';
-import christmasTree from 'assets/images/christmas/xmas3.svg';
 import cn from 'classnames/bind';
 import { useGetPriceChange } from 'pages/Pools/hooks';
 import { useSelector } from 'react-redux';
@@ -33,15 +32,13 @@ export const HeaderTab: React.FC<{
               '-'
             ) : (
               <div className={cx('bottom')}>
-                <img src={christmasTree} alt="christmasTree" />
-                <div className={cx('pair')}>
-                  <div className={cx('pair_info')}>{baseDenom && quoteDenom && baseDenom + '/' + quoteDenom}</div>
-                  <div className={cx('balance', isIncrement ? 'increment' : 'decrement')}>
-                    <span>{priceChange.price.toFixed(6)}</span>
-                    <span className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
-                      {(isIncrement ? '+' : '') + priceChange.price_change.toFixed(2)}%
-                    </span>
-                  </div>
+                <div className={cx('balance')}>
+                  {baseDenom &&
+                    quoteDenom &&
+                    '1 ' + baseDenom + ' ≈ ' + priceChange.price.toFixed(6) + ' ' + quoteDenom}
+                </div>
+                <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+                  {(isIncrement ? '+' : '') + priceChange.price_change.toFixed(2)} %
                 </div>
               </div>
             )}
