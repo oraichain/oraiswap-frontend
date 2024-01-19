@@ -23,15 +23,6 @@ export interface IBitcoin {
 }
 
 export default class Bitcoin {
-  //   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
-  //     const keplr = await window.Keplr.getKeplr();
-  //     if (!keplr) {
-  //       throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
-  //     }
-  //     // use keplr instead
-  //     return await keplr.getOfflineSignerAuto(chainId);
-  //   }
-
   // typeWallet: WalletType;
   constructor() {
     // super();

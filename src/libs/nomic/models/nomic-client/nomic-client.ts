@@ -48,10 +48,6 @@ export class NomicClient implements NomicClientInterface {
     }
   }
   public async init() {
-    console.log(
-      '🚀 ~ NomicClient ~ init ~ process.env.REACT_APP_IS_ORAIBTC_TESTNET:',
-      process.env.REACT_APP_IS_ORAIBTC_TESTNET
-    );
     await init();
     this.oraibtc = new OraiBtc(
       Config.rpcUrl,

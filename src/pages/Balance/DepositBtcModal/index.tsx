@@ -23,15 +23,16 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const nomic = useContext(NomicContext);
 
   const expiration = nomic?.depositAddress?.expirationTimeMs ?? Date.now();
+  console.log('🚀 ~ expiration:', expiration);
   useEffect(() => {
     (async () => {
-      if (nomic?.depositAddress?.bitcoinAddress) {
+      if (nomic.depositAddress?.bitcoinAddress) {
         const url = await QRCode.toDataURL(nomic.depositAddress.bitcoinAddress);
         setUrlQRCode(url);
       }
     })();
-    return () => { };
-  }, [nomic?.depositAddress?.bitcoinAddress]);
+    return () => {};
+  }, [nomic.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
     const TIMEOUT_COPY = 2000;
@@ -70,13 +71,13 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             <button
               className={styles.copy}
               onClick={() => {
-                if (nomic?.depositAddress?.bitcoinAddress) {
-                  copy(nomic?.depositAddress?.bitcoinAddress);
+                if (nomic.depositAddress?.bitcoinAddress) {
+                  copy(nomic.depositAddress?.bitcoinAddress);
                   setIsCopied(true);
                 }
               }}
             >
-              <span>{reduceString(nomic?.depositAddress?.bitcoinAddress, 10, 10) ?? '...'}</span>
+              <span>{reduceString(nomic.depositAddress?.bitcoinAddress, 10, 10) ?? '...'}</span>
               {isCopied ? <SuccessIcon width={20} height={20} /> : <CopyIcon />}
             </button>
           </div>
@@ -85,7 +86,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             {/* <CopyIcon /> */}
             <span>
               This address expires in 4 days; deposits sent after that will be lost. Transactions fail for deposit
-              amounts exceeding 21 BTC
+              amounts exceeding 19 BTC
             </span>
           </div>
         </div>
