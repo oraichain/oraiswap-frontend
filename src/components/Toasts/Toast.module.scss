@@ -7,49 +7,13 @@
   justify-content: flex-start;
 
   .info_icon {
-    svg {
-      path:nth-child(3),
-      path:nth-child(7),
-      path:nth-child(11),
-      path:nth-child(12) {
-        @include theme() {
-          fill: theme-get('basic-primary-surface-default');
-        }
-      }
-      & > path {
-        @include theme() {
-          fill: theme-get('warning-surface-default');
-        }
-      }
-    }
-  }
+    svg > path {
+      // @include theme() {
+      //   fill: theme-get('basic-primary-surface-default');
+      // }
 
-  .success_icon {
-    svg {
-      path:nth-child(13),
-      path:nth-child(14),
-      path:nth-child(15),
-      path:nth-child(18),
-      path:nth-child(19),
-      path:nth-child(20),
-      path:nth-child(21),
-      path:nth-child(24),
-      path:nth-child(25),
-      path:nth-child(29) {
-        @include theme() {
-          fill: theme-get('basic-primary-surface-default');
-        }
-      }
-    }
-  }
-
-  .failed_icon {
-    svg {
-      path:nth-child(3),
-      path:nth-child(6) {
-        @include theme() {
-          fill: theme-get('basic-primary-surface-default');
-        }
+      @include theme() {
+        fill: theme-get('warning-surface-default');
       }
     }
   }
