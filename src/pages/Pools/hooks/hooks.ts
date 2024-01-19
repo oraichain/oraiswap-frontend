@@ -284,11 +284,11 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
 
   // unit LP
   const totalRewardPerSec = rewardPerSecInfoData.assets
-    .map((asset) => BigInt(asset.amount))
+    ?.map((asset) => BigInt(asset.amount))
     .reduce((a, b) => a + b, BigInt(0));
 
   const results = rewardPerSecInfoData.assets
-    .filter((asset) => parseInt(asset.amount))
+    ?.filter((asset) => parseInt(asset.amount))
     .map(async (asset) => {
       const pendingWithdraw = BigInt(
         currentPoolReward?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
@@ -332,7 +332,7 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
 export const getClaimableAmountByPool = async ({ pool, totalRewardInfoData, cachePrices }) => {
   const results = getClaimableInfoByPool({ pool, totalRewardInfoData });
 
-  const res = await Promise.all(results);
+  const res = await Promise.all(results || []);
 
   const total = res.reduce((acc, cur) => {
     const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);

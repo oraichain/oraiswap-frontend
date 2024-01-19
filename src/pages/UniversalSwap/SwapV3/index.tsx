@@ -9,8 +9,7 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay,
-  truncDecimals
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -22,10 +21,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import SwitchDarkImg from 'assets/icons/switch.svg';
 import SwitchLightImg from 'assets/icons/switch_light.svg';
-import snowLeft from 'assets/images/christmas/snow-left.svg';
-import snowRight from 'assets/images/christmas/snow-right.svg';
-import christmasBall from 'assets/images/christmas/xmas1.svg';
-import christmasGift from 'assets/images/christmas/xmas2.svg';
 import { ReactComponent as RefreshImg } from 'assets/images/refresh.svg';
 import cn from 'classnames/bind';
 import Loader from 'components/Loader';
@@ -348,10 +343,6 @@ const SwapComponent: React.FC<{
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
-        {/* christmas img */}
-        <img className={cx('ball', 'christmas-img')} src={christmasBall} alt="christmasBall" />
-        <img className={cx('gift', 'christmas-img')} src={christmasGift} alt="christmasGift" />
-
         <div className={cx('swap-box')}>
           <div className={cx('header')}>
             <div className={cx('title')}>Universal Swap & Bridge</div>
@@ -466,23 +457,19 @@ const SwapComponent: React.FC<{
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
             return (
-              <div className={cx('swap-btn-wrapper')}>
-                <img src={snowLeft} alt="snowLeft" className={cx('snow-left')} />
-                <img src={snowRight} alt="snowRight" className={cx('snow-right')} />
-                <button
-                  className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
-                  onClick={handleSubmit}
-                  disabled={disabledSwapBtn}
-                >
-                  {swapLoading && <Loader width={22} height={22} />}
-                  {/* hardcode check minimum tron */}
-                  {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
-                    <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
-                  ) : (
-                    <span>{disableMsg || 'Swap'}</span>
-                  )}
-                </button>
-              </div>
+              <button
+                className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
+                onClick={handleSubmit}
+                disabled={disabledSwapBtn}
+              >
+                {swapLoading && <Loader width={35} height={35} />}
+                {/* hardcode check minimum tron */}
+                {!swapLoading && (!fromAmountToken || !toAmountToken) && fromToken.denom === TRON_DENOM ? (
+                  <span>Minimum amount: {(fromToken.minAmountSwap || '0') + ' ' + fromToken.name} </span>
+                ) : (
+                  <span>{disableMsg || 'Swap'}</span>
+                )}
+              </button>
             );
           })()}
 
