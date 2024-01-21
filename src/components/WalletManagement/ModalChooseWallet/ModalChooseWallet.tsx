@@ -17,6 +17,7 @@ import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
 import styles from './ModalChooseWallet.module.scss';
 import { WalletByNetwork } from './WalletByNetwork';
+import { keplrCheck, owalletCheck } from 'helper';
 export type Wallet = {
   icon: React.FunctionComponent<
     React.SVGProps<SVGSVGElement> & {
@@ -24,100 +25,136 @@ export type Wallet = {
     }
   >;
   name: string;
+  nameRegistry?: string;
+  isActive: boolean;
 };
+
+export type ChainWallet = {
+  icon: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement> & {
+      title?: string;
+    }
+  >;
+  name: string;
+  chainName: string;
+};
+
+export type NetworkType = 'cosmos' | 'evm' | 'tron';
 export type WalletProvider = {
-  type?: string;
-  networks: Wallet[];
+  networkType: NetworkType;
+  networks: ChainWallet[];
   wallets: Wallet[];
 };
-const walletProvider: WalletProvider[] = [
+
+const version = window?.keplr?.version;
+const isCheckKeplr = !!version && keplrCheck('keplr');
+const isCheckOwallet = !!version && owalletCheck('owallet');
+const isMetamask = !!window?.ethereum?.isMetaMask;
+
+export const walletProvider: WalletProvider[] = [
   {
-    type: 'cosmos',
+    networkType: 'cosmos',
     networks: [
       {
         icon: OraiLightIcon,
-        name: ''
+        name: '',
+        chainName: 'oraichain'
       },
       {
         icon: AtomIcon,
-        name: ''
+        name: '',
+        chainName: 'cosmoshub'
       },
       {
         icon: OsmoLightIcon,
-        name: ''
+        name: '',
+        chainName: 'osmosis'
       },
       {
         icon: InjIcon,
-        name: ''
+        name: '',
+        chainName: 'injective'
       },
       {
         icon: NobleLightIcon,
-        name: ''
+        name: '',
+        chainName: 'noble'
       },
       {
         icon: KwtIcon,
-        name: ''
+        name: '',
+        chainName: 'kawaiiverse'
       }
     ],
     wallets: [
       {
         icon: OwalletIcon,
-        name: 'Owallet'
+        name: 'Owallet',
+        nameRegistry: 'owallet-extension',
+        isActive: isCheckOwallet
       },
       {
         icon: KeplrIcon,
-        name: 'Keplr'
+        name: 'Keplr',
+        nameRegistry: 'keplr-extension',
+        isActive: isCheckKeplr
       },
       {
         icon: MetamaskIcon,
-        name: 'Metamask (Leap Snap)'
-      }
-    ]
-  },
-  {
-    networks: [
-      {
-        icon: EthIcon,
-        name: ''
-      },
-      {
-        icon: BnbIcon,
-        name: ''
-      },
-      {
-        icon: KwtIcon,
-        name: ''
-      }
-    ],
-    wallets: [
-      {
-        icon: OwalletIcon,
-        name: 'Owallet'
-      },
-      {
-        icon: MetamaskIcon,
-        name: 'Metamask'
-      }
-    ]
-  },
-  {
-    networks: [
-      {
-        icon: TronNetworkIcon,
-        name: ''
-      }
-    ],
-    wallets: [
-      {
-        icon: OwalletIcon,
-        name: 'Owallet'
-      },
-      {
-        icon: TronIcon,
-        name: 'TronLink'
+        name: 'Metamask (Leap Snap)',
+        nameRegistry: 'leap-metamask-cosmos-snap',
+        isActive: isMetamask
       }
     ]
   }
+  // {
+  //   networks: [
+  //     {
+  //       icon: EthIcon,
+  //       name: '',
+  //       chainName: 'ethereum'
+  //     },
+  //     {
+  //       icon: BnbIcon,
+  //       name: '',
+  //       chainName: 'ethereum'
+  //     },
+  //     {
+  //       icon: KwtIcon,
+  //       name: '',
+  //       chainName: 'ethereum'
+  //     }
+  //   ],
+  //   wallets: [
+  //     {
+  //       icon: OwalletIcon,
+  //       name: 'Owallet'
+  //     },
+  //     {
+  //       icon: MetamaskIcon,
+  //       name: 'Metamask'
+  //     }
+  //   ]
+  // },
+  // {
+  //   networks: [
+  //     {
+  //       icon: TronNetworkIcon,
+  //       name: '',
+  //       chainName: 'tron'
+  //     }
+  //   ],
+  //   wallets: [
+  //     {
+  //       icon: OwalletIcon,
+  //       name: 'Owallet'
+  //     },
+  //     {
+  //       icon: TronIcon,
+  //       name: 'TronLink'
+  //     }
+  //   ]
+  // }
 ];
 
 export const ModalChooseWallet: React.FC<{
