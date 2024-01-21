@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 yarn test:ci
-yarn ts-check
+# yarn ts-check

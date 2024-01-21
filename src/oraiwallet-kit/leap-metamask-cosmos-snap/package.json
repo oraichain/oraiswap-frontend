@@ -50,6 +50,6 @@
   "peerDependencies": {
     "@cosmjs/amino": ">=0.32.2",
     "@cosmjs/proto-signing": ">=0.32.2",
-    "cosmjs-types": ">=0.8.0"
+    "cosmjs-types": "=0.8.0"
   }
 }
