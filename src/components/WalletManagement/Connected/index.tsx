@@ -1,15 +1,16 @@
-import cn from 'classnames/bind';
-import { useSelector } from 'react-redux';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
-import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { getTotalUsd } from 'libs/utils';
-import { RootState } from 'store/configure';
-import styles from './index.module.scss';
+import { useManager } from '@cosmos-kit/react-lite';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
+import cn from 'classnames/bind';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { getTotalUsd } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import { walletProvider } from '../ModalChooseWallet';
+import styles from './index.module.scss';
+
 const cx = cn.bind(styles);
 
 const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({ setIsShowMyWallet }) => {
@@ -19,15 +20,23 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const totalUsd = getTotalUsd(amounts, prices);
+  const { mainWallets } = useManager();
 
   return (
     <div className={cx('connected_container', theme)} onClick={() => setIsShowMyWallet(true)}>
-      <div className={cx('wallet_icon')}>
-        <MetamaskIcon width={20} height={20} />
-      </div>
-      <div className={cx('wallet_icon')}>
-        <OwalletIcon width={20} height={20} />
-      </div>
+      {mainWallets
+        .filter((w) => w.isWalletConnected)
+        .map((mainWallet) => {
+          const wallet = walletProvider
+            .find((item) => item.wallets.find((w) => w.nameRegistry === mainWallet.walletName))
+            ?.wallets.find((item) => item.nameRegistry === mainWallet.walletName);
+          if (!wallet) return null;
+          return (
+            <div className={cx('wallet_icon')}>
+              <wallet.icon width={20} height={20} />
+            </div>
+          );
+        })}
       {!mobileMode && (
         <>
           <div className={cx('content')}>
