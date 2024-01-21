@@ -1,52 +1,39 @@
-import cn from 'classnames/bind';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import copy from 'copy-to-clipboard';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as DisconnectIcon } from 'assets/icons/ic_logout.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import { ReactComponent as UpArrowIcon } from 'assets/icons/up-arrow.svg';
-import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow-v2.svg';
-import { ReactComponent as UnavailableCloudIcon } from 'assets/icons/unavailable-cloud.svg';
-import { ReactComponent as Light } from 'assets/icons/dark-light.svg';
-import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
-import { ReactComponent as EthIcon } from 'assets/icons/ethereum.svg';
-import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
+
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
-import { reduceString } from 'libs/utils';
+import { getTotalUsd } from 'libs/utils';
 import styles from './MyWallet.module.scss';
 import { ThemeContext } from 'context/theme-context';
-// import { WalletItem } from '../';
 import { isMobile } from '@walletconnect/browser-utils';
 import ToggleSwitch from 'components/ToggleSwitch';
 import { Button } from 'components/Button';
-import OwalletImage from 'assets/images/owallet-logo.png';
-import { cosmosNetworks, isEmptyObject } from 'helper';
-import { ReactComponent as BnbIcon } from 'assets/icons/bnb.svg';
+import { cosmosNetworks, evmNetworksWithoutTron, tronNetworks } from 'helper';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { ModalDisconnect } from '../ModalDisconnect';
-const cx = cn.bind(styles);
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { NetworkType } from '../ModalChooseWallet';
 
 export const MyWallet: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
   isShowMyWallet: boolean;
   isShowChooseWallet: boolean;
   setIsShowChooseWallet: (isShowChooseWallet: boolean) => void;
-  //   handleAddWallet: () => void;
   //   handleLogoutWallets: (walletType: any) => void;
-  //   handleLoginWallets: (walletType: any) => Promise<void>;
-  //   toggleShowNetworks: (id: number) => void;
-  //   wallets: any[];
 }> = ({
   setIsShowMyWallet,
   isShowMyWallet,
   isShowChooseWallet,
   setIsShowChooseWallet
-  //   handleAddWallet,
   //   handleLogoutWallets,
-  //   handleLoginWallets,
-  //   toggleShowNetworks,
-  //   wallets = []
 }) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
@@ -57,6 +44,13 @@ export const MyWallet: React.FC<{
   });
 
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
+  const [oraiAddress] = useConfigReducer('address');
+  const [tronAddress] = useConfigReducer('tronAddress');
+  const [metamaskAddress] = useConfigReducer('metamaskAddress');
+
+  const amounts = useSelector((state: RootState) => state.token.amounts);
+  const { data: prices } = useCoinGeckoPrices();
+  const totalUsd = getTotalUsd(amounts, prices);
 
   useEffect(() => {
     if (copiedAddressCoordinates.networkId && copiedAddressCoordinates.walletId) {
@@ -85,6 +79,8 @@ export const MyWallet: React.FC<{
     !isShowChooseWallet && !isShowDisconnect && setIsShowMyWallet(false);
   });
 
+  const handleDisconnectNetwork = (networkType: NetworkType) => {};
+
   return (
     <div
       ref={myWalletRef}
@@ -94,7 +90,7 @@ export const MyWallet: React.FC<{
       <div className={styles.header}>
         <div className={styles.balance}>
           <h3>My Wallets</h3>
-          <div>$30,756.21</div>
+          <div>{formatDisplayUsdt(totalUsd)}</div>
         </div>
         {!isMobile() && (
           <div className={styles.btnAddWallet}>
@@ -126,7 +122,7 @@ export const MyWallet: React.FC<{
               }}
             />
           </div>
-          <div className={styles.toggleMode}>
+          {/* <div className={styles.toggleMode}>
             <div className={styles.toggleModeIcon}>
               <span className={cx('text')}>Hide empty assets</span>
             </div>
@@ -138,171 +134,162 @@ export const MyWallet: React.FC<{
                 // setTheme(theme === 'dark' ? 'light' : 'dark');
               }}
             />
-          </div>
+          </div> */}
         </div>
         <div className={styles.listAddressByNetwork}>
-          <div className={styles.addressByNetworkItem}>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <EthIcon width={30} height={30} />
+          {oraiAddress && (
+            <div className={styles.addressByNetworkItem}>
+              {cosmosNetworks.map((network, index) => {
+                return (
+                  <div className={styles.addressByChainInNetwork} key={network.chainId}>
+                    <div className={styles.left}>
+                      <div className={styles.icon}>
+                        <div className={styles.iconChain}>
+                          {theme === 'light' ? (
+                            <network.IconLight width={30} height={30} />
+                          ) : (
+                            <network.Icon width={30} height={30} />
+                          )}
+                        </div>
+
+                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
+                        <div className={styles.iconWalletByChain}>
+                          <KeplrIcon width={18} height={18} />
+                        </div>
+                      </div>
+                      <div className={styles.info}>
+                        <div className={styles.chainName}>{network.chainName}</div>
+                        <div className={styles.chainAddress}>
+                          <span>0xD3aB...7f1108</span>
+                          <div
+                            className={styles.copyBtn}
+                            onClick={(e) => copyWalletAddress(e, '12341', 1, network.chainId)}
+                          >
+                            {copiedAddressCoordinates.networkId === network.chainId &&
+                            copiedAddressCoordinates.walletId === 1 ? (
+                              <SuccessIcon width={15} height={15} />
+                            ) : (
+                              <CopyIcon width={15} height={15} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {index === 0 && (
+                      <div className={styles.right}>
+                        {/* get wallet info from local storage */}
+                        <div
+                          className={styles.disconnectBtn}
+                          onClick={() => handleDisconnectNetwork(network.networkType)}
+                        >
+                          <DisconnectIcon width={25} height={25} />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className={styles.iconWalletByChain}>
-                    <MetamaskIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
+                );
+              })}
+            </div>
+          )}
+          {metamaskAddress && (
+            <div className={styles.addressByNetworkItem}>
+              {evmNetworksWithoutTron.map((network, index) => {
+                return (
+                  <div className={styles.addressByChainInNetwork}>
+                    <div className={styles.left}>
+                      <div className={styles.icon}>
+                        <div className={styles.iconChain}>
+                          {theme === 'light' ? (
+                            <network.IconLight width={30} height={30} />
+                          ) : (
+                            <network.Icon width={30} height={30} />
+                          )}
+                        </div>
+
+                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
+                        <div className={styles.iconWalletByChain}>
+                          <KeplrIcon width={18} height={18} />
+                        </div>
+                      </div>
+                      <div className={styles.info}>
+                        <div className={styles.chainName}>{network.chainName}</div>
+                        <div className={styles.chainAddress}>
+                          <span>0xD3aB...7f1108</span>
+                          <div
+                            className={styles.copyBtn}
+                            onClick={(e) => copyWalletAddress(e, '12341', 1, network.chainId)}
+                          >
+                            {copiedAddressCoordinates.networkId === network.chainId &&
+                            copiedAddressCoordinates.walletId === 1 ? (
+                              <SuccessIcon width={15} height={15} />
+                            ) : (
+                              <CopyIcon width={15} height={15} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.right}>
+                      {/* get wallet info from local storage */}
+                      <div className={styles.disconnectBtn} onClick={() => {}}>
+                        <DisconnectIcon width={25} height={25} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => setIsShowDisconnect(true)}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
+                );
+              })}
             </div>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <BnbIcon width={30} height={30} />
-                  </div>
-                  <div className={styles.iconWalletByChain}>
-                    <MetamaskIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
+          )}
+          {tronAddress && (
+            <div className={styles.addressByNetworkItem}>
+              {tronNetworks.map((network, index) => {
+                return (
+                  <div className={styles.addressByChainInNetwork}>
+                    <div className={styles.left}>
+                      <div className={styles.icon}>
+                        <div className={styles.iconChain}>
+                          {theme === 'light' ? (
+                            <network.IconLight width={30} height={30} />
+                          ) : (
+                            <network.Icon width={30} height={30} />
+                          )}
+                        </div>
+
+                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
+                        <div className={styles.iconWalletByChain}>
+                          <KeplrIcon width={18} height={18} />
+                        </div>
+                      </div>
+                      <div className={styles.info}>
+                        <div className={styles.chainName}>{network.chainName}</div>
+                        <div className={styles.chainAddress}>
+                          <span>0xD3aB...7f1108</span>
+                          <div
+                            className={styles.copyBtn}
+                            onClick={(e) => copyWalletAddress(e, '12341', 1, network.chainId)}
+                          >
+                            {copiedAddressCoordinates.networkId === network.chainId &&
+                            copiedAddressCoordinates.walletId === 1 ? (
+                              <SuccessIcon width={15} height={15} />
+                            ) : (
+                              <CopyIcon width={15} height={15} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.right}>
+                      {/* get wallet info from local storage */}
+                      <div className={styles.disconnectBtn} onClick={() => {}}>
+                        <DisconnectIcon width={25} height={25} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => {}}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
-          <div className={styles.addressByNetworkItem}>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <InjIcon width={30} height={30} />
-                  </div>
-                  <div className={styles.iconWalletByChain}>
-                    <KeplrIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => {}}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
-            </div>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <EthIcon width={30} height={30} />
-                  </div>
-                  <div className={styles.iconWalletByChain}>
-                    <MetamaskIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => {}}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.addressByNetworkItem}>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <EthIcon width={30} height={30} />
-                  </div>
-                  <div className={styles.iconWalletByChain}>
-                    <MetamaskIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => {}}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
-            </div>
-            <div className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <EthIcon width={30} height={30} />
-                  </div>
-                  <div className={styles.iconWalletByChain}>
-                    <MetamaskIcon width={18} height={18} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>Ethereum</div>
-                  <div className={styles.chainAddress}>
-                    <span>0xD3aB...7f1108</span>
-                    <div className={styles.copyBtn}>
-                      <CopyIcon width={15} height={15} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.right}>
-                <div className={styles.disconnectBtn} onClick={() => {}}>
-                  <DisconnectIcon width={25} height={25} />
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
+
           {/* {wallets.map((wallet, index) => {
             return (
               <div key={index} className={cx('wallet_container')}>

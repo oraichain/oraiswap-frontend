@@ -9,7 +9,6 @@ import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
 import { checkVersionWallet, getNetworkGasPrice, getStorageKey, keplrCheck, setStorageKey, switchWallet } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect } from 'react';
@@ -24,6 +23,12 @@ import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
+import { ChainProvider } from '@cosmos-kit/react';
+import { SignerOptions } from '@cosmos-kit/core';
+import { chains, assets } from 'chain-registry';
+import { wallets as keplrWallets } from 'oraiwallet-kit/keplr-extension';
+import { wallets as snapWallets } from 'oraiwallet-kit/leap-metamask-cosmos-snap';
+import { wallets as owalletWallets } from 'oraiwallet-kit/owallet-extension';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -198,14 +203,27 @@ const App = () => {
     }
   };
 
+  const signerOptions: SignerOptions = {
+    // signingStargate: () => {
+    //   return getSigningCosmosClientOptions();
+    // }
+  };
+
   return (
     <ThemeProvider>
-      <div className={`app ${theme}`}>
-        <Menu />
-        {routes()}
-        {!isMobile() && <Instruct />}
-        {!isMobile() && <FutureCompetition />}
-      </div>
+      <ChainProvider
+        chains={chains}
+        assetLists={assets}
+        wallets={[...keplrWallets, ...snapWallets, ...owalletWallets]}
+        signerOptions={signerOptions}
+      >
+        <div className={`app ${theme}`}>
+          <Menu />
+          {routes()}
+          {!isMobile() && <Instruct />}
+          {!isMobile() && <FutureCompetition />}
+        </div>
+      </ChainProvider>
     </ThemeProvider>
   );
 };
