@@ -41,7 +41,7 @@ import { TaxRateResponse } from '@oraichain/oraidex-contracts-sdk/build/Oraiswap
 import { generateSwapOperationMsgs, simulateSwap } from '@oraichain/oraidex-universal-swap';
 import { oraichainTokens, tokenMap, tokens } from 'config/bridgeTokens';
 import { network } from 'config/networks';
-import { Long } from 'cosmjs-types/helpers';
+import Long from 'long';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import isEqual from 'lodash/isEqual';
 import { RemainingOraibTokenItem } from 'pages/Balance/StuckOraib/useGetOraiBridgeBalances';
