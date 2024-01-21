@@ -26,7 +26,7 @@ import { feeEstimate, getNetworkGasPrice } from 'helper';
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
 import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
-import Long from 'long';
+import { Long } from 'cosmjs-types/helpers';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
 import KawaiiverseJs from 'libs/kawaiiversejs';
