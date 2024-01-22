@@ -72,6 +72,7 @@ import {
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
 import { bitcoinChainId } from 'helper/constants';
+import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -484,11 +485,11 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'BTC',
-      coinGeckoId: 'bitcoin',
+      coinGeckoId: 'bitcoin' as any,
       coinMinimalDenom: 'btc',
       type: 'cw20',
-      contractAddress: BTC_CONTRACT,
-      // bridgeTo: ["bitcoinTestnet"],
+      contractAddress: OBTCContractAddress,
+      bridgeTo: [bitcoinChainId],
       coinDecimals: 6,
       Icon: BTCIcon,
       IconLight: BTCIcon,
