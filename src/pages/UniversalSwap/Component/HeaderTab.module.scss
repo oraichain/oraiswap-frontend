@@ -71,50 +71,33 @@
   .bottom {
     display: flex;
     align-items: center;
-
+    gap: 4px;
     @include theme() {
       color: theme-get('neutral-1');
     }
+    .balance {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .icon {
+      width: 18px;
+      height: 18px;
+    }
+    .denom {
+      text-transform: uppercase;
+    }
+    .percent {
+      font-size: 14px;
+      font-weight: 400;
+      padding-left: 6px;
 
-    .pair {
-      display: flex;
-      flex-direction: column;
-      margin-left: 12px;
-
-      &_info {
-        font-size: 16px;
-        line-height: 150%;
-        font-weight: 600;
-        // margin-bottom: 4px;
-      }
-
-      .balance {
-        font-size: 18px;
-        font-weight: 600;
-        line-height: 150%;
-
-        display: flex;
-      }
-      .icon {
-        width: 18px;
-        height: 18px;
-      }
-      .denom {
-        text-transform: uppercase;
-      }
-      .percent {
-        font-size: 14px;
-        font-weight: 400;
-        padding-left: 6px;
-
-        &.increment {
-          @include theme() {
-            color: theme-get('success-surface-default');
-          }
+      &.increment {
+        @include theme() {
+          color: theme-get('success-surface-default');
         }
-        &.decrement {
-          color: $red;
-        }
+      }
+      &.decrement {
+        color: $red;
       }
     }
   }
