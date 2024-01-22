@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import copy from 'copy-to-clipboard';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { ReactComponent as BTCToken } from 'assets/images/token-btc.svg';
@@ -47,7 +48,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   }, [isCopied]);
 
   return (
-    <Modal theme={theme} isOpen={isOpen} close={close} open={open}>
+    <Modal theme={theme} isOpen={isOpen} close={close} open={open} className={styles[theme]}>
       {/* <div className={classNames(style.modal)}>
         <button
           onClick={async () => {
@@ -83,7 +84,9 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
           </div>
 
           <div className={styles.error}>
-            {/* <CopyIcon /> */}
+            <div>
+              <TooltipIcon width={20} height={20} />
+            </div>
             <span>
               This address expires in 4 days; deposits sent after that will be lost. Transactions fail for deposit
               amounts exceeding 19 BTC
@@ -103,6 +106,9 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
           </div>
         </div>
         <div className={styles.warning}>
+          <div>
+            <TooltipIcon width={20} height={20} />
+          </div>
           <span>
             The Bitcoin Recovery address is necessary for retrieving Bitcoin in the event of an emergency disbursement.
           </span>
