@@ -209,36 +209,6 @@ export const initEthereum = async () => {
   }
 };
 
-export const initClient = async () => {
-  try {
-    // TODO: need to suggest chain when user click connect wallet btn
-    // switchWallet(getStorageKey() as WalletType);
-    // const keplr = await window.Keplr.getKeplr();
-    // // suggest our chain
-    // if (keplr) {
-    //   // always trigger suggest chain when users enter the webpage
-    //   for (const networkId of [
-    //     network.chainId,
-    //     COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
-    //     COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
-    //   ] as NetworkChainId[]) {
-    //     try {
-    //       await window.Keplr.suggestChain(networkId);
-    //     } catch (error) {
-    //       console.log({ error });
-    //     }
-    //   }
-    // const { client } = await getCosmWasmClient({ chainId: network.chainId });
-    // window.client = client;
-    // }
-  } catch (ex) {
-    console.log(ex);
-    displayToast(TToastType.KEPLR_FAILED, {
-      message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
-    });
-  }
-};
-
 export const timeSince = (date: number): string => {
   const seconds = Math.floor((Date.now() - date) / 1000);
   let interval = seconds / 31536000;
