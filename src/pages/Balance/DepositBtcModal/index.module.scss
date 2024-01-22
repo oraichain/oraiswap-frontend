@@ -18,6 +18,7 @@
   background-color: $white-color;
   padding: 24px;
   border-radius: 12px;
+
   .label {
     display: flex;
     justify-content: space-between;
@@ -32,10 +33,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 16px;
+
+    img {
+      border-radius: 8px;
+    }
+
     .address {
       display: flex;
       justify-content: center;
       align-items: center;
+
+      button {
+        padding: 4px 8px;
+        border-radius: 99px;
+        background: $light-bg-primary-box;
+      }
+
       .copy {
         display: flex;
         align-items: center;
@@ -49,6 +63,8 @@
       }
     }
     .error {
+      display: flex;
+      gap: 12px;
       background-color: $light-shade-color;
       padding: 16px;
       border-radius: 12px;
@@ -56,6 +72,14 @@
       span {
         color: $warning-color;
         font-size: 14px;
+      }
+
+      svg {
+        vertical-align: middle;
+
+        path {
+          stroke: $warning-color;
+        }
       }
     }
   }
@@ -85,6 +109,8 @@
   }
 
   .warning {
+    display: flex;
+    gap: 12px;
     background: $light-shade-color;
     padding: 16px;
     border-radius: 12px;
@@ -92,6 +118,14 @@
     span {
       color: $yellow-brown-color;
       font-size: 14px;
+    }
+
+    svg {
+      vertical-align: middle;
+
+      path {
+        stroke: $yellow-brown-color;
+      }
     }
   }
   .btn {
@@ -117,5 +151,73 @@
 @media only screen and (max-width: 600px) {
   .deposit {
     max-height: 500px;
+  }
+}
+
+.dark {
+  .deposit {
+    background-color: $dropdown-bg-color-dark;
+    .label {
+      .title {
+        color: $light-bg-primary-box;
+      }
+    }
+    .info {
+      .address {
+        button {
+          background: $dropdown-bg-color-hover-dark;
+        }
+        .copy {
+          span {
+            color: $neutral-text-title;
+          }
+        }
+      }
+      .error {
+        background-color: $error-surface-default-subtle;
+
+        svg {
+          path {
+            stroke: $error-color;
+          }
+        }
+
+        span {
+          color: $error-color;
+        }
+      }
+    }
+    .estimate {
+      background-color: $dropdown-bg-color-hover-dark;
+
+      .timeMinerFee {
+        color: $neutron-text-body-dark;
+      }
+
+      .value {
+        span {
+          color: $neutron-text-body-dark;
+        }
+      }
+    }
+
+    .warning {
+      background: $warning-surface-default-subtle;
+      span {
+        color: $warning-surface-default;
+      }
+
+      svg {
+        path {
+          stroke: $warning-surface-default;
+        }
+      }
+    }
+    .btn {
+      color: $dropdown-bg-color-hover-dark;
+
+      color: $light-bg-primary-box;
+      border: 1px solid $light-bg-primary-box;
+    }
   }
 }
