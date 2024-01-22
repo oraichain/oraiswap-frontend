@@ -1,6 +1,6 @@
 import { useWallet } from '@cosmos-kit/react';
 import type { Wallet } from 'components/WalletManagement/ModalChooseWallet/ModalChooseWallet';
-import { getListAddressCosmos, switchWalletCosmos } from 'helper';
+import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import { MouseEventHandler, useEffect } from 'react';
@@ -15,6 +15,12 @@ import {
   WalletConnectComponent
 } from './WalletConnect';
 import styles from './WalletItem.module.scss';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import Keplr from 'libs/keplr';
+import { collectWallet } from 'libs/cosmjs';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { network } from 'config/networks';
+import { GasPrice } from '@cosmjs/stargate';
 type WalletItemProps = {
   wallet: Wallet;
   setConnectStatus: React.Dispatch<React.SetStateAction<ConnectStatus>>;
@@ -36,6 +42,7 @@ export const WalletItem = ({
 }: WalletItemProps) => {
   const theme = useTheme();
   const walletClient = useWallet(wallet.nameRegistry);
+  if (wallet.nameRegistry === 'leap-metamask-cosmos-snap') console.log({ walletClient: walletClient.mainWallet });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,21 +61,21 @@ export const WalletItem = ({
         setConnectStatus('confirming-switch');
         setCurrentWalletConnecting(walletClient.mainWallet);
       } else {
-        await walletClient.mainWallet.connect();
-        if (
-          !(
-            walletClient.mainWallet.getGlobalStatusAndMessage()[0] === 'Connected' ||
-            walletClient.mainWallet.getGlobalStatusAndMessage()[0] === 'Connecting'
-          )
-        )
-          throw new Error(walletClient.mainWallet.getGlobalStatusAndMessage()[1]);
-        switchWalletCosmos(
-          walletClient.mainWallet.walletName === 'owallet-extension'
-            ? 'owallet'
-            : walletClient.mainWallet.walletName === 'keplr-extension'
+        const type =
+          walletClient.mainWallet.walletName === 'keplr-extension'
             ? 'keplr'
-            : 'leapSnap'
-        );
+            : walletClient.mainWallet.walletName === 'owallet-extension'
+            ? 'owallet'
+            : 'leapSnap';
+        window.Keplr = new Keplr(type);
+        setStorageKey('typeWallet', type);
+        const wallet = await collectWallet(network.chainId);
+        window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+          gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+        });
+
+        await walletClient.mainWallet.connect(true);
+
         const oraiAddr = await window.Keplr.getKeplrAddr();
         setOraiAddress(oraiAddr);
         const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
@@ -77,6 +84,9 @@ export const WalletItem = ({
       }
     } catch (error) {
       console.log({ errorConnect: error });
+      displayToast(TToastType.METAMASK_FAILED, {
+        message: typeof error === 'object' ? error.message : JSON.stringify(error)
+      });
       // setConnectStatus('failed');
     }
   };

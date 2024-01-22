@@ -29,7 +29,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const wallet = useWallet();
   const handleConfirmSwitch = async () => {
     try {
-      switchWalletCosmos(
+      await switchWalletCosmos(
         currentWalletConnecting.walletName === 'owallet-extension'
           ? 'owallet'
           : currentWalletConnecting.walletName === 'keplr-extension'
@@ -121,7 +121,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               </Button>
               <Button
                 onClick={async () => {
-                  await currentWalletConnected.disconnect();
+                  await currentWalletConnected.disconnect(true);
                   switch (networkType) {
                     case 'cosmos':
                       setOraiAddress(undefined);

@@ -61,7 +61,7 @@ const initApp = async () => {
     </Provider>
   );
 
-  await initClient();
+  // await initClient();
 };
 
 initApp();
