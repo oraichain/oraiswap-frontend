@@ -4,7 +4,7 @@ import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
 import { Button } from 'components/Button';
 import useTheme from 'hooks/useTheme';
-import { useChains } from '@cosmos-kit/react-lite';
+// import { useChains } from '@cosmos-kit/react-lite';
 import { useWallet } from '@cosmos-kit/react';
 import { MainWalletBase } from '@cosmos-kit/core';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -18,15 +18,38 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<MainWalletBase | null>(null);
   const theme = useTheme();
   const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
-  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  const chains = useChains(['oraichain', 'cosmoshub', 'osmosis', 'injective', 'noble']);
-  const connected = Object.values(chains).every((chain) => chain.isWalletConnected);
-  const { connect, openView, disconnect, isWalletConnected } = chains.oraichain;
+  const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  // const chains = useChains(['oraichain', 'cosmoshub', 'osmosis', 'injective', 'noble']);
+  // const connected = Object.values(chains).every((chain) => chain.isWalletConnected);
+  // const { connect, openView, disconnect, isWalletConnected } = chains.oraichain;
   console.log({ _oraiAddress });
+
   const wallet = useWallet();
+  const handleConfirmSwitch = async () => {
+    try {
+      switchWalletCosmos(
+        currentWalletConnecting.walletName === 'owallet-extension'
+          ? 'owallet'
+          : currentWalletConnecting.walletName === 'keplr-extension'
+          ? 'keplr'
+          : 'leapSnap'
+      );
+      await currentWalletConnected?.disconnect();
+      await currentWalletConnecting.connect();
+      setConnectStatus('init');
+      const oraiAddr = await window.Keplr.getKeplrAddr();
+      setOraiAddress(oraiAddr);
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
+      setCosmosAddress(listAddressCosmos);
+      setCurrentWalletConnected(currentWalletConnecting);
+      setCurrentWalletConnecting(null);
+    } catch (error) {
+      console.log({ errorConnectAfterConfirmSwitch: error });
+    }
+  };
+
   const renderNetworkContent = () => {
     let content;
     switch (connectStatus) {
@@ -62,27 +85,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button
-                onClick={async () => {
-                  switchWalletCosmos(
-                    currentWalletConnecting.walletName === 'owallet-extension'
-                      ? 'owallet'
-                      : currentWalletConnecting.walletName === 'keplr-extension'
-                      ? 'keplr'
-                      : 'leapSnap'
-                  );
-                  await currentWalletConnected?.disconnect();
-                  await currentWalletConnecting.connect();
-                  setConnectStatus('init');
-                  const oraiAddr = await window.Keplr.getKeplrAddr();
-                  setOraiAddress(oraiAddr);
-                  const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
-                  setCosmosAddress(listAddressCosmos);
-                  setCurrentWalletConnected(currentWalletConnecting);
-                  setCurrentWalletConnecting(null);
-                }}
-                type="primary"
-              >
+              <Button onClick={handleConfirmSwitch} type="primary">
                 Switch
               </Button>
             </div>
