@@ -95,9 +95,10 @@ const App = () => {
 
     if (isClearPersistStorage) clearPersistStorage();
 
-    if (window.keplr && !isMobile()) {
-      keplrGasPriceCheck();
-    }
+    // TODO: dont need to check keplr gas price when user not connect to wallet
+    // if (window.keplr && !isMobile()) {
+    //   keplrGasPriceCheck();
+    // }
 
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
