@@ -101,9 +101,9 @@ const App = () => {
 
     if (isClearPersistStorage) clearPersistStorage();
 
-    if (window.keplr && !isMobile()) {
-      keplrGasPriceCheck();
-    }
+    // if (window.keplr && !isMobile()) {
+    //   keplrGasPriceCheck();
+    // }
 
     // add event listener here to prevent adding the same one everytime App.tsx re-renders
     // try to set it again
