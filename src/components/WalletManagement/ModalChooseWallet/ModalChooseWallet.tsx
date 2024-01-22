@@ -17,7 +17,7 @@ import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
 import styles from './ModalChooseWallet.module.scss';
 import { WalletByNetwork } from './WalletByNetwork';
-import { keplrCheck } from 'helper';
+import { isUnlockMetamask, keplrCheck } from 'helper';
 import { useEffect, useState } from 'react';
 export type Wallet = {
   icon: React.FunctionComponent<
@@ -179,28 +179,32 @@ export const ModalChooseWallet: React.FC<{
 
   // update wallet provider with status is active or not
   useEffect(() => {
-    const updatedWalletProvider = walletProviderWithStatus.map((item) => {
-      const updatedWallets = item.wallets.map((wallet) => {
-        let isActive = true;
-        switch (wallet.nameRegistry) {
-          case 'keplr-extension':
-            isActive = isCheckKeplr;
-            break;
-          case 'owallet-extension':
-            isActive = isCheckOwallet;
-            break;
-          case 'leap-metamask-cosmos-snap':
-            isActive = isMetamask;
-            break;
-        }
-        return { ...wallet, isActive };
+    async function updateWalletProvider() {
+      const isMetamaskUnlock = await isUnlockMetamask();
+      const updatedWalletProvider = walletProviderWithStatus.map((item) => {
+        const updatedWallets = item.wallets.map((wallet) => {
+          let isActive = true;
+          switch (wallet.nameRegistry) {
+            case 'keplr-extension':
+              isActive = isCheckKeplr;
+              break;
+            case 'owallet-extension':
+              isActive = isCheckOwallet;
+              break;
+            case 'leap-metamask-cosmos-snap':
+              isActive = isMetamask && isMetamaskUnlock;
+              break;
+          }
+          return { ...wallet, isActive };
+        });
+        return {
+          ...item,
+          wallets: updatedWallets
+        };
       });
-      return {
-        ...item,
-        wallets: updatedWallets
-      };
-    });
-    setWalletProviderWithStatus(updatedWalletProvider);
+      setWalletProviderWithStatus(updatedWalletProvider);
+    }
+    updateWalletProvider();
   }, [isCheckOwallet, isCheckKeplr, isMetamask]);
 
   return (
