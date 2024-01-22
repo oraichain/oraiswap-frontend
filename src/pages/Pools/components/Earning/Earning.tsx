@@ -51,52 +51,56 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   }, [totalRewardInfoData, info]);
 
   const setNewReward = async () => {
-    const rewardPerSecInfoData = JSON.parse(info.rewardPerSec);
+    const rewardPerSec = info.rewardPerSec && info.rewardPerSec !== '0' ? info.rewardPerSec : '{"assets":[]}';
+    const rewardPerSecInfoData = JSON.parse(rewardPerSec);
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
     // unit LP
-    const totalRewardPerSec = rewardPerSecInfoData.assets
-      .map((asset) => BigInt(asset.amount))
-      .reduce((a, b) => a + b, BigInt(0));
+    const rewardPerSecInfoDataIsArray = rewardPerSecInfoData.assets && Array.isArray(rewardPerSecInfoData.assets);
+    const totalRewardPerSec =
+      rewardPerSecInfoDataIsArray &&
+      rewardPerSecInfoData.assets.map((asset) => BigInt(asset.amount)).reduce((a, b) => a + b, BigInt(0));
 
-    const result = rewardPerSecInfoData.assets
-      .filter((asset) => parseInt(asset.amount))
-      .map(async (asset) => {
-        const pendingWithdraw = BigInt(
-          totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
-        );
+    const result =
+      rewardPerSecInfoDataIsArray &&
+      rewardPerSecInfoData.assets
+        .filter((asset) => parseInt(asset.amount))
+        .map(async (asset) => {
+          const pendingWithdraw = BigInt(
+            totalRewardInfoData.reward_infos[0]?.pending_withdraw.find((e) => isEqual(e.info, asset.info))?.amount ?? 0
+          );
 
-        const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
-        let token =
-          'token' in asset.info
-            ? cw20TokenMap[asset.info.token.contract_addr]
-            : tokenMap[asset.info.native_token.denom];
+          const amount = (totalRewardAmount * BigInt(asset.amount)) / totalRewardPerSec + pendingWithdraw;
+          let token =
+            'token' in asset.info
+              ? cw20TokenMap[asset.info.token.contract_addr]
+              : tokenMap[asset.info.native_token.denom];
 
-        // only for atom/scatom pool
-        if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
-          const tokenInfo = await fetchTokenInfo({
-            contractAddress: asset.info.token.contract_addr,
-            name: '',
-            org: 'Oraichain',
-            denom: '',
-            Icon: undefined,
-            chainId: 'Oraichain',
-            rpc: '',
-            decimals: 0,
-            coinGeckoId: 'scatom',
-            cosmosBased: undefined
-          });
+          // only for atom/scatom pool
+          if (!token && 'token' in asset.info && asset.info?.token?.contract_addr) {
+            const tokenInfo = await fetchTokenInfo({
+              contractAddress: asset.info.token.contract_addr,
+              name: '',
+              org: 'Oraichain',
+              denom: '',
+              Icon: undefined,
+              chainId: 'Oraichain',
+              rpc: '',
+              decimals: 0,
+              coinGeckoId: 'scatom',
+              cosmosBased: undefined
+            });
 
-          token = {
-            ...tokenInfo,
-            denom: tokenInfo?.symbol
+            token = {
+              ...tokenInfo,
+              denom: tokenInfo?.symbol
+            };
+          }
+          return {
+            ...token,
+            amount,
+            pendingWithdraw
           };
-        }
-        return {
-          ...token,
-          amount,
-          pendingWithdraw
-        };
-      });
+        });
 
     const res = await Promise.all(result);
     setPendingRewards(res);

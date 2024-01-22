@@ -66,7 +66,8 @@ import {
   WRAP_BNB_CONTRACT,
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
-  WETH_CONTRACT
+  WETH_CONTRACT,
+  BTC_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -480,6 +481,18 @@ export const oraichainNetwork: CustomChainInfo = {
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
       Icon: EthIcon,
       IconLight: EthIcon
+    },
+    {
+      coinDenom: 'BTC',
+      coinGeckoId: 'bitcoin',
+      coinMinimalDenom: 'btc',
+      type: 'cw20',
+      contractAddress: BTC_CONTRACT,
+      // bridgeTo: ["bitcoinTestnet"],
+      coinDecimals: 6,
+      Icon: BTCIcon,
+      IconLight: BTCIcon,
+      coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
     }
     // {
     //   coinDenom: 'ATOM-CW20',
