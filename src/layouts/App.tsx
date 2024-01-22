@@ -34,8 +34,8 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-
-  // useTronEventListener();
+  const mobileMode = isMobile();
+  useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
@@ -100,10 +100,12 @@ const App = () => {
     // if (window.keplr && !isMobile()) {
     //   keplrGasPriceCheck();
     // }
-
-    // add event listener here to prevent adding the same one everytime App.tsx re-renders
-    // try to set it again
   }, []);
+
+  useEffect(() => {
+    // just auto connect keplr in mobile mode
+    mobileMode && keplrHandler();
+  }, [mobileMode]);
 
   useEffect(() => {
     (async () => {
