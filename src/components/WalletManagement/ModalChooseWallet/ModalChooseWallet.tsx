@@ -17,7 +17,8 @@ import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
 import styles from './ModalChooseWallet.module.scss';
 import { WalletByNetwork } from './WalletByNetwork';
-import { keplrCheck, owalletCheck } from 'helper';
+import { keplrCheck } from 'helper';
+import { useEffect, useState } from 'react';
 export type Wallet = {
   icon: React.FunctionComponent<
     React.SVGProps<SVGSVGElement> & {
@@ -46,11 +47,11 @@ export type WalletProvider = {
   wallets: Wallet[];
 };
 
-const version = window?.keplr?.version;
-const isCheckKeplr = !!version && keplrCheck('keplr');
-const isCheckOwallet = !!version && owalletCheck('owallet');
-const isMetamask = !!window?.ethereum?.isMetaMask;
-
+// const version = window?.keplr?.version;
+// const isCheckKeplr = !!version && keplrCheck('keplr');
+// const isCheckOwallet = window.owallet as any;
+// const isMetamask = !!window?.ethereum?.isMetaMask;
+// console.log({ isCheckKeplr, isCheckOwallet, isMetamask });
 export const walletProvider: WalletProvider[] = [
   {
     networkType: 'cosmos',
@@ -91,19 +92,19 @@ export const walletProvider: WalletProvider[] = [
         icon: OwalletIcon,
         name: 'Owallet',
         nameRegistry: 'owallet-extension',
-        isActive: isCheckOwallet
+        isActive: true
       },
       {
         icon: KeplrIcon,
         name: 'Keplr',
         nameRegistry: 'keplr-extension',
-        isActive: isCheckKeplr
+        isActive: true
       },
       {
         icon: MetamaskIcon,
         name: 'Metamask (Leap Snap)',
         nameRegistry: 'leap-metamask-cosmos-snap',
-        isActive: isMetamask
+        isActive: true
       }
     ]
   }
@@ -162,11 +163,45 @@ export const ModalChooseWallet: React.FC<{
 }> = ({ close }) => {
   const [theme] = useConfigReducer('theme');
 
+  const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
+
   const renderListWalletByNetwork = () => {
-    return walletProvider.map((item, index) => {
+    return walletProviderWithStatus.map((item, index) => {
       return <WalletByNetwork key={index} walletProvider={item} />;
     });
   };
+
+  // @ts-ignore
+  const isCheckOwallet = window.owallet?.isOwallet;
+  const version = window?.keplr?.version;
+  const isCheckKeplr = !!version && keplrCheck('keplr');
+  const isMetamask = window?.ethereum?.isMetaMask;
+
+  // update wallet provider with status is active or not
+  useEffect(() => {
+    const updatedWalletProvider = walletProviderWithStatus.map((item) => {
+      const updatedWallets = item.wallets.map((wallet) => {
+        let isActive = true;
+        switch (wallet.nameRegistry) {
+          case 'keplr-extension':
+            isActive = isCheckKeplr;
+            break;
+          case 'owallet-extension':
+            isActive = isCheckOwallet;
+            break;
+          case 'leap-metamask-cosmos-snap':
+            isActive = isMetamask;
+            break;
+        }
+        return { ...wallet, isActive };
+      });
+      return {
+        ...item,
+        wallets: updatedWallets
+      };
+    });
+    setWalletProviderWithStatus(updatedWalletProvider);
+  }, [isCheckOwallet, isCheckKeplr, isMetamask]);
 
   return (
     <Modal
