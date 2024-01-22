@@ -32,7 +32,7 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
             ?.wallets.find((item) => item.nameRegistry === mainWallet.walletName);
           if (!wallet) return null;
           return (
-            <div className={cx('wallet_icon')}>
+            <div className={cx('wallet_icon')} key={wallet.nameRegistry}>
               <wallet.icon width={20} height={20} />
             </div>
           );
