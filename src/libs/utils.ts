@@ -214,7 +214,6 @@ export const initClient = async () => {
     // TODO: need to suggest chain when user click connect wallet btn
     // switchWallet(getStorageKey() as WalletType);
     // const keplr = await window.Keplr.getKeplr();
-
     // // suggest our chain
     // if (keplr) {
     //   // always trigger suggest chain when users enter the webpage
@@ -229,8 +228,8 @@ export const initClient = async () => {
     //       console.log({ error });
     //     }
     //   }
-    const { client } = await getCosmWasmClient({ chainId: network.chainId });
-    window.client = client;
+    // const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    // window.client = client;
     // }
   } catch (ex) {
     console.log(ex);

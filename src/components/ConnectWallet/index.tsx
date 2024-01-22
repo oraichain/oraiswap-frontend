@@ -41,6 +41,7 @@ import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
 import { leapWalletType } from 'helper/constants';
+import { getCosmWasmClient } from 'libs/cosmjs';
 
 const cx = cn.bind(styles);
 
@@ -293,6 +294,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const connectKeplr = async (type: any) => {
     try {
+      if (!window.client) {
+        const { client } = await getCosmWasmClient({ chainId: network.chainId });
+        window.client = client;
+      }
       setWalletTypeStore(type);
       await switchWalletCosmos(type);
       // await window.Keplr.suggestChain(network.chainId);
