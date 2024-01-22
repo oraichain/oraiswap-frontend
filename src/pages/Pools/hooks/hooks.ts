@@ -332,7 +332,7 @@ export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
 export const getClaimableAmountByPool = async ({ pool, totalRewardInfoData, cachePrices }) => {
   const results = getClaimableInfoByPool({ pool, totalRewardInfoData });
 
-  const res = await Promise.all(results);
+  const res = await Promise.all(results || []);
 
   const total = res.reduce((acc, cur) => {
     const eachBalance = getUsd(cur.amount, cur, cachePrices, cur.coinGeckoId === 'scatom' && xOCH_PRICE);

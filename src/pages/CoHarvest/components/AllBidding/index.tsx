@@ -1,19 +1,15 @@
 import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as NoDataDark } from 'assets/images/nodata-bid-dark.svg';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { dateFormat, shortenAddress } from 'pages/CoHarvest/helpers';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
 
 const AllBidding = ({ list, isLoading }) => {
   const [theme] = useConfigReducer('theme');
-  const { data: prices } = useCoinGeckoPrices();
-  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
-
   if (isLoading) return <div className={styles.loadingDiv}></div>;
 
   return (
@@ -22,7 +18,6 @@ const AllBidding = ({ list, isLoading }) => {
         list
           .sort((a, b) => b.premium_slot - a.premium_slot)
           .map((item, index) => {
-            const amountUsd = getUsd(item.amount, ORAIX_TOKEN_INFO, prices);
             return (
               <div className={styles.item} key={index}>
                 <div className={styles.right}>
@@ -33,8 +28,8 @@ const AllBidding = ({ list, isLoading }) => {
                   </div>
                 </div>
                 <div className={styles.amount}>
-                  <div className={styles.token}>{toDisplay(item.amount)} ORAIX</div>
-                  {formatDisplayUsdt(amountUsd)}
+                  <div className={styles.token}>{numberWithCommas(toDisplay(item.amount))} ORAIX</div>
+                  {formatDisplayUsdt(item.amountUSD)}
                 </div>
               </div>
             );
