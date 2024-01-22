@@ -43,6 +43,11 @@ export const WalletManagement: FC<{}> = () => {
   }, [oraiAddress, tronAddress, metamaskAddress]);
 
   const isAnyWalletConnected = !!wallet.mainWallet;
+  useEffect(() => {
+    // close my wallet info when not connect to any wallet
+    if (!isAnyWalletConnected) setIsShowMyWallet(false);
+  }, [isAnyWalletConnected]);
+
   return (
     <div className={cx('connect-wallet-container', theme)}>
       {!isAnyWalletConnected ? (
