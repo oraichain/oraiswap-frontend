@@ -301,17 +301,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     if (!address) throw Error('Not found Orai BTC Address');
     const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
-    console.log({
-      oraiAddress,
-      destinationAddress,
-      OBTCContractAddress,
-      OraichainChain,
-      local_channel_id: OraichainChain.source.channelId,
-      remote_address: destinationAddress,
-      remote_denom: OraichainChain.source.nBtcIbcDenom,
-      memo: `withdraw:${btcAddress}`,
-      window: window.client
-    });
+
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
@@ -336,7 +326,7 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         'auto'
       )) as any;
-      console.log('🚀 ~ file: index.tsx:341 ~ rs:', result);
+
       processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
     } catch (error) {
       console.log({});
