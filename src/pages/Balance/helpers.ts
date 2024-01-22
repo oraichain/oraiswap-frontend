@@ -44,6 +44,8 @@ import QRCode from 'qrcode';
 import { useEffect } from 'react';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
+import { BitcoinUnit } from 'bitcoin-units';
+import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC } from 'helper/constants';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -674,4 +676,11 @@ export const useInitNomic = (nomic) => {
     };
     getAddress();
   }, [nomic.wallet?.address, nomic.depositAddress]);
+};
+
+export const getMinDepositBtc = () => {
+  return new BitcoinUnit(MIN_DEPOSIT_BTC, 'satoshi').to('BTC').getValue();
+};
+export const getMinWithDrawBtc = () => {
+  return new BitcoinUnit(MIN_WITHDRAW_BTC, 'satoshi').to('BTC').getValue();
 };

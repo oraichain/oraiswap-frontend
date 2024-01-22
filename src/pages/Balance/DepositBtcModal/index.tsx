@@ -11,6 +11,9 @@ import { ReactComponent as BTCToken } from 'assets/images/token-btc.svg';
 import { NomicContext } from 'context/nomic-context';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
+import { timeAgo } from 'helper';
+import { MIN_DEPOSIT_BTC } from 'helper/constants';
+import { getMinDepositBtc } from '../helpers';
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
@@ -24,6 +27,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const nomic = useContext(NomicContext);
 
   const expiration = nomic?.depositAddress?.expirationTimeMs;
+  console.log('🚀 ~ expiration:', expiration);
   // console.log('🚀 ~ expiration:', expiration);
   useEffect(() => {
     (async () => {
@@ -88,21 +92,23 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
               <TooltipIcon width={20} height={20} />
             </div>
             <span>
-              This address expires in 4 days; deposits sent after that will be lost. Transactions fail for deposit
-              amounts exceeding 19 BTC
+              This address expires {timeAgo(expiration)}; deposits sent after that will be lost. Transactions fail for
+              deposit amounts exceeding 19 BTC
             </span>
           </div>
         </div>
         <div className={styles.estimate}>
           <div className={styles.timeMinerFee}>
+            <span className={styles.fee}>Minimum Deposit:</span>
             <span className={styles.time}>Expected transaction time:</span>
             <span className={styles.miner}>Bitcoin Miner Fee:</span>
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>10 mins - 1.5 hours</span>
-            <span>{nomic?.depositAddress?.minerFeeRate} BTC</span>
-            <span>{nomic?.depositAddress?.bridgeFeeRate * 100}%</span>
+            <span>{nomic.depositAddress?.minerFeeRate + getMinDepositBtc()} BTC</span>
+            <span>20 mins - 1.5 hours</span>
+            <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
+            <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>
           </div>
         </div>
         <div className={styles.warning}>
@@ -110,7 +116,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             <TooltipIcon width={20} height={20} />
           </div>
           <span>
-            The Bitcoin Recovery address is necessary for retrieving Bitcoin in the event of an emergency disbursement.
+            If you sent the balance to an expired bitcoin address, please check the bitcoin address in owallet wallet to
+            receive an automatic refund.
           </span>
         </div>
         <div className={styles.btn} onClick={close}>

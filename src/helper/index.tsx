@@ -410,3 +410,13 @@ export const getListAddressCosmosByLeapSnap = async () => {
   }
   return { listAddressCosmos };
 };
+export const timeAgo = (timestamp = 0) => {
+  if (!timestamp) return 'in 0 day';
+  const now = Date.now();
+  const diffInSeconds = Math.floor((now - timestamp) / 1000);
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  return rtf.format(-diffInDays, 'day');
+};
