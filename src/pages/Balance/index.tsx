@@ -182,7 +182,6 @@ const Balance: React.FC<BalanceProps> = () => {
         const tmClient = await Tendermint37Client.connect(config.rpcUrl);
 
         const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-        console.log('🚀 ~ handleRecoveryAddress ~ result:', result);
 
         displayToast(
           TToastType.TX_SUCCESSFUL
