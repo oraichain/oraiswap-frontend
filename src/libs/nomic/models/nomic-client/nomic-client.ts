@@ -37,7 +37,7 @@ export class NomicClient implements NomicClientInterface {
       const config = {
         relayers: [Config.relayerUrl],
         channel: OraiBtcSubnetChain.source.channelId, // ibc between oraibtc and orai chain
-        network: process.env.REACT_APP_IS_ORAIBTC_TESTNET ? 'testnet' : 'bitcoin',
+        network: process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin',
         receiver: receiver, // bech32 address of the depositing user,
         sender: sender
       } as DepositOptions;
@@ -49,10 +49,7 @@ export class NomicClient implements NomicClientInterface {
   }
   public async init() {
     await init();
-    this.oraibtc = new OraiBtc(
-      Config.rpcUrl,
-      Config.chainId,
-      process.env.REACT_APP_IS_ORAIBTC_TESTNET ? 'testnet' : 'bitcoin'
-    );
+    console.log(process.env.REACT_APP_ORAIBTC_NETWORK, 'env');
+    this.oraibtc = new OraiBtc(Config.rpcUrl, Config.chainId, process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin');
   }
 }

@@ -26,6 +26,7 @@ import { ethers } from 'ethers';
 import axios from 'rest/request';
 import { reduce } from 'lodash';
 import { getUtxos } from 'pages/Balance/helpers';
+import { bitcoinChainId } from 'helper/constants';
 
 export type LoadTokenParams = {
   refresh?: boolean;
@@ -103,7 +104,8 @@ async function loadTokens(
       loadBtcAmounts(
         dispatch,
         btcAddress,
-        chainInfos.filter((c) => (c.chainId as any) == 'bitcoinTestnet')
+        // TODO: hardcode check bitcoinTestnet need update later
+        chainInfos.filter((c) => (c.chainId as any) == bitcoinChainId)
       );
     }, 2000);
   }

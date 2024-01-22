@@ -8,6 +8,7 @@ import {
   MILKYBSC_ORAICHAIN_DENOM,
   TokenItemType
 } from '@oraichain/oraidex-common';
+import { bitcoinChainId } from 'helper/constants';
 
 const evmDenomsMap = {
   kwt: [KWTBSC_ORAICHAIN_DENOM],
@@ -88,7 +89,7 @@ export const evmTokens = uniqBy(
   (c) => c.denom
 );
 export const btcTokens = uniqBy(
-  flattenTokens.filter((token) => (token.chainId as any) === 'bitcoinTestnet'),
+  flattenTokens.filter((token) => (token.chainId as any) === bitcoinChainId),
   (c) => c.denom
 );
 

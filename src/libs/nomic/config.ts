@@ -7,7 +7,7 @@ class Config {
   relayerUrl: string;
 
   constructor() {
-    if (process.env.REACT_APP_IS_ORAIBTC_TESTNET) {
+    if (process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet') {
       this.chainId = 'oraibtc-subnet-1';
       this.chainName = 'OraiBtcSubnet';
       this.rpcUrl = 'https://oraibtc.rpc.orai.io';

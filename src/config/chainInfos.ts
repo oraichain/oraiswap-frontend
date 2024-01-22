@@ -70,6 +70,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
+import { bitcoinChainId } from 'helper/constants';
 
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
@@ -175,7 +176,7 @@ export const chainIcons: ChainIcon[] = [
     IconLight: OraiLightIcon
   },
   {
-    chainId: 'bitcoinTestnet' as any,
+    chainId: bitcoinChainId as any,
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -389,7 +390,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
       type: 'cw20',
       contractAddress: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
-      bridgeTo: ['bitcoinTestnet'] as any,
+      bridgeTo: [bitcoinChainId] as any,
       coinDecimals: 6,
       Icon: BTCIcon,
       IconLight: BTCIcon
@@ -492,57 +493,105 @@ export const oraichainNetwork: CustomChainInfo = {
     // }
   ]
 };
+const bitcoinTestnet: CustomChainInfo = {
+  rest: 'https://blockstream.info/testnet/api',
+  rpc: 'https://blockstream.info/testnet/api',
+  chainId: ChainIdEnum.BitcoinTestnet as any,
+  chainName: 'Bitcoin Testnet' as any,
+  bip44: {
+    coinType: 1 as any
+  },
+  coinType: 1,
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  stakeCurrency: {
+    coinDenom: 'BTC',
+    coinMinimalDenom: 'btc',
+    coinDecimals: 8,
+    coinGeckoId: 'bitcoin',
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+  },
+  bech32Config: defaultBech32Config('tb'),
+  networkType: 'bitcoin' as any,
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'btc',
+      coinDecimals: 8 as any,
+      bridgeTo: ['Oraichain'],
+      Icon: BTCIcon,
+      coinGeckoId: 'bitcoin' as any,
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    }
+  ],
+  get feeCurrencies() {
+    return this.currencies;
+  },
 
+  features: ['isBtc'],
+  txExplorer: {
+    name: 'BlockStream',
+    txUrl: 'https://blockstream.info/testnet/tx/{txHash}',
+    accountUrl: 'https://blockstream.info/testnet/address/{address}'
+  }
+};
+const bitcoinMainnet: CustomChainInfo = {
+  rest: 'https://blockstream.info/api',
+  rpc: 'https://blockstream.info/api',
+  chainId: ChainIdEnum.Bitcoin as any,
+  chainName: 'Bitcoin' as any,
+  bip44: {
+    coinType: 0 as any
+  },
+  coinType: 0,
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  stakeCurrency: {
+    coinDenom: 'BTC',
+    coinMinimalDenom: 'btc',
+    coinDecimals: 8,
+    coinGeckoId: 'bitcoin',
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+  },
+  bech32Config: defaultBech32Config('bc'),
+  networkType: 'bitcoin' as any,
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'btc',
+      coinDecimals: 8 as any,
+      bridgeTo: ['Oraichain'],
+      Icon: BTCIcon,
+      coinGeckoId: 'bitcoin' as any,
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    }
+  ],
+  get feeCurrencies() {
+    return this.currencies;
+  },
+
+  features: ['isBtc'],
+  txExplorer: {
+    name: 'BlockStream',
+    txUrl: 'https://blockstream.info/tx/{txHash}',
+    accountUrl: 'https://blockstream.info/address/{address}'
+  }
+};
+const bitcoinNetwork = process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? bitcoinTestnet : bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,
-  {
-    rest: 'https://blockstream.info/testnet/api',
-    rpc: 'https://blockstream.info/testnet/api',
-    chainId: ChainIdEnum.BitcoinTestnet as any,
-    chainName: 'Bitcoin Testnet' as any,
-    bip44: {
-      coinType: 1 as any
-    },
-    coinType: 1,
-    Icon: BTCIcon,
-    IconLight: BTCIcon,
-    stakeCurrency: {
-      coinDenom: 'BTC',
-      coinMinimalDenom: 'btc',
-      coinDecimals: 8,
-      coinGeckoId: 'bitcoin',
-      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-    },
-    bech32Config: defaultBech32Config('tb'),
-    networkType: 'bitcoin' as any,
-    currencies: [
-      {
-        coinDenom: 'BTC',
-        coinMinimalDenom: 'btc',
-        coinDecimals: 8 as any,
-        bridgeTo: ['Oraichain'],
-        Icon: BTCIcon,
-        coinGeckoId: 'bitcoin' as any,
-        coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-        gasPriceStep: {
-          low: 0,
-          average: 0,
-          high: 0
-        }
-      }
-    ],
-    get feeCurrencies() {
-      return this.currencies;
-    },
-
-    features: ['isBtc'],
-    txExplorer: {
-      name: 'BlockStream',
-      txUrl: 'https://blockstream.info/testnet/tx/{txHash}',
-      accountUrl: 'https://blockstream.info/testnet/address/{address}'
-    }
-  },
+  bitcoinNetwork,
   {
     rpc: 'https://bridge-v2.rpc.orai.io',
     rest: 'https://bridge-v2.lcd.orai.io',

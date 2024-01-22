@@ -30,12 +30,12 @@ export const OraiBtcSubnetChain: IbcChain = {
   chainId: config.chainId,
   rpcEndpoint: config.rpcUrl,
   source: {
-    channelId: 'channel-1',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-1' : 'channel-0',
     port: 'transfer',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: 'channel-170',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-170' : 'channel-174',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm'
   },
   locked: true
@@ -47,17 +47,19 @@ export const OraichainChain: IbcChain = {
   chainId: 'Oraichain',
   rpcEndpoint: 'https://rpc.orai.io',
   source: {
-    channelId: 'channel-170',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-170' : 'channel-174',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: 'channel-1',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-1' : 'channel-0',
     port: 'transfer'
   },
   locked: true
 };
 
-export const OBTCContractAddress = 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646';
-
+const OBTCContractAddressTestnet = 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646';
+const OBTCContractAddressMainnet = 'orai10g6frpysmdgw5tdqke47als6f97aqmr8s3cljsvjce4n5enjftcqtamzsd';
+export const OBTCContractAddress =
+  process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? OBTCContractAddressTestnet : OBTCContractAddressMainnet;
 export const Chains: IbcChain[] = [OraiBtcSubnetChain, OraichainChain];

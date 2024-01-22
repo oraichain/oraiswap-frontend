@@ -2,6 +2,7 @@ import { Key } from '@keplr-wallet/types';
 
 import { ChainIdEnum } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
+import { bitcoinChainId } from 'helper/constants';
 export type BitcoinMode = 'core' | 'extension' | 'mobile-web' | 'walletconnect';
 // import { CosmosChainId, BitcoinWallet } from '@oraichain/oraidex-common';
 type BtcChainId = 'bitcoin' | 'bitcoinTestnet';
@@ -69,7 +70,7 @@ export default class Bitcoin {
     }
   }
 
-  async getAddress(chainId: BtcChainId = ChainIdEnum.BitcoinTestnet): Promise<string | undefined> {
+  async getAddress(chainId: BtcChainId = bitcoinChainId): Promise<string | undefined> {
     try {
       const key = await this.getBitcoinKey(chainId);
       return key?.bech32Address;
@@ -78,7 +79,7 @@ export default class Bitcoin {
     }
   }
   async signAndBroadCast(
-    chainId: BtcChainId = ChainIdEnum.BitcoinTestnet,
+    chainId: BtcChainId = bitcoinChainId,
     data: object
   ): Promise<{
     rawTxHex: string;

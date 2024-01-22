@@ -70,6 +70,7 @@ import { BitcoinUnit } from 'bitcoin-units';
 import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
+import { bitcoinChainId } from 'helper/constants';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -343,8 +344,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
       // TODO: hardcode check bitcoinTestnet need update later
       // [BTC Native] ==> ORAICHAIN
-      const isBTCtoOraichain = (from.chainId as any) === 'bitcoinTestnet' && to.chainId === 'Oraichain';
-      const isOraichainToBTC = from.chainId === 'Oraichain' && (to.chainId as any) === 'bitcoinTestnet';
+      const isBTCtoOraichain = (from.chainId as any) === bitcoinChainId && to.chainId === 'Oraichain';
+      const isOraichainToBTC = from.chainId === 'Oraichain' && (to.chainId as any) === bitcoinChainId;
       if (isBTCtoOraichain || isOraichainToBTC)
         return handleTransferBTC({
           isBTCToOraichain: isBTCtoOraichain,
@@ -535,8 +536,9 @@ const Balance: React.FC<BalanceProps> = () => {
                   amount += subAmount;
                   usd += getUsd(subAmount, t, prices);
                 }
+                // TODO: hardcode check bitcoinTestnet need update later
                 const TokenItemELement: React.FC<TokenItemProps> =
-                  (t.chainId as any) === 'bitcoinTestnet' && (t?.coinGeckoId as any) === 'bitcoin'
+                  (t.chainId as any) === bitcoinChainId && (t?.coinGeckoId as any) === 'bitcoin'
                     ? TokenItemBtc
                     : TokenItem;
 
