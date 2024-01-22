@@ -89,7 +89,6 @@ const App = () => {
 
   // clear persist storage when update version
   useEffect(() => {
-    nomic.init();
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
       localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);

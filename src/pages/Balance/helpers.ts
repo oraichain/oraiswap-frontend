@@ -505,7 +505,7 @@ export const getUtxos = async (address: string, baseUrl: string) => {
   });
   return data;
 };
-export const mapUtxos = ({ utxos, address, path, currentBlockHeight = 0 }) => {
+export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBlockHeight = 0 }) => {
   let balance = 0;
   let utxosData = [];
   if (!utxos || utxos?.length === 0) {
@@ -596,7 +596,8 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 
-export const BTC_SCAN = 'https://blockstream.info/testnet';
+export const BTC_SCAN =
+  process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
 // decimals BTC is 8
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;

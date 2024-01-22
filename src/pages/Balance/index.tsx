@@ -20,6 +20,7 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
+import { makeStdTx } from '@cosmjs/amino';
 import {
   getTransactionUrl,
   handleErrorMsg,
@@ -45,6 +46,7 @@ import KwtModal from './KwtModal';
 import StuckOraib from './StuckOraib';
 import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
+import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
   convertKwt,
   convertTransferIBCErc20Kwt,
@@ -71,6 +73,7 @@ import { toBinary } from '@cosmjs/cosmwasm-stargate';
 import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
+import { config } from 'libs/nomic/config';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -100,12 +103,20 @@ const Balance: React.FC<BalanceProps> = () => {
 
   // const { infoBTCDeposit } = useGetInfoBtcDeposit();
   // const { urlQRCode } = useGetQRCode(nomic);
+  const isOwallet = (window.owallet as any)?.isOwallet;
+  // console.log('🚀 ~ isOwallet:', isOwallet);
   useEffect(() => {
     const getAddress = async () => {
-      await nomic.generateAddress();
+      try {
+        await nomic.generateAddress();
+      } catch (error) {
+        console.log('🚀 ~ getAddress ~ error:', error);
+      }
     };
-    getAddress();
-  }, [oraiAddress]);
+    if (isOwallet) {
+      getAddress();
+    }
+  }, [oraiAddress, isOwallet]);
   useOnClickOutside(ref, () => {
     setTokenBridge([undefined, undefined]);
   });
@@ -143,7 +154,50 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     setTxHash(result.transactionHash);
   };
+  const handleRecoveryAddress = async () => {
+    try {
+      const addressRecovered = await nomic.getRecoveryAddress();
 
+      const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+      if (addressRecovered !== btcAddress && oraiBtcAddress) {
+        const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
+        const signDoc = {
+          account_number: accountInfo?.account?.account_number,
+          chain_id: OraiBtcSubnetChain.chainId,
+          fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
+          memo: '',
+          msgs: [
+            {
+              type: 'nomic/MsgSetRecoveryAddress',
+              value: {
+                recovery_address: btcAddress
+              }
+            }
+          ],
+          sequence: accountInfo?.account?.sequence
+        } as any;
+
+        const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
+        const tx = makeStdTx(signDoc, signature.signature);
+        const tmClient = await Tendermint37Client.connect(config.rpcUrl);
+
+        const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
+        console.log('🚀 ~ handleRecoveryAddress ~ result:', result);
+
+        displayToast(
+          TToastType.TX_SUCCESSFUL
+          //   {
+          //   customLink: `${BTC_SCAN}/tx/${result.hash}`
+          // }
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      displayToast(TToastType.TX_FAILED, {
+        message: JSON.stringify(error)
+      });
+    }
+  };
   const onClickToken = useCallback(
     (token: TokenItemType) => {
       if (isEqual(from, token)) {
@@ -181,9 +235,6 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number) => {
-    console.log('🚀 ~ handleTransferBTCToOraichain ~ btcAddress:', btcAddress);
-    await nomic.setRecoveryAddress(btcAddress);
-
     const utxos = await getUtxos(btcAddress, fromToken.rpc);
     const feeRate = await getFeeRate({
       url: from.rpc
@@ -191,8 +242,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
     const utxosMapped = mapUtxos({
       utxos,
-      address: btcAddress,
-      path: "m/84'/0'/0'/0/0"
+      address: btcAddress
     });
     const totalFee = calculatorTotalFeeBtc({
       utxos: utxosMapped.utxos,
@@ -294,7 +344,10 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
-    if (isBTCToOraichain) return handleTransferBTCToOraichain(fromToken, transferAmount);
+    if (isBTCToOraichain) {
+      await handleRecoveryAddress();
+      return handleTransferBTCToOraichain(fromToken, transferAmount);
+    }
     return handleTransferOraichainToBTC(fromToken, transferAmount);
   };
 

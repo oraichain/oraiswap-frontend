@@ -386,17 +386,6 @@ export const oraichainNetwork: CustomChainInfo = {
       Icon: KwtIcon
     },
     {
-      coinDenom: 'BTC',
-      coinGeckoId: 'bitcoin' as any,
-      coinMinimalDenom: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
-      type: 'cw20',
-      contractAddress: 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646',
-      bridgeTo: [bitcoinChainId] as any,
-      coinDecimals: 6,
-      Icon: BTCIcon,
-      IconLight: BTCIcon
-    },
-    {
       coinDenom: 'BEP20 MILKY',
       coinGeckoId: 'milky-token',
       coinMinimalDenom: MILKYBSC_ORAICHAIN_DENOM,
@@ -485,7 +474,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BTC',
       coinGeckoId: 'bitcoin' as any,
-      coinMinimalDenom: 'btc',
+      coinMinimalDenom: OBTCContractAddress,
       type: 'cw20',
       contractAddress: OBTCContractAddress,
       bridgeTo: [bitcoinChainId],
@@ -711,6 +700,7 @@ export const chainInfos: CustomChainInfo[] = [
       }
     ]
   },
+
   {
     rpc: 'https://tendermint1.kawaii.global',
     rest: 'https://cosmos1.kawaii.global',

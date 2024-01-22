@@ -16,15 +16,23 @@ export class NomicClient implements NomicClientInterface {
   public depositAddress: DepositSuccess | null = null;
   private oraibtc: OraiBtc | null = null;
 
-  public async setRecoveryAddress(recovery_address: string) {
+  public async getRecoveryAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();
     if (isKeplrActive) {
       const address = await window.Keplr.getKeplrAddr(Config.chainId as any);
-      if (!address || !recovery_address) {
+      if (!address) {
         return;
       }
-      await this.oraibtc.setRecoveryAddress(address, recovery_address);
+      // return await this.oraibtc.getRecoveryAddress(address);
     }
+    return null;
+  }
+
+  public async getAccountInfo(accAddress: string) {
+    // const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
+    return await fetch(`${Config.restUrl}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
+      data.json()
+    );
   }
   public async generateAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();

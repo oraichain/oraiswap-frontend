@@ -17,7 +17,7 @@
     "@oraichain/ethereum-multicall": "^1.0.2",
     "@oraichain/kawaiiverse-txs": "^0.0.3",
     "@oraichain/orai-bitcoin": "^1.0.7",
-    "@oraichain/oraibtc-wasm": "1.0.8",
+    "@oraichain/oraibtc-wasm": "0.7.7",
     "@oraichain/oraidex-common-ui": "^1.0.3",
     "@oraichain/oraidex-contracts-sdk": "^1.0.26",
     "@oraichain/oraidex-universal-swap": "^1.0.50",
