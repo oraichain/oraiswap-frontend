@@ -98,7 +98,6 @@ export const WalletConnectComponent = ({
   notExist: ReactNode;
   isActive: boolean;
 }) => {
-  if (!isActive) return <>{notExist}</>;
   switch (walletStatus) {
     case WalletStatus.Disconnected:
       return <>{disconnect}</>;

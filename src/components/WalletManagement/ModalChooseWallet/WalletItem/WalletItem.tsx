@@ -9,7 +9,7 @@ import {
   Connected,
   Connecting,
   Disconnected,
-  Error,
+  Error as ErrorBtn,
   NotExist,
   Rejected,
   WalletConnectComponent
@@ -47,13 +47,21 @@ export const WalletItem = ({
     }
   }, [walletClient]);
 
-  const onClickConnect: MouseEventHandler = async (e) => {
+  const onClickConnect = async (e) => {
     try {
       e.preventDefault();
       if (currentWallet && currentWallet !== walletClient.mainWallet?.walletName) {
         setConnectStatus('confirming-switch');
         setCurrentWalletConnecting(walletClient.mainWallet);
       } else {
+        await walletClient.mainWallet.connect();
+        if (
+          !(
+            walletClient.mainWallet.getGlobalStatusAndMessage()[0] === 'Connected' ||
+            walletClient.mainWallet.getGlobalStatusAndMessage()[0] === 'Connecting'
+          )
+        )
+          throw new Error(walletClient.mainWallet.getGlobalStatusAndMessage()[1]);
         switchWalletCosmos(
           walletClient.mainWallet.walletName === 'owallet-extension'
             ? 'owallet'
@@ -61,7 +69,6 @@ export const WalletItem = ({
             ? 'keplr'
             : 'leapSnap'
         );
-        await walletClient.mainWallet.connect();
         const oraiAddr = await window.Keplr.getKeplrAddr();
         setOraiAddress(oraiAddr);
         const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
@@ -69,7 +76,8 @@ export const WalletItem = ({
         setCurrentWalletConnected(walletClient.mainWallet);
       }
     } catch (error) {
-      setConnectStatus('failed');
+      console.log({ errorConnect: error });
+      // setConnectStatus('failed');
     }
   };
 
@@ -88,7 +96,7 @@ export const WalletItem = ({
       connecting={<Connecting />}
       connected={<Connected buttonText={'Connected'} onClick={onClickDisconnect} />}
       rejected={<Rejected buttonText="Reconnect" onClick={onClickConnect} />}
-      error={<Error buttonText="Change Wallet" onClick={onClickConnect} />}
+      error={<ErrorBtn buttonText="Change Wallet" onClick={onClickConnect} />}
       notExist={<NotExist buttonText="Not Exist" onClick={() => {}} />}
     />
   );
