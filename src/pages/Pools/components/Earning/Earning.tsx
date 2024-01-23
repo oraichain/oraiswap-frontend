@@ -51,8 +51,7 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
   }, [totalRewardInfoData, info]);
 
   const setNewReward = async () => {
-    const rewardPerSec = info.rewardPerSec && info.rewardPerSec !== '0' ? info.rewardPerSec : '{"assets":[]}';
-    const rewardPerSecInfoData = JSON.parse(rewardPerSec);
+    const rewardPerSecInfoData = JSON.parse(info.rewardPerSec);
     const totalRewardAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.pending_reward ?? 0);
     // unit LP
     const rewardPerSecInfoDataIsArray = rewardPerSecInfoData.assets && Array.isArray(rewardPerSecInfoData.assets);
