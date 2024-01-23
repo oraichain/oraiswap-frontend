@@ -27,6 +27,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
   const expiration = nomic?.depositAddress?.expirationTimeMs;
+
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
@@ -91,7 +92,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             </div>
             <span>
               This address expires {timeAgo(expiration)}; deposits sent after that will be lost. Transactions fail for
-              deposit amounts exceeding {satToBTC(infoBTC.capacity_limit)} BTC
+              deposit amounts exceeding {satToBTC(infoBTC?.capacity_limit)} BTC
             </span>
           </div>
         </div>
@@ -103,7 +104,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{nomic.depositAddress?.minerFeeRate + satToBTC(infoBTC.min_deposit_amount)} BTC</span>
+            <span>{nomic.depositAddress?.minerFeeRate + satToBTC(infoBTC?.min_deposit_amount)} BTC</span>
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>

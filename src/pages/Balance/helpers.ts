@@ -652,5 +652,6 @@ export const useGetQRCode = (nomic) => {
 };
 
 export const satToBTC = (sat = 0) => {
+  if (!sat) return 0;
   return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
 };
