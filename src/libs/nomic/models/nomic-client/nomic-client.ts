@@ -1,6 +1,6 @@
 import { config as Config } from '../../config';
 
-import { NomicClientInterface } from './nomic-client-interface';
+import { NomicClientInterface, ResConfigOraiBTC } from './nomic-client-interface';
 import { OraiBtcSubnetChain } from '../ibc-chain';
 import { DepositSuccess, generateDepositAddress, DepositOptions } from '@oraichain/orai-bitcoin';
 
@@ -19,9 +19,7 @@ export class NomicClient implements NomicClientInterface {
       if (!address) {
         return;
       }
-      const result = await this.getRecoveredAddress(address);
-      console.log('🚀 ~ NomicClient ~ getRecoveryAddress ~ result:', result);
-      return result;
+      return await this.getRecoveredAddress(address);
     }
     return null;
   }
@@ -40,6 +38,11 @@ export class NomicClient implements NomicClientInterface {
         method: 'GET'
       }
     ).then((data) => data.json());
+  }
+  public async getConfig(): Promise<ResConfigOraiBTC> {
+    return await fetch(`${Config.restUrl}/bitcoin/config`, {
+      method: 'GET'
+    }).then((data) => data.json());
   }
 
   public async generateAddress() {

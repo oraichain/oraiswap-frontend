@@ -12,8 +12,8 @@ import { NomicContext } from 'context/nomic-context';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
 import { timeAgo } from 'helper';
-import { MIN_DEPOSIT_BTC } from 'helper/constants';
-import { getMinDepositBtc } from '../helpers';
+
+import { satToBTC, useGetInfoBtc } from '../helpers';
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
@@ -25,10 +25,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [urlQRCode, setUrlQRCode] = useState(null);
   const nomic = useContext(NomicContext);
-
+  const { infoBTC } = useGetInfoBtc();
   const expiration = nomic?.depositAddress?.expirationTimeMs;
-  console.log('🚀 ~ expiration:', expiration);
-  // console.log('🚀 ~ expiration:', expiration);
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
@@ -93,7 +91,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             </div>
             <span>
               This address expires {timeAgo(expiration)}; deposits sent after that will be lost. Transactions fail for
-              deposit amounts exceeding 19 BTC
+              deposit amounts exceeding {satToBTC(infoBTC.capacity_limit)} BTC
             </span>
           </div>
         </div>
@@ -105,7 +103,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{nomic.depositAddress?.minerFeeRate + getMinDepositBtc()} BTC</span>
+            <span>{nomic.depositAddress?.minerFeeRate + satToBTC(infoBTC.min_deposit_amount)} BTC</span>
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>

@@ -46,6 +46,7 @@ import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
 import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC } from 'helper/constants';
+import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -608,25 +609,30 @@ export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
 };
 
-export const useGetInfoBtcDeposit = () => {
-  const { data: infoBTCDeposit } = useQuery(
+export const useGetInfoBtc = () => {
+  const { data: infoBTC } = useQuery(
     ['estimate-btc-deposit'],
     async () => {
-      const resp = await fetch(`${config.relayerUrl}/sigset`);
-      const data = await resp.json();
-      return data;
+      const nomic = new NomicClient();
+      return await nomic.getConfig();
     },
     {
       placeholderData: {
-        index: 0,
-        bridgeFeeRate: 0,
-        minerFeeRate: 0,
-        depositsEnabled: true,
-        threshold: []
+        capacity_limit: 0,
+        max_offline_checkpoints: 0,
+        max_withdrawal_amount: 0,
+        max_withdrawal_script_length: 0,
+        min_checkpoint_confirmations: 0,
+        min_confirmations: 0,
+        min_deposit_amount: 0,
+        min_withdrawal_amount: 0,
+        min_withdrawal_checkpoints: 0,
+        transfer_fee: 0,
+        units_per_sat: 0
       }
     }
   );
-  return { infoBTCDeposit };
+  return { infoBTC };
 };
 
 export const useGetQRCode = (nomic) => {
@@ -645,42 +651,6 @@ export const useGetQRCode = (nomic) => {
   return { urlQRCode };
 };
 
-// export const useInitNomic = (nomic) => {
-//   useEffect(() => {
-//     const initNomic = async () => {
-//       try {
-//         await nomic.init();
-//         // setInitialized(true);
-//         const wallet = await nomic.getCurrentWallet();
-//         if (wallet && !wallet.connected) {
-//           await wallet.connect();
-//           nomic.wallet = wallet;
-//           // await nomic.build();
-//         }
-//         // await bitcoin.getBitcoinPrice();
-//       } catch (error) {
-//         console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
-//       }
-//     };
-//     initNomic();
-//   }, []);
-
-//   useEffect(() => {
-//     if (!nomic.wallet?.address) return;
-//     const getAddress = async () => {
-//       if (nomic.depositAddress) {
-//         return;
-//       }
-//       // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
-//       await nomic.generateAddress();
-//     };
-//     getAddress();
-//   }, [nomic.wallet?.address, nomic.depositAddress]);
-// };
-
-export const getMinDepositBtc = () => {
-  return new BitcoinUnit(MIN_DEPOSIT_BTC, 'satoshi').to('BTC').getValue();
-};
-export const getMinWithDrawBtc = () => {
-  return new BitcoinUnit(MIN_WITHDRAW_BTC, 'satoshi').to('BTC').getValue();
+export const satToBTC = (sat = 0) => {
+  return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
 };

@@ -22,14 +22,10 @@ export default function useTokenFee(
   fromChainId?: NetworkChainId,
   toChainId?: NetworkChainId
 ) {
-  console.log('🚀 ~ remoteTokenDenom:', remoteTokenDenom);
-  console.log('🚀 ~ toChainId:', toChainId);
-  console.log('🚀 ~ fromChainId:', fromChainId);
   const [bridgeFee, setBridgeFee] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
 
   useEffect(() => {
-    console.log(remoteTokenDenom, 'remoteTokenDenom');
     let fee = 0;
     if (!remoteTokenDenom || !feeConfig) return;
 

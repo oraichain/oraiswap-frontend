@@ -98,13 +98,10 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
-  const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
+
   const ref = useRef(null);
 
-  // const { infoBTCDeposit } = useGetInfoBtcDeposit();
-  // const { urlQRCode } = useGetQRCode(nomic);
   const isOwallet = (window.owallet as any)?.isOwallet;
-  // console.log('🚀 ~ isOwallet:', isOwallet);
   useEffect(() => {
     const getAddress = async () => {
       try {
@@ -159,7 +156,7 @@ const Balance: React.FC<BalanceProps> = () => {
       const addressRecovered = await nomic.getRecoveryAddress();
 
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
-      if (addressRecovered !== btcAddress && oraiBtcAddress) {
+      if (btcAddress && addressRecovered !== btcAddress && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
           account_number: accountInfo?.account?.account_number,
@@ -589,7 +586,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
                 return (
                   <TokenItemELement
-                    onDepositBtc={() => {
+                    onDepositBtc={async () => {
+                      await handleRecoveryAddress();
                       setIsDepositBtcModal(true);
                     }}
                     className={classNames(styles.tokens_element, styles[theme])}
