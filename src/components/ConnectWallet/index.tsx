@@ -295,6 +295,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const connectKeplr = async (type: any) => {
     try {
+      setWalletTypeStore(type);
       await initClient(type);
 
       const oraiAddr = await window.Keplr.getKeplrAddr();
