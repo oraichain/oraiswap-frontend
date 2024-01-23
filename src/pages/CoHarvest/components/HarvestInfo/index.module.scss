@@ -86,6 +86,30 @@
       }
     }
   }
+
+  .explain {
+    color: #2f5711;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    margin-top: 24px;
+    border-radius: 8px;
+    border: 1px solid #5ea402;
+    background: #eef9e5;
+
+    svg {
+      cursor: pointer;
+      vertical-align: middle;
+      path {
+        stroke: #2f5711;
+      }
+    }
+  }
 }
 
 .tooltip {
