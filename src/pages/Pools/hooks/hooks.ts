@@ -275,8 +275,7 @@ export const getStatisticData = (data: PoolTableData[]) => {
 };
 
 export const getClaimableInfoByPool = ({ pool, totalRewardInfoData }) => {
-  const rewardPerSec = pool.rewardPerSec && pool.rewardPerSec !== '0' ? pool.rewardPerSec : '{"assets":[]}';
-  const rewardPerSecInfoData = JSON.parse(rewardPerSec);
+  const rewardPerSecInfoData = JSON.parse(pool.rewardPerSec);
 
   const currentPoolReward = totalRewardInfoData?.reward_infos?.find((reward) =>
     isEqual(reward.staking_token, pool.liquidityAddr)
