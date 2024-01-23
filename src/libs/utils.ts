@@ -13,7 +13,7 @@ import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet } from 'helper';
+import { getStorageKey, switchWallet, switchWalletCosmos } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
@@ -206,6 +206,35 @@ export const initEthereum = async () => {
     });
     await provider.enable();
     (window.ethereum as any) = provider;
+  }
+};
+
+export const initClient = async (type: WalletType) => {
+  try {
+    await switchWalletCosmos(type);
+
+    const keplr = await window.Keplr.getKeplr();
+    // suggest our chain
+    if (keplr) {
+      for (const networkId of [
+        network.chainId,
+        COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
+        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
+      ] as NetworkChainId[]) {
+        try {
+          await window.Keplr.suggestChain(networkId);
+        } catch (error) {
+          console.log({ error });
+        }
+      }
+      const { client } = await getCosmWasmClient({ chainId: network.chainId });
+      window.client = client;
+    }
+  } catch (ex) {
+    console.log(ex);
+    displayToast(TToastType.KEPLR_FAILED, {
+      message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
+    });
   }
 };
 
