@@ -48,6 +48,8 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
+export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
+
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
@@ -89,7 +91,7 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
 export const getNetworkGasPrice = async (chainId): Promise<number> => {
   try {
     const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints(chainId);
-    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == chainId);
+    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId === chainId);
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
@@ -257,32 +259,31 @@ export const switchWalletCosmos = async (type: WalletType) => {
   if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
-  // const wallet = await collectWallet(network.chainId);
-  // window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-  //   gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  // });
+  const wallet = await collectWallet(network.chainId);
+  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  });
 };
 
 export const switchWalletTron = async () => {
   let tronAddress: string;
+  const res = await window.tronLink.request({
+    method: 'tron_requestAccounts'
+  });
   if (isMobile()) {
-    const addressTronMobile = await window.tronLink.request({
-      method: 'tron_requestAccounts'
-    });
-    //@ts-ignore
-    tronAddress = addressTronMobile?.base58;
-  } else {
+    // @ts-ignore
+    tronAddress = res?.base58;
+    // @ts-ignore
+  } else if (!window.owallet?.isOwallet) {
     if (!window.tronWeb.defaultAddress?.base58) {
-      const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-        method: 'tron_requestAccounts'
-      });
-      // throw error when not connected
+      const { code, message = 'Tronlink is not ready' } = res;
       if (code !== 200) {
         throw new Error(message);
       }
     }
     tronAddress = window.tronWeb.defaultAddress.base58;
-  }
+    // @ts-ignore
+  } else tronAddress = res?.base58;
   return {
     tronAddress
   };
