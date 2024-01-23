@@ -327,8 +327,11 @@ const Balance: React.FC<BalanceProps> = () => {
       )) as any;
 
       processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
-    } catch (error) {
-      console.log({});
+    } catch (ex) {
+      handleErrorTransaction(ex, {
+        tokenName: from.name,
+        chainName: from.chainId
+      });
     }
   };
 

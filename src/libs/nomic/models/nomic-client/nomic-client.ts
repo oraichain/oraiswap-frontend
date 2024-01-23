@@ -1,6 +1,3 @@
-import init, { OraiBtc } from '@oraichain/oraibtc-wasm';
-// import { generateDepositAddress, DepositOptions, DepositSuccess } from '@oraichain/orai-bitcoin';
-
 import { config as Config } from '../../config';
 
 import { NomicClientInterface } from './nomic-client-interface';
@@ -14,7 +11,6 @@ export class NomicClient implements NomicClientInterface {
   initialized = false;
 
   public depositAddress: DepositSuccess | null = null;
-  private oraibtc: OraiBtc | null = null;
 
   public async getRecoveryAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();
@@ -23,17 +19,29 @@ export class NomicClient implements NomicClientInterface {
       if (!address) {
         return;
       }
-      // return await this.oraibtc.getRecoveryAddress(address);
+      const result = await this.getRecoveredAddress(address);
+      console.log('🚀 ~ NomicClient ~ getRecoveryAddress ~ result:', result);
+      return result;
     }
     return null;
   }
 
   public async getAccountInfo(accAddress: string) {
-    // const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
     return await fetch(`${Config.restUrl}/cosmos/auth/v1beta1/accounts/${accAddress}`, { method: 'GET' }).then((data) =>
       data.json()
     );
   }
+  public async getRecoveredAddress(accAddress: string) {
+    return await fetch(
+      `${Config.restUrl}/bitcoin/recovery_address/${accAddress}?network=${
+        process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin'
+      }`,
+      {
+        method: 'GET'
+      }
+    ).then((data) => data.json());
+  }
+
   public async generateAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();
     if (isKeplrActive) {
@@ -54,10 +62,5 @@ export class NomicClient implements NomicClientInterface {
 
       this.depositAddress = btcAddressToDeposit;
     }
-  }
-  public async init() {
-    await init();
-    console.log(process.env.REACT_APP_ORAIBTC_NETWORK, 'env');
-    this.oraibtc = new OraiBtc(Config.rpcUrl, Config.chainId, process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin');
   }
 }

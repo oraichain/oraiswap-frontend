@@ -645,38 +645,38 @@ export const useGetQRCode = (nomic) => {
   return { urlQRCode };
 };
 
-export const useInitNomic = (nomic) => {
-  useEffect(() => {
-    const initNomic = async () => {
-      try {
-        await nomic.init();
-        // setInitialized(true);
-        const wallet = await nomic.getCurrentWallet();
-        if (wallet && !wallet.connected) {
-          await wallet.connect();
-          nomic.wallet = wallet;
-          // await nomic.build();
-        }
-        // await bitcoin.getBitcoinPrice();
-      } catch (error) {
-        console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
-      }
-    };
-    initNomic();
-  }, []);
+// export const useInitNomic = (nomic) => {
+//   useEffect(() => {
+//     const initNomic = async () => {
+//       try {
+//         await nomic.init();
+//         // setInitialized(true);
+//         const wallet = await nomic.getCurrentWallet();
+//         if (wallet && !wallet.connected) {
+//           await wallet.connect();
+//           nomic.wallet = wallet;
+//           // await nomic.build();
+//         }
+//         // await bitcoin.getBitcoinPrice();
+//       } catch (error) {
+//         console.log('🚀 ~ file: index.tsx:113 ~ init ~ error:', error);
+//       }
+//     };
+//     initNomic();
+//   }, []);
 
-  useEffect(() => {
-    if (!nomic.wallet?.address) return;
-    const getAddress = async () => {
-      if (nomic.depositAddress) {
-        return;
-      }
-      // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
-      await nomic.generateAddress();
-    };
-    getAddress();
-  }, [nomic.wallet?.address, nomic.depositAddress]);
-};
+//   useEffect(() => {
+//     if (!nomic.wallet?.address) return;
+//     const getAddress = async () => {
+//       if (nomic.depositAddress) {
+//         return;
+//       }
+//       // `${channel_of_oraibtc_that_connect_to_destination_chain}/${destination_chain_address}`
+//       await nomic.generateAddress();
+//     };
+//     getAddress();
+//   }, [nomic.wallet?.address, nomic.depositAddress]);
+// };
 
 export const getMinDepositBtc = () => {
   return new BitcoinUnit(MIN_DEPOSIT_BTC, 'satoshi').to('BTC').getValue();

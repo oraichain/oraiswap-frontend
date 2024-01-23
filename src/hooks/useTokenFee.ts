@@ -22,10 +22,14 @@ export default function useTokenFee(
   fromChainId?: NetworkChainId,
   toChainId?: NetworkChainId
 ) {
+  console.log('🚀 ~ remoteTokenDenom:', remoteTokenDenom);
+  console.log('🚀 ~ toChainId:', toChainId);
+  console.log('🚀 ~ fromChainId:', fromChainId);
   const [bridgeFee, setBridgeFee] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
 
   useEffect(() => {
+    console.log(remoteTokenDenom, 'remoteTokenDenom');
     let fee = 0;
     if (!remoteTokenDenom || !feeConfig) return;
 
@@ -36,6 +40,7 @@ export default function useTokenFee(
     const { token_fees: tokenFees } = feeConfig;
     const tokenFee = tokenFees.find((tokenFee) => tokenFee.token_denom === remoteTokenDenom);
     if (tokenFee) fee = (tokenFee.ratio.nominator / tokenFee.ratio.denominator) * 100;
+    console.log('🚀 ~ useEffect ~ fee:', fee);
     setBridgeFee(fee);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
