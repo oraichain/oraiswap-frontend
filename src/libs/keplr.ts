@@ -6,16 +6,16 @@ import { cosmosTokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getSnap, connectSnap, suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provider';
+import { suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provider';
 import { CosmjsOfflineSigner, ChainInfo as ChainInfoLeap } from '@leapwallet/cosmos-snap-provider';
 
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
-import { chainInfoWithoutIcon, getAddressBySnap, getChainSupported } from 'helper';
+import { chainInfoWithoutIcon, checkSnapExist, getAddressBySnap, getChainSupported } from 'helper';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await this.getKeplr();
-    const snapInstalled = await getSnap();
+    const snapInstalled = await checkSnapExist();
     if (keplr) {
       // use keplr instead
       return await keplr.getOfflineSignerAuto(chainId);
@@ -55,7 +55,7 @@ export default class Keplr extends CosmosWallet {
     }>
   > {
     // TODO: need check
-    const isSnap = await getSnap();
+    const isSnap = await checkSnapExist();
     const isKeplr = await this.getKeplr();
     if (isKeplr) return this.keplr.getChainInfosWithoutEndpoints();
     if (isSnap) {
@@ -66,7 +66,7 @@ export default class Keplr extends CosmosWallet {
 
   async suggestChain(chainId: string) {
     const isEnableKeplr = await this.getKeplr();
-    const isLeapSnap = await getSnap();
+    const isLeapSnap = await checkSnapExist();
     if (isEnableKeplr) {
       if (!window.keplr) return;
       const chainInfo = chainInfos.find((chainInfo) => chainInfo.chainId === chainId);
@@ -152,7 +152,7 @@ export default class Keplr extends CosmosWallet {
     chainId = chainId ?? network.chainId;
     try {
       const isEnableKeplr = await this.getKeplr();
-      const isEnableLeapSnap = await getSnap();
+      const isEnableLeapSnap = await checkSnapExist();
       if (isEnableKeplr) {
         const { bech32Address } = await this.getKeplrKey(chainId);
         if (!bech32Address) throw Error('Not found address from keplr!');

@@ -26,8 +26,8 @@ import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { leapSnapId } from './constants';
-import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
 
 export interface Tokens {
   denom?: string;
@@ -137,10 +137,14 @@ export const addNumber = (number1: number, number2: number) => {
 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
-  const isSnap = await getSnap();
+  const isSnap = await checkSnapExist();
   if (!keplr && !isSnap) {
     return displayInstallWallet();
   }
+};
+
+export const checkSnapExist = async (): Promise<boolean> => {
+  return window.ethereum?.isMetamask && !!(await getSnap());
 };
 
 export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {
@@ -259,7 +263,7 @@ export const switchWalletCosmos = async (type: WalletType) => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();
-  const isLeapSnap = await getSnap();
+  const isLeapSnap = await checkSnapExist();
   if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
@@ -323,6 +327,7 @@ export const getListAddressCosmos = async (oraiAddr) => {
   }
   return { listAddressCosmos };
 };
+
 export const getChainSupported = async () => {
   return await window.ethereum.request({
     method: 'wallet_invokeSnap',

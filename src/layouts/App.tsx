@@ -7,7 +7,15 @@ import {
 } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { checkVersionWallet, getNetworkGasPrice, getStorageKey, keplrCheck, setStorageKey, switchWallet } from 'helper';
+import {
+  checkSnapExist,
+  checkVersionWallet,
+  getNetworkGasPrice,
+  getStorageKey,
+  keplrCheck,
+  setStorageKey,
+  switchWallet
+} from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
@@ -20,7 +28,6 @@ import { ethers } from 'ethers';
 import Menu from './Menu';
 import Instruct from './Instruct';
 import './index.scss';
-import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
 
@@ -131,7 +138,7 @@ const App = () => {
   const keplrHandler = async () => {
     try {
       const typeWallet = getStorageKey();
-      const isSnap = await getSnap();
+      const isSnap = await checkSnapExist();
       if (!typeWallet) {
         const vs = window?.keplr?.version;
         const isCheckKeplr = !!vs && keplrCheck('keplr');
