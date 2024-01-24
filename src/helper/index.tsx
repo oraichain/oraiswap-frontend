@@ -144,7 +144,7 @@ export const handleCheckWallet = async () => {
 };
 
 export const checkSnapExist = async (): Promise<boolean> => {
-  return window.ethereum?.isMetamask && !!(await getSnap());
+  return window.ethereum?.isMetaMask && !!(await getSnap());
 };
 
 export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {

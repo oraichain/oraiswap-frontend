@@ -38,6 +38,29 @@ export type WalletProvider = {
   wallets: WalletNetwork[];
 };
 
+export const cosmosWallets: WalletNetwork[] = [
+  {
+    icon: OwalletIcon,
+    name: 'Owallet',
+    nameRegistry: 'owallet',
+    isActive: true
+  },
+  {
+    icon: KeplrIcon,
+    name: 'Keplr',
+    nameRegistry: 'keplr',
+    isActive: true
+  },
+  {
+    icon: MetamaskIcon,
+    name: 'Metamask (Leap Snap)',
+    nameRegistry: 'leapSnap',
+    isActive: true
+  }
+];
+
+export const allWallets: WalletNetwork[] = [...cosmosWallets];
+
 export const walletProvider: WalletProvider[] = [
   {
     networkType: 'cosmos',
@@ -73,26 +96,7 @@ export const walletProvider: WalletProvider[] = [
         chainName: 'kawaiiverse'
       }
     ],
-    wallets: [
-      {
-        icon: OwalletIcon,
-        name: 'Owallet',
-        nameRegistry: 'owallet',
-        isActive: true
-      },
-      {
-        icon: KeplrIcon,
-        name: 'Keplr',
-        nameRegistry: 'keplr',
-        isActive: true
-      },
-      {
-        icon: MetamaskIcon,
-        name: 'Metamask (Leap Snap)',
-        nameRegistry: 'leapSnap',
-        isActive: true
-      }
-    ]
+    wallets: cosmosWallets
   }
   // {
   // networkType: 'evm',
