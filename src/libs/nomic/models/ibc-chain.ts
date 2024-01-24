@@ -30,12 +30,12 @@ export const OraiBtcSubnetChain: IbcChain = {
   chainId: config.chainId,
   rpcEndpoint: config.rpcUrl,
   source: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-1' : 'channel-0',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-0' : 'channel-1',
     port: 'transfer',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-180' : 'channel-174',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-185' : 'channel-188',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm'
   },
   locked: true
@@ -47,12 +47,12 @@ export const OraichainChain: IbcChain = {
   chainId: 'Oraichain',
   rpcEndpoint: 'https://rpc.orai.io',
   source: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-180' : 'channel-174',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-185' : 'channel-188',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-1' : 'channel-0',
+    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-0' : 'channel-1',
     port: 'transfer'
   },
   locked: true

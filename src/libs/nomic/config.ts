@@ -8,7 +8,7 @@ class Config {
 
   constructor() {
     if (process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet') {
-      this.chainId = 'oraibtc-subnet-1';
+      this.chainId = 'oraibtc-testnet-2';
       this.chainName = 'OraiBtcSubnet';
       this.rpcUrl = 'https://oraibtc.rpc.orai.io';
       this.restUrl = 'https://oraibtc.lcd.orai.io';
