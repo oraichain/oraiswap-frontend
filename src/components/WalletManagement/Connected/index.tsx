@@ -1,43 +1,48 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
 import cn from 'classnames/bind';
+import { WalletNetwork, allWallets } from 'components/WalletManagement/walletConfig';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useWalletReducer from 'hooks/useWalletReducer';
 import { getTotalUsd } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { walletProvider } from 'components/WalletManagement/walletConfig';
 import styles from './index.module.scss';
-
 const cx = cn.bind(styles);
 
 const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({ setIsShowMyWallet }) => {
   const mobileMode = isMobile();
-
   const [theme] = useConfigReducer('theme');
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const totalUsd = getTotalUsd(amounts, prices);
+  const [walletsByNetwork] = useWalletReducer('walletsByNetwork');
 
-  // TODO: get list wallet connected from storage
-  const mainWallets = [];
+  const renderConnectedWalletLogo = () => {
+    const connectedWallets = Object.values(walletsByNetwork).reduce((acc, currentWalletType) => {
+      if (!currentWalletType) return acc;
+
+      const wallet = allWallets.find((wallet) => wallet.nameRegistry === currentWalletType);
+      if (!wallet) return acc;
+
+      acc.add(wallet);
+      return acc;
+    }, new Set<WalletNetwork>());
+
+    return Array.from(connectedWallets).map((connectedWallet) => {
+      return (
+        <div className={cx('wallet_icon')} key={connectedWallet.nameRegistry}>
+          <connectedWallet.icon width={20} height={20} />
+        </div>
+      );
+    });
+  };
 
   return (
     <div className={cx('connected_container', theme)} onClick={() => setIsShowMyWallet(true)}>
-      {mainWallets
-        .filter((w) => w.isWalletConnected)
-        .map((mainWallet) => {
-          const wallet = walletProvider
-            .find((item) => item.wallets.find((w) => w.nameRegistry === mainWallet.walletName))
-            ?.wallets.find((item) => item.nameRegistry === mainWallet.walletName);
-          if (!wallet) return null;
-          return (
-            <div className={cx('wallet_icon')} key={wallet.nameRegistry}>
-              <wallet.icon width={20} height={20} />
-            </div>
-          );
-        })}
+      {renderConnectedWalletLogo()}
       {!mobileMode && (
         <>
           <div className={cx('content')}>
