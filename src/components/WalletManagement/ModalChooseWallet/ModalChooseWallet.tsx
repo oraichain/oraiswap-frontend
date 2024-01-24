@@ -12,6 +12,8 @@ import { ReactComponent as OsmoLightIcon } from 'assets/icons/osmosis_light.svg'
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 import { ReactComponent as TronNetworkIcon } from 'assets/icons/tron.svg';
+import { WalletType } from '@oraichain/oraidex-common/build/constant';
+
 import classNames from 'classnames';
 import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -26,7 +28,7 @@ export type Wallet = {
     }
   >;
   name: string;
-  nameRegistry?: string;
+  nameRegistry?: WalletType;
   isActive: boolean;
 };
 
@@ -47,11 +49,6 @@ export type WalletProvider = {
   wallets: Wallet[];
 };
 
-// const version = window?.keplr?.version;
-// const isCheckKeplr = !!version && keplrCheck('keplr');
-// const isCheckOwallet = window.owallet as any;
-// const isMetamask = !!window?.ethereum?.isMetaMask;
-// console.log({ isCheckKeplr, isCheckOwallet, isMetamask });
 export const walletProvider: WalletProvider[] = [
   {
     networkType: 'cosmos',
@@ -91,19 +88,19 @@ export const walletProvider: WalletProvider[] = [
       {
         icon: OwalletIcon,
         name: 'Owallet',
-        nameRegistry: 'owallet-extension',
+        nameRegistry: 'owallet',
         isActive: true
       },
       {
         icon: KeplrIcon,
         name: 'Keplr',
-        nameRegistry: 'keplr-extension',
+        nameRegistry: 'keplr',
         isActive: true
       },
       {
         icon: MetamaskIcon,
         name: 'Metamask (Leap Snap)',
-        nameRegistry: 'leap-metamask-cosmos-snap',
+        nameRegistry: 'leapSnap',
         isActive: true
       }
     ]
@@ -185,13 +182,13 @@ export const ModalChooseWallet: React.FC<{
         const updatedWallets = item.wallets.map((wallet) => {
           let isActive = true;
           switch (wallet.nameRegistry) {
-            case 'keplr-extension':
+            case 'keplr':
               isActive = isCheckKeplr;
               break;
-            case 'owallet-extension':
+            case 'owallet':
               isActive = isCheckOwallet;
               break;
-            case 'leap-metamask-cosmos-snap':
+            case 'leapSnap':
               isActive = isMetamask && isMetamaskUnlock;
               break;
           }

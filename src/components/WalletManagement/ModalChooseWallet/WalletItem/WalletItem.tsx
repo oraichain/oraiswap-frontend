@@ -20,6 +20,8 @@ import { collectWallet } from 'libs/cosmjs';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { network } from 'config/networks';
 import { GasPrice } from '@cosmjs/stargate';
+import useWalletReducer from 'hooks/useWalletReducer';
+
 type WalletItemProps = {
   wallet: Wallet;
   setConnectStatus: React.Dispatch<React.SetStateAction<ConnectStatus>>;
@@ -43,6 +45,8 @@ export const WalletItem = ({
   const [, setOraiAddress] = useConfigReducer('address');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
 
+  const [wallets, setWallets] = useWalletReducer('wallets');
+
   const walletClient = {
     mainWallet: null
   };
@@ -60,20 +64,13 @@ export const WalletItem = ({
         setConnectStatus('confirming-switch');
         setCurrentWalletConnecting(walletClient.mainWallet);
       } else {
-        const type =
-          walletClient.mainWallet.walletName === 'keplr-extension'
-            ? 'keplr'
-            : walletClient.mainWallet.walletName === 'owallet-extension'
-            ? 'owallet'
-            : 'leapSnap';
+        const type = wallet.nameRegistry;
         window.Keplr = new Keplr(type);
         setStorageKey('typeWallet', type);
-        const wallet = await collectWallet(network.chainId);
-        window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+        const walletCollected = await collectWallet(network.chainId);
+        window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, walletCollected, {
           gasPrice: GasPrice.fromString(`0.002${network.denom}`)
         });
-
-        await walletClient.mainWallet.connect(true);
 
         const oraiAddr = await window.Keplr.getKeplrAddr();
         setOraiAddress(oraiAddr);

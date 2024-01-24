@@ -25,9 +25,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const handleConfirmSwitch = async () => {
     try {
       await switchWalletCosmos(
-        currentWalletConnecting.walletName === 'owallet-extension'
+        currentWalletConnecting.walletName === 'owallet'
           ? 'owallet'
-          : currentWalletConnecting.walletName === 'keplr-extension'
+          : currentWalletConnecting.walletName === 'keplr'
           ? 'keplr'
           : 'leapSnap'
       );
