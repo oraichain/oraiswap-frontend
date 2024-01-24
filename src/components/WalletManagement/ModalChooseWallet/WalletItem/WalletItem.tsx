@@ -1,4 +1,3 @@
-import { useWallet } from '@cosmos-kit/react';
 import type { Wallet } from 'components/WalletManagement/ModalChooseWallet/ModalChooseWallet';
 import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -41,12 +40,12 @@ export const WalletItem = ({
   isActive
 }: WalletItemProps) => {
   const theme = useTheme();
-  const walletClient = useWallet(wallet.nameRegistry);
-  if (wallet.nameRegistry === 'leap-metamask-cosmos-snap') console.log({ walletClient: walletClient.mainWallet });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const [, setOraiAddress] = useConfigReducer('address');
+  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+
+  const walletClient = {
+    mainWallet: null
+  };
 
   useEffect(() => {
     if (walletClient?.mainWallet?.walletStatus === 'Connected') {
@@ -87,7 +86,6 @@ export const WalletItem = ({
       displayToast(TToastType.METAMASK_FAILED, {
         message: typeof error === 'object' ? error.message : JSON.stringify(error)
       });
-      // setConnectStatus('failed');
     }
   };
 

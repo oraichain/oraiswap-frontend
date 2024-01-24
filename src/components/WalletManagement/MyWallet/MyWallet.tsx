@@ -1,40 +1,32 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
-import copy from 'copy-to-clipboard';
+import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as DisconnectIcon } from 'assets/icons/ic_logout.svg';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-
 import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
-import { getTotalUsd } from 'libs/utils';
-import styles from './MyWallet.module.scss';
-import { ThemeContext } from 'context/theme-context';
-import { isMobile } from '@walletconnect/browser-utils';
-import ToggleSwitch from 'components/ToggleSwitch';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { Button } from 'components/Button';
-import { cosmosNetworks, evmNetworksWithoutTron, tronNetworks } from 'helper';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import { ModalDisconnect } from '../ModalDisconnect';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
+import ToggleSwitch from 'components/ToggleSwitch';
+import { ThemeContext } from 'context/theme-context';
+import copy from 'copy-to-clipboard';
+import { cosmosNetworksWithIcon, evmNetworksWithoutTron, tronNetworks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { NetworkType } from '../ModalChooseWallet';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import { getTotalUsd } from 'libs/utils';
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import type { RootState } from 'store/configure';
+import type { NetworkType } from '../ModalChooseWallet';
+import { ModalDisconnect } from '../ModalDisconnect';
+import styles from './MyWallet.module.scss';
 
 export const MyWallet: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
   isShowMyWallet: boolean;
   isShowChooseWallet: boolean;
   setIsShowChooseWallet: (isShowChooseWallet: boolean) => void;
-  //   handleLogoutWallets: (walletType: any) => void;
-}> = ({
-  setIsShowMyWallet,
-  isShowMyWallet,
-  isShowChooseWallet,
-  setIsShowChooseWallet
-  //   handleLogoutWallets,
-}) => {
+}> = ({ setIsShowMyWallet, isShowMyWallet, isShowChooseWallet, setIsShowChooseWallet }) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
 
@@ -139,7 +131,7 @@ export const MyWallet: React.FC<{
         <div className={styles.listAddressByNetwork}>
           {oraiAddress && (
             <div className={styles.addressByNetworkItem}>
-              {cosmosNetworks.map((network, index) => {
+              {cosmosNetworksWithIcon.map((network, index) => {
                 return (
                   <div className={styles.addressByChainInNetwork} key={network.chainId}>
                     <div className={styles.left}>
@@ -152,7 +144,6 @@ export const MyWallet: React.FC<{
                           )}
                         </div>
 
-                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
                         <div className={styles.iconWalletByChain}>
                           <KeplrIcon width={18} height={18} />
                         </div>
@@ -177,7 +168,6 @@ export const MyWallet: React.FC<{
                     </div>
                     {index === 0 && (
                       <div className={styles.right}>
-                        {/* get wallet info from local storage */}
                         <div
                           className={styles.disconnectBtn}
                           onClick={() => handleDisconnectNetwork(network.networkType)}
@@ -206,7 +196,6 @@ export const MyWallet: React.FC<{
                           )}
                         </div>
 
-                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
                         <div className={styles.iconWalletByChain}>
                           <KeplrIcon width={18} height={18} />
                         </div>
@@ -230,7 +219,6 @@ export const MyWallet: React.FC<{
                       </div>
                     </div>
                     <div className={styles.right}>
-                      {/* get wallet info from local storage */}
                       <div className={styles.disconnectBtn} onClick={() => {}}>
                         <DisconnectIcon width={25} height={25} />
                       </div>
@@ -255,7 +243,6 @@ export const MyWallet: React.FC<{
                           )}
                         </div>
 
-                        {/* need to wallet of cosmos network in local storage that save when connect wallet, e.g: {cosmos: owallet, evm: owallet, tron: tronlink  */}
                         <div className={styles.iconWalletByChain}>
                           <KeplrIcon width={18} height={18} />
                         </div>

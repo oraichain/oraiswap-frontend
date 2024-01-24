@@ -1,8 +1,15 @@
 import React, { MouseEventHandler, ReactNode } from 'react';
 import { ConnectWalletType } from './types';
-import { WalletStatus } from '@cosmos-kit/core';
 import { Button } from 'components/Button';
 
+export enum WalletStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+  NotExist = 'NotExist',
+  Rejected = 'Rejected',
+  Error = 'Error'
+}
 export const ConnectWalletButton = ({ buttonText, isLoading, isDisabled, onClickConnectBtn }: ConnectWalletType) => {
   return (
     <Button

@@ -4,9 +4,6 @@ import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
 import { Button } from 'components/Button';
 import useTheme from 'hooks/useTheme';
-// import { useChains } from '@cosmos-kit/react-lite';
-import { useWallet } from '@cosmos-kit/react';
-import { MainWalletBase } from '@cosmos-kit/core';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getListAddressCosmos, switchWalletCosmos } from 'helper';
 
@@ -14,19 +11,17 @@ export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnec
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
   const { networks, wallets, networkType } = walletProvider;
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
-  const [currentWalletConnected, setCurrentWalletConnected] = useState<MainWalletBase | null>(null);
-  const [currentWalletConnecting, setCurrentWalletConnecting] = useState<MainWalletBase | null>(null);
+  const [currentWalletConnected, setCurrentWalletConnected] = useState(null);
+  const [currentWalletConnecting, setCurrentWalletConnecting] = useState(null);
   const theme = useTheme();
   const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  // const chains = useChains(['oraichain', 'cosmoshub', 'osmosis', 'injective', 'noble']);
-  // const connected = Object.values(chains).every((chain) => chain.isWalletConnected);
-  // const { connect, openView, disconnect, isWalletConnected } = chains.oraichain;
   console.log({ _oraiAddress });
 
-  const wallet = useWallet();
+  // TODO: get wallet from storage
+  const wallet = { mainWallet: null };
   const handleConfirmSwitch = async () => {
     try {
       await switchWalletCosmos(

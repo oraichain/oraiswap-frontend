@@ -1,4 +1,3 @@
-import { useWallet } from '@cosmos-kit/react';
 import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
 import { Button } from 'components/Button';
@@ -17,12 +16,11 @@ export const WalletManagement: FC<{}> = () => {
   const [theme] = useConfigReducer('theme');
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(true);
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
-  const wallet = useWallet();
-  const loadTokenAmounts = useLoadTokens();
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const { handleResetBalance } = useResetBalance();
+  const loadTokenAmounts = useLoadTokens();
 
   // load balance every time change address
   useEffect(() => {
@@ -42,7 +40,7 @@ export const WalletManagement: FC<{}> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oraiAddress, tronAddress, metamaskAddress]);
 
-  const isAnyWalletConnected = !!wallet.mainWallet;
+  const isAnyWalletConnected = true;
   useEffect(() => {
     // close my wallet info when not connect to any wallet
     if (!isAnyWalletConnected) setIsShowMyWallet(false);

@@ -1,4 +1,3 @@
-import { useManager } from '@cosmos-kit/react-lite';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
 import cn from 'classnames/bind';
@@ -20,7 +19,9 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const totalUsd = getTotalUsd(amounts, prices);
-  const { mainWallets } = useManager();
+
+  // TODO: get list wallet connected from storage
+  const mainWallets = [];
 
   return (
     <div className={cx('connected_container', theme)} onClick={() => setIsShowMyWallet(true)}>

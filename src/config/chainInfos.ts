@@ -1,4 +1,3 @@
-import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
 import {
   TokenItemType,
   tokens,
