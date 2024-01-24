@@ -98,6 +98,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
+  const [addressRecovery, setAddressRecovery] = useState('');
 
   const ref = useRef(null);
 
@@ -106,6 +107,8 @@ const Balance: React.FC<BalanceProps> = () => {
     const getAddress = async () => {
       try {
         await nomic.generateAddress();
+        const addressRecovered = await nomic.getRecoveryAddress();
+        setAddressRecovery(addressRecovered);
       } catch (error) {
         console.log('🚀 ~ getAddress ~ error:', error);
       }
@@ -151,12 +154,11 @@ const Balance: React.FC<BalanceProps> = () => {
     }
     setTxHash(result.transactionHash);
   };
+
   const handleRecoveryAddress = async () => {
     try {
-      const addressRecovered = await nomic.getRecoveryAddress();
-
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
-      if (btcAddress && addressRecovered !== btcAddress && oraiBtcAddress) {
+      if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
           account_number: accountInfo?.account?.account_number,
@@ -179,19 +181,13 @@ const Balance: React.FC<BalanceProps> = () => {
         const tmClient = await Tendermint37Client.connect(config.rpcUrl);
 
         const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-
-        displayToast(
-          TToastType.TX_SUCCESSFUL
-          //   {
-          //   customLink: `${BTC_SCAN}/tx/${result.hash}`
-          // }
-        );
+        //@ts-ignore
+        displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
+          message: result?.log
+        });
       }
     } catch (error) {
-      console.log(error);
-      displayToast(TToastType.TX_FAILED, {
-        message: JSON.stringify(error)
-      });
+      handleErrorTransaction(error);
     }
   };
   const onClickToken = useCallback(
@@ -587,7 +583,6 @@ const Balance: React.FC<BalanceProps> = () => {
                 return (
                   <TokenItemELement
                     onDepositBtc={async () => {
-                      await handleRecoveryAddress();
                       setIsDepositBtcModal(true);
                     }}
                     className={classNames(styles.tokens_element, styles[theme])}
@@ -636,10 +631,10 @@ const Balance: React.FC<BalanceProps> = () => {
         />
         <DepositBtcModal
           isOpen={isDepositBtcModal}
-          // infoBTCDeposit={infoBTCDeposit}
+          addressRecovery={addressRecovery}
+          handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
-          // urlQRCode={urlQRCode}
         />
       </div>
     </Content>

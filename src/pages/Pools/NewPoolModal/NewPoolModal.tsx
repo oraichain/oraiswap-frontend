@@ -41,10 +41,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  console.log({ token: getPoolTokens(), PAIRS });
-
-  const tokenObj1 = getPoolTokens().find((token) => token.denom === token1);
-  const tokenObj2 = getPoolTokens().find((token) => token.denom === token2);
+  const tokenObj1 = getPoolTokens().find((token) => token?.denom === token1);
+  const tokenObj2 = getPoolTokens().find((token) => token?.denom === token2);
 
   const { data: token1InfoData } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
     enabled: !!tokenObj1

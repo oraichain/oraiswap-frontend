@@ -128,9 +128,23 @@
       }
     }
   }
+
+  .recovery {
+    display: flex;
+    gap: 12px;
+    background-color: $light-bg-primary-box;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 16px;
+    span {
+      color: $neutral-gray;
+      font-size: 14px;
+    }
+  }
+
   .btn {
     width: 100%;
-    margin-top: 24px;
+    margin-top: 10px;
     color: $dropdown-bg-color-hover-dark;
     font-weight: 500;
     font-size: 16px;
@@ -187,6 +201,15 @@
         }
       }
     }
+
+    .recovery {
+      background-color: $dropdown-bg-color-hover-dark;
+
+      span {
+        color: $neutron-text-body-dark;
+      }
+    }
+
     .estimate {
       background-color: $dropdown-bg-color-hover-dark;
 
