@@ -277,10 +277,17 @@ const Balance: React.FC<BalanceProps> = () => {
 
     try {
       const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId as any, dataRequest);
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+      console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
+      if (rs?.rawTxHex) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+        });
+        setTxHash(rs.rawTxHex);
+        return;
+      }
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Transaction failed'
       });
-      setTxHash(rs.rawTxHex);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: JSON.stringify(error)
