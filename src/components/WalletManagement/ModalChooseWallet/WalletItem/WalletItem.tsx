@@ -55,17 +55,33 @@ export const WalletItem = ({
     }
   };
 
+  const hanleOnClick: MouseEventHandler = (e) => {
+    switch (status) {
+      case WalletStatus.Connected:
+        onClickDisconnect(e);
+        break;
+      case WalletStatus.Disconnected:
+        onClickConnect(e);
+        break;
+      default:
+        break;
+    }
+  };
+
   // Components
   const connectWalletButton = (
     <WalletConnectComponent
       walletStatus={status}
-      disconnect={<Disconnected buttonText="Connect Wallet" onClick={onClickConnect} />}
-      connected={<Connected buttonText={'Connected'} onClick={onClickDisconnect} />}
+      disconnect={<Disconnected buttonText="Connect Wallet" />}
+      connected={<Connected buttonText={'Connected'} />}
     />
   );
 
   return (
-    <div className={`${styles.walletItem} ${styles[theme]} ${isActive ? null : styles.disabled}`}>
+    <div
+      className={`${styles.walletItem} ${styles[theme]} ${isActive ? null : styles.disabled}`}
+      onClick={hanleOnClick}
+    >
       <div className={styles.walletIcon}>
         <wallet.icon />
       </div>

@@ -17,23 +17,23 @@ export const ConnectWalletButton = ({ buttonText, isLoading, isDisabled, onClick
 };
 
 export const Disconnected = ({
-  buttonText,
-  onClick
-}: {
+  buttonText
+}: // onClick
+{
   buttonText: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  // onClick: MouseEventHandler<HTMLButtonElement>;
 }) => {
-  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={onClick} />;
+  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
 export const Connected = ({
-  buttonText,
-  onClick
-}: {
+  buttonText
+}: // onClick
+{
   buttonText: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  // onClick: MouseEventHandler<HTMLButtonElement>;
 }) => {
-  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={onClick} />;
+  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
 export const Connecting = () => {
