@@ -1,67 +1,145 @@
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { GasPrice } from '@cosmjs/stargate';
+import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
+import { Button } from 'components/Button';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { getListAddressCosmos, setStorageKey } from 'helper';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useTheme from 'hooks/useTheme';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { collectWallet } from 'libs/cosmjs';
+import Keplr from 'libs/keplr';
 import { useState } from 'react';
-import { WalletProvider } from '../ModalChooseWallet';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import { Button } from 'components/Button';
-import useTheme from 'hooks/useTheme';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { getListAddressCosmos, switchWalletCosmos } from 'helper';
+import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
   const { networks, wallets, networkType } = walletProvider;
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
-  const [currentWalletConnected, setCurrentWalletConnected] = useState(null);
-  const [currentWalletConnecting, setCurrentWalletConnecting] = useState(null);
+  const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
   const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   console.log({ _oraiAddress });
+  const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
   // TODO: get wallet from storage
-  const wallet = { mainWallet: null };
   const handleConfirmSwitch = async () => {
+    await handleConnectWalletByNetwork(currentWalletConnecting);
+    setConnectStatus('init');
+  };
+
+  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
+    window.Keplr = new Keplr(walletType);
+    setStorageKey('typeWallet', walletType);
+    const walletCollected = await collectWallet(network.chainId);
+    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, walletCollected, {
+      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+    });
+    const oraiAddr = await window.Keplr.getKeplrAddr();
+    setOraiAddress(oraiAddr);
+    const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
+    setCosmosAddress(listAddressCosmos);
+  };
+
+  const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
+    switch (networkType) {
+      case 'cosmos':
+        await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
+        break;
+      case 'evm':
+        //  TODO: handle connect evm
+        break;
+      case 'tron':
+        //  TODO: handle connect tron
+        break;
+      default:
+        break;
+    }
+    setWalletByNetworks({
+      ...walletByNetworks,
+      [networkType]: wallet.nameRegistry
+    });
+    setCurrentWalletConnecting(null);
+  };
+
+  /**
+   * NOTE: we can check current network type and wallet name so we can update walletByNetworks to storage
+   * TODO:
+   * 1, with cosmos, we can update window.Keplr then reassigg window.client
+   * 2, with evm, we update window.Ethereum follow by owallet or metamask, then polyfill window.Metamask = window.Metamask = new Metamask(window.tronWeb, window.Ethereum);
+   * 3, with tron, we update window.tronWeb = window.tronWeb of owallet or tron then polyfill window.Metamask = new Metamask(window.tronWeb, window.Ethereum),
+   * @param
+   */
+  const handleClickConnect = async (wallet: WalletNetwork) => {
     try {
-      await switchWalletCosmos(
-        currentWalletConnecting.walletName === 'owallet'
-          ? 'owallet'
-          : currentWalletConnecting.walletName === 'keplr'
-          ? 'keplr'
-          : 'leapSnap'
-      );
-      await currentWalletConnected?.disconnect();
-      await currentWalletConnecting.connect();
-      setConnectStatus('init');
-      const oraiAddr = await window.Keplr.getKeplrAddr();
-      setOraiAddress(oraiAddr);
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
-      setCosmosAddress(listAddressCosmos);
-      setCurrentWalletConnected(currentWalletConnecting);
-      setCurrentWalletConnecting(null);
+      if (walletByNetworks[networkType] && walletByNetworks[networkType] !== wallet.nameRegistry) {
+        console.log({ wallet });
+        setCurrentWalletConnecting(wallet);
+        setConnectStatus('confirming-switch');
+      } else {
+        await handleConnectWalletByNetwork(wallet);
+      }
     } catch (error) {
-      console.log({ errorConnectAfterConfirmSwitch: error });
+      // TODO: handle error correctly
+      console.log({ errorConnect: error });
+      displayToast(TToastType.METAMASK_FAILED, {
+        message: typeof error === 'object' ? error.message : JSON.stringify(error)
+      });
     }
   };
 
+  const handleClickDisconnect = async () => {
+    setConnectStatus('confirming-disconnect');
+  };
+
+  const handleDisconnect = async () => {
+    setWalletByNetworks({
+      ...walletByNetworks,
+      [networkType]: null
+    });
+    switch (networkType) {
+      case 'cosmos':
+        setOraiAddress(undefined);
+        break;
+      case 'evm':
+        setMetamaskAddress(undefined);
+        break;
+      case 'tron':
+        setTronAddress(undefined);
+        break;
+      default:
+        break;
+    }
+    setConnectStatus('init');
+  };
+
+  console.log({ currentWalletConnecting });
   const renderNetworkContent = () => {
+    const currentWalletType = walletByNetworks[networkType];
+    const currentWalletName = currentWalletType
+      ? wallets.find((w) => w.nameRegistry === currentWalletType)?.name
+      : null;
+
     let content;
     switch (connectStatus) {
       case 'init':
         content = (
           <div className={styles.wallets}>
-            {wallets.map((w, index) => {
+            {wallets.map((w) => {
               return (
                 <WalletItem
                   isActive={w.isActive}
                   key={w.name + Math.random()}
                   wallet={w}
-                  setConnectStatus={setConnectStatus}
-                  connectStatus={connectStatus}
-                  currentWallet={wallet.mainWallet?.walletName}
-                  setCurrentWalletConnected={setCurrentWalletConnected}
-                  setCurrentWalletConnecting={setCurrentWalletConnecting}
+                  handleClickConnect={handleClickConnect}
+                  handleClickDisconnect={handleClickDisconnect}
+                  networkType={networkType}
                 />
               );
             })}
@@ -73,8 +151,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           <div className={styles.swithWallet}>
             <h4>Switch wallet?</h4>
             <div className={styles.switchText}>
-              Disconnect from {wallet.mainWallet?.walletPrettyName} and connect to{' '}
-              {currentWalletConnecting.walletPrettyName}
+              Disconnect from {currentWalletName} and connect to {currentWalletConnecting?.name}
             </div>
             <div className={styles.groupBtns}>
               <Button onClick={() => setConnectStatus('init')} type="secondary">
@@ -107,33 +184,12 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
         content = (
           <div className={styles.swithWallet}>
             <h4>Disconnect wallet?</h4>
-            <div className={styles.switchText}>
-              Are you sure you want to disconnect {currentWalletConnected?.walletPrettyName}?
-            </div>
+            <div className={styles.switchText}>Are you sure you want to disconnect {currentWalletName}?</div>
             <div className={styles.groupBtns}>
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button
-                onClick={async () => {
-                  await currentWalletConnected.disconnect(true);
-                  switch (networkType) {
-                    case 'cosmos':
-                      setOraiAddress(undefined);
-                      break;
-                    case 'evm':
-                      setMetamaskAddress(undefined);
-                      break;
-                    case 'tron':
-                      setTronAddress(undefined);
-                      break;
-                    default:
-                      break;
-                  }
-                  setConnectStatus('init');
-                }}
-                type="primary"
-              >
+              <Button onClick={handleDisconnect} type="primary">
                 Disconnect
               </Button>
             </div>

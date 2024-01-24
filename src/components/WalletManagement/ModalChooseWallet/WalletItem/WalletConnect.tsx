@@ -1,15 +1,8 @@
 import React, { MouseEventHandler, ReactNode } from 'react';
 import { ConnectWalletType } from './types';
 import { Button } from 'components/Button';
+import { WalletStatus } from './WalletItem';
 
-export enum WalletStatus {
-  Disconnected = 'Disconnected',
-  Connecting = 'Connecting',
-  Connected = 'Connected',
-  NotExist = 'NotExist',
-  Rejected = 'Rejected',
-  Error = 'Error'
-}
 export const ConnectWalletButton = ({ buttonText, isLoading, isDisabled, onClickConnectBtn }: ConnectWalletType) => {
   return (
     <Button
@@ -89,35 +82,25 @@ export const NotExist = ({
 export const WalletConnectComponent = ({
   walletStatus,
   disconnect,
-  connecting,
-  connected,
-  rejected,
-  error,
-  notExist,
-  isActive
+  connected
 }: {
   walletStatus: WalletStatus;
   disconnect: ReactNode;
-  connecting: ReactNode;
   connected: ReactNode;
-  rejected: ReactNode;
-  error: ReactNode;
-  notExist: ReactNode;
-  isActive: boolean;
 }) => {
   switch (walletStatus) {
     case WalletStatus.Disconnected:
       return <>{disconnect}</>;
-    case WalletStatus.Connecting:
-      return <>{connecting}</>;
+    // case WalletStatus.Loading:
+    //   return <>{connecting}</>;
     case WalletStatus.Connected:
       return <>{connected}</>;
-    case WalletStatus.Rejected:
-      return <>{rejected}</>;
-    case WalletStatus.Error:
-      return <>{error}</>;
-    case WalletStatus.NotExist:
-      return <>{notExist}</>;
+    // case WalletStatus.Rejected:
+    //   return <>{rejected}</>;
+    // case WalletStatus.Error:
+    //   return <>{error}</>;
+    // case WalletStatus.NotExist:
+    //   return <>{notExist}</>;
     default:
       return <>{disconnect}</>;
   }

@@ -7,7 +7,7 @@ import { getTotalUsd } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
-import { walletProvider } from '../ModalChooseWallet';
+import { walletProvider } from 'components/WalletManagement/walletConfig';
 import styles from './index.module.scss';
 
 const cx = cn.bind(styles);

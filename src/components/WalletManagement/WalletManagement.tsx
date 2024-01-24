@@ -10,6 +10,7 @@ import Connected from './Connected';
 import { ModalChooseWallet } from './ModalChooseWallet';
 import { MyWallet } from './MyWallet';
 import styles from './WalletManagement.module.scss';
+import useWalletReducer from 'hooks/useWalletReducer';
 const cx = cn.bind(styles);
 
 export const WalletManagement: FC<{}> = () => {
@@ -21,6 +22,7 @@ export const WalletManagement: FC<{}> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const { handleResetBalance } = useResetBalance();
   const loadTokenAmounts = useLoadTokens();
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   // load balance every time change address
   useEffect(() => {
@@ -40,7 +42,7 @@ export const WalletManagement: FC<{}> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oraiAddress, tronAddress, metamaskAddress]);
 
-  const isAnyWalletConnected = true;
+  const isAnyWalletConnected = Object.values(walletByNetworks).some((wallet) => wallet !== null);
   useEffect(() => {
     // close my wallet info when not connect to any wallet
     if (!isAnyWalletConnected) setIsShowMyWallet(false);

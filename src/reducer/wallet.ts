@@ -8,11 +8,11 @@ export type WalletsByNetwork = {
 };
 
 export interface WalletState {
-  wallets: WalletsByNetwork;
+  walletsByNetwork: WalletsByNetwork;
 }
 
 const initialState: WalletState = {
-  wallets: {
+  walletsByNetwork: {
     cosmos: null,
     evm: null,
     tron: null

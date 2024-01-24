@@ -17,7 +17,7 @@ import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from 'store/configure';
-import type { NetworkType } from '../ModalChooseWallet';
+import type { NetworkType } from 'components/WalletManagement/walletConfig';
 import { ModalDisconnect } from '../ModalDisconnect';
 import styles from './MyWallet.module.scss';
 
