@@ -3,6 +3,7 @@ import { GasPrice } from '@cosmjs/stargate';
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
+import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
 import { network } from 'config/networks';
 import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -13,7 +14,6 @@ import Keplr from 'libs/keplr';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -205,8 +205,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     return networks.map((network, index) => {
       return (
         <div className={styles.networkIcon} key={network.chainName + index}>
-          <network.icon />
-          {network.name ? <span style={{ marginLeft: '4px' }}>{network.name}</span> : null}
+          {theme === 'dark' ? <network.Icon width={18} height={18} /> : <network.IconLight width={18} height={18} />}
         </div>
       );
     });
