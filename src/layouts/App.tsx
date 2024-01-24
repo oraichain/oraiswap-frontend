@@ -30,6 +30,7 @@ import Instruct from './Instruct';
 import './index.scss';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
+import useWalletReducer from 'hooks/useWalletReducer';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -40,7 +41,7 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   // useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -153,9 +154,9 @@ const App = () => {
 
       let metamaskAddr = undefined,
         tronAddr = undefined;
-      // TODO: owallet get address tron
       if (!isMobile()) {
-        if (window.tronWeb && window.tronLink) {
+
+        if (walletByNetworks.tron === 'owallet') {
           await window.tronLink.request({
             method: 'tron_requestAccounts'
           });
@@ -165,8 +166,8 @@ const App = () => {
             setTronAddress(base58Address);
           }
         }
-        // TODO: owallet get address evm
-        if (window.ethereum) {
+
+        if (walletByNetworks.evm === 'owallet') {
           try {
             const [address] = await window.ethereum!.request({
               method: 'eth_requestAccounts',
@@ -191,8 +192,8 @@ const App = () => {
       const oraiAddress = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({
         oraiAddress,
-        metamaskAddress: metamaskAddr,
-        tronAddress: tronAddr
+        // metamaskAddress: metamaskAddr,
+        // tronAddress: tronAddr
       });
       setAddress(oraiAddress);
     } catch (error) {
