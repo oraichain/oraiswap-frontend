@@ -28,11 +28,11 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   console.log({ _oraiAddress });
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
-  // TODO: get wallet from storage
   const handleConfirmSwitch = async () => {
+    setConnectStatus('loading');
     await handleConnectWalletByNetwork(currentWalletConnecting);
-    setConnectStatus('init');
   };
+  console.log({ connectStatus, currentWalletConnecting });
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
     window.Keplr = new Keplr(walletType);
@@ -48,24 +48,31 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
-    switch (networkType) {
-      case 'cosmos':
-        await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
-        break;
-      case 'evm':
-        //  TODO: handle connect evm
-        break;
-      case 'tron':
-        //  TODO: handle connect tron
-        break;
-      default:
-        break;
+    try {
+      setConnectStatus('loading');
+      switch (networkType) {
+        case 'cosmos':
+          await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
+          break;
+        case 'evm':
+          //  TODO: handle connect evm
+          break;
+        case 'tron':
+          //  TODO: handle connect tron
+          break;
+        default:
+          setConnectStatus('init');
+          break;
+      }
+      setWalletByNetworks({
+        ...walletByNetworks,
+        [networkType]: wallet.nameRegistry
+      });
+      setCurrentWalletConnecting(null);
+      setConnectStatus('init');
+    } catch (error) {
+      setConnectStatus('failed');
     }
-    setWalletByNetworks({
-      ...walletByNetworks,
-      [networkType]: wallet.nameRegistry
-    });
-    setCurrentWalletConnecting(null);
   };
 
   /**
@@ -78,9 +85,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
    */
   const handleClickConnect = async (wallet: WalletNetwork) => {
     try {
+      setCurrentWalletConnecting(wallet);
       if (walletByNetworks[networkType] && walletByNetworks[networkType] !== wallet.nameRegistry) {
-        console.log({ wallet });
-        setCurrentWalletConnecting(wallet);
         setConnectStatus('confirming-switch');
       } else {
         await handleConnectWalletByNetwork(wallet);
@@ -128,6 +134,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     let content;
     switch (connectStatus) {
       case 'init':
+      case 'loading':
         content = (
           <div className={styles.wallets}>
             {wallets.map((w) => {
@@ -139,6 +146,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
                   handleClickConnect={handleClickConnect}
                   handleClickDisconnect={handleClickDisconnect}
                   networkType={networkType}
+                  connectStatus={connectStatus}
+                  currentWalletConnecting={currentWalletConnecting}
                 />
               );
             })}
@@ -172,7 +181,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button onClick={() => setConnectStatus('confirming-switch')} type="primary">
+              <Button onClick={handleConfirmSwitch} type="primary">
                 Try again
               </Button>
             </div>

@@ -85,6 +85,7 @@ export const MyWallet: React.FC<{
     return (
       <div className={styles.addressByNetworkItem}>
         {cosmosNetworksWithIcon.map((network, index) => {
+          const chainAddress = cosmosAddresses[network.chainId];
           return !cosmosAddresses[network.chainId] ? null : (
             <div className={styles.addressByChainInNetwork} key={network.chainId}>
               <div className={styles.left}>
@@ -104,8 +105,11 @@ export const MyWallet: React.FC<{
                 <div className={styles.info}>
                   <div className={styles.chainName}>{network.chainName}</div>
                   <div className={styles.chainAddress}>
-                    <span>{reduceString(cosmosAddresses[network.chainId], 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, '12341', 1, network.chainId)}>
+                    <span>{reduceString(chainAddress, 6, 6)}</span>
+                    <div
+                      className={styles.copyBtn}
+                      onClick={(e) => copyWalletAddress(e, chainAddress, 1, network.chainId)}
+                    >
                       {copiedAddressCoordinates.networkId === network.chainId &&
                       copiedAddressCoordinates.walletId === 1 ? (
                         <SuccessIcon width={15} height={15} />
