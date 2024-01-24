@@ -259,10 +259,10 @@ export const switchWalletCosmos = async (type: WalletType) => {
   if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
-  const wallet = await collectWallet(network.chainId);
-  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  });
+  // const wallet = await collectWallet(network.chainId);
+  // window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+  //   gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  // });
 };
 
 export const switchWalletTron = async () => {

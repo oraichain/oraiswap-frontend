@@ -231,7 +231,7 @@ export const initClient = async (type: WalletType) => {
       window.client = client;
     }
   } catch (ex) {
-    console.log(ex);
+    console.log('error initClient:', ex);
     displayToast(TToastType.KEPLR_FAILED, {
       message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
     });
