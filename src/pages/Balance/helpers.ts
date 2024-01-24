@@ -45,7 +45,7 @@ import { useEffect } from 'react';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
-import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC } from 'helper/constants';
+import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, btcNetwork } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 
 export const transferIBC = async (data: {
@@ -599,8 +599,7 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 
-export const BTC_SCAN =
-  process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
+export const BTC_SCAN = btcNetwork ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
 // decimals BTC is 8
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;

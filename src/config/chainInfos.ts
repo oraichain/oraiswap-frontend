@@ -70,7 +70,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
-import { bitcoinChainId } from 'helper/constants';
+import { bitcoinChainId, btcNetwork } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 
 const [otherChainTokens, oraichainTokens] = tokens;
@@ -589,7 +589,7 @@ const bitcoinMainnet: CustomChainInfo = {
     accountUrl: 'https://blockstream.info/address/{address}'
   }
 };
-const bitcoinNetwork = process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? bitcoinTestnet : bitcoinMainnet;
+const bitcoinNetwork = btcNetwork === 'testnet' ? bitcoinTestnet : bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,

@@ -1,6 +1,7 @@
 import OraiBtc from 'assets/icons/btc-icon.svg';
 import { config } from '../config';
 import Orai from 'assets/icons/btc-icon.svg';
+import { btcNetwork } from 'helper/constants';
 
 export interface ChainInfo {
   name: string;
@@ -30,12 +31,12 @@ export const OraiBtcSubnetChain: IbcChain = {
   chainId: config.chainId,
   rpcEndpoint: config.rpcUrl,
   source: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-0' : 'channel-1',
+    channelId: btcNetwork === 'testnet' ? 'channel-0' : 'channel-1',
     port: 'transfer',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-185' : 'channel-188',
+    channelId: btcNetwork === 'testnet' ? 'channel-185' : 'channel-188',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm'
   },
   locked: true
@@ -47,12 +48,12 @@ export const OraichainChain: IbcChain = {
   chainId: 'Oraichain',
   rpcEndpoint: 'https://rpc.orai.io',
   source: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-185' : 'channel-188',
+    channelId: btcNetwork === 'testnet' ? 'channel-185' : 'channel-188',
     port: 'wasm.orai195269awwnt5m6c843q6w7hp8rt0k7syfu9de4h0wz384slshuzps8y7ccm',
     nBtcIbcDenom: 'usat'
   },
   destination: {
-    channelId: process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? 'channel-0' : 'channel-1',
+    channelId: btcNetwork === 'testnet' ? 'channel-0' : 'channel-1',
     port: 'transfer'
   },
   locked: true
@@ -60,6 +61,5 @@ export const OraichainChain: IbcChain = {
 
 const OBTCContractAddressTestnet = 'orai1d2hq8pzf0nswlqhhng95hkfnmgutpmz6g8hd8q7ec9q9pj6t3r2q7vc646';
 const OBTCContractAddressMainnet = 'orai10g6frpysmdgw5tdqke47als6f97aqmr8s3cljsvjce4n5enjftcqtamzsd';
-export const OBTCContractAddress =
-  process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet' ? OBTCContractAddressTestnet : OBTCContractAddressMainnet;
+export const OBTCContractAddress = btcNetwork === 'testnet' ? OBTCContractAddressTestnet : OBTCContractAddressMainnet;
 export const Chains: IbcChain[] = [OraiBtcSubnetChain, OraichainChain];

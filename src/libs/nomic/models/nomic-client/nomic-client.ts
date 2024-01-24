@@ -3,6 +3,7 @@ import { config as Config } from '../../config';
 import { NomicClientInterface, ResConfigOraiBTC } from './nomic-client-interface';
 import { OraiBtcSubnetChain } from '../ibc-chain';
 import { DepositSuccess, generateDepositAddress, DepositOptions } from '@oraichain/orai-bitcoin';
+import { btcNetwork } from 'helper/constants';
 
 export class NomicClient implements NomicClientInterface {
   readonly modifier = BigInt(1e6);
@@ -30,14 +31,9 @@ export class NomicClient implements NomicClientInterface {
     );
   }
   public async getRecoveredAddress(accAddress: string) {
-    return await fetch(
-      `${Config.restUrl}/bitcoin/recovery_address/${accAddress}?network=${
-        process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin'
-      }`,
-      {
-        method: 'GET'
-      }
-    ).then((data) => data.json());
+    return await fetch(`${Config.restUrl}/bitcoin/recovery_address/${accAddress}?network=${btcNetwork}`, {
+      method: 'GET'
+    }).then((data) => data.json());
   }
   public async getConfig(): Promise<ResConfigOraiBTC> {
     return await fetch(`${Config.restUrl}/bitcoin/config`, {
@@ -56,7 +52,7 @@ export class NomicClient implements NomicClientInterface {
       const config = {
         relayers: [Config.relayerUrl],
         channel: OraiBtcSubnetChain.source.channelId, // ibc between oraibtc and orai chain
-        network: process.env.REACT_APP_ORAIBTC_NETWORK ?? 'bitcoin',
+        network: btcNetwork,
         receiver: receiver, // bech32 address of the depositing user,
         sender: sender
       } as DepositOptions;

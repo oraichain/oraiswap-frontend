@@ -1,3 +1,5 @@
+import { btcNetwork } from 'helper/constants';
+
 class Config {
   chainId: string;
   chainName: string;
@@ -7,7 +9,7 @@ class Config {
   relayerUrl: string;
 
   constructor() {
-    if (process.env.REACT_APP_ORAIBTC_NETWORK === 'testnet') {
+    if (btcNetwork === 'testnet') {
       this.chainId = 'oraibtc-testnet-2';
       this.chainName = 'OraiBtcSubnet';
       this.rpcUrl = 'https://oraibtc.rpc.orai.io';
