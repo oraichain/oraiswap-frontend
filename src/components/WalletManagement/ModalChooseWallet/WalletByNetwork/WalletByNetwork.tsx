@@ -119,7 +119,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setConnectStatus('init');
   };
 
-  console.log({ currentWalletConnecting });
   const renderNetworkContent = () => {
     const currentWalletType = walletByNetworks[networkType];
     const currentWalletName = currentWalletType
