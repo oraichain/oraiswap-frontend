@@ -1,16 +1,13 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
-import { network } from 'config/networks';
 import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
-import { collectWallet } from 'libs/cosmjs';
 import Keplr from 'libs/keplr';
+import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
@@ -32,15 +29,12 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setConnectStatus('loading');
     await handleConnectWalletByNetwork(currentWalletConnecting);
   };
-  console.log({ connectStatus, currentWalletConnecting });
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
     window.Keplr = new Keplr(walletType);
     setStorageKey('typeWallet', walletType);
-    const walletCollected = await collectWallet(network.chainId);
-    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, walletCollected, {
-      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-    });
+    await initClient();
+
     const oraiAddr = await window.Keplr.getKeplrAddr();
     setOraiAddress(oraiAddr);
     const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
@@ -71,6 +65,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       setCurrentWalletConnecting(null);
       setConnectStatus('init');
     } catch (error) {
+      console.log('error handleConnectWalletByNetwork: ', error);
       setConnectStatus('failed');
     }
   };
