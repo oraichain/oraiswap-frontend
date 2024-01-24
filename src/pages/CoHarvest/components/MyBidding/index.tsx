@@ -7,18 +7,14 @@ import { ReactComponent as WinIconLight } from 'assets/icons/win-icon-light.svg'
 import { ReactComponent as WinIcon } from 'assets/icons/win-icon.svg';
 import { ReactComponent as NoDataDark } from 'assets/images/nodata-bid-dark.svg';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { BidStatus } from 'pages/CoHarvest/constants';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
 
 const MyBidding = ({ list, isLoading }) => {
   const [theme] = useConfigReducer('theme');
-  const { data: prices } = useCoinGeckoPrices();
-  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
-  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
   const StatusIcon = {
     [BidStatus.BIDDING]: theme === 'light' ? BiddingIconLight : BiddingIcon,
@@ -46,15 +42,15 @@ const MyBidding = ({ list, isLoading }) => {
               {list
                 .sort((a, b) => b.premium_slot - a.premium_slot)
                 .map((item, index) => {
-                  const amountUsd = getUsd(item.amount || '0', ORAIX_TOKEN_INFO, prices);
                   const Status = StatusIcon[item.status] || BiddingIcon;
 
                   return (
                     <tr className={styles.item} key={index}>
                       <td className={styles.index}>{index + 1}</td>
                       <td className={styles.bid}>
-                        <div>{formatDisplayUsdt(amountUsd)}</div>
-                        <div className={styles.detailPrice}>{toDisplay(item.amount || '0')} ORAIX</div>
+                        <div>{formatDisplayUsdt(item.amountUSD)}</div>
+                        {/* <div className={styles.detailPrice}>{toDisplay(item.amount || '0')} ORAIX</div> */}
+                        <div className={styles.detailPrice}>{numberWithCommas(toDisplay(item.amount))} ORAIX</div>
                       </td>
                       <td className={styles.slot}>
                         <span>{item.premium_slot || 0}%</span>
@@ -72,13 +68,17 @@ const MyBidding = ({ list, isLoading }) => {
                             item.status !== BidStatus.BIDDING ? styles[item.status] : ''
                           }`}
                         >
-                          {formatDisplayUsdt(item.potentialReturnUSD)}
+                          ≈ {formatDisplayUsdt(item.potentialReturnUSD)}
                         </div>
                         {item.estimateResidueBid !== '0' && (
-                          <div className={styles.detailPrice}>{toDisplay(item.estimateResidueBid)} ORAIX Refund</div>
+                          <div className={styles.detailPrice}>
+                            {numberWithCommas(toDisplay(item.estimateResidueBid))} ORAIX Refund
+                          </div>
                         )}
                         {item.estimateReceive !== '0' && (
-                          <div className={styles.detailPrice}>{toDisplay(item.estimateReceive)} USDC</div>
+                          <div className={styles.detailPrice}>
+                            {numberWithCommas(toDisplay(item.estimateReceive))} USDC
+                          </div>
                         )}
                       </td>
                     </tr>

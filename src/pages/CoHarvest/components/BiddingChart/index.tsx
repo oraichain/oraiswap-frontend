@@ -3,7 +3,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { useGetAllBidPoolInRound } from 'pages/CoHarvest/hooks/useGetBidRound';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { memo, useState } from 'react';
 import ChartColumn from '../ChartColumn';
 import { TooltipIconBtn } from '../Tooltip';
@@ -43,7 +43,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
           <div className={styles.balance}>
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
             {'('}
-            <div className={styles.token}>{toDisplay(totalBidAmount)} ORAIX</div>
+            <div className={styles.token}>{numberWithCommas(toDisplay(totalBidAmount))} ORAIX</div>
             {')'}
           </div>
         </div>

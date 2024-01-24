@@ -20,7 +20,7 @@ import {
   useGetHistoryBid,
   useGetPotentialReturn
 } from 'pages/CoHarvest/hooks/useGetBidRound';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
 import { memo, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -104,11 +104,11 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
             <div className={styles.balance}>
               {/* <div className={styles.token}>{formatDisplayUsdt(amountUsd)}</div> */}
               <UsdcIcon />
-              <span>{toDisplay(estimateReceive)} USDC</span>
+              <span>{numberWithCommas(toDisplay(estimateReceive))} USDC</span>
             </div>
             <div className={styles.balance}>
               {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
-              <span>{toDisplay(estimateResidueBid)} ORAIX</span>
+              <span>{numberWithCommas(toDisplay(estimateResidueBid))} ORAIX</span>
             </div>
           </div>
         </div>

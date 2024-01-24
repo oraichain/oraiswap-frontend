@@ -4,20 +4,44 @@ import { BigDecimal, oraichainTokens, toDisplay } from '@oraichain/oraidex-commo
 import { CoharvestBidPoolQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { network } from 'config/networks';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { useEffect, useState } from 'react';
 import { fetchRoundBid } from 'rest/api';
 import { BidStatus, TIMER } from '../constants';
-import { Bid, BiddingInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
+import { Bid, BiddingInfo, BiddingInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
 export const useGetRound = () => {
   const [round, setRound] = useState(0);
 
   const queryRoundBid = async () => {
-    const data = await fetchRoundBid();
-    setRound(data as number);
+    const currentRound = await fetchRoundBid();
+
+    const prevRound = Number(currentRound) - 1;
+    const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
+    const currentBid = await coHavestBidPool.biddingInfo({
+      round: +currentRound
+    });
+
+    const now = Date.now();
+
+    if (
+      !(prevRound >= 0 && currentBid?.bid_info?.round && now < currentBid?.bid_info?.start_time * TIMER.MILLISECOND)
+    ) {
+      setRound(currentRound as number);
+      return;
+    }
+
+    const prevBid = await coHavestBidPool.biddingInfo({
+      round: prevRound
+    });
+
+    if (prevBid?.bid_info?.end_time * TIMER.MILLISECOND >= now) {
+      setRound(prevRound);
+      return;
+    }
+    setRound(currentRound as number);
   };
 
   useEffect(() => {
@@ -70,6 +94,7 @@ export const useGetBiddingFilter = (round: number) => {
     const data = await coHavestBidPool.biddingInfo({
       round
     });
+
     return data;
   };
 
@@ -154,6 +179,7 @@ export const useGetPotentialReturn = (props: {
       round,
       slot
     });
+
     return data;
   };
 
@@ -161,7 +187,7 @@ export const useGetPotentialReturn = (props: {
     data: potentialReturn,
     isLoading,
     refetch: refetchPotentialReturn
-  } = useQuery(['potential-return', bidAmount, round], () => getPotentialReturn(), {
+  } = useQuery(['potential-return-info-bid', bidAmount, round], () => getPotentialReturn(), {
     refetchOnWindowFocus: false,
     placeholderData: {
       receive: '0',
@@ -177,11 +203,12 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
   exchangeRate: string;
   listBidHistories: Bid[];
   biddingInfo: BiddingInfoResponse;
+  prices: CoinGeckoPrices<string>;
 }) => {
-  const { listBidHistories, exchangeRate, biddingInfo } = props;
+  const { listBidHistories, exchangeRate, biddingInfo, prices } = props;
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-  const { data: prices } = useCoinGeckoPrices();
+  const now = Date.now();
 
   const getListPotentialReturn = async () => {
     const multicall = new MulticallQueryClient(window.client, network.multicall);
@@ -204,6 +231,7 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
         return {
           ...bid,
           potentialReturnUSD: '0',
+          amountUSD: '0',
           estimate_receive: '0',
           estimate_residue_bid: '0',
           status: BidStatus.BIDDING
@@ -215,15 +243,20 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
       // get status
       const isRunningRound =
         !bid.is_distributed || // case: chưa chia reward
-        new Date().getTime() <= new Date(biddingInfo.bid_info.end_time * TIMER.MILLISECOND).getTime(); // case: time now < time end
+        now <= biddingInfo.bid_info.end_time * TIMER.MILLISECOND; // case: time now < time end
 
       const estimateReceive = isRunningRound ? response?.receive || '0' : bid.amount_received || '0';
       const estimateResidueBid = isRunningRound ? response?.residue_bid || '0' : bid.residue_bid || '0';
+      const pricesToken = isRunningRound
+        ? prices
+        : { oraidex: Number(biddingInfo.distribution_info.exchange_rate), 'usd-coin': prices['usd-coin'] };
 
-      const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
-      const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
+      const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, pricesToken);
+      const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, pricesToken);
 
       const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
+
+      const amountUSD = getUsd(bid.amount || '0', ORAIX_TOKEN_INFO, pricesToken);
 
       let status = BidStatus.BIDDING;
       let percent = 0;
@@ -245,7 +278,8 @@ export const useGetBidHistoryWithPotentialReturn = (props: {
         estimateReceive,
         estimateResidueBid,
         status,
-        percent
+        percent,
+        amountUSD
       };
     });
   };
@@ -292,7 +326,15 @@ export const useGetHistoryBid = (round: number) => {
   return { historyBidPool, isLoading, refetchHistoryBidPool };
 };
 
-export const useGetAllBids = (round: number, exchangeRate: string) => {
+export const useGetAllBids = (
+  round: number,
+  biddingInfo: BiddingInfoResponse,
+  prices: CoinGeckoPrices<string>,
+  exchangeRate: string
+) => {
+  const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+  const now = Date.now();
+
   const getHistoryBidPool = async () => {
     const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
     const data = await coHarvestBidPool.allBidInRound({
@@ -321,7 +363,15 @@ export const useGetAllBids = (round: number, exchangeRate: string) => {
         };
       }
       const response = fromBinary(res.return_data[ind].data);
-      return response;
+
+      // get status
+      const isRunningRound = !response.is_distributed || now <= biddingInfo.bid_info.end_time * TIMER.MILLISECOND;
+
+      const pricesToken = isRunningRound ? prices : { oraidex: Number(biddingInfo.distribution_info.exchange_rate) };
+
+      const amountUSD = getUsd(response.amount || '0', ORAIX_TOKEN_INFO, pricesToken);
+
+      return { ...response, amountUSD };
     });
   };
 
@@ -333,7 +383,7 @@ export const useGetAllBids = (round: number, exchangeRate: string) => {
   } = useQuery(['history-bid-pool-all', round], () => getHistoryBidPool(), {
     refetchOnWindowFocus: false,
     placeholderData: [],
-    enabled: !!round
+    enabled: !!round && !!biddingInfo?.bid_info.round
   });
 
   return { historyAllBidPool, isLoading: isFetching, refetchAllHistoryBidPool };

@@ -23,7 +23,7 @@ import Instruct from './Instruct';
 import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
-import { NomicContext } from 'context/nomic-context';
+import FutureCompetition from 'components/FutureCompetitionModal';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -35,7 +35,7 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-  const nomic = useContext(NomicContext);
+
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -218,6 +218,7 @@ const App = () => {
         <Menu />
         {routes()}
         {!isMobile() && <Instruct />}
+        {!isMobile() && <FutureCompetition />}
       </div>
     </ThemeProvider>
   );

@@ -1,8 +1,9 @@
-import bg_claim_btn from 'assets/images/christmas/bg-claim.svg';
 import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
 import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
+import bg_claim_btn from 'assets/images/bg_claim_btn.svg';
+import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -12,6 +13,7 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
+import { PoolTableData } from 'pages/Pools';
 import {
   getStatisticData,
   useGetMyStake,
@@ -21,7 +23,6 @@ import {
 } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
-import { PoolTableData } from 'pages/Pools';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -211,8 +212,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
         </div>
         <div className={styles.header_claim_reward}>
           <div className={styles.claim_reward_bg}>
-            {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
-            <img src={bg_claim_btn} alt="bg-claim-reward" />
+            <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
           </div>
           <Button
             type="primary-sm"
