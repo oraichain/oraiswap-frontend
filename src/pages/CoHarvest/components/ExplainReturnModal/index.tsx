@@ -2,20 +2,28 @@ import styles from './index.module.scss';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import distributionStartImg from 'assets/images/Co-harvestDistribution.png';
 import DistributionStartLottie from 'assets/lottie/distribution_RENDER.json';
+import DistributionStartLottieDark from 'assets/lottie/distribution_RENDER_dark.json';
 import useConfigReducer from 'hooks/useConfigReducer';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import Lottie from 'lottie-react';
+import { useRef } from 'react';
 
 const ExplainReturnModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [theme] = useConfigReducer('theme');
+
+  const ref = useRef(null);
+
+  useOnClickOutside(ref, () => {
+    onClose();
+  });
 
   if (!open) {
     return null;
   }
 
   return (
-    <div className={styles.explainModal}>
+    <div className={styles.explainModal} ref={ref}>
       <div className={styles.overlay} onClick={onClose}></div>
       <div className={styles.explainContentWrapper}>
         <div className={styles.title}>How are my returns calculated?</div>
@@ -24,8 +32,12 @@ const ExplainReturnModal = ({ open, onClose }: { open: boolean; onClose: () => v
           <div className={styles.distribution}>
             <div className={styles.lottieWrapper}>
               {/* <img src={distributionStartImg} alt="distributionStartImg" /> */}
-              <Lottie animationData={DistributionStartLottie} autoPlay={open} />
-              <div>Higher bonus, Harder to win</div>
+              <Lottie
+                animationData={theme === 'light' ? DistributionStartLottie : DistributionStartLottieDark}
+                autoPlay={open}
+                loop
+              />
+              {/* <div>Higher bonus, Harder to win</div> */}
             </div>
 
             <div className={styles.desc}>
@@ -82,8 +94,8 @@ const ExplainReturnModal = ({ open, onClose }: { open: boolean; onClose: () => v
               </div>
               <div className={styles.caseContent}>
                 <i>N</i>
-                {' = 1 => '}
-                <i>Refund = 0</i>
+                {' = 1 '}
+                <i>&rArr; Refund = 0</i>
               </div>
             </div>
             <div className={styles.case}>
@@ -94,8 +106,8 @@ const ExplainReturnModal = ({ open, onClose }: { open: boolean; onClose: () => v
               </div>
               <div className={styles.caseContent}>
                 <i>N</i>
-                {' = 0 => '}
-                <i>Refund = YourBidAmount_on_Pool_InORAIX</i>
+                {' = 0 '}
+                <i>&rArr; Refund = YourBidAmount_on_Pool_InORAIX</i>
               </div>
             </div>
             <div className={styles.case}>

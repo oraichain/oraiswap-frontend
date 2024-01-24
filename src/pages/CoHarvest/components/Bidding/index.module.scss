@@ -167,8 +167,7 @@
 
       .explain {
         @include theme {
-          // color: theme-get('primary-text-text-link');
-          color: #2f5711;
+          color: theme-get('primary-surface-default');
         }
         font-size: 14px;
         font-weight: 400;
@@ -244,6 +243,10 @@
         width: 100%;
 
         background: #2f5711;
+
+        @include theme {
+          background: theme-get('primary-surface-default');
+        }
       }
 
       .value {
@@ -280,7 +283,6 @@
     }
 
     .calcExplain {
-      color: #2f5711;
       font-size: 14px;
       font-weight: 400;
       line-height: 150%; /* 21px */
@@ -293,8 +295,15 @@
       svg {
         cursor: pointer;
         vertical-align: middle;
-        path {
-          stroke: #2f5711;
+      }
+
+      @include theme {
+        color: theme-get('primary-surface-default');
+
+        svg {
+          path {
+            stroke: theme-get('primary-surface-default');
+          }
         }
       }
     }

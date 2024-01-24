@@ -88,7 +88,6 @@
   }
 
   .explain {
-    color: #2f5711;
     font-size: 14px;
     font-weight: 400;
     line-height: 150%;
@@ -99,14 +98,24 @@
     padding: 16px;
     margin-top: 24px;
     border-radius: 8px;
-    border: 1px solid #5ea402;
-    background: #eef9e5;
+    border: 1px solid;
+    @include theme {
+      border-color: theme-get('primary-text-text-link');
+      background: theme-get('primary-surface-default-subtle');
+    }
 
     svg {
       cursor: pointer;
       vertical-align: middle;
-      path {
-        stroke: #2f5711;
+    }
+
+    @include theme {
+      color: theme-get('primary-surface-default');
+
+      svg {
+        path {
+          stroke: theme-get('primary-surface-default');
+        }
       }
     }
   }
