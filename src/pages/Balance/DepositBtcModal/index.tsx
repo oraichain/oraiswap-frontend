@@ -18,9 +18,11 @@ interface ModalProps {
   isOpen: boolean;
   open: () => void;
   close: () => void;
+  handleRecoveryAddress: () => void;
+  addressRecovery: string;
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAddress, addressRecovery }) => {
   const [theme] = useConfigReducer('theme');
   const [isCopied, setIsCopied] = useState(false);
   const [urlQRCode, setUrlQRCode] = useState(null);
@@ -35,7 +37,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
         setUrlQRCode(url);
       }
     })();
-    return () => {};
+    return () => { };
   }, [nomic.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
@@ -119,6 +121,19 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close }) => {
             receive an automatic refund.
           </span>
         </div>
+        {addressRecovery ? (
+          <div className={styles.recovery}>
+            <span>
+              Your recovery BTC Address is:
+              <b> {reduceString(addressRecovery, 10, 10)}</b>
+            </span>
+          </div>
+        ) : (
+          <div className={styles.btn} onClick={handleRecoveryAddress}>
+            <div>Set Recovery Address</div>
+          </div>
+        )}
+
         <div className={styles.btn} onClick={close}>
           <div>Close</div>
         </div>
