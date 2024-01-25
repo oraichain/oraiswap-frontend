@@ -499,6 +499,28 @@ export const calcMaxAmount = ({
 };
 
 //==================================================> BTC <===========================================================================
+const MIN_FEE_RATE = 5;
+const TX_EMPTY_SIZE = 4 + 1 + 1 + 4; //10
+const TX_INPUT_BASE = 32 + 4 + 1 + 4; // 41
+const TX_INPUT_PUBKEYHASH = 107;
+const TX_OUTPUT_BASE = 8 + 1; //9
+const TX_OUTPUT_PUBKEYHASH = 25;
+const MIN_TX_FEE = 1000;
+// decimals BTC is 8
+const truncDecimals = 8;
+const atomic = 10 ** truncDecimals;
+
+const networkConfig = {
+  RELAYERS: [process.env.RELAYER || 'https://oraibtc.relayer.orai.io:443'],
+  LCD: [process.env.LCD || 'https://oraibtc.lcd.orai.io']
+};
+
+export const BTC_SCAN = btcNetwork === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
+
+const inputBytes = (input) => {
+  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
+};
+
 export const getUtxos = async (address: string, baseUrl: string) => {
   if (!address) throw Error('Address is not empty');
   if (!baseUrl) throw Error('BaseUrl is not empty');
@@ -539,7 +561,6 @@ export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBloc
     utxos: utxosData
   };
 };
-const MIN_FEE_RATE = 5;
 export const getFeeRate = async ({ blocksWillingToWait = 2, url }) => {
   if (!blocksWillingToWait) throw Error('blocksWillingToWait is not empty');
   if (!url) throw Error('url is not empty');
@@ -556,15 +577,6 @@ export const getFeeRate = async ({ blocksWillingToWait = 2, url }) => {
   return feeRateByBlock > MIN_FEE_RATE ? feeRateByBlock : MIN_FEE_RATE;
 };
 
-const TX_EMPTY_SIZE = 4 + 1 + 1 + 4; //10
-const TX_INPUT_BASE = 32 + 4 + 1 + 4; // 41
-const TX_INPUT_PUBKEYHASH = 107;
-const TX_OUTPUT_BASE = 8 + 1; //9
-const TX_OUTPUT_PUBKEYHASH = 25;
-const inputBytes = (input) => {
-  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
-};
-const MIN_TX_FEE = 1000;
 const getFeeFromUtxos = (utxos, feeRate, data) => {
   const inputSizeBasedOnInputs =
     utxos.length > 0
@@ -584,6 +596,7 @@ const getFeeFromUtxos = (utxos, feeRate, data) => {
   const fee = sum * feeRate;
   return fee > MIN_TX_FEE ? fee : MIN_TX_FEE;
 };
+
 const compileMemo = (memo) => {
   const data = Buffer.from(memo, 'utf8'); // converts MEMO to buffer
   return script.compile([opcodes.OP_RETURN, data]); // Compile OP_RETURN script
@@ -600,10 +613,6 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 
-export const BTC_SCAN = btcNetwork === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
-// decimals BTC is 8
-const truncDecimals = 8;
-const atomic = 10 ** truncDecimals;
 export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
@@ -652,13 +661,6 @@ export const calculateInputSize = (estWitnessSize: number) => {
 
 export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSize: number) => {
   return (minerFeeRate * 10 ** 8) / estWitnessSize; // miner fee rate is in BTC, we * 10**8 to convert to sats
-};
-
-const networkConfig = {
-  RELAYERS: [process.env.RELAYER || 'https://oraibtc.relayer.orai.io:443'],
-  LCD: [process.env.LCD || 'https://oraibtc.lcd.orai.io'],
-  IBC_CHANNEL: process.env.IBC_CHANNEL || 'channel-0',
-  NETWORK: process.env.NETWORK || 'testnet'
 };
 
 const calculateDepositFees = async () => {
@@ -711,6 +713,6 @@ export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) 
   );
   return {
     toDisplayBTCFee: btcFee
-    // toAmountBTCFee: feeBtc
+    // toAmountBTCFee: btcFee
   };
 };
