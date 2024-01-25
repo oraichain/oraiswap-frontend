@@ -167,7 +167,7 @@
 
       .explain {
         @include theme {
-          color: theme-get('primary-text-text-link');
+          color: theme-get('primary-surface-default');
         }
         font-size: 14px;
         font-weight: 400;
@@ -202,8 +202,10 @@
 
     .return {
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
 
       padding: 16px;
       border-radius: 8px;
@@ -217,14 +219,45 @@
       font-weight: 500;
       line-height: 150%;
 
+      .total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        .usdReturn {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          @include theme {
+            color: theme-get('primary-surface-default-dark');
+          }
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 150%;
+        }
+      }
+
+      .divider {
+        height: 1px;
+        width: 100%;
+
+        background: #2f5711;
+
+        @include theme {
+          background: theme-get('primary-surface-default');
+        }
+      }
+
       .value {
         display: flex;
         flex-direction: column;
         gap: 8px;
+        width: 100%;
 
         .balance {
           display: flex;
-          justify-content: flex-end;
+          justify-content: space-between;
           align-items: center;
           @include theme {
             color: theme-get('neutral-9');
@@ -238,18 +271,39 @@
             width: 16px;
             height: 16px;
           }
-        }
 
-        .usdReturn {
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          @include theme {
-            color: theme-get('primary-surface-default-dark');
+          .priceValue {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
           }
-          font-size: 18px;
-          font-weight: 600;
-          line-height: 150%;
+        }
+      }
+    }
+
+    .calcExplain {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 150%; /* 21px */
+      letter-spacing: 0.1px;
+
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        cursor: pointer;
+        vertical-align: middle;
+      }
+
+      @include theme {
+        color: theme-get('primary-surface-default');
+
+        svg {
+          path {
+            stroke: theme-get('primary-surface-default');
+          }
         }
       }
     }

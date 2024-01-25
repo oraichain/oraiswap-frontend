@@ -86,6 +86,39 @@
       }
     }
   }
+
+  .explain {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    margin-top: 24px;
+    border-radius: 8px;
+    border: 1px solid;
+    @include theme {
+      border-color: theme-get('primary-text-text-link');
+      background: theme-get('primary-surface-default-subtle');
+    }
+
+    svg {
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
+    @include theme {
+      color: theme-get('primary-surface-default');
+
+      svg {
+        path {
+          stroke: theme-get('primary-surface-default');
+        }
+      }
+    }
+  }
 }
 
 .tooltip {

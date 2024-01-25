@@ -1,4 +1,5 @@
 import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -10,8 +11,14 @@ import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
 import { BiddingInfo } from '@oraichain/oraidex-contracts-sdk/build/CoharvestBidPool.types';
 
-const HarvestInfo = (props: { poolValue: string; onEnd: () => void; onStart: () => void; bidInfo: BiddingInfo }) => {
-  const { poolValue, onEnd, onStart, bidInfo } = props;
+const HarvestInfo = (props: {
+  poolValue: string;
+  onEnd: () => void;
+  onStart: () => void;
+  bidInfo: BiddingInfo;
+  openExplainModal: () => void;
+}) => {
+  const { poolValue, onEnd, onStart, bidInfo, openExplainModal } = props;
   const { data: prices } = useCoinGeckoPrices();
   const [visible, setVisible] = useState(false);
   const [theme] = useConfigReducer('theme');
@@ -50,6 +57,13 @@ const HarvestInfo = (props: { poolValue: string; onEnd: () => void; onStart: () 
           </div>
         </div>
         <div className={styles.shadow}></div>
+      </div>
+
+      <div className={styles.explain}>
+        <div>
+          <TooltipIcon onClick={openExplainModal} width={20} height={20} />
+        </div>
+        <span>Total Rewards will be distributed at the end of the round. Starting from Pool 1% to Pool 25%.</span>
       </div>
     </div>
   );
