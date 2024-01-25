@@ -28,7 +28,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const [urlQRCode, setUrlQRCode] = useState(null);
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
-  const expiration = nomic?.depositAddress?.expirationTimeMs;
+  const expiration = nomic.depositAddress?.expirationTimeMs;
 
   useEffect(() => {
     (async () => {
