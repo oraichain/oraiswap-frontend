@@ -71,6 +71,14 @@
             padding-right: 4px;
             width: 100%;
         }
+
+        .flexJustifyBetween {
+            justify-content: space-between;
+
+            &>div {
+                width: 47%;
+            }
+        }
     }
 }
 

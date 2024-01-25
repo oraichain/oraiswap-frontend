@@ -97,7 +97,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         if (network.chainId === '0x2b6653dc') {
           // TODO: Check owallet mobile
           if (isMobile()) {
-            const addressTronMobile = await window.tronLink.request({
+            const addressTronMobile = await window.tronLinkDapp.request({
               method: 'tron_requestAccounts'
             });
             //@ts-ignore

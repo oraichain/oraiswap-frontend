@@ -56,6 +56,8 @@ export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType ===
 
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
+export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
+
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);

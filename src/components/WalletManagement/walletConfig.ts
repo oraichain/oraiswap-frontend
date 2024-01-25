@@ -3,7 +3,7 @@ import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
-import { cosmosNetworksWithIcon, tronNetworks } from 'helper';
+import { cosmosNetworksWithIcon, tronNetworksWithIcon } from 'helper';
 
 export type NetworkType = 'cosmos' | 'evm' | 'tron';
 export type WalletType = WalletCosmosType | 'metamask' | 'tronLink';
@@ -70,7 +70,7 @@ export const tronWallets: WalletNetwork[] = [
   }
 ];
 
-export const allWallets: WalletNetwork[] = [...cosmosWallets];
+export const allWallets: WalletNetwork[] = [...cosmosWallets, ...tronWallets];
 
 export const walletProvider: WalletProvider[] = [
   {
@@ -110,7 +110,7 @@ export const walletProvider: WalletProvider[] = [
   // },
   {
     networkType: 'tron',
-    networks: tronNetworks,
+    networks: tronNetworksWithIcon,
     wallets: tronWallets
   }
 ];
