@@ -93,7 +93,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network: CustomChainInfo) => {
     let address: string = '';
     try {
-      if (network.networkType === 'evm') {
+      if (network.networkType === 'bitcoin' as string) {
+        address = await window.Bitcoin.getAddress();
+      } else if (network.networkType === 'evm') {
         if (network.chainId === '0x2b6653dc') {
           // TODO: Check owallet mobile
           if (isMobile()) {

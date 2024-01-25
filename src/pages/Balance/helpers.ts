@@ -688,29 +688,29 @@ const calculateWithdrawFees = async (feeRate: number, dest: string) => {
 };
 
 export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) => {
-  const [feeBtc, setFeeBtc] = useState<string | number>(0);
-  useQuery(
-    ['fee-deposit-withdraw-btc-oraichain', fromToken.chainId, fromToken.coinGeckoId, btcAddress],
+  const { data: btcFee } = useQuery(
+    ['fee-deposit-withdraw-btc-oraichain', fromToken.coinGeckoId, btcAddress],
     async () => {
       const { depositFees, witnessSize, feeRate } = await calculateDepositFees();
       if (fromToken.chainId === 'Oraichain') {
         //ORAICHAIN -> BTC
         const withdrawalFees = await calculateWithdrawFees(feeRate, btcAddress);
         const widthdrawFee = satToBTC(withdrawalFees, true);
-        return setFeeBtc(widthdrawFee);
+        return widthdrawFee;
       }
       // BTC -> ORAICHAIN
       const checkpointFees = await calculateCheckpointFees(feeRate, witnessSize);
       let btcFee = satToBTC(checkpointFees, true);
       if (depositFees > checkpointFees) btcFee = satToBTC(depositFees, true);
-      setFeeBtc(btcFee);
+      return btcFee;
     },
     {
+      placeholderData: '0',
       enabled: fromToken.coinGeckoId === 'bitcoin' && !!btcAddress
     }
   );
   return {
-    toDisplayBTCFee: feeBtc
+    toDisplayBTCFee: btcFee
     // toAmountBTCFee: feeBtc
   };
 };
