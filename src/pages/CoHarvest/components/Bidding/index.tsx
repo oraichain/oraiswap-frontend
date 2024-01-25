@@ -4,6 +4,7 @@ import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -29,7 +30,17 @@ import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
 
-const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; isStarted: boolean }) => {
+const Bidding = ({
+  openExplainModal,
+  isEnd,
+  round,
+  isStarted
+}: {
+  openExplainModal: () => void;
+  isEnd: boolean;
+  round: number;
+  isStarted: boolean;
+}) => {
   const [range, setRange] = useState(1);
   const [amount, setAmount] = useState();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -88,9 +99,13 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
       <div className={styles.content}>
         <InputBalance balance={balance} amount={amount} onChangeAmount={setAmount} />
         <div className={styles.interest}>
-          <div className={styles.interestTitle}>Interest</div>
+          <div className={styles.interestTitle}>
+            Select Pool <span className={styles.note}>(Bonus)</span>
+          </div>
           <InputRange className={styles.range} value={range} onChange={(value) => setRange(+value)} />
-          <div className={styles.explain}>Get {range}% interest on your bid</div>
+          <div className={styles.explain}>
+            Selecting this pool also means you will get a {range}% bonus on your rewards if your bid wins.
+          </div>
         </div>
       </div>
       <div className={styles.info}>
@@ -100,19 +115,34 @@ const Bidding = ({ isEnd, round, isStarted }: { isEnd: boolean; round: number; i
         </div>
 
         <div className={styles.return}>
-          <span>Potential return</span>
-          <div className={styles.value}>
+          <div className={styles.total}>
+            <span>Potential return</span>
             <div className={styles.usdReturn}>{formatDisplayUsdt(potentialReturnUSD)}</div>
+          </div>
+
+          <div className={styles.divider}></div>
+          <div className={styles.value}>
             <div className={styles.balance}>
-              {/* <div className={styles.token}>{formatDisplayUsdt(amountUsd)}</div> */}
-              <UsdcIcon />
-              <span>{numberWithCommas(toDisplay(estimateReceive))} USDC</span>
+              <div>Rewards with Bonus</div>
+              <div className={styles.priceValue}>
+                <UsdcIcon />
+                <span>{numberWithCommas(toDisplay(estimateReceive))} USDC</span>
+              </div>
             </div>
             <div className={styles.balance}>
-              {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
-              <span>{numberWithCommas(toDisplay(estimateResidueBid))} ORAIX</span>
+              <div>Refund</div>
+              <div className={styles.priceValue}>
+                {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
+                <span>{numberWithCommas(toDisplay(estimateResidueBid))} ORAIX</span>
+              </div>
             </div>
           </div>
+        </div>
+        <div className={styles.calcExplain}>
+          <div>
+            <TooltipIcon onClick={openExplainModal} width={20} height={20} />
+          </div>
+          <span onClick={openExplainModal}>How are my returns calculated?</span>
         </div>
       </div>
       <div className={styles.button}>

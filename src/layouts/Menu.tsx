@@ -13,6 +13,7 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Menu.module.scss';
+import BuyOraiModal from './BuyOraiModal';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -20,6 +21,8 @@ const Menu: React.FC = () => {
   const [otherActive, setOtherActive] = useState(false);
   const { theme } = useContext(ThemeContext);
   const [open, setOpen] = useState(false);
+  const [openBuy, setOpenBuy] = useState(false);
+  const [isLoadedIframe, setIsLoadedIframe] = useState(false); // check iframe data loaded
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
@@ -98,7 +101,10 @@ const Menu: React.FC = () => {
       {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
       {mobileMode ? (
         <>
-          {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+          {/* {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)} */}
+          {renderLink('#', 'BUY ORAI', () => {
+            setOpenBuy(true);
+          })}
           {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
           {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
         </>
@@ -115,19 +121,37 @@ const Menu: React.FC = () => {
               <DownArrowIcon />
             </span>
           </div>
+
           <TooltipContainer
             placement="bottom-end"
             visible={otherActive}
             setVisible={() => setOtherActive(!otherActive)}
             content={
               <div className={classNames(styles.menu_others_list, styles[theme])}>
-                {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)}
+                {/* {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)} */}
+
+                {renderLink('#', 'BUY ORAI', () => {
+                  setOpenBuy(true);
+                  setOtherActive(!otherActive);
+                })}
                 {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
                 {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
               </div>
             }
           />
         </>
+      )}
+
+      {openBuy && (
+        <BuyOraiModal
+          open={openBuy}
+          close={() => {
+            setOpenBuy(false);
+            setIsLoadedIframe(false);
+          }}
+          onAfterLoad={() => setIsLoadedIframe(true)}
+          isLoadedIframe={isLoadedIframe}
+        />
       )}
     </div>
   );
