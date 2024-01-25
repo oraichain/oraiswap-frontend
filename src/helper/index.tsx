@@ -48,7 +48,7 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
-export const bitcoinNetworks = chainInfos.filter((c) => (c.chainId as any) === bitcoinChainId);
+export const bitcoinNetworks = chainInfos.filter((c) => (c.chainId ) === bitcoinChainId);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -368,7 +368,7 @@ const checkErrorObj = (info) => {
 };
 export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
   let chainInfoData = [...chainInfos];
-  return (chainInfoData as any).map((info) => {
+  return (chainInfoData).map((info) => {
     const infoWithoutIcon = checkErrorObj(info);
 
     const currenciesWithoutIcons = info.currencies.map((currency) => {

@@ -89,7 +89,7 @@ export const evmTokens = uniqBy(
   (c) => c.denom
 );
 export const btcTokens = uniqBy(
-  flattenTokens.filter((token) => (token.chainId as any) === bitcoinChainId),
+  flattenTokens.filter((token) => token.chainId === bitcoinChainId),
   (c) => c.denom
 );
 

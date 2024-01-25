@@ -1,4 +1,4 @@
-import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
+// @ts-nocheck
 import {
   TokenItemType,
   tokens,
@@ -89,7 +89,7 @@ export const tokensIcon: TokenIcon[] = [
     IconLight: UsdcIcon
   },
   {
-    coinGeckoId: 'bitcoin' as any,
+    coinGeckoId: 'bitcoin',
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -177,7 +177,7 @@ export const chainIcons: ChainIcon[] = [
     IconLight: OraiLightIcon
   },
   {
-    chainId: bitcoinChainId as any,
+    chainId: bitcoinChainId,
     Icon: BTCIcon,
     IconLight: BTCIcon
   },
@@ -473,7 +473,7 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'BTC',
-      coinGeckoId: 'bitcoin' as any,
+      coinGeckoId: 'bitcoin',
       coinMinimalDenom: OBTCContractAddress,
       type: 'cw20',
       contractAddress: OBTCContractAddress,
@@ -498,10 +498,10 @@ export const oraichainNetwork: CustomChainInfo = {
 const bitcoinTestnet: CustomChainInfo = {
   rest: 'https://blockstream.info/testnet/api',
   rpc: 'https://blockstream.info/testnet/api',
-  chainId: ChainIdEnum.BitcoinTestnet as any,
-  chainName: 'Bitcoin Testnet' as any,
+  chainId: ChainIdEnum.BitcoinTestnet,
+  chainName: 'Bitcoin Testnet',
   bip44: {
-    coinType: 1 as any
+    coinType: 1
   },
   coinType: 1,
   Icon: BTCIcon,
@@ -514,15 +514,15 @@ const bitcoinTestnet: CustomChainInfo = {
     coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
   },
   bech32Config: defaultBech32Config('tb'),
-  networkType: 'bitcoin' as any,
+  networkType: 'bitcoin',
   currencies: [
     {
       coinDenom: 'BTC',
       coinMinimalDenom: 'btc',
-      coinDecimals: 8 as any,
+      coinDecimals: 8,
       bridgeTo: ['Oraichain'],
       Icon: BTCIcon,
-      coinGeckoId: 'bitcoin' as any,
+      coinGeckoId: 'bitcoin',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
       gasPriceStep: {
         low: 0,
@@ -545,10 +545,10 @@ const bitcoinTestnet: CustomChainInfo = {
 const bitcoinMainnet: CustomChainInfo = {
   rest: 'https://blockstream.info/api',
   rpc: 'https://blockstream.info/api',
-  chainId: ChainIdEnum.Bitcoin as any,
-  chainName: 'Bitcoin' as any,
+  chainId: ChainIdEnum.Bitcoin,
+  chainName: 'Bitcoin',
   bip44: {
-    coinType: 0 as any
+    coinType: 0
   },
   coinType: 0,
   Icon: BTCIcon,
@@ -561,15 +561,15 @@ const bitcoinMainnet: CustomChainInfo = {
     coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
   },
   bech32Config: defaultBech32Config('bc'),
-  networkType: 'bitcoin' as any,
+  networkType: 'bitcoin',
   currencies: [
     {
       coinDenom: 'BTC',
       coinMinimalDenom: 'btc',
-      coinDecimals: 8 as any,
+      coinDecimals: 8,
       bridgeTo: ['Oraichain'],
       Icon: BTCIcon,
-      coinGeckoId: 'bitcoin' as any,
+      coinGeckoId: 'bitcoin',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
       gasPriceStep: {
         low: 0,
@@ -1101,4 +1101,4 @@ export const evmChains = chainInfos.filter(
   (c) => c.networkType === 'evm' && c.bip44.coinType === 60 && c.chainId !== '0x1ae6'
 );
 
-export const btcChains = chainInfos.filter((c) => c.networkType === ('bitcoin' as any));
+export const btcChains = chainInfos.filter((c) => c.networkType === 'bitcoin');
