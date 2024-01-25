@@ -1,9 +1,12 @@
 import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
+import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
-import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { PoolTableData } from 'pages/Pools';
+import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PoolInfoResponse } from 'types/pool';
@@ -17,6 +20,7 @@ type ListPoolProps = {
 
 export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon }) => {
   const [pairDenomsDeposit, setPairDenomsDeposit] = useState('');
+  const [theme] = useConfigReducer('theme');
   const navigate = useNavigate();
 
   const headers: TableHeaderProps<PoolTableData> = {
@@ -37,7 +41,10 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
       width: '12%',
       accessor: (data) => (
         <div className={styles.apr}>
-          <div>{`${(data.apr || 0).toFixed(2)}%`}</div>
+          <div className={styles.aprValue}>
+            <span>{`${(data.apr || 0).toFixed(2)}%`}</span>&nbsp;
+            <div>{theme === 'light' ? <BoostIconLight /> : <BoostIconDark />}</div>
+          </div>
           <div className={styles.apr_reward}>
             {data.reward.map((asset) => (
               <span key={asset}>+{asset}</span>

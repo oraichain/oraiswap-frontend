@@ -12,12 +12,20 @@ import { CW20_DECIMALS } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useState } from 'react';
 import classNames from 'classnames';
+import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
+import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
+import useConfigReducer from 'hooks/useConfigReducer';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
   const theme = useTheme();
   const mobileMode = isMobile();
+  const [cachedReward] = useConfigReducer('rewardPools');
+
   const { pairAmountInfoData, lpTokenInfoData } = useGetPairInfo(poolDetailData);
   const { token1, token2 } = poolDetailData;
+
+  const { liquidityAddr: stakingToken } = poolDetailData.info || {};
+  const poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
 
   const [isShowMore, setIsShowMore] = useState(false);
 
@@ -120,8 +128,23 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         <div className={styles.icon}>
           <AprIcon />
         </div>
-        <div className={styles.title}>APR</div>
+        <div className={styles.title}>Total APR</div>
         <div className={styles.volumeAmount}>{poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0}%</div>
+        <div className={styles.aprDetail}>
+          <div className={styles.fee}>
+            <span>Swap fees</span>
+            <span>{14.1}%</span>
+          </div>
+          <div className={styles.aprBoost}>
+            <div className={styles.text}>
+              <div>{theme === 'light' ? <BoostIconLight /> : <BoostIconDark />}</div>
+              <span>{poolReward?.reward?.join('+')}</span>
+              Boost
+            </div>
+
+            <span>{`${(poolDetailData.info?.apr || 0).toFixed(2)}%`}</span>
+          </div>
+        </div>
       </div>
     </section>
   );

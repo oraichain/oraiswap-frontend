@@ -1,7 +1,10 @@
 import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
+import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
-import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
+import useConfigReducer from 'hooks/useConfigReducer';
 import { PoolTableData } from 'pages/Pools';
+import { formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { useNavigate } from 'react-router-dom';
 import styles from './ItemPoolMobile.module.scss';
 
@@ -12,6 +15,7 @@ type PoolMobileItemProps = {
 };
 export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDenomsDeposit, generateIcon }) => {
   const navigate = useNavigate();
+  const [theme] = useConfigReducer('theme');
 
   const handleClickRow = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
     event.stopPropagation();
@@ -33,11 +37,16 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
         </div>
         <div className={styles.apr}>
           <div className={styles.title}>APR</div>
-          <div className={styles.value}>{`${pool.apr.toFixed(2)}%`}</div>
-          <div className={styles.aprReward}>
-            {pool.reward.map((asset) => (
-              <span key={asset}>+{asset}</span>
-            ))}
+          <div className={styles.apr}>
+            <div className={styles.value}>
+              <span>{`${(pool.apr || 0).toFixed(2)}%`}</span>&nbsp;
+              <div>{theme === 'light' ? <BoostIconLight /> : <BoostIconDark />}</div>
+            </div>
+            <div className={styles.aprReward}>
+              {pool.reward.map((asset) => (
+                <span key={asset}>+{asset}</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

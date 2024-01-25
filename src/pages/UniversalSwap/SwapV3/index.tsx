@@ -512,7 +512,7 @@ const SwapComponent: React.FC<{
             {!fromTokenFee && !toTokenFee && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
-                  <span>Tax rate</span>
+                  <span>Swap Fees</span>
                 </div>
                 <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
               </div>
