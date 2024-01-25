@@ -1,19 +1,16 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
+import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
 import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
-import { collectWallet } from 'libs/cosmjs';
 import Keplr from 'libs/keplr';
+import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -28,19 +25,16 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   console.log({ _oraiAddress });
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
-  // TODO: get wallet from storage
   const handleConfirmSwitch = async () => {
+    setConnectStatus('loading');
     await handleConnectWalletByNetwork(currentWalletConnecting);
-    setConnectStatus('init');
   };
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
     window.Keplr = new Keplr(walletType);
     setStorageKey('typeWallet', walletType);
-    const walletCollected = await collectWallet(network.chainId);
-    window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, walletCollected, {
-      gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-    });
+    await initClient();
+
     const oraiAddr = await window.Keplr.getKeplrAddr();
     setOraiAddress(oraiAddr);
     const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
@@ -48,24 +42,32 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
-    switch (networkType) {
-      case 'cosmos':
-        await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
-        break;
-      case 'evm':
-        //  TODO: handle connect evm
-        break;
-      case 'tron':
-        //  TODO: handle connect tron
-        break;
-      default:
-        break;
+    try {
+      setConnectStatus('loading');
+      switch (networkType) {
+        case 'cosmos':
+          await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
+          break;
+        case 'evm':
+          //  TODO: handle connect evm
+          break;
+        case 'tron':
+          //  TODO: handle connect tron
+          break;
+        default:
+          setConnectStatus('init');
+          break;
+      }
+      setWalletByNetworks({
+        ...walletByNetworks,
+        [networkType]: wallet.nameRegistry
+      });
+      setCurrentWalletConnecting(null);
+      setConnectStatus('init');
+    } catch (error) {
+      console.log('error handleConnectWalletByNetwork: ', error);
+      setConnectStatus('failed');
     }
-    setWalletByNetworks({
-      ...walletByNetworks,
-      [networkType]: wallet.nameRegistry
-    });
-    setCurrentWalletConnecting(null);
   };
 
   /**
@@ -78,9 +80,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
    */
   const handleClickConnect = async (wallet: WalletNetwork) => {
     try {
+      setCurrentWalletConnecting(wallet);
       if (walletByNetworks[networkType] && walletByNetworks[networkType] !== wallet.nameRegistry) {
-        console.log({ wallet });
-        setCurrentWalletConnecting(wallet);
         setConnectStatus('confirming-switch');
       } else {
         await handleConnectWalletByNetwork(wallet);
@@ -119,7 +120,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setConnectStatus('init');
   };
 
-  console.log({ currentWalletConnecting });
   const renderNetworkContent = () => {
     const currentWalletType = walletByNetworks[networkType];
     const currentWalletName = currentWalletType
@@ -129,6 +129,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     let content;
     switch (connectStatus) {
       case 'init':
+      case 'loading':
         content = (
           <div className={styles.wallets}>
             {wallets.map((w) => {
@@ -140,6 +141,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
                   handleClickConnect={handleClickConnect}
                   handleClickDisconnect={handleClickDisconnect}
                   networkType={networkType}
+                  connectStatus={connectStatus}
+                  currentWalletConnecting={currentWalletConnecting}
                 />
               );
             })}
@@ -173,7 +176,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
               <Button onClick={() => setConnectStatus('init')} type="secondary">
                 Cancel
               </Button>
-              <Button onClick={() => setConnectStatus('confirming-switch')} type="primary">
+              <Button onClick={handleConfirmSwitch} type="primary">
                 Try again
               </Button>
             </div>
@@ -206,8 +209,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     return networks.map((network, index) => {
       return (
         <div className={styles.networkIcon} key={network.chainName + index}>
-          <network.icon />
-          {network.name ? <span style={{ marginLeft: '4px' }}>{network.name}</span> : null}
+          {theme === 'dark' ? <network.Icon width={18} height={18} /> : <network.IconLight width={18} height={18} />}
         </div>
       );
     });

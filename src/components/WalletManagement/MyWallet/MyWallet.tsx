@@ -6,18 +6,19 @@ import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { Button } from 'components/Button';
 import ToggleSwitch from 'components/ToggleSwitch';
+import { cosmosWallets, type NetworkType } from 'components/WalletManagement/walletConfig';
 import { ThemeContext } from 'context/theme-context';
 import copy from 'copy-to-clipboard';
 import { cosmosNetworksWithIcon, evmNetworksWithoutTron, tronNetworks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { getTotalUsd } from 'libs/utils';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { getTotalUsd, reduceString } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from 'store/configure';
-import type { NetworkType } from 'components/WalletManagement/walletConfig';
 import { ModalDisconnect } from '../ModalDisconnect';
 import styles from './MyWallet.module.scss';
 
@@ -39,6 +40,8 @@ export const MyWallet: React.FC<{
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [cosmosAddresses] = useConfigReducer('cosmosAddress');
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
@@ -72,6 +75,64 @@ export const MyWallet: React.FC<{
   });
 
   const handleDisconnectNetwork = (networkType: NetworkType) => {};
+
+  const renderCosmosAddresses = () => {
+    if (!oraiAddress) return <></>;
+
+    const cosmosWalletConnected = cosmosWallets.find((item) => item.nameRegistry === walletByNetworks.cosmos);
+    if (!cosmosWalletConnected) return <></>;
+
+    return (
+      <div className={styles.addressByNetworkItem}>
+        {cosmosNetworksWithIcon.map((network, index) => {
+          const chainAddress = cosmosAddresses[network.chainId];
+          return !cosmosAddresses[network.chainId] ? null : (
+            <div className={styles.addressByChainInNetwork} key={network.chainId}>
+              <div className={styles.left}>
+                <div className={styles.icon}>
+                  <div className={styles.iconChain}>
+                    {theme === 'light' ? (
+                      <network.IconLight width={30} height={30} />
+                    ) : (
+                      <network.Icon width={30} height={30} />
+                    )}
+                  </div>
+
+                  <div className={styles.iconWalletByChain}>
+                    <cosmosWalletConnected.icon width={18} height={18} />
+                  </div>
+                </div>
+                <div className={styles.info}>
+                  <div className={styles.chainName}>{network.chainName}</div>
+                  <div className={styles.chainAddress}>
+                    <span>{reduceString(chainAddress, 6, 6)}</span>
+                    <div
+                      className={styles.copyBtn}
+                      onClick={(e) => copyWalletAddress(e, chainAddress, 1, network.chainId)}
+                    >
+                      {copiedAddressCoordinates.networkId === network.chainId &&
+                      copiedAddressCoordinates.walletId === 1 ? (
+                        <SuccessIcon width={15} height={15} />
+                      ) : (
+                        <CopyIcon width={15} height={15} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {index === 0 && (
+                <div className={styles.right}>
+                  <div className={styles.disconnectBtn} onClick={() => handleDisconnectNetwork(network.networkType)}>
+                    <DisconnectIcon width={25} height={25} />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -129,58 +190,7 @@ export const MyWallet: React.FC<{
           </div> */}
         </div>
         <div className={styles.listAddressByNetwork}>
-          {oraiAddress && (
-            <div className={styles.addressByNetworkItem}>
-              {cosmosNetworksWithIcon.map((network, index) => {
-                return (
-                  <div className={styles.addressByChainInNetwork} key={network.chainId}>
-                    <div className={styles.left}>
-                      <div className={styles.icon}>
-                        <div className={styles.iconChain}>
-                          {theme === 'light' ? (
-                            <network.IconLight width={30} height={30} />
-                          ) : (
-                            <network.Icon width={30} height={30} />
-                          )}
-                        </div>
-
-                        <div className={styles.iconWalletByChain}>
-                          <KeplrIcon width={18} height={18} />
-                        </div>
-                      </div>
-                      <div className={styles.info}>
-                        <div className={styles.chainName}>{network.chainName}</div>
-                        <div className={styles.chainAddress}>
-                          <span>0xD3aB...7f1108</span>
-                          <div
-                            className={styles.copyBtn}
-                            onClick={(e) => copyWalletAddress(e, '12341', 1, network.chainId)}
-                          >
-                            {copiedAddressCoordinates.networkId === network.chainId &&
-                            copiedAddressCoordinates.walletId === 1 ? (
-                              <SuccessIcon width={15} height={15} />
-                            ) : (
-                              <CopyIcon width={15} height={15} />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {index === 0 && (
-                      <div className={styles.right}>
-                        <div
-                          className={styles.disconnectBtn}
-                          onClick={() => handleDisconnectNetwork(network.networkType)}
-                        >
-                          <DisconnectIcon width={25} height={25} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {renderCosmosAddresses()}
           {metamaskAddress && (
             <div className={styles.addressByNetworkItem}>
               {evmNetworksWithoutTron.map((network, index) => {
@@ -276,75 +286,6 @@ export const MyWallet: React.FC<{
               })}
             </div>
           )}
-
-          {/* {wallets.map((wallet, index) => {
-            return (
-              <div key={index} className={cx('wallet_container')}>
-                <div className={cx('wallet_info')}>
-                  <div className={cx('logo')}>
-                    <div className={cx('remove')} onClick={() => {}}>
-                      <DisconnectIcon />
-                    </div>
-                    <img src={wallet.icon} alt="wallet icon" />
-                  </div>
-                  <div className={cx('info')}>
-                    <div className={cx('name')}>{wallet.name}</div>
-                  </div>
-                  <div className={cx('control')} onClick={() => {}}>
-                    {wallet.isOpen ? <UpArrowIcon /> : <DownArrowIcon />}
-                  </div>
-                </div>
-                {wallet.isOpen ? (
-                  <div className={cx('networks_container')}>
-                    {wallet.networks.map((network, index) => {
-                      return (
-                        <div key={'network' + index} className={cx('network_container')}>
-                          <div>
-                            {theme === 'light' ? (
-                              network.IconLight ? (
-                                <network.IconLight className={cx('icon')} />
-                              ) : (
-                                <network.Icon className={cx('icon')} />
-                              )
-                            ) : (
-                              <network.Icon className={cx('icon')} />
-                            )}
-                          </div>
-                          <div className={cx('info')}>
-                            <div className={cx('name')}>{network.chainName}</div>
-                            {network.address ? (
-                              <div className={cx('address')}>{reduceString(network.address, 5, 5)}</div>
-                            ) : null}
-                          </div>
-                          <div className={cx('actions')}>
-                            {network.address ? (
-                              <>
-                                <div
-                                  className={cx('copy')}
-                                  onClick={(e) => copyWalletAddress(e, network.address, wallet.id, network.chainId)}
-                                >
-                                  {copiedAddressCoordinates.networkId === network.chainId &&
-                                  copiedAddressCoordinates.walletId === wallet.id ? (
-                                    <SuccessIcon width={20} height={20} />
-                                  ) : (
-                                    <CopyIcon />
-                                  )}
-                                </div>
-                              </>
-                            ) : (
-                              <div>
-                                <UnavailableCloudIcon />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
-            );
-          })} */}
         </div>
       </div>
     </div>

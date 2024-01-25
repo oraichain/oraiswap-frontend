@@ -5,39 +5,34 @@ import { WalletStatus } from './WalletItem';
 
 export const ConnectWalletButton = ({ buttonText, isLoading, isDisabled, onClickConnectBtn }: ConnectWalletType) => {
   return (
-    <Button
-      //   isLoading={isLoading}
-      //   isDisabled={isDisabled}
-      type="primary-sm"
-      onClick={onClickConnectBtn}
-    >
+    <Button disabled={isLoading} type="primary-sm" onClick={onClickConnectBtn}>
       {buttonText}
     </Button>
   );
 };
 
 export const Disconnected = ({
-  buttonText,
-  onClick
-}: {
+  buttonText
+}: // onClick
+{
   buttonText: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  // onClick: MouseEventHandler<HTMLButtonElement>;
 }) => {
-  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={onClick} />;
+  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
 export const Connected = ({
-  buttonText,
-  onClick
-}: {
+  buttonText
+}: // onClick
+{
   buttonText: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  // onClick: MouseEventHandler<HTMLButtonElement>;
 }) => {
-  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={onClick} />;
+  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
-export const Connecting = () => {
-  return <ConnectWalletButton isLoading={true} />;
+export const Connecting = ({ buttonText }: { buttonText: string }) => {
+  return <ConnectWalletButton buttonText={buttonText} isLoading={true} onClickConnectBtn={() => {}} />;
 };
 
 export const Rejected = ({
@@ -82,17 +77,19 @@ export const NotExist = ({
 export const WalletConnectComponent = ({
   walletStatus,
   disconnect,
-  connected
+  connected,
+  connecting
 }: {
   walletStatus: WalletStatus;
   disconnect: ReactNode;
   connected: ReactNode;
+  connecting: ReactNode;
 }) => {
   switch (walletStatus) {
     case WalletStatus.Disconnected:
       return <>{disconnect}</>;
-    // case WalletStatus.Loading:
-    //   return <>{connecting}</>;
+    case WalletStatus.Loading:
+      return <>{connecting}</>;
     case WalletStatus.Connected:
       return <>{connected}</>;
     // case WalletStatus.Rejected:

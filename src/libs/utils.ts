@@ -211,7 +211,6 @@ export const initEthereum = async () => {
 
 export const initClient = async () => {
   try {
-    switchWallet(getStorageKey() as WalletType);
     const keplr = await window.Keplr.getKeplr();
 
     // suggest our chain

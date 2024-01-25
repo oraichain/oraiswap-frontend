@@ -10,6 +10,7 @@ import { ThemeProvider } from 'context/theme-context';
 import {
   checkSnapExist,
   checkVersionWallet,
+  getListAddressCosmos,
   getNetworkGasPrice,
   getStorageKey,
   keplrCheck,
@@ -42,6 +43,8 @@ const App = () => {
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+
   // useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -136,71 +139,75 @@ const App = () => {
     }
   };
 
-  const keplrHandler = async () => {
+  const keplrHandler = async (e) => {
     try {
-      const typeWallet = getStorageKey();
-      const isSnap = await checkSnapExist();
-      if (!typeWallet) {
-        const vs = window?.keplr?.version;
-        const isCheckKeplr = !!vs && keplrCheck('keplr');
-        if (checkVersionWallet()) {
-          setStorageKey('typeWallet', 'owallet');
-        } else if (isCheckKeplr) {
-          setStorageKey('typeWallet', 'keplr' as WalletType);
-        } else if (isSnap) {
-          setStorageKey('typeWallet', leapWalletType);
-        }
-      }
+      // const typeWallet = getStorageKey();
 
-      let metamaskAddr = undefined,
-        tronAddr = undefined;
-      if (!isMobile()) {
+      // const isSnap = await checkSnapExist();
+      // if (!typeWallet) {
+      //   const vs = window?.keplr?.version;
+      //   const isCheckKeplr = !!vs && keplrCheck('keplr');
+      //   if (checkVersionWallet()) {
+      //     setStorageKey('typeWallet', 'owallet');
+      //   } else if (isCheckKeplr) {
+      //     setStorageKey('typeWallet', 'keplr' as WalletType);
+      //   } else if (isSnap) {
+      //     setStorageKey('typeWallet', leapWalletType);
+      //   }
+      // }
 
-        if (walletByNetworks.tron === 'owallet') {
-          await window.tronLink.request({
-            method: 'tron_requestAccounts'
-          });
-          const base58Address = window.tronWeb?.defaultAddress?.base58;
-          if (base58Address && base58Address !== tronAddress) {
-            tronAddr = base58Address;
-            setTronAddress(base58Address);
-          }
-        }
+      // let metamaskAddr = undefined,
+      //   tronAddr = undefined;
+      // if (!isMobile()) {
+      //   if (walletByNetworks.tron === 'owallet') {
+      //     await window.tronLink.request({
+      //       method: 'tron_requestAccounts'
+      //     });
+      //     const base58Address = window.tronWeb?.defaultAddress?.base58;
+      //     if (base58Address && base58Address !== tronAddress) {
+      //       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      //       tronAddr = base58Address;
+      //       setTronAddress(base58Address);
+      //     }
+      //   }
 
-        if (walletByNetworks.evm === 'owallet') {
-          try {
-            const [address] = await window.ethereum!.request({
-              method: 'eth_requestAccounts',
-              params: []
-            });
-            if (address && address !== metamaskAddress) {
-              metamaskAddr = address;
-              setMetamaskAddress(ethers.utils.getAddress(address));
-            }
-          } catch (error) {
-            if (error?.code === -32002) {
-              displayToast(TToastType.METAMASK_FAILED, {
-                message: ' Already processing request Ethereum account. Please wait'
-              });
-            }
-          }
-        }
-      }
+      //   if (walletByNetworks.evm === 'owallet') {
+      //     try {
+      //       const [address] = await window.ethereum!.request({
+      //         method: 'eth_requestAccounts',
+      //         params: []
+      //       });
+      //       if (address && address !== metamaskAddress) {
+      //         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      //         metamaskAddr = address;
+      //         setMetamaskAddress(ethers.utils.getAddress(address));
+      //       }
+      //     } catch (error) {
+      //       if (error?.code === -32002) {
+      //         displayToast(TToastType.METAMASK_FAILED, {
+      //           message: ' Already processing request Ethereum account. Please wait'
+      //         });
+      //       }
+      //     }
+      //   }
+      // }
 
-      switchWallet(walletTypeStore as WalletType);
+      // event owallet va dang connect vi evm ko phai la owallet thi ko load lai balance evm, tron
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
       loadTokenAmounts({
-        oraiAddress,
+        oraiAddress
         // metamaskAddress: metamaskAddr,
         // tronAddress: tronAddr
       });
       setAddress(oraiAddress);
+      setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Keplr wallet. Please try again!`
+        message: `There is an unexpected error with Cosmos wallet. Please try again!`
       });
     }
   };
