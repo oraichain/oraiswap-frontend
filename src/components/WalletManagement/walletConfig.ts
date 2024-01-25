@@ -8,6 +8,7 @@ import { ReactComponent as NobleLightIcon } from 'assets/icons/noble_light.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OsmoLightIcon } from 'assets/icons/osmosis_light.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
+import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 
 export type NetworkType = 'cosmos' | 'evm' | 'tron';
 export type WalletType = WalletCosmosType | 'metamask' | 'tronLink';
@@ -93,7 +94,7 @@ export const walletProvider: WalletProvider[] = [
         isActive: true
       }
     ]
-  }
+  },
   // {
   // networkType: 'evm',
   //   networks: [
@@ -124,24 +125,28 @@ export const walletProvider: WalletProvider[] = [
   //     }
   //   ]
   // },
-  // {
-  // networkType: 'tron',
-  //   networks: [
-  //     {
-  //       icon: TronNetworkIcon,
-  //       name: '',
-  //       chainName: 'tron'
-  //     }
-  //   ],
-  //   wallets: [
-  //     {
-  //       icon: OwalletIcon,
-  //       name: 'Owallet'
-  //     },
-  //     {
-  //       icon: TronIcon,
-  //       name: 'TronLink'
-  //     }
-  //   ]
-  // }
+  {
+    networkType: 'tron',
+    networks: [
+      {
+        icon: TronIcon,
+        name: '',
+        chainName: 'tron'
+      }
+    ],
+    wallets: [
+      {
+        icon: OwalletIcon,
+        name: 'Owallet',
+        nameRegistry: 'owallet',
+        isActive: true
+      },
+      {
+        icon: TronIcon,
+        name: 'TronLink',
+        nameRegistry: 'tronLink',
+        isActive: true
+      }
+    ]
+  }
 ];

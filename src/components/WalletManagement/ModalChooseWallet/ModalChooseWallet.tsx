@@ -16,9 +16,7 @@ export const ModalChooseWallet: React.FC<{
   const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
 
   const renderListWalletByNetwork = () => {
-    return walletProviderWithStatus.map((item, index) => {
-      return <WalletByNetwork key={index} walletProvider={item} />;
-    });
+    return walletProviderWithStatus.map((item, index) => <WalletByNetwork key={index} walletProvider={item} />);
   };
 
   // @ts-ignore
@@ -61,7 +59,7 @@ export const ModalChooseWallet: React.FC<{
     <Modal
       isOpen={true}
       close={close}
-      open={() => {}}
+      open={() => { }}
       isCloseBtn={false}
       className={classNames(styles.chooseWalletModalContainer, `${styles[theme]}`)}
     >
