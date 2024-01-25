@@ -99,7 +99,9 @@ const Bidding = ({
       <div className={styles.content}>
         <InputBalance balance={balance} amount={amount} onChangeAmount={setAmount} />
         <div className={styles.interest}>
-          <div className={styles.interestTitle}>Interest</div>
+          <div className={styles.interestTitle}>
+            Select Pool <span className={styles.note}>(Bonus)</span>
+          </div>
           <InputRange className={styles.range} value={range} onChange={(value) => setRange(+value)} />
           <div className={styles.explain}>
             Selecting this pool also means you will get a {range}% bonus on your rewards if your bid wins.
@@ -140,7 +142,7 @@ const Bidding = ({
           <div>
             <TooltipIcon onClick={openExplainModal} width={20} height={20} />
           </div>
-          <span>How are my returns calculated?</span>
+          <span onClick={openExplainModal}>How are my returns calculated?</span>
         </div>
       </div>
       <div className={styles.button}>
