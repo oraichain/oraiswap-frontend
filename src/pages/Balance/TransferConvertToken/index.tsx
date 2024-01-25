@@ -19,7 +19,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
-import { evmChains } from 'config/chainInfos';
+import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -30,7 +30,7 @@ import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { calcMaxAmount } from '../helpers';
+import { calcMaxAmount, useGetFeeBitcoin } from '../helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -143,6 +143,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount, toNetworkChainId);
         return;
       }
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ toNetworkChainId:', toNetworkChainId);
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ convertAmount:', convertAmount);
       await onClickTransfer(convertAmount, toNetworkChainId);
       return;
     } catch (error) {
@@ -169,6 +171,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
   const renderBridgeFee = () => {
@@ -189,6 +192,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           {' '}
           {receivedAmount.toFixed(6)} {token.name}
         </span>
+        {
+          !!toDisplayBTCFee && <>
+            {' '}- BTC fee: <span>{toDisplayBTCFee} BTC </span>
+          </>
+        }
       </div>
     );
   };
@@ -360,7 +368,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          if (listedTokens.length > 0 || evmChains.find((chain) => chain.chainId === token.chainId)) {
+          if (
+            listedTokens.length > 0 ||
+            evmChains.find((chain) => chain.chainId === token.chainId) ||
+            btcChains.find((chain) => chain.chainId !== token.chainId)
+          ) {
             return (
               <button
                 disabled={transferLoading || !addressTransfer || receivedAmount < 0}

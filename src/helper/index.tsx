@@ -25,7 +25,7 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { leapSnapId } from './constants';
+import { bitcoinChainId, leapSnapId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
 
@@ -48,7 +48,7 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
-// export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
+export const bitcoinNetworks = chainInfos.filter((c) => (c.chainId ) === bitcoinChainId);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -368,7 +368,7 @@ const checkErrorObj = (info) => {
 };
 export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
   let chainInfoData = [...chainInfos];
-  return (chainInfoData as any).map((info) => {
+  return (chainInfoData).map((info) => {
     const infoWithoutIcon = checkErrorObj(info);
 
     const currenciesWithoutIcons = info.currencies.map((currency) => {
@@ -409,4 +409,14 @@ export const getListAddressCosmosByLeapSnap = async () => {
     }
   }
   return { listAddressCosmos };
+};
+export const timeAgo = (timestamp = 0) => {
+  if (!timestamp) return 'in 0 day';
+  const now = Date.now();
+  const diffInSeconds = Math.floor((now - timestamp) / 1000);
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  return rtf.format(-diffInDays, 'day');
 };

@@ -12,7 +12,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
@@ -28,12 +28,14 @@ import FutureCompetition from 'components/FutureCompetitionModal';
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
+
   useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -142,10 +144,13 @@ const App = () => {
         const vs = window?.keplr?.version;
         const isCheckKeplr = !!vs && keplrCheck('keplr');
         if (checkVersionWallet()) {
+          setWalletTypeStore('owallet');
           setStorageKey('typeWallet', 'owallet');
         } else if (isCheckKeplr) {
+          setWalletTypeStore('keplr');
           setStorageKey('typeWallet', 'keplr' as WalletType);
         } else if (isSnap) {
+          setWalletTypeStore(leapWalletType);
           setStorageKey('typeWallet', leapWalletType);
         }
       }
@@ -188,10 +193,13 @@ const App = () => {
       switchWallet(walletTypeStore as WalletType);
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
+      const btcAddress = walletTypeStore === 'owallet' ? await window.Bitcoin.getAddress() : null;
+      setBtcAddress(btcAddress);
       loadTokenAmounts({
         oraiAddress,
         metamaskAddress: metamaskAddr,
-        tronAddress: tronAddr
+        tronAddress: tronAddr,
+        btcAddress
       });
       setAddress(oraiAddress);
     } catch (error) {

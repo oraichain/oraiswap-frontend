@@ -1,4 +1,3 @@
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { MONTHS_ARR, TIMER } from '../constants';
 
 export const formatCountdownTime = (milliseconds: number) => {
@@ -127,19 +126,4 @@ export const getUTCTime = (date: Date | number) => {
   const utcSeconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
 
   return `${utcHours}:${utcMinutes}:${utcSeconds}`;
-};
-
-export const formatNumberKMB = (num: number) => {
-  if (num >= 1e9) {
-    return '$' + (num / 1e9).toFixed(2) + 'B';
-  }
-
-  if (num >= 1e6) {
-    return '$' + (num / 1e6).toFixed(2) + 'M';
-  }
-
-  if (num >= 1e3) {
-    return '$' + (num / 1e3).toFixed(2) + 'K';
-  }
-  return formatDisplayUsdt(num, 2);
 };

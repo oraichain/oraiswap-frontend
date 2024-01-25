@@ -36,6 +36,7 @@ export default function useTokenFee(
     const { token_fees: tokenFees } = feeConfig;
     const tokenFee = tokenFees.find((tokenFee) => tokenFee.token_denom === remoteTokenDenom);
     if (tokenFee) fee = (tokenFee.ratio.nominator / tokenFee.ratio.denominator) * 100;
+    console.log('🚀 ~ useEffect ~ fee:', fee);
     setBridgeFee(fee);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

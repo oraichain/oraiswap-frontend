@@ -1,8 +1,10 @@
-$light-bg-primary-box: #fcfcfc;
+$light-bg-primary-box: #f7f7f7;
 $light-bg-btn-active-gray: #d9dbdd;
 $light-text-color: #272b30;
 $light-text-color-gray: #777e90;
+$light-shade-color: #ffedeb;
 $white-color: #fff;
+$black-color: black;
 $blue-color: #a871df;
 $shadow-modal: 0px 4px 8px -4px rgba(0, 0, 0, 0.1), inset 0px -1px 1px rgba(0, 0, 0, 0.04);
 $shadow-btn: inset 0px -2px 0px #4b2993, inset 1px 2px 0px #804af2;
@@ -11,16 +13,18 @@ $success-color: #00ad26;
 $error-color: #ff5947;
 $warning-color: #e01600;
 $primary-text-link: #78ca11;
+$yellow-brown-color: #ad9c00;
 $primary-surface-default-light: #e5f7d6;
 $primary-bg-btn: #aee67f;
 $text-btn-default: #1e300a;
 $text-placeholder: #505665;
+$neutral-gray: #686a66;
 $warning-surface-default: #e6cf00;
 
 $neutron-text-body-dark: #979995;
 $neutron-text-body-light: #979995;
 
-$dropdown-bg-color-dark: #121511;
+$dropdown-bg-color-dark: #181a17;
 $dropdown-border-color-dark: #494949;
 $dropdown-bg-color-hover-dark: #232521;
 
@@ -34,6 +38,9 @@ $primary-surface-default-light: #2f5711;
 $primary-surface-default: #92e54c;
 
 $primary-banner-default: #c9ff85;
+$neutral-text-title: #efefef;
+$error-surface-default-subtle: #380016;
+$warning-surface-default-subtle: #383200;
 
 // for dark-light mode
 $themes: (
@@ -81,7 +88,7 @@ $themes: (
     'neutral-3': #979797,
     'neutral-2': #efefef,
     'neutral-1': #f7f7f7,
-    'neutral-white': #121511,
+    'neutral-white': #181a17,
     'primary-1': #aee67f,
     'sea-stone-800': #f7f7f7,
     'sea-stone-700': #4a4d46,
@@ -96,7 +103,7 @@ $themes: (
     'neutral-surface-bg-section-2': #31332e,
     'neutral-border-border-bold': #494949,
     'primary-surface-default': #92e54c,
-    'neutral-surface-bg': #121511,
+    'neutral-surface-bg': #181a17,
     'neutral-text-body-on-section': #979995,
     'neutral-text-text-btn-default': #163300,
     'neutral-surface-bg-toast': #232521,

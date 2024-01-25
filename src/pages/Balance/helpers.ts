@@ -1,6 +1,7 @@
 import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { Coin, coin } from '@cosmjs/proto-signing';
 import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
+// import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   CosmosChainId,
   IBCInfo,
@@ -16,7 +17,9 @@ import {
   calculateTimeoutTimestamp,
   getEncodedExecuteContractMsgs,
   parseTokenInfo,
-  toAmount
+  toAmount,
+  CustomChainInfo,
+  validateNumber
 } from '@oraichain/oraidex-common';
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
@@ -33,6 +36,17 @@ import KawaiiverseJs from 'libs/kawaiiversejs';
 import { generateError } from 'libs/utils';
 import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages } from 'rest/api';
 import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
+import axios from 'rest/request';
+import { script, opcodes } from 'bitcoinjs-lib';
+import { useQuery } from '@tanstack/react-query';
+import { config } from 'libs/nomic/config';
+import QRCode from 'qrcode';
+import { useEffect, useState } from 'react';
+import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
+import { fromBech32, toBech32 } from '@cosmjs/encoding';
+import { BitcoinUnit } from 'bitcoin-units';
+import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, btcNetwork } from 'helper/constants';
+import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -358,6 +372,7 @@ export const transferIbcCustom = async (
 
 export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
+
   return flattenTokens.find(
     (t) => from.bridgeTo.includes(t.chainId) && from.name.includes(t.name) && from.chainId !== t.chainId
   );
@@ -481,4 +496,221 @@ export const calcMaxAmount = ({
   }
 
   return finalAmount;
+};
+
+//==================================================> BTC <===========================================================================
+export const getUtxos = async (address: string, baseUrl: string) => {
+  if (!address) throw Error('Address is not empty');
+  if (!baseUrl) throw Error('BaseUrl is not empty');
+  const { data } = await axios({
+    baseURL: baseUrl,
+    method: 'get',
+    url: `/address/${address}/utxo`
+  });
+  return data;
+};
+export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBlockHeight = 0 }) => {
+  let balance = 0;
+  let utxosData = [];
+  if (!utxos || utxos?.length === 0) {
+    return {
+      balance,
+      utxos: utxosData
+    };
+  }
+  utxos.forEach((utxo) => {
+    balance = balance + Number(utxo.value);
+    const data = {
+      address: address, //Required
+      path: path, //Required
+      value: utxo.value, //Required
+      confirmations: currentBlockHeight - Number(utxo.status.block_height ?? 0), //Required
+      blockHeight: utxo.status.block_height ?? 0,
+      txid: utxo.txid, //Required (Same as tx_hash_big_endian)
+      vout: utxo.vout, //Required (Same as tx_output_n)
+      tx_hash: utxo.txid,
+      tx_hash_big_endian: utxo.txid,
+      tx_output_n: utxo.vout
+    };
+    utxosData.push(data);
+  });
+  return {
+    balance,
+    utxos: utxosData
+  };
+};
+const MIN_FEE_RATE = 5;
+export const getFeeRate = async ({ blocksWillingToWait = 2, url }) => {
+  if (!blocksWillingToWait) throw Error('blocksWillingToWait is not empty');
+  if (!url) throw Error('url is not empty');
+  const { data: feeRate } = await axios({
+    baseURL: url,
+    method: 'get',
+    url: `/fee-estimates`
+  });
+
+  const feeRateByBlock = feeRate?.[blocksWillingToWait];
+  if (!feeRateByBlock) {
+    throw Error('Not found Fee rate');
+  }
+  return feeRateByBlock > MIN_FEE_RATE ? feeRateByBlock : MIN_FEE_RATE;
+};
+
+const TX_EMPTY_SIZE = 4 + 1 + 1 + 4; //10
+const TX_INPUT_BASE = 32 + 4 + 1 + 4; // 41
+const TX_INPUT_PUBKEYHASH = 107;
+const TX_OUTPUT_BASE = 8 + 1; //9
+const TX_OUTPUT_PUBKEYHASH = 25;
+const inputBytes = (input) => {
+  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
+};
+const MIN_TX_FEE = 1000;
+const getFeeFromUtxos = (utxos, feeRate, data) => {
+  const inputSizeBasedOnInputs =
+    utxos.length > 0
+      ? utxos.reduce((a, x) => a + inputBytes(x), 0) + utxos.length // +1 byte for each input signature
+      : 0;
+  let sum =
+    TX_EMPTY_SIZE +
+    inputSizeBasedOnInputs +
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH +
+    TX_OUTPUT_BASE +
+    TX_OUTPUT_PUBKEYHASH;
+
+  if (data) {
+    sum += TX_OUTPUT_BASE + data.length;
+  }
+  const fee = sum * feeRate;
+  return fee > MIN_TX_FEE ? fee : MIN_TX_FEE;
+};
+const compileMemo = (memo) => {
+  const data = Buffer.from(memo, 'utf8'); // converts MEMO to buffer
+  return script.compile([opcodes.OP_RETURN, data]); // Compile OP_RETURN script
+};
+
+export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message = '' }) => {
+  if (message && message.length > 80) {
+    throw new Error('message too long, must not be longer than 80 chars.');
+  }
+  if (utxos.length === 0) return 0;
+  const feeRateWhole = Math.ceil(transactionFee);
+  const compiledMemo = message ? compileMemo(message) : null;
+  const fee = getFeeFromUtxos(utxos, feeRateWhole, compiledMemo);
+  return fee;
+};
+
+export const BTC_SCAN = btcNetwork ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
+// decimals BTC is 8
+const truncDecimals = 8;
+const atomic = 10 ** truncDecimals;
+export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
+  const validatedAmount = validateNumber(amount);
+  return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
+};
+
+export const useGetInfoBtc = () => {
+  const { data: infoBTC } = useQuery(
+    ['estimate-btc-deposit'],
+    async () => {
+      const nomic = new NomicClient();
+      return await nomic.getConfig();
+    },
+    {
+      placeholderData: {
+        capacity_limit: 0,
+        max_offline_checkpoints: 0,
+        max_withdrawal_amount: 0,
+        max_withdrawal_script_length: 0,
+        min_checkpoint_confirmations: 0,
+        min_confirmations: 0,
+        min_deposit_amount: 0,
+        min_withdrawal_amount: 0,
+        min_withdrawal_checkpoints: 0,
+        transfer_fee: 0,
+        units_per_sat: 0
+      }
+    }
+  );
+  return { infoBTC };
+};
+
+export const satToBTC = (sat = 0, isDisplayAmount?: boolean) => {
+  if (!sat) return 0;
+  if (isDisplayAmount) return new BitcoinUnit(sat, 'satoshi').to('BTC').getValueAsString();
+  return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
+};
+
+//==================================================> BTC <-> Oraichain <===========================================================================
+export const calculateEstWitnessSize = (signatoriesLength: number) => {
+  return signatoriesLength * 79 + 39; // 79 and 39 are magic numbers
+};
+
+export const calculateInputSize = (estWitnessSize: number) => {
+  return estWitnessSize + 40; // 40 is a magic number
+};
+
+export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSize: number) => {
+  return (minerFeeRate * 10 ** 8) / estWitnessSize; // miner fee rate is in BTC, we * 10**8 to convert to sats
+};
+
+const networkConfig = {
+  RELAYERS: [process.env.RELAYER || 'https://oraibtc.relayer.orai.io:443'],
+  LCD: [process.env.LCD || 'https://oraibtc.lcd.orai.io'],
+  IBC_CHANNEL: process.env.IBC_CHANNEL || 'channel-0',
+  NETWORK: process.env.NETWORK || 'testnet'
+};
+
+const calculateDepositFees = async () => {
+  const { signatories, minerFeeRate, index } = await (await fetch(`${networkConfig.RELAYERS}/sigset`)).json();
+  const witnessSize = calculateEstWitnessSize(signatories.length);
+  const feeRate = calculateFeeRateFromMinerFee(minerFeeRate, witnessSize);
+  const inputSize = calculateInputSize(witnessSize);
+
+  // calculate the actual fees
+  const depositFees = inputSize * feeRate;
+  return { depositFees, index, witnessSize, feeRate };
+};
+
+const calculateCheckpointFees = async (feeRate: number, witnessSize: number) => {
+  const { checkpoint_vsize: vsizeCheckpointTx, total_input_size: inputLength } = await (
+    await fetch(`${networkConfig.LCD}/bitcoin/checkpoint/current_checkpoint_size`)
+  ).json();
+  const totalCheckpointInputWitnessSize = inputLength * witnessSize;
+  const estVsize = vsizeCheckpointTx + totalCheckpointInputWitnessSize;
+  return feeRate * estVsize;
+};
+
+const calculateWithdrawFees = async (feeRate: number, dest: string) => {
+  const scriptPubkey = await (await fetch(`${networkConfig.LCD}/bitcoin/script_pubkey/${dest}`)).json();
+  console.log('base64 script pubkey: ', scriptPubkey);
+  return (9 + Buffer.from(scriptPubkey, 'base64').length) * feeRate; // 9 is the magic number
+};
+
+export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) => {
+  const [feeBtc, setFeeBtc] = useState<string | number>(0);
+  useQuery(
+    ['fee-deposit-withdraw-btc-oraichain', fromToken.chainId, fromToken.coinGeckoId, btcAddress],
+    async () => {
+      const { depositFees, witnessSize, feeRate } = await calculateDepositFees();
+      if (fromToken.chainId === 'Oraichain') {
+        //ORAICHAIN -> BTC
+        const withdrawalFees = await calculateWithdrawFees(feeRate, btcAddress);
+        const widthdrawFee = satToBTC(withdrawalFees, true);
+        return setFeeBtc(widthdrawFee);
+      }
+      // BTC -> ORAICHAIN
+      const checkpointFees = await calculateCheckpointFees(feeRate, witnessSize);
+      let btcFee = satToBTC(checkpointFees, true);
+      if (depositFees > checkpointFees) btcFee = satToBTC(depositFees, true);
+      setFeeBtc(btcFee);
+    },
+    {
+      enabled: fromToken.coinGeckoId === 'bitcoin' && !!btcAddress
+    }
+  );
+  return {
+    toDisplayBTCFee: feeBtc
+    // toAmountBTCFee: feeBtc
+  };
 };
