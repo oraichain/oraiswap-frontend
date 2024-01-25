@@ -509,7 +509,6 @@ export const getUtxos = async (address: string, baseUrl: string) => {
   });
   return data;
 };
-
 export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBlockHeight = 0 }) => {
   let balance = 0;
   let utxosData = [];
@@ -688,7 +687,7 @@ const calculateWithdrawFees = async (feeRate: number, dest: string) => {
   return (9 + Buffer.from(scriptPubkey, 'base64').length) * feeRate; // 9 is the magic number
 };
 
-export const useGetFeeBitcoin = (fromToken: any, btcAddress?: string) => {
+export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) => {
   const [feeBtc, setFeeBtc] = useState<string | number>(0);
   useQuery(
     ['fee-deposit-withdraw-btc-oraichain', fromToken.chainId, fromToken.coinGeckoId, btcAddress],

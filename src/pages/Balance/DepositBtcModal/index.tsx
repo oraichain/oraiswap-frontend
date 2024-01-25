@@ -106,7 +106,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{nomic.depositAddress?.minerFeeRate + satToBTC(infoBTC?.min_deposit_amount)} BTC</span>
+            <span>{nomic.depositAddress?.minerFeeRate + (satToBTC(infoBTC?.min_deposit_amount) as number)} BTC</span>
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>

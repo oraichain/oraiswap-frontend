@@ -161,7 +161,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       totalUsd: 0,
       isOpen: false,
       isConnect: !!metamaskAddress,
-      networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }]
+      networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' }]
     },
     OwalletInfo,
     {
@@ -198,7 +198,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         ...OwalletInfo,
         networks: [
           ...OwalletInfo.networks,
-          ...[{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }],
+          ...[{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' }],
           ...tronNetworks.map((item: any) => {
             item.address = tronAddress;
             return item;

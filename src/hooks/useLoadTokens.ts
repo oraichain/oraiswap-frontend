@@ -105,7 +105,7 @@ async function loadTokens(
         dispatch,
         btcAddress,
         // TODO: hardcode check bitcoinTestnet need update later
-        chainInfos.filter((c) => (c.chainId as any) == bitcoinChainId)
+        chainInfos.filter((c) => (c.chainId) == bitcoinChainId)
       );
     }, 2000);
   }

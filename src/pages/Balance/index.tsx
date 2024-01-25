@@ -101,8 +101,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [addressRecovery, setAddressRecovery] = useState('');
 
   const ref = useRef(null);
-
-  const isOwallet = (window.owallet as any)?.isOwallet;
+  //@ts-ignore
+  const isOwallet = window.owallet?.isOwallet;
   useEffect(() => {
     const getAddress = async () => {
       try {
@@ -157,7 +157,8 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const handleRecoveryAddress = async () => {
     try {
-      const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+      // @ts-ignore-check
+      const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
       if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
@@ -174,7 +175,7 @@ const Balance: React.FC<BalanceProps> = () => {
             }
           ],
           sequence: accountInfo?.account?.sequence
-        } as any;
+        };
 
         const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
         const tx = makeStdTx(signDoc, signature.signature);
@@ -276,11 +277,19 @@ const Balance: React.FC<BalanceProps> = () => {
     };
 
     try {
-      const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId as any, dataRequest);
-      displayToast(TToastType.TX_SUCCESSFUL, {
-        customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+      // @ts-ignore-check
+      const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
+      console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
+      if (rs?.rawTxHex) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+        });
+        setTxHash(rs.rawTxHex);
+        return;
+      }
+      displayToast(TToastType.TX_FAILED, {
+        message: 'Transaction failed'
       });
-      setTxHash(rs.rawTxHex);
     } catch (error) {
       displayToast(TToastType.TX_FAILED, {
         message: JSON.stringify(error)
@@ -292,7 +301,8 @@ const Balance: React.FC<BalanceProps> = () => {
     const { bitcoinAddress: address } = nomic.depositAddress;
 
     if (!address) throw Error('Not found Orai BTC Address');
-    const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId as any);
+    // @ts-ignore-check
+    const destinationAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
 
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
@@ -300,7 +310,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!btcAddress) throw Error('Not found your bitcoin address!');
     if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
     try {
-      const result = (await window.client.execute(
+      const result = await window.client.execute(
         oraiAddress,
         OBTCContractAddress,
         {
@@ -317,8 +327,8 @@ const Balance: React.FC<BalanceProps> = () => {
           }
         },
         'auto'
-      )) as any;
-
+      );
+      // @ts-ignore-check
       processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex, {
@@ -576,9 +586,7 @@ const Balance: React.FC<BalanceProps> = () => {
                 }
                 // TODO: hardcode check bitcoinTestnet need update later
                 const TokenItemELement: React.FC<TokenItemProps> =
-                  (t.chainId as any) === bitcoinChainId && (t?.coinGeckoId as any) === 'bitcoin'
-                    ? TokenItemBtc
-                    : TokenItem;
+                  t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
 
                 return (
                   <TokenItemELement
