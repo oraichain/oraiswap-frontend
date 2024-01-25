@@ -115,7 +115,8 @@ $themes: (
     'primary-surface-default-dark-2': #2f5711,
     'bg-section-05': #1b1c1a,
     'neutral-text-text-disabled': #494949,
-    'neutral-surface-bg-modal': #232521
+    'neutral-surface-bg-modal': #232521,
+    'bg-iframe-modal': #0a121f
   ),
   light: (
     'text-color': #272b30,
@@ -195,6 +196,7 @@ $themes: (
     'primary-surface-default-dark-2': #000,
     'bg-section-05': #f7f7f7,
     'neutral-text-text-disabled': #c7c8c6,
-    'neutral-surface-bg-modal': #fff
+    'neutral-surface-bg-modal': #fff,
+    'bg-iframe-modal': #fff
   )
 );
