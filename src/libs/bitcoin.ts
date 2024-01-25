@@ -24,36 +24,10 @@ export interface IBitcoin {
 }
 
 export default class Bitcoin {
-  // typeWallet: WalletType;
-  constructor() {
-    // super();
-    // this.typeWallet = type;
-  }
+  constructor() {}
 
   disconnect() {
     // clear data?
-  }
-
-  // priority with owallet
-  private get bitcoin(): IBitcoin {
-    return window.bitcoin;
-  }
-
-  async getBitcoin(): Promise<IBitcoin | undefined> {
-    if (document.readyState === 'complete') {
-      return this.bitcoin;
-    }
-
-    return new Promise((resolve) => {
-      const documentStateChange = (event: Event) => {
-        if (event.target && (event.target as Document).readyState === 'complete') {
-          resolve(this.bitcoin);
-          document.removeEventListener('readystatechange', documentStateChange);
-        }
-      };
-
-      document.addEventListener('readystatechange', documentStateChange);
-    });
   }
 
   async getBitcoinKey(chainId?: string): Promise<Key | undefined> {
@@ -61,7 +35,7 @@ export default class Bitcoin {
       chainId = chainId ?? network.chainId;
       if (!chainId) return undefined;
 
-      const bitcoin = await this.getBitcoin();
+      const bitcoin = await window.owallet;
       if (bitcoin) {
         return bitcoin.getKey(chainId);
       }
@@ -85,8 +59,8 @@ export default class Bitcoin {
     rawTxHex: string;
   }> {
     try {
-      const bitcoin = await this.getBitcoin();
-      const rs = await bitcoin.signAndBroadcast(chainId, data);
+      //TODO: hotfix for wallet connect to DApp
+      const rs = await window.bitcoin.signAndBroadcast(chainId, data);
       return rs;
     } catch (ex) {
       console.log(ex, chainId);

@@ -37,7 +37,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
         setUrlQRCode(url);
       }
     })();
-    return () => { };
+    return () => {};
   }, [nomic.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
@@ -107,6 +107,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
           </div>
           <div className={styles.value}>
             <span>{nomic.depositAddress?.minerFeeRate + (satToBTC(infoBTC?.min_deposit_amount) as number)} BTC</span>
+
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>
