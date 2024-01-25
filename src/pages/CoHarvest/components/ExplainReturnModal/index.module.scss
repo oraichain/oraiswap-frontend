@@ -136,7 +136,7 @@
             flex-wrap: wrap;
 
             @include theme {
-              color: theme-get('neutral-text-text-btn-default');
+              color: theme-get('neutral-text-text-dropdown');
             }
 
             text-align: center;
@@ -161,6 +161,10 @@
                 gap: 10px;
                 border-radius: 99px;
                 background: $primary-bg-btn;
+
+                @include theme {
+                  color: theme-get('neutral-text-text-btn-default');
+                }
               }
             }
 
@@ -273,10 +277,7 @@
         }
 
         .caseTitle {
-          display: flex;
-          align-items: center;
           margin-bottom: 16px;
-          gap: 8px;
 
           font-size: 14px;
           font-weight: 600;
@@ -291,6 +292,7 @@
               color: theme-get('neutral-9');
             }
             font-weight: 400;
+            margin-left: 8px;
           }
         }
 

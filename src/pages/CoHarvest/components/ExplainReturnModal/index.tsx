@@ -117,7 +117,7 @@ const ExplainReturnModal = ({ open, onClose }: { open: boolean; onClose: () => v
                 <span className={styles.note}>(Partial distribution of Total Rewards with bonus)</span>
               </div>
               <div className={styles.caseContent}>
-                <i>N = Left_TotalRewards/TotalBiddedValue_on_Pool</i>
+                <i>N = Left_TotalRewards / TotalBiddedValue_on_Pool</i>
               </div>
             </div>
           </div>
