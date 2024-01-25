@@ -600,7 +600,7 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 
-export const BTC_SCAN = btcNetwork ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
+export const BTC_SCAN = btcNetwork === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
 // decimals BTC is 8
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;
