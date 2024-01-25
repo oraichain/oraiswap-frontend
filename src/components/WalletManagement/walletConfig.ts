@@ -77,7 +77,7 @@ export const walletProvider: WalletProvider[] = [
     networkType: 'cosmos',
     networks: cosmosNetworksWithIcon,
     wallets: cosmosWallets
-  },
+  }
   // {
   // networkType: 'evm',
   //   networks: [
@@ -108,9 +108,9 @@ export const walletProvider: WalletProvider[] = [
   //     }
   //   ]
   // },
-  {
-    networkType: 'tron',
-    networks: tronNetworks,
-    wallets: tronWallets
-  }
+  // {
+  //   networkType: 'tron',
+  //   networks: tronNetworks,
+  //   wallets: tronWallets
+  // }
 ];
