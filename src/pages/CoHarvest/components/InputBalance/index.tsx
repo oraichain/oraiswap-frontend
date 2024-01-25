@@ -20,7 +20,10 @@ const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: Inpu
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
-        Balance: <span className={styles.token}>{numberWithCommas(toDisplay(balance))} ORAIX</span>
+        <span className={styles.bid}>Bid amount</span>
+        <span>
+          Balance: <span className={styles.token}>{numberWithCommas(toDisplay(balance))} ORAIX</span>
+        </span>
       </div>
       <div className={styles.input}>
         <NumberFormat

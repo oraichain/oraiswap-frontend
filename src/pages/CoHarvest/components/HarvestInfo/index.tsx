@@ -32,7 +32,7 @@ const HarvestInfo = (props: {
         <div className={styles.content}>
           <div className={styles.value}>
             <span className={styles.heading}>
-              Pool Value
+              Total Rewards
               <TooltipIconBtn
                 placement="auto"
                 visible={visible}
@@ -59,7 +59,7 @@ const HarvestInfo = (props: {
         <div className={styles.shadow}></div>
       </div>
 
-      <div className={styles.explain}>
+      <div className={styles.explain} onClick={openExplainModal}>
         <div>
           <TooltipIcon onClick={openExplainModal} width={20} height={20} />
         </div>
