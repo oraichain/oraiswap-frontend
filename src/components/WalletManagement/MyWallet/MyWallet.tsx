@@ -35,6 +35,7 @@ export const MyWallet: React.FC<{
     networkId: '',
     walletId: 0
   });
+  const [currentDisconnectingNetwork, setCurrentDisconnectingNetwork] = useState<NetworkType>(null);
 
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
   const [oraiAddress] = useConfigReducer('address');
@@ -73,8 +74,6 @@ export const MyWallet: React.FC<{
     // just close when no modal is open
     !isShowChooseWallet && !isShowDisconnect && setIsShowMyWallet(false);
   });
-
-  const handleDisconnectNetwork = (networkType: NetworkType) => {};
 
   const renderCosmosAddresses = () => {
     if (!oraiAddress) return <></>;
@@ -122,7 +121,13 @@ export const MyWallet: React.FC<{
               </div>
               {index === 0 && (
                 <div className={styles.right}>
-                  <div className={styles.disconnectBtn} onClick={() => handleDisconnectNetwork(network.networkType)}>
+                  <div
+                    className={styles.disconnectBtn}
+                    onClick={() => {
+                      setIsShowDisconnect(true);
+                      setCurrentDisconnectingNetwork(network.networkType);
+                    }}
+                  >
                     <DisconnectIcon width={25} height={25} />
                   </div>
                 </div>
@@ -139,7 +144,13 @@ export const MyWallet: React.FC<{
       ref={myWalletRef}
       className={`${styles.myWallets} ${styles[theme]} ${isShowMyWallet ? styles.open : styles.close}`}
     >
-      {isShowDisconnect && <ModalDisconnect close={() => setIsShowDisconnect(false)} />}
+      {isShowDisconnect && (
+        <ModalDisconnect
+          close={() => setIsShowDisconnect(false)}
+          currentDisconnectingNetwork={currentDisconnectingNetwork}
+          setCurrentDisconnectingNetwork={setCurrentDisconnectingNetwork}
+        />
+      )}
       <div className={styles.header}>
         <div className={styles.balance}>
           <h3>My Wallets</h3>
