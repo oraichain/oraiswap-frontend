@@ -30,7 +30,7 @@ import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { calcMaxAmount } from '../helpers';
+import { calcMaxAmount, useGetFeeBitcoin } from '../helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -171,6 +171,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
   const renderBridgeFee = () => {
@@ -191,6 +192,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           {' '}
           {receivedAmount.toFixed(6)} {token.name}
         </span>
+        {
+          !!toDisplayBTCFee && <>
+            {' '}- BTC fee: <span>{toDisplayBTCFee} BTC </span>
+          </>
+        }
       </div>
     );
   };

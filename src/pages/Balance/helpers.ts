@@ -41,7 +41,7 @@ import { script, opcodes } from 'bitcoinjs-lib';
 import { useQuery } from '@tanstack/react-query';
 import { config } from 'libs/nomic/config';
 import QRCode from 'qrcode';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
@@ -498,6 +498,7 @@ export const calcMaxAmount = ({
   return finalAmount;
 };
 
+//==================================================> BTC <===========================================================================
 export const getUtxos = async (address: string, baseUrl: string) => {
   if (!address) throw Error('Address is not empty');
   if (!baseUrl) throw Error('BaseUrl is not empty');
@@ -508,6 +509,7 @@ export const getUtxos = async (address: string, baseUrl: string) => {
   });
   return data;
 };
+
 export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBlockHeight = 0 }) => {
   let balance = 0;
   let utxosData = [];
@@ -634,23 +636,82 @@ export const useGetInfoBtc = () => {
   return { infoBTC };
 };
 
-export const useGetQRCode = (nomic) => {
-  const { data: urlQRCode } = useQuery(
-    ['url-qr-code', nomic?.depositAddress?.address],
-    async () => {
-      const url = await QRCode.toDataURL(nomic.depositAddress.address);
-      return url;
-    },
-    {
-      placeholderData: '',
-      enabled: !!nomic?.depositAddress?.address
-    }
-  );
-
-  return { urlQRCode };
+export const satToBTC = (sat = 0, isDisplayAmount?: boolean) => {
+  if (!sat) return 0;
+  if (isDisplayAmount) return new BitcoinUnit(sat, 'satoshi').to('BTC').getValueAsString();
+  return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
 };
 
-export const satToBTC = (sat = 0) => {
-  if (!sat) return 0;
-  return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
+//==================================================> BTC <-> Oraichain <===========================================================================
+export const calculateEstWitnessSize = (signatoriesLength: number) => {
+  return signatoriesLength * 79 + 39; // 79 and 39 are magic numbers
+};
+
+export const calculateInputSize = (estWitnessSize: number) => {
+  return estWitnessSize + 40; // 40 is a magic number
+};
+
+export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSize: number) => {
+  return (minerFeeRate * 10 ** 8) / estWitnessSize; // miner fee rate is in BTC, we * 10**8 to convert to sats
+};
+
+const networkConfig = {
+  RELAYERS: [process.env.RELAYER || 'https://oraibtc.relayer.orai.io:443'],
+  LCD: [process.env.LCD || 'https://oraibtc.lcd.orai.io'],
+  IBC_CHANNEL: process.env.IBC_CHANNEL || 'channel-0',
+  NETWORK: process.env.NETWORK || 'testnet'
+};
+
+const calculateDepositFees = async () => {
+  const { signatories, minerFeeRate, index } = await (await fetch(`${networkConfig.RELAYERS}/sigset`)).json();
+  const witnessSize = calculateEstWitnessSize(signatories.length);
+  const feeRate = calculateFeeRateFromMinerFee(minerFeeRate, witnessSize);
+  const inputSize = calculateInputSize(witnessSize);
+
+  // calculate the actual fees
+  const depositFees = inputSize * feeRate;
+  return { depositFees, index, witnessSize, feeRate };
+};
+
+const calculateCheckpointFees = async (feeRate: number, witnessSize: number) => {
+  const { checkpoint_vsize: vsizeCheckpointTx, total_input_size: inputLength } = await (
+    await fetch(`${networkConfig.LCD}/bitcoin/checkpoint/current_checkpoint_size`)
+  ).json();
+  const totalCheckpointInputWitnessSize = inputLength * witnessSize;
+  const estVsize = vsizeCheckpointTx + totalCheckpointInputWitnessSize;
+  return feeRate * estVsize;
+};
+
+const calculateWithdrawFees = async (feeRate: number, dest: string) => {
+  const scriptPubkey = await (await fetch(`${networkConfig.LCD}/bitcoin/script_pubkey/${dest}`)).json();
+  console.log('base64 script pubkey: ', scriptPubkey);
+  return (9 + Buffer.from(scriptPubkey, 'base64').length) * feeRate; // 9 is the magic number
+};
+
+export const useGetFeeBitcoin = (fromToken: any, btcAddress?: string) => {
+  const [feeBtc, setFeeBtc] = useState<string | number>(0);
+  useQuery(
+    ['fee-deposit-withdraw-btc-oraichain', fromToken.chainId, fromToken.coinGeckoId, btcAddress],
+    async () => {
+      const { depositFees, witnessSize, feeRate } = await calculateDepositFees();
+      if (fromToken.chainId === 'Oraichain') {
+        //ORAICHAIN -> BTC
+        const withdrawalFees = await calculateWithdrawFees(feeRate, btcAddress);
+        const widthdrawFee = satToBTC(withdrawalFees, true);
+        return setFeeBtc(widthdrawFee);
+      }
+      // BTC -> ORAICHAIN
+      const checkpointFees = await calculateCheckpointFees(feeRate, witnessSize);
+      let btcFee = satToBTC(checkpointFees, true);
+      if (depositFees > checkpointFees) btcFee = satToBTC(depositFees, true);
+      setFeeBtc(btcFee);
+    },
+    {
+      enabled: fromToken.coinGeckoId === 'bitcoin' && !!btcAddress
+    }
+  );
+  return {
+    toDisplayBTCFee: feeBtc
+    // toAmountBTCFee: feeBtc
+  };
 };

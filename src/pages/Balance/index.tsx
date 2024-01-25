@@ -74,7 +74,7 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-interface BalanceProps {}
+interface BalanceProps { }
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -381,9 +381,9 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       // TODO: hardcode check bitcoinTestnet need update later
-      // [BTC Native] ==> ORAICHAIN
-      const isBTCtoOraichain = (from.chainId as any) === bitcoinChainId && to.chainId === 'Oraichain';
-      const isOraichainToBTC = from.chainId === 'Oraichain' && (to.chainId as any) === bitcoinChainId;
+      // [BTC Native] <==> ORAICHAIN
+      const isBTCtoOraichain = from.chainId === bitcoinChainId && to.chainId === 'Oraichain';
+      const isOraichainToBTC = from.chainId === 'Oraichain' && to.chainId === bitcoinChainId;
       if (isBTCtoOraichain || isOraichainToBTC)
         return handleTransferBTC({
           isBTCToOraichain: isBTCtoOraichain,

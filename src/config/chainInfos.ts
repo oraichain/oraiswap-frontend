@@ -474,7 +474,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BTC',
       coinGeckoId: 'bitcoin' as any,
-      coinMinimalDenom: OBTCContractAddress,
+      coinMinimalDenom: 'obtc',
       type: 'cw20',
       contractAddress: OBTCContractAddress,
       bridgeTo: [bitcoinChainId],
