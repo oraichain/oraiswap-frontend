@@ -46,7 +46,8 @@ export class NomicClient implements NomicClientInterface {
     const isKeplrActive = await window.Keplr.getKeplr();
     if (isKeplrActive) {
       // @ts-ignore-check
-      const sender = await window.Keplr.getKeplrAddr(Config.chainId);
+      await window.Keplr.suggestChain(Config.chainId);
+      const sender = await window.Keplr.getKeplrAddr(Config.chainId as any);
       const receiver = await window.Keplr.getKeplrAddr();
       if (!sender || !receiver) {
         return;

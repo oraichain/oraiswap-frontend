@@ -590,6 +590,63 @@ const bitcoinMainnet: CustomChainInfo = {
     accountUrl: 'https://blockstream.info/address/{address}'
   }
 };
+
+export const OraiBTCBridgeNetwork = {
+  chainId: 'oraibtc-mainnet-1',
+  chainName: 'OraiBtc Bridge',
+  rpc: 'https://btc.rpc.orai.io',
+  rest: 'https://btc.lcd.orai.io',
+  networkType: 'cosmos',
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  stakeCurrency: {
+    coinDenom: 'ORAIBTC',
+    coinMinimalDenom: 'uoraibtc',
+    coinDecimals: 6,
+    gasPriceStep: {
+      low: 0,
+      average: 0,
+      high: 0
+    },
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+  },
+  bip44: {
+    coinType: 118
+  },
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  coinType: 118,
+  bech32Config: defaultBech32Config('oraibtc'),
+  currencies: [
+    {
+      coinDenom: 'ORAIBTC',
+      coinMinimalDenom: 'uoraibtc',
+      coinDecimals: 6,
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      },
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+    },
+    {
+      coinDenom: 'oBTC',
+      coinMinimalDenom: 'usat',
+      coinDecimals: 14,
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      },
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+    }
+  ],
+
+  get feeCurrencies() {
+    return this.currencies;
+  }
+};
+
 const bitcoinNetwork = btcNetwork === 'testnet' ? bitcoinTestnet : bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
