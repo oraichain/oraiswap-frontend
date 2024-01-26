@@ -3,7 +3,7 @@ import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { cosmosTokens } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
+import { OraiBTCBridgeNetwork, chainInfos } from 'config/chainInfos';
 import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { getSnap, connectSnap, suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provider';
@@ -69,7 +69,8 @@ export default class Keplr extends CosmosWallet {
     const isLeapSnap = await getSnap();
     if (isEnableKeplr) {
       if (!window.keplr) return;
-      const chainInfo = chainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+      // TODO: hotfix add oraiBTC bridge network
+      const chainInfo = [...chainInfos, OraiBTCBridgeNetwork].find((chainInfo) => chainInfo.chainId === chainId);
 
       // do nothing without chainInfo
       if (!chainInfo) return;
