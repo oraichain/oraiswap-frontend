@@ -37,7 +37,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
         setUrlQRCode(url);
       }
     })();
-    return () => {};
+    return () => { };
   }, [nomic.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
@@ -118,8 +118,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <TooltipIcon width={20} height={20} />
           </div>
           <span>
-            If you sent the balance to an expired bitcoin address, please check the bitcoin address in owallet wallet to
-            receive an automatic refund.
+            Warning: Register recovery address for automatic refund once original transaction fail.
           </span>
         </div>
         {addressRecovery ? (

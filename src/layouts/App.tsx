@@ -193,14 +193,14 @@ const App = () => {
       switchWallet(walletTypeStore as WalletType);
 
       const oraiAddress = await window.Keplr.getKeplrAddr();
-      const btcAddress = walletTypeStore === 'owallet' ? await window.Bitcoin.getAddress() : null;
-      setBtcAddress(btcAddress);
+      const btcAddress = await window.Bitcoin.getAddress();
       loadTokenAmounts({
         oraiAddress,
         metamaskAddress: metamaskAddr,
         tronAddress: tronAddr,
         btcAddress
       });
+      setBtcAddress(btcAddress);
       setAddress(oraiAddress);
     } catch (error) {
       console.log('Error: ', error.message);
