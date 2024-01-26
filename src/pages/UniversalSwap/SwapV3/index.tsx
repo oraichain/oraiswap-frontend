@@ -192,15 +192,25 @@ const SwapComponent: React.FC<{
   const isToWETH = originalToToken.coinGeckoId === 'weth';
 
   const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
+  const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
 
   const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
   const INIT_SIMULATE_TEN_AMOUNT = 10;
-  const INIT_AMOUNT =
-    isFromAiriToUsdc || isFromOraixToUsdc || isToWETH
-      ? INIT_SIMULATE_THOUNDSAND_AMOUNT
-      : isFromUsdc
-        ? INIT_SIMULATE_TEN_AMOUNT
-        : 1;
+  const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.01;
+
+  let INIT_AMOUNT = 1;
+
+  if (isFromAiriToUsdc || isFromOraixToUsdc || isToWETH) {
+    INIT_AMOUNT = INIT_SIMULATE_THOUNDSAND_AMOUNT
+  }
+
+  if (isFromUsdc) {
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT
+  }
+
+  if (isFromBTC) {
+    INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT
+  }
 
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
