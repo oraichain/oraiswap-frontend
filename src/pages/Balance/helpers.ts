@@ -21,14 +21,14 @@ import {
   CustomChainInfo,
   validateNumber
 } from '@oraichain/oraidex-common';
-import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
+import { flattenTokens, kawaiiTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { feeEstimate, getNetworkGasPrice } from 'helper';
+import { cosmosNetworks, feeEstimate, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import { OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
+import { OraiswapRouterQueryClient, OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
 import { Long } from 'cosmjs-types/helpers';
 import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
 import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
@@ -47,6 +47,7 @@ import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
 import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, btcNetwork } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
+import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -707,7 +708,7 @@ export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) 
       return btcFee;
     },
     {
-      placeholderData: '0',
+      placeholderData: 0,
       enabled: fromToken.coinGeckoId === 'bitcoin' && !!btcAddress
     }
   );
@@ -716,3 +717,34 @@ export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) 
     // toAmountBTCFee: btcFee
   };
 };
+
+export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
+  try {
+    amount = Number(amount);
+    BitcoinUnit.setFiat('usd', exchangeRate);
+    return new BitcoinUnit(amount, 'usd').to('satoshi').getValue().toFixed(0);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+// export const usdtToBtc = () => {
+//   const originalFromToken = oraichainTokens.find((token) => token.coinGeckoId === 'tether');
+//   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+//   const originalToToken = oraichainTokens.find((token) => token.coinGeckoId === 'bitcoin');
+//   const { data } = useQuery(
+//     ['simulate-relayer-data', originalFromToken, originalToToken],
+//     () => {
+//       return handleSimulateSwap({
+//         originalFromInfo: originalFromToken,
+//         originalToInfo: originalToToken,
+//         originalAmount: 50,
+//         routerClient
+//       });
+//     },
+//     {
+//       enabled: !!originalFromToken && !!originalToToken
+//     }
+//   );
+//   return data;
+// };

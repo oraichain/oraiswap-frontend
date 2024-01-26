@@ -8,7 +8,12 @@ import {
   toAmount,
   tronToEthAddress
 } from '@oraichain/oraidex-common';
-import { UniversalSwapHandler, isSupportedNoPoolSwapEvm, addOraiBridgeRoute } from '@oraichain/oraidex-universal-swap';
+import {
+  UniversalSwapHandler,
+  isSupportedNoPoolSwapEvm,
+  addOraiBridgeRoute,
+  handleSimulateSwap
+} from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
 import { ReactComponent as RefreshIcon } from 'assets/icons/reload.svg';
@@ -29,6 +34,7 @@ import {
   networks,
   EVM_CHAIN_ID
 } from 'helper';
+import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -60,11 +66,11 @@ import {
   calculatorTotalFeeBtc,
   BTC_SCAN
 } from './helpers';
-import { useGetFeeConfig } from 'hooks/useTokenFee';
+import { useGetFeeConfig, useUsdtToBtc } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
-import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
+
 import { NomicContext } from 'context/nomic-context';
 import { Decimal } from '@cosmjs/math';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
@@ -74,7 +80,8 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-interface BalanceProps { }
+
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -103,16 +110,16 @@ const Balance: React.FC<BalanceProps> = () => {
   const ref = useRef(null);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
+  const getAddress = async () => {
+    try {
+      await nomic.generateAddress();
+      const addressRecovered = await nomic.getRecoveryAddress();
+      setAddressRecovery(addressRecovered);
+    } catch (error) {
+      console.log('🚀 ~ getAddress ~ error:', error);
+    }
+  };
   useEffect(() => {
-    const getAddress = async () => {
-      try {
-        await nomic.generateAddress();
-        const addressRecovered = await nomic.getRecoveryAddress();
-        setAddressRecovery(addressRecovered);
-      } catch (error) {
-        console.log('🚀 ~ getAddress ~ error:', error);
-      }
-    };
     if (isOwallet) {
       getAddress();
     }
@@ -182,6 +189,7 @@ const Balance: React.FC<BalanceProps> = () => {
         const tmClient = await Tendermint37Client.connect(config.rpcUrl);
 
         const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
+        await getAddress();
         //@ts-ignore
         displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
           message: result?.log
@@ -307,7 +315,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
-    const btcAddr = btcAddress ?? await window.Bitcoin.getAddress();
+    const btcAddr = btcAddress ?? (await window.Bitcoin.getAddress());
     if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
     setBtcAddress(btcAddr);

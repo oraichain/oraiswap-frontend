@@ -14,6 +14,8 @@ import { reduceString } from 'libs/utils';
 import { timeAgo } from 'helper';
 
 import { satToBTC, useGetInfoBtc } from '../helpers';
+import { useUsdtToBtc } from 'hooks/useTokenFee';
+
 interface ModalProps {
   isOpen: boolean;
   open: () => void;
@@ -28,6 +30,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const [urlQRCode, setUrlQRCode] = useState(null);
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
+  const usdt = useUsdtToBtc();
+  console.log('🚀 ~ usdtToBtc ~ usdtToBtc:', usdt);
   const expiration = nomic.depositAddress?.expirationTimeMs;
 
   useEffect(() => {
@@ -37,7 +41,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
         setUrlQRCode(url);
       }
     })();
-    return () => { };
+    return () => {};
   }, [nomic.depositAddress?.bitcoinAddress]);
 
   useEffect(() => {
@@ -106,7 +110,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{nomic.depositAddress?.minerFeeRate + (satToBTC(infoBTC?.min_deposit_amount) as number)} BTC</span>
+            <span>{usdt?.displayAmount} BTC</span>
 
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
@@ -117,9 +121,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
           <div>
             <TooltipIcon width={20} height={20} />
           </div>
-          <span>
-            Warning: Register recovery address for automatic refund once original transaction fail.
-          </span>
+          <span>Warning: Register recovery address for automatic refund once original transaction fail.</span>
         </div>
         {addressRecovery ? (
           <div className={styles.recovery}>

@@ -107,6 +107,26 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     relayerFeeInOraiToAmount: toAmount(relayerFeeInOrai)
   };
 };
+export const useUsdtToBtc = () => {
+  const originalFromToken = oraichainTokens.find((token) => token.coinGeckoId === 'tether');
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+  const originalToToken = oraichainTokens.find((token) => token.coinGeckoId === 'bitcoin');
+  const { data: relayerFeeAmount } = useQuery(
+    ['fee-btc', originalFromToken, originalToToken],
+    () => {
+      return handleSimulateSwap({
+        originalFromInfo: originalFromToken,
+        originalToInfo: originalToToken,
+        originalAmount: 50,
+        routerClient
+      });
+    },
+    {
+      enabled: !!originalFromToken && !!originalToToken
+    }
+  );
+  return relayerFeeAmount;
+};
 
 export const useGetFeeConfig = () => {
   const dispatch = useDispatch();
