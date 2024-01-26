@@ -97,7 +97,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
   const [tronAddress] = useConfigReducer('tronAddress');
-  const [btcAddress] = useConfigReducer('btcAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
 
   const ref = useRef(null);
@@ -307,8 +307,10 @@ const Balance: React.FC<BalanceProps> = () => {
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
-    if (!btcAddress) throw Error('Not found your bitcoin address!');
+    const btcAddr = btcAddress ?? await window.Bitcoin.getAddress();
+    if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
+    setBtcAddress(btcAddr);
     try {
       const result = await window.client.execute(
         oraiAddress,
@@ -322,7 +324,7 @@ const Balance: React.FC<BalanceProps> = () => {
               remote_address: destinationAddress,
               remote_denom: OraichainChain.source.nBtcIbcDenom,
               timeout: DEFAULT_TIMEOUT,
-              memo: `withdraw:${btcAddress}`
+              memo: `withdraw:${btcAddr}`
             })
           }
         },

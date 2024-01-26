@@ -35,7 +35,7 @@ export default class Bitcoin {
       chainId = chainId ?? network.chainId;
       if (!chainId) return undefined;
 
-      const bitcoin = await window.owallet;
+      const bitcoin = window.owallet;
       if (bitcoin) {
         return bitcoin.getKey(chainId);
       }
