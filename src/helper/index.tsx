@@ -53,6 +53,9 @@ export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
 );
 
 export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
+export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
+  (c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc'
+);
 
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');

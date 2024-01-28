@@ -1,7 +1,7 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
 import cn from 'classnames/bind';
-import { WalletNetwork, allWallets } from 'components/WalletManagement/walletConfig';
+import { allWallets } from 'components/WalletManagement/walletConfig';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -27,14 +27,14 @@ const Connected: React.FC<{ setIsShowMyWallet: (isShow: boolean) => void }> = ({
       const wallet = allWallets.find((wallet) => wallet.nameRegistry === currentWalletType);
       if (!wallet) return acc;
 
-      acc.add(wallet);
+      if (!acc.find((item) => item.name === wallet.name)) acc.push(wallet);
       return acc;
-    }, new Set<WalletNetwork>());
+    }, []);
 
-    return Array.from(connectedWallets).map((connectedWallet) => {
+    return Array.from(connectedWallets).map((connectedWalletIcon, index) => {
       return (
-        <div className={cx('wallet_icon')} key={connectedWallet.nameRegistry}>
-          <connectedWallet.icon width={20} height={20} />
+        <div className={cx('wallet_icon')} key={connectedWalletIcon.nameRegistry}>
+          <connectedWalletIcon.icon width={20} height={20} />
         </div>
       );
     });

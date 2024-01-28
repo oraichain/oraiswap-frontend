@@ -3,7 +3,7 @@ import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
-import { cosmosNetworksWithIcon, tronNetworks } from 'helper';
+import { cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworks } from 'helper';
 
 export type NetworkType = 'cosmos' | 'evm' | 'tron';
 export type WalletType = WalletCosmosType | 'metamask' | 'tronLink';
@@ -16,6 +16,7 @@ export type WalletNetwork = {
   name: string;
   nameRegistry?: WalletType;
   isActive: boolean;
+  suffixName?: string;
 };
 
 export type ChainWallet = {
@@ -49,7 +50,8 @@ export const cosmosWallets: WalletNetwork[] = [
   },
   {
     icon: MetamaskIcon,
-    name: 'Metamask (Leap Snap)',
+    name: 'Metamask',
+    suffixName: ' (Leap Snap)',
     nameRegistry: 'leapSnap',
     isActive: true
   }
@@ -70,44 +72,36 @@ export const tronWallets: WalletNetwork[] = [
   }
 ];
 
-export const allWallets: WalletNetwork[] = [...cosmosWallets];
+export const evmWallets: WalletNetwork[] = [
+  {
+    icon: OwalletIcon,
+    name: 'Owallet',
+    nameRegistry: 'owallet',
+    isActive: true
+  },
+  {
+    icon: MetamaskIcon,
+    name: 'Metamask',
+    nameRegistry: 'metamask',
+    isActive: true
+  }
+];
+
+
+
+export const allWallets: WalletNetwork[] = [...cosmosWallets, ...evmWallets];
 
 export const walletProvider: WalletProvider[] = [
   {
     networkType: 'cosmos',
     networks: cosmosNetworksWithIcon,
     wallets: cosmosWallets
-  }
-  // {
-  // networkType: 'evm',
-  //   networks: [
-  //     {
-  //       icon: EthIcon,
-  //       name: '',
-  //       chainName: 'ethereum'
-  //     },
-  //     {
-  //       icon: BnbIcon,
-  //       name: '',
-  //       chainName: 'ethereum'
-  //     },
-  //     {
-  //       icon: KwtIcon,
-  //       name: '',
-  //       chainName: 'ethereum'
-  //     }
-  //   ],
-  //   wallets: [
-  //     {
-  //       icon: OwalletIcon,
-  //       name: 'Owallet'
-  //     },
-  //     {
-  //       icon: MetamaskIcon,
-  //       name: 'Metamask'
-  //     }
-  //   ]
-  // },
+  },
+  {
+    networkType: 'evm',
+    networks: evmNetworksIconWithoutTron,
+    wallets: evmWallets
+  },
   // {
   //   networkType: 'tron',
   //   networks: tronNetworks,

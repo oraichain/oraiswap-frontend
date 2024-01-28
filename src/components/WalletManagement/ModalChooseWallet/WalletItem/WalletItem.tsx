@@ -114,7 +114,7 @@ export const WalletItem = ({
           <div className={styles.walletIcon}>
             <wallet.icon />
           </div>
-          <div className={styles.walletName}>{wallet.name}</div>
+          <div className={styles.walletName}>{wallet.name + wallet.suffixName ? wallet.suffixName : ''}</div>
           {connectWalletButton}
         </div>
       )}

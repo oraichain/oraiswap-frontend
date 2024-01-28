@@ -1,8 +1,8 @@
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
-import { getListAddressCosmos, setStorageKey } from 'helper';
+import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
+import { getListAddressCosmos, isEmptyObject, isUnlockMetamask, owalletCheck, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -11,6 +11,7 @@ import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
+import { useInactiveConnect } from 'hooks/useMetamask';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -21,7 +22,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const [cosmosAddresses, setCosmosAddress] = useConfigReducer('cosmosAddress');
   console.log({ _oraiAddress });
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
@@ -41,6 +42,27 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setCosmosAddress(listAddressCosmos);
   };
 
+  const connect = useInactiveConnect();
+  const isCheckOwallet = !isEmptyObject(cosmosAddresses) && owalletCheck('owallet');
+  const handleConnectWalletInEvmNetwork = async (walletType: WalletType) => {
+    const isMetamask = !!window.ethereum.isMetaMask;
+    if (isMetamask) {
+      const isUnlock = await isUnlockMetamask();
+      if (!isUnlock) {
+        // request to unlock metmask
+        await window.Metamask.getEthAddress();
+      }
+    } else if (!isCheckOwallet && !isMetamask) {
+      displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
+      throw new Error('Please install Metamask wallet');
+    }
+    // if chain id empty, we switch to default network which is BSC
+    if (!window.ethereum || !window.ethereum.chainId) {
+      await window.Metamask.switchNetwork(Networks.bsc);
+    }
+    await connect();
+  };
+
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
       setConnectStatus('loading');
@@ -49,7 +71,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
           break;
         case 'evm':
-          //  TODO: handle connect evm
+          await handleConnectWalletInEvmNetwork(wallet.nameRegistry);
           break;
         case 'tron':
           //  TODO: handle connect tron
@@ -67,6 +89,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     } catch (error) {
       console.log('error handleConnectWalletByNetwork: ', error);
       setConnectStatus('failed');
+      const msg = error.message ? error.message : 'Connect wallet failed';
+      throw new Error(msg);
     }
   };
 
