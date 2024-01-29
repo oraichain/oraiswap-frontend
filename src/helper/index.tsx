@@ -67,7 +67,7 @@ export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
 };
 
 export const getDenomEvm = (): EvmDenom => {
-  switch (Number(window.ethereum?.chainId)) {
+  switch (Number(window.ethereumDapp?.chainId)) {
     case Networks.bsc:
       return 'bep20_orai';
     case Networks.mainnet:

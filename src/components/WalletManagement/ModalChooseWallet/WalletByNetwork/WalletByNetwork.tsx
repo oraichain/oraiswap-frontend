@@ -2,15 +2,7 @@ import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
-import {
-  checkSnapExist,
-  getListAddressCosmos,
-  isUnlockMetamask,
-  setStorageKey,
-  switchWalletTron,
-  isEmptyObject,
-  owalletCheck
-} from 'helper';
+import { checkSnapExist, getListAddressCosmos, isUnlockMetamask, setStorageKey, switchWalletTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -30,12 +22,12 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
-  const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
+  const [, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddresses, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  console.log({ _oraiAddress });
+  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
+  const connect = useInactiveConnect();
 
   const handleConfirmSwitch = async () => {
     setConnectStatus('loading');
@@ -43,54 +35,48 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
-    if (walletType === 'leapSnap') {
-      const isUnlock = await isUnlockMetamask();
-      if (!isUnlock) await window.Metamask.getEthAddress();
-
-      const isSnap = await checkSnapExist();
-      if (!isSnap) {
-        await connectSnap();
+    try {
+      if (walletType === 'leapSnap') {
+        const isUnlock = await isUnlockMetamask();
+        if (!isUnlock) await window.Metamask.getEthAddress();
+        const isSnap = await checkSnapExist();
+        if (!isSnap) {
+          await connectSnap();
+        }
       }
-    }
-    window.Keplr = new Keplr(walletType);
-    setStorageKey('typeWallet', walletType);
-    await initClient();
 
-    const oraiAddr = await window.Keplr.getKeplrAddr();
-    setOraiAddress(oraiAddr);
-    const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
-    setCosmosAddress(listAddressCosmos);
+      window.Keplr = new Keplr(walletType);
+      setStorageKey('typeWallet', walletType);
+      await initClient();
+
+      const oraiAddr = await window.Keplr.getKeplrAddr();
+      setOraiAddress(oraiAddr);
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
+      setCosmosAddress(listAddressCosmos);
+    } catch (error) {
+      console.trace({ errorCosmos: error });
+      throw new Error(error?.message ?? JSON.stringify(error));
+    }
   };
 
-  const connect = useInactiveConnect();
-  const isCheckOwallet = !isEmptyObject(cosmosAddresses) && owalletCheck('owallet');
   const handleConnectWalletInEvmNetwork = async (walletType: WalletType) => {
-    const isMetamask = !!window.ethereum.isMetaMask;
-    if (isMetamask) {
-      const isUnlock = await isUnlockMetamask();
-      if (!isUnlock) {
-        // request to unlock metmask
-        await window.Metamask.getEthAddress();
-      }
-    } else if (!isCheckOwallet && !isMetamask) {
-      displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
-      throw new Error('Please install Metamask wallet');
-    }
+    // re-polyfill ethereum for dapp
+    window.ethereumDapp = walletType === 'owallet' ? window.eth_owallet : window.ethereum;
+
+    const metamaskAddress = await window.Metamask.getEthAddress();
+    console.log({ metamaskAddress });
     // if chain id empty, we switch to default network which is BSC
-    if (!window.ethereum || !window.ethereum.chainId) {
+    if (!window.ethereumDapp || !window.ethereumDapp.chainId) {
       await window.Metamask.switchNetwork(Networks.bsc);
     }
     await connect();
   };
 
-  // re-polyfill tronWeb
   const handleConnectWalletInTronNetwork = async (walletType: WalletType) => {
-    // @ts-ignore
+    // re-polyfill tronWeb
     window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
-    // @ts-ignore
     window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
 
-    // @ts-ignore
     window.Metamask = new Metamask(window.tronWebDapp);
 
     const { tronAddress } = await switchWalletTron();
@@ -124,7 +110,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       console.log('error handleConnectWalletByNetwork: ', error);
       setConnectStatus('failed');
       const msg = error.message ? error.message : JSON.stringify(error);
-      displayToast(TToastType.TRONLINK_FAILED, { message: msg });
+      displayToast(TToastType.WALLET_FAILED, { message: msg });
     }
   };
 
