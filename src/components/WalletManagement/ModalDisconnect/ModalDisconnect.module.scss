@@ -160,6 +160,11 @@
       padding-left: 8px;
       padding-right: 8px;
     }
+
+    .copyBtn {
+      display: flex;
+      cursor: pointer;
+    }
   }
 
   .actions {

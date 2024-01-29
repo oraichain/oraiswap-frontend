@@ -2,13 +2,12 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import { ReactComponent as DisconnectIcon } from 'assets/icons/ic_logout.svg';
-import { ReactComponent as KeplrIcon } from 'assets/icons/keplr-icon.svg';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 import { Button } from 'components/Button';
 import ToggleSwitch from 'components/ToggleSwitch';
-import { cosmosWallets, evmWallets, type NetworkType } from 'components/WalletManagement/walletConfig';
 import { ThemeContext } from 'context/theme-context';
-import { cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworks } from 'helper';
+import { cosmosWallets, tronWallets, evmWallets, type NetworkType } from 'components/WalletManagement/walletConfig';
+import { tronNetworksWithIcon, cosmosNetworksWithIcon, evmNetworksIconWithoutTron } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -21,6 +20,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from 'store/configure';
 import { ModalDisconnect } from '../ModalDisconnect';
 import styles from './MyWallet.module.scss';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 
 export const MyWallet: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
@@ -59,16 +59,15 @@ export const MyWallet: React.FC<{
       <div className={styles.addressByNetworkItem}>
         {cosmosNetworksWithIcon.map((network, index) => {
           const chainAddress = cosmosAddresses[network.chainId];
+          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+          if (!NetworkIcon) NetworkIcon = DefaultIcon;
+
           return !cosmosAddresses[network.chainId] ? null : (
             <div className={styles.addressByChainInNetwork} key={network.chainId}>
               <div className={styles.left}>
                 <div className={styles.icon}>
                   <div className={styles.iconChain}>
-                    {theme === 'light' ? (
-                      <network.IconLight width={30} height={30} />
-                    ) : (
-                      <network.Icon width={30} height={30} />
-                    )}
+                    <NetworkIcon width={30} height={30} />
                   </div>
 
                   <div className={styles.iconWalletByChain}>
@@ -168,6 +167,61 @@ export const MyWallet: React.FC<{
       </div>
     );
   };
+  const renderTronAddresses = () => {
+    if (!tronAddress) return <></>;
+
+    const tronWalletConnected = tronWallets.find((item) => item.nameRegistry === walletByNetworks.tron);
+    if (!tronWalletConnected) return <></>;
+
+    return (
+      <div className={styles.addressByNetworkItem}>
+        {tronNetworksWithIcon.map((network) => {
+          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+          if (!NetworkIcon) NetworkIcon = DefaultIcon;
+          return (
+            <div key={network.chainId} className={styles.addressByChainInNetwork}>
+              <div className={styles.left}>
+                <div className={styles.icon}>
+                  <div className={styles.iconChain}>
+                    <NetworkIcon width={30} height={30} />
+                  </div>
+
+                  <div className={styles.iconWalletByChain}>
+                    <tronWalletConnected.icon width={18} height={18} />
+                  </div>
+                </div>
+                <div className={styles.info}>
+                  <div className={styles.chainName}>{network.chainName}</div>
+                  <div className={styles.chainAddress}>
+                    <span>{reduceString(tronAddress, 6, 6)}</span>
+                    <div className={styles.copyBtn} onClick={(e) => handleCopy(tronAddress)}>
+                      {isCopied && copiedValue === tronAddress ? (
+                        <SuccessIcon width={15} height={15} />
+                      ) : (
+                        <CopyIcon width={15} height={15} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.right}>
+                {/* get wallet info from local storage */}
+                <div
+                  className={styles.disconnectBtn}
+                  onClick={() => {
+                    setIsShowDisconnect(true);
+                    setCurrentDisconnectingNetwork('tron');
+                  }}
+                >
+                  <DisconnectIcon width={25} height={25} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -233,50 +287,7 @@ export const MyWallet: React.FC<{
         <div className={styles.listAddressByNetwork}>
           {renderCosmosAddresses()}
           {renderEvmAddresses()}
-          {tronAddress && (
-            <div className={styles.addressByNetworkItem}>
-              {tronNetworks.map((network, index) => {
-                return (
-                  <div className={styles.addressByChainInNetwork}>
-                    <div className={styles.left}>
-                      <div className={styles.icon}>
-                        <div className={styles.iconChain}>
-                          {theme === 'light' ? (
-                            <network.IconLight width={30} height={30} />
-                          ) : (
-                            <network.Icon width={30} height={30} />
-                          )}
-                        </div>
-
-                        <div className={styles.iconWalletByChain}>
-                          <KeplrIcon width={18} height={18} />
-                        </div>
-                      </div>
-                      <div className={styles.info}>
-                        <div className={styles.chainName}>{network.chainName}</div>
-                        <div className={styles.chainAddress}>
-                          <span>0xD3aB...7f1108</span>
-                          <div className={styles.copyBtn} onClick={(e) => handleCopy('1234')}>
-                            {isCopied && copiedValue === '1234' ? (
-                              <SuccessIcon width={15} height={15} />
-                            ) : (
-                              <CopyIcon width={15} height={15} />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.right}>
-                      {/* get wallet info from local storage */}
-                      <div className={styles.disconnectBtn} onClick={() => {}}>
-                        <DisconnectIcon width={25} height={25} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {renderTronAddresses()}
         </div>
       </div>
     </div>

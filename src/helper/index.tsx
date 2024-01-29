@@ -59,6 +59,8 @@ export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
 
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
+export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
+
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
@@ -278,24 +280,21 @@ export const switchWalletCosmos = async (type: WalletType) => {
 
 export const switchWalletTron = async () => {
   let tronAddress: string;
-  if (isMobile()) {
-    const addressTronMobile = await window.tronLink.request({
-      method: 'tron_requestAccounts'
-    });
-    //@ts-ignore
-    tronAddress = addressTronMobile?.base58;
+  // @ts-ignore
+  const res = await window.tronLinkDapp.request({
+    method: 'tron_requestAccounts'
+  });
+  // @ts-ignore
+  if (isMobile() || window.tronLinkDapp?.isOwallet) {
+    tronAddress = res?.base58;
   } else {
-    if (!window.tronWeb.defaultAddress?.base58) {
-      const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-        method: 'tron_requestAccounts'
-      });
-      // throw error when not connected
-      if (code !== 200) {
-        throw new Error(message);
-      }
-    }
-    tronAddress = window.tronWeb.defaultAddress.base58;
+    const { code, message = 'Tronlink is not ready' } = res;
+    if (code !== 200) throw new Error(message);
+    tronAddress = window.tronWeb?.defaultAddress?.base58;
   }
+
+  if (!tronAddress) throw new Error(res?.message ?? 'Error get Tron address!');
+
   return {
     tronAddress
   };

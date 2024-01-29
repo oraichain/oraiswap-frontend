@@ -20,7 +20,7 @@ export const ModalChooseWallet: React.FC<{
     <Modal
       isOpen={true}
       close={close}
-      open={() => { }}
+      open={() => {}}
       isCloseBtn={false}
       className={classNames(styles.chooseWalletModalContainer, `${styles[theme]}`)}
     >

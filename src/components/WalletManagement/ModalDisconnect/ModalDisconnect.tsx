@@ -7,6 +7,8 @@ import { NetworkType, allWallets, walletProvider } from '../walletConfig';
 import styles from './ModalDisconnect.module.scss';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { reduceString } from 'libs/utils';
+import { useCopyClipboard } from 'hooks/useCopyClipboard';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
 
 const cx = cn.bind(styles);
 
@@ -20,6 +22,8 @@ export const ModalDisconnect: React.FC<{
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const { isCopied, copiedValue, handleCopy } = useCopyClipboard();
+
   const chains =
     walletProvider.find((provider) => provider.networkType === currentDisconnectingNetwork)?.networks || [];
 
@@ -107,7 +111,13 @@ export const ModalDisconnect: React.FC<{
             <div className={cx('content-2')}>
               {currentWalletConnected && <currentWalletConnected.icon width={30} height={30} />}
               <span className={cx('sub-label')}>{reduceString(checkAddressByWalletType(), 6, 6)}</span>
-              <CopyIcon />
+              <div className={styles.copyBtn} onClick={(e) => handleCopy(tronAddress)}>
+                {isCopied && copiedValue === tronAddress ? (
+                  <SuccessIcon width={15} height={15} />
+                ) : (
+                  <CopyIcon width={15} height={15} />
+                )}
+              </div>
             </div>
           </div>
           <div className={cx('actions')}>
