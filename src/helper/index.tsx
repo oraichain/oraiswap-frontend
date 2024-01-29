@@ -6,7 +6,7 @@ import {
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
-  WalletType,
+  WalletType as WalletCosmosType,
   ChainIdEnum,
   BigDecimal,
   COSMOS_CHAIN_ID_COMMON,
@@ -28,6 +28,7 @@ import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { leapSnapId } from './constants';
 import { Bech32Config } from '@keplr-wallet/types';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { WalletType } from 'components/WalletManagement/walletConfig';
 
 export interface Tokens {
   denom?: string;
@@ -229,15 +230,15 @@ export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
 
-export const keplrCheck = (type: WalletType) => {
+export const keplrCheck = (type: WalletCosmosType) => {
   return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
 };
 
-export const owalletCheck = (type: WalletType) => {
+export const owalletCheck = (type: WalletCosmosType) => {
   return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
 };
 
-export const switchWallet = (type: WalletType) => {
+export const switchWallet = (type: WalletCosmosType) => {
   if (type === 'owallet' && window.owallet) {
     window.Keplr = new Keplr(type);
     return true;
@@ -264,7 +265,7 @@ export const isEmptyObject = (value: object) => {
   return true;
 };
 
-export const switchWalletCosmos = async (type: WalletType) => {
+export const switchWalletCosmos = async (type: WalletCosmosType) => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();
@@ -278,14 +279,14 @@ export const switchWalletCosmos = async (type: WalletType) => {
   });
 };
 
-export const switchWalletTron = async () => {
+export const switchWalletTron = async (walletType: WalletType) => {
   let tronAddress: string;
   // @ts-ignore
   const res = await window.tronLinkDapp.request({
     method: 'tron_requestAccounts'
   });
   // @ts-ignore
-  if (isMobile() || window.tronLinkDapp?.isOwallet) {
+  if (isMobile() || (walletType === 'owallet' && window.tronLinkDapp?.isOwallet)) {
     // @ts-ignore
     tronAddress = res?.base58;
   } else {

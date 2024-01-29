@@ -224,7 +224,7 @@ export const initClient = async () => {
       }
     }
   } catch (ex) {
-    console.log(ex);
+    console.log({ errorInitClient: ex });
     throw new Error(ex?.message ?? 'Error when suggestChain');
   }
 };

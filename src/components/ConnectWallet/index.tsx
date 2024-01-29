@@ -271,7 +271,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
 
   const connectTronLink = async () => {
     try {
-      const { tronAddress: address } = await switchWalletTron();
+      const { tronAddress: address } = await switchWalletTron(walletTypeActive);
       loadTokenAmounts({ tronAddress: address });
       setTronAddress(address);
     } catch (ex) {

@@ -79,7 +79,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
     window.Metamask = new Metamask(window.tronWebDapp);
 
-    const { tronAddress } = await switchWalletTron();
+    const { tronAddress } = await switchWalletTron(walletType);
     setTronAddress(tronAddress);
   };
 
