@@ -82,6 +82,11 @@ export type DisplayToastFn = ((
     type: TToastType.TX_INFO,
     extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>>,
     options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.WALLET_FAILED,
+    extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>>,
+    options?: Partial<ToastOptions>
   ) => void);
 
 export interface DisplayToast {

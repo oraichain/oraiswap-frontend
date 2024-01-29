@@ -157,10 +157,10 @@ const App = () => {
       }
 
       if (walletByNetworks.tron === 'owallet') {
-        // @ts-ignore
         const res = await window.tronLinkDapp.request({
           method: 'tron_requestAccounts'
         });
+        // @ts-ignore
         tronAddress = res?.base58;
         if (tronAddress) setTronAddress(tronAddress);
       }

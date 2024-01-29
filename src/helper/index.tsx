@@ -286,6 +286,7 @@ export const switchWalletTron = async () => {
   });
   // @ts-ignore
   if (isMobile() || window.tronLinkDapp?.isOwallet) {
+    // @ts-ignore
     tronAddress = res?.base58;
   } else {
     const { code, message = 'Tronlink is not ready' } = res;
