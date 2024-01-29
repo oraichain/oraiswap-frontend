@@ -24,13 +24,13 @@ import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { calcMaxAmount, useGetFeeBitcoin } from '../helpers';
+import { calcMaxAmount, checkDisableTransferBtc, useGetFeeBitcoin } from '../helpers';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -93,7 +93,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network: CustomChainInfo) => {
     let address: string = '';
     try {
-      if (network.networkType === 'bitcoin' as string) {
+      if (network.networkType === ('bitcoin' as string)) {
         address = await window.Bitcoin.getAddress();
       } else if (network.networkType === 'evm') {
         if (network.chainId === '0x2b6653dc') {
@@ -194,11 +194,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           {' '}
           {receivedAmount.toFixed(6)} {token.name}
         </span>
-        {
-          !!toDisplayBTCFee && <>
-            {' '}- BTC fee: <span>{toDisplayBTCFee} BTC </span>
+        {!!toDisplayBTCFee && (
+          <>
+            {' '}
+            - BTC fee: <span>{toDisplayBTCFee} BTC </span>
           </>
-        }
+        )}
       </div>
     );
   };
@@ -210,7 +211,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
     return buttonName;
   };
-
+  const usdt = useUsdtToBtc();
+  console.log(convertAmount, usdt.displayAmount, 'convertAmount');
+  console.log(token, 'token chain info');
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
@@ -377,7 +380,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <button
-                disabled={transferLoading || !addressTransfer || receivedAmount < 0}
+                disabled={
+                  transferLoading ||
+                  !addressTransfer ||
+                  receivedAmount < 0 ||
+                  checkDisableTransferBtc(convertAmount, usdt.displayAmount, token.coinGeckoId)
+                }
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >

@@ -31,7 +31,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
   const usdt = useUsdtToBtc();
-  console.log('🚀 ~ usdtToBtc ~ usdtToBtc:', usdt);
+
   const expiration = nomic.depositAddress?.expirationTimeMs;
 
   useEffect(() => {
@@ -110,7 +110,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{usdt?.displayAmount} BTC</span>
+            <span>{usdt?.displayAmount} BTC (≈$50)</span>
 
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>

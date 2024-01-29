@@ -45,7 +45,7 @@ import { useEffect, useState } from 'react';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
-import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, btcNetwork } from 'helper/constants';
+import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, bitcoinChainId, btcNetwork } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 
@@ -727,24 +727,21 @@ export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
     console.log(e);
   }
 };
+export const BTCtoSat = (sat = 0, isDisplayAmount?: boolean) => {
+  if (!sat) return 0;
+  if (isDisplayAmount) return new BitcoinUnit(sat, 'BTC').to('satoshi').getValueAsString();
+  return new BitcoinUnit(sat, 'BTC').to('satoshi').getValue();
+};
 
-// export const usdtToBtc = () => {
-//   const originalFromToken = oraichainTokens.find((token) => token.coinGeckoId === 'tether');
-//   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-//   const originalToToken = oraichainTokens.find((token) => token.coinGeckoId === 'bitcoin');
-//   const { data } = useQuery(
-//     ['simulate-relayer-data', originalFromToken, originalToToken],
-//     () => {
-//       return handleSimulateSwap({
-//         originalFromInfo: originalFromToken,
-//         originalToInfo: originalToToken,
-//         originalAmount: 50,
-//         routerClient
-//       });
-//     },
-//     {
-//       enabled: !!originalFromToken && !!originalToToken
-//     }
-//   );
-//   return data;
-// };
+export const checkDisableTransferBtc = (fromAmount: number, minimumAmount: number, chainId: string) => {
+  if (chainId === bitcoinChainId) {
+    if (!fromAmount || !minimumAmount) return true;
+    const fromSat = BTCtoSat(fromAmount);
+    const minimumSat = BTCtoSat(minimumAmount);
+    if (fromSat >= minimumSat) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+};
