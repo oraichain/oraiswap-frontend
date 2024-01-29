@@ -1,42 +1,32 @@
-import { displayToast, TToastType } from 'components/Toasts/Toast';
 import {
   IBC_WASM_CONTRACT,
-  WalletType,
   WEBSOCKET_RECONNECT_ATTEMPTS,
   WEBSOCKET_RECONNECT_INTERVAL
 } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import {
-  checkSnapExist,
-  checkVersionWallet,
-  getListAddressCosmos,
-  getNetworkGasPrice,
-  getStorageKey,
-  keplrCheck,
-  setStorageKey,
-  switchWallet
-} from 'helper';
+import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
+import { leapWalletType } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useWalletReducer from 'hooks/useWalletReducer';
+import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import { isMobile } from '@walletconnect/browser-utils';
-import { ethers } from 'ethers';
-import Menu from './Menu';
-import Instruct from './Instruct';
-import './index.scss';
-import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
-import useWalletReducer from 'hooks/useWalletReducer';
+import './index.scss';
+import Instruct from './Instruct';
+import Menu from './Menu';
 
 const App = () => {
-  const [address, setAddress] = useConfigReducer('address');
-  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
-  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [address, setOraiAddress] = useConfigReducer('address');
+  const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -44,8 +34,21 @@ const App = () => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const ethOwallet = window.eth_owallet;
 
   // useTronEventListener();
+
+  // TODO: polyfill evm, tron, need refactor
+  useEffect(() => {
+    if (walletByNetworks.tron === 'owallet') {
+      window.tronWebDapp = window.tronWeb_owallet;
+      window.tronLinkDapp = window.tronLink_owallet;
+      window.Metamask = new Metamask(window.tronWebDapp);
+    }
+    if (walletByNetworks.evm === 'owallet' && ethOwallet) {
+      window.ethereumDapp = ethOwallet;
+    }
+  }, [walletByNetworks, ethOwallet]);
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
@@ -109,9 +112,6 @@ const App = () => {
     // if (window.keplr && !isMobile()) {
     //   keplrGasPriceCheck();
     // }
-
-    // add event listener here to prevent adding the same one everytime App.tsx re-renders
-    // try to set it again
   }, []);
 
   useEffect(() => {
@@ -141,68 +141,35 @@ const App = () => {
 
   const keplrHandler = async (e) => {
     try {
-      // const typeWallet = getStorageKey();
+      let metamaskAddress, oraiAddress, tronAddress;
+      if (walletByNetworks.cosmos) {
+        oraiAddress = await window.Keplr.getKeplrAddr();
+        if (oraiAddress) {
+          const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+          setCosmosAddress(listAddressCosmos);
+          setOraiAddress(oraiAddress);
+        }
+      }
 
-      // const isSnap = await checkSnapExist();
-      // if (!typeWallet) {
-      //   const vs = window?.keplr?.version;
-      //   const isCheckKeplr = !!vs && keplrCheck('keplr');
-      //   if (checkVersionWallet()) {
-      //     setStorageKey('typeWallet', 'owallet');
-      //   } else if (isCheckKeplr) {
-      //     setStorageKey('typeWallet', 'keplr' as WalletType);
-      //   } else if (isSnap) {
-      //     setStorageKey('typeWallet', leapWalletType);
-      //   }
-      // }
+      if (walletByNetworks.evm === 'owallet') {
+        metamaskAddress = await window.Metamask.getEthAddress();
+        if (metamaskAddress) setMetamaskAddress(metamaskAddress);
+      }
 
-      // let metamaskAddr = undefined,
-      //   tronAddr = undefined;
-      // if (!isMobile()) {
-      //   if (walletByNetworks.tron === 'owallet') {
-      //     await window.tronLink.request({
-      //       method: 'tron_requestAccounts'
-      //     });
-      //     const base58Address = window.tronWeb?.defaultAddress?.base58;
-      //     if (base58Address && base58Address !== tronAddress) {
-      //       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      //       tronAddr = base58Address;
-      //       setTronAddress(base58Address);
-      //     }
-      //   }
+      if (walletByNetworks.tron === 'owallet') {
+        // @ts-ignore
+        const res = await window.tronLinkDapp.request({
+          method: 'tron_requestAccounts'
+        });
+        tronAddress = res?.base58;
+        if (tronAddress) setTronAddress(tronAddress);
+      }
 
-      //   if (walletByNetworks.evm === 'owallet') {
-      //     try {
-      //       const [address] = await window.ethereum!.request({
-      //         method: 'eth_requestAccounts',
-      //         params: []
-      //       });
-      //       if (address && address !== metamaskAddress) {
-      //         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      //         metamaskAddr = address;
-      //         setMetamaskAddress(ethers.utils.getAddress(address));
-      //       }
-      //     } catch (error) {
-      //       if (error?.code === -32002) {
-      //         displayToast(TToastType.METAMASK_FAILED, {
-      //           message: ' Already processing request Ethereum account. Please wait'
-      //         });
-      //       }
-      //     }
-      //   }
-      // }
-
-      // event owallet va dang connect vi evm ko phai la owallet thi ko load lai balance evm, tron
-
-      const oraiAddress = await window.Keplr.getKeplrAddr();
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
       loadTokenAmounts({
-        oraiAddress
-        // metamaskAddress: metamaskAddr,
-        // tronAddress: tronAddr
+        oraiAddress,
+        metamaskAddress,
+        tronAddress
       });
-      setAddress(oraiAddress);
-      setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('Error: ', error.message);
       setStatusChangeAccount(false);
