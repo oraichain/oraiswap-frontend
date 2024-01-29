@@ -3,7 +3,7 @@ import cn from 'classnames/bind';
 import { Button } from 'components/Button';
 import type { Wallet as WalletResetType } from 'components/ConnectWallet/useResetBalance';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
-import { isUnlockMetamask, keplrCheck } from 'helper';
+import { keplrCheck } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -37,7 +37,6 @@ export const WalletManagement: FC<{}> = () => {
   // update wallet provider with status is active or not
   useEffect(() => {
     async function updateWalletProvider() {
-      const isMetamaskUnlock = await isUnlockMetamask();
       const updatedWalletProvider = walletProviderWithStatus.map((item) => {
         const updatedWallets = item.wallets.map((wallet) => {
           let isActive = true;
@@ -49,7 +48,7 @@ export const WalletManagement: FC<{}> = () => {
               isActive = isCheckOwallet;
               break;
             case 'leapSnap':
-              isActive = isMetamask && isMetamaskUnlock;
+              isActive = isMetamask;
               break;
           }
           return { ...wallet, isActive };

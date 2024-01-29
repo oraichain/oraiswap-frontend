@@ -2,7 +2,7 @@ import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
-import { getListAddressCosmos, setStorageKey, switchWalletTron } from 'helper';
+import { checkSnapExist, getListAddressCosmos, isUnlockMetamask, setStorageKey, switchWalletTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -13,6 +13,7 @@ import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { connectSnap } from '@leapwallet/cosmos-snap-provider';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -32,6 +33,15 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
+    if (walletType === 'leapSnap') {
+      const isUnlock = await isUnlockMetamask();
+      if (!isUnlock) await window.Metamask.getEthAddress();
+
+      const isSnap = await checkSnapExist();
+      if (!isSnap) {
+        await connectSnap();
+      }
+    }
     window.Keplr = new Keplr(walletType);
     setStorageKey('typeWallet', walletType);
     await initClient();
@@ -194,10 +204,10 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
             <h4>Fail to connect to wallet</h4>
             <div className={styles.switchText}>Unfortunately, we did not receive the confirmation.</div>
             <div className={styles.groupBtns}>
-              <Button onClick={() => setConnectStatus('init')} type="secondary">
+              <Button onClick={() => setConnectStatus('init')} type="secondary-sm">
                 Cancel
               </Button>
-              <Button onClick={handleConfirmSwitch} type="primary">
+              <Button onClick={handleConfirmSwitch} type="primary-sm">
                 Try again
               </Button>
             </div>
