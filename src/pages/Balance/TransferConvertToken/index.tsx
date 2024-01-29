@@ -173,6 +173,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  console.log('🚀 ~ to:', to);
+  console.log('🚀 ~ token:', token);
+  console.log('🚀 ~ relayerFeeTokenFee:', relayerFeeTokenFee);
+
   const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
@@ -212,8 +216,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     return buttonName;
   };
   const usdt = useUsdtToBtc();
-  console.log(convertAmount, usdt.displayAmount, 'convertAmount');
-  console.log(token, 'token chain info');
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>

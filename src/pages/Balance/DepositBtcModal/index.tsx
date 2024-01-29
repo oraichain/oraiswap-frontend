@@ -15,6 +15,8 @@ import { timeAgo } from 'helper';
 
 import { satToBTC, useGetInfoBtc } from '../helpers';
 import { useUsdtToBtc } from 'hooks/useTokenFee';
+import { useCopy } from 'hooks/useCopy';
+import { DepositPending } from 'libs/nomic/models/nomic-client/nomic-client-interface';
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,14 +28,33 @@ interface ModalProps {
 
 const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAddress, addressRecovery }) => {
   const [theme] = useConfigReducer('theme');
-  const [isCopied, setIsCopied] = useState(false);
+  const { isCopied, setIsCopied } = useCopy();
   const [urlQRCode, setUrlQRCode] = useState(null);
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
+  const [oraiAddress] = useConfigReducer('address');
+  const [depositPendings, setDepositPendings] = useState<DepositPending[]>();
+
   const usdt = useUsdtToBtc();
 
   const expiration = nomic.depositAddress?.expirationTimeMs;
+  useEffect(() => {
+    let intervalId;
+    if (oraiAddress) {
+      intervalId = setInterval(async () => {
+        const res = await nomic.getDepositsPending(oraiAddress);
+        console.log('🚀 ~ intervalId=setInterval ~ res:', res);
+        if (res?.length > 0) {
+          setDepositPendings(res);
+        }
+      }, 10000);
+      return;
+    }
 
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [oraiAddress]);
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
@@ -44,29 +65,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
     return () => {};
   }, [nomic.depositAddress?.bitcoinAddress]);
 
-  useEffect(() => {
-    const TIMEOUT_COPY = 2000;
-    let timeoutId;
-    if (isCopied) {
-      timeoutId = setTimeout(() => {
-        setIsCopied(false);
-      }, TIMEOUT_COPY);
-    }
-
-    return () => clearTimeout(timeoutId);
-  }, [isCopied]);
-
   return (
     <Modal theme={theme} isOpen={isOpen} close={close} open={open} className={styles[theme]}>
-      {/* <div className={classNames(style.modal)}>
-        <button
-          onClick={async () => {
-            await nomic.setRecoveryAddress('tb1qepum984v3l7nnvzy79dtgx3kh709uvm93v3qjj');
-          }}
-        >
-          Set recovery address
-        </button>
-      </div> */}
       <div className={styles.deposit}>
         <div className={styles.label}>
           <span className={styles.title}>Transfer BTC to Oraichain</span>
@@ -102,6 +102,16 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             </span>
           </div>
         </div>
+        {depositPendings?.length > 0 && (
+          <div className={styles.estimate}>
+            <div className={styles.timeMinerFee}>
+              <span className={styles.fee}>
+                Deposits Pending: <b>{depositPendings?.length}</b> transaction{depositPendings?.length > 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className={styles.estimate}>
           <div className={styles.timeMinerFee}>
             <span className={styles.fee}>Minimum Deposit:</span>
@@ -111,7 +121,6 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
           </div>
           <div className={styles.value}>
             <span>{usdt?.displayAmount} BTC (≈$50)</span>
-
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>

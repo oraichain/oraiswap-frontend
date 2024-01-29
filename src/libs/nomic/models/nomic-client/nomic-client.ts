@@ -41,6 +41,12 @@ export class NomicClient implements NomicClientInterface {
       method: 'GET'
     }).then((data) => data.json());
   }
+  public async getDepositsPending(oraiAddress: string): Promise<any> {
+    if (!oraiAddress) throw Error('Not found orai address!');
+    return await fetch(`${Config.relayerUrl}/pending_deposits?receiver=${oraiAddress}`, {
+      method: 'GET'
+    }).then((data) => data.json());
+  }
 
   public async generateAddress() {
     const isKeplrActive = await window.Keplr.getKeplr();

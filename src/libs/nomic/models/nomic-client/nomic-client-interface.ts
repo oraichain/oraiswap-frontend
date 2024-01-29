@@ -20,7 +20,17 @@ export interface ResConfigOraiBTC {
   transfer_fee: number;
   units_per_sat: number;
 }
+export interface DepositPending {
+  deposit: Deposit;
+  confirmations: number;
+}
 
+export interface Deposit {
+  txid: string;
+  vout: number;
+  amount: number;
+  height: any;
+}
 export abstract class NomicClientInterface {
   readonly modifier = BigInt(1e6);
   readonly nbtcModifier = BigInt(1e14);
@@ -36,4 +46,5 @@ export abstract class NomicClientInterface {
   getRecoveryAddress: () => Promise<string>;
   getAccountInfo: (addressAcc: string) => Promise<AuthAccount>;
   getConfig: () => Promise<ResConfigOraiBTC>;
+  getDepositsPending: (oraiAddress: string) => Promise<DepositPending[]>;
 }
