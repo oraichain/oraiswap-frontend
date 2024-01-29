@@ -246,7 +246,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectBitcoin = async () => {
     try {
       const btcAddress = await window.Bitcoin.getAddress();
-      console.log('🚀 ~ connectBitcoin ~ btcAddress:', btcAddress);
       if (!btcAddress) {
         displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Owallet to get address bitcoin!' });
         throw Error('Please install Owallet to get address bitcoin!');

@@ -43,7 +43,6 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
     if (oraiAddress) {
       intervalId = setInterval(async () => {
         const res = await nomic.getDepositsPending(oraiAddress);
-        console.log('🚀 ~ intervalId=setInterval ~ res:', res);
         if (res?.length > 0) {
           setDepositPendings(res);
         }
