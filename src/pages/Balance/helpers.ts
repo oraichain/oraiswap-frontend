@@ -511,11 +511,6 @@ const MIN_TX_FEE = 1000;
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;
 
-const networkConfig = {
-  RELAYERS: [process.env.RELAYER || 'https://oraibtc.relayer.orai.io:443'],
-  LCD: [process.env.LCD || 'https://oraibtc.lcd.orai.io']
-};
-
 export const BTC_SCAN = btcNetwork === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
 
 const inputBytes = (input) => {
@@ -665,7 +660,7 @@ export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSiz
 };
 
 const calculateDepositFees = async () => {
-  const { signatories, minerFeeRate, index } = await (await fetch(`${networkConfig.RELAYERS}/sigset`)).json();
+  const { signatories, minerFeeRate, index } = await (await fetch(`${config.relayerUrl}/sigset`)).json();
   const witnessSize = calculateEstWitnessSize(signatories.length);
   const feeRate = calculateFeeRateFromMinerFee(minerFeeRate, witnessSize);
   const inputSize = calculateInputSize(witnessSize);
@@ -677,7 +672,7 @@ const calculateDepositFees = async () => {
 
 const calculateCheckpointFees = async (feeRate: number, witnessSize: number) => {
   const { checkpoint_vsize: vsizeCheckpointTx, total_input_size: inputLength } = await (
-    await fetch(`${networkConfig.LCD}/bitcoin/checkpoint/current_checkpoint_size`)
+    await fetch(`${config.restUrl}/bitcoin/checkpoint/current_checkpoint_size`)
   ).json();
   const totalCheckpointInputWitnessSize = inputLength * witnessSize;
   const estVsize = vsizeCheckpointTx + totalCheckpointInputWitnessSize;
@@ -685,7 +680,7 @@ const calculateCheckpointFees = async (feeRate: number, witnessSize: number) => 
 };
 
 const calculateWithdrawFees = async (feeRate: number, dest: string) => {
-  const scriptPubkey = await (await fetch(`${networkConfig.LCD}/bitcoin/script_pubkey/${dest}`)).json();
+  const scriptPubkey = await (await fetch(`${config.restUrl}/bitcoin/script_pubkey/${dest}`)).json();
   console.log('base64 script pubkey: ', scriptPubkey);
   return (9 + Buffer.from(scriptPubkey, 'base64').length) * feeRate; // 9 is the magic number
 };
