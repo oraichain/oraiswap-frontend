@@ -25,7 +25,7 @@ export const WalletManagement: FC<{}> = () => {
   const loadTokenAmounts = useLoadTokens();
 
   const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
-  const [isShowChooseWallet, setIsShowChooseWallet] = useState(true);
+  const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
   const [isShowMyWallet, setIsShowMyWallet] = useState(false);
 
   // @ts-ignore
