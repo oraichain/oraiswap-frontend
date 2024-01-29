@@ -30,7 +30,7 @@ export default class Metamask extends EvmWallet {
   }
 
   public checkTron() {
-    if (window.tronWeb && window.tronLink) {
+    if (window.tronWebDapp && window.tronLinkDapp) {
       return true;
     }
 
