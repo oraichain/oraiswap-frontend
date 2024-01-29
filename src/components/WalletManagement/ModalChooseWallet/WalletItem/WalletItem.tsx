@@ -85,7 +85,7 @@ export const WalletItem = ({
   const connectWalletButton = (
     <WalletConnectComponent
       walletStatus={status}
-      disconnect={<Disconnected buttonText="Connect Wallet" />}
+      disconnect={<Disconnected buttonText="Connect" />}
       connected={<Connected buttonText={'Connected'} />}
       connecting={<Connecting buttonText={'Connecting...'} />}
     />

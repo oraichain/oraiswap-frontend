@@ -1,8 +1,8 @@
 import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
-import type { WalletNetwork, WalletProvider } from 'components/WalletManagement/walletConfig';
-import { getListAddressCosmos, setStorageKey } from 'helper';
+import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
+import { checkSnapExist, getListAddressCosmos, isUnlockMetamask, setStorageKey, switchWalletTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -11,6 +11,9 @@ import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
+import Metamask from 'libs/metamask';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import { connectSnap } from '@leapwallet/cosmos-snap-provider';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -18,11 +21,10 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
-  const [_oraiAddress, setOraiAddress] = useConfigReducer('address');
+  const [, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
-  console.log({ _oraiAddress });
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
   const handleConfirmSwitch = async () => {
@@ -31,6 +33,15 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
+    if (walletType === 'leapSnap') {
+      const isUnlock = await isUnlockMetamask();
+      if (!isUnlock) await window.Metamask.getEthAddress();
+
+      const isSnap = await checkSnapExist();
+      if (!isSnap) {
+        await connectSnap();
+      }
+    }
     window.Keplr = new Keplr(walletType);
     setStorageKey('typeWallet', walletType);
     await initClient();
@@ -39,6 +50,20 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setOraiAddress(oraiAddr);
     const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
     setCosmosAddress(listAddressCosmos);
+  };
+
+  // re-polyfill tronWeb
+  const handleConnectWalletInTronNetwork = async (walletType: WalletType) => {
+    // @ts-ignore
+    window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
+    // @ts-ignore
+    window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
+
+    // @ts-ignore
+    window.Metamask = new Metamask(window.tronWebDapp);
+
+    const { tronAddress } = await switchWalletTron();
+    setTronAddress(tronAddress);
   };
 
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
@@ -52,7 +77,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           //  TODO: handle connect evm
           break;
         case 'tron':
-          //  TODO: handle connect tron
+          await handleConnectWalletInTronNetwork(wallet.nameRegistry as WalletCosmosType);
           break;
         default:
           setConnectStatus('init');
@@ -67,6 +92,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     } catch (error) {
       console.log('error handleConnectWalletByNetwork: ', error);
       setConnectStatus('failed');
+      const msg = error.message ? error.message : JSON.stringify(error);
+      displayToast(TToastType.TRONLINK_FAILED, { message: msg });
     }
   };
 
@@ -131,7 +158,11 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       case 'init':
       case 'loading':
         content = (
-          <div className={styles.wallets}>
+          <div
+            className={`${styles.wallets} ${
+              networkType === 'cosmos' ? styles.flexJustifyStart : styles.flexJustifyBetween
+            }`}
+          >
             {wallets.map((w) => {
               return (
                 <WalletItem
@@ -173,10 +204,10 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
             <h4>Fail to connect to wallet</h4>
             <div className={styles.switchText}>Unfortunately, we did not receive the confirmation.</div>
             <div className={styles.groupBtns}>
-              <Button onClick={() => setConnectStatus('init')} type="secondary">
+              <Button onClick={() => setConnectStatus('init')} type="secondary-sm">
                 Cancel
               </Button>
-              <Button onClick={handleConfirmSwitch} type="primary">
+              <Button onClick={handleConfirmSwitch} type="primary-sm">
                 Try again
               </Button>
             </div>
@@ -207,9 +238,11 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
   const renderNetworkIcons = () => {
     return networks.map((network, index) => {
+      let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+      if (!NetworkIcon) NetworkIcon = DefaultIcon;
       return (
         <div className={styles.networkIcon} key={network.chainName + index}>
-          {theme === 'dark' ? <network.Icon width={18} height={18} /> : <network.IconLight width={18} height={18} />}
+          <NetworkIcon width={18} height={18} />
         </div>
       );
     });

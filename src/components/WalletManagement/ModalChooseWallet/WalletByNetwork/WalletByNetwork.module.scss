@@ -55,7 +55,6 @@
 
                 &>button {
                     width: 48%;
-                    padding: 8px 25px;
                     font-size: 15px;
                 }
             }
@@ -70,6 +69,14 @@
             padding-left: 4px;
             padding-right: 4px;
             width: 100%;
+        }
+
+        .flexJustifyBetween {
+            justify-content: space-between;
+
+            &>div {
+                width: 47%;
+            }
         }
     }
 }
