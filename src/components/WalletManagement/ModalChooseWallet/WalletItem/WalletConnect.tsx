@@ -21,13 +21,7 @@ export const Disconnected = ({
   return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
-export const Connected = ({
-  buttonText
-}: // onClick
-{
-  buttonText: string;
-  // onClick: MouseEventHandler<HTMLButtonElement>;
-}) => {
+export const Connected = ({ buttonText }: { buttonText: string }) => {
   return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 

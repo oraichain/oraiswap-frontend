@@ -96,6 +96,7 @@ export const MyWallet: React.FC<{
                       setIsShowDisconnect(true);
                       setCurrentDisconnectingNetwork(network.networkType);
                     }}
+                    title="Disconnect"
                   >
                     <DisconnectIcon width={25} height={25} />
                   </div>
@@ -156,6 +157,7 @@ export const MyWallet: React.FC<{
                       setIsShowDisconnect(true);
                       setCurrentDisconnectingNetwork(network.networkType);
                     }}
+                    title="Disconnect"
                   >
                     <DisconnectIcon width={25} height={25} />
                   </div>
@@ -167,6 +169,7 @@ export const MyWallet: React.FC<{
       </div>
     );
   };
+
   const renderTronAddresses = () => {
     if (!tronAddress) return <></>;
 
@@ -205,13 +208,13 @@ export const MyWallet: React.FC<{
                 </div>
               </div>
               <div className={styles.right}>
-                {/* get wallet info from local storage */}
                 <div
                   className={styles.disconnectBtn}
                   onClick={() => {
                     setIsShowDisconnect(true);
                     setCurrentDisconnectingNetwork('tron');
                   }}
+                  title="Disconnect"
                 >
                   <DisconnectIcon width={25} height={25} />
                 </div>

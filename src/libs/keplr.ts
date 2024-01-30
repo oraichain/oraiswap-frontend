@@ -73,9 +73,8 @@ export default class Keplr extends CosmosWallet {
 
       // do nothing without chainInfo
       if (!chainInfo) return;
-
       // if there is chainInfo try to suggest, otherwise enable it
-      if (!isMobile() && chainInfo) {
+      if (!isMobile()) {
         await this.keplr.experimentalSuggestChain(chainInfo as ChainInfo);
       }
       await this.keplr.enable(chainId);

@@ -211,17 +211,14 @@ export const initEthereum = async () => {
 
 export const initClient = async () => {
   try {
-    const keplr = await window.Keplr.getKeplr();
     // suggest our chain
-    if (keplr) {
-      const arrChainIds = [
-        network.chainId,
-        COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
-        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
-      ] as NetworkChainId[];
-      for (const chainId of arrChainIds) {
-        await window.Keplr.suggestChain(chainId);
-      }
+    const arrChainIds = [
+      network.chainId,
+      COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
+      COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
+    ] as NetworkChainId[];
+    for (const chainId of arrChainIds) {
+      await window.Keplr.suggestChain(chainId);
     }
   } catch (ex) {
     console.log({ errorInitClient: ex });
