@@ -133,7 +133,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         <div className={styles.aprDetail}>
           <div className={styles.fee}>
             <span>Swap fees</span>
-            <span>{14.1}%</span>
+            <span>{100 * Number(poolDetailData.info?.commissionRate || 0)}%</span>
           </div>
           <div className={styles.aprBoost}>
             <div className={styles.text}>
