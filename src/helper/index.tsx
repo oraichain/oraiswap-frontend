@@ -226,6 +226,17 @@ export const setStorageKey = (key = 'typeWallet', value) => {
   return localStorage.setItem(key, value);
 };
 
+export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType => {
+  try {
+    const result = localStorage.getItem(key);
+    const parsedResult = JSON.parse(result);
+    const wallet = JSON.parse(parsedResult.wallet);
+    return wallet.walletsByNetwork.cosmos ?? 'keplr';
+  } catch (error) {
+    console.log('error getWalletByNetworksFromStorage: ', error);
+  }
+};
+
 export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
