@@ -1,3 +1,4 @@
+const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
@@ -85,26 +86,16 @@ module.exports = {
       fs.copyFileSync(vendorFileSrc, vendorFileDest);
     }
 
-    // if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
-    //   const SentryWebpackPlugin = require('@sentry/webpack-plugin');
-    //   config.devtool = 'source-map';
-    //   config.plugins.push(
-    //     new SentryWebpackPlugin({
-    //       org: 'oraichain',
-    //       project: 'oraidex',
-
-    //       // Specify the directory containing build artifacts
-    //       include: './build',
-
-    //       // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
-    //       // and needs the `project:releases` and `org:read` scopes
-    //       authToken: process.env.SENTRY_AUTH_TOKEN,
-
-    //       // Optionally uncomment the line below to override automatic release name detection
-    //       release: vendorHash
-    //     })
-    //   );
-    // }
+    if (!isDevelopment && process.env.SENTRY_AUTH_TOKEN) {
+      config.devtool = 'source-map';
+      config.plugins.push(
+        sentryWebpackPlugin({
+          org: 'oraichain',
+          project: 'oraidex',
+          authToken: process.env.SENTRY_AUTH_TOKEN
+        })
+      );
+    }
 
     config.plugins.push(
       new webpack.DllReferencePlugin({
