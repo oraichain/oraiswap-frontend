@@ -146,11 +146,11 @@ const Pools: React.FC<{}> = () => {
           )}
         </div>
 
-        <NewPoolModal
+        {/* <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
-        />
+        /> */}
         <NewTokenModal
           isOpen={isOpenNewTokenModal}
           open={() => setIsOpenNewTokenModal(true)}
