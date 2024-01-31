@@ -93,7 +93,7 @@ export const getNetworkGasPrice = async (chainId): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -161,6 +161,7 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 
 const transferMsgError = (message: string, info?: InfoError) => {
   if (message.includes('invalid hash')) return `Transation was not included to block`;
+  if (message.includes("Assertion failed; minimum receive amount")) return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
   if (message.includes('account sequence mismatch'))
     return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`;
