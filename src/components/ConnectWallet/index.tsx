@@ -42,6 +42,8 @@ import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
 import { leapWalletType } from 'helper/constants';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import { initClient } from 'libs/utils';
 
 const cx = cn.bind(styles);
 
@@ -295,8 +297,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const connectKeplr = async (type: any) => {
     try {
       setWalletTypeStore(type);
-      await switchWalletCosmos(type);
-      // await window.Keplr.suggestChain(network.chainId);
+      await initClient();
+
       const oraiAddr = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
@@ -305,7 +307,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
-      throw Error(error);
+      throw new Error(error);
     }
   };
 

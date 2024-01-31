@@ -13,7 +13,7 @@ import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet } from 'helper';
+import { getStorageKey, switchWallet, switchWalletCosmos } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';

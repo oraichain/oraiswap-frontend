@@ -6,7 +6,11 @@ import useLoadTokens from './useLoadTokens';
 export function useTronEventListener() {
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const loadTokenAmounts = useLoadTokens();
+  const mobileMode = isMobile();
+
   useEffect(() => {
+    // not auto connect Tron in browser
+    if (!mobileMode) return;
     window.dispatchEvent(new Event('tronLink#initialized'));
     // Example
     // Suggested reception method
@@ -21,7 +25,7 @@ export function useTronEventListener() {
       // the user probably doesn't have TronLink installed.
       setTimeout(handleTronLink, 3000); // 3 seconds
     }
-  }, []);
+  }, [mobileMode]);
 
   async function handleTronLink() {
     const { tronLink, tronWeb } = window;

@@ -34,8 +34,8 @@ const App = () => {
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const mobileMode = isMobile();
   const ethOwallet = window.eth_owallet;
-
   // useTronEventListener();
 
   // TODO: polyfill evm, tron, need refactor
@@ -115,6 +115,11 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    // just auto connect keplr in mobile mode
+    mobileMode && keplrHandler();
+  }, [mobileMode]);
+
+  useEffect(() => {
     (async () => {
       if (walletTypeStore !== leapWalletType || isMobile()) {
         window.addEventListener('keplr_keystorechange', keplrHandler);
@@ -139,7 +144,7 @@ const App = () => {
     }
   };
 
-  const keplrHandler = async (e) => {
+  const keplrHandler = async () => {
     try {
       let metamaskAddress, oraiAddress, tronAddress;
       if (walletByNetworks.cosmos) {
