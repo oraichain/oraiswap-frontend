@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
-import { initClient } from 'libs/utils';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -60,8 +59,6 @@ const initApp = async () => {
       </PersistGate>
     </Provider>
   );
-
-  await initClient();
 };
 
 initApp();
