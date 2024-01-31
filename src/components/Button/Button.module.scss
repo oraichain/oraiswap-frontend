@@ -74,3 +74,17 @@
 
   white-space: nowrap;
 }
+
+.disable-sm {
+  background-color: #EFEFEF;
+  color: #979995;
+
+  @include theme() {
+    color: theme-get('neutral-text-body');
+    background-color: theme-get('neutral-surface-bg-section-2');
+  }
+}
+
+.disable-sm.dark {
+  background-color: #31332E;
+}

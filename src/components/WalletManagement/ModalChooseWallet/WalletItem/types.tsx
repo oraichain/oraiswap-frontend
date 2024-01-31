@@ -31,6 +31,7 @@ export interface ConnectWalletType {
   isLoading?: boolean;
   isDisabled?: boolean;
   onClickConnectBtn?: MouseEventHandler<HTMLButtonElement>;
+  isConnected?: boolean;
 }
 
 export interface ConnectedUserCardType {

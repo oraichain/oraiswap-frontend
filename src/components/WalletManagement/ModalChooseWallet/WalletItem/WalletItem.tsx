@@ -85,7 +85,7 @@ export const WalletItem = ({
   const connectWalletButton = (
     <WalletConnectComponent
       walletStatus={status}
-      disconnect={<Disconnected buttonText="Connect" />}
+      disconnect={<Disconnected buttonText="Disconnect" />}
       connected={<Connected buttonText={'Connected'} />}
       connecting={<Connecting buttonText={'Connecting...'} />}
     />
@@ -103,7 +103,7 @@ export const WalletItem = ({
               <Lottie animationData={OraiDEXLoadingBlack} />
             </span>
           </div>
-          <div className={styles.walletName}>{wallet.name}</div>
+          <div className={styles.walletName}>{wallet.name + (wallet.suffixName || '')}</div>
           {connectWalletButton}
         </div>
       ) : (

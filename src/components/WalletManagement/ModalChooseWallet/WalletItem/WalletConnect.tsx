@@ -3,9 +3,20 @@ import { ConnectWalletType } from './types';
 import { Button } from 'components/Button';
 import { WalletStatus } from './WalletItem';
 
-export const ConnectWalletButton = ({ buttonText, isLoading, isDisabled, onClickConnectBtn }: ConnectWalletType) => {
+export const ConnectWalletButton = ({
+  buttonText,
+  isLoading,
+  isDisabled,
+  onClickConnectBtn,
+  isConnected
+}: ConnectWalletType) => {
   return (
-    <Button disabled={isLoading} type="primary-sm" onClick={onClickConnectBtn}>
+    <Button
+      style={{ fontWeight: isConnected ? 500 : 400 }}
+      disabled={isLoading}
+      type={isConnected ? 'primary-sm' : 'disable-sm'}
+      onClick={onClickConnectBtn}
+    >
       {buttonText}
     </Button>
   );
@@ -22,7 +33,7 @@ export const Disconnected = ({
 };
 
 export const Connected = ({ buttonText }: { buttonText: string }) => {
-  return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
+  return <ConnectWalletButton isConnected buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
 export const Connecting = ({ buttonText }: { buttonText: string }) => {
