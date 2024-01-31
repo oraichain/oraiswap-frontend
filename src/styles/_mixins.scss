@@ -25,6 +25,12 @@
   }
 }
 
+@mixin medium_mobile {
+  @media (max-width: ($breakpoint_medium - 0.02)) {
+    @content;
+  }
+}
+
 @mixin small-mobile {
   @media (max-width: ($breakpoint-sm - 0.02)) {
     @content;

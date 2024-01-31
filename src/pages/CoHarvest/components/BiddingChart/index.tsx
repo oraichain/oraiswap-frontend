@@ -26,7 +26,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
   return (
     <div className={styles.biddingChart}>
       <div className={styles.title}>
-        <span className={styles.titleLeft}>Bid Placed in Co-harvest</span>
+        <span className={styles.titleLeft}>Pools</span>
         <div className={styles.titleRight}>
           <div className={styles.subtitle}>
             <span>Total Bid</span>
@@ -36,7 +36,7 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
               setVisible={setVisible}
               content={
                 <div className={`${styles.tooltip} ${styles[theme]}`}>
-                  Total amount of ORAIX currently allocated across all Co-Harvest interest levels
+                  Total amount of ORAIX currently allocated across all Co-Harvest Pools (Bonus levels)
                 </div>
               }
             />
