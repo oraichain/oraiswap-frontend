@@ -23,13 +23,18 @@ export function useEagerConnect() {
   const mobileMode = isMobile();
 
   const connect = async (accounts?: string[]) => {
-    accounts = accounts ?? (await loadAccounts());
-    if (accounts || accounts?.length > 0) {
-      const metamaskAddress = await window.Metamask.getEthAddress();
-      loadTokenAmounts({ metamaskAddress });
-      setMetamaskAddress(metamaskAddress);
-    } else {
-      setMetamaskAddress(undefined);
+    try {
+      accounts = accounts ?? (await loadAccounts());
+      if (accounts || accounts?.length > 0) {
+        const metamaskAddress = await window.Metamask.getEthAddress();
+        loadTokenAmounts({ metamaskAddress });
+        setMetamaskAddress(metamaskAddress);
+      } else {
+        setMetamaskAddress(undefined);
+      }
+    } catch (error) {
+      console.log({ errorConnectMetmask: error });
+      throw new Error(error?.message ?? JSON.stringify(error));
     }
   };
 

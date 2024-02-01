@@ -15,6 +15,7 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { connectSnap } from '@leapwallet/cosmos-snap-provider';
+import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';
 export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProvider }) => {
@@ -60,9 +61,10 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletInEvmNetwork = async (walletType: WalletType) => {
+    if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
+
     // re-polyfill ethereum for dapp
     window.ethereumDapp = walletType === 'owallet' ? window.eth_owallet : window.ethereum;
-
     const metamaskAddress = await window.Metamask.getEthAddress();
     console.log({ metamaskAddress });
     // if chain id empty, we switch to default network which is BSC
@@ -73,6 +75,8 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   };
 
   const handleConnectWalletInTronNetwork = async (walletType: WalletType) => {
+    if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
+
     // re-polyfill tronWeb
     window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
     window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
