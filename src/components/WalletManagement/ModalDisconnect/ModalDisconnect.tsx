@@ -31,7 +31,7 @@ export const ModalDisconnect: React.FC<{
     (item) => item.nameRegistry === walletByNetworks[currentDisconnectingNetwork]
   );
 
-  const checkAddressByWalletType = () => {
+  const getAddressByWalletType = () => {
     let choosedAddressDisplayByNetwork = '';
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
@@ -69,6 +69,8 @@ export const ModalDisconnect: React.FC<{
     }
     close();
   };
+
+  const currentDisconnectAddress = getAddressByWalletType();
 
   return (
     <Modal
@@ -110,9 +112,9 @@ export const ModalDisconnect: React.FC<{
             </div>
             <div className={cx('content-2')}>
               {currentWalletConnected && <currentWalletConnected.icon width={30} height={30} />}
-              <span className={cx('sub-label')}>{reduceString(checkAddressByWalletType(), 6, 6)}</span>
-              <div className={styles.copyBtn} onClick={(e) => handleCopy(tronAddress)}>
-                {isCopied && copiedValue === tronAddress ? (
+              <span className={cx('sub-label')}>{reduceString(currentDisconnectAddress, 6, 6)}</span>
+              <div className={styles.copyBtn} onClick={(e) => handleCopy(currentDisconnectAddress)}>
+                {isCopied && copiedValue === currentDisconnectAddress ? (
                   <SuccessIcon width={15} height={15} />
                 ) : (
                   <CopyIcon width={15} height={15} />
