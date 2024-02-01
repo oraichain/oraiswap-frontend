@@ -50,6 +50,9 @@ export const WalletManagement: FC<{}> = () => {
             case 'leapSnap':
               isActive = isMetamask;
               break;
+            case 'metamask':
+              isActive = isMetamask;
+              break;
           }
           return { ...wallet, isActive };
         });

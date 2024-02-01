@@ -65,8 +65,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
 
     // re-polyfill ethereum for dapp
     window.ethereumDapp = walletType === 'owallet' ? window.eth_owallet : window.ethereum;
-    const metamaskAddress = await window.Metamask.getEthAddress();
-    console.log({ metamaskAddress });
+
     // if chain id empty, we switch to default network which is BSC
     if (!window.ethereumDapp || !window.ethereumDapp.chainId) {
       await window.Metamask.switchNetwork(Networks.bsc);
