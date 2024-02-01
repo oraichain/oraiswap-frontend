@@ -117,14 +117,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     }
   };
 
-  /**
-   * NOTE: we can check current network type and wallet name so we can update walletByNetworks to storage
-   * TODO:
-   * 1, with cosmos, we can update window.Keplr then reassigg window.client
-   * 2, with evm, we update window.ethereumDapp follow by owallet or metamask;
-   * 3, with tron, we update window.tronWebDapp = window.tronWeb_owallet of owallet or window.tronWeb of tron then polyfill window.Metamask = new Metamask(window.tronWebDapp),
-   * @param
-   */
   const handleClickConnect = async (wallet: WalletNetwork) => {
     try {
       setCurrentWalletConnecting(wallet);
@@ -134,7 +126,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
         await handleConnectWalletByNetwork(wallet);
       }
     } catch (error) {
-      // TODO: handle error correctly
       console.log({ errorConnect: error });
       displayToast(TToastType.METAMASK_FAILED, {
         message: typeof error === 'object' ? error.message : JSON.stringify(error)
