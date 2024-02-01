@@ -220,6 +220,8 @@ export const initClient = async () => {
     for (const chainId of arrChainIds) {
       await window.Keplr.suggestChain(chainId);
     }
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
   } catch (ex) {
     console.log({ errorInitClient: ex });
     throw new Error(ex?.message ?? 'Error when suggestChain');
