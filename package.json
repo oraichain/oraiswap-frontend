@@ -57,7 +57,7 @@
     "@oraichain/common-contracts-build": "1.0.34",
     "@oraichain/cw-simulate": "^2.8.75",
     "@oraichain/oraidex-contracts-build": "^1.0.22",
-    "@sentry/webpack-plugin": "^1.20.0",
+    "@sentry/webpack-plugin": "^2.10.3",
     "@types/classnames": "^2.2.10",
     "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.182",
