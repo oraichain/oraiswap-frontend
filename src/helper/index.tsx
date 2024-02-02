@@ -93,7 +93,7 @@ export const getNetworkGasPrice = async (chainId): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -346,6 +346,7 @@ export const getAddressBySnap = async (chainId) => {
     if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
     return bech32Address;
   }
+  return null;
 };
 
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
