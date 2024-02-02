@@ -347,6 +347,7 @@ export const getAddressBySnap = async (chainId) => {
     if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
     return bech32Address;
   }
+  return null;
 };
 
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
