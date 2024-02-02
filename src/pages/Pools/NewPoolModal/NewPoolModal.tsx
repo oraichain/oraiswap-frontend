@@ -41,8 +41,8 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
   const [amountToken1, setAmountToken1] = useState(0);
   const [amountToken2, setAmountToken2] = useState(0);
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const tokenObj1 = getPoolTokens().find((token) => token.denom === token1);
-  const tokenObj2 = getPoolTokens().find((token) => token.denom === token2);
+  const tokenObj1 = getPoolTokens().find((token) => token?.denom === token1);
+  const tokenObj2 = getPoolTokens().find((token) => token?.denom === token2);
 
   const { data: token1InfoData } = useQuery(['token-info', token1], () => fetchTokenInfo(tokenObj1!), {
     enabled: !!tokenObj1
@@ -331,10 +331,10 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
               thousandSeparator
               decimalScale={6}
               type="text"
-              // value={supplyToken2 ? supplyToken2 : ''}
-              // onValueChange={({ floatValue }) => {
-              //   setSupplyToken2(floatValue);
-              // }}
+            // value={supplyToken2 ? supplyToken2 : ''}
+            // onValueChange={({ floatValue }) => {
+            //   setSupplyToken2(floatValue);
+            // }}
             />
             <span>%</span>
           </div>
@@ -353,7 +353,7 @@ const NewPoolModal: FC<ModalProps> = ({ isOpen, close, open }) => {
         <div className={cx('back-btn')} onClick={() => setStep(2)}>
           Back
         </div>
-        <div className={cx('swap-btn')} onClick={() => {}}>
+        <div className={cx('swap-btn')} onClick={() => { }}>
           Create
         </div>
       </div>
