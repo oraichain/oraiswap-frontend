@@ -1,5 +1,5 @@
-import Banner from 'assets/images/competiton-future-banner.png';
-import BannerDark from 'assets/images/competiton-future-banner-dark.png';
+import Banner from 'assets/images/ftc_deadline_extended.png';
+// import BannerDark from 'assets/images/competiton-future-banner-dark.png';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect, useState } from 'react';
 import styles from './index.module.scss';
@@ -21,7 +21,7 @@ const FutureCompetition = () => {
 
   return (
     <div className={`${styles.competition} ${active ? styles.active : ''}`}>
-      <img src={theme === 'light' ? Banner : BannerDark} alt="" />
+      <img src={Banner} alt="" />
       <div className={styles.content}>
         <div className={styles.header}>Futures Trading Competition is live! 🎁</div>
         <div className={styles.desc}>
