@@ -24,6 +24,7 @@ import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
+import { persistor } from 'store/configure';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -90,7 +91,10 @@ const App = () => {
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
-      localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
+      persistor.pause();
+      persistor.flush().then(() => {
+        return persistor.purge();
+      });
       setPersistVersion(PERSIST_VER);
     };
 
