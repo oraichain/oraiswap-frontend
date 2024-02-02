@@ -188,10 +188,16 @@ const SwapComponent: React.FC<{
     routerClient
   );
 
-  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, ORAIX/USDC), update later after migrate contract
+  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, USDT/USDC), update later after migrate contract
   const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
+  const isFromUsdtToUsdc = originalFromToken.coinGeckoId === 'tether' && originalToToken.coinGeckoId === 'usd-coin';
+  const isFromUsdcToUsdt = originalFromToken.coinGeckoId === 'usd-coin' && originalToToken.coinGeckoId === 'tether';
   const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
+  const INIT_SIMULATE_TEN_AMOUNT = 10;
   let INIT_AMOUNT = 1;
+  if (isFromUsdtToUsdc || isFromUsdcToUsdt) {
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT
+  }
 
   if (isFromAiriToUsdc) {
     INIT_AMOUNT = INIT_SIMULATE_THOUNDSAND_AMOUNT;
