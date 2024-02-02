@@ -161,30 +161,34 @@ export const buildUnsubscribeMessage = () => {
 };
 
 export const processWsResponseMsg = (message: any): string => {
-  if (message === null || message.result === null) {
-    return null;
-  }
-  const { result } = message;
-  if (
-    result && // 👈 null and undefined check
-    (Object.keys(result).length !== 0 || result.constructor !== Object)
-  ) {
-    if (!result.events) return null;
-    const events = result.events;
-    const packets = events['recv_packet.packet_data'];
-    if (!packets) return null;
-    let tokens = '';
-    for (let packetRaw of packets) {
-      const packet = JSON.parse(packetRaw);
-      // we look for the true denom information with decimals to process
-      // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
-      const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
-      const displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
-      tokens = tokens.concat(`${displayAmount} ${receivedToken?.name}, `);
+  try {
+    if (message === null || message.result === null) {
+      return null;
     }
-    return tokens.substring(0, tokens.length - 2); // remove , due to concat
+    const { result } = message;
+    if (
+      result && // 👈 null and undefined check
+      (Object.keys(result).length !== 0 || result.constructor !== Object)
+    ) {
+      if (!result.events) return null;
+      const events = result.events;
+      const packets = events['recv_packet.packet_data'];
+      if (!packets) return null;
+      let tokens = '';
+      for (let packetRaw of packets) {
+        const packet = JSON.parse(packetRaw);
+        // we look for the true denom information with decimals to process
+        // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
+        const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
+        const displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
+        tokens = tokens.concat(`${displayAmount} ${receivedToken?.name}, `);
+      }
+      return tokens.substring(0, tokens.length - 2); // remove , due to concat
+    }
+    return null;
+  } catch (error) {
+    console.error({ errorProcessWsResponseMsg: error });
   }
-  return null;
 };
 
 export const generateError = (message: string) => {
