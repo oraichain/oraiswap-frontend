@@ -13,7 +13,7 @@ import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet } from 'helper';
+import { getStorageKey, switchWallet, switchWalletCosmos } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
 import { TokenInfo } from 'types/token';
@@ -209,14 +209,13 @@ export const initEthereum = async () => {
   }
 };
 
-export const initClient = async () => {
+export const initClient = async (type: WalletType) => {
   try {
-    switchWallet(getStorageKey() as WalletType);
-    const keplr = await window.Keplr.getKeplr();
+    await switchWalletCosmos(type);
 
+    const keplr = await window.Keplr.getKeplr();
     // suggest our chain
     if (keplr) {
-      // always trigger suggest chain when users enter the webpage
       for (const networkId of [
         network.chainId,
         COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
@@ -232,7 +231,7 @@ export const initClient = async () => {
       window.client = client;
     }
   } catch (ex) {
-    console.log(ex);
+    console.log('error initClient:', ex);
     displayToast(TToastType.KEPLR_FAILED, {
       message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
     });

@@ -1,10 +1,9 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ethers } from 'ethers';
 import useConfigReducer from 'hooks/useConfigReducer';
-
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import useLoadTokens from './useLoadTokens';
+import { useLocation } from 'react-router-dom';
 
 const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
@@ -18,10 +17,11 @@ const loadAccounts = async (): Promise<string[]> => {
 };
 
 export function useEagerConnect() {
-  const { pathname } = useLocation();
-  const [chainInfo] = useConfigReducer('chainInfo');
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const { pathname } = useLocation();
+  const [chainInfo] = useConfigReducer('chainInfo');
+  const mobileMode = isMobile();
 
   const connect = async (accounts?: string[]) => {
     accounts = accounts ?? (await loadAccounts());
@@ -35,8 +35,9 @@ export function useEagerConnect() {
   };
 
   useEffect(() => {
-    connect();
-  }, [chainInfo, pathname]);
+    // just auto connect metamask in mobile
+    mobileMode && connect();
+  }, [chainInfo, pathname, mobileMode]);
 
   return connect;
 }
