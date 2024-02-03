@@ -132,18 +132,14 @@ const SwapComponent: React.FC<{
     ? tokenMap[toTokenDenom]
     : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
-  const remoteTokenDenomFrom = originalFromToken.contractAddress ? originalFromToken.prefix + originalFromToken.contractAddress : originalFromToken.denom;
-  const remoteTokenDenomTo = originalToToken.contractAddress ? originalToToken.prefix + originalToToken.contractAddress : originalToToken.denom;
-  const fromTokenFee = useTokenFee(
-    remoteTokenDenomFrom,
-    fromToken.chainId,
-    toToken.chainId
-  );
-  const toTokenFee = useTokenFee(
-    remoteTokenDenomTo,
-    fromToken.chainId,
-    toToken.chainId
-  );
+  const remoteTokenDenomFrom = originalFromToken.contractAddress
+    ? originalFromToken.prefix + originalFromToken.contractAddress
+    : originalFromToken.denom;
+  const remoteTokenDenomTo = originalToToken.contractAddress
+    ? originalToToken.prefix + originalToToken.contractAddress
+    : originalToToken.denom;
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
+  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -192,15 +188,22 @@ const SwapComponent: React.FC<{
   const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
   const isFromUsdtToUsdc = originalFromToken.coinGeckoId === 'tether' && originalToToken.coinGeckoId === 'usd-coin';
   const isFromUsdcToUsdt = originalFromToken.coinGeckoId === 'usd-coin' && originalToToken.coinGeckoId === 'tether';
+
+  const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
+
   const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
   const INIT_SIMULATE_TEN_AMOUNT = 10;
   let INIT_AMOUNT = 1;
   if (isFromUsdtToUsdc || isFromUsdcToUsdt) {
-    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT;
   }
 
   if (isFromAiriToUsdc) {
     INIT_AMOUNT = INIT_SIMULATE_THOUNDSAND_AMOUNT;
+  }
+
+  if (isFromUsdc) {
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT;
   }
 
   const { simulateData: averageRatio } = useSimulate(
@@ -235,12 +238,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-      // @ts-ignore
-      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
@@ -251,8 +254,8 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-    ).toNumber()
+        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+      ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -443,8 +446,9 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
