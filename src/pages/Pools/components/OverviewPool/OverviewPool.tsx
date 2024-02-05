@@ -31,6 +31,12 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
 
   const BaseTokenIcon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
   const QuoteTokenIcon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
+
+  const aprBoost = Number(poolDetailData.info?.aprBoost || 0).toFixed(2);
+  const isApproximatelyZero = Number(aprBoost) === 0;
+  const totalApr = poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0;
+  const originalApr = Number(totalApr) - Number(aprBoost);
+
   return (
     <section className={styles.overview}>
       <div className={classNames(styles.totalLiquidity, { [styles.isShowMore]: isShowMore })}>
@@ -132,8 +138,11 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         <div className={styles.volumeAmount}>{poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0}%</div>
         <div className={styles.aprDetail}>
           <div className={styles.fee}>
-            <span>Swap fees</span>
-            <span>{100 * Number(poolDetailData.info?.commissionRate || 0)}%</span>
+            <span>Earn swap fees</span>
+            <span>
+              <span>{isApproximatelyZero ? '≈ ' : ''}</span>
+              {Number(poolDetailData.info?.aprBoost || 0).toFixed(2)}%
+            </span>
           </div>
           <div className={styles.aprBoost}>
             <div className={styles.text}>
@@ -142,7 +151,8 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
               Boost
             </div>
 
-            <span>{`${(poolDetailData.info?.apr || 0).toFixed(2)}%`}</span>
+            {/* <span>{`${(poolDetailData.info?.apr || 0).toFixed(2)}%`}</span> */}
+            <span>{`${originalApr.toFixed(2)}%`}</span>
           </div>
         </div>
       </div>

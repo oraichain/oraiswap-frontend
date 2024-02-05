@@ -55,6 +55,7 @@ import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import styles from './index.module.scss';
+import { useSwapFee } from './hooks/useSwapFee';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -175,7 +176,12 @@ const SwapComponent: React.FC<{
     setFilteredFromTokens(filteredFromTokens);
   }, [fromTokenDenom, toTokenDenom]);
 
-  const taxRate = useTaxRate();
+  const { fee } = useSwapFee({
+    fromToken: originalFromToken,
+    toToken: originalToToken
+  });
+
+  // const taxRate = useTaxRate();
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
@@ -509,12 +515,13 @@ const SwapComponent: React.FC<{
                 </div>
               </div>
             )}
-            {!fromTokenFee && !toTokenFee && (
+            {!fromTokenFee && !toTokenFee && fee && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
                   <span>Swap Fees</span>
                 </div>
-                <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+                {/* <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span> */}
+                <span>{fee && floatToPercent(fee) + '%'}</span>
               </div>
             )}
           </div>
