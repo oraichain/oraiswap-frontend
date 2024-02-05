@@ -149,11 +149,13 @@ const App = () => {
     try {
       let metamaskAddress, oraiAddress, tronAddress;
 
-      window.tronWebDapp = window.tronWeb;
-      window.tronLinkDapp = window.tronLink;
-      window.ethereumDapp = window.ethereum;
-      window.Keplr = new Keplr('owallet');
-      window.Metamask = new Metamask(window.tronWebDapp);
+      if (mobileMode) {
+        window.tronWebDapp = window.tronWeb;
+        window.tronLinkDapp = window.tronLink;
+        window.ethereumDapp = window.ethereum;
+        window.Keplr = new Keplr('owallet');
+        window.Metamask = new Metamask(window.tronWebDapp);
+      }
 
       if (walletByNetworks.cosmos) {
         oraiAddress = await window.Keplr.getKeplrAddr();
