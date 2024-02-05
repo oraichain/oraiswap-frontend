@@ -30,6 +30,11 @@
     visibility: visible;
   }
 
+  img {
+    border-start-end-radius: 12px;
+    border-start-start-radius: 12px;
+  }
+
   .content {
     display: flex;
     flex-direction: column;

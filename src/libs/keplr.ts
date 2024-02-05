@@ -8,7 +8,7 @@ import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-co
 import { network } from 'config/networks';
 import { suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provider';
 import { CosmjsOfflineSigner, ChainInfo as ChainInfoLeap } from '@leapwallet/cosmos-snap-provider';
-
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
 import { chainInfoWithoutIcon, checkSnapExist, getAddressBySnap, getChainSupported } from 'helper';
 
@@ -151,14 +151,17 @@ export default class Keplr extends CosmosWallet {
     chainId = chainId ?? network.chainId;
     try {
       const isEnableKeplr = await this.getKeplr();
-      const isEnableLeapSnap = await checkSnapExist();
-      if (isEnableKeplr) {
+      const isEnableLeapSnap = await getSnap();
+      if (isEnableKeplr && ['keplr', 'owallet'].includes(this.typeWallet)) {
+        if (!this.keplr) throw new Error('Error: get window cosmos!');
         const { bech32Address } = await this.getKeplrKey(chainId);
         if (!bech32Address) throw Error('Not found address from keplr!');
         return bech32Address;
-      } else if (isEnableLeapSnap) {
+      }
+      if (isEnableLeapSnap && this.typeWallet === 'leapSnap') {
         return getAddressBySnap(chainId);
       }
+      return null;
     } catch (ex) {
       console.log(ex, chainId);
     }

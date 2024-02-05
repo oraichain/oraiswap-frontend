@@ -23,6 +23,7 @@ import './index.scss';
 import Instruct from './Instruct';
 import Menu from './Menu';
 import Keplr from 'libs/keplr';
+import { persistor } from 'store/configure';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -104,7 +105,10 @@ const App = () => {
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
-      localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
+      persistor.pause();
+      persistor.flush().then(() => {
+        return persistor.purge();
+      });
       setPersistVersion(PERSIST_VER);
     };
 

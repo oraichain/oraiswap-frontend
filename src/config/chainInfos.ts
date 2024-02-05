@@ -834,7 +834,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'ethereum',
-        Icon: EthIcon
+        Icon: EthIcon,
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX
       },
       {
         coinDenom: 'USDT',
@@ -956,6 +957,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'binancecoin',
         bridgeTo: ['Oraichain'],
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: BnbIcon
       }
     ]
