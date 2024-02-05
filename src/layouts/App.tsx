@@ -157,7 +157,7 @@ const App = () => {
         window.Metamask = new Metamask(window.tronWebDapp);
       }
 
-      if (walletByNetworks.cosmos) {
+      if (walletByNetworks.cosmos || mobileMode) {
         oraiAddress = await window.Keplr.getKeplrAddr();
         if (oraiAddress) {
           const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
@@ -166,12 +166,12 @@ const App = () => {
         }
       }
 
-      if (walletByNetworks.evm === 'owallet') {
+      if (walletByNetworks.evm === 'owallet' || mobileMode) {
         metamaskAddress = await window.Metamask.getEthAddress();
         if (metamaskAddress) setMetamaskAddress(metamaskAddress);
       }
 
-      if (walletByNetworks.tron === 'owallet') {
+      if (walletByNetworks.tron === 'owallet' || mobileMode) {
         const res = await window.tronLinkDapp.request({
           method: 'tron_requestAccounts'
         });
