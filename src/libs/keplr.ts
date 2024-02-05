@@ -83,8 +83,9 @@ export default class Keplr extends CosmosWallet {
       const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
       if (!keplrChain) return;
 
+      const findFeeCurrencies = keplrChain.feeCurrencies.find((fee) => fee.gasPriceStep);
       // check to update newest chain info
-      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !keplrChain.feeCurrencies?.[0]?.gasPriceStep) {
+      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !findFeeCurrencies) {
         displayToast(TToastType.TX_INFO, {
           message: `${keplrChain.chainName} has Keplr cointype ${keplrChain.bip44.coinType}, while the chain info config cointype is ${chainInfo.bip44.coinType}. Please reach out to the developers regarding this problem!`
         });
