@@ -3,6 +3,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
 import { useLocation } from 'react-router-dom';
+import { ethers } from 'ethers';
 
 const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
@@ -26,7 +27,7 @@ export function useEagerConnect() {
     try {
       accounts = accounts ?? (await loadAccounts());
       if (accounts || accounts?.length > 0) {
-        const metamaskAddress = await window.Metamask.getEthAddress();
+        const metamaskAddress = ethers.utils.getAddress(accounts[0]);
         loadTokenAmounts({ metamaskAddress });
         setMetamaskAddress(metamaskAddress);
       } else {

@@ -22,6 +22,7 @@ import FutureCompetition from 'components/FutureCompetitionModal';
 import './index.scss';
 import Instruct from './Instruct';
 import Menu from './Menu';
+import Keplr from 'libs/keplr';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -147,6 +148,15 @@ const App = () => {
   const keplrHandler = async () => {
     try {
       let metamaskAddress, oraiAddress, tronAddress;
+
+      if (mobileMode) {
+        window.tronWebDapp = window.tronWeb;
+        window.tronLinkDapp = window.tronLink;
+        window.ethereumDapp = window.ethereum;
+        window.Keplr = new Keplr('owallet');
+        window.Metamask = new Metamask(window.tronWebDapp);
+      }
+
       if (walletByNetworks.cosmos) {
         oraiAddress = await window.Keplr.getKeplrAddr();
         if (oraiAddress) {

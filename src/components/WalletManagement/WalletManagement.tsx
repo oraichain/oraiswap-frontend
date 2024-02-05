@@ -13,6 +13,8 @@ import { ModalChooseWallet } from './ModalChooseWallet';
 import { MyWallet } from './MyWallet';
 import styles from './WalletManagement.module.scss';
 import { WalletProvider, walletProvider } from './walletConfig';
+import { ConnectedMobile } from './ConnectedMobile';
+import { MyWalletMobile } from './MyWalletMobile';
 const cx = cn.bind(styles);
 
 export const WalletManagement: FC<{}> = () => {
@@ -23,6 +25,7 @@ export const WalletManagement: FC<{}> = () => {
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const { handleResetBalance } = useResetBalance();
   const loadTokenAmounts = useLoadTokens();
+  const mobileMode = isMobile();
 
   const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
@@ -93,7 +96,7 @@ export const WalletManagement: FC<{}> = () => {
 
   return (
     <div className={cx('connect-wallet-container', theme)}>
-      {!isAnyWalletConnected ? (
+      {!isAnyWalletConnected && !mobileMode ? (
         <Button
           type="primary"
           onClick={() => {
@@ -102,15 +105,27 @@ export const WalletManagement: FC<{}> = () => {
         >
           Connect Wallet
         </Button>
+      ) : mobileMode ? (
+        <ConnectedMobile setIsShowMyWallet={setIsShowMyWallet} />
       ) : (
         <Connected setIsShowMyWallet={setIsShowMyWallet} />
       )}
-      <MyWallet
-        setIsShowChooseWallet={setIsShowChooseWallet}
-        isShowMyWallet={isShowMyWallet}
-        setIsShowMyWallet={setIsShowMyWallet}
-        isShowChooseWallet={isShowChooseWallet}
-      />
+
+      {mobileMode ? (
+        <MyWalletMobile
+          setIsShowChooseWallet={setIsShowChooseWallet}
+          isShowMyWallet={isShowMyWallet}
+          setIsShowMyWallet={setIsShowMyWallet}
+          isShowChooseWallet={isShowChooseWallet}
+        />
+      ) : (
+        <MyWallet
+          setIsShowChooseWallet={setIsShowChooseWallet}
+          isShowMyWallet={isShowMyWallet}
+          setIsShowMyWallet={setIsShowMyWallet}
+          isShowChooseWallet={isShowChooseWallet}
+        />
+      )}
       {isShowChooseWallet && !isMobile() ? (
         <ModalChooseWallet
           close={() => {
