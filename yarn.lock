@@ -2969,9 +2969,9 @@
     shx "^0.3.4"
 
 "@oraichain/oraidex-common-ui@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.4.tgz#5c55dd83cb4c5c1ec5563d32077daa68ccdd01ab"
-  integrity sha512-Y6CD+/J398iip2SC20BBl7+bo2lSbGqATb7P2mCW3W7iWOAVE/WyTdSdgKeBn3qH5prW8daSJygwyK+IILH6sg==
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.5.tgz#ec6d2e7e3602a6d7885ca7d6304293602e8a4e39"
+  integrity sha512-PTwh4Kw7qSDSp+ke4kTIj7Tm9tbGeD9zKNNiW28Wxsbt1Z87G0YYos+rMDP4gw/BMloJBHD8CM/yghHZ7BuAgA==
   dependencies:
     axios "^0.26.1"
     axios-extensions "^3.1.3"
