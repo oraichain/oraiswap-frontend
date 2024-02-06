@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
-import { initClient } from 'libs/utils';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -30,7 +29,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
       /^chrome-extension:\/\//i,
       /^moz-extension:\/\//i
     ],
-    ignoreErrors: ['Request rejected', 'Failed to fetch', 'Load failed'],
+    ignoreErrors: ['Request rejected', 'Failed to fetch', 'Load failed', 'User rejected the request'],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -60,8 +59,6 @@ const initApp = async () => {
       </PersistGate>
     </Provider>
   );
-
-  await initClient();
 };
 
 initApp();

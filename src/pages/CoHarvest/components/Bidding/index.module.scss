@@ -59,6 +59,14 @@
         @include theme() {
           color: theme-get('text-color');
         }
+
+        .note {
+          font-weight: 400;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+        }
       }
 
       .range {
@@ -295,6 +303,10 @@
       svg {
         cursor: pointer;
         vertical-align: middle;
+      }
+
+      span {
+        cursor: pointer;
       }
 
       @include theme {

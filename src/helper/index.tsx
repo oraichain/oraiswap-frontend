@@ -89,11 +89,11 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
 export const getNetworkGasPrice = async (chainId): Promise<number> => {
   try {
     const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints(chainId);
-    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId == chainId);
+    const findToken = chainInfosWithoutEndpoints.find((e) => e.chainId === chainId);
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch {}
+  } catch { }
   return 0;
 };
 
@@ -161,6 +161,7 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 
 const transferMsgError = (message: string, info?: InfoError) => {
   if (message.includes('invalid hash')) return `Transation was not included to block`;
+  if (message.includes("Assertion failed; minimum receive amount")) return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
   if (message.includes('account sequence mismatch'))
     return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`;
@@ -257,32 +258,31 @@ export const switchWalletCosmos = async (type: WalletType) => {
   if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
-  const wallet = await collectWallet(network.chainId);
-  window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
-    gasPrice: GasPrice.fromString(`0.002${network.denom}`)
-  });
+  // const wallet = await collectWallet(network.chainId);
+  // window.client = await SigningCosmWasmClient.connectWithSigner(network.rpc, wallet, {
+  //   gasPrice: GasPrice.fromString(`0.002${network.denom}`)
+  // });
 };
 
 export const switchWalletTron = async () => {
   let tronAddress: string;
+  const res = await window.tronLink.request({
+    method: 'tron_requestAccounts'
+  });
   if (isMobile()) {
-    const addressTronMobile = await window.tronLink.request({
-      method: 'tron_requestAccounts'
-    });
-    //@ts-ignore
-    tronAddress = addressTronMobile?.base58;
-  } else {
+    // @ts-ignore
+    tronAddress = res?.base58;
+    // @ts-ignore
+  } else if (!window.owallet?.isOwallet) {
     if (!window.tronWeb.defaultAddress?.base58) {
-      const { code, message = 'Tronlink is not ready' } = await window.tronLink.request({
-        method: 'tron_requestAccounts'
-      });
-      // throw error when not connected
+      const { code, message = 'Tronlink is not ready' } = res;
       if (code !== 200) {
         throw new Error(message);
       }
     }
     tronAddress = window.tronWeb.defaultAddress.base58;
-  }
+    // @ts-ignore
+  } else tronAddress = res?.base58;
   return {
     tronAddress
   };
@@ -347,6 +347,7 @@ export const getAddressBySnap = async (chainId) => {
     if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
     return bech32Address;
   }
+  return null;
 };
 
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {

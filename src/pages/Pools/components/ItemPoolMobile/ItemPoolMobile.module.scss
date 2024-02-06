@@ -81,6 +81,35 @@
       }
 
       .aprReward {
+        .apr {
+          width: 50%;
+
+          .aprReward {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+
+            & > span {
+              padding: 4px;
+              border-radius: 4px;
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: 150%;
+              letter-spacing: 0.012px;
+              margin-top: 5px;
+              margin-right: 5px;
+
+              @include theme() {
+                background-color: theme-get('neutral-surface-bg-section-2');
+                color: theme-get('neutral-text-title');
+              }
+            }
+          }
+        }
+      }
+
+      .poolInfo {
         display: flex;
         align-items: center;
         margin-top: 6px;

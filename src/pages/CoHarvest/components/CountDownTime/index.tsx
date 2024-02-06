@@ -22,7 +22,7 @@ const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
   return (
     <div className={styles.countdownWrapper}>
       <div className={styles.title}>
-        <span>{isStarted ? 'Co-Harvest Ending In' : 'Co-Harvest Start In'}</span>
+        <span>{isStarted ? 'Round Ending In' : 'Round Start In'}</span>
         {/* <TooltipIcon /> */}
         <TooltipIconBtn
           placement="auto"

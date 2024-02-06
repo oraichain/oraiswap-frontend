@@ -133,16 +133,14 @@ const SwapComponent: React.FC<{
     ? tokenMap[toTokenDenom]
     : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(
-    originalFromToken.prefix + originalFromToken.contractAddress,
-    fromToken.chainId,
-    toToken.chainId
-  );
-  const toTokenFee = useTokenFee(
-    originalToToken.prefix + originalToToken.contractAddress,
-    fromToken.chainId,
-    toToken.chainId
-  );
+  const remoteTokenDenomFrom = originalFromToken.contractAddress
+    ? originalFromToken.prefix + originalFromToken.contractAddress
+    : originalFromToken.denom;
+  const remoteTokenDenomTo = originalToToken.contractAddress
+    ? originalToToken.prefix + originalToToken.contractAddress
+    : originalToToken.denom;
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
+  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -192,21 +190,27 @@ const SwapComponent: React.FC<{
     routerClient
   );
 
-  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, ORAIX/USDC), update later after migrate contract
+  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, USDT/USDC), update later after migrate contract
   const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
-  const isFromOraixToUsdc = originalFromToken.coinGeckoId === 'oraidex' && originalToToken.coinGeckoId === 'usd-coin';
-  const isToWETH = originalToToken.coinGeckoId === 'weth';
+  const isFromUsdtToUsdc = originalFromToken.coinGeckoId === 'tether' && originalToToken.coinGeckoId === 'usd-coin';
+  const isFromUsdcToUsdt = originalFromToken.coinGeckoId === 'usd-coin' && originalToToken.coinGeckoId === 'tether';
 
   const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
 
   const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
   const INIT_SIMULATE_TEN_AMOUNT = 10;
-  const INIT_AMOUNT =
-    isFromAiriToUsdc || isFromOraixToUsdc || isToWETH
-      ? INIT_SIMULATE_THOUNDSAND_AMOUNT
-      : isFromUsdc
-      ? INIT_SIMULATE_TEN_AMOUNT
-      : 1;
+  let INIT_AMOUNT = 1;
+  if (isFromUsdtToUsdc || isFromUsdcToUsdt) {
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT;
+  }
+
+  if (isFromAiriToUsdc) {
+    INIT_AMOUNT = INIT_SIMULATE_THOUNDSAND_AMOUNT;
+  }
+
+  if (isFromUsdc) {
+    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT;
+  }
 
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
