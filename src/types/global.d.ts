@@ -144,6 +144,14 @@ declare global {
     interface ProcessEnv {
       REACT_APP_SITE_TITLE: string;
       REACT_APP_SITE_DESC: string;
+
+      REACT_APP_BASE_API_URL: string;
+
+      REACT_APP_KADO_API_KEY: string;
+      REACT_APP_MIX_PANEL_ENVIRONMENT: string;
+
+      REACT_APP_MAINTAIN_NOTE: string;
+      REACT_APP_IS_MAINTAIN_MODE: boolean;
     }
   }
 

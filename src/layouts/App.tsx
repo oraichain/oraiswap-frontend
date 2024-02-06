@@ -12,7 +12,7 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
@@ -25,6 +25,7 @@ import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
 import { persistor } from 'store/configure';
+import { MaintainModeBanner } from './MaintainModeBanner';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -205,11 +206,15 @@ const App = () => {
     }
   };
 
+  const { REACT_APP_IS_MAINTAIN_MODE = false } = process.env;
+  const [openBanner, setOpenBanner] = useState(REACT_APP_IS_MAINTAIN_MODE);
+
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
         <Menu />
-        {routes()}
+        <MaintainModeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div>
         {!isMobile() && <Instruct />}
         {!isMobile() && <FutureCompetition />}
       </div>
