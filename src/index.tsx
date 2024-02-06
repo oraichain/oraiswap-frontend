@@ -38,7 +38,7 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   });
 
   // init mixpanel track event
-  mixpanel.init(process.env.REACT_APP_SENTRY_ENVIRONMENT);
+  mixpanel.init(process.env.REACT_APP_MIX_PANEL_ENVIRONMENT);
 }
 
 const initApp = async () => {
