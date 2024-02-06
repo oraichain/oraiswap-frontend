@@ -109,7 +109,9 @@ const BiddingHistory = ({ round, isEnd }) => {
       <div className={styles.content}>
         {activeTab === TAB_HISTORY.MY_BID && (
           <LoadingBox loading={loadingMyBid} className={styles.loadingDivWrapper}>
-            {listPotentialReturn.length <= 0 ? null : <span className={styles.title}>Round #{filterRound}</span>}
+            {listPotentialReturn && listPotentialReturn.length <= 0 ? null : (
+              <span className={styles.title}>Round #{filterRound}</span>
+            )}
             <MyBidding list={listPotentialReturn} isLoading={loadingMyBid} />
           </LoadingBox>
         )}

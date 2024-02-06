@@ -5,11 +5,7 @@ import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Header } from './components/Header';
 import { ListPools } from './components/ListPool';
 import { ListPoolsMobile } from './components/ListPoolMobile';
-import {
-  CW20_DECIMALS,
-  TokenItemType,
-  toDisplay,
-} from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
@@ -75,7 +71,7 @@ const Pools: React.FC<{}> = () => {
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-        '0'
+          '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
@@ -150,11 +146,11 @@ const Pools: React.FC<{}> = () => {
           )}
         </div>
 
-        <NewPoolModal
+        {/* <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
-        />
+        /> */}
         <NewTokenModal
           isOpen={isOpenNewTokenModal}
           open={() => setIsOpenNewTokenModal(true)}
