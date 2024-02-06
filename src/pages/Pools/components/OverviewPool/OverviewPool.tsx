@@ -135,13 +135,13 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           <AprIcon />
         </div>
         <div className={styles.title}>Total APR</div>
-        <div className={styles.volumeAmount}>{poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0}%</div>
+        <div className={styles.volumeAmount}>{totalApr}%</div>
         <div className={styles.aprDetail}>
           <div className={styles.fee}>
             <span>Earn swap fees</span>
             <span>
               <span>{isApproximatelyZero ? '≈ ' : ''}</span>
-              {Number(poolDetailData.info?.aprBoost || 0).toFixed(2)}%
+              {aprBoost}%
             </span>
           </div>
           <div className={styles.aprBoost}>
