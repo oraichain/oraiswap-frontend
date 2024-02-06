@@ -21,8 +21,10 @@ export const MaintainModeBanner = ({
     REACT_APP_IS_MAINTAIN_MODE: false
   };
 
-  const [open, setOpen] = useState(REACT_APP_IS_MAINTAIN_MODE);
-  // const [openBanner, setOpenBanner] = useState(REACT_APP_IS_MAINTAIN_MODE);
+  const isMaintainMode = String(REACT_APP_IS_MAINTAIN_MODE) === 'true';
+
+  const [open, setOpen] = useState(isMaintainMode);
+  // const [openBanner, setOpenBanner] = useState(isMaintainMode);
   const theme = useTheme();
   const mobileMode = isMobile();
 

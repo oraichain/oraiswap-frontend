@@ -207,7 +207,8 @@ const App = () => {
   };
 
   const { REACT_APP_IS_MAINTAIN_MODE = false } = process.env;
-  const [openBanner, setOpenBanner] = useState(REACT_APP_IS_MAINTAIN_MODE);
+  const isMaintainMode = String(REACT_APP_IS_MAINTAIN_MODE) === 'true';
+  const [openBanner, setOpenBanner] = useState(isMaintainMode);
 
   return (
     <ThemeProvider>
