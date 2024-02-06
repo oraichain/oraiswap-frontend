@@ -11,6 +11,7 @@ import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from 'store/configure';
+import mixpanel from 'mixpanel-browser';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
@@ -35,6 +36,9 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
     // We recommend adjusting this value in production
     tracesSampleRate: 1
   });
+
+  // init mixpanel track event
+  mixpanel.init(process.env.REACT_APP_SENTRY_ENVIRONMENT);
 }
 
 const initApp = async () => {
