@@ -7,7 +7,7 @@ import { Button } from 'components/Button';
 import ToggleSwitch from 'components/ToggleSwitch';
 import { ThemeContext } from 'context/theme-context';
 import { cosmosWallets, tronWallets, evmWallets, type NetworkType } from 'components/WalletManagement/walletConfig';
-import { tronNetworksWithIcon, cosmosNetworksWithIcon, evmNetworksIconWithoutTron } from 'helper';
+import { tronNetworksWithIcon, cosmosNetworksWithIcon, evmNetworksIconWithoutTron, getListAddressCosmos } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useCopyClipboard } from 'hooks/useCopyClipboard';
@@ -15,7 +15,7 @@ import useOnClickOutside from 'hooks/useOnClickOutside';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { getTotalUsd, reduceString } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from 'store/configure';
 import { ModalDisconnect } from '../ModalDisconnect';
@@ -32,7 +32,7 @@ export const MyWallet: React.FC<{
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
-  const [cosmosAddresses] = useConfigReducer('cosmosAddress');
+  const [cosmosAddresses, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   const [currentDisconnectingNetwork, setCurrentDisconnectingNetwork] = useState<NetworkType>(null);
@@ -49,9 +49,18 @@ export const MyWallet: React.FC<{
     !isShowChooseWallet && !isShowDisconnect && setIsShowMyWallet(false);
   });
 
+  useEffect(() => {
+    (async () => {
+      const listAddress = Object.values(cosmosAddresses).filter(e => e);
+      if (oraiAddress && listAddress.length < cosmosNetworksWithIcon.length) {
+        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+        setCosmosAddress(listAddressCosmos);
+      }
+    })();
+  }, []);
+
   const renderCosmosAddresses = () => {
     if (!oraiAddress) return <></>;
-
     const cosmosWalletConnected = cosmosWallets.find((item) => item.nameRegistry === walletByNetworks.cosmos);
     if (!cosmosWalletConnected) return <></>;
 
