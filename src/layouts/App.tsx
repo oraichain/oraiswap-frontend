@@ -24,7 +24,6 @@ import Instruct from './Instruct';
 import Menu from './Menu';
 import Keplr from 'libs/keplr';
 import { persistor } from 'store/configure';
-import { ethers } from 'ethers';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
