@@ -1,0 +1,75 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+@import 'src/styles/variables';
+
+.ml {
+    margin-left: 12px;
+    margin-right: 10px;
+}
+
+.connected_container {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 99px;
+
+    @include theme() {
+        background-color: theme-get('bg-connect-wallet');
+    }
+
+    padding-right: 16px;
+    padding-left: 16px;
+
+    .wallet_icon {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #aee67f;
+        border-radius: 50%;
+        padding: 6px;
+    }
+
+    .down_icon {}
+
+    .content {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        flex: 1;
+        margin-left: 12px;
+        margin-right: 10px;
+
+        .label-start {
+            font-size: 16px;
+            color: #232521;
+            color: var(--colors-neutral-text-text-btn-default, #163300);
+        }
+
+        .title {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            color: #494949;
+        }
+
+        .money {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 600;
+            color: #232521;
+        }
+    }
+}
+
+.dark {
+    .content {
+        .title {
+            color: #efefef;
+        }
+
+        .money {
+            color: #f7f7f7;
+        }
+    }
+}

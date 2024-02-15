@@ -1,0 +1,10 @@
+@import 'src/styles/mixins';
+
+.connect-wallet-container {
+    @include theme() {
+        button {
+            padding: 10px;
+        }
+    }
+
+}

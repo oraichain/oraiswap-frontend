@@ -1,15 +1,15 @@
 import { isMobile } from '@walletconnect/browser-utils';
-import { ethers } from 'ethers';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
 import { useLocation } from 'react-router-dom';
+import { ethers } from 'ethers';
 
 const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
   if (isMobile()) await window.Metamask.switchNetwork(Networks.bsc);
   // passe cointype 60 for ethereum or let it use default param
-  const accounts = await window.ethereum.request({
+  const accounts = await window.ethereumDapp.request({
     method: 'eth_accounts',
     params: [60]
   });
@@ -24,13 +24,18 @@ export function useEagerConnect() {
   const mobileMode = isMobile();
 
   const connect = async (accounts?: string[]) => {
-    accounts = accounts ?? (await loadAccounts());
-    if (accounts?.length > 0) {
-      const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-      loadTokenAmounts({ metamaskAddress });
-      setMetamaskAddress(metamaskAddress);
-    } else {
-      setMetamaskAddress(undefined);
+    try {
+      accounts = accounts ?? (await loadAccounts());
+      if (accounts || accounts?.length > 0) {
+        const metamaskAddress = ethers.utils.getAddress(accounts[0]);
+        loadTokenAmounts({ metamaskAddress });
+        setMetamaskAddress(metamaskAddress);
+      } else {
+        setMetamaskAddress(undefined);
+      }
+    } catch (error) {
+      console.log({ errorConnectMetmask: error });
+      throw new Error(error?.message ?? JSON.stringify(error));
     }
   };
 

@@ -1399,7 +1399,7 @@
 
 "@cosmjs/json-rpc@^0.31.0":
   version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/json-rpc/-/json-rpc-0.31.3.tgz#11e5cf0f6d9ab426dff470bb8d68d5d31cd6ab13"
+  resolved "https://registry.npmjs.org/@cosmjs/json-rpc/-/json-rpc-0.31.3.tgz"
   integrity sha512-7LVYerXjnm69qqYR3uA6LGCrBW2EO5/F7lfJxAmY+iII2C7xO3a0vAjMSt5zBBh29PXrJVS6c2qRP22W1Le2Wg==
   dependencies:
     "@cosmjs/stream" "^0.31.3"
@@ -1422,7 +1422,7 @@
 
 "@cosmjs/math@^0.31.0":
   version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.31.3.tgz#767f7263d12ba1b9ed2f01f68d857597839fd957"
+  resolved "https://registry.npmjs.org/@cosmjs/math/-/math-0.31.3.tgz"
   integrity sha512-kZ2C6glA5HDb9hLz1WrftAjqdTBb3fWQsRR+Us2HsjAYdeE6M3VdXMsYCP5M3yiihal1WDwAY2U7HmfJw7Uh4A==
   dependencies:
     bn.js "^5.2.0"
@@ -1472,7 +1472,7 @@
 
 "@cosmjs/socket@^0.31.0":
   version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/socket/-/socket-0.31.3.tgz#52086380f4de2fc3514b90b0484b4b1c4c50e39e"
+  resolved "https://registry.npmjs.org/@cosmjs/socket/-/socket-0.31.3.tgz"
   integrity sha512-aqrDGGi7os/hsz5p++avI4L0ZushJ+ItnzbqA7C6hamFSCJwgOkXaOUs+K9hXZdX4rhY7rXO4PH9IH8q09JkTw==
   dependencies:
     "@cosmjs/stream" "^0.31.3"
@@ -1535,7 +1535,7 @@
 
 "@cosmjs/stream@^0.31.0", "@cosmjs/stream@^0.31.3":
   version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/stream/-/stream-0.31.3.tgz#53428fd62487ec08fc3886a50a3feeb8b2af2e66"
+  resolved "https://registry.npmjs.org/@cosmjs/stream/-/stream-0.31.3.tgz"
   integrity sha512-8keYyI7X0RjsLyVcZuBeNjSv5FA4IHwbFKx7H60NHFXszN8/MvXL6aZbNIvxtcIHHsW7K9QSQos26eoEWlAd+w==
   dependencies:
     xstream "^11.14.0"
@@ -1549,7 +1549,7 @@
 
 "@cosmjs/tendermint-rpc@0.31.0":
   version "0.31.0"
-  resolved "https://registry.yarnpkg.com/@cosmjs/tendermint-rpc/-/tendermint-rpc-0.31.0.tgz#df82f634ff08fc377dfdccea43a31d92b5b0eaf1"
+  resolved "https://registry.npmjs.org/@cosmjs/tendermint-rpc/-/tendermint-rpc-0.31.0.tgz"
   integrity sha512-yo9xbeuI6UoEKIhFZ9g0dvUKLqnBzwdpEc/uldQygQc51j38gQVwFko+6sjmhieJqRYYvrYumcbJMiV6GFM9aA==
   dependencies:
     "@cosmjs/crypto" "^0.31.0"
@@ -1602,7 +1602,7 @@
 
 "@cosmjs/utils@^0.31.0":
   version "0.31.3"
-  resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.31.3.tgz#f97bbfda35ad69e80cd5c7fe0a270cbda16db1ed"
+  resolved "https://registry.npmjs.org/@cosmjs/utils/-/utils-0.31.3.tgz"
   integrity sha512-VBhAgzrrYdIe0O5IbKRqwszbQa7ZyQLx9nEQuHQ3HUplQW7P44COG/ye2n6AzCudtqxmwdX7nyX8ta1J07GoqA==
 
 "@cosmjs/utils@^0.31.1":
@@ -2776,7 +2776,7 @@
 
 "@leapwallet/cosmos-snap-provider@0.1.25":
   version "0.1.25"
-  resolved "https://registry.yarnpkg.com/@leapwallet/cosmos-snap-provider/-/cosmos-snap-provider-0.1.25.tgz#f256cd4c7ef89aa9209ed8dbaf16487db24bde10"
+  resolved "https://registry.npmjs.org/@leapwallet/cosmos-snap-provider/-/cosmos-snap-provider-0.1.25.tgz"
   integrity sha512-oov2jgISkvoAYvGsWkPscFt/XEEv1McTehTqJRfIJPO8uebIE6goJi4wjaaMW3wDIDsMMK54uGSdqbL6C8ciYQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
@@ -2874,7 +2874,7 @@
 
 "@oraichain/babel-plugin-operator-overloading@^1.0.4":
   version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@oraichain/babel-plugin-operator-overloading/-/babel-plugin-operator-overloading-1.0.4.tgz#b0e3bc7790c66dbb21372fd0bfa954813f32a7bb"
+  resolved "https://registry.npmjs.org/@oraichain/babel-plugin-operator-overloading/-/babel-plugin-operator-overloading-1.0.4.tgz"
   integrity sha512-AFU6dc4lnuj3CWXCs/7DXIICcV0L8BMBvJBswtERcsCj3Be3qYV/NLu6miLEIjNPZANGeEd24bGasWT3R54UZQ==
   dependencies:
     "@babel/core" "^7.23.3"
@@ -2909,7 +2909,7 @@
 
 "@oraichain/cosmwasm-vm-js@^0.2.79":
   version "0.2.79"
-  resolved "https://registry.yarnpkg.com/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.79.tgz#a622447112afa0fc0ed2248f368f96d18f595199"
+  resolved "https://registry.npmjs.org/@oraichain/cosmwasm-vm-js/-/cosmwasm-vm-js-0.2.79.tgz"
   integrity sha512-GlXOg9qRRlxk+1IZKtj1w5t6DIRBOFl9+IH1/ofyTKCQaca2/yOAP1N1uzMlXxQsMBOvVKNNVfd/lQuUzjJ2gQ==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
@@ -2923,7 +2923,7 @@
 
 "@oraichain/cw-simulate@^2.8.75":
   version "2.8.75"
-  resolved "https://registry.yarnpkg.com/@oraichain/cw-simulate/-/cw-simulate-2.8.75.tgz#29c00f2cf76b88f8a80284e9b7ca236f1246387b"
+  resolved "https://registry.npmjs.org/@oraichain/cw-simulate/-/cw-simulate-2.8.75.tgz"
   integrity sha512-a4NATLUeoZsqL7EVRtzHyLQ8Pb1nebeBqJL46sWmyUZbT2v77nuBfgiaGYyBxLk7+T71gGPhhgwGzAe1uw7TjA==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
@@ -2980,7 +2980,7 @@
     react-dom "^18.2.0"
     react-use "^17.4.0"
 
-"@oraichain/oraidex-common@^1.0.45":
+"@oraichain/oraidex-common@^1.0.58":
   version "1.0.64"
   resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.64.tgz#50b18abdcdd7bf3b70846fced2362c42e2925be3"
   integrity sha512-twhl/uNRl+hmHjU1FLGZNxTUWFnoaeIMNCh/7V31Zwx0wbb5nGdKjx2apGpJoc+SnhHuY9Tl78/AHhxWFdo14g==
@@ -3005,15 +3005,15 @@
 
 "@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26", "@oraichain/oraidex-contracts-sdk@^1.0.30":
   version "1.0.31"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
+  resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz"
   integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.49"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.49.tgz#94d1d5549236ea2f3ef73143be31d58374b768e3"
-  integrity sha512-UB3ExIkzVlLqqPDDFWFW673nNrJXDINo1FZpdhxhqNE2oU/H1q2Q2JnnfbGILsoQ79RH+FLEKdd+X0taPQElzw==
+  version "1.0.50"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.50.tgz#c3aeb3ae774fd26d6d9c579663ec2528f8fd34af"
+  integrity sha512-0FNmNUYYGGuGUuRWthVqyxqTRH/kGT9SXE0FOvHG2tIas/4i/5UKlv6Es+u/qeSisQGEyoqr63p2tGmlvYHhLQ==
   dependencies:
-    "@oraichain/oraidex-common" "^1.0.45"
+    "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
@@ -4590,7 +4590,7 @@ acorn@^7.1.1:
 
 acorn@^8.2.4, acorn@^8.7.0, acorn@^8.7.1, acorn@^8.8.1, acorn@^8.8.2, acorn@^8.9.0:
   version "8.11.3"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.11.3.tgz#71e0b14e13a4ec160724b38fb7b0f233b1b81d7a"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-8.11.3.tgz"
   integrity sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==
 
 address@^1.0.1, address@^1.1.2:
@@ -6826,7 +6826,7 @@ data-urls@^2.0.0:
 
 date-fns@^3.2.0:
   version "3.2.0"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.2.0.tgz#c97cf685b62c829aa4ecba554e4a51768cf0bffc"
+  resolved "https://registry.npmjs.org/date-fns/-/date-fns-3.2.0.tgz"
   integrity sha512-E4KWKavANzeuusPi0jUjpuI22SURAznGkx7eZV+4i6x2A+IZxAMcajgkvuDAU1bg40+xuhW1zRdVIIM/4khuIg==
 
 debug@2.6.9, debug@^2.6.0:
@@ -15587,7 +15587,7 @@ triple-beam@^1.3.0:
 
 tronweb@5.3.0, tronweb@^5.1.0:
   version "5.3.0"
-  resolved "https://registry.yarnpkg.com/tronweb/-/tronweb-5.3.0.tgz#b40c4aa68f81b70bac4d8de52960b82b61f9ab04"
+  resolved "https://registry.npmjs.org/tronweb/-/tronweb-5.3.0.tgz"
   integrity sha512-i03+3UviQacqdrr3VgXHDL8h/2E24BeULak4w6+yRkJaCuEyxjWOtEn1dq87ulTkHzS/vKK0zIyvW7rSxuISOA==
   dependencies:
     "@babel/runtime" "^7.0.0"

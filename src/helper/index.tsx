@@ -6,7 +6,7 @@ import {
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
-  WalletType,
+  WalletType as WalletCosmosType,
   ChainIdEnum,
   BigDecimal,
   COSMOS_CHAIN_ID_COMMON,
@@ -17,7 +17,7 @@ import {
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainIcons, chainInfos } from 'config/chainInfos';
+import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -26,8 +26,9 @@ import { GasPrice } from '@cosmjs/stargate';
 import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { leapSnapId } from './constants';
-import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
+import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { WalletType } from 'components/WalletManagement/walletConfig';
 
 export interface Tokens {
   denom?: string;
@@ -48,15 +49,26 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
+export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
+  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
+);
+
+export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
+export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
+  (c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc'
+);
+
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
+export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
+
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
 };
 
 export const getDenomEvm = (): EvmDenom => {
-  switch (Number(window.ethereum?.chainId)) {
+  switch (Number(window.ethereumDapp?.chainId)) {
     case Networks.bsc:
       return 'bep20_orai';
     case Networks.mainnet:
@@ -131,10 +143,14 @@ export const addNumber = (number1: number, number2: number) => {
 
 export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
-  const isSnap = await getSnap();
+  const isSnap = await checkSnapExist();
   if (!keplr && !isSnap) {
     return displayInstallWallet();
   }
+};
+
+export const checkSnapExist = async (): Promise<boolean> => {
+  return window.ethereum?.isMetaMask && !!(await getSnap());
 };
 
 export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {
@@ -211,19 +227,30 @@ export const setStorageKey = (key = 'typeWallet', value) => {
   return localStorage.setItem(key, value);
 };
 
+export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType => {
+  try {
+    const result = localStorage.getItem(key);
+    const parsedResult = JSON.parse(result);
+    const wallet = JSON.parse(parsedResult.wallet);
+    return wallet.walletsByNetwork.cosmos ?? 'keplr';
+  } catch (error) {
+    console.log('error getWalletByNetworksFromStorage: ', error);
+  }
+};
+
 export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
 
-export const keplrCheck = (type: WalletType) => {
+export const keplrCheck = (type: WalletCosmosType) => {
   return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
 };
 
-export const owalletCheck = (type: WalletType) => {
+export const owalletCheck = (type: WalletCosmosType) => {
   return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
 };
 
-export const switchWallet = (type: WalletType) => {
+export const switchWallet = (type: WalletCosmosType) => {
   if (type === 'owallet' && window.owallet) {
     window.Keplr = new Keplr(type);
     return true;
@@ -250,11 +277,11 @@ export const isEmptyObject = (value: object) => {
   return true;
 };
 
-export const switchWalletCosmos = async (type: WalletType) => {
+export const switchWalletCosmos = async (type: WalletCosmosType) => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();
-  const isLeapSnap = await getSnap();
+  const isLeapSnap = await checkSnapExist();
   if (!isKeplr && !isLeapSnap) {
     return displayInstallWallet();
   }
@@ -264,25 +291,24 @@ export const switchWalletCosmos = async (type: WalletType) => {
   // });
 };
 
-export const switchWalletTron = async () => {
+export const switchWalletTron = async (walletType: WalletType) => {
   let tronAddress: string;
-  const res = await window.tronLink.request({
+  // @ts-ignore
+  const res = await window.tronLinkDapp.request({
     method: 'tron_requestAccounts'
   });
-  if (isMobile()) {
+  // @ts-ignore
+  if (isMobile() || (walletType === 'owallet' && window.tronLinkDapp?.isOwallet)) {
     // @ts-ignore
     tronAddress = res?.base58;
-    // @ts-ignore
-  } else if (!window.owallet?.isOwallet) {
-    if (!window.tronWeb.defaultAddress?.base58) {
-      const { code, message = 'Tronlink is not ready' } = res;
-      if (code !== 200) {
-        throw new Error(message);
-      }
-    }
-    tronAddress = window.tronWeb.defaultAddress.base58;
-    // @ts-ignore
-  } else tronAddress = res?.base58;
+  } else {
+    const { code, message = 'Tronlink is not ready' } = res;
+    if (code !== 200) throw new Error(message);
+    tronAddress = window.tronWeb?.defaultAddress?.base58;
+  }
+
+  if (!tronAddress) throw new Error(res?.message ?? 'Error get Tron address!');
+
   return {
     tronAddress
   };
@@ -317,6 +343,7 @@ export const getListAddressCosmos = async (oraiAddr) => {
   }
   return { listAddressCosmos };
 };
+
 export const getChainSupported = async () => {
   return await window.ethereum.request({
     method: 'wallet_invokeSnap',

@@ -1,10 +1,11 @@
 //@ts-nocheck
 
-import _BigInt from 'big-integer';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
+import _BigInt from 'big-integer';
+import { chainInfos } from 'config/chainInfos';
+import { getWalletByNetworkCosmosFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
-import { chainInfos } from 'config/chainInfos';
 
 // polyfill
 Tendermint37Client.detectVersion = () => {};
@@ -23,7 +24,10 @@ window.TronWeb = require('tronweb');
 window.Networks = require('@oraichain/ethereum-multicall').Networks;
 
 // enable Keplr
-window.Keplr = new Keplr();
+const walletType = getWalletByNetworkCosmosFromStorage();
+window.Keplr = new Keplr(walletType);
+
+window.ethereumDapp = window.ethereum;
 window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');
