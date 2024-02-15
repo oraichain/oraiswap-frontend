@@ -5,7 +5,7 @@ import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
 import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
 import classNames from 'classnames';
-import ConnectWallet from 'components/ConnectWallet';
+import { WalletManagement } from 'components/WalletManagement';
 import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { ThemeContext } from 'context/theme-context';
@@ -167,7 +167,7 @@ const Menu: React.FC = () => {
                 <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
               </Link>
             </div>
-            <ConnectWallet />
+            <WalletManagement />
           </div>
 
           <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
@@ -185,7 +185,7 @@ const Menu: React.FC = () => {
           </div>
           <div className={classNames(styles.connect_wallet_wrapper)}>
             <span>
-              <ConnectWallet />
+              <WalletManagement />
             </span>
           </div>
         </div>

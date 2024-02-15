@@ -1,0 +1,49 @@
+.walletItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #DFE0DE;
+    }
+
+    &>button {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+    }
+
+    .walletIcon {
+        display: flex;
+        width: 40px;
+        height: 40px;
+    }
+
+    .walletName {
+        color: #232521;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 150%;
+    }
+}
+
+.dark {
+    &:hover {
+        background-color: #494949;
+    }
+
+    .walletName {
+        color: #f7f7f7;
+    }
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
