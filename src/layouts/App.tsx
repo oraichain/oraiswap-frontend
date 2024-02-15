@@ -24,6 +24,7 @@ import Instruct from './Instruct';
 import Menu from './Menu';
 import Keplr from 'libs/keplr';
 import { persistor } from 'store/configure';
+import { ethers } from 'ethers';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -171,6 +172,7 @@ const App = () => {
       }
 
       if (walletByNetworks.evm === 'owallet' || mobileMode) {
+        if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
         metamaskAddress = await window.Metamask.getEthAddress();
         if (metamaskAddress) setMetamaskAddress(metamaskAddress);
       }
