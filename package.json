@@ -33,11 +33,7 @@
     "ethers": "^5.0.15",
     "idb-keyval": "^6.2.1",
     "lottie-react": "^2.4.0",
-<<<<<<< HEAD
-    "node-polyfill-webpack-plugin": "^3.0.0",
-=======
     "mixpanel-browser": "^2.49.0",
->>>>>>> main
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
