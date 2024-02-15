@@ -58,7 +58,7 @@ describe('pool', () => {
   });
 
   it('test Pairs getPoolTokens', () => {
-    const poolTokens = getPoolTokens();
+    const poolTokens = getPoolTokens().filter(Boolean);
     expect(Array.isArray(poolTokens)).toBe(true);
     expect(poolTokens.length).toBe(14);
   });

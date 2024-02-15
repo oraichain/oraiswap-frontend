@@ -66,7 +66,7 @@ const Pools: React.FC<{}> = () => {
   const poolTableData: PoolTableData[] = filteredPools
     .map((pool) => {
       const { liquidityAddr: stakingToken, totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
-      const poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+      const poolReward = cachedReward?.find((item) => item.liquidity_token === stakingToken);
 
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
@@ -146,11 +146,11 @@ const Pools: React.FC<{}> = () => {
           )}
         </div>
 
-        <NewPoolModal
+        {/* <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
-        />
+        /> */}
         <NewTokenModal
           isOpen={isOpenNewTokenModal}
           open={() => setIsOpenNewTokenModal(true)}

@@ -205,7 +205,7 @@ const App = () => {
         <Menu />
         {routes()}
         {!isMobile() && <Instruct />}
-        {!isMobile() && <FutureCompetition />}
+        {/* {!isMobile() && <FutureCompetition />} */}
       </div>
     </ThemeProvider>
   );

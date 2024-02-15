@@ -55,6 +55,8 @@ import InputSwap from './InputSwapV3';
 import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import styles from './index.module.scss';
+import { useSwapFee } from './hooks/useSwapFee';
+import mixpanel from 'mixpanel-browser';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -173,7 +175,12 @@ const SwapComponent: React.FC<{
     setFilteredFromTokens(filteredFromTokens);
   }, [fromTokenDenom, toTokenDenom]);
 
-  const taxRate = useTaxRate();
+  const { fee } = useSwapFee({
+    fromToken: originalFromToken,
+    toToken: originalToToken
+  });
+
+  // const taxRate = useTaxRate();
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
@@ -238,12 +245,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-        // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-        fromAmountTokenBalance.toString(),
-        userSlippage,
-        originalFromToken.decimals
-      )
+      // @ts-ignore
+      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+      fromAmountTokenBalance.toString(),
+      userSlippage,
+      originalFromToken.decimals
+    )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
@@ -254,8 +261,8 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-      ).toNumber()
+      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+    ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -338,6 +345,20 @@ const SwapComponent: React.FC<{
       });
     } finally {
       setSwapLoading(false);
+      let address = '';
+      if (oraiAddress) address += oraiAddress + " ";
+      if (metamaskAddress) address += metamaskAddress + " ";
+      if (tronAddress) address += tronAddress + " ";
+      const logEvent = {
+        address,
+        fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,
+        fromAmount: `${fromAmountToken}`,
+        toToken: `${originalToToken.name} - ${originalToToken.chainId}`,
+        toAmount: `${toAmountToken}`,
+        fromNetwork: originalFromToken.chainId,
+        toNetwork: originalToToken.chainId
+      };
+      mixpanel.track("Universal Swap Oraidex", logEvent);
     }
   };
 
@@ -446,9 +467,8 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${
-                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                  } ${originalToToken.name}`}
               </div>
             </div>
           </div>
@@ -513,12 +533,13 @@ const SwapComponent: React.FC<{
                 </div>
               </div>
             )}
-            {!fromTokenFee && !toTokenFee && (
+            {!fromTokenFee && !toTokenFee && fee && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
-                  <span>Tax rate</span>
+                  <span>Swap Fees</span>
                 </div>
-                <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+                {/* <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span> */}
+                <span>{fee && floatToPercent(fee) + '%'}</span>
               </div>
             )}
           </div>
