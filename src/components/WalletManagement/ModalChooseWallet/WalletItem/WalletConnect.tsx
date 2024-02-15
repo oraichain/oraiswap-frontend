@@ -3,13 +3,7 @@ import { ConnectWalletType } from './types';
 import { Button } from 'components/Button';
 import { WalletStatus } from './WalletItem';
 
-export const ConnectWalletButton = ({
-  buttonText,
-  isLoading,
-  isDisabled,
-  onClickConnectBtn,
-  isConnected
-}: ConnectWalletType) => {
+export const ConnectWalletButton = ({ buttonText, isLoading, onClickConnectBtn, isConnected }: ConnectWalletType) => {
   return (
     <Button
       style={{ fontWeight: isConnected ? 500 : 400 }}
@@ -22,13 +16,7 @@ export const ConnectWalletButton = ({
   );
 };
 
-export const Disconnected = ({
-  buttonText
-}: // onClick
-{
-  buttonText: string;
-  // onClick: MouseEventHandler<HTMLButtonElement>;
-}) => {
+export const Disconnected = ({ buttonText }: { buttonText: string }) => {
   return <ConnectWalletButton buttonText={buttonText} onClickConnectBtn={() => {}} />;
 };
 
@@ -97,12 +85,6 @@ export const WalletConnectComponent = ({
       return <>{connecting}</>;
     case WalletStatus.Connected:
       return <>{connected}</>;
-    // case WalletStatus.Rejected:
-    //   return <>{rejected}</>;
-    // case WalletStatus.Error:
-    //   return <>{error}</>;
-    // case WalletStatus.NotExist:
-    //   return <>{notExist}</>;
     default:
       return <>{disconnect}</>;
   }
