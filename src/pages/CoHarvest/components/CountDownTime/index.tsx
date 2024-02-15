@@ -24,16 +24,18 @@ const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
       <div className={styles.title}>
         <span>{isStarted ? 'Round Ending In' : 'Round Start In'}</span>
         {/* <TooltipIcon /> */}
-        <TooltipIconBtn
-          placement="auto"
-          visible={visible}
-          setVisible={setVisible}
-          content={
-            <div className={`${styles.tooltip} ${styles[theme]}`}>
-              Current round period: {formatUTCDateString(start)} - {formatUTCDateString(end)}
-            </div>
-          }
-        />
+        {!bidInfo?.round ? null : (
+          <TooltipIconBtn
+            placement="auto"
+            visible={visible}
+            setVisible={setVisible}
+            content={
+              <div className={`${styles.tooltip} ${styles[theme]}`}>
+                Current round period: {formatUTCDateString(start)} - {formatUTCDateString(end)}
+              </div>
+            }
+          />
+        )}
       </div>
 
       {isStarted ? (

@@ -3009,11 +3009,11 @@
   integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.50"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.50.tgz#c3aeb3ae774fd26d6d9c579663ec2528f8fd34af"
-  integrity sha512-0FNmNUYYGGuGUuRWthVqyxqTRH/kGT9SXE0FOvHG2tIas/4i/5UKlv6Es+u/qeSisQGEyoqr63p2tGmlvYHhLQ==
+  version "1.0.49"
+  resolved "https://registry.npmjs.org/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.49.tgz"
+  integrity sha512-UB3ExIkzVlLqqPDDFWFW673nNrJXDINo1FZpdhxhqNE2oU/H1q2Q2JnnfbGILsoQ79RH+FLEKdd+X0taPQElzw==
   dependencies:
-    "@oraichain/oraidex-common" "^1.0.58"
+    "@oraichain/oraidex-common" "^1.0.45"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
