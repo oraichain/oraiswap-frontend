@@ -23,6 +23,8 @@ import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { leapWalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
+import { persistor } from 'store/configure';
+import { useTronEventListener } from 'hooks/useTronLink';
 
 const App = () => {
   const [address, setAddress] = useConfigReducer('address');
@@ -33,8 +35,8 @@ const App = () => {
   const loadTokenAmounts = useLoadTokens();
   const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
   const [theme] = useConfigReducer('theme');
-
-  // useTronEventListener();
+  const mobileMode = isMobile();
+  useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
@@ -89,19 +91,25 @@ const App = () => {
   useEffect(() => {
     const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
-      localStorage.removeItem(`persist:${PERSIST_CONFIG_KEY}`);
+      persistor.pause();
+      persistor.flush().then(() => {
+        return persistor.purge();
+      });
       setPersistVersion(PERSIST_VER);
     };
 
     if (isClearPersistStorage) clearPersistStorage();
 
+    // TODO: dont need to check keplr gas price when user not connect to wallet
     // if (window.keplr && !isMobile()) {
     //   keplrGasPriceCheck();
     // }
-
-    // add event listener here to prevent adding the same one everytime App.tsx re-renders
-    // try to set it again
   }, []);
+
+  useEffect(() => {
+    // just auto connect keplr in mobile mode
+    mobileMode && keplrHandler();
+  }, [mobileMode]);
 
   useEffect(() => {
     (async () => {
@@ -203,7 +211,7 @@ const App = () => {
         <Menu />
         {routes()}
         {!isMobile() && <Instruct />}
-        {!isMobile() && <FutureCompetition />}
+        {/* {!isMobile() && <FutureCompetition />} */}
       </div>
     </ThemeProvider>
   );

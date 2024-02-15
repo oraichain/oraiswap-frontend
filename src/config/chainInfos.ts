@@ -16,9 +16,8 @@ import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as OraixIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraixLightIcon } from 'assets/icons/oraix_light.svg';
-import { ReactComponent as OsmoLightIcon } from 'assets/icons/osmosis_light.svg';
+import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis_light.svg';
 import { ReactComponent as ScOraiIcon } from 'assets/icons/orchai.svg';
-import { ReactComponent as OsmoIcon } from 'assets/icons/osmosis.svg';
 import { ReactComponent as UsdtIcon } from 'assets/icons/tether.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
@@ -111,7 +110,7 @@ export const tokensIcon: TokenIcon[] = [
   {
     coinGeckoId: 'osmosis',
     Icon: OsmoIcon,
-    IconLight: OsmoLightIcon
+    IconLight: OsmoIcon
   },
   {
     coinGeckoId: 'injective-protocol',
@@ -174,7 +173,7 @@ export const chainIcons: ChainIcon[] = [
   {
     chainId: 'osmosis-1',
     Icon: OsmoIcon,
-    IconLight: OsmoLightIcon
+    IconLight: OsmoIcon
   },
   {
     chainId: 'injective-1',
@@ -351,7 +350,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'osmosis',
       bridgeTo: ['osmosis-1'],
       Icon: OsmoIcon,
-      IconLight: OsmoLightIcon
+      IconLight: OsmoIcon
     },
     {
       coinDenom: 'BEP20 KWT',
@@ -653,7 +652,7 @@ export const chainInfos: CustomChainInfo[] = [
       coinType: 118
     },
     Icon: OsmoIcon,
-    IconLight: OsmoLightIcon,
+    IconLight: OsmoIcon,
     bech32Config: defaultBech32Config('osmo'),
     feeCurrencies: [OsmoToken],
     currencies: [
@@ -664,7 +663,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'osmosis',
         bridgeTo: ['Oraichain'],
         Icon: OsmoIcon,
-        IconLight: OsmoLightIcon
+        IconLight: OsmoIcon
       }
     ]
   },
@@ -834,7 +833,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'ethereum',
-        Icon: EthIcon
+        Icon: EthIcon,
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX
       },
       {
         coinDenom: 'USDT',
@@ -956,6 +956,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'binancecoin',
         bridgeTo: ['Oraichain'],
+        prefixToken: ORAI_BRIDGE_EVM_DENOM_PREFIX,
         Icon: BnbIcon
       }
     ]
