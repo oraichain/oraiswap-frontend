@@ -4,8 +4,14 @@ import flatten from 'lodash/flatten';
 import { assetInfoMap } from './bridgeTokens';
 
 export const getPoolTokens = (): TokenItemType[] => {
-  return uniq(flatten(PAIRS.map((pair) => pair.asset_infos)).map((info) => assetInfoMap[parseAssetInfo(info)]));
-}
+  return (
+    uniq(
+      flatten(PAIRS.map((pair) => pair.asset_infos))
+        .map((info) => assetInfoMap[parseAssetInfo(info)])
+        .filter(Boolean)
+    ) ?? []
+  );
+};
 
 export const PAIRS_CHART = PAIRS.map((pair) => {
   const assets = pair.asset_infos.map((info) => {

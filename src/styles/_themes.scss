@@ -37,8 +37,7 @@ $primary-banner-default: #c9ff85;
 
 // for dark-light mode
 $themes: (
-  dark: (
-    'text-color': white,
+  dark: ('text-color': white,
     'text-color-secondary': #fff,
     'bg-connect-wallet': #232521,
     'text-color-third': #fff,
@@ -116,10 +115,8 @@ $themes: (
     'bg-section-05': #1b1c1a,
     'neutral-text-text-disabled': #494949,
     'neutral-surface-bg-modal': #232521,
-    'bg-iframe-modal': #0a121f
-  ),
-  light: (
-    'text-color': #272b30,
+    'bg-iframe-modal': #0a121f),
+  light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
@@ -177,7 +174,7 @@ $themes: (
     'neutral-border-border-bold': #dfe0de,
     'primary-surface-default': #2f5711,
     'neutral-surface-bg': #fff,
-    'neutral-text-body-on-section': #686a,
+    'neutral-text-body-on-section': #686A66,
     'neutral-text-text-token-name': #232521,
     'neutral-text-text-btn-default': #232521,
     'neutral-surface-bg-toast': #f7f7f7,
@@ -197,6 +194,5 @@ $themes: (
     'bg-section-05': #f7f7f7,
     'neutral-text-text-disabled': #c7c8c6,
     'neutral-surface-bg-modal': #fff,
-    'bg-iframe-modal': #fff
-  )
+    'bg-iframe-modal': #fff)
 );

@@ -1,4 +1,3 @@
-import { Bech32Config, ChainInfo, Currency, FeeCurrency } from '@keplr-wallet/types';
 import {
   TokenItemType,
   tokens,
@@ -25,6 +24,7 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
+import { ReactComponent as NobleLightIcon } from 'assets/icons/ic_noble_light.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -209,7 +209,7 @@ export const chainIcons: ChainIcon[] = [
   {
     chainId: 'noble-1',
     Icon: NobleIcon,
-    IconLight: NobleIcon
+    IconLight: NobleLightIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {

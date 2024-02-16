@@ -15,6 +15,7 @@ import mixpanel from 'mixpanel-browser';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import { getCosmWasmClient } from 'libs/cosmjs';
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,9 @@ const initApp = async () => {
       </PersistGate>
     </Provider>
   );
+
+  const { client } = await getCosmWasmClient({ chainId: network.chainId });
+  window.client = client;
 };
 
 initApp();

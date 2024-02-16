@@ -56,39 +56,43 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 
 const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  if (oraiAddress) {
-    clearTimeout(timer[oraiAddress]);
-    // case get address when keplr ledger not support kawaii
-    const kawaiiAddress = getAddress(
-      await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
-      'oraie'
-    );
-    timer[oraiAddress] = setTimeout(async () => {
-      await Promise.all([
-        loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
-        loadCw20Balance(dispatch, oraiAddress),
-        // different cointype but also require keplr connected by checking oraiAddress
-        loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
-      ]);
-    }, 2000);
-  }
-
-  if (metamaskAddress) {
-    clearTimeout(timer[metamaskAddress]);
-    timer[metamaskAddress] = setTimeout(() => {
-      loadEvmAmounts(dispatch, metamaskAddress, evmChains);
-    }, 2000);
-  }
-
-  if (tronAddress) {
-    clearTimeout(timer[tronAddress]);
-    timer[tronAddress] = setTimeout(() => {
-      loadEvmAmounts(
-        dispatch,
-        tronToEthAddress(tronAddress),
-        chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+  try {
+    if (oraiAddress) {
+      clearTimeout(timer[oraiAddress]);
+      // case get address when keplr ledger not support kawaii
+      const kawaiiAddress = getAddress(
+        await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+        'oraie'
       );
-    }, 2000);
+      timer[oraiAddress] = setTimeout(async () => {
+        await Promise.all([
+          loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
+          loadCw20Balance(dispatch, oraiAddress),
+          // different cointype but also require keplr connected by checking oraiAddress
+          loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
+        ]);
+      }, 2000);
+    }
+
+    if (metamaskAddress) {
+      clearTimeout(timer[metamaskAddress]);
+      timer[metamaskAddress] = setTimeout(() => {
+        loadEvmAmounts(dispatch, metamaskAddress, evmChains);
+      }, 2000);
+    }
+
+    if (tronAddress) {
+      clearTimeout(timer[tronAddress]);
+      timer[tronAddress] = setTimeout(() => {
+        loadEvmAmounts(
+          dispatch,
+          tronToEthAddress(tronAddress),
+          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+        );
+      }, 2000);
+    }
+  } catch (error) {
+    console.log('error load balance: ', error);
   }
 }
 
