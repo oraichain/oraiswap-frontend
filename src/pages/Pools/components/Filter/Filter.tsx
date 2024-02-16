@@ -29,13 +29,13 @@ const LIST_FILTER_POOL = [
 type FilterProps = {
   setFilteredPools: React.Dispatch<React.SetStateAction<PoolInfoResponse[]>>;
   setIsOpenNewTokenModal: (status: boolean) => void;
+  pools: PoolInfoResponse[]
 };
-export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal }) => {
+export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal, pools }) => {
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const [searchValue, setSearchValue] = useState('');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const theme = useTheme();
-  const pools = useGetPools();
   const [address] = useConfigReducer('address');
 
   const { totalRewardInfoData } = useGetRewardInfo({
