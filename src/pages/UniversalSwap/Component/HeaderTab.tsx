@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { selectChartTimeFrame, selectCurrentToken } from 'reducer/tradingSlice';
 import styles from './HeaderTab.module.scss';
 import { reverseSymbolArr } from 'pages/Pools/helpers';
+import { calculateFinalPriceChange } from '../helpers';
 const cx = cn.bind(styles);
 
 export const HeaderTab: React.FC<{
@@ -19,7 +20,7 @@ export const HeaderTab: React.FC<{
   const isPairReverseSymbol = reverseSymbolArr.find(
     (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
   );
-  let [baseDenom, quoteDenom] = currentPair.symbol.split('/');
+  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
 
   const tf = useSelector(selectChartTimeFrame);
   const { isLoading, priceChange } = useGetPriceChange({
@@ -29,16 +30,11 @@ export const HeaderTab: React.FC<{
   });
   const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
 
-  const calculateFinalPriceChange = () => {
-    if (!priceChange) return 0;
-    const { price, price_change } = priceChange;
-
-    if (!isPairReverseSymbol) return price_change;
-
-    if (price === 0) return 0;
-    return (price / (1 + price_change) - price) / price;
-  };
-
+  const percentPriceChange = calculateFinalPriceChange(
+    !!isPairReverseSymbol,
+    priceChange.price,
+    priceChange.price_change
+  );
   return (
     <div className={cx('headerTab')}>
       <div>
@@ -54,7 +50,7 @@ export const HeaderTab: React.FC<{
                   } ${quoteDenom}`}
                 </div>
                 <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
-                  {(isIncrement ? '+' : '') + calculateFinalPriceChange().toFixed(2)}%
+                  {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
                 </div>
               </div>
             )}

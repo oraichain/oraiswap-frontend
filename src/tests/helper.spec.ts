@@ -3,7 +3,7 @@ import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { formateNumberDecimalsAuto, timeSince, toSumDisplay } from 'libs/utils';
 import { getTotalUsd, reduceString } from './../libs/utils';
 import { PairToken } from 'reducer/type';
-import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { calculateFinalPriceChange, generateNewSymbol } from 'pages/UniversalSwap/helpers';
 import {
   MILKYBSC_ORAICHAIN_DENOM,
   USDT_CONTRACT,
@@ -157,4 +157,19 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(result).toEqual(expected);
     });
   });
+
+  it.each([
+    [false, 5, 10, 10],
+    [true, 0, 10, 0],
+    [true, 5, 10, -0.9090909090909092]
+  ])(
+    'test-calculateFinalPriceChange',
+    (isPairReverseSymbol: boolean, currentPrice: number, percentPriceChange: number, expectedResult: number) => {
+      // act
+      const result = calculateFinalPriceChange(isPairReverseSymbol, currentPrice, percentPriceChange);
+
+      // expect
+      expect(result).toEqual(expectedResult);
+    }
+  );
 });
