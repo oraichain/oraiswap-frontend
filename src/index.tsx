@@ -16,6 +16,7 @@ import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
 import { getCosmWasmClient } from 'libs/cosmjs';
+import { getWalletByNetworkCosmosFromStorage } from 'helper';
 
 const queryClient = new QueryClient();
 
@@ -65,8 +66,12 @@ const initApp = async () => {
     </Provider>
   );
 
-  const { client } = await getCosmWasmClient({ chainId: network.chainId });
-  window.client = client;
+  // init cosmwasm client when user connected cosmos wallet
+  const walletType = getWalletByNetworkCosmosFromStorage();
+  if (walletType) {
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
+  }
 };
 
 initApp();

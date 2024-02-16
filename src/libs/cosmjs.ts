@@ -28,18 +28,22 @@ const getCosmWasmClient = async (
   config: { signer?: OfflineSigner; chainId?: string; rpc?: string },
   options?: cosmwasm.SigningCosmWasmClientOptions
 ) => {
-  const { chainId, rpc, signer } = config;
-  const wallet = signer ?? (await collectWallet(chainId));
-  const defaultAddress = (await wallet.getAccounts())[0];
-  const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
-  const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
-    tmClient,
-    wallet,
-    options ?? {
-      gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
-    }
-  );
-  return { wallet, client, defaultAddress };
+  try {
+    const { chainId, rpc, signer } = config;
+    const wallet = signer ?? (await collectWallet(chainId));
+    const defaultAddress = (await wallet.getAccounts())[0];
+    const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
+    const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
+      tmClient,
+      wallet,
+      options ?? {
+        gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
+      }
+    );
+    return { wallet, client, defaultAddress };
+  } catch (error) {
+    console.error('error getCosmwasmClient: ', error);
+  }
 };
 
 export const connectWithSigner = async (rpc: string, signer: OfflineSigner, clientType: clientType, options?: any) => {
