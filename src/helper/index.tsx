@@ -17,7 +17,7 @@ import {
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
+import { chainIcons, chainInfos } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -47,12 +47,6 @@ export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiB
 export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
-
-export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
-);
-
-export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
 
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
