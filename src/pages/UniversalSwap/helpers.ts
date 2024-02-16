@@ -236,3 +236,14 @@ export const generateNewSymbol = (
   }
   return newTVPair;
 };
+
+export const calculateFinalPriceChange = (
+  isPairReverseSymbol: boolean,
+  currentPrice: number,
+  percentPriceChange: number
+) => {
+  if (!isPairReverseSymbol) return percentPriceChange;
+
+  if (currentPrice === 0) return 0;
+  return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
+};
