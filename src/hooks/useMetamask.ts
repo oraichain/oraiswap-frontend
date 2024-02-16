@@ -9,10 +9,17 @@ const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
   if (isMobile()) await window.Metamask.switchNetwork(Networks.bsc);
   // passe cointype 60 for ethereum or let it use default param
-  const accounts = await window.ethereumDapp.request({
+  let accounts = await window.ethereumDapp.request({
     method: 'eth_accounts',
     params: [60]
   });
+
+  if (accounts.length === 0) {
+    accounts = await window.ethereumDapp.request({
+      method: 'eth_requestAccounts',
+      params: []
+    });
+  }
   return accounts;
 };
 
@@ -26,12 +33,13 @@ export function useEagerConnect() {
   const connect = async (accounts?: string[]) => {
     try {
       accounts = accounts ?? (await loadAccounts());
-      if (accounts || accounts?.length > 0) {
+      if (accounts && accounts?.length > 0) {
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
         loadTokenAmounts({ metamaskAddress });
         setMetamaskAddress(metamaskAddress);
       } else {
         setMetamaskAddress(undefined);
+        throw new Error('Connect metamask failed!');
       }
     } catch (error) {
       console.log({ errorConnectMetmask: error });
