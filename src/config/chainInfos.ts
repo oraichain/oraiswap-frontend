@@ -157,6 +157,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'scatom',
     Icon: ScAtomIcon,
     IconLight: ScAtomIcon
+  },
+  {
+    coinGeckoId: 'neutaro' as any,
+    Icon: OraiIcon,
+    IconLight: OraiIcon
   }
 ];
 
@@ -210,6 +215,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: 'noble-1',
     Icon: NobleIcon,
     IconLight: NobleIcon
+  },
+  {
+    chainId: 'Neutaro-1' as any,
+    Icon: OraiIcon,
+    IconLight: OraiIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -303,6 +313,15 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'cosmos',
       coinMinimalDenom: ATOM_ORAICHAIN_DENOM,
       bridgeTo: ['cosmoshub-4'],
+      coinDecimals: 6,
+      Icon: AtomIcon,
+      IconLight: AtomIcon
+    },
+    {
+      coinDenom: 'NEUTARO',
+      coinGeckoId: 'neutaro' as any,
+      coinMinimalDenom: 'ibc/576B1D63E401B6A9A071C78A1D1316D016EC9333D2FEB14AD503FAC4B8731CD1',
+      bridgeTo: ['Neutaro-1'] as any,
       coinDecimals: 6,
       Icon: AtomIcon,
       IconLight: AtomIcon
@@ -758,6 +777,50 @@ export const chainInfos: CustomChainInfo[] = [
       name: 'Mintscan',
       txUrl: 'https://www.mintscan.io/noble/txs/{txHash}'
     }
+  },
+  {
+    // rpc: 'http://rpc.neutaro.tech:26657/',
+    rpc: 'https://rpc1.neutaro.tech/',
+    rest: 'http://api.neutaro.tech:1317/',
+    chainId: 'Neutaro-1' as any,
+    chainName: 'Neutaro' as any,
+    networkType: 'cosmos',
+    bip44: {
+      coinType: 118
+    },
+    Icon: OraiIcon,
+    IconLight: OraiIcon,
+    bech32Config: defaultBech32Config('neutaro'),
+    stakeCurrency: {
+      coinDenom: 'neutaro',
+      coinMinimalDenom: 'uneutaro',
+      coinDecimals: 6,
+      coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png'
+    },
+    feeCurrencies: [
+      {
+        coinDenom: 'neutaro',
+        coinMinimalDenom: 'uneutaro',
+        coinDecimals: 6,
+        coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03
+        }
+      }
+    ],
+    currencies: [
+      {
+        coinDenom: 'NEUTARO',
+        coinMinimalDenom: 'uneutaro',
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'neutaro' as any,
+        Icon: OraiIcon,
+        IconLight: OraiIcon
+      }
+    ]
   },
   {
     rpc: 'https://rpc-cosmos.oraidex.io',
