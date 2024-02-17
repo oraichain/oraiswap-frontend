@@ -63,7 +63,8 @@ import {
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
   WETH_CONTRACT,
-  USDT_ETH_CONTRACT
+  USDT_ETH_CONTRACT,
+  NEUTARO_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -159,7 +160,7 @@ export const tokensIcon: TokenIcon[] = [
     IconLight: ScAtomIcon
   },
   {
-    coinGeckoId: 'neutaro' as any,
+    coinGeckoId: 'neutaro',
     Icon: OraiIcon,
     IconLight: OraiIcon
   }
@@ -217,7 +218,7 @@ export const chainIcons: ChainIcon[] = [
     IconLight: NobleIcon
   },
   {
-    chainId: 'Neutaro-1' as any,
+    chainId: 'Neutaro-1',
     Icon: OraiIcon,
     IconLight: OraiIcon
   }
@@ -319,9 +320,9 @@ export const oraichainNetwork: CustomChainInfo = {
     },
     {
       coinDenom: 'NEUTARO',
-      coinGeckoId: 'neutaro' as any,
-      coinMinimalDenom: 'ibc/576B1D63E401B6A9A071C78A1D1316D016EC9333D2FEB14AD503FAC4B8731CD1',
-      bridgeTo: ['Neutaro-1'] as any,
+      coinGeckoId: 'neutaro',
+      coinMinimalDenom: NEUTARO_ORAICHAIN_DENOM,
+      bridgeTo: ['Neutaro-1'],
       coinDecimals: 6,
       Icon: AtomIcon,
       IconLight: AtomIcon
@@ -780,10 +781,10 @@ export const chainInfos: CustomChainInfo[] = [
   },
   {
     // rpc: 'http://rpc.neutaro.tech:26657/',
-    rpc: 'https://rpc1.neutaro.tech/',
+    rpc: 'https://neutaro.rpc.orai.io/',
     rest: 'http://api.neutaro.tech:1317/',
-    chainId: 'Neutaro-1' as any,
-    chainName: 'Neutaro' as any,
+    chainId: 'Neutaro-1',
+    chainName: 'Neutaro',
     networkType: 'cosmos',
     bip44: {
       coinType: 118
@@ -816,7 +817,7 @@ export const chainInfos: CustomChainInfo[] = [
         coinMinimalDenom: 'uneutaro',
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
-        coinGeckoId: 'neutaro' as any,
+        coinGeckoId: 'neutaro',
         Icon: OraiIcon,
         IconLight: OraiIcon
       }
