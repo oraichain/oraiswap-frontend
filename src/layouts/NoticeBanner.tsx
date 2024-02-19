@@ -6,6 +6,8 @@ import useTheme from 'hooks/useTheme';
 import { useEffect, useState } from 'react';
 import styles from './NoticeBanner.module.scss';
 
+const INTERVAL_TIME = 3000;
+
 export const NoticeBanner = ({
   openBanner,
   setOpenBanner
@@ -20,8 +22,6 @@ export const NoticeBanner = ({
   const mobileMode = isMobile();
 
   useEffect(() => {
-    let timeout;
-
     const carousel = () => {
       if (LIST_NOTICES.length <= 1) return;
 
@@ -32,14 +32,17 @@ export const NoticeBanner = ({
 
         return noteIdx + 1;
       });
-
-      timeout = setTimeout(carousel, 3000);
     };
 
-    carousel();
+    let interval;
+
+    (() => {
+      if (LIST_NOTICES.length <= 1) return;
+      interval = setInterval(carousel, INTERVAL_TIME);
+    })();
 
     return () => {
-      clearTimeout(timeout);
+      clearInterval(interval);
     };
   }, []);
 
@@ -74,10 +77,10 @@ export const LIST_NOTICES = [
     title: 'NTMPI Premiere Listing',
     content: 'Timpi (NTMPI) will be listed on Feb 19th',
     icon: <TimpiIcon />
+  },
+  {
+    title: 'OCH Premiere Listing',
+    content: 'Orchai (OCH) will be listed soon',
+    icon: <OrchaiIcon />
   }
-  // {
-  //   title: 'OCH Premiere Listing',
-  //   content: 'Orchai (OCH) will be listed on ???',
-  //   icon: <OrchaiIcon />
-  // }
 ];
