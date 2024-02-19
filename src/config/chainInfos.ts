@@ -25,6 +25,8 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
+import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
+import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -161,8 +163,8 @@ export const tokensIcon: TokenIcon[] = [
   },
   {
     coinGeckoId: 'neutaro',
-    Icon: OraiIcon,
-    IconLight: OraiIcon
+    Icon: TimpiIcon,
+    IconLight: TimpiIcon
   }
 ];
 
@@ -219,8 +221,8 @@ export const chainIcons: ChainIcon[] = [
   },
   {
     chainId: 'Neutaro-1',
-    Icon: OraiIcon,
-    IconLight: OraiIcon
+    Icon: NeutaroIcon,
+    IconLight: NeutaroIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -789,8 +791,8 @@ export const chainInfos: CustomChainInfo[] = [
     bip44: {
       coinType: 118
     },
-    Icon: OraiIcon,
-    IconLight: OraiIcon,
+    Icon: NeutaroIcon,
+    IconLight: NeutaroIcon,
     bech32Config: defaultBech32Config('neutaro'),
     stakeCurrency: {
       coinDenom: 'ntmpi',
@@ -818,8 +820,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
         coinGeckoId: 'neutaro',
-        Icon: OraiIcon,
-        IconLight: OraiIcon
+        Icon: TimpiIcon,
+        IconLight: TimpiIcon
       }
     ]
   },
