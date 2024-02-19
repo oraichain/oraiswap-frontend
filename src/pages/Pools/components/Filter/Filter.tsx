@@ -57,7 +57,7 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
   };
 
   useEffect(() => {
-    if (!pools.length || !totalRewardInfoData) return;
+    if (!pools.length) return;
 
     let filteredPools: PoolInfoResponse[];
 
