@@ -800,7 +800,7 @@ export const chainInfos: CustomChainInfo[] = [
     },
     feeCurrencies: [
       {
-        coinDenom: 'neutaro',
+        coinDenom: 'ntmpi',
         coinMinimalDenom: 'uneutaro',
         coinDecimals: 6,
         coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png',
