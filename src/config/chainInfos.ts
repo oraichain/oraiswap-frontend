@@ -326,8 +326,8 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: NEUTARO_ORAICHAIN_DENOM,
       bridgeTo: ['Neutaro-1'],
       coinDecimals: 6,
-      Icon: OraiIcon,
-      IconLight: OraiLightIcon
+      Icon: TimpiIcon,
+      IconLight: TimpiIcon
     },
     // {
     //   coinDenom: 'BEP20 AIRI',
