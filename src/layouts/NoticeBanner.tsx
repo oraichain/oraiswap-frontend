@@ -75,9 +75,9 @@ export const LIST_NOTICES = [
     content: 'Timpi (NTMPI) will be listed on Feb 19th',
     icon: <TimpiIcon />
   }
-  //   {
-  //     title: 'OCH Premiere Listing',
-  //     content: 'Orchai (OCH) will be listed on ???',
-  //     icon: <OrchaiIcon />
-  //   }
+  // {
+  //   title: 'OCH Premiere Listing',
+  //   content: 'Orchai (OCH) will be listed on ???',
+  //   icon: <OrchaiIcon />
+  // }
 ];
