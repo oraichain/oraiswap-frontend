@@ -18,13 +18,11 @@ export const NoticeBanner = ({
   const [noteIdx, setNoteIdx] = useState(0);
 
   const note = LIST_NOTICES[noteIdx];
-  const theme = useTheme();
-  const mobileMode = isMobile();
 
   useEffect(() => {
-    const carousel = () => {
-      if (LIST_NOTICES.length <= 1) return;
+    if (LIST_NOTICES.length <= 1) return;
 
+    const carousel = () => {
       setNoteIdx((noteIdx) => {
         if (noteIdx === LIST_NOTICES.length - 1) {
           return 0;
@@ -34,12 +32,7 @@ export const NoticeBanner = ({
       });
     };
 
-    let interval;
-
-    (() => {
-      if (LIST_NOTICES.length <= 1) return;
-      interval = setInterval(carousel, INTERVAL_TIME);
-    })();
+    const interval = setInterval(carousel, INTERVAL_TIME);
 
     return () => {
       clearInterval(interval);
