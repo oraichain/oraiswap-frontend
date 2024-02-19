@@ -323,7 +323,9 @@ export const oraichainNetwork: CustomChainInfo = {
       coinGeckoId: 'neutaro',
       coinMinimalDenom: NEUTARO_ORAICHAIN_DENOM,
       bridgeTo: ['Neutaro-1'],
-      coinDecimals: 6
+      coinDecimals: 6,
+      Icon: OraiIcon,
+      IconLight: OraiLightIcon
     },
     // {
     //   coinDenom: 'BEP20 AIRI',
@@ -791,7 +793,7 @@ export const chainInfos: CustomChainInfo[] = [
     IconLight: OraiIcon,
     bech32Config: defaultBech32Config('neutaro'),
     stakeCurrency: {
-      coinDenom: 'neutaro',
+      coinDenom: 'ntmpi',
       coinMinimalDenom: 'uneutaro',
       coinDecimals: 6,
       coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png'
