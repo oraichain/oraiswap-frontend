@@ -2,9 +2,9 @@
     xmlns:xlink="http://www.w3.org/1999/xlink">
     <path
         d="M0 18C0 8.05888 8.05888 0 18 0C27.9411 0 36 8.05888 36 18C36 27.9411 27.9411 36 18 36C8.05888 36 0 27.9411 0 18Z"
-        fill="url(#pattern0)" />
+        fill="url(#patternTimpi)" />
     <defs>
-        <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
+        <pattern id="patternTimpi" patternContentUnits="objectBoundingBox" width="1" height="1">
             <use xlink:href="#image0_6188_281111" transform="scale(0.0025)" />
         </pattern>
         <image id="image0_6188_281111" width="400" height="400"
