@@ -319,13 +319,11 @@ export const oraichainNetwork: CustomChainInfo = {
       IconLight: AtomIcon
     },
     {
-      coinDenom: 'NEUTARO',
+      coinDenom: 'NTMPI',
       coinGeckoId: 'neutaro',
       coinMinimalDenom: NEUTARO_ORAICHAIN_DENOM,
       bridgeTo: ['Neutaro-1'],
-      coinDecimals: 6,
-      Icon: AtomIcon,
-      IconLight: AtomIcon
+      coinDecimals: 6
     },
     // {
     //   coinDenom: 'BEP20 AIRI',
@@ -813,7 +811,7 @@ export const chainInfos: CustomChainInfo[] = [
     ],
     currencies: [
       {
-        coinDenom: 'NEUTARO',
+        coinDenom: 'NTMPI',
         coinMinimalDenom: 'uneutaro',
         coinDecimals: 6,
         bridgeTo: ['Oraichain'],
