@@ -2968,17 +2968,19 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common-ui@^1.0.4":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.5.tgz#ec6d2e7e3602a6d7885ca7d6304293602e8a4e39"
-  integrity sha512-PTwh4Kw7qSDSp+ke4kTIj7Tm9tbGeD9zKNNiW28Wxsbt1Z87G0YYos+rMDP4gw/BMloJBHD8CM/yghHZ7BuAgA==
+"@oraichain/oraidex-common-ui@latest":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.6.tgz#914e75ba834e01e1e76165bf745cf137bb5b05d7"
+  integrity sha512-P+Zw99QRvOIuRLb+5/DyIzCEUqHI+41Vk1IYJ24HGnXofJPZc4dZE2uPv8Boe+SojcFhfGlPr2xbPdE1DCoWMg==
   dependencies:
+    "@sentry/react" "^7.99.0"
     axios "^0.26.1"
     axios-extensions "^3.1.3"
     date-fns "^3.2.0"
     react "^18.2.0"
     react-dom "^18.2.0"
     react-use "^17.4.0"
+    react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.58":
   version "1.0.68"
@@ -3186,6 +3188,34 @@
     "@noble/hashes" "~1.3.0"
     "@scure/base" "~1.1.0"
 
+"@sentry-internal/feedback@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/feedback/-/feedback-7.101.1.tgz#d7e27ebcc46bd7306cfaa89b591293a394d75672"
+  integrity sha512-fOKDMVvLX+FuJHJszKBvRg1m7+fd4hchqRnZ9DDfitT6P5Ppl0gbEt/LStqu8Wq5M0tna+hpdwHlVEt7gZVKzw==
+  dependencies:
+    "@sentry/core" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+
+"@sentry-internal/replay-canvas@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/replay-canvas/-/replay-canvas-7.101.1.tgz#6856431a6360dd456c693d0510410dcd46f28150"
+  integrity sha512-09l6nD+lxWvwkpXLlIZuzj/z79Llbo6mcH33TJvxrUTjAqSGF/i3Pd5bTLWro9atippOyQgIV/yTGG4Bc5FhyQ==
+  dependencies:
+    "@sentry/core" "7.101.1"
+    "@sentry/replay" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+
+"@sentry-internal/tracing@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/tracing/-/tracing-7.101.1.tgz#9504e29c3c2c3ef5f652777e487b596cf8f78e1a"
+  integrity sha512-ihjWG8x4x0ozx6t+EHoXLKbsPrgzYLCpeBLWyS+M6n3hn6cmHM76c8nZw3ldhUQi5UYL3LFC/JZ50b4oSxtlrg==
+  dependencies:
+    "@sentry/core" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+
 "@sentry-internal/tracing@7.69.0":
   version "7.69.0"
   resolved "https://registry.npmjs.org/@sentry-internal/tracing/-/tracing-7.69.0.tgz"
@@ -3204,6 +3234,19 @@
     "@sentry/core" "7.99.0"
     "@sentry/types" "7.99.0"
     "@sentry/utils" "7.99.0"
+
+"@sentry/browser@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-7.101.1.tgz#bab1257de499ed0e928bb4264a2e64d16cecccb5"
+  integrity sha512-+rIFoWPdO29AHVYsAwq8QEl2Ihv17Xh9Bt2aPFvLTGDA0caHjnx98g2jSOvLIOah6HI7Nwp3Njg2zBEzDtHkNw==
+  dependencies:
+    "@sentry-internal/feedback" "7.101.1"
+    "@sentry-internal/replay-canvas" "7.101.1"
+    "@sentry-internal/tracing" "7.101.1"
+    "@sentry/core" "7.101.1"
+    "@sentry/replay" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
 
 "@sentry/browser@7.69.0":
   version "7.69.0"
@@ -3285,6 +3328,14 @@
     "@sentry/cli-win32-i686" "2.27.0"
     "@sentry/cli-win32-x64" "2.27.0"
 
+"@sentry/core@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-7.101.1.tgz#929841b7734129803b6dcd4d16bf0d3f53af4657"
+  integrity sha512-XSmXXeYT1d4O14eDF3OXPJFUgaN2qYEeIGUztqPX9nBs9/ij8y/kZOayFqlIMnfGvjOUM+63sy/2xDBOpFn6ug==
+  dependencies:
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+
 "@sentry/core@7.69.0":
   version "7.69.0"
   resolved "https://registry.npmjs.org/@sentry/core/-/core-7.69.0.tgz"
@@ -3323,6 +3374,27 @@
     hoist-non-react-statics "^3.3.2"
     tslib "^2.4.1 || ^1.9.3"
 
+"@sentry/react@^7.99.0":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/react/-/react-7.101.1.tgz#678781d477bb4ff5b24444508168dd899472c1b2"
+  integrity sha512-CwaBXntX2e3XHZQZVuv/tcfm5H+UHcS6aVChGfUiBHIBi2JpAqdnLdQIFGTkE8BSnKyolKgIsnvIU3BQ//QTig==
+  dependencies:
+    "@sentry/browser" "7.101.1"
+    "@sentry/core" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+    hoist-non-react-statics "^3.3.2"
+
+"@sentry/replay@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/replay/-/replay-7.101.1.tgz#129ca5ac70690e78468b037a71a9b756bc3d965f"
+  integrity sha512-l4jmj2Rf/myzk3TA83PdMiomassG8okdBh1b2Hp1+ycBRVZFDmsR81gKPvnefSXwGwGNGKEmp6Q2bdGzekpp3Q==
+  dependencies:
+    "@sentry-internal/tracing" "7.101.1"
+    "@sentry/core" "7.101.1"
+    "@sentry/types" "7.101.1"
+    "@sentry/utils" "7.101.1"
+
 "@sentry/replay@7.69.0":
   version "7.69.0"
   resolved "https://registry.npmjs.org/@sentry/replay/-/replay-7.69.0.tgz"
@@ -3331,6 +3403,11 @@
     "@sentry/core" "7.69.0"
     "@sentry/types" "7.69.0"
     "@sentry/utils" "7.69.0"
+
+"@sentry/types@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.101.1.tgz#7f936022d9b373f85ebf357634bf03a9e433a3d0"
+  integrity sha512-bwtkQvrCZ6JGc7vqX7TEAKBgkbQFORt84FFS3JQQb8G3efTt9fZd2ReY4buteKQdlALl8h1QWVngTLmI+kyUuw==
 
 "@sentry/types@7.69.0":
   version "7.69.0"
@@ -3341,6 +3418,13 @@
   version "7.99.0"
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.99.0.tgz#bba7a514abab445026ee42f40f92f81275a6deba"
   integrity sha512-94qwOw4w40sAs5mCmzcGyj8ZUu/KhnWnuMZARRq96k+SjRW/tHFAOlIdnFSrt3BLPvSOK7R3bVAskZQ0N4FTmA==
+
+"@sentry/utils@7.101.1":
+  version "7.101.1"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-7.101.1.tgz#97399b1e6a63a15e8f9fec5112ac4834239f1db6"
+  integrity sha512-Nrg0nrEI3nrOCd9SLJ/WGzxS5KMQE4cryLOvrDcHJRWpsSyGBF1hLLerk84Nsw/0myMsn7zTYU+xoq7idNsX5A==
+  dependencies:
+    "@sentry/types" "7.101.1"
 
 "@sentry/utils@7.69.0":
   version "7.69.0"
@@ -13745,6 +13829,11 @@ react-use-websocket@3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/react-use-websocket/-/react-use-websocket-3.0.0.tgz"
   integrity sha512-BInlbhXYrODBPKIplDAmI0J1VPM+1KhCLN09o+dzgQ8qMyrYs4t5kEYmCrTqyRuMTmpahylHFZWQXpfYyDkqOw==
+
+react-use-websocket@^4.5.0:
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/react-use-websocket/-/react-use-websocket-4.7.0.tgz#e45545ed48eb60171bf6401d1884cc80c700a0ea"
+  integrity sha512-YjR62jB7vB94IZy5UPBGZSR3c0hxu796q9IuJ0vbNg7InJ7Z84NHOd/LHzVI5nAKtaGy1oqvf8EmjKxX+cNz4A==
 
 react-use@^17.4.0:
   version "17.4.0"
