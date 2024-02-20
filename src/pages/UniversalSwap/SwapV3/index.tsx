@@ -57,7 +57,6 @@ import { useGetTransHistory, useSimulate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
-import { useUpdateTokenQueryParam } from './hooks/useUpdateTokenQueryParam';
 import { useFillToken } from './hooks/useFillToken';
 
 const cx = cn.bind(styles);
