@@ -1,3 +1,4 @@
+import { tokenMap } from '@oraichain/oraidex-common';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -18,7 +19,12 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
       return;
     }
 
-    setSwapTokens([fromDenom, toDenom]);
+    const originalFromToken = tokenMap[fromDenom];
+    const originalToToken = tokenMap[toDenom];
+
+    if (originalFromToken && originalToToken) {
+      setSwapTokens([fromDenom, toDenom]);
+    }
   }, [location.search, fromDenom, toDenom]);
 
   return {
