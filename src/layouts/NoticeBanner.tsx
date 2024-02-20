@@ -66,14 +66,14 @@ export const NoticeBanner = ({
 };
 
 export const LIST_NOTICES = [
-  {
-    title: 'NTMPI Premiere Listing',
-    content: 'Timpi (NTMPI) will be listed on Feb 19th',
-    icon: <TimpiIcon />
-  },
+  // {
+  //   title: 'NTMPI Premiere Listing',
+  //   content: 'Timpi (NTMPI) will be listed on Feb 19th',
+  //   icon: <TimpiIcon />
+  // },
   {
     title: 'OCH Premiere Listing',
-    content: 'Orchai (OCH) will be listed soon',
+    content: 'Orchai (OCH) will be listed on Feb 22th',
     icon: <OrchaiIcon />
   }
 ];
