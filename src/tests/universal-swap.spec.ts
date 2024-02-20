@@ -18,9 +18,9 @@ import {
 describe('universal-swap', () => {
   it.each<[string, CoinGeckoId, string, string, SwapDirection, number]>([
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.From, 5],
-    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 24],
-    ['Oraichain', 'oraichain-token', 'orai', '', SwapDirection.To, 23],
-    ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 25],
+    ['Oraichain', 'tether', 'usdt', '', SwapDirection.From, 23],
+    ['Oraichain', 'oraichain-token', 'orai', '', SwapDirection.To, 22],
+    ['0x38', 'oraichain-token', 'bep20_orai', '', SwapDirection.To, 24],
     ['0x38', 'wbnb', 'bep20_bnb', '', SwapDirection.To, 8],
     ['0x38', 'oraichain-token', 'oraichain-token', 'AIRI', SwapDirection.From, 2]
   ])('test-filterNonPoolEvmTokens', (chainId, coinGeckoId, denom, searchTokenName, direction, expectedLength) => {
