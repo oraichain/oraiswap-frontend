@@ -35,6 +35,7 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
+import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
@@ -52,11 +53,11 @@ import {
   getSwapType
 } from '../helpers';
 import InputSwap from './InputSwapV3';
-import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
+import { useGetTransHistory, useSimulate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
-import styles from './index.module.scss';
 import { useSwapFee } from './hooks/useSwapFee';
-import mixpanel from 'mixpanel-browser';
+import styles from './index.module.scss';
+import { useUpdateTokenQueryParam } from './hooks/useUpdateTokenQueryParam';
 import { useFillToken } from './hooks/useFillToken';
 
 const cx = cn.bind(styles);
@@ -90,7 +91,8 @@ const SwapComponent: React.FC<{
   const { refetchTransHistory } = useGetTransHistory();
   useGetFeeConfig();
 
-  useFillToken(setSwapTokens);
+  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
+
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
@@ -537,6 +539,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([fromTokenDenom, denom]);
+            handleUpdateQueryURL([fromTokenDenom, denom]);
           }}
           setSearchTokenName={setSearchTokenName}
           searchTokenName={searchTokenName}
@@ -552,6 +555,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([denom, toTokenDenom]);
+            handleUpdateQueryURL([denom, toTokenDenom]);
           }}
           setSearchTokenName={setSearchTokenName}
           searchTokenName={searchTokenName}
