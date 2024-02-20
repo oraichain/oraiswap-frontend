@@ -50,8 +50,10 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
 
     if (originalFromToken && originalToToken) {
       setSwapTokens([fromDenom, toDenom]);
+    } else {
+      navigate(location.pathname);
     }
-  }, [location.search]);
+  }, [location.search, location.pathname]);
 
   return {
     handleUpdateQueryURL
