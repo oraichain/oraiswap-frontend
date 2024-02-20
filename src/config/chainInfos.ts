@@ -25,6 +25,8 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
+import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
+import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -63,7 +65,8 @@ import {
   WRAP_ETH_CONTRACT,
   WRAP_TRON_TRX_CONTRACT,
   WETH_CONTRACT,
-  USDT_ETH_CONTRACT
+  USDT_ETH_CONTRACT,
+  NEUTARO_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -157,6 +160,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'scatom',
     Icon: ScAtomIcon,
     IconLight: ScAtomIcon
+  },
+  {
+    coinGeckoId: 'neutaro',
+    Icon: TimpiIcon,
+    IconLight: TimpiIcon
   }
 ];
 
@@ -210,6 +218,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: 'noble-1',
     Icon: NobleIcon,
     IconLight: NobleIcon
+  },
+  {
+    chainId: 'Neutaro-1',
+    Icon: NeutaroIcon,
+    IconLight: NeutaroIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -306,6 +319,15 @@ export const oraichainNetwork: CustomChainInfo = {
       coinDecimals: 6,
       Icon: AtomIcon,
       IconLight: AtomIcon
+    },
+    {
+      coinDenom: 'NTMPI',
+      coinGeckoId: 'neutaro',
+      coinMinimalDenom: NEUTARO_ORAICHAIN_DENOM,
+      bridgeTo: ['Neutaro-1'],
+      coinDecimals: 6,
+      Icon: TimpiIcon,
+      IconLight: TimpiIcon
     },
     // {
     //   coinDenom: 'BEP20 AIRI',
@@ -758,6 +780,50 @@ export const chainInfos: CustomChainInfo[] = [
       name: 'Mintscan',
       txUrl: 'https://www.mintscan.io/noble/txs/{txHash}'
     }
+  },
+  {
+    // rpc: 'http://rpc.neutaro.tech:26657/',
+    rpc: 'https://neutaro.rpc.orai.io/',
+    rest: 'http://api.neutaro.tech:1317/',
+    chainId: 'Neutaro-1',
+    chainName: 'Neutaro',
+    networkType: 'cosmos',
+    bip44: {
+      coinType: 118
+    },
+    Icon: NeutaroIcon,
+    IconLight: NeutaroIcon,
+    bech32Config: defaultBech32Config('neutaro'),
+    stakeCurrency: {
+      coinDenom: 'ntmpi',
+      coinMinimalDenom: 'uneutaro',
+      coinDecimals: 6,
+      coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png'
+    },
+    feeCurrencies: [
+      {
+        coinDenom: 'ntmpi',
+        coinMinimalDenom: 'uneutaro',
+        coinDecimals: 6,
+        coinImageUrl: 'https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/Neutaro/chain.png',
+        gasPriceStep: {
+          low: 0.01,
+          average: 0.025,
+          high: 0.03
+        }
+      }
+    ],
+    currencies: [
+      {
+        coinDenom: 'NTMPI',
+        coinMinimalDenom: 'uneutaro',
+        coinDecimals: 6,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'neutaro',
+        Icon: TimpiIcon,
+        IconLight: TimpiIcon
+      }
+    ]
   },
   {
     rpc: 'https://rpc-cosmos.oraidex.io',
