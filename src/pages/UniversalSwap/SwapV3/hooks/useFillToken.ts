@@ -42,6 +42,7 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     const toDenom = params.get(TO_QUERY_KEY);
 
     if (!queryString || !fromDenom || !toDenom) {
+      navigate(location.pathname);
       return;
     }
 
