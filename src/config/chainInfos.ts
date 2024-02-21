@@ -953,7 +953,8 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'och',
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         coinImageUrl:
-          'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670'
+          'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670',
+        Icon: OrchaiIcon
       }
     ]
   },
