@@ -15,6 +15,7 @@ import classNames from 'classnames';
 import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
   const theme = useTheme();
@@ -29,8 +30,9 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
 
   const [isShowMore, setIsShowMore] = useState(false);
 
-  const BaseTokenIcon = theme === 'light' ? token1?.IconLight || token1?.Icon : token1?.Icon;
-  const QuoteTokenIcon = theme === 'light' ? token2?.IconLight || token2?.Icon : token2?.Icon;
+  let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
+  if (token1) BaseTokenIcon = theme === 'light' ? token1.IconLight : token1.Icon;
+  if (token2) QuoteTokenIcon = theme === 'light' ? token2.IconLight : token2.Icon;
 
   const aprBoost = Number(poolDetailData.info?.aprBoost || 0).toFixed(2);
   const isApproximatelyZero = Number(aprBoost) === 0;
@@ -70,24 +72,24 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         </div>
         <div className={styles.amountToken}>
           <div className={styles.percent}>
-            <span>{poolDetailData.token1.name}: 50%</span>
+            <span>{poolDetailData.token1?.name}: 50%</span>
             <div className={styles.bar}>
               <div className={styles.barActive}></div>
             </div>
-            <span>{poolDetailData.token2.name}: 50%</span>
+            <span>{poolDetailData.token2?.name}: 50%</span>
           </div>
           <div className={styles.amount}>
             <TokenBalance
               balance={{
                 amount: pairAmountInfoData?.token1Amount || '0',
-                decimals: poolDetailData.token1.decimals
+                decimals: poolDetailData.token1?.decimals
               }}
               decimalScale={6}
             />
             <TokenBalance
               balance={{
                 amount: pairAmountInfoData?.token2Amount || '0',
-                decimals: poolDetailData.token2.decimals
+                decimals: poolDetailData.token2?.decimals
               }}
               decimalScale={6}
             />
