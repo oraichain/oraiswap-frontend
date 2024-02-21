@@ -70,24 +70,24 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
         </div>
         <div className={styles.amountToken}>
           <div className={styles.percent}>
-            <span>{poolDetailData.token1.name}: 50%</span>
+            <span>{poolDetailData.token1?.name}: 50%</span>
             <div className={styles.bar}>
               <div className={styles.barActive}></div>
             </div>
-            <span>{poolDetailData.token2.name}: 50%</span>
+            <span>{poolDetailData.token2?.name}: 50%</span>
           </div>
           <div className={styles.amount}>
             <TokenBalance
               balance={{
                 amount: pairAmountInfoData?.token1Amount || '0',
-                decimals: poolDetailData.token1.decimals
+                decimals: poolDetailData.token1?.decimals
               }}
               decimalScale={6}
             />
             <TokenBalance
               balance={{
                 amount: pairAmountInfoData?.token2Amount || '0',
-                decimals: poolDetailData.token2.decimals
+                decimals: poolDetailData.token2?.decimals
               }}
               decimalScale={6}
             />
