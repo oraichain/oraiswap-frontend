@@ -2968,10 +2968,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common-ui@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.6.tgz#914e75ba834e01e1e76165bf745cf137bb5b05d7"
-  integrity sha512-P+Zw99QRvOIuRLb+5/DyIzCEUqHI+41Vk1IYJ24HGnXofJPZc4dZE2uPv8Boe+SojcFhfGlPr2xbPdE1DCoWMg==
+"@oraichain/oraidex-common-ui@^1.0.6":
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.9.tgz#291c89dc47cd40527e2778349244919c86516197"
+  integrity sha512-XfZFSv+q636QiW5JPKSVnpe5kW/xVaIy3qX4jr3LTaz0lbOtDpPkRBf1Ke3tkkbOHyFPwdE/yb3c1ZTuWjbo7A==
   dependencies:
     "@sentry/react" "^7.99.0"
     axios "^0.26.1"
