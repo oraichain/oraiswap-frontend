@@ -37,6 +37,7 @@
   }
 
   .input {
+    width: 100%;
     display: flex;
     height: 56px;
     padding: 12px 16px;
@@ -53,8 +54,14 @@
       color: theme-get('text-color');
       background-color: theme-get('neutral-surface-bg-section-3');
     }
+
     input {
       flex: 1;
+      max-width: 100%;
+
+      @include small-mobile {
+        max-width: 70%;
+      }
     }
 
     .symbol {
@@ -65,6 +72,14 @@
       font-size: 20px;
       font-weight: 500;
       line-height: 150%; /* 30px */
+    }
+
+    @include small-mobile {
+      font-size: 18px;
+
+      .symbol {
+        font-size: 18px;
+      }
     }
   }
 
@@ -81,6 +96,10 @@
     font-weight: 400;
     line-height: 150%;
 
+    @include small-mobile {
+      font-size: 12px;
+    }
+
     .button {
       display: flex;
       height: 40px;
@@ -89,6 +108,11 @@
       align-items: center;
       flex: 1 0 0;
       border-radius: 99px;
+
+      @include small-mobile {
+        height: 35px;
+        padding: 0 8px;
+      }
 
       @include theme() {
         color: theme-get('neutral-text-text-dropdown');

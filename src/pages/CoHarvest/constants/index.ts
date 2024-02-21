@@ -13,6 +13,10 @@ export const MONTHS_ARR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug
 
 export const INIT_AMOUNT_SIMULATE = 1000;
 
+export const TF_PRICE_CHANGE = 1440;
+
+export const LIMIT_PAGE = 5;
+
 export enum TAB_HISTORY {
   MY_BID,
   ALL_BID
@@ -22,4 +26,9 @@ export enum BidStatus {
   WIN = 'Won',
   DRAW = 'Draw',
   BIDDING = 'Bidding'
+}
+
+export enum BID_ROUND_STATUS {
+  ONGOING = 'ONGOING',
+  ENDED = 'ENDED'
 }
