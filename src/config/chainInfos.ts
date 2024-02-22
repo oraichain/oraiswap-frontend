@@ -814,8 +814,9 @@ export const chainInfos: CustomChainInfo[] = [
   },
   {
     // rpc: 'http://rpc.neutaro.tech:26657/',
-    rpc: 'https://neutaro.rpc.orai.io/',
-    rest: 'http://api.neutaro.tech:1317/',
+    rpc: 'https://neutaro.rpc.orai.io',
+    rest: 'https://neutaro.lcd.orai.io',
+    // rest: 'http://api.neutaro.tech:1317/',
     chainId: 'Neutaro-1',
     chainName: 'Neutaro',
     networkType: 'cosmos',
