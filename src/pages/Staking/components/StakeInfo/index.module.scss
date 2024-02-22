@@ -1,0 +1,51 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.stakeInfo {
+  width: 100%;
+  display: flex;
+  padding: 24px;
+  justify-content: flex-start;
+  align-items: center;
+
+  gap: 32px;
+  border-radius: 24px;
+  border: 1px solid;
+  border-color: #5ea402;
+  background: #eef9e5;
+
+  .item {
+    width: 100%;
+    max-width: 190px;
+
+    color: #2f5711;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 100%;
+
+    .title {
+      margin-bottom: 32px;
+    }
+
+    .usd {
+      color: #2f5711;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 100%;
+
+      margin-bottom: 16px;
+    }
+
+    .value {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}

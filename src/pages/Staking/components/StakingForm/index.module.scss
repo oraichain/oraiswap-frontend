@@ -1,0 +1,43 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.stakingForm {
+  width: 100%;
+
+  .tabWrapper {
+    display: flex;
+    height: 48px;
+    padding: 4px;
+    align-items: center;
+    gap: 4px;
+    align-self: stretch;
+
+    margin: 16px 0;
+
+    border-radius: 99px;
+    background: #efefef;
+
+    color: #979995;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+
+    .tab {
+      cursor: pointer;
+      display: flex;
+      padding: 12px 24px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex: 1 0 0;
+      align-self: stretch;
+      border-radius: 99px;
+
+      &.active {
+        background: #fff;
+        color: #232521;
+      }
+    }
+  }
+}

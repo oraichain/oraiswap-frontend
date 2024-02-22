@@ -9,6 +9,7 @@ import Pools from 'pages/Pools';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import UniversalSwap from 'pages/UniversalSwap/index';
 import CoHarvest from 'pages/CoHarvest';
+import StakingPage from 'pages/Staking';
 
 export default () => (
   <Suspense
@@ -31,6 +32,7 @@ export default () => (
       <Route path="/bridge" element={<Balance />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
+      <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/pools/:poolUrl" element={<PoolDetail />} />
       <Route path="*" element={<NotFound />} />
