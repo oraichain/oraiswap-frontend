@@ -60,7 +60,7 @@ describe('pool', () => {
   it('test Pairs getPoolTokens', () => {
     const poolTokens = getPoolTokens().filter(Boolean);
     expect(Array.isArray(poolTokens)).toBe(true);
-    expect(poolTokens.length).toBe(15);
+    expect(poolTokens.length).toBe(16);
   });
 
   it.each([

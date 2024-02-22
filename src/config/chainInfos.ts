@@ -27,6 +27,7 @@ import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
 import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
+import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -66,7 +67,9 @@ import {
   WRAP_TRON_TRX_CONTRACT,
   WETH_CONTRACT,
   USDT_ETH_CONTRACT,
-  NEUTARO_ORAICHAIN_DENOM
+  NEUTARO_ORAICHAIN_DENOM,
+  OCH_CONTRACT,
+  OCH_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -165,6 +168,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'neutaro',
     Icon: TimpiIcon,
     IconLight: TimpiIcon
+  },
+  {
+    coinGeckoId: 'och',
+    Icon: OrchaiIcon,
+    IconLight: OrchaiIcon
   }
 ];
 
@@ -477,6 +485,19 @@ export const oraichainNetwork: CustomChainInfo = {
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
       Icon: EthIcon,
       IconLight: EthIcon
+    },
+    {
+      coinDenom: 'OCH',
+      coinGeckoId: 'och',
+      coinMinimalDenom: 'och',
+      type: 'cw20',
+      contractAddress: OCH_CONTRACT,
+      bridgeTo: ['0x01'],
+      coinDecimals: 6,
+      coinImageUrl:
+        'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670',
+      Icon: OrchaiIcon,
+      IconLight: OrchaiIcon
     }
     // {
     //   coinDenom: 'ATOM-CW20',
@@ -606,6 +627,16 @@ export const chainInfos: CustomChainInfo[] = [
         coinDecimals: 18,
         coinGeckoId: 'milky-token',
         Icon: MilkyIcon
+      },
+      {
+        coinDenom: 'OCH',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + OCH_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 18,
+        coinGeckoId: 'och',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        coinImageUrl:
+          'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670'
       }
     ]
   },
@@ -783,8 +814,9 @@ export const chainInfos: CustomChainInfo[] = [
   },
   {
     // rpc: 'http://rpc.neutaro.tech:26657/',
-    rpc: 'https://neutaro.rpc.orai.io/',
-    rest: 'http://api.neutaro.tech:1317/',
+    rpc: 'https://neutaro.rpc.orai.io',
+    rest: 'https://neutaro.lcd.orai.io',
+    // rest: 'http://api.neutaro.tech:1317/',
     chainId: 'Neutaro-1',
     chainName: 'Neutaro',
     networkType: 'cosmos',
@@ -912,6 +944,18 @@ export const chainInfos: CustomChainInfo[] = [
         coinGeckoId: 'tether',
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         Icon: UsdtIcon
+      },
+      {
+        coinDenom: 'OCH',
+        coinMinimalDenom: 'erc20_och',
+        contractAddress: OCH_ETH_CONTRACT,
+        coinDecimals: 18,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'och',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        coinImageUrl:
+          'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670',
+        Icon: OrchaiIcon
       }
     ]
   },
