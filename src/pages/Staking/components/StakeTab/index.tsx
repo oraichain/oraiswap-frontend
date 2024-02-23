@@ -1,27 +1,97 @@
-import styles from './index.module.scss';
-import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as BlinkIcon } from 'assets/icons/blinkIcon.svg';
-import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getUsd } from 'libs/utils';
-import InputBalance from '../InputBalance';
-import { RootState } from 'store/configure';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { MONTHLY_SECOND, ORAIX_TOKEN_INFO, USDC_TOKEN_INFO, YEARLY_SECOND } from 'pages/Staking/constants';
 import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
+import InputBalance from '../InputBalance';
+import styles from './index.module.scss';
+import { useGetMyStakeRewardInfo, useGetRewardPerSecInfo, useGetStakeInfo } from 'pages/Staking/hooks';
+import { useState } from 'react';
+import { USDC_CONTRACT, cw20TokenMap, tokenMap } from '@oraichain/oraidex-common';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { Type, generateMiningMsgs } from 'rest/api';
+import useConfigReducer from 'hooks/useConfigReducer';
+import CosmJs from 'libs/cosmjs';
+import { handleCheckAddress, handleErrorTransaction } from 'helper';
+import { network } from 'config/networks';
+import { calcAPY } from 'pages/Staking/helpers';
 
 const StakeTab = () => {
+  const [address] = useConfigReducer('address');
   const { data: prices } = useCoinGeckoPrices();
-  const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const balance = amounts['oraix'];
+  const [amount, setAmount] = useState<number>();
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const monthlyUSD = getUsd('2', USDC_TOKEN_INFO, prices);
-  const yearlyUSD = getUsd('5', USDC_TOKEN_INFO, prices);
+  const { rewardPerSec } = useGetRewardPerSecInfo(ORAIX_TOKEN_INFO.contractAddress);
+  const { stakeInfo, refetchStakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
+  const { refetchMyStakeRewardInfo } = useGetMyStakeRewardInfo(ORAIX_TOKEN_INFO.contractAddress, address);
+
+  const rewardPerSecInfo = rewardPerSec?.[0] || {
+    amount: '0',
+    info: {
+      token: {
+        contract_addr: USDC_CONTRACT
+      }
+    },
+    token: USDC_TOKEN_INFO
+  };
+
+  const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0');
+  const yearlyReward = apy * amount || 0;
+  const monthlyReward = (MONTHLY_SECOND / YEARLY_SECOND) * yearlyReward;
+
+  const monthlyUSD = getUsd(toAmount(monthlyReward), rewardPerSecInfo.token, prices);
+  const yearlyUSD = getUsd(toAmount(yearlyReward), rewardPerSecInfo.token, prices);
+
+  const handleBond = async () => {
+    if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
+
+    const oraiAddress = await handleCheckAddress('Oraichain');
+
+    setLoading(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      // generate bonding msg
+      const msg = generateMiningMsgs({
+        type: Type.BOND_STAKING_CW20,
+        sender: oraiAddress,
+        amount: toAmount(amount).toString(),
+        lpAddress: ORAIX_TOKEN_INFO.contractAddress
+      });
+
+      // execute msg
+      const result = await CosmJs.execute({
+        address: msg.contractAddress,
+        walletAddr: oraiAddress,
+        handleMsg: msg.msg,
+        gasAmount: { denom: ORAI, amount: '0' },
+        funds: msg.funds
+      });
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+
+        refetchMyStakeRewardInfo();
+        refetchStakeInfo();
+      }
+    } catch (error) {
+      console.log('error in bond: ', error);
+      handleErrorTransaction(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.stakeTab}>
-      <InputBalance balance={balance} />
+      <InputBalance loading={loading} onSubmit={handleBond} balance={balance} amount={amount} setAmount={setAmount} />
 
       <div className={styles.result}>
         <div className={styles.header}>
@@ -42,7 +112,7 @@ const StakeTab = () => {
 
             <div className={styles.value}>
               <UsdcIcon />
-              <span>{numberWithCommas(toDisplay('33333123'))}</span>
+              <span>{numberWithCommas(monthlyReward)}</span>
             </div>
           </div>
 
@@ -54,7 +124,7 @@ const StakeTab = () => {
 
             <div className={styles.value}>
               <UsdcIcon />
-              <span>{numberWithCommas(toDisplay('33333123'))}</span>
+              <span>{numberWithCommas(yearlyReward)}</span>
             </div>
           </div>
         </div>

@@ -1,27 +1,42 @@
-import TokenBalance from 'components/TokenBalance';
 import { useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 
 import { toAmount, toDisplay } from '@oraichain/oraidex-common';
-import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
-import { numberWithCommas } from 'pages/Pools/helpers';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
-import useConfigReducer from 'hooks/useConfigReducer';
 import { Button } from 'components/Button';
-import { STAKE_TAB } from 'pages/Staking/constants';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import { getUsd } from 'libs/utils';
+import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { ORAIX_TOKEN_INFO, STAKE_TAB } from 'pages/Staking/constants';
+import Loader from 'components/Loader';
 
 export type InputBalanceType = {
   balance: string;
   type?: STAKE_TAB;
   label?: string;
+  amount: number;
+  setAmount: React.Dispatch<React.SetStateAction<number>>;
+  onSubmit: () => void;
+  loading: boolean;
 };
 
-const InputBalance = ({ balance, type = STAKE_TAB.Stake, label = 'Balance' }: InputBalanceType) => {
+const InputBalance = ({
+  onSubmit,
+  balance,
+  type = STAKE_TAB.Stake,
+  label = 'Balance',
+  amount,
+  setAmount,
+  loading
+}: InputBalanceType) => {
   const [theme] = useConfigReducer('theme');
   const [coeff, setCoeff] = useState(0);
-  const [amount, setAmount] = useState<number>();
+  const { data: prices } = useCoinGeckoPrices();
+  const amountUSD = getUsd(toAmount(amount), ORAIX_TOKEN_INFO, prices);
 
   return (
     <div className={styles.inputBalance}>
@@ -54,10 +69,12 @@ const InputBalance = ({ balance, type = STAKE_TAB.Stake, label = 'Balance' }: In
               setAmount(floatValue);
             }}
           />
+          <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
         </div>
         <div className={styles.stakeBtn}>
-          <Button type="primary" onClick={() => console.log(amount)}>
-            {type}
+          <Button type="primary" onClick={() => onSubmit()} disabled={loading || amount <= 0}>
+            {loading && <Loader width={22} height={22} />}&nbsp;
+            {type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
           </Button>
         </div>
       </div>

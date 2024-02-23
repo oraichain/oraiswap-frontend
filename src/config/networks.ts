@@ -14,6 +14,8 @@ import {
   ORAIDEX_BID_POOL_CONTRACT
 } from '@oraichain/oraidex-common';
 
+const ORAIDEX_STAKING_CONTRACT = 'orai16hysdxarelmw064zq2tdgjl9fr9fe0h4wh4thly7g0synep43tls9xngy8';
+
 export const network: CustomChainInfo & NetworkConfig = {
   ...oraichainNetwork,
   prefix: oraichainNetwork.bech32Config.bech32PrefixAccAddr,
@@ -29,6 +31,7 @@ export const network: CustomChainInfo & NetworkConfig = {
   converter: CONVERTER_CONTRACT,
   oraidex_listing: ORAIDEX_LISTING_CONTRACT,
   bid_pool: ORAIDEX_BID_POOL_CONTRACT,
+  staking_oraix: ORAIDEX_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io'
 };
