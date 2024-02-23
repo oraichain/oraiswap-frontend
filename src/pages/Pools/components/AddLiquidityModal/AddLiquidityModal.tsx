@@ -59,15 +59,15 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
   let token1Balance = BigInt(amounts[token1?.denom] ?? '0');
   let token2Balance = BigInt(amounts[token2?.denom] ?? '0');
   let subAmounts: AmountDetails;
-  if (token1.contractAddress && token1.evmDenoms) {
+  if (token1?.contractAddress && token1?.evmDenoms) {
     subAmounts = getSubAmountDetails(amounts, token1);
-    const subAmount = toAmount(toSumDisplay(subAmounts), token1.decimals);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token1?.decimals);
     token1Balance += subAmount;
   }
 
   if (token2.contractAddress && token2.evmDenoms) {
     subAmounts = getSubAmountDetails(amounts, token2);
-    const subAmount = toAmount(toSumDisplay(subAmounts), token2.decimals);
+    const subAmount = toAmount(toSumDisplay(subAmounts), token2?.decimals);
     token2Balance += subAmount;
   }
 
@@ -292,7 +292,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
         <InputWithOptionPercent
           TokenIcon={Token1Icon}
           onChange={(e: any) => {
-            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1.decimals));
+            onChangeAmount1(toAmount(Number(e.target.value.replaceAll(',', '')), token1?.decimals));
           }}
           slippage={
             <TooltipIcon
@@ -317,7 +317,7 @@ export const AddLiquidityModal: FC<ModalProps> = ({ isOpen, close, onLiquidityCh
           TokenIcon={Token2Icon}
           value={quoteAmount}
           onChange={(e: any) => {
-            onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2.decimals));
+            onChangeAmount2(toAmount(Number(e.target.value.replaceAll(',', '')), token2?.decimals));
           }}
           token={token2}
           setAmountFromPercent={onChangeAmount2}
