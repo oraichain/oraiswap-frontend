@@ -94,7 +94,7 @@ const StakeInfo = () => {
       </div> */}
 
       <div className={styles.item}>
-        <div className={styles.title}>Received Rewards</div>
+        <div className={styles.title}>Claimable Rewards</div>
 
         <div className={styles.usd}>{formatDisplayUsdt(rewardUsd)}</div>
 

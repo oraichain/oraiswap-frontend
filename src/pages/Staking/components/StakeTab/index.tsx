@@ -9,7 +9,12 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
 import InputBalance from '../InputBalance';
 import styles from './index.module.scss';
-import { useGetMyStakeRewardInfo, useGetRewardPerSecInfo, useGetStakeInfo } from 'pages/Staking/hooks';
+import {
+  useGetAllStakerRewardInfo,
+  useGetMyStakeRewardInfo,
+  useGetRewardPerSecInfo,
+  useGetStakeInfo
+} from 'pages/Staking/hooks';
 import { useState } from 'react';
 import { USDC_CONTRACT, cw20TokenMap, tokenMap } from '@oraichain/oraidex-common';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -31,6 +36,7 @@ const StakeTab = () => {
   const { rewardPerSec } = useGetRewardPerSecInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { stakeInfo, refetchStakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { refetchMyStakeRewardInfo } = useGetMyStakeRewardInfo(ORAIX_TOKEN_INFO.contractAddress, address);
+  const { refetchAllStakerRewardInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
 
   const rewardPerSecInfo = rewardPerSec?.[0] || {
     amount: '0',
@@ -80,6 +86,7 @@ const StakeTab = () => {
 
         refetchMyStakeRewardInfo();
         refetchStakeInfo();
+        refetchAllStakerRewardInfo();
       }
     } catch (error) {
       console.log('error in bond: ', error);
