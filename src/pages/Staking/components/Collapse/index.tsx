@@ -24,7 +24,19 @@ const CollapseButton = ({ label, content, key }: CollapseType) => {
             setOpen((open) => !open);
           }}
         >
-          {open ? <MinusIcon /> : <PlusIcon />}
+          {open ? (
+            <MinusIcon
+              onClick={() => {
+                setOpen((open) => !open);
+              }}
+            />
+          ) : (
+            <PlusIcon
+              onClick={() => {
+                setOpen((open) => !open);
+              }}
+            />
+          )}
         </div>
       </div>
 
