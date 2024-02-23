@@ -119,8 +119,23 @@ export const TabsTxs: React.FC<{
   const [searchParams] = useSearchParams();
   let tab = searchParams.get(TYPE_QUERY_TYPE)?.toLowerCase();
 
+  const getUrlString = (param?: string) => {
+    const currentFromDenom = searchParams.get(FROM_QUERY_KEY);
+    const currentToDenom = searchParams.get(TO_QUERY_KEY);
+    const queryParams = new URLSearchParams();
+
+    if (param) queryParams.set('type', param);
+
+    if (currentFromDenom) queryParams.set('from', currentFromDenom);
+    if (currentToDenom) queryParams.set('to', currentToDenom);
+
+    const queryString = queryParams.toString();
+    return { queryString };
+  };
+
   if (tab && !Object.values(TYPE_TAB_HISTORY).includes(tab)) {
-    navigate(`${pathname}`);
+    const { queryString } = getUrlString();
+    navigate(`${pathname}?${queryString}`);
   }
 
   return (
@@ -136,16 +151,7 @@ export const TabsTxs: React.FC<{
                 `${!tab && type === TYPE_TAB_HISTORY.ASSETS ? 'active' : ''}`
               )}
               onClick={() => {
-                const currentFromDenom = searchParams.get(FROM_QUERY_KEY);
-                const currentToDenom = searchParams.get(TO_QUERY_KEY);
-                const queryParams = new URLSearchParams();
-
-                queryParams.set('type', type);
-
-                if (currentFromDenom) queryParams.set('from', currentFromDenom);
-                if (currentToDenom) queryParams.set('to', currentToDenom);
-
-                const queryString = queryParams.toString();
+                const { queryString } = getUrlString(type);
                 navigate(`${pathname}?${queryString}`);
               }}
             >
