@@ -66,12 +66,17 @@ const Pools: React.FC<{}> = () => {
   const poolTableData: PoolTableData[] = filteredPools
     .map((pool) => {
       const { liquidityAddr: stakingToken, totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
-      const poolReward = cachedReward?.find((item) => item.liquidity_token === stakingToken);
+      let poolReward = {
+        reward: []
+      };
+      if (cachedReward && cachedReward.length > 0) {
+        poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+      }
 
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-        '0'
+          '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;

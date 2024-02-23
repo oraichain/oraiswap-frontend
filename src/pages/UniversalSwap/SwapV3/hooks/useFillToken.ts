@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 export const FROM_QUERY_KEY = 'from';
 export const TO_QUERY_KEY = 'to';
+export const TYPE_QUERY_TYPE = 'type';
 
 // URL: /universalswap?from=orai&to=usdt
 export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) => {
@@ -40,11 +41,11 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     const params = new URLSearchParams(queryString || '');
     const fromDenom = params.get(FROM_QUERY_KEY);
     const toDenom = params.get(TO_QUERY_KEY);
+    const tab = params.get(TYPE_QUERY_TYPE);
 
-    if (!queryString || !fromDenom || !toDenom) {
-      navigate(location.pathname);
-      return;
-    }
+    let pathname = location.pathname;
+    if (tab) pathname += `?type=${tab}`;
+    if (!queryString || !fromDenom || !toDenom) return navigate(pathname);
 
     const originalFromToken = tokenMap[fromDenom];
     const originalToToken = tokenMap[toDenom];
@@ -52,7 +53,7 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     if (originalFromToken && originalToToken) {
       setSwapTokens([fromDenom, toDenom]);
     } else {
-      navigate(location.pathname);
+      navigate(pathname);
     }
   }, [location.search, location.pathname]);
 
