@@ -5,6 +5,7 @@ import loadingGif from 'assets/gif/loading.gif';
 import { RemainingOraibTokenItem } from './useGetOraiBridgeBalances';
 import { TooltipIcon } from './TooltipBridgeToken';
 import { toDisplay } from '@oraichain/oraidex-common';
+import { flattenTokensWithIcon } from 'config/chainInfos';
 
 interface Props {
   handleMove: () => Promise<void>;
@@ -29,11 +30,11 @@ export default function StuckOraib({ handleMove, loading, remainingOraib }: Prop
       <TooltipIcon
         placement="bottom-end"
         content={remainingOraib.map((token) => {
-          const { Icon } = token;
+          const tokensIcon = flattenTokensWithIcon.find((tok) => tok.coinGeckoId === token.coinGeckoId);
           return (
             <div key={token.denom} className={styles.stuckToken}>
               <div className={styles.icon}>
-                <Icon width={20} height={20} />
+                <tokensIcon.Icon width={20} height={20} />
                 <span className={styles.name}>{token.name}</span>
               </div>
               <TokenBalance

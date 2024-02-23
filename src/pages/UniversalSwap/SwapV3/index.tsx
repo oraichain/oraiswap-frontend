@@ -211,7 +211,11 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
-  const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+
+  let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+  if (!Number(usdPriceShow)) {
+    usdPriceShow = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
+  }
 
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
@@ -328,10 +332,7 @@ const SwapComponent: React.FC<{
       });
     } finally {
       setSwapLoading(false);
-      let address = '';
-      if (oraiAddress) address += oraiAddress + ' ';
-      if (metamaskAddress) address += metamaskAddress + ' ';
-      if (tronAddress) address += tronAddress + ' ';
+      const address = [oraiAddress, metamaskAddress, tronAddress].filter(Boolean).join(' ');
       const logEvent = {
         address,
         fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,

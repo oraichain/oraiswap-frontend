@@ -223,8 +223,7 @@ export const initClient = async (type: WalletType) => {
       for (const networkId of [
         network.chainId,
         COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
-        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID,
-        'Neutaro-1'
+        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
       ] as NetworkChainId[]) {
         try {
           await window.Keplr.suggestChain(networkId);

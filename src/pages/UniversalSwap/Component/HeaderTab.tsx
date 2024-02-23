@@ -1,12 +1,14 @@
 import HideImg from 'assets/icons/hidden.svg';
 import ShowImg from 'assets/icons/show.svg';
 import cn from 'classnames/bind';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { reverseSymbolArr } from 'pages/Pools/helpers';
 import { useGetPriceChange } from 'pages/Pools/hooks';
 import { useSelector } from 'react-redux';
 import { selectChartTimeFrame, selectCurrentToken } from 'reducer/tradingSlice';
-import styles from './HeaderTab.module.scss';
-import { reverseSymbolArr } from 'pages/Pools/helpers';
 import { calculateFinalPriceChange } from '../helpers';
+import styles from './HeaderTab.module.scss';
+
 const cx = cn.bind(styles);
 
 export const HeaderTab: React.FC<{
@@ -15,6 +17,7 @@ export const HeaderTab: React.FC<{
   toTokenDenom: string;
 }> = ({ setHideChart, hideChart }) => {
   const currentPair = useSelector(selectCurrentToken);
+  const { data: prices } = useCoinGeckoPrices();
 
   const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
   const isPairReverseSymbol = reverseSymbolArr.find(
@@ -35,6 +38,9 @@ export const HeaderTab: React.FC<{
     priceChange.price,
     priceChange.price_change
   );
+
+  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
+  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
   return (
     <div className={cx('headerTab')}>
       <div>
@@ -46,8 +52,8 @@ export const HeaderTab: React.FC<{
               <div className={cx('bottom')}>
                 <div className={cx('balance')}>
                   {`1 ${baseDenom} ≈ ${
-                    isPairReverseSymbol ? (1 / priceChange.price || 0).toFixed(6) : priceChange.price.toFixed(6)
-                  } ${quoteDenom}`}
+                    isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
+                  } ${isOchOraiPair ? 'USD' : quoteDenom}`}
                 </div>
                 <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
                   {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%

@@ -2968,10 +2968,10 @@
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"@oraichain/oraidex-common-ui@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.6.tgz#914e75ba834e01e1e76165bf745cf137bb5b05d7"
-  integrity sha512-P+Zw99QRvOIuRLb+5/DyIzCEUqHI+41Vk1IYJ24HGnXofJPZc4dZE2uPv8Boe+SojcFhfGlPr2xbPdE1DCoWMg==
+"@oraichain/oraidex-common-ui@1.0.10":
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common-ui/-/oraidex-common-ui-1.0.10.tgz#d5ccdb37ee09e251e176bc944e662a3f11b7e413"
+  integrity sha512-jkbu+cmJ0jx7mzK/5xjDP0K9mhTXf/KbcaIE1duOPrbGsP5iZafcOBZy3Gz659H2a5ipZOgMpAObnhNSDE3gKw==
   dependencies:
     "@sentry/react" "^7.99.0"
     axios "^0.26.1"
@@ -2983,9 +2983,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.58":
-  version "1.0.68"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.68.tgz#5c38082da60b3fb9254da7b1f141f8c9b0471815"
-  integrity sha512-3HvLIEeIw/EkcEuCfCgepLmjaxwv99uibCOlokPDHMdwUU9HvQRDF2f58NWdmG7ZKph/MoW5RXHkngsR9Pmsvg==
+  version "1.0.70"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.70.tgz#ec68f38b43b25affcec684183bc6514e86520aa1"
+  integrity sha512-DZY5M/4JGwhEZJULHE+rfoET7dAw8FpnS/M3404xZ/GV1q9t6935M0qSzNiy2yk4PHJaWq+DxN8hPAYiiSTe9Q==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
