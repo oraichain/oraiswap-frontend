@@ -213,6 +213,9 @@
 
       button {
         gap: 10px;
+        @include small-mobile {
+          gap: 4px;
+        }
         flex: 1;
       }
 
