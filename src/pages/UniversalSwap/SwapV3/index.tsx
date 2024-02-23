@@ -332,10 +332,7 @@ const SwapComponent: React.FC<{
       });
     } finally {
       setSwapLoading(false);
-      let address = '';
-      if (oraiAddress) address += oraiAddress + ' ';
-      if (metamaskAddress) address += metamaskAddress + ' ';
-      if (tronAddress) address += tronAddress + ' ';
+      const address = [oraiAddress, metamaskAddress, tronAddress].filter(Boolean).join(' ');
       const logEvent = {
         address,
         fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,

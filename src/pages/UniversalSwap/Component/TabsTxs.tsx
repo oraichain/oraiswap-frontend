@@ -7,10 +7,11 @@ import { networks } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from '../helpers';
 import styles from './TabsTxs.module.scss';
 import { chainIcons } from 'config/chainInfos';
+import { FROM_QUERY_KEY, TO_QUERY_KEY, TYPE_QUERY_TYPE } from '../SwapV3/hooks/useFillToken';
 
 const cx = cn.bind(styles);
 const ItemNetwork: React.FC<{
@@ -69,32 +70,32 @@ const TabsNetwork: React.FC<{
         />
       </div>
       <div className={cx('options')}>
-        {networks && networks.map((item: CustomChainInfo) => {
-          const networkIcon = chainIcons.find(chainIcon => chainIcon.chainId === item.chainId)
-          return (
-            <div key={item.chainName}>
-              <ItemNetwork
-                onClick={() => {
-                  setNetworkFilter({
-                    label: item.chainName,
-                    value: item.chainId,
+        {networks &&
+          networks.map((item: CustomChainInfo) => {
+            const networkIcon = chainIcons.find((chainIcon) => chainIcon.chainId === item.chainId);
+            return (
+              <div key={item.chainName}>
+                <ItemNetwork
+                  onClick={() => {
+                    setNetworkFilter({
+                      label: item.chainName,
+                      value: item.chainId,
+                      Icon: networkIcon.Icon,
+                      IconLight: networkIcon.IconLight
+                    });
+                    setIsNetwork(false);
+                  }}
+                  item={{
+                    ...item,
                     Icon: networkIcon.Icon,
                     IconLight: networkIcon.IconLight
-                  });
-                  setIsNetwork(false);
-                }}
-
-                item={{
-                  ...item,
-                  Icon: networkIcon.Icon,
-                  IconLight: networkIcon.IconLight
-                }}
-                theme={theme}
-                isCheck={networkFilter === item.chainName}
-              />
-            </div>
-          );
-        })}
+                  }}
+                  theme={theme}
+                  isCheck={networkFilter === item.chainName}
+                />
+              </div>
+            );
+          })}
       </div>
     </div>
   );
@@ -108,13 +109,19 @@ export const TabsTxs: React.FC<{
   const [theme] = useConfigReducer('theme');
   const ref = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  let pathname = location.pathname;
 
   useOnClickOutside(ref, () => {
     setIsNetwork(false);
   });
 
   const [searchParams] = useSearchParams();
-  let tab = searchParams.get('type');
+  let tab = searchParams.get(TYPE_QUERY_TYPE)?.toLowerCase();
+
+  if (tab && !Object.values(TYPE_TAB_HISTORY).includes(tab)) {
+    navigate(`${pathname}`);
+  }
 
   return (
     <div className={cx('tabsTxs')} ref={ref}>
@@ -129,7 +136,17 @@ export const TabsTxs: React.FC<{
                 `${!tab && type === TYPE_TAB_HISTORY.ASSETS ? 'active' : ''}`
               )}
               onClick={() => {
-                navigate(`/universalswap?type=${type}`);
+                const currentFromDenom = searchParams.get(FROM_QUERY_KEY);
+                const currentToDenom = searchParams.get(TO_QUERY_KEY);
+                const queryParams = new URLSearchParams();
+
+                queryParams.set('type', type);
+
+                if (currentFromDenom) queryParams.set('from', currentFromDenom);
+                if (currentToDenom) queryParams.set('to', currentToDenom);
+
+                const queryString = queryParams.toString();
+                navigate(`${pathname}?${queryString}`);
               }}
             >
               {type}
@@ -155,7 +172,7 @@ export const TabsTxs: React.FC<{
               <img src={theme === 'light' ? NetworkImg : NetworkImg} alt="network" />
             )}
             <div className={cx('all-network')}>
-              <span className={cx(`detail`)}>{networkFilter.label ? networkFilter.label : 'All Networks'}</span>
+              <span className={cx(`detail`)}>{networkFilter?.label ?? 'All Networks'}</span>
             </div>
             <img src={theme === 'light' ? ArrowImg : ArrowImg} alt="arrow" />
           </div>
