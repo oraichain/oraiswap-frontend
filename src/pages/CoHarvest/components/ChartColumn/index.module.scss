@@ -17,7 +17,12 @@
     line-height: 100%;
     letter-spacing: 0.013px;
     writing-mode: vertical-lr;
-
+    transform-origin: center center;
+    transform: rotate(-45deg);
+    @include mobile {
+      transform-origin: unset;
+      transform: unset;
+    }
     height: 60px;
   }
 
