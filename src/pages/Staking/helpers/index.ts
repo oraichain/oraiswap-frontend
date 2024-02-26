@@ -46,3 +46,8 @@ export const calcAPY = (rewardPerSec: string, totalBond: string, prices: CoinGec
 
   return ((Number(rewardPerSecUsd) * YEARLY_SECOND) / Number(totalBondUsd)) * 100;
 };
+
+export const calcYearlyReward = (amount: number, apr: number, prices: CoinGeckoPrices<string>) => {
+  if (!prices[ORAIX_TOKEN_INFO.coinGeckoId]) return 0;
+  return ((amount * apr) / 100) * prices[ORAIX_TOKEN_INFO.coinGeckoId];
+};

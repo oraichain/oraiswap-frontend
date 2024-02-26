@@ -11,7 +11,7 @@ import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { MONTHLY_SECOND, ORAIX_TOKEN_INFO, USDC_TOKEN_INFO, YEARLY_SECOND } from 'pages/Staking/constants';
-import { calcAPY } from 'pages/Staking/helpers';
+import { calcAPY, calcYearlyReward } from 'pages/Staking/helpers';
 import {
   useGetAllStakerRewardInfo,
   useGetMyStakeRewardInfo,
@@ -53,7 +53,7 @@ const StakeTab = () => {
   };
 
   const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0', prices);
-  const yearlyReward = apy * amount || 0;
+  const yearlyReward = calcYearlyReward(amount, apy, prices) || 0;
   const monthlyReward = (MONTHLY_SECOND / YEARLY_SECOND) * yearlyReward;
 
   const monthlyUSD = getUsd(toAmount(monthlyReward), rewardPerSecInfo.token, prices);
