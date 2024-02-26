@@ -69,7 +69,7 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
     filteredPools = filteredPools.filter((pool) => pool.symbols.toLowerCase().includes(searchValue.toLowerCase()));
     setFilteredPools(filteredPools);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeFilter, searchValue, pools, totalRewardInfoData]);
+  }, [typeFilter, searchValue, pools.length, totalRewardInfoData]);
 
   return (
     <div className={styles.pool_filter}>
