@@ -88,7 +88,7 @@ const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, ba
   const returnAmountUsd = getUsd(estimateReceive, USDC_TOKEN_INFO, prices);
   const residueBidAmountUsd = getUsd(estimateResidueBid, ORAIX_TOKEN_INFO, prices);
 
-  const potentialReturnUSD = new BigDecimal(BigInt(returnAmountUsd)).add(BigInt(residueBidAmountUsd)).toNumber();
+  const potentialReturnUSD = new BigDecimal(returnAmountUsd).add(residueBidAmountUsd).toNumber();
 
   const insufficientFund = amount && amount > toDisplay(balance);
 

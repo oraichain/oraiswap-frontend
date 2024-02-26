@@ -40,7 +40,7 @@ const InputBalance = ({ amount, onChangeAmount, disable = false, balance }: Inpu
           isAllowed={(values) => {
             const { floatValue } = values;
             // allow !floatValue to let user can clear their input
-            return !floatValue || (floatValue >= 0 && floatValue <= 1e14);
+            return !floatValue || (floatValue >= 0 && floatValue <= 1e10);
           }}
           onValueChange={({ floatValue }) => {
             onChangeAmount && onChangeAmount(floatValue);
