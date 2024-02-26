@@ -106,7 +106,7 @@ const Menu: React.FC = () => {
             setOpenBuy(true);
           })}
           {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-          {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
+          {/* {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)} */}
         </>
       ) : (
         <>
@@ -135,7 +135,7 @@ const Menu: React.FC = () => {
                   setOtherActive(!otherActive);
                 })}
                 {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-                {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)}
+                {/* {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)} */}
               </div>
             }
           />

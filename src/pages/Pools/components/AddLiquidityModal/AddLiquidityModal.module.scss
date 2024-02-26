@@ -4,6 +4,11 @@
 .modal {
   max-width: 568px;
 
+  @include small-mobile {
+    align-items: flex-end;
+    width: 100%;
+  }
+
   .container {
     position: relative;
     background-color: #121511;
@@ -17,6 +22,13 @@
     padding: 24px;
     max-height: 100vh;
     overflow-y: auto;
+
+    @include small-mobile {
+      padding: 24px 10px;
+
+      border-end-end-radius: 0px;
+      border-end-start-radius: 0px;
+    }
 
     .header {
       display: flex;
@@ -107,6 +119,11 @@
       position: absolute;
       left: 20px;
       top: 165px;
+
+      @include small-mobile {
+        height: 160px;
+        left: 13px;
+      }
     }
 
     .slippage-add-liquidity {
@@ -196,6 +213,9 @@
 
       button {
         gap: 10px;
+        @include small-mobile {
+          gap: 4px;
+        }
         flex: 1;
       }
 

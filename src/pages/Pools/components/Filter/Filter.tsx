@@ -29,13 +29,13 @@ const LIST_FILTER_POOL = [
 type FilterProps = {
   setFilteredPools: React.Dispatch<React.SetStateAction<PoolInfoResponse[]>>;
   setIsOpenNewTokenModal: (status: boolean) => void;
+  pools: PoolInfoResponse[];
 };
-export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal }) => {
+export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenModal, pools }) => {
   const [typeFilter, setTypeFilter] = useConfigReducer('filterDefaultPool');
   const [searchValue, setSearchValue] = useState('');
   const lpPools = useSelector((state: RootState) => state.token.lpPools);
   const theme = useTheme();
-  const pools = useGetPools();
   const [address] = useConfigReducer('address');
 
   const { totalRewardInfoData } = useGetRewardInfo({
@@ -70,7 +70,7 @@ export const Filter: FC<FilterProps> = ({ setFilteredPools, setIsOpenNewTokenMod
     filteredPools = filteredPools.filter((pool) => pool.symbols.toLowerCase().includes(searchValue.toLowerCase()));
     setFilteredPools(filteredPools);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeFilter, searchValue, pools]);
+  }, [typeFilter, searchValue, pools, totalRewardInfoData]);
 
   return (
     <div className={styles.pool_filter}>

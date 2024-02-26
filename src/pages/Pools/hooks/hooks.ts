@@ -256,7 +256,7 @@ export const useGetRewardInfoDetail = ({ stakerAddr, poolInfo }: RewardInfoQuery
   return { totalRewardInfoData, refetchRewardInfo };
 };
 
-export const getStatisticData = (data: PoolTableData[]) => {
+export const getStatisticData = (data: PoolInfoResponse[]) => {
   const statisticData = data.reduce(
     (acc, curr) => {
       acc.volume = acc.volume + toDisplay(curr.volume24Hour);

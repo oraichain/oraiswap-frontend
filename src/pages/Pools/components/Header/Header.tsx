@@ -13,7 +13,6 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import { PoolTableData } from 'pages/Pools';
 import {
   getStatisticData,
   useGetMyStake,
@@ -23,6 +22,7 @@ import {
 } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
+import { PoolInfoResponse } from 'types/pool';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -34,11 +34,11 @@ export const useGetOraiPrice = () => {
       (pool) =>
         pool.firstAssetInfo === JSON.stringify(ORAI_INFO) &&
         pool.secondAssetInfo ===
-          JSON.stringify({
-            token: {
-              contract_addr: USDT_CONTRACT
-            }
-          })
+        JSON.stringify({
+          token: {
+            contract_addr: USDT_CONTRACT
+          }
+        })
     );
     if (!oraiUsdtPool) return;
     const oraiPrice = toDecimal(BigInt(oraiUsdtPool.askPoolAmount), BigInt(oraiUsdtPool.offerPoolAmount));
@@ -48,7 +48,7 @@ export const useGetOraiPrice = () => {
   return oraiPrice;
 };
 
-export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
+export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) => {
   const theme = useTheme();
   const [address] = useConfigReducer('address');
   const { totalStaked, totalEarned } = useGetMyStake({
@@ -99,11 +99,11 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
         .filter((rewardInfo) => rewardInfo.pending_reward !== '0')
         .map(
           (rewardInfo) =>
-            ({
-              contractAddress: network.staking,
-              msg: { withdraw: { staking_token: rewardInfo.staking_token } },
-              funds: null
-            } as ExecuteInstruction)
+          ({
+            contractAddress: network.staking,
+            msg: { withdraw: { staking_token: rewardInfo.staking_token } },
+            funds: null
+          } as ExecuteInstruction)
         );
 
       const result = await CosmJs.executeMultiple({
