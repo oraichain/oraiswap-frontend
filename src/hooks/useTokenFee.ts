@@ -114,7 +114,6 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
 export const useGetFeeConfig = () => {
   const dispatch = useDispatch();
-
   useEffect(() => {
     const queryRelayerFee = async () => {
       const feeConfig = await fetchFeeConfig();

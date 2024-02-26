@@ -13,11 +13,11 @@ import {
   evmChains,
   cosmosChains
 } from '@oraichain/oraidex-common';
-
+import { serializeError } from 'serialize-error';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
+import { chainIcons, chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import Keplr from 'libs/keplr';
 import { collectWallet } from 'libs/cosmjs';
@@ -203,7 +203,7 @@ export const handleErrorMsg = (error: any, info?: InfoError) => {
   } else {
     if (error?.ex?.message) finalError = transferMsgError(error.ex.message, info);
     else if (error?.message) finalError = transferMsgError(error.message, info);
-    else finalError = JSON.stringify(error);
+    else finalError = JSON.stringify(serializeError(error));
   }
   return finalError;
 };

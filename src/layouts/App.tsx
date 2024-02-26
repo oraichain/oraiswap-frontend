@@ -10,11 +10,12 @@ import { ThemeProvider } from 'context/theme-context';
 import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
 import { leapWalletType } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
@@ -24,6 +25,7 @@ import Instruct from './Instruct';
 import Menu from './Menu';
 import Keplr from 'libs/keplr';
 import { persistor } from 'store/configure';
+import { NoticeBanner } from './NoticeBanner';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -199,10 +201,14 @@ const App = () => {
     }
   };
 
+  const [openBanner, setOpenBanner] = useState(true);
+
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
         <Menu />
+        {/* <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} /> */}
+        {/* <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div> */}
         {routes()}
         {!isMobile() && <Instruct />}
         {/* {!isMobile() && <FutureCompetition />} */}

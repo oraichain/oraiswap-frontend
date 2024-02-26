@@ -75,7 +75,15 @@ export function filterNonPoolEvmTokens(
   direction: SwapDirection // direction = to means we are filtering to tokens
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
-  const listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
+  let listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
+
+  // TODO: count down swap OCH
+  const localTime = 1708610400000; // Thursday, February 22, 2024 9:00:00 PM GMT+07:00 -  Thursday, February 22, 2024 2:00:00 PM
+  const currentTime = Date.now();
+
+  if (localTime > currentTime) {
+    listTokens = listTokens.filter((listTime) => listTime.coinGeckoId !== 'och');
+  }
   let filteredToTokens = listTokens.filter(
     (token) => token.denom !== denom && token.name.toLowerCase().includes(searchTokenName.toLowerCase())
   );
@@ -235,4 +243,15 @@ export const generateNewSymbol = (
     newTVPair.info = findedPair.info;
   }
   return newTVPair;
+};
+
+export const calculateFinalPriceChange = (
+  isPairReverseSymbol: boolean,
+  currentPrice: number,
+  percentPriceChange: number
+) => {
+  if (!isPairReverseSymbol) return percentPriceChange;
+
+  if (currentPrice === 0) return 0;
+  return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
 };

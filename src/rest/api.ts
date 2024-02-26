@@ -141,7 +141,7 @@ async function fetchPoolInfoAmount(
   try {
     pair = pairInfo ?? (await fetchPairInfo([fromTokenInfo, toTokenInfo]));
   } catch (error) {
-    console.log('pair not found when fetching pair info');
+    console.log('pair not found when fetching pair info', error);
   }
 
   const client = window.client;
@@ -668,6 +668,7 @@ async function getPairAmountInfo(
   oraiUsdtPoolInfo?: PoolInfo
 ): Promise<PairAmountInfo> {
   const poolData = poolInfo ?? (await fetchPoolInfoAmount(fromToken, toToken, cachedPairs));
+
   // default is usdt
   let tokenPrice = 0;
 

@@ -85,10 +85,10 @@ export default class Keplr extends CosmosWallet {
 
       const findFeeCurrencies = keplrChain.feeCurrencies.find((fee) => fee.gasPriceStep);
       // check to update newest chain info
-      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !findFeeCurrencies) {
-        displayToast(TToastType.TX_INFO, {
-          message: `${keplrChain.chainName} has Keplr cointype ${keplrChain.bip44.coinType}, while the chain info config cointype is ${chainInfo.bip44.coinType}. Please reach out to the developers regarding this problem!`
-        });
+      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !keplrChain.feeCurrencies?.[0]?.gasPriceStep) {
+        // displayToast(TToastType.TX_INFO, {
+        //   message: `${keplrChain.chainName} has Keplr cointype ${keplrChain.bip44.coinType}, while the chain info config cointype is ${chainInfo.bip44.coinType}. Please reach out to the developers regarding this problem!`
+        // });
       }
     } else if (isLeapSnap) {
       const chainInfo: ChainInfoLeap = chainInfoWithoutIcon().find((chainInfo) => chainInfo.chainId === chainId);
