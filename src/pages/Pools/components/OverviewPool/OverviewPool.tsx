@@ -26,7 +26,13 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   const { token1, token2 } = poolDetailData;
 
   const { liquidityAddr: stakingToken } = poolDetailData.info || {};
-  const poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+  let poolReward = {
+    reward: []
+  };
+
+  if (cachedReward && cachedReward.length > 0) {
+    poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+  }
 
   const [isShowMore, setIsShowMore] = useState(false);
 

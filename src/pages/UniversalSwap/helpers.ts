@@ -38,8 +38,8 @@ export interface SwapData {
 }
 
 export const TYPE_TAB_HISTORY = {
-  ASSETS: 'Assets',
-  HISTORY: 'History'
+  ASSETS: 'assets',
+  HISTORY: 'history'
 };
 
 export interface NetworkFilter {
@@ -76,14 +76,6 @@ export function filterNonPoolEvmTokens(
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
   let listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
-
-  // TODO: count down swap OCH
-  const localTime = 1708610400000; // Thursday, February 22, 2024 9:00:00 PM GMT+07:00 -  Thursday, February 22, 2024 2:00:00 PM
-  const currentTime = Date.now();
-
-  if (localTime > currentTime) {
-    listTokens = listTokens.filter((listTime) => listTime.coinGeckoId !== 'och');
-  }
   let filteredToTokens = listTokens.filter(
     (token) => token.denom !== denom && token.name.toLowerCase().includes(searchTokenName.toLowerCase())
   );
