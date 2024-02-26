@@ -98,6 +98,7 @@ const UnStakeTab = () => {
         refetchStakeInfo();
         refetchMyStakeRewardInfo();
         refetchLockInfo();
+        loadTokenAmounts({ oraiAddress: address });
       }
     } catch (error) {
       console.log('error in withdraw: ', error);
