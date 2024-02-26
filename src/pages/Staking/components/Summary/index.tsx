@@ -1,13 +1,15 @@
-import { numberWithCommas } from 'pages/Pools/helpers';
 import { toDisplay, USDC_CONTRACT } from '@oraichain/oraidex-common';
 import { ReactComponent as ChartUpIcon } from 'assets/icons/chartUpIcon.svg';
 import { ReactComponent as PercentIcon } from 'assets/icons/percentIcon.svg';
-import styles from './index.module.scss';
-import { useGetAllStakerRewardInfo, useGetRewardPerSecInfo, useGetStakeInfo } from 'pages/Staking/hooks';
-import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO, YEARLY_SECOND } from 'pages/Staking/constants';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import { numberWithCommas } from 'pages/Pools/helpers';
+import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO } from 'pages/Staking/constants';
 import { calcAPY } from 'pages/Staking/helpers';
+import { useGetAllStakerRewardInfo, useGetRewardPerSecInfo, useGetStakeInfo } from 'pages/Staking/hooks';
+import styles from './index.module.scss';
 
 const Summary = () => {
+  const { data: prices } = useCoinGeckoPrices();
   const { stakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { allRewardStakerInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
 
@@ -23,7 +25,7 @@ const Summary = () => {
     token: USDC_TOKEN_INFO
   };
 
-  const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0');
+  const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0', prices);
 
   // console.log('stakeInfo', stakeInfo);
 

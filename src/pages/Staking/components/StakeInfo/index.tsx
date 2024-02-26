@@ -1,23 +1,23 @@
-import { toDisplay, toAmount } from '@oraichain/oraidex-common';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 
 import useConfigReducer from 'hooks/useConfigReducer';
 
+import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
+import { Button } from 'components/Button';
+import Loader from 'components/Loader';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, USDC_TOKEN_INFO } from 'pages/Staking/constants';
 import { useGetLockInfo, useGetMyStakeRewardInfo } from 'pages/Staking/hooks';
-import styles from './index.module.scss';
-import { Button } from 'components/Button';
 import { useState } from 'react';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
-import { network } from 'config/networks';
-import { handleErrorTransaction } from 'helper';
-import Loader from 'components/Loader';
+import styles from './index.module.scss';
 
 const StakeInfo = () => {
   const [theme] = useConfigReducer('theme');
@@ -38,8 +38,6 @@ const StakeInfo = () => {
   const rewardUsd = getUsd(reward, USDC_TOKEN_INFO, prices);
   const lockUsd = getUsd(lockAmount, ORAIX_TOKEN_INFO, prices);
   const [loading, setLoading] = useState<boolean>(false);
-
-  console.log('myStakeRewardInfo', myStakeRewardInfo);
 
   const handleClaim = async () => {
     // if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });

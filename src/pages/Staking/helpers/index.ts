@@ -1,6 +1,7 @@
-import { toDisplay } from '@oraichain/oraidex-common';
+import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { MONTHLY_SECOND, MONTHS_ARR, STAKING_PERIOD, TIMER, YEARLY_SECOND } from '../constants';
+import { MONTHLY_SECOND, ORAIX_TOKEN_INFO, TIMER, USDC_TOKEN_INFO, YEARLY_SECOND } from '../constants';
 
 export const calcDiffTime = (start: string | Date | number, end: string | Date | number) => {
   return new Date(end).getTime() - new Date(start).getTime();
@@ -37,7 +38,11 @@ export const formatNumberKMB = (num: number) => {
   return formatDisplayUsdt(num, 2);
 };
 
-export const calcAPY = (rewardPerSec: string | number, totalBond: string | number) => {
+export const calcAPY = (rewardPerSec: string, totalBond: string, prices: CoinGeckoPrices<string>) => {
   if (!totalBond || !Number(totalBond)) return 0;
-  return ((Number(rewardPerSec) * YEARLY_SECOND) / Number(totalBond)) * 100;
+
+  const rewardPerSecUsd = getUsd(rewardPerSec, USDC_TOKEN_INFO, prices);
+  const totalBondUsd = getUsd(totalBond, ORAIX_TOKEN_INFO, prices);
+
+  return ((Number(rewardPerSecUsd) * YEARLY_SECOND) / Number(totalBondUsd)) * 100;
 };

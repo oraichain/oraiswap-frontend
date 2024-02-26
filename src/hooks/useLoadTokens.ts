@@ -107,8 +107,16 @@ async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddr
 
 async function loadCw20Balance(dispatch: Dispatch, address: string) {
   if (!address) return;
+
+  // TODO: HARDCODE ORAIX_STAKING_TEST
+  const ORAIX_TOKEN_TEST_INFO = {
+    ...oraichainTokens.find((e) => e.coinGeckoId === 'oraidex'),
+    contractAddress: 'orai16n6xlcda2grn6wt0h9247mexnm638evdj4sam022zh8zlhewkr4s02gc9t',
+    denom: 'oraix_test'
+  };
+
   // get all cw20 token contract
-  const cw20Tokens = oraichainTokens.filter((t) => t.contractAddress);
+  const cw20Tokens = [...oraichainTokens.filter((t) => t.contractAddress), ORAIX_TOKEN_TEST_INFO];
   const data = toBinary({
     balance: { address }
   });
@@ -132,6 +140,7 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
       return [t.denom, amount];
     })
   );
+
   dispatch(updateAmounts(amountDetails));
 }
 

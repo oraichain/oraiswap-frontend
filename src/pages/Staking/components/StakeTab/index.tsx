@@ -1,14 +1,17 @@
-import { ORAI, toDisplay, toAmount } from '@oraichain/oraidex-common';
+import { ORAI, USDC_CONTRACT, toAmount } from '@oraichain/oraidex-common';
 import { ReactComponent as BlinkIcon } from 'assets/icons/blinkIcon.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
+import CosmJs from 'libs/cosmjs';
 import { getUsd } from 'libs/utils';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { MONTHLY_SECOND, ORAIX_TOKEN_INFO, USDC_TOKEN_INFO, YEARLY_SECOND } from 'pages/Staking/constants';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
-import InputBalance from '../InputBalance';
-import styles from './index.module.scss';
+import { calcAPY } from 'pages/Staking/helpers';
 import {
   useGetAllStakerRewardInfo,
   useGetMyStakeRewardInfo,
@@ -16,20 +19,21 @@ import {
   useGetStakeInfo
 } from 'pages/Staking/hooks';
 import { useState } from 'react';
-import { USDC_CONTRACT, cw20TokenMap, tokenMap } from '@oraichain/oraidex-common';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { useSelector } from 'react-redux';
 import { Type, generateMiningMsgs } from 'rest/api';
-import useConfigReducer from 'hooks/useConfigReducer';
-import CosmJs from 'libs/cosmjs';
-import { handleCheckAddress, handleErrorTransaction } from 'helper';
-import { network } from 'config/networks';
-import { calcAPY } from 'pages/Staking/helpers';
+import { RootState } from 'store/configure';
+import InputBalance from '../InputBalance';
+import styles from './index.module.scss';
 
 const StakeTab = () => {
   const [address] = useConfigReducer('address');
   const { data: prices } = useCoinGeckoPrices();
   const amounts = useSelector((state: RootState) => state.token.amounts);
-  const balance = amounts['oraix'];
+  const loadTokenAmounts = useLoadTokens();
+
+  // TODO: HARDCODE ORAIX_STAKING_TEST
+  // const balance = amounts['oraix'];
+  const balance = amounts['oraix_test'];
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -48,7 +52,7 @@ const StakeTab = () => {
     token: USDC_TOKEN_INFO
   };
 
-  const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0');
+  const apy = calcAPY(rewardPerSecInfo.amount, stakeInfo?.total_bond_amount || '0', prices);
   const yearlyReward = apy * amount || 0;
   const monthlyReward = (MONTHLY_SECOND / YEARLY_SECOND) * yearlyReward;
 
@@ -87,6 +91,7 @@ const StakeTab = () => {
         refetchMyStakeRewardInfo();
         refetchStakeInfo();
         refetchAllStakerRewardInfo();
+        loadTokenAmounts({ oraiAddress: address });
       }
     } catch (error) {
       console.log('error in bond: ', error);

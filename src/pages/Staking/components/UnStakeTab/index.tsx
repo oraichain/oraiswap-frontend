@@ -1,31 +1,31 @@
-import { oraichainTokens, toDisplay, toAmount } from '@oraichain/oraidex-common';
+import { toAmount, toDisplay } from '@oraichain/oraidex-common';
+import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
+import { LockInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/Cw20Staking.types';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import useConfigReducer from 'hooks/useConfigReducer';
-import { getUsd } from 'libs/utils';
-import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
-import { ORAIX_TOKEN_INFO, STAKE_TAB, STAKING_PERIOD, USDC_TOKEN_INFO } from 'pages/Staking/constants';
-import { useSelector } from 'react-redux';
-import { RootState } from 'store/configure';
-import InputBalance from '../InputBalance';
-import styles from './index.module.scss';
-import { useState } from 'react';
-import { useGetLockInfo, useGetMyStakeRewardInfo, useGetStakeInfo } from 'pages/Staking/hooks';
-import { LockInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/Cw20Staking.types';
-import { getDiffDay } from 'pages/Staking/helpers';
-import { TIMER } from 'pages/CoHarvest/constants';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
-import { network } from 'config/networks';
-import { handleErrorTransaction } from 'helper';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { handleErrorTransaction } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
+import useConfigReducer from 'hooks/useConfigReducer';
+import useLoadTokens from 'hooks/useLoadTokens';
+import { getUsd } from 'libs/utils';
+import { TIMER } from 'pages/CoHarvest/constants';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { ORAIX_TOKEN_INFO, STAKE_TAB, STAKING_PERIOD } from 'pages/Staking/constants';
+import { getDiffDay } from 'pages/Staking/helpers';
+import { useGetLockInfo, useGetMyStakeRewardInfo, useGetStakeInfo } from 'pages/Staking/hooks';
+import { useState } from 'react';
+import InputBalance from '../InputBalance';
+import styles from './index.module.scss';
 
 const UnStakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
   const [theme] = useConfigReducer('theme');
   const [address] = useConfigReducer('address');
+  const loadTokenAmounts = useLoadTokens();
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingWithdraw, setLoadingWithdraw] = useState<boolean>(false);
@@ -67,6 +67,7 @@ const UnStakeTab = () => {
         refetchStakeInfo();
         refetchMyStakeRewardInfo();
         refetchLockInfo();
+        loadTokenAmounts({ oraiAddress: address });
       }
     } catch (error) {
       console.log('error in unbond: ', error);
