@@ -38,6 +38,9 @@ const InputBalance = ({
   const { data: prices } = useCoinGeckoPrices();
   const amountUSD = getUsd(toAmount(amount), ORAIX_TOKEN_INFO, prices);
 
+  const isInsufficient = amount && amount > toDisplay(balance);
+  const disabled = loading || !amount || amount <= 0 || isInsufficient;
+
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
@@ -72,9 +75,9 @@ const InputBalance = ({
           <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
         </div>
         <div className={styles.stakeBtn}>
-          <Button type="primary" onClick={() => onSubmit()} disabled={loading || amount <= 0}>
+          <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
             {loading && <Loader width={22} height={22} />}&nbsp;
-            {type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
+            {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
           </Button>
         </div>
       </div>

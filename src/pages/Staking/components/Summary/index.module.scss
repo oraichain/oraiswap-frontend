@@ -12,10 +12,16 @@
   align-self: stretch;
 
   border-radius: 24px;
-  background: linear-gradient(180deg, #f5f5f5 0%, rgba(251, 251, 251, 0) 100%);
+
+  @include theme {
+    background: theme-get('bg-linear-section');
+  }
 
   .title {
-    color: #232521;
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+
     font-size: 16px;
     font-weight: 500;
     line-height: 150%;
@@ -24,7 +30,10 @@
   .divider {
     width: 100%;
     height: 1px;
-    background: #dfe0de;
+
+    @include theme {
+      background: theme-get('neutral-border-border-bold');
+    }
   }
 
   .statistic {
@@ -44,7 +53,9 @@
     flex-direction: column;
     gap: 16px;
 
-    color: #686a66;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
     font-size: 14px;
     font-weight: 400;
     line-height: 120%;
@@ -52,7 +63,19 @@
     .header {
       font-size: 20px;
       font-weight: 600;
-      color: #232521;
+
+      @include theme {
+        color: theme-get('neutral-text-text-dropdown');
+      }
+    }
+
+    svg {
+      path {
+        @include theme {
+          fill: theme-get('neutral-9');
+          stroke: theme-get('neutral-9');
+        }
+      }
     }
   }
 }

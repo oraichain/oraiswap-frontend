@@ -11,17 +11,25 @@
   align-self: stretch;
 
   border-radius: 24px;
-  background: #f7f7f7;
+
+  @include theme {
+    background: theme-get('neutral-6');
+  }
 
   .note {
-    color: #686a66;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+
     font-size: 14px;
     font-weight: 400;
     line-height: 150%;
     letter-spacing: 0.1px;
 
     .noteHighlight {
-      color: #ad9c00;
+      @include theme {
+        color: theme-get('warning-surface-default');
+      }
     }
   }
 
@@ -36,27 +44,12 @@
       align-items: center;
       justify-content: space-between;
 
-      color: #232521;
+      @include theme {
+        color: theme-get('neutral-text-text-dropdown');
+      }
       font-size: 18px;
       font-weight: 600;
       line-height: 100%;
-
-      .highlight {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        padding: 0px 8px;
-        border-radius: 99px;
-        border: 1px solid;
-        border-color: #2f5711;
-        background: #eef9e5;
-
-        color: #2f5711;
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 150%;
-        letter-spacing: 0.1px;
-      }
     }
 
     .list {
@@ -79,8 +72,11 @@
         flex-direction: column;
         gap: 12px;
         border-radius: 12px;
-        background: #fff;
         width: 100%;
+
+        @include theme {
+          background: theme-get('neutral-surface-bg-section-4');
+        }
 
         .title {
           display: flex;
@@ -88,7 +84,9 @@
           align-items: center;
           gap: 8px;
 
-          color: #686a66;
+          @include theme {
+            color: theme-get('neutral-9');
+          }
 
           font-size: 14px;
           font-weight: 400;
@@ -122,7 +120,9 @@
             height: 18px;
           }
 
-          color: #232521;
+          @include theme {
+            color: theme-get('neutral-text-text-dropdown');
+          }
           font-size: 20px;
           font-weight: 600;
           line-height: 100%;

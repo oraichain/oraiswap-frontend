@@ -12,7 +12,9 @@
 
   margin-top: 40px;
 
-  color: #232521;
+  @include theme {
+    color: theme-get('neutral-text-text-dropdown');
+  }
   font-size: 20px;
   font-weight: 600;
   line-height: 150%;

@@ -35,7 +35,7 @@ const Summary = () => {
       <div className={styles.statistic}>
         <div className={styles.item}>
           <div className={styles.header}>{Number(apy).toFixed(2)}%</div>
-          <span>APY</span>
+          <span>APR</span>
         </div>
         <div className={styles.item}>
           <div className={styles.header}>{numberWithCommas(toDisplay(stakeInfo?.total_bond_amount || '0'))} ORAIX</div>

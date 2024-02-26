@@ -113,8 +113,8 @@ const StakeTab = () => {
         <div className={styles.list}>
           <div className={styles.item}>
             <div className={styles.title}>
-              <span>Monthly</span>
               <div className={styles.usd}>{formatDisplayUsdt(monthlyUSD)}</div>
+              <span>Monthly</span>
             </div>
 
             <div className={styles.value}>
@@ -125,8 +125,8 @@ const StakeTab = () => {
 
           <div className={styles.item}>
             <div className={styles.title}>
-              <span>Yearly</span>
               <div className={styles.usd}>{formatDisplayUsdt(yearlyUSD)}</div>
+              <span>Yearly</span>
             </div>
 
             <div className={styles.value}>

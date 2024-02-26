@@ -3,8 +3,12 @@
 @import 'src/styles/themes';
 
 .headerWrapper {
+  // height: 298px;
   width: 100%;
-  background: linear-gradient(180deg, #eaffd0 0%, #fff 100%);
+
+  // @include theme {
+  //   background: theme-get('bg-linear-highlight');
+  // }
 
   padding-top: 24px;
   padding-bottom: 24px;
@@ -27,18 +31,25 @@
 
     .title {
       .text {
-        color: #232521;
+        @include theme {
+          color: theme-get('neutral-text-text-dropdown');
+        }
+
         font-size: 36px;
         font-weight: 600;
         line-height: 150%;
 
         .highlight {
-          color: #5ea402;
+          @include theme {
+            color: theme-get('primary-text-text-link');
+          }
         }
       }
 
       .desc {
-        color: #686a66;
+        @include theme {
+          color: theme-get('neutral-9');
+        }
         font-size: 14px;
         font-weight: 400;
         line-height: 150%;

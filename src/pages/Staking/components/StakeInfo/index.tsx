@@ -71,18 +71,19 @@ const StakeInfo = () => {
 
   return (
     <div className={styles.stakeInfo}>
-      <div className={styles.item}>
-        <div className={styles.title}>Staked Amount</div>
+      <div className={styles.info}>
+        <div className={styles.item}>
+          <div className={styles.title}>Staked Amount</div>
 
-        <div className={styles.usd}>{formatDisplayUsdt(stakeAmountUsd)}</div>
+          <div className={styles.usd}>{formatDisplayUsdt(stakeAmountUsd)}</div>
 
-        <div className={styles.value}>
-          {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
-          <span>{numberWithCommas(toDisplay(stakedAmount))} ORAIX</span>
+          <div className={styles.value}>
+            {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
+            <span>{numberWithCommas(toDisplay(stakedAmount))} ORAIX</span>
+          </div>
         </div>
-      </div>
 
-      {/* <div className={styles.item}>
+        {/* <div className={styles.item}>
         <div className={styles.title}>Unstaking</div>
 
         <div className={styles.usd}>{formatDisplayUsdt(lockUsd)}</div>
@@ -93,18 +94,19 @@ const StakeInfo = () => {
         </div>
       </div> */}
 
-      <div className={styles.item}>
-        <div className={styles.title}>Claimable Rewards</div>
+        <div className={styles.item}>
+          <div className={styles.title}>Claimable Rewards</div>
 
-        <div className={styles.usd}>{formatDisplayUsdt(rewardUsd)}</div>
+          <div className={styles.usd}>{formatDisplayUsdt(rewardUsd)}</div>
 
-        <div className={styles.value}>
-          <UsdcIcon />
-          <span>{numberWithCommas(toDisplay(reward))} USDC</span>
+          <div className={styles.value}>
+            <UsdcIcon />
+            <span>{numberWithCommas(toDisplay(reward))} USDC</span>
+          </div>
         </div>
       </div>
 
-      <div className={styles.item}>
+      <div className={styles.itemBtn}>
         <Button type="primary" onClick={() => handleClaim()} disabled={loading || toDisplay(reward) <= 0}>
           {loading && <Loader width={22} height={22} />}&nbsp;
           <span>Claim Rewards</span>

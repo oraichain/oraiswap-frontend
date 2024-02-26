@@ -10,8 +10,7 @@
 
   border-radius: 12px;
   @include theme {
-    // background: theme-get('neutral-surface-bg');
-    background: #f7f7f7;
+    background: theme-get('neutral-6');
   }
 
   .title {
@@ -57,9 +56,9 @@
       line-height: 150%;
       border-radius: 99px;
 
-      @include theme() {
-        color: #232521;
-        background-color: #fff;
+      @include theme {
+        color: theme-get('neutral-text-text-dropdown');
+        background: theme-get('neutral-surface-bg-section-4');
       }
 
       input {
@@ -78,7 +77,9 @@
       }
 
       .usd {
-        color: #686a66;
+        @include theme {
+          color: theme-get('neutral-9');
+        }
         font-size: 14px;
         font-weight: 400;
         letter-spacing: 0.1px;

@@ -10,6 +10,10 @@
     min-height: calc(100vh - 110px);
     margin-top: 80px;
   }
+
+  @include theme {
+    background: theme-get('bg-linear-highlight');
+  }
 }
 
 .contentWrapper {

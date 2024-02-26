@@ -107,6 +107,7 @@ $themes: (
     'primary-surface-default-light': #e5f7d6,
     'neutral-text-text-dropdown': #f7f7f7,
     'neutral-surface-bg-section-3': #31332e,
+    'neutral-surface-bg-section-4': #31332e,
     'neutral-surface-bg-section-hover': #494949,
     'neutral-surface-bg-section-active': #494949,
     'warning-surface-default': #e6cf00,
@@ -116,7 +117,11 @@ $themes: (
     'bg-section-05': #1b1c1a,
     'neutral-text-text-disabled': #494949,
     'neutral-surface-bg-modal': #232521,
-    'bg-iframe-modal': #0a121f
+    'bg-iframe-modal': #0a121f,
+    'bg-linear-highlight': linear-gradient(180deg, #152703 0%, #181a17 298px),
+    'bg-linear-section': linear-gradient(180deg, #232521 0%, #181a17 100%),
+    'neutral-surface-btn-default': #152703,
+    'neutral-text-btn-default': #152703
   ),
   light: (
     'text-color': #272b30,
@@ -188,6 +193,7 @@ $themes: (
     'primary-surface-default-light': #e5f7d6,
     'neutral-text-text-dropdown': #232521,
     'neutral-surface-bg-section-3': #efefef,
+    'neutral-surface-bg-section-4': #fff,
     'neutral-surface-bg-section-hover': #dfe0de,
     'neutral-surface-bg-section-active': #efefef,
     'warning-surface-default': #979995,
@@ -197,6 +203,10 @@ $themes: (
     'bg-section-05': #f7f7f7,
     'neutral-text-text-disabled': #c7c8c6,
     'neutral-surface-bg-modal': #fff,
-    'bg-iframe-modal': #fff
+    'bg-iframe-modal': #fff,
+    'bg-linear-highlight': linear-gradient(180deg, #eaffd0 0%, #fff 298px),
+    'bg-linear-section': linear-gradient(180deg, #f5f5f5 0%, rgba(251, 251, 251, 0) 100%),
+    'neutral-surface-btn-default': #eef9e5,
+    'neutral-text-btn-default': #232521
   )
 );

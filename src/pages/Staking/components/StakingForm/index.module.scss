@@ -14,14 +14,17 @@
     align-self: stretch;
 
     margin: 16px 0;
-
     border-radius: 99px;
-    background: #efefef;
 
-    color: #979995;
     font-size: 16px;
     font-weight: 500;
     line-height: 150%;
+
+    color: $neutron-text-body-light;
+
+    @include theme {
+      background: theme-get('neutral-surface-bg-btn-disabled');
+    }
 
     .tab {
       cursor: pointer;
@@ -35,8 +38,11 @@
       border-radius: 99px;
 
       &.active {
-        background: #fff;
-        color: #232521;
+        background: $white-color;
+
+        @include theme {
+          color: theme-get('neutral-text-btn-default');
+        }
       }
     }
   }

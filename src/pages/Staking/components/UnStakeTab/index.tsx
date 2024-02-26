@@ -41,6 +41,12 @@ const UnStakeTab = () => {
 
   const listUnstake: LockInfoResponse[] = lockInfo?.lock_infos || [];
 
+  const isEnableWithdraw = listUnstake.find((unstakeItem) => {
+    const timeLeft = getDiffDay(Date.now(), unstakeItem.unlock_time * TIMER.MILLISECOND);
+
+    return !timeLeft;
+  });
+
   const handleUnstake = async () => {
     if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Unstake Amount is required' });
 
@@ -122,7 +128,7 @@ const UnStakeTab = () => {
         {listUnstake?.length <= 0 ? null : (
           <div className={styles.header}>
             <span>Available to withdraw</span>
-            <Button type="primary-sm" onClick={() => handleWithdraw()} disabled={loadingWithdraw}>
+            <Button type="primary-sm" onClick={() => handleWithdraw()} disabled={loadingWithdraw || !isEnableWithdraw}>
               {loadingWithdraw && <Loader width={18} height={18} />}&nbsp; Withdraw All
             </Button>
           </div>
