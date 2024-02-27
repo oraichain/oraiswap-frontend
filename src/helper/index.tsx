@@ -170,7 +170,7 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
 export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
   const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
   if (!cosmosAddress) {
-    throw new Error('Please login both metamask and keplr!');
+    throw new Error('Please login Cosmos wallet!');
   }
   return cosmosAddress;
 };

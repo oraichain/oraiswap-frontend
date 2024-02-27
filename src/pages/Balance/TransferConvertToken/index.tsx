@@ -31,6 +31,7 @@ import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
 import { calcMaxAmount } from '../helpers';
+import useWalletReducer from 'hooks/useWalletReducer';
 
 interface TransferConvertProps {
   token: TokenItemType;
@@ -58,6 +59,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [theme] = useConfigReducer('theme');
   const [addressTransfer, setAddressTransfer] = useState('');
   const { data: prices } = useCoinGeckoPrices();
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   useEffect(() => {
     if (chainInfo) {
@@ -95,6 +97,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     try {
       if (network.networkType === 'evm') {
         if (network.chainId === '0x2b6653dc') {
+          if (!isMobile && !walletByNetworks.tron) {
+            setAddressTransfer('');
+            return;
+          }
           // TODO: Check owallet mobile
           if (isMobile()) {
             //@ts-ignore
@@ -107,10 +113,13 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
             address = window?.tronWeb?.defaultAddress?.base58;
           }
         } else {
-          if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
+          if ((walletByNetworks.evm || isMobile()) && window.Metamask.isWindowEthereum())
+            address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await window.Keplr.getKeplrAddr(network.chainId);
+        if (walletByNetworks.cosmos || isMobile()) {
+          address = await window.Keplr.getKeplrAddr(network.chainId);
+        }
       }
     } catch (error) {
       console.log({
