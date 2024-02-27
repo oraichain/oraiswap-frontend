@@ -15,6 +15,7 @@ import styles from './WalletManagement.module.scss';
 import { WalletProvider, walletProvider } from './walletConfig';
 import { ConnectedMobile } from './ConnectedMobile';
 import { MyWalletMobile } from './MyWalletMobile';
+import { useInactiveConnect } from 'hooks/useMetamask';
 const cx = cn.bind(styles);
 
 export const WalletManagement: FC<{}> = () => {
@@ -26,6 +27,7 @@ export const WalletManagement: FC<{}> = () => {
   const { handleResetBalance } = useResetBalance();
   const loadTokenAmounts = useLoadTokens();
   const mobileMode = isMobile();
+  useInactiveConnect();
 
   const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
