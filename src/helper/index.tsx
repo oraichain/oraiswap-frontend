@@ -245,12 +245,15 @@ export const checkVersionWallet = () => {
   return window.keplr && window.keplr.version.slice(0, 3) === '0.9'; // TODO: hardcode version of owallet
 };
 
+//@ts-ignore
+const walletIsOwallet = window?.keplr?.isOwallet;
+
 export const keplrCheck = (type: WalletCosmosType) => {
-  return (type === 'owallet' && !window.owallet) || (type === 'keplr' && !checkVersionWallet());
+  return type === 'keplr' && window.keplr && window.keplr.mode === 'extension' && !walletIsOwallet;
 };
 
 export const owalletCheck = (type: WalletCosmosType) => {
-  return (type === 'owallet' && !!window.owallet) || (type === 'keplr' && checkVersionWallet());
+  return type === 'owallet' && walletIsOwallet;
 };
 
 export const switchWallet = (type: WalletCosmosType) => {
