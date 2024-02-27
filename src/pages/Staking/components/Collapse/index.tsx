@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 
 import { ReactComponent as MinusIcon } from 'assets/icons/minus.svg';
 import { ReactComponent as PlusIcon } from 'assets/icons/plusIcon.svg';
 import styles from './index.module.scss';
 
-export type CollapseType = { label: string; content: string; key?: React.Key };
+export type CollapseType = { label: string; content: string | ReactElement; key?: React.Key };
 
 const CollapseButton = ({ label, content, key }: CollapseType) => {
   const [open, setOpen] = useState(false);
