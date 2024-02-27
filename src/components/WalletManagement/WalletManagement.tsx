@@ -38,6 +38,8 @@ export const WalletManagement: FC<{}> = () => {
   const version = window?.keplr?.version;
   const isCheckKeplr = !!version && keplrCheck('keplr');
   const isMetamask = window?.ethereum?.isMetaMask;
+  //@ts-ignore
+  const isTronLink = window?.tronWeb?.isTronLink;
 
   // update wallet provider with status is active or not
   useEffect(() => {
@@ -57,6 +59,9 @@ export const WalletManagement: FC<{}> = () => {
               break;
             case 'metamask':
               isActive = isMetamask;
+              break;
+            case 'tronLink':
+              isActive = isTronLink;
               break;
           }
           return { ...wallet, isActive };
