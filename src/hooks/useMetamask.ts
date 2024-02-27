@@ -59,14 +59,14 @@ export function useInactiveConnect() {
   const connect = useEagerConnect();
 
   useEffect(() => {
-    const { ethereum } = window;
-    if (ethereum && ethereum.on) {
-      ethereum.on('connect', connect);
-      ethereum.on('accountsChanged', connect);
+    const { ethereumDapp } = window;
+    if (ethereumDapp && ethereumDapp.on) {
+      ethereumDapp.on('connect', connect);
+      ethereumDapp.on('accountsChanged', connect);
       return () => {
-        if (ethereum.removeListener) {
-          ethereum.removeListener('connect', connect);
-          ethereum.removeListener('accountsChanged', connect);
+        if (ethereumDapp.removeListener) {
+          ethereumDapp.removeListener('connect', connect);
+          ethereumDapp.removeListener('accountsChanged', connect);
         }
       };
     }
