@@ -10,6 +10,7 @@ import { MILLISECOND_PER_DAY, TIMER } from './constants';
 import { checkTimeIsMillisecond } from './helpers';
 import { useGetBidding, useGetRound } from './hooks/useGetBidRound';
 import styles from './index.module.scss';
+import { useRoundRoute } from './hooks/useQueryRoute';
 
 const CoHarvest = () => {
   const mobileMode = isMobile();
@@ -49,6 +50,8 @@ const CoHarvest = () => {
     setIsEnd(true);
   };
 
+  const { handleUpdateRoundURL } = useRoundRoute(currentActiveRound, setSelectedRound);
+
   return (
     <div className={styles.pageWrapper}>
       <BannerHistory openBanner={openBanner} setOpenBanner={setOpenBanner} />
@@ -65,7 +68,10 @@ const CoHarvest = () => {
                   isEnd={isEnd}
                   isStarted={isStarted}
                   isCurrentRound={isCurrentRound}
-                  backToCurrentRound={() => setSelectedRound(currentActiveRound)}
+                  backToCurrentRound={() => {
+                    // setSelectedRound(currentActiveRound)
+                    handleUpdateRoundURL(currentActiveRound);
+                  }}
                 />
               </div>
               <div className={styles.info}>
@@ -80,7 +86,12 @@ const CoHarvest = () => {
                 <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
               </div>
             </div>
-            <BiddingHistory round={currentActiveRound} filterRound={selectedRound} setFilterRound={setSelectedRound} />
+            <BiddingHistory
+              handleUpdateRoundURL={handleUpdateRoundURL}
+              round={currentActiveRound}
+              filterRound={selectedRound}
+              setFilterRound={setSelectedRound}
+            />
           </div>
         ) : (
           <div className={styles.auction}>
@@ -98,10 +109,17 @@ const CoHarvest = () => {
               isEnd={isEnd}
               isStarted={isStarted}
               isCurrentRound={isCurrentRound}
-              backToCurrentRound={() => setSelectedRound(currentActiveRound)}
+              backToCurrentRound={() => {
+                handleUpdateRoundURL(currentActiveRound);
+              }}
             />
             <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
-            <BiddingHistory round={currentActiveRound} filterRound={selectedRound} setFilterRound={setSelectedRound} />
+            <BiddingHistory
+              handleUpdateRoundURL={handleUpdateRoundURL}
+              round={currentActiveRound}
+              filterRound={selectedRound}
+              setFilterRound={setSelectedRound}
+            />
           </div>
         )}
       </div>

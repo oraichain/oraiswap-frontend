@@ -1,9 +1,8 @@
 import { BigDecimal, oraichainTokens, tokenMap } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
-import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import LoadingBox from 'components/LoadingBox';
 import { network } from 'config/networks';
-import useOnClickOutside from 'hooks/useOnClickOutside';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { INIT_AMOUNT_SIMULATE, TAB_HISTORY } from 'pages/CoHarvest/constants';
 import {
   useGetAllBids,
@@ -11,20 +10,19 @@ import {
   useGetBiddingFilter,
   useGetHistoryBid
 } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { useTabRoute } from 'pages/CoHarvest/hooks/useQueryRoute';
 import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import AllBidding from '../AllBidding';
+import ListHistory from '../ListHistory';
 import MyBidding from '../MyBidding';
 import styles from './index.module.scss';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import ListHistory from '../ListHistory';
-import { useTabRoute } from 'pages/CoHarvest/hooks/useQueryRoute';
 
-const BiddingHistory = ({ round, filterRound, setFilterRound }) => {
+const BiddingHistory = ({ round, filterRound, setFilterRound, handleUpdateRoundURL }) => {
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
   const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
-  const [showFilter, setShowFilter] = useState(false);
+  // const [showFilter, setShowFilter] = useState(false);
 
   const originalFromToken = tokenMap['oraix'];
   const originalToToken = tokenMap['usdc'];
@@ -59,7 +57,12 @@ const BiddingHistory = ({ round, filterRound, setFilterRound }) => {
   return (
     <div className={styles.biddingHistory} id="history">
       <div className={styles.historyList}>
-        <ListHistory activeRound={round} filterRound={filterRound} setFilterRound={setFilterRound} />
+        <ListHistory
+          handleUpdateRoundURL={handleUpdateRoundURL}
+          activeRound={round}
+          filterRound={filterRound}
+          setFilterRound={setFilterRound}
+        />
       </div>
 
       <div className={styles.historyDetail}>

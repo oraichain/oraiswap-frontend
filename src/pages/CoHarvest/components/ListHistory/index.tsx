@@ -1,34 +1,35 @@
-import { useGetListBiddingRoundInfo } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as BiddingIconLight } from 'assets/icons/bidding-icon-light.svg';
 import { ReactComponent as BiddingIcon } from 'assets/icons/bidding-icon.svg';
-import { ReactComponent as EndedIconLight } from 'assets/icons/endIconLight.svg';
 import { ReactComponent as EndedIcon } from 'assets/icons/endIcon.svg';
+import { ReactComponent as EndedIconLight } from 'assets/icons/endIconLight.svg';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
-import styles from './index.module.scss';
-import { numberWithCommas } from 'pages/Pools/helpers';
-import { toDisplay } from '@oraichain/oraidex-common';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { BID_ROUND_STATUS, LIMIT_PAGE } from 'pages/CoHarvest/constants';
-import { useEffect, useState } from 'react';
-import { useRoundRoute } from 'pages/CoHarvest/hooks/useQueryRoute';
+import { useGetListBiddingRoundInfo } from 'pages/CoHarvest/hooks/useGetBidRound';
+import { numberWithCommas } from 'pages/Pools/helpers';
+import { useState } from 'react';
+import styles from './index.module.scss';
 
 const ListHistory = ({
   activeRound,
   filterRound,
-  setFilterRound
+  setFilterRound,
+  handleUpdateRoundURL
 }: {
   activeRound: number;
   filterRound: number;
   setFilterRound: React.Dispatch<React.SetStateAction<number>>;
+  handleUpdateRoundURL: (round: number) => void;
 }) => {
   const [theme] = useConfigReducer('theme');
   const { listBiddingRoundInfo, isLoading } = useGetListBiddingRoundInfo(activeRound);
 
   const [limit, setLimit] = useState(LIMIT_PAGE);
 
-  const { handleUpdateRoundURL } = useRoundRoute(activeRound, setFilterRound);
+  // const { handleUpdateRoundURL } = useRoundRoute(activeRound, setFilterRound);
 
   const StatusIcon = {
     [BID_ROUND_STATUS.ONGOING]: theme === 'light' ? BiddingIconLight : BiddingIcon,
