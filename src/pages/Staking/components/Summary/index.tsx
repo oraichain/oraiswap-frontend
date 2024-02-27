@@ -60,8 +60,8 @@ const Summary = () => {
 
         <div className={styles.item}>
           <PercentIcon />
-          <span className={styles.header}>Earn rewards over time</span>
-          <span>USDC rewards are distributed approximately every 5 minutes.</span>
+          <span className={styles.header}>Earn revenue sharing</span>
+          <span>10% of the revenue will be distributed to ORAIX stakers as USDC</span>
         </div>
       </div>
     </div>
