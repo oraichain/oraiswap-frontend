@@ -12,6 +12,7 @@ import { toDisplay } from '@oraichain/oraidex-common';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { BID_ROUND_STATUS, LIMIT_PAGE } from 'pages/CoHarvest/constants';
 import { useEffect, useState } from 'react';
+import { useRoundRoute } from 'pages/CoHarvest/hooks/useQueryRoute';
 
 const ListHistory = ({
   activeRound,
@@ -26,6 +27,8 @@ const ListHistory = ({
   const { listBiddingRoundInfo, isLoading } = useGetListBiddingRoundInfo(activeRound);
 
   const [limit, setLimit] = useState(LIMIT_PAGE);
+
+  const { handleUpdateRoundURL } = useRoundRoute(activeRound, setFilterRound);
 
   const StatusIcon = {
     [BID_ROUND_STATUS.ONGOING]: theme === 'light' ? BiddingIconLight : BiddingIcon,
@@ -51,7 +54,10 @@ const ListHistory = ({
 
             return (
               <div
-                onClick={() => setFilterRound(bid?.bid_info?.round || filterRound)}
+                onClick={() => {
+                  // setFilterRound(bid?.bid_info?.round || filterRound)
+                  handleUpdateRoundURL(bid?.bid_info?.round || filterRound);
+                }}
                 className={`${styles.bidItem} ${filterRound === bid?.bid_info?.round ? styles.active : ''}`}
                 key={`${key}-${bid?.distribution_info?.total_distribution}`}
               >

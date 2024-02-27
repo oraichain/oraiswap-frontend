@@ -18,6 +18,7 @@ import MyBidding from '../MyBidding';
 import styles from './index.module.scss';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import ListHistory from '../ListHistory';
+import { useTabRoute } from 'pages/CoHarvest/hooks/useQueryRoute';
 
 const BiddingHistory = ({ round, filterRound, setFilterRound }) => {
   const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
@@ -53,8 +54,10 @@ const BiddingHistory = ({ round, filterRound, setFilterRound }) => {
     prices
   });
 
+  const { handleUpdateTabURL } = useTabRoute(setActiveTab);
+
   return (
-    <div className={styles.biddingHistory}>
+    <div className={styles.biddingHistory} id="history">
       <div className={styles.historyList}>
         <ListHistory activeRound={round} filterRound={filterRound} setFilterRound={setFilterRound} />
       </div>
@@ -64,13 +67,19 @@ const BiddingHistory = ({ round, filterRound, setFilterRound }) => {
         <div className={styles.tabWrapper}>
           <div className={styles.tabTitle}>
             <div
-              onClick={() => setActiveTab(TAB_HISTORY.MY_BID)}
+              onClick={() => {
+                // setActiveTab(TAB_HISTORY.MY_BID)
+                handleUpdateTabURL(TAB_HISTORY.MY_BID);
+              }}
               className={`${styles.title} ${activeTab === TAB_HISTORY.MY_BID ? styles.active : ''}`}
             >
               My bids history
             </div>
             <div
-              onClick={() => setActiveTab(TAB_HISTORY.ALL_BID)}
+              onClick={() => {
+                // setActiveTab(TAB_HISTORY.ALL_BID)
+                handleUpdateTabURL(TAB_HISTORY.ALL_BID);
+              }}
               className={`${styles.title} ${activeTab === TAB_HISTORY.ALL_BID ? styles.active : ''}`}
             >
               All Bidding
