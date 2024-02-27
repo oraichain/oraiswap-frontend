@@ -4,28 +4,25 @@ import {
   WEBSOCKET_RECONNECT_INTERVAL
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
 import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
 import { leapWalletType } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { useTronEventListener } from 'hooks/useTronLink';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useWalletReducer from 'hooks/useWalletReducer';
+import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
-import { PERSIST_CONFIG_KEY, PERSIST_VER } from 'store/constants';
-import FutureCompetition from 'components/FutureCompetitionModal';
-import './index.scss';
+import { persistor } from 'store/configure';
+import { PERSIST_VER } from 'store/constants';
 import Instruct from './Instruct';
 import Menu from './Menu';
-import Keplr from 'libs/keplr';
-import { persistor } from 'store/configure';
-import { NoticeBanner } from './NoticeBanner';
+import './index.scss';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');

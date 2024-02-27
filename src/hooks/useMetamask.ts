@@ -13,7 +13,6 @@ const loadAccounts = async (): Promise<string[]> => {
     method: 'eth_accounts',
     params: [60]
   });
-
   if (accounts.length === 0) {
     accounts = await window.ethereumDapp.request({
       method: 'eth_requestAccounts',
@@ -32,14 +31,14 @@ export function useEagerConnect() {
 
   const connect = async (accounts?: string[]) => {
     try {
-      accounts = accounts ?? (await loadAccounts());
+      accounts = Array.isArray(accounts) ? accounts : await loadAccounts();
       if (accounts && accounts?.length > 0) {
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
         loadTokenAmounts({ metamaskAddress });
         setMetamaskAddress(metamaskAddress);
       } else {
         setMetamaskAddress(undefined);
-        throw new Error('Connect metamask failed!');
+        console.error('Connect metamask failed!');
       }
     } catch (error) {
       console.log({ errorConnectMetmask: error });
