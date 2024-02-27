@@ -28,7 +28,7 @@
 
     .noteHighlight {
       @include theme {
-        color: theme-get('warning-surface-default');
+        color: theme-get('warning-text-default');
       }
     }
   }

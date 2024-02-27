@@ -11,7 +11,7 @@ import styles from './index.module.scss';
 const Summary = () => {
   const { data: prices } = useCoinGeckoPrices();
   const { stakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
-  const { allRewardStakerInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
+  // const { allRewardStakerInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
 
   const { rewardPerSec } = useGetRewardPerSecInfo(ORAIX_TOKEN_INFO.contractAddress);
 
@@ -43,10 +43,10 @@ const Summary = () => {
           <div className={styles.header}>{numberWithCommas(toDisplay(stakeInfo?.total_bond_amount || '0'))} ORAIX</div>
           <span>Total staked</span>
         </div>
-        <div className={styles.item}>
+        {/* <div className={styles.item}>
           <div className={styles.header}>{numberWithCommas(allRewardStakerInfo?.length || 0)}</div>
           <span>Stakers</span>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.divider}></div>

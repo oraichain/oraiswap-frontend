@@ -29,6 +29,7 @@ export enum STAKE_TAB {
 // export const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
 // export const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
 
+// TODO: HARDCODE ORAIX_STAKING_TEST
 export const ORAIX_TOKEN_INFO = {
   ...oraichainTokens.find((e) => e.coinGeckoId === 'oraidex'),
   contractAddress: 'orai16n6xlcda2grn6wt0h9247mexnm638evdj4sam022zh8zlhewkr4s02gc9t',

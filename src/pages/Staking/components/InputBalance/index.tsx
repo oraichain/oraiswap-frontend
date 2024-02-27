@@ -44,7 +44,10 @@ const InputBalance = ({
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
-        <span className={styles.text}>You {type.toLowerCase()}</span>
+        <span className={styles.text}>
+          ORAIX Amount
+          {/* You {type.toLowerCase()} */}
+        </span>
         <span>
           {label}: <span className={styles.token}>{numberWithCommas(toDisplay(balance))} ORAIX</span>
         </span>

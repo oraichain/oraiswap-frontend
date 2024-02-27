@@ -113,7 +113,7 @@ const UnStakeTab = () => {
       <InputBalance
         onSubmit={() => handleUnstake()}
         balance={stakedAmount}
-        label="Stake amount"
+        label="Staked amount"
         type={STAKE_TAB.UnStake}
         amount={amount}
         loading={loading}

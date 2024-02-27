@@ -40,7 +40,7 @@ const StakeTab = () => {
   const { rewardPerSec } = useGetRewardPerSecInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { stakeInfo, refetchStakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { refetchMyStakeRewardInfo } = useGetMyStakeRewardInfo(ORAIX_TOKEN_INFO.contractAddress, address);
-  const { refetchAllStakerRewardInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
+  // const { refetchAllStakerRewardInfo } = useGetAllStakerRewardInfo(ORAIX_TOKEN_INFO.contractAddress);
 
   const rewardPerSecInfo = rewardPerSec?.[0] || {
     amount: '0',
@@ -90,7 +90,7 @@ const StakeTab = () => {
 
         refetchMyStakeRewardInfo();
         refetchStakeInfo();
-        refetchAllStakerRewardInfo();
+        // refetchAllStakerRewardInfo();
         loadTokenAmounts({ oraiAddress: address });
       }
     } catch (error) {
@@ -105,7 +105,7 @@ const StakeTab = () => {
     <div className={styles.stakeTab}>
       <InputBalance loading={loading} onSubmit={handleBond} balance={balance} amount={amount} setAmount={setAmount} />
 
-      <div className={styles.result}>
+      {/* <div className={styles.result}>
         <div className={styles.header}>
           <span>You’ll earn</span>
 
@@ -140,7 +140,7 @@ const StakeTab = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
