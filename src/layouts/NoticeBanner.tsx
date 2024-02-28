@@ -1,9 +1,10 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseBannerIcon } from 'assets/icons/close.svg';
 import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
+import { ReactComponent as INJIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import useTheme from 'hooks/useTheme';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import styles from './NoticeBanner.module.scss';
 
 const INTERVAL_TIME = 3000;
@@ -47,11 +48,18 @@ export const NoticeBanner = ({
         {/* <div className={styles.noteList}>
           {LIST_NOTICES.map((note, index) => {
             return ( */}
-        <div className={styles.note}>
+        <div className={`${styles.note} ${!note.title ? styles.onlyText : ''}`}>
           <div className={styles.icon}>{note.icon}</div>
-          <div className={styles.text}>
-            <span className={styles.title}>{note.title}</span>
-            <span>{note.content}</span>
+          <div className={`${styles.text}`}>
+            {!note.title ? null : <span className={styles.title}>{note.title}</span>}
+            <span>
+              {!note.content ? null : <span>{note.content} &nbsp;</span>}
+              {!note.link ? null : (
+                <a className={styles.link} href={note.link || ''} target={note.target || '_blank'}>
+                  {note.linkText || 'Click here'}
+                </a>
+              )}
+            </span>
           </div>
         </div>
         {/* );
@@ -65,15 +73,30 @@ export const NoticeBanner = ({
   );
 };
 
-export const LIST_NOTICES = [
+export const LIST_NOTICES: {
+  title: string;
+  content: string;
+  icon: ReactElement;
+  link?: string;
+  linkText?: string;
+  target?: string;
+}[] = [
   // {
   //   title: 'NTMPI Premiere Listing',
   //   content: 'Timpi (NTMPI) will be listed on Feb 19th',
   //   icon: <TimpiIcon />
   // },
+  // {
+  //   title: 'OCH Premiere Listing',
+  //   content: 'Orchai (OCH) will be listed on Feb 22th',
+  //   icon: <OrchaiIcon />
+  // }
   {
-    title: 'OCH Premiere Listing',
-    content: 'Orchai (OCH) will be listed on Feb 22th',
-    icon: <OrchaiIcon />
+    title: '',
+    content: 'Trading INJ/USDC futures with more liquidity and low slippage.', //'Trading INJ/USDC futures with more liquidity and low slippage',
+    icon: <INJIcon />,
+    link: 'https://futures.oraidex.io/INJ_USDC',
+    linkText: 'Click here',
+    target: '_blank'
   }
 ];

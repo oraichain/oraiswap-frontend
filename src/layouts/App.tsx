@@ -206,15 +206,15 @@ const App = () => {
     }
   };
 
-  // const [openBanner, setOpenBanner] = useState(true);
+  const [openBanner, setOpenBanner] = useState(true);
 
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
         <Menu />
-        {/* <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div> */}
-        {routes()}
+        <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div>
+        {/* {routes()} */}
         {!isMobile() && <Instruct />}
         {/* {!isMobile() && <FutureCompetition />} */}
       </div>
