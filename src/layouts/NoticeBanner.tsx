@@ -92,11 +92,11 @@ export const LIST_NOTICES: {
   //   icon: <OrchaiIcon />
   // }
   {
-    title: '',
+    title: 'Trading INJ/USDC futures',
     content: 'Trading INJ/USDC futures with more liquidity and low slippage.', //'Trading INJ/USDC futures with more liquidity and low slippage',
     icon: <INJIcon />,
     link: 'https://futures.oraidex.io/INJ_USDC',
-    linkText: 'Click here',
+    linkText: 'Trade now',
     target: '_blank'
   }
 ];
