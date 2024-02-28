@@ -24,6 +24,7 @@ import {
   useGetRewardInfo
 } from './hooks';
 import styles from './index.module.scss';
+import LiquidityChart from './components/LiquidityChart';
 
 export type PoolTableData = PoolInfoResponse & {
   reward: string[];
@@ -141,6 +142,8 @@ const Pools: React.FC<{}> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
+        <LiquidityChart />
+
         <Header dataSource={pools} />
         <div>
           <Filter setFilteredPools={setFilteredPools} pools={pools} setIsOpenNewTokenModal={setIsOpenNewTokenModal} />

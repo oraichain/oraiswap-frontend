@@ -113,6 +113,11 @@ export function formatDate(date: Date | number) {
   return `${obj.month} ${obj.day}, ${obj.year}`;
 }
 
+export function formatDateChart(date: Date | number) {
+  const obj = dateFormatter.formatToJson(date);
+  return `${obj.day} ${obj.month}`;
+}
+
 export function formatTime(date: Date | number) {
   const obj = timeFormatter.formatToJson(date);
   return `${obj.hour}:${obj.minute}:${obj.second}`; // ${obj.dayPeriod}

@@ -164,3 +164,12 @@ export const estimateShare = ({
 };
 
 export { generateMsgFrontierAddToken, getInfoLiquidityPool, isBigIntZero, getSymbolPools };
+
+export const getInclude = (list, condition) => {
+  let i = 0;
+  while (i < list.length) {
+    if (condition(list[i])) return i;
+    i++;
+  }
+  return -1;
+};

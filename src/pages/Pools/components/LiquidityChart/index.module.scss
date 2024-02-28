@@ -1,0 +1,47 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.liquidityChart {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px;
+  @include theme {
+    background: theme-get('neutral-surface-bg-btn-disabled');
+  }
+
+  .header {
+    color: $neutron-text-body-light;
+
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%; /* 21px */
+  }
+
+  .chartContainer {
+    position: relative;
+    height: 150px;
+    width: 50%;
+
+    .chartRoot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+
+      table > tr {
+        border-left: 1px solid;
+        border-color: transparent;
+
+        &:first-of-type {
+          @include theme {
+            border-color: theme-get('neutral-surface-bg-btn-disabled');
+          }
+        }
+      }
+    }
+  }
+}
