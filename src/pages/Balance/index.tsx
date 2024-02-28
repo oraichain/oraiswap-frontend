@@ -6,7 +6,8 @@ import {
   TokenItemType,
   findToTokenOnOraiBridge,
   toAmount,
-  tronToEthAddress
+  tronToEthAddress,
+  CosmosChainId
 } from '@oraichain/oraidex-common';
 import { UniversalSwapHandler, isSupportedNoPoolSwapEvm, addOraiBridgeRoute } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
@@ -20,7 +21,15 @@ import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { getTransactionUrl, handleErrorMsg, handleCheckWallet, handleErrorTransaction, networks, EVM_CHAIN_ID } from 'helper';
+import {
+  getTransactionUrl,
+  handleErrorMsg,
+  handleCheckWallet,
+  handleErrorTransaction,
+  networks,
+  EVM_CHAIN_ID,
+  handleCheckAddress
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -52,7 +61,7 @@ import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 
-interface BalanceProps { }
+interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
   // hook
@@ -215,7 +224,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
-      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
 
       const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
       const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
@@ -232,7 +241,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
@@ -241,8 +250,7 @@ const Balance: React.FC<BalanceProps> = () => {
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
 
-      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
-
+      const { swapRoute } = addOraiBridgeRoute(cosmosAddress, from, newToToken);
       // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
       // so we use this func just for Noble, and handleTransferIBC for other.
       if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
@@ -252,7 +260,7 @@ const Balance: React.FC<BalanceProps> = () => {
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
-        chainName: toNetworkChainId,
+        chainName: toNetworkChainId
       });
       // Add log sentry Oraichain -> Noble-1
       if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
