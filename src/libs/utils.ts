@@ -1,23 +1,19 @@
 import {
+  COSMOS_CHAIN_ID_COMMON,
   NetworkChainId,
   TokenItemType,
   getSubAmountDetails,
   toAmount,
-  toDisplay,
-  COSMOS_CHAIN_ID_COMMON
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet, switchWalletCosmos } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { TokenInfo } from 'types/token';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
 
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;

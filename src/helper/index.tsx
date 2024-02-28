@@ -247,21 +247,12 @@ export const checkVersionWallet = () => {
 
 //@ts-ignore
 const walletIsOwallet = window?.keplr?.isOwallet;
-
 export const keplrCheck = (type: WalletCosmosType) => {
   return type === 'keplr' && window.keplr && window.keplr.mode === 'extension' && !walletIsOwallet;
 };
 
 export const owalletCheck = (type: WalletCosmosType) => {
   return type === 'owallet' && walletIsOwallet;
-};
-
-export const switchWallet = (type: WalletCosmosType) => {
-  if (type === 'owallet' && window.owallet) {
-    window.Keplr = new Keplr(type);
-    return true;
-  }
-  return false;
 };
 
 export const isUnlockMetamask = async (): Promise<boolean> => {

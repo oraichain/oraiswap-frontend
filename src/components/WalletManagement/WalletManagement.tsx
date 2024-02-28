@@ -6,16 +6,16 @@ import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 import { keplrCheck } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import { useInactiveConnect } from 'hooks/useMetamask';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { FC, useEffect, useState } from 'react';
 import Connected from './Connected';
+import { ConnectedMobile } from './ConnectedMobile';
 import { ModalChooseWallet } from './ModalChooseWallet';
 import { MyWallet } from './MyWallet';
+import { MyWalletMobile } from './MyWalletMobile';
 import styles from './WalletManagement.module.scss';
 import { WalletProvider, walletProvider } from './walletConfig';
-import { ConnectedMobile } from './ConnectedMobile';
-import { MyWalletMobile } from './MyWalletMobile';
-import { useInactiveConnect } from 'hooks/useMetamask';
 const cx = cn.bind(styles);
 
 export const WalletManagement: FC<{}> = () => {
