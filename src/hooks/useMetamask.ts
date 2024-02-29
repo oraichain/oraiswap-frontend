@@ -9,10 +9,16 @@ const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
   if (isMobile()) await window.Metamask.switchNetwork(Networks.bsc);
   // passe cointype 60 for ethereum or let it use default param
-  const accounts = await window.ethereum.request({
+  let accounts = await window.ethereum.request({
     method: 'eth_accounts',
     params: [60]
   });
+  if (accounts.length === 0) {
+    accounts = await window.ethereum.request({
+      method: 'eth_requestAccounts',
+      params: []
+    });
+  }
   return accounts;
 };
 
