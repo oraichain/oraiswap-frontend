@@ -17,6 +17,7 @@ import { OverviewPool } from './components/OverviewPool';
 import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hooks';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
 import { useGetLpBalance } from './hooks/useGetLpBalance';
+import TransactionHistory from './components/TransactionHistory';
 
 const PoolDetail: React.FC = () => {
   let { poolUrl } = useParams();
@@ -65,6 +66,8 @@ const PoolDetail: React.FC = () => {
     [address, pools]
   );
 
+  const { token1, token2 } = poolDetailData;
+
   return (
     <Content nonBackground>
       <div className={styles.pool_detail}>
@@ -80,6 +83,7 @@ const PoolDetail: React.FC = () => {
         <OverviewPool poolDetailData={poolDetailData} />
         <Earning onLiquidityChange={onLiquidityChange} />
         <MyPoolInfo myLpBalance={lpTokenBalance} onLiquidityChange={onLiquidityChange} />
+        <TransactionHistory baseToken={token1} quoteToken={token2} />
       </div>
     </Content>
   );

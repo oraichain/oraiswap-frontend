@@ -71,8 +71,8 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
   const statisticData = getStatisticData(dataSource);
   const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
-  const [openChart, setOpenChart] = useState(false);
-  const [filterDay, setFilterDay] = useState(FILTER_DAY.MONTH);
+  const [openChart, setOpenChart] = useState(true);
+  const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
   const [liquidityDataChart, setLiquidityDataChart] = useState(statisticData.totalLiquidity);
   const [volumeDataChart, setVolumeDataChart] = useState(statisticData.volume);
 

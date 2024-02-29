@@ -132,16 +132,22 @@
       }
 
       .chart {
-        display: none;
-        padding: 16px;
+        // display: none;
+        max-height: 0px;
+        padding: 0px 16px;
         border-radius: 12px;
+
+        overflow: hidden;
+        transition: all ease-in-out 0.5s;
 
         @include theme {
           background: theme-get('neutral-surface-bg-2');
         }
 
         &.active {
-          display: block;
+          // display: block;
+          padding: 16px;
+          max-height: 300px;
         }
       }
 
