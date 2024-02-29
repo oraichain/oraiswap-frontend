@@ -15,6 +15,7 @@ import mixpanel from 'mixpanel-browser';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
+import { handleErrorTransaction } from 'helper';
 
 const queryClient = new QueryClient();
 
@@ -42,27 +43,31 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
 }
 
 const initApp = async () => {
-  // @ts-ignore
-  window.client = await SigningCosmWasmClient.connect(network.rpc);
-
-  const root = createRoot(document.getElementById('oraiswap'));
-  root.render(
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ToastProvider>
-          <Router>
-            <ScrollToTop />
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </Router>
-          <ToastContext.Consumer>
-            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
-          </ToastContext.Consumer>
-        </ToastProvider>
-      </PersistGate>
-    </Provider>
-  );
+  try {
+    // @ts-ignore
+    window.client = await SigningCosmWasmClient.connect(network.rpc);
+  } catch (error) {
+    handleErrorTransaction(error);
+  } finally {
+    const root = createRoot(document.getElementById('oraiswap'));
+    root.render(
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ToastProvider>
+            <Router>
+              <ScrollToTop />
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </Router>
+            <ToastContext.Consumer>
+              {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+            </ToastContext.Consumer>
+          </ToastProvider>
+        </PersistGate>
+      </Provider>
+    );
+  }
 };
 
 initApp();
