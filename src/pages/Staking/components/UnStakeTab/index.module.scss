@@ -16,6 +16,10 @@
     background: theme-get('neutral-6');
   }
 
+  @include small-mobile {
+    padding: 16px;
+  }
+
   .note {
     @include theme {
       color: theme-get('neutral-9');

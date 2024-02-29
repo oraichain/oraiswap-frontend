@@ -44,6 +44,10 @@
             color: theme-get('primary-text-text-link');
           }
         }
+
+        @include small-mobile {
+          font-size: 24px;
+        }
       }
 
       .desc {

@@ -26,6 +26,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
 
     .text {
       @include theme {
@@ -33,6 +34,18 @@
       }
       font-size: 16px;
       font-weight: 500;
+
+      @include small-mobile {
+        font-size: 14px;
+      }
+    }
+
+    .balance {
+      text-align: right;
+
+      @include small-mobile {
+        font-size: 12px;
+      }
     }
   }
 
@@ -85,16 +98,30 @@
         letter-spacing: 0.1px;
       }
     }
+  }
 
-    .stakeBtn {
-      button {
-        white-space: nowrap;
+  .stakeBtn {
+    button {
+      white-space: nowrap;
 
-        @include small-mobile {
-          width: 100%;
-          max-width: 100px;
-          font-size: 12px;
-        }
+      @include small-mobile {
+        width: 100%;
+        // max-width: 100px;
+        font-size: 14px;
+      }
+    }
+
+    &.inDesktop {
+      @include small-mobile {
+        display: none;
+      }
+    }
+
+    &.inMobile {
+      display: none;
+
+      @include small-mobile {
+        display: block;
       }
     }
   }
@@ -124,6 +151,10 @@
       @include theme() {
         color: theme-get('neutral-text-text-dropdown');
         background-color: theme-get('neutral-surface-bg-section-3');
+      }
+
+      @include small-mobile {
+        padding: 0px 12px 0px 12px;
       }
 
       &:hover {

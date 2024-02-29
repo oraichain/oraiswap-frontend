@@ -1,3 +1,4 @@
+import { isMobile } from '@walletconnect/browser-utils';
 import { useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
@@ -6,13 +7,13 @@ import { toAmount, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
 import { Button } from 'components/Button';
+import Loader from 'components/Loader';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
 import { ORAIX_DECIMAL } from 'pages/CoHarvest/constants';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, STAKE_TAB } from 'pages/Staking/constants';
-import Loader from 'components/Loader';
 
 export type InputBalanceType = {
   balance: string;
@@ -41,6 +42,8 @@ const InputBalance = ({
   const isInsufficient = amount && amount > toDisplay(balance);
   const disabled = loading || !amount || amount <= 0 || isInsufficient;
 
+  const isMobileMode = isMobile();
+
   return (
     <div className={styles.inputBalance}>
       <div className={styles.title}>
@@ -48,7 +51,7 @@ const InputBalance = ({
           ORAIX Amount
           {/* You {type.toLowerCase()} */}
         </span>
-        <span>
+        <span className={styles.balance}>
           {label}: <span className={styles.token}>{numberWithCommas(toDisplay(balance))} ORAIX</span>
         </span>
       </div>
@@ -77,7 +80,8 @@ const InputBalance = ({
           />
           <span className={styles.usd}>{formatDisplayUsdt(amountUSD)}</span>
         </div>
-        <div className={styles.stakeBtn}>
+
+        <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
           <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
             {loading && <Loader width={22} height={22} />}&nbsp;
             {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
@@ -106,6 +110,12 @@ const InputBalance = ({
             </button>
           );
         })}
+      </div>
+      <div className={`${styles.stakeBtn} ${styles.inMobile}`}>
+        <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
+          {loading && <Loader width={22} height={22} />}&nbsp;
+          {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
+        </Button>
       </div>
     </div>
   );

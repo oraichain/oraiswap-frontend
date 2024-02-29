@@ -28,14 +28,20 @@
     padding-right: 80px;
   }
 
-  @include mobile {
-    padding: 24px 8px 24px 8px;
-  }
-
   display: flex;
   justify-content: space-between;
   gap: 40px;
   flex-wrap: wrap;
+
+  @include mobile {
+    padding: 24px 8px 24px 8px;
+    gap: 16px;
+  }
+
+  @include small-mobile {
+    padding: 16px 8px 24px 8px;
+    gap: 16px;
+  }
 
   .action {
     width: calc(66% - 40px);

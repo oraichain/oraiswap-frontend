@@ -11,7 +11,7 @@
 
   @include small-mobile {
     flex-wrap: wrap;
-    padding: 24px 16px;
+    padding: 16px;
   }
 
   gap: 32px;
@@ -63,6 +63,10 @@
       line-height: 100%;
 
       margin-bottom: 16px;
+
+      @include small-mobile {
+        font-size: 20px;
+      }
     }
 
     .value {
