@@ -1,42 +1,28 @@
-import {
-  ChartOptions,
-  ColorType,
-  DeepPartial,
-  LastPriceAnimationMode,
-  LineStyle,
-  TickMarkType,
-  Time,
-  createChart
-} from 'lightweight-charts';
+import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { useLiquidityEventChart } from 'pages/Pools/hooks/useLiquidityEventChart';
+import { useVolumeEventChart } from 'pages/Pools/hooks/useVolumeEventChart';
 import { useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
 
-export enum CHART_STATE {
-  NOT_INITIAL,
-  INITIALIZING,
-  FULL_FILL
-}
-
-const LiquidityChart = () => {
+const VolumeChart = () => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
   const serieRef = useRef(null);
   const resizeObserver = useRef(null);
   const [theme] = useConfigReducer('theme');
 
-  const [chartState, setChartState] = useState(CHART_STATE.NOT_INITIAL);
+  const [chartState, setChartState] = useState(null);
 
   const {
-    currentDataLiquidity: data,
+    currentDataVolume: data,
     currentItem,
     onCrossMove: crossMove,
-    onMouseLiquidityLeave: onMouseLeave
-  } = useLiquidityEventChart();
+    onMouseVolumeLeave: onMouseLeave,
+    onClickChart
+  } = useVolumeEventChart('month');
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -76,7 +62,6 @@ const LiquidityChart = () => {
     },
     localization: {
       locale: 'en-US',
-      dateFormat: 'dd MMM, yyyy',
       priceFormatter: (price) => {
         return formatNumberKMB(Number(price));
       }
@@ -103,7 +88,8 @@ const LiquidityChart = () => {
         labelVisible: false,
         style: LineStyle.Solid,
         width: 1,
-        color: theme === 'light' ? '#DFE0DE' : '#494949',
+        // color: theme === 'light' ? '#DFE0DE' : '#494949',
+        color: theme === 'light' ? '#5EA402' : '#78CA11',
         labelBackgroundColor: '#aee67f'
       }
     },
@@ -132,31 +118,24 @@ const LiquidityChart = () => {
     if (chartRef.current === null) {
       const chart = createChart(containerRef.current, defaultOption);
 
-      serieRef.current = chart.addAreaSeries({
-        priceLineVisible: false,
-        topColor: theme === 'light' ? '#AEE67F' : '#152703',
-        bottomColor: theme === 'light' ? 'rgba(255, 255, 255, 0.00)' : '#181A17',
-        lineColor: theme === 'light' ? '#5EA402' : '#78CA11',
-        lineWidth: 3
-        //   lastPriceAnimation: LastPriceAnimationMode.OnDataUpdate
+      serieRef.current = chart.addHistogramSeries({
+        color: theme === 'light' ? '#5EA402' : '#78CA11'
       });
-
-      // // priceScaleId: left | right
-      //   chart.priceScale('right').applyOptions({
-      //     borderVisible: false
-      //   });
 
       chartRef.current = chart;
     }
-
     const hover = (event) => {
       let item = event?.seriesData?.get(serieRef.current) || { time: '', value: '' };
+
       crossMove(item);
     };
+
     chartRef.current.subscribeCrosshairMove(hover);
+    chartRef.current.subscribeClick(onClickChart);
 
     return () => {
       chartRef.current.unsubscribeCrosshairMove(hover);
+      chartRef.current.unsubscribeClick(onClickChart);
     };
   }, [crossMove]);
 
@@ -168,11 +147,8 @@ const LiquidityChart = () => {
     // remove current series
     chartRef.current.removeSeries(serieRef.current);
 
-    serieRef.current = chartRef.current.addAreaSeries({
-      topColor: theme === 'light' ? '#AEE67F' : '#152703',
-      bottomColor: theme === 'light' ? 'rgba(255, 255, 255, 0.00)' : '#181A17',
-      lineColor: theme === 'light' ? '#5EA402' : '#78CA11',
-      lineWidth: 3
+    serieRef.current = chartRef.current.addHistogramSeries({
+      color: theme === 'light' ? '#5EA402' : '#78CA11'
     });
 
     // update new theme series with current data
@@ -206,7 +182,7 @@ const LiquidityChart = () => {
   }, [currentItem]);
 
   return (
-    <div className={styles.liquidityChart}>
+    <div className={styles.volumeChart}>
       <div className={styles.header}>
         <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
         <br />
@@ -219,4 +195,4 @@ const LiquidityChart = () => {
   );
 };
 
-export default LiquidityChart;
+export default VolumeChart;

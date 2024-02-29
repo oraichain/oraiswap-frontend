@@ -25,6 +25,7 @@ import {
 } from './hooks';
 import styles from './index.module.scss';
 import LiquidityChart from './components/LiquidityChart';
+import VolumeChart from './components/VolumeChart';
 
 export type PoolTableData = PoolInfoResponse & {
   reward: string[];
@@ -142,7 +143,10 @@ const Pools: React.FC<{}> = () => {
   return (
     <Content nonBackground>
       <div className={styles.pools}>
-        <LiquidityChart />
+        <div>
+          <LiquidityChart />
+          <VolumeChart />
+        </div>
 
         <Header dataSource={pools} />
         <div>

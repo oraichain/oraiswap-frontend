@@ -1,10 +1,10 @@
 import { sleep } from 'helper';
 import { useEffect, useRef, useState } from 'react';
 import { getInclude } from '../helpers';
+import axios from 'rest/request';
 
-export const useVolumeEventChart = () => {
+export const useVolumeEventChart = (type: 'day' | 'week' | 'month') => {
   const [currentDataVolume, setCurrentDataVolume] = useState([]);
-  const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,13 +19,7 @@ export const useVolumeEventChart = () => {
     setCurrentItem(item);
   };
 
-  const onMouseLiquidityLeave = () => {
-    if (currentDataLiquidity.length > 0) {
-      setCurrentItem(currentDataLiquidity[currentDataLiquidity.length - 1]);
-    }
-  };
-
-  const onMouseVolumeLeave = (e) => {
+  const onMouseVolumeLeave = () => {
     if (currentDataVolume.length > 0)
       if (dataClick.current.clickedTwice) {
         let lastElt = currentDataVolume[currentDataVolume.length - 1];
@@ -53,19 +47,17 @@ export const useVolumeEventChart = () => {
     }
   };
 
-  const onChangeRangeVolume = async (value) => {
+  const onChangeRangeVolume = async (value: 'day' | 'week' | 'month' = 'day') => {
     try {
       setIsLoading(true);
-      // let data = await getDataLiquidity(value)
-      const data = DATA_LIQUIDITY_MOCK;
+      let data = await getDataVolumeHistorical(value);
+      // const data = DATA_LIQUIDITY_MOCK;
 
       setCurrentDataVolume(data);
       if (data.length > 0) {
         setCurrentItem({ ...data[data.length - 1] });
-        // setRangeLiquidity(value)
       }
 
-      // setRangeVolume(value)
       setIsLoading(false);
     } catch (e) {
       console.log('Volume ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
@@ -73,38 +65,31 @@ export const useVolumeEventChart = () => {
     }
   };
 
-  const onChangeRangeLiquidity = async (value: string = 'DAY') => {
-    try {
-      setIsLoading(true);
-      // let data = await getDataLiquidity(value)
-      const data = DATA_LIQUIDITY_MOCK;
-
-      sleep(1000);
-
-      setCurrentDataLiquidity(data);
-      if (data.length > 0) {
-        setCurrentItem({ ...data[data.length - 1] });
-        // setRangeLiquidity(value)
-      }
-      setIsLoading(false);
-    } catch (e) {
-      console.log('Liquidity ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    onChangeRangeLiquidity();
-  }, []);
+    onChangeRangeVolume(type);
+  }, [type]);
 
   return {
-    currentDataLiquidity,
+    currentDataVolume,
     currentItem,
     onCrossMove,
     onClickChart,
-    onMouseLiquidityLeave,
     onMouseVolumeLeave
   };
+};
+
+export const getDataVolumeHistorical = async (type: 'day' | 'week' | 'month' = 'day') => {
+  try {
+    const res = await axios.get('/v1/volume/historical/all-charts', {
+      params: {
+        type
+      }
+    });
+    return res.data;
+  } catch (e) {
+    console.error('getDataVolumeHistorical', e);
+    return [];
+  }
 };
 
 const DATA_LIQUIDITY_MOCK = [
