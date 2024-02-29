@@ -1,79 +1,35 @@
 import { sleep } from 'helper';
 import { useEffect, useRef, useState } from 'react';
-import { getInclude } from '../helpers';
+import { FILTER_DAY } from '../components/Header';
 
-export const useLiquidityEventChart = () => {
-  const [currentDataVolume, setCurrentDataVolume] = useState([]);
+export const useLiquidityEventChart = (
+  type: FILTER_DAY,
+  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>
+) => {
   const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [currentItem, setCurrentItem] = useState<{
     value: number;
-    time: string | number | { day: number; month: number; year: number };
-  }>({ value: 0, time: '-' });
+    time: string | number;
+  }>({ value: 0, time: 0 });
 
   const dataClick = useRef({ time: { day: 1, month: 1, year: 1 }, value: 0, clickedTwice: true });
 
   const onCrossMove = (item) => {
     setCurrentItem(item);
+    onUpdateCurrentItem && onUpdateCurrentItem(item?.value || 0);
   };
 
   const onMouseLiquidityLeave = () => {
     if (currentDataLiquidity.length > 0) {
       setCurrentItem(currentDataLiquidity[currentDataLiquidity.length - 1]);
+      onUpdateCurrentItem && onUpdateCurrentItem(currentDataLiquidity[currentDataLiquidity.length - 1]?.value || 0);
     }
   };
 
-  const onMouseVolumeLeave = (e) => {
-    if (currentDataVolume.length > 0)
-      if (dataClick.current.clickedTwice) {
-        let lastElt = currentDataVolume[currentDataVolume.length - 1];
-        setCurrentItem({ time: lastElt.time, value: lastElt.value });
-      } else {
-        setCurrentItem({ time: dataClick.current.time, value: dataClick.current.value });
-      }
-  };
-
-  const onClickChart = (e) => {
-    let index = getInclude(currentDataVolume, (item) => {
-      return item.time.year === e.time.year && item.time.month === e.time.month && item.time.day === e.time.day;
-    });
-    if (index > -1) {
-      let same =
-        e.time.year === dataClick.current.time.year &&
-        e.time.month === dataClick.current.time.month &&
-        e.time.day === dataClick.current.time.day;
-
-      dataClick.current = {
-        time: currentDataVolume[index].time,
-        value: currentDataVolume[index].value,
-        clickedTwice: same ? !dataClick.current.clickedTwice : false
-      };
-    }
-  };
-
-  const onChangeRangeVolume = async (value) => {
-    try {
-      setIsLoading(true);
-      // let data = await getDataLiquidity(value)
-      const data = DATA_LIQUIDITY_MOCK;
-
-      setCurrentDataVolume(data);
-      if (data.length > 0) {
-        setCurrentItem({ ...data[data.length - 1] });
-        // setRangeLiquidity(value)
-      }
-
-      // setRangeVolume(value)
-      setIsLoading(false);
-    } catch (e) {
-      console.log('Volume ERROR: e', 'background: #FF0000; color:#FFFFFF', e);
-      setIsLoading(false);
-    }
-  };
-
-  const onChangeRangeLiquidity = async (value: string = 'DAY') => {
+  const onChangeRangeLiquidity = async (value: string = FILTER_DAY.DAY) => {
     try {
       setIsLoading(true);
       // let data = await getDataLiquidity(value)
@@ -84,7 +40,7 @@ export const useLiquidityEventChart = () => {
       setCurrentDataLiquidity(data);
       if (data.length > 0) {
         setCurrentItem({ ...data[data.length - 1] });
-        // setRangeLiquidity(value)
+        onUpdateCurrentItem && onUpdateCurrentItem(data[data.length - 1]?.value || 0);
       }
       setIsLoading(false);
     } catch (e) {
@@ -94,16 +50,14 @@ export const useLiquidityEventChart = () => {
   };
 
   useEffect(() => {
-    onChangeRangeLiquidity();
-  }, []);
+    onChangeRangeLiquidity(type);
+  }, [type]);
 
   return {
     currentDataLiquidity,
     currentItem,
     onCrossMove,
-    onClickChart,
-    onMouseLiquidityLeave,
-    onMouseVolumeLeave
+    onMouseLiquidityLeave
   };
 };
 

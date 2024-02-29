@@ -1,42 +1,32 @@
-import {
-  ChartOptions,
-  ColorType,
-  DeepPartial,
-  LastPriceAnimationMode,
-  LineStyle,
-  TickMarkType,
-  Time,
-  createChart
-} from 'lightweight-charts';
-import { TIMER } from 'pages/CoHarvest/constants';
-import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
-import { useLiquidityEventChart } from 'pages/Pools/hooks/useLiquidityEventChart';
-import { useEffect, useRef, useState } from 'react';
-import styles from './index.module.scss';
 import useConfigReducer from 'hooks/useConfigReducer';
+import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
+import { TIMER } from 'pages/CoHarvest/constants';
+import { formatDate, formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
+import { formatDisplayUsdt, formatTimeDataChart } from 'pages/Pools/helpers';
+import { useLiquidityEventChart } from 'pages/Pools/hooks/useLiquidityEventChart';
+import { useEffect, useRef } from 'react';
+import { FILTER_DAY } from '../Header';
+import styles from './index.module.scss';
 
-export enum CHART_STATE {
-  NOT_INITIAL,
-  INITIALIZING,
-  FULL_FILL
-}
-
-const LiquidityChart = () => {
+const LiquidityChart = ({
+  filterDay,
+  onUpdateCurrentItem
+}: {
+  filterDay: FILTER_DAY;
+  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>;
+}) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
   const serieRef = useRef(null);
   const resizeObserver = useRef(null);
   const [theme] = useConfigReducer('theme');
 
-  const [chartState, setChartState] = useState(CHART_STATE.NOT_INITIAL);
-
   const {
     currentDataLiquidity: data,
     currentItem,
     onCrossMove: crossMove,
     onMouseLiquidityLeave: onMouseLeave
-  } = useLiquidityEventChart();
+  } = useLiquidityEventChart(filterDay, onUpdateCurrentItem);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -205,12 +195,14 @@ const LiquidityChart = () => {
     }
   }, [currentItem]);
 
+  const showTime = formatTimeDataChart(currentItem.time, filterDay, data?.[data?.length - 1]?.time);
+
   return (
     <div className={styles.liquidityChart}>
       <div className={styles.header}>
-        <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
-        <br />
-        <span>Time: {(currentItem.time || '').toString()}</span>
+        {/* <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
+        <br /> */}
+        <span>{showTime}</span>
       </div>
       <div className={styles.chartContainer}>
         <div onMouseLeave={onMouseLeave} className={styles.chartRoot} ref={containerRef} />

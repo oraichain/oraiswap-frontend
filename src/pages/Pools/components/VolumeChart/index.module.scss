@@ -4,11 +4,7 @@
 .volumeChart {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding: 24px;
-  @include theme {
-    background: theme-get('neutral-surface-bg-btn-disabled');
-  }
+  gap: 16px;
 
   .header {
     color: $neutron-text-body-light;
@@ -21,7 +17,7 @@
   .chartContainer {
     position: relative;
     height: 150px;
-    width: 50%;
+    width: 100%;
 
     .chartRoot {
       position: absolute;

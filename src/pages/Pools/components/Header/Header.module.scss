@@ -13,12 +13,23 @@
     flex-wrap: wrap;
     margin-bottom: 16px;
 
-    // TODO: disable when has filter day
-    @include mobile() {
-      display: none;
-    }
+    // // TODO: disable when has filter day
+    // @include mobile() {
+    //   display: none;
+    // }
 
     &_text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 24px;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        vertical-align: top;
+      }
+
       @include mobile() {
         display: none;
       }
@@ -45,8 +56,13 @@
       color: $neutron-text-body-light;
 
       @include mobile() {
+        margin-top: 80px;
         width: 100%;
         justify-content: space-between;
+      }
+
+      @include small-mobile {
+        margin-top: 0px;
       }
 
       @include theme() {
@@ -93,24 +109,55 @@
       display: flex;
       padding: 16px;
       flex-direction: column;
-      gap: 8px;
+      gap: 16px;
       flex: 1 0 0;
 
       color: $neutron-text-body-light;
       font-size: 16px;
       font-weight: 500;
       line-height: 150%;
-      /* 24px */
 
       @include mobile() {
         width: 100%;
       }
 
+      .info {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+
+        .content {
+          flex: 1;
+        }
+      }
+
+      .chart {
+        display: none;
+        padding: 16px;
+        border-radius: 12px;
+
+        @include theme {
+          background: theme-get('neutral-surface-bg-2');
+        }
+
+        &.active {
+          display: block;
+        }
+      }
+
       &:nth-child(even) {
+        border-start-end-radius: 12px;
+        border-end-end-radius: 12px;
 
         // odd
         @include theme() {
           background-color: theme-get('neutral-surface-bg-section-3');
+        }
+
+        @include mobile {
+          border-radius: unset;
+          border-end-start-radius: 12px;
+          border-end-end-radius: 12px;
         }
       }
 
@@ -188,7 +235,7 @@
 
     &_name {
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 500;
       line-height: 150%;
       white-space: nowrap;
 
@@ -202,7 +249,7 @@
     }
 
     &_value {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 500;
       line-height: 120%;
 

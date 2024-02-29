@@ -1,28 +1,33 @@
+import useConfigReducer from 'hooks/useConfigReducer';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
 import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
-import { formatDisplayUsdt } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, formatTimeDataChart } from 'pages/Pools/helpers';
 import { useVolumeEventChart } from 'pages/Pools/hooks/useVolumeEventChart';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { FILTER_DAY } from '../Header';
 import styles from './index.module.scss';
-import useConfigReducer from 'hooks/useConfigReducer';
 
-const VolumeChart = () => {
+const VolumeChart = ({
+  filterDay,
+  onUpdateCurrentItem
+}: {
+  filterDay: FILTER_DAY;
+  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<any>>;
+}) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
   const serieRef = useRef(null);
   const resizeObserver = useRef(null);
   const [theme] = useConfigReducer('theme');
 
-  const [chartState, setChartState] = useState(null);
-
   const {
     currentDataVolume: data,
     currentItem,
     onCrossMove: crossMove,
-    onMouseVolumeLeave: onMouseLeave,
-    onClickChart
-  } = useVolumeEventChart('month');
+    onMouseVolumeLeave: onMouseLeave
+    // onClickChart
+  } = useVolumeEventChart(filterDay, onUpdateCurrentItem);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -131,11 +136,11 @@ const VolumeChart = () => {
     };
 
     chartRef.current.subscribeCrosshairMove(hover);
-    chartRef.current.subscribeClick(onClickChart);
+    // chartRef.current.subscribeClick(onClickChart);
 
     return () => {
       chartRef.current.unsubscribeCrosshairMove(hover);
-      chartRef.current.unsubscribeClick(onClickChart);
+      // chartRef.current.unsubscribeClick(onClickChart);
     };
   }, [crossMove]);
 
@@ -181,12 +186,14 @@ const VolumeChart = () => {
     }
   }, [currentItem]);
 
+  const showTime = formatTimeDataChart(currentItem.time, filterDay, data?.[data?.length - 1]?.time, 'Last 24 hours');
+
   return (
     <div className={styles.volumeChart}>
       <div className={styles.header}>
-        <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
-        <br />
-        <span>Time: {(currentItem.time || '').toString()}</span>
+        {/* <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
+        <br /> */}
+        <span>{showTime}</span>
       </div>
       <div className={styles.chartContainer}>
         <div onMouseLeave={onMouseLeave} className={styles.chartRoot} ref={containerRef} />

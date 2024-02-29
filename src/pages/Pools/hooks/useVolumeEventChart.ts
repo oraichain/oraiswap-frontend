@@ -1,22 +1,27 @@
-import { sleep } from 'helper';
 import { useEffect, useRef, useState } from 'react';
-import { getInclude } from '../helpers';
 import axios from 'rest/request';
+import { FILTER_DAY } from '../components/Header';
+import { getInclude } from '../helpers';
 
-export const useVolumeEventChart = (type: 'day' | 'week' | 'month') => {
+export const useVolumeEventChart = (
+  type: FILTER_DAY,
+  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>
+) => {
   const [currentDataVolume, setCurrentDataVolume] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [currentItem, setCurrentItem] = useState<{
     value: number;
-    time: string | number | { day: number; month: number; year: number };
-  }>({ value: 0, time: '-' });
+    time: string | number;
+    //| { day: number; month: number; year: number };
+  }>({ value: 0, time: 0 });
 
   const dataClick = useRef({ time: { day: 1, month: 1, year: 1 }, value: 0, clickedTwice: true });
 
   const onCrossMove = (item) => {
     setCurrentItem(item);
+    onUpdateCurrentItem && onUpdateCurrentItem(item?.value || 0);
   };
 
   const onMouseVolumeLeave = () => {
@@ -24,9 +29,12 @@ export const useVolumeEventChart = (type: 'day' | 'week' | 'month') => {
       if (dataClick.current.clickedTwice) {
         let lastElt = currentDataVolume[currentDataVolume.length - 1];
         setCurrentItem({ time: lastElt.time, value: lastElt.value });
-      } else {
-        setCurrentItem({ time: dataClick.current.time, value: dataClick.current.value });
+        onUpdateCurrentItem && onUpdateCurrentItem(lastElt?.value || 0);
       }
+    // else {
+    //   setCurrentItem({ time: dataClick.current.time, value: dataClick.current.value });
+    //   onUpdateCurrentItem && onUpdateCurrentItem(dataClick?.current?.value || 0);
+    // }
   };
 
   const onClickChart = (e) => {
@@ -47,15 +55,15 @@ export const useVolumeEventChart = (type: 'day' | 'week' | 'month') => {
     }
   };
 
-  const onChangeRangeVolume = async (value: 'day' | 'week' | 'month' = 'day') => {
+  const onChangeRangeVolume = async (value: FILTER_DAY = FILTER_DAY.DAY) => {
     try {
       setIsLoading(true);
       let data = await getDataVolumeHistorical(value);
-      // const data = DATA_LIQUIDITY_MOCK;
 
       setCurrentDataVolume(data);
       if (data.length > 0) {
         setCurrentItem({ ...data[data.length - 1] });
+        onUpdateCurrentItem && onUpdateCurrentItem(data[data.length - 1]?.value || 0);
       }
 
       setIsLoading(false);
@@ -78,7 +86,7 @@ export const useVolumeEventChart = (type: 'day' | 'week' | 'month') => {
   };
 };
 
-export const getDataVolumeHistorical = async (type: 'day' | 'week' | 'month' = 'day') => {
+export const getDataVolumeHistorical = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
   try {
     const res = await axios.get('/v1/volume/historical/all-charts', {
       params: {
@@ -91,130 +99,3 @@ export const getDataVolumeHistorical = async (type: 'day' | 'week' | 'month' = '
     return [];
   }
 };
-
-const DATA_LIQUIDITY_MOCK = [
-  {
-    time: '2024-01-29T00:00:00.000Z',
-    value: 15186381
-  },
-  {
-    time: '2024-01-30T00:00:00.000Z',
-    value: 15369808
-  },
-  {
-    time: '2024-01-31T00:00:00.000Z',
-    value: 14666815
-  },
-  {
-    time: '2024-02-01T00:00:00.000Z',
-    value: 14080691
-  },
-  {
-    time: '2024-02-02T00:00:00.000Z',
-    value: 13532554
-  },
-  {
-    time: '2024-02-03T00:00:00.000Z',
-    value: 13025174
-  },
-  {
-    time: '2024-02-04T00:00:00.000Z',
-    value: 12914096
-  },
-  {
-    time: '2024-02-05T00:00:00.000Z',
-    value: 13673090
-  },
-  {
-    time: '2024-02-06T00:00:00.000Z',
-    value: 13008852
-  },
-  {
-    time: '2024-02-07T00:00:00.000Z',
-    value: 12813845
-  },
-  {
-    time: '2024-02-08T00:00:00.000Z',
-    value: 12739527
-  },
-  {
-    time: '2024-02-09T00:00:00.000Z',
-    value: 12973204
-  },
-  {
-    time: '2024-02-10T00:00:00.000Z',
-    value: 12900695
-  },
-  {
-    time: '2024-02-11T00:00:00.000Z',
-    value: 12849813
-  },
-  {
-    time: '2024-02-12T00:00:00.000Z',
-    value: 13333876
-  },
-  {
-    time: '2024-02-13T00:00:00.000Z',
-    value: 13323275
-  },
-  {
-    time: '2024-02-14T00:00:00.000Z',
-    value: 12777470
-  },
-  {
-    time: '2024-02-15T00:00:00.000Z',
-    value: 12394313
-  },
-  {
-    time: '2024-02-16T00:00:00.000Z',
-    value: 12393760
-  },
-  {
-    time: '2024-02-17T00:00:00.000Z',
-    value: 12416720
-  },
-  {
-    time: '2024-02-18T00:00:00.000Z',
-    value: 13801393
-  },
-  {
-    time: '2024-02-19T00:00:00.000Z',
-    value: 16239678
-  },
-  {
-    time: '2024-02-20T00:00:00.000Z',
-    value: 16631884
-  },
-  {
-    time: '2024-02-21T00:00:00.000Z',
-    value: 17361575
-  },
-  {
-    time: '2024-02-22T00:00:00.000Z',
-    value: 17573575
-  },
-  {
-    time: '2024-02-23T00:00:00.000Z',
-    value: 17544073
-  },
-  {
-    time: '2024-02-24T00:00:00.000Z',
-    value: 17422899
-  },
-  {
-    time: '2024-02-25T00:00:00.000Z',
-    value: 18360843
-  },
-  {
-    time: '2024-02-26T00:00:00.000Z',
-    value: 18924591
-  },
-  {
-    time: '2024-02-27T00:00:00.000Z',
-    value: 18946800
-  },
-  {
-    time: '2024-02-28T00:00:00.000Z',
-    value: 18383705
-  }
-];

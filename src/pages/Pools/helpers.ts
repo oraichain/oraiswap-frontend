@@ -3,6 +3,9 @@ import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/
 import { validateNumber, INJECTIVE_CONTRACT, ORAI, USDC_CONTRACT, ORAIX_CONTRACT } from '@oraichain/oraidex-common';
 import { Asset, AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
+import { FILTER_DAY } from './components/Header';
+import { formatDate } from 'pages/CoHarvest/helpers';
+import { TIMER } from 'pages/CoHarvest/constants';
 
 // TODO: hardcode reverse symbol for ORAI/INJ,USDC/ORAIX, need to update later
 export const reverseSymbolArr = [
@@ -172,4 +175,44 @@ export const getInclude = (list, condition) => {
     i++;
   }
   return -1;
+};
+
+export const endOfWeek = (date: Date) => {
+  const lastDayOfWeek = date.getDate() - (date.getDay() - 1) + 6;
+  const endDateOfWeek = new Date(date.setDate(lastDayOfWeek));
+  const now = new Date();
+
+  return endDateOfWeek >= now ? now : endDateOfWeek;
+};
+
+export const endOfMonth = (date: Date) => {
+  const lastDateOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  const now = new Date();
+  return lastDateOfMonth >= now ? now : lastDateOfMonth;
+};
+
+export const formatTimeDataChart = (
+  time: number | string,
+  type: FILTER_DAY,
+  lastDate: number,
+  currentText: string = 'Now'
+) => {
+  if (!time) {
+    return currentText;
+  }
+
+  const fmtTime = typeof time === 'string' ? new Date(time).getTime() : time * TIMER.MILLISECOND;
+  const date = new Date(fmtTime);
+
+  switch (type) {
+    case FILTER_DAY.DAY:
+      return time === lastDate ? currentText : formatDate(fmtTime);
+
+    case FILTER_DAY.WEEK:
+      return formatDate(fmtTime) + ' - ' + formatDate(endOfWeek(date));
+
+    case FILTER_DAY.MONTH:
+      return formatDate(fmtTime) + ' - ' + formatDate(endOfMonth(date));
+  }
 };
