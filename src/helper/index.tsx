@@ -13,7 +13,7 @@ import {
   evmChains,
   cosmosChains
 } from '@oraichain/oraidex-common';
-import { serializeError } from 'serialize-error'
+import { serializeError } from 'serialize-error';
 import { network } from 'config/networks';
 
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -93,7 +93,7 @@ export const getNetworkGasPrice = async (chainId): Promise<number> => {
     if (findToken) {
       return findToken.feeCurrencies[0].gasPriceStep.average;
     }
-  } catch { }
+  } catch {}
   return 0;
 };
 
@@ -154,14 +154,15 @@ export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link
 export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string> => {
   const cosmosAddress = await window.Keplr.getKeplrAddr(chainId);
   if (!cosmosAddress) {
-    throw new Error('Please login both metamask and keplr!');
+    throw new Error('Please login cosmos wallet Owallet or Keplr!');
   }
   return cosmosAddress;
 };
 
 const transferMsgError = (message: string, info?: InfoError) => {
   if (message.includes('invalid hash')) return `Transation was not included to block`;
-  if (message.includes("Assertion failed; minimum receive amount")) return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
+  if (message.includes('Assertion failed; minimum receive amount'))
+    return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
   if (message.includes('account sequence mismatch'))
     return `Your previous transaction has not been included in a block. Please wait until it is included before creating a new transaction!`;

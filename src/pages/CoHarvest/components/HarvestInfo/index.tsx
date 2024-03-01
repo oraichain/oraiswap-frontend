@@ -17,8 +17,9 @@ const HarvestInfo = (props: {
   onStart: () => void;
   bidInfo: BiddingInfo;
   openExplainModal: () => void;
+  isCurrentRound: boolean;
 }) => {
-  const { poolValue, onEnd, onStart, bidInfo, openExplainModal } = props;
+  const { poolValue, onEnd, onStart, bidInfo, openExplainModal, isCurrentRound } = props;
   const { data: prices } = useCoinGeckoPrices();
   const [visible, setVisible] = useState(false);
   const [theme] = useConfigReducer('theme');
@@ -29,7 +30,7 @@ const HarvestInfo = (props: {
   return (
     <div className={styles.harvestInfo}>
       <div className={styles.contentWrapper}>
-        <div className={styles.content}>
+        <div className={`${styles.content} ${!isCurrentRound ? styles.inPast : ''}`}>
           <div className={styles.value}>
             <span className={styles.heading}>
               Total Rewards
@@ -53,7 +54,7 @@ const HarvestInfo = (props: {
             <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
           </div>
           <div className={styles.countdown}>
-            <CountDownTime bidInfo={bidInfo} onEnd={onEnd} onStart={onStart} />
+            <CountDownTime bidInfo={bidInfo} onEnd={onEnd} onStart={onStart} isCurrentRound={isCurrentRound} />
           </div>
         </div>
         <div className={styles.shadow}></div>

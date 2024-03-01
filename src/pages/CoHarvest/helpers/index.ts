@@ -153,3 +153,10 @@ export const formatNumberKMB = (num: number) => {
   }
   return formatDisplayUsdt(num, 2);
 };
+
+export const checkTimeIsMillisecond = (timestamp: number) => {
+  if (Math.abs(Date.now() - timestamp) < Math.abs(Date.now() - timestamp * 1000)) {
+    return true;
+  }
+  return false;
+};
