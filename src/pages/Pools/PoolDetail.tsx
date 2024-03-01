@@ -14,12 +14,16 @@ import styles from './PoolDetail.module.scss';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
-import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools } from './hooks';
+import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools, useGetPriceChange } from './hooks';
 import { useGetPairInfo } from './hooks/useGetPairInfo';
 import { useGetLpBalance } from './hooks/useGetLpBalance';
 import TransactionHistory from './components/TransactionHistory';
+import ChartDetail from './components/ChartDetail';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
+import useTheme from 'hooks/useTheme';
 
 const PoolDetail: React.FC = () => {
+  const theme = useTheme();
   let { poolUrl } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -68,19 +72,57 @@ const PoolDetail: React.FC = () => {
 
   const { token1, token2 } = poolDetailData;
 
+  const pair = (poolUrl || '')
+    .split('_')
+    .map((e) => decodeURIComponent(e))
+    .join('-');
+
+  console.log('pair', pair);
+
+  const params = {
+    base_denom: pair.split('-')[0],
+    quote_denom: pair.split('-')[1],
+    tf: 1440
+  };
+
+  const { priceChange } = useGetPriceChange(params);
+
+  const baseToken = (token1?.contractAddress || token1?.denom) === params.base_denom ? token1 : token2;
+  const quoteToken = (token2?.contractAddress || token2?.denom) === params.base_denom ? token1 : token2;
+
+  let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
+  if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.IconLight || baseToken.Icon : baseToken.Icon;
+  if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight || quoteToken.Icon : quoteToken.Icon;
+
   return (
     <Content nonBackground>
       <div className={styles.pool_detail}>
         <div
-          className={styles.back}
+          className={styles.backWrapper}
           onClick={() => {
             navigate(`/pools`);
           }}
         >
-          <BackIcon className={styles.backIcon} />
-          <span>Back to all pools</span>
+          <div className={styles.back}>
+            <BackIcon className={styles.backIcon} />
+            <span>Back to all pools</span>
+          </div>
+          <div className={styles.price}>
+            <div>
+              <BaseTokenIcon />
+            </div>
+            1 {baseToken?.name} = {(priceChange?.price || 0).toFixed(6)} {quoteToken?.name}
+            {/* ≈ */}
+          </div>
         </div>
-        <OverviewPool poolDetailData={poolDetailData} />
+        <div className={styles.summary}>
+          <div className={styles.overview}>
+            <OverviewPool poolDetailData={poolDetailData} />
+          </div>
+          <div className={styles.chart}>
+            <ChartDetail pair={pair} />
+          </div>
+        </div>
         <Earning onLiquidityChange={onLiquidityChange} />
         <MyPoolInfo myLpBalance={lpTokenBalance} onLiquidityChange={onLiquidityChange} />
         <TransactionHistory baseToken={token1} quoteToken={token2} />

@@ -47,8 +47,8 @@ export function dateFormat(date) {
   return `${MONTHS_ARR[MONTHS_ARR.indexOf(month)]} ${day} ${year} ${time}`;
 }
 
-export function shortenAddress(address: string) {
-  return address.substring(0, 8) + '...' + address.substring(address.length - 7, address.length);
+export function shortenAddress(address: string, start: number = 8, end: number = 7) {
+  return address.substring(0, start) + '...' + address.substring(address.length - end, address.length);
 }
 
 export const formatUTCDateString = (date) => {
@@ -83,7 +83,7 @@ export const dateFormatter = new Intl.DateTimeFormat('en-US', {
 });
 
 export const timeFormatter = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
+  hour: '2-digit',
   minute: '2-digit',
   second: '2-digit'
 });
@@ -111,6 +111,11 @@ Intl.DateTimeFormat.prototype.formatToJson = function (date: Date | number) {
 export function formatDate(date: Date | number) {
   const obj = dateFormatter.formatToJson(date);
   return `${obj.month} ${obj.day}, ${obj.year}`;
+}
+
+export function formatDateV2(date: Date | number) {
+  const obj = dateTimeFormatter.formatToJson(date);
+  return `${obj.day}/${obj.month}/${obj.year}`;
 }
 
 export function formatDateChart(date: Date | number) {

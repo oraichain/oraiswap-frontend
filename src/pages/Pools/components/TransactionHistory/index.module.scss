@@ -101,17 +101,48 @@
       @include theme {
         color: theme-get('neutral-text-text-dropdown');
       }
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 400;
       line-height: 100%; /* 27px */
+    }
+
+    .alignRight {
+      text-align: right;
     }
 
     .hash {
       width: 14%;
+      font-weight: 500;
+      white-space: nowrap;
+
+      .txhash {
+        margin-right: 4px;
+      }
+
+      a {
+        cursor: pointer;
+      }
+
+      svg {
+        width: 14px;
+        height: 14px;
+        vertical-align: top;
+
+        path {
+          fill: $neutron-text-body-light;
+        }
+      }
     }
 
     .time {
-      width: 23%;
+      width: 14%;
+
+      & > div {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
     }
 
     .pay {
@@ -130,20 +161,24 @@
       width: 14%;
     }
 
-    .Won {
-      color: #78ca11;
-    }
+    .amount {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
 
-    .Bidding {
-      color: #ad9c00;
-    }
+      svg {
+        width: 20px;
+        height: 20px;
 
-    .Draw {
-      color: #979995;
-    }
+        vertical-align: middle;
+      }
 
-    .return {
-      width: 23%;
+      .symbol {
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+      }
     }
 
     .detailPrice {

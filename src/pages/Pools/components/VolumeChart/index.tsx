@@ -10,10 +10,14 @@ import styles from './index.module.scss';
 
 const VolumeChart = ({
   filterDay,
-  onUpdateCurrentItem
+  onUpdateCurrentItem,
+  pair,
+  height = 150
 }: {
   filterDay: FILTER_DAY;
-  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<any>>;
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<any>>;
+  pair?: string;
+  height?: number;
 }) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
@@ -27,7 +31,7 @@ const VolumeChart = ({
     onCrossMove: crossMove,
     onMouseVolumeLeave: onMouseLeave
     // onClickChart
-  } = useVolumeEventChart(filterDay, onUpdateCurrentItem);
+  } = useVolumeEventChart(filterDay, onUpdateCurrentItem, pair);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -61,7 +65,8 @@ const VolumeChart = ({
     layout: {
       background: {
         type: ColorType.Solid,
-        color: theme === 'light' ? '#FFF' : '#181A17'
+        // color: theme === 'light' ? '#FFF' : '#181A17'
+        color: 'transparent'
       },
       textColor: theme === 'light' ? '#686A66' : '#979995'
     },
@@ -191,11 +196,10 @@ const VolumeChart = ({
   return (
     <div className={styles.volumeChart}>
       <div className={styles.header}>
-        {/* <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
-        <br /> */}
-        <span>{showTime}</span>
+        {!pair ? null : <div className={styles.value}>{formatDisplayUsdt(currentItem.value || '0')}</div>}
+        <div>{showTime}</div>
       </div>
-      <div className={styles.chartContainer}>
+      <div className={styles.chartContainer} style={{ height }}>
         <div onMouseLeave={onMouseLeave} className={styles.chartRoot} ref={containerRef} />
       </div>
     </div>

@@ -5,7 +5,8 @@ import axios from 'rest/request';
 
 export const useLiquidityEventChart = (
   type: FILTER_DAY,
-  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
+  pair?: string
 ) => {
   const [currentDataLiquidity, setCurrentDataLiquidity] = useState([]);
 
@@ -33,7 +34,13 @@ export const useLiquidityEventChart = (
   const onChangeRangeLiquidity = async (value: FILTER_DAY = FILTER_DAY.DAY) => {
     try {
       setIsLoading(true);
-      let data = await getDataLiquidityHistorical(value);
+      let data = [];
+
+      if (pair) {
+        data = await getDataLiquidityHistoricalByPair(pair, value);
+      } else {
+        data = await getDataLiquidityHistoricalAll(value);
+      }
 
       sleep(1000);
 
@@ -61,7 +68,7 @@ export const useLiquidityEventChart = (
   };
 };
 
-export const getDataLiquidityHistorical = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
+export const getDataLiquidityHistoricalAll = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
   try {
     const res = await axios.get('/v1/liquidity/historical/all-charts', {
       params: {
@@ -70,7 +77,22 @@ export const getDataLiquidityHistorical = async (type: FILTER_DAY = FILTER_DAY.D
     });
     return res.data;
   } catch (e) {
-    console.error('getDataLiquidityHistorical', e);
+    console.error('getDataLiquidityHistoricalAll', e);
+    return [];
+  }
+};
+
+export const getDataLiquidityHistoricalByPair = async (pair: string, type: FILTER_DAY = FILTER_DAY.DAY) => {
+  try {
+    const res = await axios.get('/v1/liquidity/historical/chart', {
+      params: {
+        type,
+        pair
+      }
+    });
+    return res.data;
+  } catch (e) {
+    console.error(`getDataLiquidityHistoricalByPair - pair: ${pair}`, e);
     return [];
   }
 };

@@ -12,6 +12,16 @@
     font-size: 14px;
     font-weight: 500;
     line-height: 150%; /* 21px */
+
+    .value {
+      @include theme {
+        color: theme-get('sea-stone-200');
+      }
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 120%;
+      margin-bottom: 16px;
+    }
   }
 
   .chartContainer {

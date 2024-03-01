@@ -10,10 +10,14 @@ import styles from './index.module.scss';
 
 const LiquidityChart = ({
   filterDay,
-  onUpdateCurrentItem
+  onUpdateCurrentItem,
+  pair,
+  height = 150
 }: {
   filterDay: FILTER_DAY;
-  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>;
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
+  pair?: string;
+  height?: number;
 }) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
@@ -26,7 +30,7 @@ const LiquidityChart = ({
     currentItem,
     onCrossMove: crossMove,
     onMouseLiquidityLeave: onMouseLeave
-  } = useLiquidityEventChart(filterDay, onUpdateCurrentItem);
+  } = useLiquidityEventChart(filterDay, onUpdateCurrentItem, pair);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -60,7 +64,8 @@ const LiquidityChart = ({
     layout: {
       background: {
         type: ColorType.Solid,
-        color: theme === 'light' ? '#FFF' : '#181A17'
+        // color: theme === 'light' ? '#FFF' : '#181A17'
+        color: 'transparent'
       },
       textColor: theme === 'light' ? '#686A66' : '#979995'
     },
@@ -200,11 +205,10 @@ const LiquidityChart = ({
   return (
     <div className={styles.liquidityChart}>
       <div className={styles.header}>
-        {/* <span>Value: {formatDisplayUsdt(currentItem.value || '0')}</span>
-        <br /> */}
-        <span>{showTime}</span>
+        {!pair ? null : <div className={styles.value}>{formatDisplayUsdt(currentItem.value || '0')}</div>}
+        <div>{showTime}</div>
       </div>
-      <div className={styles.chartContainer}>
+      <div className={styles.chartContainer} style={{ height }}>
         <div onMouseLeave={onMouseLeave} className={styles.chartRoot} ref={containerRef} />
       </div>
     </div>

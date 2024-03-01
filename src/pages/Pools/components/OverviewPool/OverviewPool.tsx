@@ -37,8 +37,8 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   const [isShowMore, setIsShowMore] = useState(false);
 
   let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
-  if (token1) BaseTokenIcon = theme === 'light' ? token1.IconLight : token1.Icon;
-  if (token2) QuoteTokenIcon = theme === 'light' ? token2.IconLight : token2.Icon;
+  if (token1) BaseTokenIcon = theme === 'light' ? token1.IconLight || token1.Icon : token1.Icon;
+  if (token2) QuoteTokenIcon = theme === 'light' ? token2.IconLight || token2.Icon : token2.Icon;
 
   const aprBoost = Number(poolDetailData.info?.aprBoost || 0).toFixed(2);
   const isApproximatelyZero = Number(aprBoost) === 0;
@@ -138,7 +138,7 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
           {poolDetailData.info?.volume24hChange ? toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2) : 0}%
         </div>
       </div>
-      <div className={classNames(styles.apr, { [styles.open]: isShowMore })}>
+      {/* <div className={classNames(styles.apr, { [styles.open]: isShowMore })}>
         <div className={styles.icon}>
           <AprIcon />
         </div>
@@ -159,11 +159,10 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
               Boost
             </div>
 
-            {/* <span>{`${(poolDetailData.info?.apr || 0).toFixed(2)}%`}</span> */}
             <span>{`${originalApr.toFixed(2)}%`}</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 };

@@ -5,7 +5,8 @@ import { getInclude } from '../helpers';
 
 export const useVolumeEventChart = (
   type: FILTER_DAY,
-  onUpdateCurrentItem: React.Dispatch<React.SetStateAction<number>>
+  onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>,
+  pair?: string
 ) => {
   const [currentDataVolume, setCurrentDataVolume] = useState([]);
 
@@ -58,7 +59,13 @@ export const useVolumeEventChart = (
   const onChangeRangeVolume = async (value: FILTER_DAY = FILTER_DAY.DAY) => {
     try {
       setIsLoading(true);
-      let data = await getDataVolumeHistorical(value);
+      let data = [];
+
+      if (pair) {
+        data = await getDataVolumeHistoricalByPair(pair, value);
+      } else {
+        data = await getDataVolumeHistoricalAll(value);
+      }
 
       setCurrentDataVolume(data);
       if (data.length > 0) {
@@ -86,7 +93,7 @@ export const useVolumeEventChart = (
   };
 };
 
-export const getDataVolumeHistorical = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
+export const getDataVolumeHistoricalAll = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
   try {
     const res = await axios.get('/v1/volume/historical/all-charts', {
       params: {
@@ -95,7 +102,22 @@ export const getDataVolumeHistorical = async (type: FILTER_DAY = FILTER_DAY.DAY)
     });
     return res.data;
   } catch (e) {
-    console.error('getDataVolumeHistorical', e);
+    console.error('getDataVolumeHistoricalAll', e);
+    return [];
+  }
+};
+
+export const getDataVolumeHistoricalByPair = async (pair: string, type: FILTER_DAY = FILTER_DAY.DAY) => {
+  try {
+    const res = await axios.get('/v1/volume/historical/chart', {
+      params: {
+        type,
+        pair
+      }
+    });
+    return res.data;
+  } catch (e) {
+    console.error(`getDataVolumeHistoricalByPair - pair: ${pair}`, e);
     return [];
   }
 };

@@ -109,13 +109,17 @@
       display: flex;
       padding: 16px;
       flex-direction: column;
-      gap: 16px;
       flex: 1 0 0;
+      // transition: all ease-in-out 0.5s;
+
+      // &.activeChart {
+      //   gap: 16px;
+      // }
 
       color: $neutron-text-body-light;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%;
+      line-height: 100%;
 
       @include mobile() {
         width: 100%;
@@ -127,7 +131,10 @@
         cursor: pointer;
 
         .content {
+          display: flex;
+          flex-direction: column;
           flex: 1;
+          gap: 16px;
         }
       }
 
@@ -136,9 +143,10 @@
         max-height: 0px;
         padding: 0px 16px;
         border-radius: 12px;
+        margin-top: 0px;
 
         overflow: hidden;
-        transition: all ease-in-out 0.5s;
+        transition: max-height ease-in-out 0.5s, padding ease-in-out 0.5s, margin-top ease-in-out 0.5s;
 
         @include theme {
           background: theme-get('neutral-surface-bg-2');
@@ -147,6 +155,7 @@
         &.active {
           // display: block;
           padding: 16px;
+          margin-top: 16px;
           max-height: 300px;
         }
       }

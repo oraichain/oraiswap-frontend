@@ -177,7 +177,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
 
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (
-          <div key={e.name} className={styles.header_liquidity_item}>
+          <div key={e.name} className={`${styles.header_liquidity_item} ${openChart ? styles.activeChart : ''}`}>
             <div className={styles.info} onClick={() => setOpenChart((open) => !open)}>
               <div className={styles.content}>
                 <span>{e.name}</span>

@@ -2,11 +2,18 @@
 @import 'src/styles/mixins';
 
 .overview {
+  width: 100%;
   display: flex;
+  flex-direction: column;
   margin-bottom: 32px;
+  border-radius: 12px;
+  border: 1px solid;
+  @include theme {
+    border-color: theme-get('neutral-surface-bg-btn-disabled');
+  }
 
   .totalLiquidity {
-    width: 50%;
+    width: 100%;
     border-top-left-radius: 16px;
     border-bottom-left-radius: 16px;
     padding: 24px 40px;
@@ -18,7 +25,7 @@
     }
 
     @include theme() {
-      background-color: theme-get('neutral-surface-bg-section');
+      // background-color: theme-get('neutral-surface-bg-section');
       border-color: theme-get('neutral-border-border-default');
     }
 
@@ -142,9 +149,9 @@
   }
 
   .volume {
-    @include theme() {
-      background-color: theme-get('neutral-surface-bg-section-2');
-    }
+    // @include theme() {
+    //   background-color: theme-get('neutral-surface-bg-section-2');
+    // }
 
     @include small-mobile() {
       border-bottom-left-radius: 16px;
@@ -152,14 +159,14 @@
   }
 
   .apr {
-    @include theme() {
-      background-color: theme-get('neutral-surface-bg-section');
-    }
+    // @include theme() {
+    //   background-color: theme-get('neutral-surface-bg-section');
+    // }
   }
 
   .volume,
   .apr {
-    width: 25%;
+    width: 100%;
     padding: 37px 24px;
 
     .icon {
@@ -216,7 +223,7 @@
   }
 
   .apr {
-    width: 25%;
+    width: 100%;
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
     padding: 37px 24px;
@@ -225,9 +232,9 @@
       border-top-right-radius: 0;
     }
 
-    @include theme() {
-      background-color: theme-get('neutral-surface-bg-section');
-    }
+    // @include theme() {
+    //   background-color: theme-get('neutral-surface-bg-section');
+    // }
 
     .aprDetail {
       margin-top: 24px;
