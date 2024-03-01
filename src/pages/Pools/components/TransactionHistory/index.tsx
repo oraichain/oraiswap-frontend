@@ -7,7 +7,7 @@ import LoadingBox from 'components/LoadingBox';
 import useConfigReducer from 'hooks/useConfigReducer';
 import styles from './index.module.scss';
 import { formatDateV2, formatTime, shortenAddress } from 'pages/CoHarvest/helpers';
-import { getTransactionUrl } from 'helper';
+import { getAccountUrl, getTransactionUrl } from 'helper';
 import { network } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { getUsd } from 'libs/utils';
@@ -35,6 +35,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
   return (
     <LoadingBox loading={false} className={styles.loadingDivWrapper}>
       <div className={styles.txHistory}>
+        <div className={styles.title}>Last 20 transactions</div>
         {txHistories?.length > 0 ? (
           <div className={styles.tableWrapper}>
             <table>
@@ -46,7 +47,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                   <th className={styles.alignRight}>RECEIVE AMOUNT</th>
                   <th className={styles.alignRight}>VALUE</th>
                   <th className={styles.alignRight}>FEE</th>
-                  {/* <th>ADDRESS</th> */}
+                  <th>ADDRESS</th>
                 </tr>
               </thead>
               <tbody>
@@ -67,9 +68,9 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                     return (
                       <tr className={styles.item} key={index}>
                         <td className={styles.hash}>
-                          <span className={styles.txhash}>{shortenAddress(item.txhash, 4, 4)}</span>
+                          <span className={styles.txhash}>{shortenAddress(item.txhash || '', 4, 4)}</span>
                           <a
-                            href={getTransactionUrl(network.chainId, item.txhash)}
+                            href={getTransactionUrl(network.chainId, item.txhash || '')}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -106,7 +107,16 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                         <td className={styles.fee}>
                           <div className={styles.amount}>{formatDisplayUsdt(feeUSD)}</div>
                         </td>
-                        {/* <td className={styles.address}>{item.address}</td> */}
+                        <td className={styles.address}>
+                          <span className={styles.txt}>
+                            {!item.sender ? '-' : shortenAddress(item.sender || '', 5, 5)}
+                          </span>
+                          {!item.sender ? null : (
+                            <a href={getAccountUrl(item.sender || '')} target="_blank" rel="noopener noreferrer">
+                              <LinkIcon />
+                            </a>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}

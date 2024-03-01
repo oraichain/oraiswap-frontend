@@ -86,6 +86,10 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
   }
 };
 
+export const getAccountUrl = (account: string) => {
+  return `${network.explorer}/account/${account}`;
+}
+
 export const getNetworkGasPrice = async (chainId): Promise<number> => {
   try {
     const chainInfosWithoutEndpoints = await window.Keplr?.getChainInfosWithoutEndpoints(chainId);

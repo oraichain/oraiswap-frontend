@@ -107,11 +107,11 @@
     }
 
     .alignRight {
-      text-align: right;
+      // text-align: right;
     }
 
     .hash {
-      width: 14%;
+      width: 12%;
       font-weight: 500;
       white-space: nowrap;
 
@@ -134,8 +134,36 @@
       }
     }
 
+    .address {
+      width: 12%;
+      font-weight: 500;
+      white-space: nowrap;
+
+      .txt {
+        margin-right: 4px;
+      }
+
+      a {
+        cursor: pointer;
+      }
+
+      svg {
+        width: 14px;
+        height: 14px;
+        vertical-align: top;
+
+        path {
+          fill: $neutron-text-body-light;
+        }
+      }
+    }
+
     .time {
-      width: 14%;
+      width: 12%;
+
+      @include theme {
+        color: theme-get('neutral-9');
+      }
 
       & > div {
         display: flex;
@@ -146,25 +174,25 @@
     }
 
     .pay {
-      width: 15%;
+      width: 13%;
     }
 
     .receive {
-      width: 15%;
+      width: 13%;
     }
 
     .value {
-      width: 14%;
+      width: 13%;
     }
 
     .fee {
-      width: 14%;
+      width: 12%;
     }
 
     .amount {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 4px;
 
       svg {

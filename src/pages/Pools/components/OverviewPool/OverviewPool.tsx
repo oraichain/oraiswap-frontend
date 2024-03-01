@@ -26,13 +26,13 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   const { token1, token2 } = poolDetailData;
 
   const { liquidityAddr: stakingToken } = poolDetailData.info || {};
-  let poolReward = {
-    reward: []
-  };
+  // let poolReward = {
+  //   reward: []
+  // };
 
-  if (cachedReward && cachedReward.length > 0) {
-    poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
-  }
+  // if (cachedReward && cachedReward.length > 0) {
+  //   poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+  // }
 
   const [isShowMore, setIsShowMore] = useState(false);
 
@@ -48,32 +48,10 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
   return (
     <section className={styles.overview}>
       <div className={classNames(styles.totalLiquidity, { [styles.isShowMore]: isShowMore })}>
-        <h3 className={styles.title}>Total Liquidity</h3>
         <div className={styles.totalTop}>
           <div className={styles.pairLogos}>
             <BaseTokenIcon className={styles.logo1} />
             <QuoteTokenIcon className={styles.logo2} />
-          </div>
-          <div className={styles.pairAmount}>
-            <TokenBalance
-              balance={{
-                amount: BigInt(Math.trunc(poolDetailData?.info?.totalLiquidity || 0)),
-                decimals: CW20_DECIMALS
-              }}
-              className={styles.amountUsdt}
-              decimalScale={2}
-              prefix="$"
-            />
-            <br />
-            <TokenBalance
-              balance={{
-                amount: lpTokenInfoData?.total_supply || '0',
-                decimals: lpTokenInfoData?.decimals
-              }}
-              className={styles.amountLp}
-              decimalScale={6}
-              suffix=" LP"
-            />
           </div>
         </div>
         <div className={styles.amountToken}>
@@ -101,43 +79,70 @@ export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail })
             />
           </div>
         </div>
-        {mobileMode &&
-          (!isShowMore ? (
-            <div className={styles.showMore} onClick={() => setIsShowMore(true)}>
-              Show more
-              <ArrowDownIcon />
-            </div>
-          ) : (
-            <div className={styles.showMore} onClick={() => setIsShowMore(false)}>
-              Show less
-              <ArrowUpIcon />
-            </div>
-          ))}
       </div>
-      <div className={classNames(styles.volume, { [styles.open]: isShowMore })}>
-        <div className={styles.icon}>
-          <VolumeIcon />
+      <div className={styles.liquidity}>
+        <h3 className={styles.title}>Total Liquidity</h3>
+        <div className={styles.pairAmount}>
+          <TokenBalance
+            balance={{
+              amount: BigInt(Math.trunc(poolDetailData?.info?.totalLiquidity || 0)),
+              decimals: CW20_DECIMALS
+            }}
+            className={styles.amountUsdt}
+            decimalScale={2}
+            prefix="$"
+          />
+          <TokenBalance
+            balance={{
+              amount: lpTokenInfoData?.total_supply || '0',
+              decimals: lpTokenInfoData?.decimals
+            }}
+            className={styles.amountLp}
+            decimalScale={6}
+            suffix=" LP"
+          />
         </div>
+      </div>
+
+      {/* {mobileMode &&
+        (!isShowMore ? (
+          <div className={styles.showMore} onClick={() => setIsShowMore(true)}>
+            Show more
+            <ArrowDownIcon />
+          </div>
+        ) : (
+          <div className={styles.showMore} onClick={() => setIsShowMore(false)}>
+            Show less
+            <ArrowUpIcon />
+          </div>
+        ))} */}
+
+      {mobileMode ? null : <div className={styles.divider}></div>}
+      {/* <div className={classNames(styles.volume, { [styles.open]: isShowMore })}> */}
+      <div className={classNames(styles.volume)}>
         <div className={styles.title}>Volume (24H)</div>
-        <TokenBalance
-          balance={{
-            amount: BigInt(poolDetailData.info?.volume24Hour || 0),
-            decimals: CW20_DECIMALS
-          }}
-          className={styles.volumeAmount}
-          decimalScale={2}
-          prefix="$"
-        />
-        <div
-          className={classNames(
-            styles.percent,
-            +poolDetailData.info?.volume24hChange > 0 ? styles.positiveVol : styles.negativeVol
-          )}
-        >
-          <span>{+poolDetailData.info?.volume24hChange > 0 && '+'}</span>
-          {poolDetailData.info?.volume24hChange ? toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2) : 0}%
+        <div className={styles.value}>
+          <TokenBalance
+            balance={{
+              amount: BigInt(poolDetailData.info?.volume24Hour || 0),
+              decimals: CW20_DECIMALS
+            }}
+            className={styles.volumeAmount}
+            decimalScale={2}
+            prefix="$"
+          />
+          <span
+            className={classNames(
+              styles.percent,
+              +poolDetailData.info?.volume24hChange > 0 ? styles.positiveVol : styles.negativeVol
+            )}
+          >
+            <span>{+poolDetailData.info?.volume24hChange > 0 && '+'}</span>
+            {poolDetailData.info?.volume24hChange ? toFixedIfNecessary(poolDetailData.info?.volume24hChange, 2) : 0}%
+          </span>
         </div>
       </div>
+
       {/* <div className={classNames(styles.apr, { [styles.open]: isShowMore })}>
         <div className={styles.icon}>
           <AprIcon />

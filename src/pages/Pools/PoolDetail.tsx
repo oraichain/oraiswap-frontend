@@ -77,8 +77,6 @@ const PoolDetail: React.FC = () => {
     .map((e) => decodeURIComponent(e))
     .join('-');
 
-  console.log('pair', pair);
-
   const params = {
     base_denom: pair.split('-')[0],
     quote_denom: pair.split('-')[1],

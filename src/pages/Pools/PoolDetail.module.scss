@@ -69,8 +69,10 @@
   .summary {
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 16px;
+    margin-bottom: 16px;
 
     .overview {
       width: 34%;

@@ -1,34 +1,8 @@
-import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
-import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as UpIcon } from 'assets/icons/up-arrow.svg';
-import { ReactComponent as DownIcon } from 'assets/icons/down-arrow-v2.svg';
-import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import bg_claim_btn from 'assets/images/bg_claim_btn.svg';
-import bg_claim_btn_light from 'assets/images/bg_claim_btn_light.svg';
-import { Button } from 'components/Button';
-import Loader from 'components/Loader';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import TokenBalance from 'components/TokenBalance';
-import { network } from 'config/networks';
-import { handleErrorTransaction } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useTheme from 'hooks/useTheme';
-import CosmJs from 'libs/cosmjs';
-import {
-  getStatisticData,
-  useGetMyStake,
-  useGetPools,
-  useGetRewardInfo,
-  useGetTotalClaimable
-} from 'pages/Pools/hooks';
-import { FC, useEffect, useState } from 'react';
-import { PoolInfoResponse } from 'types/pool';
+import { useState } from 'react';
 import LiquidityChart from '../LiquidityChart';
 import VolumeChart from '../VolumeChart';
 import styles from './index.module.scss';
 
-import React from 'react';
 import { FILTER_DAY, LIST_FILTER_DAY } from '../Header';
 
 export enum TAB_CHART {
@@ -73,10 +47,10 @@ const ChartDetail = ({ pair }: { pair: string }) => {
 
       <div className={styles.chartWrapper}>
         <div className={`${styles.chartItem} ${tab === TAB_CHART.LIQUIDITY ? styles.activeChart : ''}`}>
-          <LiquidityChart filterDay={filterDay} pair={pair} height={230} />
+          <LiquidityChart filterDay={filterDay} pair={pair} height={265} />
         </div>
         <div className={`${styles.chartItem} ${tab === TAB_CHART.VOLUME ? styles.activeChart : ''}`}>
-          <VolumeChart filterDay={filterDay} pair={pair} height={230} />
+          <VolumeChart filterDay={filterDay} pair={pair} height={265} />
         </div>
       </div>
     </div>

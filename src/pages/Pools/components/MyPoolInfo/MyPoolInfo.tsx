@@ -62,8 +62,9 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   return (
     <section className={styles.myPoolInfo}>
       <div className={styles.liquidity}>
-        <div className={styles.iconArrow}>
-          <ArrowRightIcon />
+        <div className={styles.dividerWrapper}>
+          <div className={styles.divider}></div>
+          {/* <ArrowRightIcon /> */}
         </div>
         <div>
           <div className={styles.title}>My Liquidity</div>
@@ -86,47 +87,50 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           </Button>
         </div>
       </div>
+
       <div className={styles.stake}>
-        <div className={styles.bgCoin}>
-          <img src={img_coin} alt="img-coin" />
-        </div>
-        <div>
-          <div className={styles.title}>My Staked</div>
-          <div className={styles.description}>Stake your Liquidity Provider token to earn rewards</div>
-        </div>
-        <div className={styles.amount}>
-          <div className={styles.amountUsdt}>
-            <TokenBalance
-              balance={{
-                amount: totalBondAmountInUsdt,
-                decimals: CW20_DECIMALS
-              }}
-              prefix="$"
-              decimalScale={4}
-            />
+        <div className={styles.stakeContent}>
+          <div className={styles.bgCoin}>
+            <img src={img_coin} alt="img-coin" />
           </div>
-          <div className={styles.amountLp}>
-            <TokenBalance
-              balance={{
-                amount: totalBondAmount,
-                decimals: CW20_DECIMALS
-              }}
-              suffix=" LP"
-              decimalScale={4}
-            />
+          <div>
+            <div className={styles.title}>My Staked</div>
+            <div className={styles.description}>Stake your Liquidity Provider token to earn rewards</div>
           </div>
-        </div>
-        <div className={styles.cta}>
-          <Button
-            type="secondary"
-            onClick={() => setModal('unstake')}
-            icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
-          >
-            Unstake LP
-          </Button>
-          <Button type="primary" onClick={() => setModal('stake')} icon={<StakingIcon />}>
-            Stake LP
-          </Button>{' '}
+          <div className={styles.amount}>
+            <div className={styles.amountUsdt}>
+              <TokenBalance
+                balance={{
+                  amount: totalBondAmountInUsdt,
+                  decimals: CW20_DECIMALS
+                }}
+                prefix="$"
+                decimalScale={4}
+              />
+            </div>
+            <div className={styles.amountLp}>
+              <TokenBalance
+                balance={{
+                  amount: totalBondAmount,
+                  decimals: CW20_DECIMALS
+                }}
+                suffix=" LP"
+                decimalScale={4}
+              />
+            </div>
+          </div>
+          <div className={styles.cta}>
+            <Button
+              type="secondary"
+              onClick={() => setModal('unstake')}
+              icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
+            >
+              Unstake LP
+            </Button>
+            <Button type="primary" onClick={() => setModal('stake')} icon={<StakingIcon />}>
+              Stake LP
+            </Button>{' '}
+          </div>
         </div>
       </div>
 
