@@ -28,6 +28,7 @@ import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { leapSnapId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
+import { MetamaskOfflineSigner } from 'libs/eip191';
 
 export interface Tokens {
   denom?: string;
@@ -351,6 +352,15 @@ export const getAddressBySnap = async (chainId) => {
   return null;
 };
 
+export const getAddressByEIP191 = async (chainId) => {
+  const prefix =
+    cosmosNetworks.find((cosmos) => cosmos.chainId === chainId)?.bech32Config?.bech32PrefixAccAddr || 'orai';
+  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, prefix);
+  if (!metamaskOfflineSinger) return;
+  const accounts = await metamaskOfflineSinger.getAccounts();
+  return accounts[0].address;
+};
+
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
   currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
   bech32Config: Bech32Config;
@@ -409,6 +419,22 @@ export const getListAddressCosmosByLeapSnap = async () => {
     } catch (error) {
       console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);
     }
+  }
+  return { listAddressCosmos };
+};
+export const getListAddressCosmosByEIP191 = async (oraiAddr) => {
+  let listAddressCosmos = {};
+  const cosmosNetworksFilter = cosmosNetworks.filter(
+    (item) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
+  );
+
+  for (const info of cosmosNetworksFilter) {
+    if (!info) continue;
+    const { cosmosAddress } = genAddressCosmos(info, '', oraiAddr);
+    listAddressCosmos = {
+      ...listAddressCosmos,
+      [info.chainId]: cosmosAddress
+    };
   }
   return { listAddressCosmos };
 };

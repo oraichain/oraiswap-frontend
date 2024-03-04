@@ -183,7 +183,7 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) =
   <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
-      <h6>Keplr failed</h6>
+      <h6>Cosmos Wallet failed</h6>
       <p>{message}</p>
     </section>
   </div>
@@ -193,7 +193,7 @@ const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }
   <div className={styles.toast_content}>
     <FailedIcon />
     <section className={styles.toast_section}>
-      <h6>Metamask failed</h6>
+      <h6>Evm Wallet failed</h6>
       <p>{message}</p>
     </section>
   </div>

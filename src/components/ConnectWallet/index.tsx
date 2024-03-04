@@ -14,7 +14,7 @@ import { useInactiveConnect } from 'hooks/useMetamask';
 import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { CosmjsOfflineSigner, connectSnap, getSnap } from '@leapwallet/cosmos-snap-provider';
+import { connectSnap, getSnap } from '@leapwallet/cosmos-snap-provider';
 import {
   cosmosNetworks,
   tronNetworks,
@@ -28,7 +28,8 @@ import {
   getListAddressCosmos,
   switchWalletTron,
   getListAddressCosmosByLeapSnap,
-  getAddressBySnap
+  getAddressBySnap,
+  getListAddressCosmosByEIP191
 } from 'helper';
 import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
@@ -40,8 +41,7 @@ import DisconnectModal from './Disconnect';
 import LoadingBox from 'components/LoadingBox';
 import { isMobile } from '@walletconnect/browser-utils';
 import { useResetBalance, Wallet } from './useResetBalance';
-import { leapWalletType } from 'helper/constants';
-import { getCosmWasmClient } from 'libs/cosmjs';
+import { leapWalletType, eip191WalletType } from 'helper/constants';
 import { initClient } from 'libs/utils';
 
 const cx = cn.bind(styles);
@@ -50,6 +50,7 @@ interface ModalProps {}
 export enum WALLET_TYPES {
   METAMASK = 'METAMASK',
   METAMASK_LEAP_SNAP = 'METAMASK_LEAP_SNAP',
+  METAMASK_EIP191 = 'METAMASK_191',
   KEPLR = 'KEPLR',
   OWALLET = 'OWALLET',
   TRON = 'TRON',
@@ -115,6 +116,11 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       if (type === 'icon') return MetamaskImage;
       if (type === 'walletType') return WALLET_TYPES.METAMASK_LEAP_SNAP;
       return 'Metamask (Leap Snap)';
+    }
+    if (walletTypeStore === eip191WalletType) {
+      if (type === 'icon') return MetamaskImage;
+      if (type === 'walletType') return WALLET_TYPES.METAMASK_EIP191;
+      return 'Metamask (EIP191)';
     }
   };
 
@@ -225,29 +231,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
 
   useEffect(() => {
-    (async () => {
-      if (oraiAddress) {
-        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
-
-        setCosmosAddress(listAddressCosmos);
-      }
-    })();
-    setWalletTypeStore(walletType);
-  }, []);
-
-  useEffect(() => {
     if (!!oraiAddress) {
       (async () => {
-        if (walletTypeStore === 'owallet') {
-          await connectDetectOwallet();
-        } else if (walletTypeStore === 'keplr') {
-          await connectDetectKeplr();
-        } else if (walletTypeStore === leapWalletType) {
-          await connectDetectLeapSnap();
-        }
+        if (walletTypeStore === 'owallet') return await connectDetectOwallet();
+        if (walletTypeStore === 'keplr') return await connectDetectKeplr();
+        if (walletTypeStore === leapWalletType) return await connectDetectLeapSnap();
+        if (walletTypeStore === eip191WalletType) return await connectDetectEip191();
       })();
     }
-
     return () => {};
   }, [oraiAddress]);
   const disconnectMetamask = async () => {
@@ -301,8 +292,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       const oraiAddr = await window.Keplr.getKeplrAddr();
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
-      const { listAddressCosmos } =
-        type === leapWalletType ? await getListAddressCosmosByLeapSnap() : await getListAddressCosmos(oraiAddr);
+      let listAddressCosmos;
+      if (type === leapWalletType) {
+        ({ listAddressCosmos } = await getListAddressCosmosByLeapSnap());
+      } else if (type === eip191WalletType) {
+        ({ listAddressCosmos } = await getListAddressCosmosByEIP191(oraiAddr));
+      } else {
+        ({ listAddressCosmos } = await getListAddressCosmos(oraiAddr));
+      }
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.log('🚀 ~ file: index.tsx:193 ~ connectKeplr ~ error: 222', error);
@@ -310,18 +307,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     }
   };
 
-  const disconnectMetamaskLeapSnap = async () => {
-    try {
-      handleResetBalance(['keplr']);
-      setCosmosAddress({});
-      setOraiAddress(undefined);
-    } catch (ex) {
-      console.log(ex);
-    }
-  };
   const disconnectKeplr = async () => {
     try {
-      window.Keplr.disconnect();
       handleResetBalance(['keplr']);
       setCosmosAddress({});
       setOraiAddress(undefined);
@@ -353,6 +340,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return;
     }
     await requestMethod(WALLET_TYPES.METAMASK_LEAP_SNAP, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const startMetamaskEIP191 = async () => {
+    if (!isEmptyObject(cosmosAddress) && walletTypeActive === WALLET_TYPES.METAMASK_EIP191) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.METAMASK_EIP191, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
   const startOwallet = async () => {
@@ -399,6 +394,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     await connectKeplr(leapWalletType);
   };
 
+  const connectDetectEip191 = async () => {
+    await connectKeplr(eip191WalletType);
+  };
+
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     setWalletTypeActive(walletType);
     switch (walletType) {
@@ -417,7 +416,17 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         } else if (method === METHOD_WALLET_TYPES.CONNECT) {
           await handleConnectWallet(connectDetectLeapSnap);
         } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-          await disconnectMetamaskLeapSnap();
+          await disconnectKeplr();
+        }
+        break;
+
+      case WALLET_TYPES.METAMASK_EIP191:
+        if (method === METHOD_WALLET_TYPES.START) {
+          await startMetamaskEIP191();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await handleConnectWallet(connectDetectEip191);
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectKeplr();
         }
         break;
       case WALLET_TYPES.OWALLET:
@@ -465,9 +474,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
     } else if (walletType === WALLET_TYPES.TRON) {
       return tronAddress;
     } else if (
-      walletType === WALLET_TYPES.KEPLR ||
-      walletType === WALLET_TYPES.OWALLET ||
-      walletType === WALLET_TYPES.METAMASK_LEAP_SNAP
+      [
+        WALLET_TYPES.KEPLR,
+        WALLET_TYPES.OWALLET,
+        WALLET_TYPES.METAMASK_LEAP_SNAP,
+        WALLET_TYPES.METAMASK_EIP191
+      ].includes(walletType)
     ) {
       return oraiAddress;
     }
