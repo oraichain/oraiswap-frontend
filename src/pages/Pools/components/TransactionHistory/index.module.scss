@@ -3,7 +3,6 @@
 @import 'src/styles/themes';
 
 .txHistory {
-  margin-top: 24px;
   margin-bottom: 40px;
 
   .tableWrapper {
@@ -112,65 +111,14 @@
 
     .hash {
       width: 12%;
-      font-weight: 500;
-      white-space: nowrap;
-
-      .txhash {
-        margin-right: 4px;
-      }
-
-      a {
-        cursor: pointer;
-      }
-
-      svg {
-        width: 14px;
-        height: 14px;
-        vertical-align: top;
-
-        path {
-          fill: $neutron-text-body-light;
-        }
-      }
     }
 
     .address {
       width: 12%;
-      font-weight: 500;
-      white-space: nowrap;
-
-      .txt {
-        margin-right: 4px;
-      }
-
-      a {
-        cursor: pointer;
-      }
-
-      svg {
-        width: 14px;
-        height: 14px;
-        vertical-align: top;
-
-        path {
-          fill: $neutron-text-body-light;
-        }
-      }
     }
 
     .time {
       width: 12%;
-
-      @include theme {
-        color: theme-get('neutral-9');
-      }
-
-      & > div {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
     }
 
     .pay {
@@ -188,36 +136,193 @@
     .fee {
       width: 12%;
     }
+  }
 
-    .amount {
+  .hash {
+    font-weight: 500;
+    white-space: nowrap;
+
+    .txhash {
+      margin-right: 4px;
+    }
+
+    a {
+      cursor: pointer;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      vertical-align: top;
+
+      path {
+        fill: $neutron-text-body-light;
+      }
+    }
+  }
+
+  .address {
+    font-weight: 500;
+    white-space: nowrap;
+
+    .txt {
+      margin-right: 4px;
+    }
+
+    a {
+      cursor: pointer;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      vertical-align: top;
+
+      path {
+        fill: $neutron-text-body-light;
+      }
+    }
+  }
+
+  .time {
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+
+    & > div {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      gap: 4px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
 
-      svg {
-        width: 20px;
-        height: 20px;
+  .amount {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
 
-        vertical-align: middle;
+    svg {
+      width: 20px;
+      height: 20px;
+
+      vertical-align: middle;
+    }
+
+    .symbol {
+      @include theme {
+        color: theme-get('neutral-9');
+      }
+    }
+  }
+
+  .detailPrice {
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 100%;
+
+    margin-top: 12px;
+  }
+
+  .listData {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 100%; /* 27px */
+
+    .item {
+      width: 100%;
+      border: 1px solid;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      gap: 12px;
+
+      @include theme() {
+        border-color: theme-get('neutral-surface-bg-btn-disabled');
+        background-color: theme-get('neutral-surface-bg-section');
       }
 
-      .symbol {
+      .titleItem {
+        margin-bottom: 12px;
         @include theme {
           color: theme-get('neutral-9');
         }
       }
-    }
 
-    .detailPrice {
-      @include theme {
-        color: theme-get('neutral-9');
+      .info {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .top {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+
+          .hashWrapper {
+            width: 50%;
+          }
+
+          .addressWrapper {
+            width: 50%;
+          }
+        }
       }
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 100%;
 
-      margin-top: 12px;
+      .divider {
+        width: 100%;
+        height: 1px;
+
+        @include theme {
+          background-color: theme-get('neutral-surface-bg-section-3');
+        }
+      }
+
+      .payReceive {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        .pay {
+          width: 50%;
+        }
+
+        .receive {
+          width: 50%;
+        }
+      }
+
+      .valueFee {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        .value {
+          width: 50%;
+        }
+
+        .fee {
+          width: 50%;
+        }
+      }
     }
   }
 }

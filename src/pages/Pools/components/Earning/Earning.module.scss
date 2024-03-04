@@ -47,6 +47,12 @@
   padding: 24px;
   border-radius: 12px;
 
+  @include small-mobile {
+    min-height: unset;
+    gap: 16px;
+    padding: 16px;
+  }
+
   @include theme {
     background: theme-get('neutral-surface-bg-section');
   }
@@ -136,6 +142,7 @@
   @include small-mobile() {
     // flex-wrap: wrap;
     padding: 24px 16px;
+    gap: 24px;
   }
 
   .earningLeft {
@@ -145,10 +152,15 @@
     width: 100%;
 
     @include mobile {
-      // flex-wrap: wrap;
+      flex-direction: column-reverse;
+      gap: 24px;
     }
 
     .assetEarning {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
       margin-right: 100px;
 
       @include mobile() {
@@ -160,7 +172,7 @@
       }
       .title {
         @include theme() {
-          color: theme-get('primary-surface-default');
+          color: theme-get('neutral-text-body');
         }
 
         height: 24px;
@@ -168,8 +180,27 @@
         align-items: center;
         font-size: 16px;
         font-weight: 400;
-        line-height: 150%;
+        line-height: 100%;
         white-space: nowrap;
+
+        @include small-mobile() {
+          font-size: 14px;
+        }
+      }
+
+      .amountWrapper {
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+        justify-content: space-between;
+
+        @include small-mobile {
+          display: flex;
+          flex-direction: row;
+          gap: 16px;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
       }
 
       .amount {
@@ -177,10 +208,13 @@
           color: theme-get('primary-surface-default');
         }
 
-        margin: 12px 0 16px 0;
         font-size: 32px;
         font-weight: 500;
         line-height: 120%;
+
+        @include small-mobile() {
+          font-size: 24px;
+        }
       }
 
       .amountOrai {
@@ -190,14 +224,13 @@
 
         font-size: 16px;
         font-weight: 500;
-        line-height: 150%;
+        line-height: 100%;
       }
     }
 
     @include small-mobile() {
       flex: 1;
       width: 100%;
-      margin-bottom: 24px;
 
       .assetEarning {
         width: 50%;
@@ -206,7 +239,7 @@
       .assetEarning:first-child {
         width: 100%;
         margin-right: 0;
-        margin-bottom: 24px;
+        // margin-bottom: 24px;
 
         .amount {
           margin-bottom: 0;

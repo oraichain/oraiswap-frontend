@@ -1,4 +1,5 @@
-import { ReactComponent as ArrowRightIcon } from 'assets/icons/ic_arrow_right.svg';
+import { CW20_DECIMALS, toDisplay } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as DepositIcon } from 'assets/icons/ic_deposit.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_stake.svg';
 import { ReactComponent as UnstakeIcon } from 'assets/icons/ic_unstake.svg';
@@ -19,12 +20,12 @@ import { StakeLPModal } from '../StakeLPModal';
 import { UnstakeLPModal } from '../UnstakeLPModal';
 import { WithdrawLiquidityModal } from '../WithdrawLiquidityModal';
 import styles from './MyPoolInfo.module.scss';
-import { toDisplay, CW20_DECIMALS } from '@oraichain/oraidex-common';
 
 type ModalPool = 'deposit' | 'withdraw' | 'stake' | 'unstake';
 type Props = { myLpBalance: bigint; onLiquidityChange: () => void };
 export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
   const theme = useTheme();
+  const isMobileMode = isMobile();
   const { poolUrl } = useParams();
   const [address] = useConfigReducer('address');
 
@@ -59,6 +60,10 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
 
   const totalBondAmount = BigInt(totalRewardInfoData?.reward_infos[0]?.bond_amount || '0');
   const totalBondAmountInUsdt = BigInt(Math.trunc(lpBalance.lpPrice ? Number(totalBondAmount) * lpBalance.lpPrice : 0));
+
+  const secondaryType = isMobileMode ? 'secondary-sm' : 'secondary';
+  const primaryType = isMobileMode ? 'primary-sm' : 'primary';
+
   return (
     <section className={styles.myPoolInfo}>
       <div className={styles.liquidity}>
@@ -76,13 +81,13 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
         </div>
         <div className={styles.cta}>
           <Button
-            type="secondary"
+            type={secondaryType}
             onClick={() => setModal('withdraw')}
             icon={theme === 'dark' ? <WithdrawIcon /> : <WithdrawLightIcon />}
           >
             Withdraw LP
           </Button>
-          <Button type="primary" onClick={() => setModal('deposit')} icon={<DepositIcon />}>
+          <Button type={primaryType} onClick={() => setModal('deposit')} icon={<DepositIcon />}>
             Deposit
           </Button>
         </div>
@@ -121,13 +126,13 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           </div>
           <div className={styles.cta}>
             <Button
-              type="secondary"
+              type={secondaryType}
               onClick={() => setModal('unstake')}
               icon={theme === 'dark' ? <UnstakeIcon /> : <UnstakeLightIcon />}
             >
               Unstake LP
             </Button>
-            <Button type="primary" onClick={() => setModal('stake')} icon={<StakingIcon />}>
+            <Button type={primaryType} onClick={() => setModal('stake')} icon={<StakingIcon />}>
               Stake LP
             </Button>{' '}
           </div>

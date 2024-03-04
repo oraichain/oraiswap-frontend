@@ -1,6 +1,6 @@
 import { sleep } from 'helper';
 import { useEffect, useRef, useState } from 'react';
-import { FILTER_DAY } from '../components/Header';
+import { FILTER_DAY } from 'reducer/type';
 import axios from 'rest/request';
 
 export const useLiquidityEventChart = (

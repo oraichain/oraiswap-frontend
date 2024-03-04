@@ -1,11 +1,11 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
-import { formatDate, formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
+import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt, formatTimeDataChart } from 'pages/Pools/helpers';
 import { useLiquidityEventChart } from 'pages/Pools/hooks/useLiquidityEventChart';
 import { useEffect, useRef } from 'react';
-import { FILTER_DAY } from '../Header';
+import { FILTER_DAY } from 'reducer/type';
 import styles from './index.module.scss';
 
 const LiquidityChart = ({

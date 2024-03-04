@@ -5,7 +5,7 @@ import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt, formatTimeDataChart } from 'pages/Pools/helpers';
 import { useVolumeEventChart } from 'pages/Pools/hooks/useVolumeEventChart';
 import { useEffect, useRef } from 'react';
-import { FILTER_DAY } from '../Header';
+import { FILTER_DAY } from 'reducer/type';
 import styles from './index.module.scss';
 
 const VolumeChart = ({

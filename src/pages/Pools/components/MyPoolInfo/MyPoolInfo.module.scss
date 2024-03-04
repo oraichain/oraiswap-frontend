@@ -7,6 +7,7 @@
 
   @include small-mobile() {
     flex-wrap: wrap;
+    margin-bottom: 16px;
   }
 
   .liquidity {
@@ -92,6 +93,7 @@
       width: 50%;
       border-top-right-radius: 0;
       border-bottom-left-radius: 0;
+      border-end-start-radius: 16px;
     }
 
     @include theme() {
@@ -103,6 +105,10 @@
       bottom: 0;
       right: 0;
       display: flex;
+
+      @include small-mobile {
+        display: none;
+      }
     }
 
     .stakeContent {
@@ -153,6 +159,17 @@
 
     .amount {
       margin: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      @include small-mobile {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        margin: 16px 0;
+      }
 
       .amountUsdt {
         @include theme() {
@@ -163,7 +180,10 @@
         font-style: normal;
         font-weight: 500;
         line-height: 120%;
-        margin-bottom: 12px;
+
+        @include small-mobile {
+          font-size: 24px;
+        }
       }
 
       .amountLp {
@@ -189,6 +209,7 @@
 
         @include small-mobile() {
           padding: 8px 0;
+          font-size: 14px;
         }
       }
     }

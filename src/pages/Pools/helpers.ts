@@ -3,9 +3,9 @@ import { InstantiateMarketingInfo } from '@oraichain/common-contracts-sdk/build/
 import { validateNumber, INJECTIVE_CONTRACT, ORAI, USDC_CONTRACT, ORAIX_CONTRACT } from '@oraichain/oraidex-common';
 import { Asset, AssetInfo } from '@oraichain/oraidex-contracts-sdk';
 import { MinterResponse } from '@oraichain/oraidex-contracts-sdk/build/OraiswapToken.types';
-import { FILTER_DAY } from './components/Header';
 import { formatDate } from 'pages/CoHarvest/helpers';
 import { TIMER } from 'pages/CoHarvest/constants';
+import { FILTER_DAY } from 'reducer/type';
 
 // TODO: hardcode reverse symbol for ORAI/INJ,USDC/ORAIX, need to update later
 export const reverseSymbolArr = [

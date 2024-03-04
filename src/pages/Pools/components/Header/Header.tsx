@@ -28,6 +28,7 @@ import LiquidityChart from '../LiquidityChart';
 import VolumeChart from '../VolumeChart';
 import styles from './Header.module.scss';
 import { isMobile } from '@walletconnect/browser-utils';
+import { FILTER_DAY } from 'reducer/type';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -52,12 +53,6 @@ export const useGetOraiPrice = () => {
 
   return oraiPrice;
 };
-
-export enum FILTER_DAY {
-  DAY = 'day',
-  WEEK = 'week',
-  MONTH = 'month'
-}
 
 export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) => {
   const theme = useTheme();

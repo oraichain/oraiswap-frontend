@@ -80,6 +80,11 @@ export interface TradingState {
   chartTimeFrame: number;
 }
 
+export interface PoolChartState {
+  filterDay: FILTER_DAY;
+  tabChart: TAB_CHART;
+}
+
 export interface TypeDecimal {
   key: string;
   title: string;
@@ -179,4 +184,15 @@ export enum OrderSide {
 export enum DirectionTrade {
   SELL = 'Sell',
   BUY = 'Buy'
+}
+
+export enum FILTER_DAY {
+  DAY = 'day',
+  WEEK = 'week',
+  MONTH = 'month'
+}
+
+export enum TAB_CHART {
+  LIQUIDITY = 'Liquidity',
+  VOLUME = 'Volume'
 }

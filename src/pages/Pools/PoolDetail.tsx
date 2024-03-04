@@ -1,9 +1,11 @@
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { ReactComponent as BackIcon } from 'assets/icons/ic_back.svg';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { network } from 'config/networks';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
+import useTheme from 'hooks/useTheme';
 import Content from 'layouts/Content';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
@@ -11,16 +13,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { updateLpPools } from 'reducer/token';
 import { PoolInfoResponse } from 'types/pool';
 import styles from './PoolDetail.module.scss';
+import ChartDetailSection from './components/ChartDetailSection';
 import { Earning } from './components/Earning';
 import { MyPoolInfo } from './components/MyPoolInfo/MyPoolInfo';
 import { OverviewPool } from './components/OverviewPool';
-import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools, useGetPriceChange } from './hooks';
-import { useGetPairInfo } from './hooks/useGetPairInfo';
-import { useGetLpBalance } from './hooks/useGetLpBalance';
 import TransactionHistory from './components/TransactionHistory';
-import ChartDetail from './components/ChartDetail';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import useTheme from 'hooks/useTheme';
+import { fetchLpPoolsFromContract, useGetPoolDetail, useGetPools, useGetPriceChange } from './hooks';
+import { useGetLpBalance } from './hooks/useGetLpBalance';
+import { useGetPairInfo } from './hooks/useGetPairInfo';
 
 const PoolDetail: React.FC = () => {
   const theme = useTheme();
@@ -118,7 +118,7 @@ const PoolDetail: React.FC = () => {
             <OverviewPool poolDetailData={poolDetailData} />
           </div>
           <div className={styles.chart}>
-            <ChartDetail pair={pair} />
+            <ChartDetailSection pair={pair} symbol={poolDetailData?.info?.symbols} />
           </div>
         </div>
         <Earning onLiquidityChange={onLiquidityChange} />

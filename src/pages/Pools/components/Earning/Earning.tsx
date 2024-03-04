@@ -220,27 +220,29 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
                       {generateIcon(pendingReward)}
                       <span>{pendingReward.denom.toUpperCase()} Earning</span>
                     </div>
-                    <div className={styles.amount}>
-                      <TokenBalance
-                        balance={getUsd(
-                          pendingReward.amount,
-                          pendingReward,
-                          cachePrices,
-                          pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
-                        )}
-                        prefix="$"
-                        decimalScale={4}
-                      />
-                    </div>
-                    <div className={styles.amountOrai}>
-                      <TokenBalance
-                        balance={{
-                          amount: pendingReward.amount,
-                          denom: pendingReward?.denom.toUpperCase(),
-                          decimals: 6
-                        }}
-                        decimalScale={6}
-                      />
+                    <div className={styles.amountWrapper}>
+                      <div className={styles.amount}>
+                        <TokenBalance
+                          balance={getUsd(
+                            pendingReward.amount,
+                            pendingReward,
+                            cachePrices,
+                            pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
+                          )}
+                          prefix="$"
+                          decimalScale={4}
+                        />
+                      </div>
+                      <div className={styles.amountOrai}>
+                        <TokenBalance
+                          balance={{
+                            amount: pendingReward.amount,
+                            denom: pendingReward?.denom.toUpperCase(),
+                            decimals: 6
+                          }}
+                          decimalScale={6}
+                        />
+                      </div>
                     </div>
                   </div>
                 );

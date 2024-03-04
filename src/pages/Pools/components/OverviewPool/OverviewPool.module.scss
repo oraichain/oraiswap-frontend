@@ -14,12 +14,24 @@
     border-color: theme-get('neutral-surface-bg-btn-disabled');
   }
 
+  @include small-mobile {
+    padding: 16px;
+    gap: 16px;
+  }
+
   .totalLiquidity {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 
-    // @include small-mobile() {
-    //   border-bottom: 1px solid;
-    // }
+    @include small-mobile {
+      flex-direction: row;
+      // justify-content: space-between;
+      align-items: center;
+      gap: 0px;
+      margin-bottom: 16px;
+    }
 
     @include theme() {
       border-color: theme-get('neutral-border-border-default');
@@ -27,7 +39,10 @@
 
     .totalTop {
       display: flex;
-      margin-bottom: 24px;
+
+      @include small-mobile {
+        margin-right: -40px;
+      }
 
       .pairLogos {
         position: relative;
@@ -37,6 +52,11 @@
         .logo2 {
           width: 48px;
           height: 48px;
+
+          @include small-mobile {
+            width: 32px;
+            height: 32px;
+          }
         }
 
         .logo2 {
@@ -63,6 +83,10 @@
 
           @include theme() {
             color: theme-get('neutral-text-body');
+          }
+
+          @include small-mobile {
+            font-size: 12px;
           }
         }
 
@@ -91,12 +115,9 @@
       .amount {
         display: flex;
         justify-content: space-between;
+        gap: 8px;
 
         span {
-          @include theme() {
-            color: theme-get('neutral-text-title');
-          }
-
           font-size: 16px;
           @include small-mobile() {
             font-size: 15px;
@@ -104,6 +125,14 @@
           font-style: normal;
           font-weight: 500;
           line-height: 100%;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
+          @include small-mobile {
+            font-size: 12px;
+          }
         }
       }
     }
@@ -114,7 +143,6 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin: 0 0 8px 0px;
 
     .title {
       @include theme() {
@@ -123,12 +151,23 @@
 
       font-size: 16px;
       font-weight: 400;
+
+      @include small-mobile {
+        font-size: 14px;
+      }
     }
 
     .pairAmount {
       display: flex;
       flex-direction: column;
       gap: 16px;
+
+      @include small-mobile {
+        flex-direction: row;
+        gap: 8px;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
 
       .amountUsdt {
         font-size: 24px;
@@ -137,6 +176,10 @@
 
         @include theme() {
           color: theme-get('neutral-text-title');
+        }
+
+        @include small-mobile {
+          font-size: 18px;
         }
       }
 
@@ -148,6 +191,10 @@
 
         @include theme() {
           color: theme-get('neutral-text-body');
+        }
+
+        @include small-mobile {
+          font-size: 16px;
         }
       }
     }
@@ -196,6 +243,10 @@
       font-style: normal;
       font-weight: 400;
       line-height: 100%;
+
+      @include small-mobile {
+        font-size: 14px;
+      }
     }
 
     .value {
@@ -213,6 +264,10 @@
       font-style: normal;
       font-weight: 500;
       line-height: 100%;
+
+      @include small-mobile {
+        font-size: 18px;
+      }
     }
 
     .percent {
@@ -228,59 +283,6 @@
 
     .negativeVol {
       color: $error-color;
-    }
-  }
-
-  .apr {
-    width: 100%;
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
-    padding: 37px 24px;
-
-    @include small-mobile() {
-      border-top-right-radius: 0;
-    }
-
-    .aprDetail {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 150%;
-
-      .fee {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        @include theme {
-          color: theme-get('neutral-9');
-        }
-      }
-
-      .aprBoost {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        font-weight: 600;
-        @include theme {
-          color: theme-get('primary-surface-default');
-        }
-
-        .text {
-          display: flex;
-          gap: 4px;
-
-          @include mobile {
-            font-size: 12px;
-            flex-direction: column-reverse;
-          }
-        }
-      }
     }
   }
 

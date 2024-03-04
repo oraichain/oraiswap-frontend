@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'rest/request';
-import { FILTER_DAY } from '../components/Header';
 import { getInclude } from '../helpers';
 import { MINIMUM_YEAR_STATISTIC } from './useLiquidityEventChart';
+import { FILTER_DAY } from 'reducer/type';
 
 export const useVolumeEventChart = (
   type: FILTER_DAY,

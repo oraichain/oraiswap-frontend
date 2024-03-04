@@ -23,12 +23,19 @@
     line-height: 24px;
     border-bottom: 2px;
     margin-bottom: 16px;
+    gap: 8px;
+
+    @include small-mobile {
+      flex-direction: column;
+      align-items: flex-start;
+    }
 
     .back {
       cursor: pointer;
       display: flex;
       align-items: center;
       width: fit-content;
+      text-decoration: underline;
 
       .backIcon {
         @include theme() {
