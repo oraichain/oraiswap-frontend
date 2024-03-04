@@ -27,6 +27,7 @@ import { PoolInfoResponse } from 'types/pool';
 import LiquidityChart from '../LiquidityChart';
 import VolumeChart from '../VolumeChart';
 import styles from './Header.module.scss';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -66,12 +67,13 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
   });
   const oraiPrice = useGetOraiPrice();
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({ stakerAddr: address });
+  const isMobileMode = isMobile();
 
   const [claimLoading, setClaimLoading] = useState(false);
   const statisticData = getStatisticData(dataSource);
   const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
-  const [openChart, setOpenChart] = useState(true);
+  const [openChart, setOpenChart] = useState(!isMobileMode);
   const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
   const [liquidityDataChart, setLiquidityDataChart] = useState(statisticData.totalLiquidity);
   const [volumeDataChart, setVolumeDataChart] = useState(statisticData.volume);
@@ -94,7 +96,6 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
       isNegative: false,
       decimal: 2,
       chart: <LiquidityChart filterDay={filterDay} onUpdateCurrentItem={setLiquidityDataChart} />,
-
       openChart: openChart
     },
     {

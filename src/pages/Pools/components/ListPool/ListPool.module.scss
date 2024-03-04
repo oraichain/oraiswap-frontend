@@ -137,7 +137,7 @@
     }
 
     @include theme {
-      color: theme-get('primary-surface-default');
+      color: theme-get('primary-surface-default-dark-3');
     }
   }
 

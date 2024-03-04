@@ -67,6 +67,7 @@ export const useLiquidityEventChart = (
     onMouseLiquidityLeave
   };
 };
+export const MINIMUM_YEAR_STATISTIC = 2000;
 
 export const getDataLiquidityHistoricalAll = async (type: FILTER_DAY = FILTER_DAY.DAY) => {
   try {
@@ -75,7 +76,7 @@ export const getDataLiquidityHistoricalAll = async (type: FILTER_DAY = FILTER_DA
         type
       }
     });
-    return res.data;
+    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
   } catch (e) {
     console.error('getDataLiquidityHistoricalAll', e);
     return [];
@@ -90,7 +91,7 @@ export const getDataLiquidityHistoricalByPair = async (pair: string, type: FILTE
         pair
       }
     });
-    return res.data;
+    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
   } catch (e) {
     console.error(`getDataLiquidityHistoricalByPair - pair: ${pair}`, e);
     return [];

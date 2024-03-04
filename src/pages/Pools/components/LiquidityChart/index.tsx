@@ -90,7 +90,7 @@ const LiquidityChart = ({
         labelVisible: false,
         style: LineStyle.Dotted,
         width: 1,
-        color: theme === 'light' ? '#5EA402' : '#78CA11',
+        color: theme === 'light' ? '#A6BE93' : '#A6BE93',
         labelBackgroundColor: '#aee67f'
       },
       vertLine: {
@@ -129,9 +129,9 @@ const LiquidityChart = ({
 
       serieRef.current = chart.addAreaSeries({
         priceLineVisible: false,
-        topColor: theme === 'light' ? '#AEE67F' : '#152703',
-        bottomColor: theme === 'light' ? 'rgba(255, 255, 255, 0.00)' : '#181A17',
-        lineColor: theme === 'light' ? '#5EA402' : '#78CA11',
+        topColor: theme === 'light' ? '#EEF9E5' : '#32392D',
+        bottomColor: theme === 'light' ? '#fff' : '#181A17',
+        lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
         lineWidth: 3
         //   lastPriceAnimation: LastPriceAnimationMode.OnDataUpdate
       });
@@ -164,9 +164,9 @@ const LiquidityChart = ({
     chartRef.current.removeSeries(serieRef.current);
 
     serieRef.current = chartRef.current.addAreaSeries({
-      topColor: theme === 'light' ? '#AEE67F' : '#152703',
-      bottomColor: theme === 'light' ? 'rgba(255, 255, 255, 0.00)' : '#181A17',
-      lineColor: theme === 'light' ? '#5EA402' : '#78CA11',
+      topColor: theme === 'light' ? '#EEF9E5' : '#32392D',
+      bottomColor: theme === 'light' ? '#fff' : '#181A17',
+      lineColor: theme === 'light' ? '#A6BE93' : '#A6BE93',
       lineWidth: 3
     });
 

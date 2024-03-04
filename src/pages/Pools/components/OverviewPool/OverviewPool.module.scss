@@ -78,9 +78,12 @@
           .barActive {
             width: 50%;
             height: 4px;
-            background-color: $primary-text-link;
             border-start-start-radius: 99px;
             border-end-start-radius: 99px;
+
+            @include theme {
+              background-color: theme-get('primary-highlight-section');
+            }
           }
         }
       }

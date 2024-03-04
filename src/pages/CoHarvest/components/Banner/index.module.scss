@@ -43,7 +43,7 @@
       line-height: 150%; /* 21px */
 
       @include theme() {
-        color: theme-get('primary-surface-default-dark');
+        color: theme-get('primary-surface-default');
       }
 
       @include mobile {
@@ -63,12 +63,12 @@
       border: 1px solid;
 
       @include theme() {
-        border-color: theme-get('primary-surface-default-dark');
-        color: theme-get('primary-surface-default-dark');
+        border-color: theme-get('primary-surface-default');
+        color: theme-get('primary-surface-default');
 
         svg {
           path {
-            stroke: theme-get('primary-surface-default-dark');
+            stroke: theme-get('primary-surface-default');
           }
         }
       }
@@ -98,7 +98,7 @@
     @include theme() {
       svg {
         path {
-          fill: theme-get('primary-surface-default-dark');
+          fill: theme-get('primary-surface-default');
         }
       }
     }

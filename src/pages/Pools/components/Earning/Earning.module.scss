@@ -2,7 +2,7 @@
 @import 'src/styles/mixins';
 
 .earningWrapper {
-  height: 100%s;
+  height: 100%;
   margin-bottom: 16px;
   display: flex;
   flex-wrap: wrap;
@@ -39,12 +39,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 40px;
-  flex-shrink: 1;
+  min-height: 250px;
   flex: 1;
 
   padding: 24px;
-
   border-radius: 12px;
 
   @include theme {
@@ -54,13 +54,21 @@
   .header {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 32px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 100%;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
 
     .volumeAmount {
-      color: #f7f7f7;
+      @include theme {
+        color: theme-get('neutral-text-text-token-name');
+      }
       font-size: 24px;
       font-weight: 500;
-      line-height: 100%; /* 28.8px */
+      line-height: 120%;
     }
   }
 
@@ -72,7 +80,9 @@
     font-size: 14px;
     font-weight: 400;
     line-height: 150%;
-    color: $neutron-text-body-light;
+    @include theme {
+      color: theme-get('neutral-9');
+    }
 
     .fee {
       display: flex;
@@ -91,7 +101,7 @@
 
       font-weight: 600;
       @include theme {
-        color: theme-get('primary-surface-default');
+        color: theme-get('primary-surface-default-dark-3');
       }
 
       .text {
@@ -109,20 +119,22 @@
 
 .earning {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   border-radius: 12px;
-  border: 1px solid $primary-text-link;
+  border: 1px solid;
   padding: 24px 40px;
 
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 32px;
+  // flex-wrap: wrap;
 
   @include theme() {
     background-color: theme-get('primary-surface-default-subtle');
+    border-color: theme-get('primary-text-text-link');
   }
 
   @include small-mobile() {
-    flex-wrap: wrap;
+    // flex-wrap: wrap;
     padding: 24px 16px;
   }
 
@@ -209,8 +221,8 @@
 
   .claim {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    // flex-direction: column;
+    // justify-content: center;
 
     .earnMore {
       margin-top: 15px;

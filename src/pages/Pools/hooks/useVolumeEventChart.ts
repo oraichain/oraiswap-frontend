@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'rest/request';
 import { FILTER_DAY } from '../components/Header';
 import { getInclude } from '../helpers';
+import { MINIMUM_YEAR_STATISTIC } from './useLiquidityEventChart';
 
 export const useVolumeEventChart = (
   type: FILTER_DAY,
@@ -100,7 +101,7 @@ export const getDataVolumeHistoricalAll = async (type: FILTER_DAY = FILTER_DAY.D
         type
       }
     });
-    return res.data;
+    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
   } catch (e) {
     console.error('getDataVolumeHistoricalAll', e);
     return [];
@@ -115,7 +116,7 @@ export const getDataVolumeHistoricalByPair = async (pair: string, type: FILTER_D
         pair
       }
     });
-    return res.data;
+    return (res.data || []).filter((item) => item?.time && new Date(item?.time).getFullYear() > MINIMUM_YEAR_STATISTIC);
   } catch (e) {
     console.error(`getDataVolumeHistoricalByPair - pair: ${pair}`, e);
     return [];

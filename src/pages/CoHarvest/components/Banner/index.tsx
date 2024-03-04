@@ -10,7 +10,7 @@ const BannerHistory = ({
   openBanner: boolean;
   setOpenBanner: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  if (!openBanner) return null;
+  // if (!openBanner) return null;
 
   return (
     <div className={styles.bannerWrapper}>

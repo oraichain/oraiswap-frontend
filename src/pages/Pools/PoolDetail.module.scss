@@ -90,7 +90,7 @@
       width: calc(66% - 16px);
 
       @include medium-desktop {
-        width: 54%;
+        width: calc(56% - 16px);
       }
 
       @include mobile {

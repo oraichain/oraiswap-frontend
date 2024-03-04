@@ -90,17 +90,16 @@ const VolumeChart = ({
         labelVisible: false,
         style: LineStyle.Dotted,
         width: 1,
-        color: theme === 'light' ? '#5EA402' : '#78CA11',
-        labelBackgroundColor: '#aee67f'
+        color: theme === 'light' ? '#A6BE93' : '#A6BE93',
+        labelBackgroundColor: '#89A571'
       },
       vertLine: {
         visible: true,
         labelVisible: false,
         style: LineStyle.Solid,
         width: 1,
-        // color: theme === 'light' ? '#DFE0DE' : '#494949',
-        color: theme === 'light' ? '#5EA402' : '#78CA11',
-        labelBackgroundColor: '#aee67f'
+        color: theme === 'light' ? '#A6BE93' : '#A6BE93',
+        labelBackgroundColor: '#89A571'
       }
     },
     timeScale: {
@@ -129,7 +128,7 @@ const VolumeChart = ({
       const chart = createChart(containerRef.current, defaultOption);
 
       serieRef.current = chart.addHistogramSeries({
-        color: theme === 'light' ? '#5EA402' : '#78CA11'
+        color: theme === 'light' ? '#A6BE93' : '#A6BE93'
       });
 
       chartRef.current = chart;
@@ -158,7 +157,7 @@ const VolumeChart = ({
     chartRef.current.removeSeries(serieRef.current);
 
     serieRef.current = chartRef.current.addHistogramSeries({
-      color: theme === 'light' ? '#5EA402' : '#78CA11'
+      color: theme === 'light' ? '#A6BE93' : '#A6BE93'
     });
 
     // update new theme series with current data

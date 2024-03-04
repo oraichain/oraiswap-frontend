@@ -95,13 +95,13 @@ const PoolDetail: React.FC = () => {
   return (
     <Content nonBackground>
       <div className={styles.pool_detail}>
-        <div
-          className={styles.backWrapper}
-          onClick={() => {
-            navigate(`/pools`);
-          }}
-        >
-          <div className={styles.back}>
+        <div className={styles.backWrapper}>
+          <div
+            className={styles.back}
+            onClick={() => {
+              navigate(`/pools`);
+            }}
+          >
             <BackIcon className={styles.backIcon} />
             <span>Back to all pools</span>
           </div>
