@@ -6,16 +6,19 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/configure';
+import { getAddress } from 'helper';
 
 export type RemainingOraibTokenItem = TokenItemType & { amount: string };
-export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean) {
+export default function useGetOraiBridgeBalances(moveOraib2OraiLoading: boolean, oraiAddress?: string) {
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [remainingOraib, setRemainingOraib] = useState<RemainingOraibTokenItem[]>([]);
   const [otherChainTokens] = tokens;
 
   const getBalanceOraibridge = async () => {
     try {
-      const oraiBridgeAddress = await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
+      const oraiBridgeAddress = oraiAddress
+        ? getAddress(oraiAddress, 'oraib')
+        : await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
       if (!oraiBridgeAddress) {
         setRemainingOraib([]);
         return;

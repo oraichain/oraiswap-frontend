@@ -21,7 +21,7 @@ import {
 import { flattenTokens, kawaiiTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { feeEstimate, getNetworkGasPrice } from 'helper';
+import { feeEstimate, getAddress, getNetworkGasPrice } from 'helper';
 
 import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
 import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
@@ -432,10 +432,10 @@ export const broadcastConvertTokenTx = async (
   return result;
 };
 
-export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[]) => {
+export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[], oraiAddress) => {
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-  const fromAddress = await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
-  const toAddress = await window.Keplr.getKeplrAddr('Oraichain');
+  const toAddress = oraiAddress ?? (await window.Keplr.getKeplrAddr('Oraichain'));
+  const fromAddress = getAddress(toAddress, 'oraib');
   const transferMsgs = generateMoveOraib2OraiMessages(remainingOraib, fromAddress, toAddress);
 
   // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain

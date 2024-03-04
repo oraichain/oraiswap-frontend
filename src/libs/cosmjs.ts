@@ -7,21 +7,15 @@ import { Stargate } from '@injectivelabs/sdk-ts';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { network } from 'config/networks';
 import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
+import { MetamaskOfflineSigner } from './eip191';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
+  if (keplr) return await keplr.getOfflineSignerAuto(chainId);
   const snapInstalled = await getSnap();
-  if (keplr) {
-    // use keplr instead
-    return await keplr.getOfflineSignerAuto(chainId);
-  }
-  if (snapInstalled) {
-    return new CosmjsOfflineSigner(chainId);
-  }
-  if (!keplr && !snapInstalled) {
-    throw new Error('You have to install Keplr first if you do not use a mnemonic to sign transactions');
-  }
+  if (snapInstalled) return new CosmjsOfflineSigner(chainId);
+  return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
 };
 
 const getCosmWasmClient = async (

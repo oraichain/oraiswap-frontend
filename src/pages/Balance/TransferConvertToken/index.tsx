@@ -50,6 +50,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
 
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
+  const [cosmosAddress] = useConfigReducer('cosmosAddress');
   const [transferLoading, setTransferLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [toNetworkChainId, setToNetworkChainId] = useState<NetworkChainId>();
@@ -109,7 +110,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
         }
       } else {
-        address = await window.Keplr.getKeplrAddr(network.chainId);
+        address = await window.Keplr.getKeplrAddr(network.chainId, cosmosAddress);
       }
     } catch (error) {
       console.log({

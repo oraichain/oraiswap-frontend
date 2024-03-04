@@ -292,11 +292,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
   // Move oraib2oraichain
   const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
-  const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading);
+  const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading, oraiAddress);
   const handleMoveOraib2Orai = async () => {
     try {
       setMoveOraib2OraiLoading(true);
-      const result = await moveOraibToOraichain(remainingOraib);
+      const result = await moveOraibToOraichain(remainingOraib, oraiAddress);
       processTxResult(chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
     } catch (error) {
       console.log('error move stuck oraib: ', error);

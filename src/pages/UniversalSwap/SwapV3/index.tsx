@@ -28,7 +28,7 @@ import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
-import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import { floatToPercent, getAddress, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -268,7 +268,6 @@ const SwapComponent: React.FC<{
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
-      const oraiAddress = await handleCheckAddress('Oraichain');
       const checksumMetamaskAddress = metamaskAddress && ethers.utils.getAddress(metamaskAddress);
       checkEvmAddress(originalFromToken.chainId, metamaskAddress, tronAddress);
       checkEvmAddress(originalToToken.chainId, metamaskAddress, tronAddress);
@@ -293,6 +292,7 @@ const SwapComponent: React.FC<{
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
       );
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
+      const oraiAddress = getAddress(cosmosAddress, 'orai');
       if (transactionHash) {
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: getTransactionUrl(originalFromToken.chainId, transactionHash)

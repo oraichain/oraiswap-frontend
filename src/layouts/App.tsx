@@ -22,7 +22,7 @@ import Menu from './Menu';
 import Instruct from './Instruct';
 import './index.scss';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
-import { leapWalletType } from 'helper/constants';
+import { leapWalletType, eip191WalletType } from 'helper/constants';
 import FutureCompetition from 'components/FutureCompetitionModal';
 import { persistor } from 'store/configure';
 import { NoticeBanner } from './NoticeBanner';
@@ -114,7 +114,7 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      if (walletTypeStore !== leapWalletType || isMobile()) {
+      if (![leapWalletType, eip191WalletType].includes(walletTypeStore) || isMobile()) {
         window.addEventListener('keplr_keystorechange', keplrHandler);
       }
     })();
