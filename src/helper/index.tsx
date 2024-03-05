@@ -354,10 +354,10 @@ export const getAddressBySnap = async (chainId) => {
   }
   return null;
 };
-
 export const getAddressByEIP191 = async (chainId) => {
-  const prefix =
-    cosmosNetworks.find((cosmos) => cosmos.chainId === chainId)?.bech32Config?.bech32PrefixAccAddr || 'orai';
+  const prefix = cosmosNetworks.find(
+    (cosmos) => cosmos.features && cosmos.features.includes('eip191') && cosmos.chainId === chainId
+  )?.bech32Config?.bech32PrefixAccAddr;
   const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, prefix);
   if (!metamaskOfflineSinger) return;
   const accounts = await metamaskOfflineSinger.getAccounts();
@@ -411,7 +411,7 @@ export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
 export const getListAddressCosmosByLeapSnap = async () => {
   let listAddressCosmos = {};
   const cosmosNetworksFilter = cosmosNetworks.filter(
-    (item, index) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
+    (item) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
   );
 
   for (const info of cosmosNetworksFilter) {
@@ -422,23 +422,6 @@ export const getListAddressCosmosByLeapSnap = async () => {
     } catch (error) {
       console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);
     }
-  }
-  return { listAddressCosmos };
-};
-export const getListAddressCosmosByEIP191 = async (oraiAddr) => {
-  let listAddressCosmos = {};
-  // @ts-ignore
-  const cosmosNetworksFilter = cosmosNetworks.filter(
-    (item) => item.features && item.features.includes(eip191WalletType)
-  );
-
-  for (const info of cosmosNetworksFilter) {
-    if (!info) continue;
-    const { cosmosAddress } = genAddressCosmos(info, '', oraiAddr);
-    listAddressCosmos = {
-      ...listAddressCosmos,
-      [info.chainId]: cosmosAddress
-    };
   }
   return { listAddressCosmos };
 };
