@@ -6,9 +6,18 @@ import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import useTheme from 'hooks/useTheme';
 import { ReactElement, useEffect, useState } from 'react';
 import styles from './NoticeBanner.module.scss';
+import axios from 'rest/request';
 
 const INTERVAL_TIME = 3000;
 
+export type Banner = {
+  title: string;
+  content: string;
+  icon?: ReactElement;
+  link?: string;
+  linkText?: string;
+  target?: string;
+};
 export const NoticeBanner = ({
   openBanner,
   setOpenBanner
@@ -17,8 +26,21 @@ export const NoticeBanner = ({
   setOpenBanner: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [noteIdx, setNoteIdx] = useState(0);
+  const [note, setNote] = useState<Banner | null>(null);
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const BASE_URL = process.env.REACT_APP_STRAPI_BASE_URL || 'https://fresh-harmony-bf37524082.strapiapp.com';
+        const res = await axios.get('api/banners', { baseURL: BASE_URL });
+        return res.data.data;
+      } catch (error) {
+        return [];
+      }
+    };
+    fetchBanners().then((banners) => setNote(banners[0].attributes));
+  }, []);
 
-  const note = LIST_NOTICES[noteIdx];
+  // const note = LIST_NOTICES[noteIdx];
 
   useEffect(() => {
     if (LIST_NOTICES.length <= 1) return;
@@ -40,7 +62,7 @@ export const NoticeBanner = ({
     };
   }, []);
 
-  if (!openBanner) return null;
+  if (!openBanner || !note) return null;
 
   return (
     <>
@@ -49,7 +71,7 @@ export const NoticeBanner = ({
           {LIST_NOTICES.map((note, index) => {
             return ( */}
         <div className={`${styles.note} ${!note.title ? styles.onlyText : ''}`}>
-          <div className={styles.icon}>{note.icon}</div>
+          {/* <div className={styles.icon}>{note.icon}</div> */}
           <div className={`${styles.text}`}>
             {!note.title ? null : <span className={styles.title}>{note.title}</span>}
             <span>
