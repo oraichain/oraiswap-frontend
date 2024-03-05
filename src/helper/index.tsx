@@ -258,7 +258,8 @@ export const switchWalletCosmos = async (type: WalletType | 'eip191') => {
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();
   const isLeapSnap = await getSnap();
-  if (!isKeplr && !isLeapSnap) {
+  const isEip191 = type === 'eip191';
+  if (!isKeplr && !isLeapSnap && !isEip191) {
     return displayInstallWallet();
   }
   // const wallet = await collectWallet(network.chainId);
