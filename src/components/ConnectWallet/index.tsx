@@ -296,7 +296,12 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       if (type === leapWalletType) {
         ({ listAddressCosmos } = await getListAddressCosmosByLeapSnap());
       } else if (type === eip191WalletType) {
-        ({ listAddressCosmos } = await getListAddressCosmosByEIP191(oraiAddr));
+        // ({ listAddressCosmos } = await getListAddressCosmosByEIP191(oraiAddr));
+        ({ listAddressCosmos } = {
+          listAddressCosmos: {
+            Oraichain: oraiAddr
+          }
+        });
       } else {
         ({ listAddressCosmos } = await getListAddressCosmos(oraiAddr));
       }

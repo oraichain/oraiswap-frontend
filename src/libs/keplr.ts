@@ -145,6 +145,7 @@ export default class Keplr extends CosmosWallet {
     try {
       if (this.typeWallet === ('eip191' as any)) {
         // TODO: cache if type wallet is eip191 ( metamask cosmos )
+        if (chainId !== 'Oraichain') return null;
         if (listCosmosAddr && Object.values(listCosmosAddr).length) return listCosmosAddr?.[chainId];
         return getAddressByEIP191(chainId);
       }

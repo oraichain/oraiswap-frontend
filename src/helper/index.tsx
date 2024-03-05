@@ -29,6 +29,7 @@ import { leapSnapId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
 import { MetamaskOfflineSigner } from 'libs/eip191';
+import { eip191WalletType } from 'helper/constants';
 
 export interface Tokens {
   denom?: string;
@@ -424,8 +425,9 @@ export const getListAddressCosmosByLeapSnap = async () => {
 };
 export const getListAddressCosmosByEIP191 = async (oraiAddr) => {
   let listAddressCosmos = {};
+  // @ts-ignore
   const cosmosNetworksFilter = cosmosNetworks.filter(
-    (item) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
+    (item) => item.features && item.features.includes(eip191WalletType)
   );
 
   for (const info of cosmosNetworksFilter) {

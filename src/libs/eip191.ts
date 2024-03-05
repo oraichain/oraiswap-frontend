@@ -10,13 +10,8 @@ import {
 import { keccak256, ripemd160, sha256 } from '@cosmjs/crypto';
 import * as secp256k1 from '@noble/secp256k1';
 import bech32 from 'bech32';
-// import { Address as EthereumUtilsAddress } from 'ethereumjs-util';
 
-export function pubkeyToBechAddress(pubkey: Uint8Array, prefix: string = 'orai', ethAddress: string): string {
-  // if (['inj', 'oraie'].includes(prefix)) {
-  //   const addressBuffer = EthereumUtilsAddress.fromString(ethAddress).toBuffer();
-  //   return bech32.encode(prefix, bech32.toWords(addressBuffer));
-  // }
+export function pubkeyToBechAddress(pubkey: Uint8Array, prefix: string = 'orai'): string {
   return bech32.encode(prefix, bech32.toWords(ripemd160(sha256(pubkey))));
 }
 
@@ -89,7 +84,7 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
   async getAccounts(): Promise<readonly AccountData[]> {
     if (this.accounts.length < 1) {
       const pubKey = await this.getPubkeyFromEthSignature();
-      const address = pubkeyToBechAddress(pubKey, this.prefix, this.ethAddress);
+      const address = pubkeyToBechAddress(pubKey, this.prefix);
       this.cosmosToEvm[address] = this.ethAddress;
       this.accounts = [
         {
