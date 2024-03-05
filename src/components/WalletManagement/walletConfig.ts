@@ -51,7 +51,7 @@ export const cosmosWallets: WalletNetwork[] = [
   {
     icon: MetamaskIcon,
     name: 'Metamask',
-    suffixName: ' (Leap Snap)',
+    suffixName: ' (Snap)',
     nameRegistry: 'leapSnap',
     isActive: true
   },

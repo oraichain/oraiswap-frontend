@@ -229,7 +229,8 @@ export const setStorageKey = (key = 'typeWallet', value) => {
   return localStorage.setItem(key, value);
 };
 
-export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType => {
+// TECH DEBT: need to update WalletTypeCosmos add type eip191 to oraidex-common
+export const getWalletByNetworkCosmosFromStorage = (key = 'persist:root'): WalletCosmosType | 'eip191' => {
   try {
     if (isMobile()) return 'owallet';
 
@@ -328,7 +329,15 @@ export const genAddressCosmos = (info, address60, address118) => {
   return { cosmosAddress };
 };
 
-export const getListAddressCosmos = async (oraiAddr) => {
+export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosType | 'eip191') => {
+  if (walletType === 'eip191') {
+    return {
+      listAddressCosmos: {
+        Oraichain: oraiAddr
+      }
+    };
+  }
+
   let listAddressCosmos = {};
   const kwtAddress = getAddress(await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID), 'oraie');
   for (const info of cosmosNetworks) {
@@ -440,8 +449,9 @@ export const getListAddressCosmosByLeapSnap = async () => {
 export const getAddressByEIP191 = async (chainId) => {
   const prefix = cosmosNetworks.find((chain) => chain.features.includes('eip191') && chain.chainId === chainId)
     ?.bech32Config?.bech32PrefixAccAddr;
-  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, prefix);
+  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, 'orai');
   if (!metamaskOfflineSinger) return;
   const accounts = await metamaskOfflineSinger.getAccounts();
+  console.log({ accounts });
   return accounts[0].address;
 };
