@@ -63,7 +63,7 @@ export const WalletManagement: FC<{}> = () => {
             case 'tronLink':
               isActive = isTronLink;
               break;
-            case 'metamask-eip191':
+            case 'eip191':
               isActive = isMetamask;
               break;
           }

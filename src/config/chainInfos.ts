@@ -317,7 +317,7 @@ export const oraichainNetwork: CustomChainInfo = {
 
   Icon: OraiIcon,
   IconLight: OraiLightIcon,
-  features: ['ibc-transfer', 'cosmwasm', 'wasmd_0.24+'],
+  features: ['ibc-transfer', 'cosmwasm', 'wasmd_0.24+', 'eip191'],
   currencies: [
     OraiToken,
     {

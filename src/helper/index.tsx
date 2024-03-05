@@ -29,6 +29,7 @@ import { leapSnapId } from './constants';
 import { Bech32Config } from '@keplr-wallet/types';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { WalletType } from 'components/WalletManagement/walletConfig';
+import { MetamaskOfflineSigner } from 'libs/eip191';
 
 export interface Tokens {
   denom?: string;
@@ -434,4 +435,13 @@ export const getListAddressCosmosByLeapSnap = async () => {
     }
   }
   return { listAddressCosmos };
+};
+
+export const getAddressByEIP191 = async (chainId) => {
+  const prefix = cosmosNetworks.find((chain) => chain.features.includes('eip191') && chain.chainId === chainId)
+    ?.bech32Config?.bech32PrefixAccAddr;
+  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, prefix);
+  if (!metamaskOfflineSinger) return;
+  const accounts = await metamaskOfflineSinger.getAccounts();
+  return accounts[0].address;
 };

@@ -6,7 +6,7 @@ import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
 import { cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworksWithIcon } from 'helper';
 
 export type NetworkType = 'cosmos' | 'evm' | 'tron';
-export type WalletType = WalletCosmosType | 'metamask' | 'tronLink' | 'metamask-eip191';
+export type WalletType = WalletCosmosType | 'metamask' | 'tronLink' | 'eip191';
 export type WalletNetwork = {
   icon: React.FunctionComponent<
     React.SVGProps<SVGSVGElement> & {
@@ -58,7 +58,7 @@ export const cosmosWallets: WalletNetwork[] = [
   {
     icon: MetamaskIcon,
     name: 'Metamask (EIP191)',
-    nameRegistry: 'metamask-eip191',
+    nameRegistry: 'eip191',
     isActive: true
   }
 ];

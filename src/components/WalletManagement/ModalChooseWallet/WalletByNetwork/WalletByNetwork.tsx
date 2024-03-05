@@ -35,7 +35,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     await handleConnectWalletByNetwork(currentWalletConnecting);
   };
 
-  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
+  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191') => {
     try {
       if (walletType === 'leapSnap') {
         const isUnlock = await isUnlockMetamask();
