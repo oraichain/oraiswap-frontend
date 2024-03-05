@@ -289,14 +289,17 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       setWalletTypeStore(type);
       await initClient(type);
 
-      const oraiAddr = await window.Keplr.getKeplrAddr();
+      let oraiAddr = oraiAddress;
+      if (type !== 'eip191' || !oraiAddr) {
+        oraiAddr = await window.Keplr.getKeplrAddr();
+      }
+
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
       let listAddressCosmos;
       if (type === leapWalletType) {
         ({ listAddressCosmos } = await getListAddressCosmosByLeapSnap());
       } else if (type === eip191WalletType) {
-        // ({ listAddressCosmos } = await getListAddressCosmosByEIP191(oraiAddr));
         ({ listAddressCosmos } = {
           listAddressCosmos: {
             Oraichain: oraiAddr

@@ -474,6 +474,11 @@
 
     .value {
       text-align: right;
+      cursor: pointer;
+      .copy-address {
+        display: flex;
+        align-items: center;
+      }
     }
   }
 }

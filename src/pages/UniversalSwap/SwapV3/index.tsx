@@ -9,7 +9,8 @@ import {
   getTokenOnOraichain,
   network,
   toAmount,
-  toDisplay
+  toDisplay,
+  CustomChainInfo
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import {
@@ -28,13 +29,20 @@ import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
-import { floatToPercent, getAddress, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import {
+  floatToPercent,
+  getAddress,
+  getTransactionUrl,
+  handleCheckAddress,
+  handleErrorTransaction,
+  networks
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
-import { getUsd, toSubAmount } from 'libs/utils';
+import { getUsd, reduceString, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
@@ -58,6 +66,9 @@ import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { useFillToken } from './hooks/useFillToken';
+import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import copy from 'copy-to-clipboard';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -78,11 +89,14 @@ const SwapComponent: React.FC<{
   const [loadingRefresh, setLoadingRefresh] = useState(false);
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
+  const [listCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress] = useConfigReducer('tronAddress');
   const [oraiAddress] = useConfigReducer('address');
   const [theme] = useConfigReducer('theme');
   const loadTokenAmounts = useLoadTokens();
   const dispatch = useDispatch();
+  const [addressTransfer, setAddressTransfer] = useState('');
+  const [copied, setCopied] = useState(false);
   const [searchTokenName, setSearchTokenName] = useState('');
   const [filteredToTokens, setFilteredToTokens] = useState([] as TokenItemType[]);
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
@@ -349,6 +363,41 @@ const SwapComponent: React.FC<{
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
 
+  useEffect(() => {
+    const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
+    getAddressTransfer(findNetwork);
+  }, [originalToToken]);
+
+  const getAddressTransfer = async (network: CustomChainInfo) => {
+    let address: string = '';
+    try {
+      if (network.networkType === 'evm') {
+        if (network.chainId === '0x2b6653dc') {
+          // TODO: Check owallet mobile
+          if (isMobile()) {
+            const addressTronMobile = await window.tronLink.request({
+              method: 'tron_requestAccounts'
+            });
+            //@ts-ignore
+            address = addressTronMobile?.base58;
+          } else {
+            address = window?.tronWeb?.defaultAddress?.base58;
+          }
+        } else {
+          if (window.Metamask.isWindowEthereum()) address = await window.Metamask.getEthAddress();
+        }
+      } else {
+        address = await window.Keplr.getKeplrAddr(network.chainId, listCosmosAddress);
+      }
+    } catch (error) {
+      console.log({
+        error
+      });
+    } finally {
+      setAddressTransfer(address);
+    }
+  };
+
   return (
     <div className={cx('swap-box-wrapper')}>
       <LoadingBox loading={loadingRefresh} className={cx('custom-loader-root')}>
@@ -483,6 +532,24 @@ const SwapComponent: React.FC<{
           })()}
 
           <div className={cx('detail')}>
+            <div className={cx('row')}>
+              <div className={cx('title')}>
+                <span> To Address: </span>
+              </div>
+              <div
+                className={cx('value')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copy(addressTransfer);
+                  setCopied(true);
+                }}
+              >
+                <div className={cx('copy-address')}>
+                  {reduceString(addressTransfer, 10, 7)}
+                  {copied ? <SuccessIcon width={20} height={20} /> : null}
+                </div>
+              </div>
+            </div>
             <div className={cx('row')}>
               <div className={cx('title')}>
                 <span> Expected Output</span>

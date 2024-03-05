@@ -253,7 +253,7 @@ export const isEmptyObject = (value: object) => {
   return true;
 };
 
-export const switchWalletCosmos = async (type: WalletType) => {
+export const switchWalletCosmos = async (type: WalletType | 'eip191') => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();

@@ -22,8 +22,8 @@ export default class Keplr extends CosmosWallet {
     return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
   }
 
-  typeWallet: WalletType;
-  constructor(type: WalletType = 'keplr') {
+  typeWallet: WalletType | 'eip191';
+  constructor(type: WalletType | 'eip191' = 'keplr') {
     super();
     this.typeWallet = type;
   }

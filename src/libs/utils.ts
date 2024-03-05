@@ -213,13 +213,13 @@ export const initEthereum = async () => {
   }
 };
 
-export const initClient = async (type: WalletType) => {
+export const initClient = async (type: WalletType | 'eip191') => {
   try {
     await switchWalletCosmos(type);
 
     const keplr = await window.Keplr.getKeplr();
     // suggest our chain
-    if (keplr) {
+    if (keplr || type === 'eip191') {
       for (const networkId of [
         network.chainId,
         COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
