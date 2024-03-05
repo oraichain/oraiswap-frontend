@@ -475,9 +475,13 @@
     .value {
       text-align: right;
       cursor: pointer;
+      &:hover {
+        font-weight: 700;
+      }
       .copy-address {
         display: flex;
         align-items: center;
+        gap: 3px;
       }
     }
   }

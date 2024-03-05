@@ -132,9 +132,10 @@ export const addNumber = (number1: number, number2: number) => {
 };
 
 export const handleCheckWallet = async () => {
+  const walletType = getStorageKey();
   const keplr = await window.Keplr.getKeplr();
   const isSnap = await getSnap();
-  if (!keplr && !isSnap) {
+  if (!keplr && !isSnap && walletType !== eip191WalletType) {
     return displayInstallWallet();
   }
 };

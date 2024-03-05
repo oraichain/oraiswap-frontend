@@ -68,6 +68,7 @@ import styles from './index.module.scss';
 import { useFillToken } from './hooks/useFillToken';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
+import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
 import copy from 'copy-to-clipboard';
 
 const cx = cn.bind(styles);
@@ -509,11 +510,18 @@ const SwapComponent: React.FC<{
 
           {(() => {
             const disabledSwapBtn =
-              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+              swapLoading ||
+              !fromAmountToken ||
+              !toAmountToken ||
+              fromAmountTokenBalance > fromTokenBalance ||
+              !addressTransfer; // insufficent fund
 
             let disableMsg: string;
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
+
+            // TODO: need validate address follow chain
+            if (!addressTransfer) disableMsg = `Destination address not found!`;
             return (
               <button
                 className={cx('swap-btn', `${disabledSwapBtn ? 'disable' : ''}`)}
@@ -546,7 +554,7 @@ const SwapComponent: React.FC<{
               >
                 <div className={cx('copy-address')}>
                   {reduceString(addressTransfer, 10, 7)}
-                  {copied ? <SuccessIcon width={20} height={20} /> : null}
+                  {copied ? <SuccessIcon width={18} height={18} /> : <CopyIcon width={18} height={18} />}
                 </div>
               </div>
             </div>
