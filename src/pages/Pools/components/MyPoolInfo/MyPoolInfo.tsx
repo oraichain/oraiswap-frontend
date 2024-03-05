@@ -6,7 +6,7 @@ import { ReactComponent as UnstakeIcon } from 'assets/icons/ic_unstake.svg';
 import { ReactComponent as UnstakeLightIcon } from 'assets/icons/ic_unstake_light.svg';
 import { ReactComponent as WithdrawIcon } from 'assets/icons/ic_withdraw.svg';
 import { ReactComponent as WithdrawLightIcon } from 'assets/icons/ic_withdraw_light.svg';
-import img_coin from 'assets/images/img_coin.png';
+import img_coin from 'assets/images/img_staked.svg';
 import { Button } from 'components/Button';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';

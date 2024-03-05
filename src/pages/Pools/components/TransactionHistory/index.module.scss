@@ -108,34 +108,6 @@
     .alignRight {
       // text-align: right;
     }
-
-    .hash {
-      width: 12%;
-    }
-
-    .address {
-      width: 12%;
-    }
-
-    .time {
-      width: 12%;
-    }
-
-    .pay {
-      width: 13%;
-    }
-
-    .receive {
-      width: 13%;
-    }
-
-    .value {
-      width: 13%;
-    }
-
-    .fee {
-      width: 12%;
-    }
   }
 
   .hash {
@@ -237,7 +209,7 @@
     @include theme {
       color: theme-get('neutral-text-text-dropdown');
     }
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     line-height: 100%; /* 27px */
 
@@ -282,6 +254,10 @@
           .addressWrapper {
             width: 50%;
           }
+
+          .time {
+            width: 50%;
+          }
         }
       }
 
@@ -299,6 +275,8 @@
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
+
+        margin-bottom: 8px;
 
         .pay {
           width: 50%;

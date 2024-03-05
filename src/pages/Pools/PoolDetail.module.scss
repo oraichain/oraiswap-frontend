@@ -35,7 +35,10 @@
       display: flex;
       align-items: center;
       width: fit-content;
-      text-decoration: underline;
+
+      @include mobile {
+        text-decoration: underline;
+      }
 
       .backIcon {
         @include theme() {
@@ -54,6 +57,11 @@
 
           &:hover {
             border-color: theme-get('neutral-text-text-token-name');
+          }
+          @include mobile {
+            &:hover {
+              border: none;
+            }
           }
         }
       }

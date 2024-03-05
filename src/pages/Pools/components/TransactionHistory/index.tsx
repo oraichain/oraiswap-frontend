@@ -73,7 +73,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                               </a>
                             </div>
                           </div>
-                          <div className={styles.addressWrapper}>
+                          {/* <div className={styles.addressWrapper}>
                             <div className={styles.titleItem}>Address</div>
                             <div className={styles.address}>
                               <span className={styles.txt}>
@@ -85,14 +85,20 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                                 </a>
                               )}
                             </div>
+                          </div> */}
+                          <div className={styles.time}>
+                            <div>
+                              <span>{formatDateV2(item.timestamp * 1000)}</span>
+                              <span>{formatTime(item.timestamp * 1000)}</span>
+                            </div>
                           </div>
                         </div>
-                        <div className={styles.time}>
+                        {/* <div className={styles.time}>
                           <div>
                             <span>{formatDateV2(item.timestamp * 1000)}</span>
                             <span>{formatTime(item.timestamp * 1000)}</span>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
 
                       <div className={styles.divider}></div>
@@ -147,7 +153,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                     <th className={styles.alignRight}>RECEIVE AMOUNT</th>
                     <th className={styles.alignRight}>VALUE</th>
                     <th className={styles.alignRight}>FEE</th>
-                    <th>ADDRESS</th>
+                    {/* <th>ADDRESS</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -208,7 +214,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                           <td className={styles.fee}>
                             <div className={styles.amount}>{formatDisplayUsdt(feeUSD)}</div>
                           </td>
-                          <td className={styles.address}>
+                          {/* <td className={styles.address}>
                             <span className={styles.txt}>
                               {!item.sender ? '-' : shortenAddress(item.sender || '', 5, 5)}
                             </span>
@@ -217,7 +223,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                                 <LinkIcon />
                               </a>
                             )}
-                          </td>
+                          </td> */}
                         </tr>
                       );
                     })}

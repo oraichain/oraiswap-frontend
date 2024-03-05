@@ -4,6 +4,7 @@
 .myPoolInfo {
   display: flex;
   margin-bottom: 40px;
+  width: 100%;
 
   @include small-mobile() {
     flex-wrap: wrap;
@@ -82,7 +83,7 @@
     width: 66%;
 
     @include medium-desktop {
-      width: 54%;
+      width: 56%;
     }
 
     @include mobile {
@@ -115,11 +116,11 @@
       width: 50%;
 
       @include medium-desktop {
-        width: 80%;
+        width: 85%;
       }
 
       @include mobile {
-        width: 80%;
+        width: 85%;
       }
 
       @include small-mobile() {
@@ -206,6 +207,7 @@
 
       button {
         width: 45%;
+        white-space: nowrap;
 
         @include small-mobile() {
           padding: 8px 0;

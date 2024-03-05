@@ -12,11 +12,24 @@
 
   .logo {
     display: flex;
+
+    @include medium-desktop {
+      width: 80%;
+      height: 80%;
+    }
   }
 
   @include theme() {
     background-color: theme-get('neutral-surface-bg');
     border-bottom: 1px solid theme-get('neutral-border-border-default');
+  }
+
+  @include ultra_desktop_max {
+    padding: 20px 100px;
+  }
+
+  @include medium-desktop {
+    padding: 20px 16px;
   }
 }
 
@@ -131,6 +144,10 @@
     }
     margin: 0 7px 0 24px;
     height: 40px;
+
+    @include medium-desktop {
+      margin: 0 16px 0 16px;
+    }
   }
 }
 
@@ -149,6 +166,11 @@
     margin-left: 17px;
     margin-right: 17px;
     cursor: pointer;
+
+    @include medium-desktop {
+      margin-left: 0px;
+      margin-right: 5px;
+    }
 
     &::before,
     &::after {
@@ -207,6 +229,10 @@
       line-height: 100%;
       justify-items: center;
       display: contents;
+
+      @include medium-desktop {
+        font-size: 13px;
+      }
 
       @include theme() {
         color: theme-get('neutral-3');
