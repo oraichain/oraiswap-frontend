@@ -43,9 +43,9 @@ export const cosmosWallets: WalletNetwork[] = [
     isActive: true
   },
   {
-    icon: KeplrIcon,
-    name: 'Keplr',
-    nameRegistry: 'keplr',
+    icon: MetamaskIcon,
+    name: 'Metamask (EIP191)',
+    nameRegistry: 'eip191',
     isActive: true
   },
   {
@@ -56,9 +56,9 @@ export const cosmosWallets: WalletNetwork[] = [
     isActive: true
   },
   {
-    icon: MetamaskIcon,
-    name: 'Metamask (EIP191)',
-    nameRegistry: 'eip191',
+    icon: KeplrIcon,
+    name: 'Keplr',
+    nameRegistry: 'keplr',
     isActive: true
   }
 ];

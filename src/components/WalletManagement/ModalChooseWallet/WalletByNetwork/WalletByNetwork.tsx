@@ -49,11 +49,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       window.Keplr = new Keplr(walletType);
       setStorageKey('typeWallet', walletType);
       await initClient();
-
-      let oraiAddr = oraiAddress;
-      if (walletType !== 'eip191' || !oraiAddr) {
-        oraiAddr = await window.Keplr.getKeplrAddr();
-      }
+      const oraiAddr = await window.Keplr.getKeplrAddr();
       setOraiAddress(oraiAddr);
       const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, walletType);
 
