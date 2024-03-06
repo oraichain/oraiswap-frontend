@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import useLoadTokens from './useLoadTokens';
 import { useLocation } from 'react-router-dom';
 import { ethers } from 'ethers';
+import { getAddressByEIP191, getWalletByNetworkCosmosFromStorage } from 'helper';
 
 const loadAccounts = async (): Promise<string[]> => {
   if (!window.ethereum) return;
@@ -25,6 +26,8 @@ const loadAccounts = async (): Promise<string[]> => {
 export function useEagerConnect() {
   const loadTokenAmounts = useLoadTokens();
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const [, setOraiAddress] = useConfigReducer('address');
   const { pathname } = useLocation();
   const [chainInfo] = useConfigReducer('chainInfo');
   const mobileMode = isMobile();
@@ -33,8 +36,25 @@ export function useEagerConnect() {
     try {
       accounts = Array.isArray(accounts) ? accounts : await loadAccounts();
       if (accounts && accounts?.length > 0) {
+        const walletType = getWalletByNetworkCosmosFromStorage();
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-        loadTokenAmounts({ metamaskAddress });
+        let addrAccounts = {
+          metamaskAddress,
+          oraiAddress: undefined
+        };
+        if (walletType === 'eip191') {
+          const isSwitchEIP = true;
+          const oraiAddress = await getAddressByEIP191(isSwitchEIP);
+          addrAccounts = {
+            ...addrAccounts,
+            oraiAddress
+          };
+          setOraiAddress(oraiAddress);
+          setCosmosAddress({
+            Oraichain: oraiAddress
+          });
+        }
+        loadTokenAmounts(addrAccounts);
         setMetamaskAddress(metamaskAddress);
       } else {
         setMetamaskAddress(undefined);

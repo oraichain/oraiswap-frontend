@@ -44,17 +44,17 @@ export const cosmosWallets: WalletNetwork[] = [
   },
   {
     icon: MetamaskIcon,
-    name: 'Metamask (EIP191)',
+    name: 'Metamask (Oraichain)',
     nameRegistry: 'eip191',
     isActive: true
   },
-  {
-    icon: MetamaskIcon,
-    name: 'Metamask',
-    suffixName: ' (Snap)',
-    nameRegistry: 'leapSnap',
-    isActive: true
-  },
+  // {
+  //   icon: MetamaskIcon,
+  //   name: 'Metamask',
+  //   suffixName: ' (Snap)',
+  //   nameRegistry: 'leapSnap',
+  //   isActive: true
+  // },
   {
     icon: KeplrIcon,
     name: 'Keplr',

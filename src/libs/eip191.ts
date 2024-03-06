@@ -113,11 +113,11 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
     return uint8Array;
   }
 
-  async getAccounts(): Promise<readonly AccountData[]> {
+  async getAccounts(isSwitch?: boolean): Promise<readonly AccountData[]> {
     if (this.accounts.length < 1) {
       // get from cache first
       const { accounts, cosmosToEvm } = this.getAccountFromStorage();
-      if (accounts.length > 0 && cosmosToEvm[accounts[0].address]) {
+      if (accounts.length > 0 && cosmosToEvm[accounts[0].address] && !isSwitch) {
         this.accounts = accounts;
         this.cosmosToEvm[accounts[0].address] = this.ethAddress;
       } else {
