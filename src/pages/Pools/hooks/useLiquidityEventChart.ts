@@ -42,8 +42,6 @@ export const useLiquidityEventChart = (
         data = await getDataLiquidityHistoricalAll(value);
       }
 
-      sleep(1000);
-
       setCurrentDataLiquidity(data);
       if (data.length > 0) {
         setCurrentItem({ ...data[data.length - 1] });

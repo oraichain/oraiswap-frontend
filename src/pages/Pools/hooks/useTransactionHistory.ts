@@ -7,7 +7,7 @@ export const useTransactionHistory = (offerDenom: string, askDenom: string) => {
     isLoading,
     refetch: refetchTxHistories
   } = useQuery(['tx-histotries-info', offerDenom, askDenom], () => getDataSwapHistorical(offerDenom, askDenom), {
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     placeholderData: [],
     enabled: !!offerDenom && !!askDenom
   });
