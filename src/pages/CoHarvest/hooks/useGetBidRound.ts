@@ -126,6 +126,77 @@ export const useGetBiddingFilter = (round: number) => {
   return { biddingInfo, isLoading, refetchBiddingInfo };
 };
 
+export const useGetListBiddingRoundInfo = (round: number) => {
+  const roundArr = [...new Array(round).keys()].map((item) => item + 1);
+
+  const getListHistoryRound = async () => {
+    const multicall = new MulticallQueryClient(window.client, network.multicall);
+
+    const res = await multicall.aggregate({
+      queries: roundArr.map((round) => ({
+        address: network.bid_pool,
+        data: toBinary({
+          bidding_info: {
+            round
+          }
+        })
+      }))
+    });
+
+    return roundArr.map((round, ind) => {
+      if (!res.return_data[ind].success) {
+        return {
+          bid_info: {
+            round,
+            start_time: Date.now(),
+            end_time: Date.now(),
+            total_bid_amount: '0',
+            total_bid_matched: '0'
+          },
+          distribution_info: {
+            total_distribution: '0',
+            exchange_rate: '0',
+            is_released: false,
+            actual_distributed: '0',
+            num_bids_distributed: 0
+          }
+        };
+      }
+      const response: BiddingInfoResponse = fromBinary(res.return_data[ind].data);
+      return response;
+    });
+  };
+
+  const {
+    data: listBiddingRoundInfo,
+    isLoading,
+    refetch: refetchListBiddingRoundInfo
+  } = useQuery(['ListBiddingRoundInfo-history', round], () => getListHistoryRound(), {
+    refetchOnWindowFocus: false,
+    placeholderData: roundArr.map((round) => {
+      return {
+        bid_info: {
+          round,
+          start_time: Date.now(),
+          end_time: Date.now(),
+          total_bid_amount: '0',
+          total_bid_matched: '0'
+        },
+        distribution_info: {
+          total_distribution: '0',
+          exchange_rate: '0',
+          is_released: false,
+          actual_distributed: '0',
+          num_bids_distributed: 0
+        }
+      };
+    }),
+    enabled: !!round
+  });
+
+  return { listBiddingRoundInfo, isLoading, refetchListBiddingRoundInfo };
+};
+
 export const useGetAllBidPoolInRound = (round: number) => {
   const getAllBidPoolRound = async () => {
     const coHarvestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
