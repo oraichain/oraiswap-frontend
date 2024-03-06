@@ -446,11 +446,9 @@ export const getListAddressCosmosByLeapSnap = async () => {
   return { listAddressCosmos };
 };
 
-export const getAddressByEIP191 = async (chainId) => {
-  const prefix = cosmosNetworks.find((chain) => chain.features.includes('eip191') && chain.chainId === chainId)
-    ?.bech32Config?.bech32PrefixAccAddr;
-  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum, prefix);
+export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
+  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum);
   if (!metamaskOfflineSinger) return;
-  const accounts = await metamaskOfflineSinger.getAccounts();
+  const accounts = await metamaskOfflineSinger.getAccounts(isSwitchWallet);
   return accounts[0].address;
 };
