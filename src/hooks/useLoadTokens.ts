@@ -64,23 +64,25 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
       const walletType = getWalletByNetworkCosmosFromStorage();
       if (walletType === 'eip191') {
         timer[oraiAddress] = setTimeout(async () => {
-          await Promise.all([loadTokensCosmos(dispatch, '', oraiAddress), loadCw20Balance(dispatch, oraiAddress)]);
+          await Promise.all([
+            loadNativeBalance(dispatch, oraiAddress, { chainId: network.chainId, rpc: network.rpc }),
+            loadCw20Balance(dispatch, oraiAddress)
+          ]);
         }, 2000);
-        return;
+      } else {
+        const kawaiiAddress = getAddress(
+          await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+          'oraie'
+        );
+        timer[oraiAddress] = setTimeout(async () => {
+          await Promise.all([
+            loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
+            loadCw20Balance(dispatch, oraiAddress),
+            // different cointype but also require keplr connected by checking oraiAddress
+            loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
+          ]);
+        }, 2000);
       }
-
-      const kawaiiAddress = getAddress(
-        await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
-        'oraie'
-      );
-      timer[oraiAddress] = setTimeout(async () => {
-        await Promise.all([
-          loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
-          loadCw20Balance(dispatch, oraiAddress),
-          // different cointype but also require keplr connected by checking oraiAddress
-          loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
-        ]);
-      }, 2000);
     }
 
     if (metamaskAddress) {
