@@ -69,7 +69,15 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
     try {
       const result = localStorage.getItem(this.storageKey);
       const parsedResult = JSON.parse(result);
-      return parsedResult ?? { accounts: [], cosmosToEvm: {} };
+      return (
+        {
+          ...parsedResult,
+          accounts: [{ ...parsedResult.accounts[0], pubkey: this.stringToUint8Array(parsedResult.accounts[0].pubkey) }]
+        } ?? {
+          accounts: [],
+          cosmosToEvm: {}
+        }
+      );
     } catch (error) {
       console.log('error getAccountFromStorage: ', error);
       return { accounts: [], cosmosToEvm: {} };
@@ -93,26 +101,44 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
     return new MetamaskOfflineSigner(ethProvider, accounts[0], prefix);
   }
 
+  uint8ArrayToString(uint8Array) {
+    return String.fromCharCode.apply(null, uint8Array);
+  }
+
+  stringToUint8Array(str) {
+    const uint8Array = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) {
+      uint8Array[i] = str.charCodeAt(i);
+    }
+    return uint8Array;
+  }
+
   async getAccounts(): Promise<readonly AccountData[]> {
     if (this.accounts.length < 1) {
       // get from cache first
-      // const { accounts, cosmosToEvm } = this.getAccountFromStorage();
-      // if (accounts.length > 0 && cosmosToEvm[accounts[0].address]) {
-      //   this.accounts = accounts
-      //   this.cosmosToEvm[accounts[0].address] = this.ethAddress;
-      // } else {
-      const pubKey = await this.getPubkeyFromEthSignature();
-      const address = pubkeyToBechAddress(pubKey, this.prefix);
-      this.cosmosToEvm[address] = this.ethAddress;
-      this.accounts = [
-        {
-          address,
-          algo: 'secp256k1',
-          pubkey: pubKey
-        }
-      ];
-      localStorage.setItem(this.storageKey, JSON.stringify({ accounts: this.accounts, cosmosToEvm: this.cosmosToEvm }));
-      // }
+      const { accounts, cosmosToEvm } = this.getAccountFromStorage();
+      if (accounts.length > 0 && cosmosToEvm[accounts[0].address]) {
+        this.accounts = accounts;
+        this.cosmosToEvm[accounts[0].address] = this.ethAddress;
+      } else {
+        const pubKey = await this.getPubkeyFromEthSignature();
+        const address = pubkeyToBechAddress(pubKey, this.prefix);
+        this.cosmosToEvm[address] = this.ethAddress;
+        this.accounts = [
+          {
+            address,
+            algo: 'secp256k1',
+            pubkey: pubKey
+          }
+        ];
+        localStorage.setItem(
+          this.storageKey,
+          JSON.stringify({
+            accounts: [{ ...this.accounts[0], pubkey: this.uint8ArrayToString(this.accounts[0].pubkey) }],
+            cosmosToEvm: this.cosmosToEvm
+          })
+        );
+      }
     }
     console.log('newAcount: ', this.accounts);
     console.log('cosmosToEVm: ', this.cosmosToEvm);
