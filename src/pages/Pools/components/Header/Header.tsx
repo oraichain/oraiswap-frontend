@@ -65,13 +65,13 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
   const isMobileMode = isMobile();
 
   const [claimLoading, setClaimLoading] = useState(false);
-  const statisticData = getStatisticData(dataSource);
+  // const statisticData = getStatisticData(dataSource);
   const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
   const [openChart, setOpenChart] = useState(!isMobileMode);
   const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
-  const [liquidityDataChart, setLiquidityDataChart] = useState(statisticData.totalLiquidity);
-  const [volumeDataChart, setVolumeDataChart] = useState(statisticData.volume);
+  const [liquidityDataChart, setLiquidityDataChart] = useState(0);
+  const [volumeDataChart, setVolumeDataChart] = useState(0);
 
   const ORAI_INFO = {
     name: 'Orai Price',
@@ -87,7 +87,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
       name: 'Total Liquidity',
       Icon: null,
       suffix: 5.25,
-      value: liquidityDataChart || statisticData.totalLiquidity,
+      value: liquidityDataChart, // || statisticData.totalLiquidity,
       isNegative: false,
       decimal: 2,
       chart: <LiquidityChart filterDay={filterDay} onUpdateCurrentItem={setLiquidityDataChart} />,
@@ -97,7 +97,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
       name: 'Volume',
       Icon: null,
       suffix: 3.93,
-      value: volumeDataChart || statisticData.volume,
+      value: volumeDataChart, // || statisticData.volume,
       isNegative: false,
       decimal: 2,
       chart: <VolumeChart filterDay={filterDay} onUpdateCurrentItem={setVolumeDataChart} />,
@@ -149,6 +149,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
           <div>
             <ORAI_INFO.Icon />
           </div>
+          <span className={styles.priceOrai}>ORAI Price</span>
           <TokenBalance
             balance={ORAI_INFO.value}
             prefix="$"

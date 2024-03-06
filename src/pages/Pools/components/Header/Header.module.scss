@@ -20,7 +20,7 @@
 
     &_text {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: 8px;
       font-size: 24px;
 
@@ -28,6 +28,15 @@
         width: 24px;
         height: 24px;
         vertical-align: top;
+      }
+
+      .priceOrai {
+        @include theme() {
+          color: theme-get('neutral-9');
+        }
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 120%; /* 28.8px */
       }
 
       @include mobile() {
@@ -227,6 +236,7 @@
 
     @include mobile() {
       flex-direction: column;
+      padding: 16px;
     }
   }
 

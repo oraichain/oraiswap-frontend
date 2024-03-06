@@ -55,7 +55,7 @@ const VolumeChart = ({
       borderVisible: false,
       scaleMargins: {
         top: 0.1,
-        bottom: 0.05
+        bottom: 0
       }
     },
     leftPriceScale: {
