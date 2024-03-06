@@ -23,7 +23,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
-  const [, setOraiAddress] = useConfigReducer('address');
+  const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
@@ -35,7 +35,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     await handleConnectWalletByNetwork(currentWalletConnecting);
   };
 
-  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType) => {
+  const handleConnectWalletInCosmosNetwork = async (walletType: WalletCosmosType | 'eip191') => {
     try {
       if (walletType === 'leapSnap') {
         const isUnlock = await isUnlockMetamask();
@@ -49,10 +49,10 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       window.Keplr = new Keplr(walletType);
       setStorageKey('typeWallet', walletType);
       await initClient();
-
       const oraiAddr = await window.Keplr.getKeplrAddr();
       setOraiAddress(oraiAddr);
-      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr);
+      const { listAddressCosmos } = await getListAddressCosmos(oraiAddr, walletType);
+
       setCosmosAddress(listAddressCosmos);
     } catch (error) {
       console.trace({ errorCosmos: error });

@@ -1,8 +1,7 @@
-import { OfflineDirectSigner, OfflineSigner } from '@cosmjs/proto-signing';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { cosmosTokens } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
 import { NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
@@ -10,26 +9,20 @@ import { suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provid
 import { CosmjsOfflineSigner, ChainInfo as ChainInfoLeap } from '@leapwallet/cosmos-snap-provider';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
-import { chainInfoWithoutIcon, checkSnapExist, getAddressBySnap, getChainSupported } from 'helper';
+import { chainInfoWithoutIcon, checkSnapExist, getAddressByEIP191, getAddressBySnap, getChainSupported } from 'helper';
+import { MetamaskOfflineSigner } from './eip191';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await this.getKeplr();
     const snapInstalled = await checkSnapExist();
-    if (keplr) {
-      // use keplr instead
-      return await keplr.getOfflineSignerAuto(chainId);
-    } else if (snapInstalled) {
-      return new CosmjsOfflineSigner(chainId);
-    }
-
-    if (!keplr && !snapInstalled) {
-      throw new Error('Please install keplr or Metamask Leap Snap Wallet');
-    }
+    if (keplr) return await keplr.getOfflineSignerAuto(chainId);
+    if (snapInstalled) return new CosmjsOfflineSigner(chainId);
+    return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
   }
 
-  typeWallet: WalletType;
-  constructor(type: WalletType = 'keplr') {
+  typeWallet: WalletType | 'eip191';
+  constructor(type: WalletType | 'eip191' = 'keplr') {
     super();
     this.typeWallet = type;
   }
@@ -151,6 +144,12 @@ export default class Keplr extends CosmosWallet {
     // not support network.chainId (Oraichain)
     chainId = chainId ?? network.chainId;
     try {
+      if (this.typeWallet === ('eip191' as any)) {
+        // TODO: cache if type wallet is eip191 ( metamask cosmos )
+        if (chainId !== 'Oraichain') return null;
+        return getAddressByEIP191(chainId);
+      }
+
       const isEnableKeplr = await this.getKeplr();
       const isEnableLeapSnap = await getSnap();
       if (isEnableKeplr && ['keplr', 'owallet'].includes(this.typeWallet)) {

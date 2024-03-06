@@ -126,7 +126,7 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      if (walletTypeStore !== leapWalletType || isMobile()) {
+      if (![leapWalletType, 'eip191'].includes(walletTypeStore) || isMobile()) {
         window.addEventListener('keplr_keystorechange', keplrHandler);
       }
     })();

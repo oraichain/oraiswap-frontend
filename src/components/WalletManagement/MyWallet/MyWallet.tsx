@@ -53,7 +53,7 @@ export const MyWallet: React.FC<{
     (async () => {
       const listAddress = Object.values(cosmosAddresses).filter((e) => e);
       if (oraiAddress && listAddress.length < cosmosNetworksWithIcon.length) {
-        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress);
+        const { listAddressCosmos } = await getListAddressCosmos(oraiAddress, walletByNetworks.cosmos);
         setCosmosAddress(listAddressCosmos);
       }
     })();

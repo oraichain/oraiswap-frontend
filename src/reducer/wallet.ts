@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 export type WalletsByNetwork = {
-  cosmos: 'owallet' | 'keplr' | 'leapSnap';
+  cosmos: 'owallet' | 'keplr' | 'leapSnap' | 'eip191';
   evm: 'owallet' | 'metamask' | null;
   tron: 'owallet' | 'tronLink' | null;
 };

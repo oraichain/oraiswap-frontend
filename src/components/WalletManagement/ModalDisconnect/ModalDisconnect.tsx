@@ -57,6 +57,10 @@ export const ModalDisconnect: React.FC<{
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
         setOraiAddress(undefined);
+        // TODO: need to refactor later
+        if (walletByNetworks.cosmos === 'eip191') {
+          localStorage.removeItem('eip191-account');
+        }
         break;
       case 'evm':
         setMetamaskAddress(undefined);

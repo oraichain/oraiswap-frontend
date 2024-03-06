@@ -3,7 +3,7 @@ import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { genAddressCosmos, getAddress, handleCheckWallet } from 'helper';
+import { genAddressCosmos, getAddress, getWalletByNetworkCosmosFromStorage, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
@@ -60,6 +60,15 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
     if (oraiAddress) {
       clearTimeout(timer[oraiAddress]);
       // case get address when keplr ledger not support kawaii
+      // case EIP191
+      const walletType = getWalletByNetworkCosmosFromStorage();
+      if (walletType === 'eip191') {
+        timer[oraiAddress] = setTimeout(async () => {
+          await Promise.all([loadTokensCosmos(dispatch, '', oraiAddress), loadCw20Balance(dispatch, oraiAddress)]);
+        }, 2000);
+        return;
+      }
+
       const kawaiiAddress = getAddress(
         await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
         'oraie'
