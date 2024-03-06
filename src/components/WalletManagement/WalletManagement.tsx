@@ -54,9 +54,6 @@ export const WalletManagement: FC<{}> = () => {
             case 'owallet':
               isActive = isCheckOwallet;
               break;
-            case 'leapSnap':
-              isActive = isMetamask;
-              break;
             case 'metamask':
               isActive = isMetamask;
               break;

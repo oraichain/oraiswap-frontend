@@ -1,35 +1,31 @@
 import {
+  BigDecimal,
   BSC_SCAN,
+  ChainIdEnum,
+  COSMOS_CHAIN_ID_COMMON,
   CosmosChainId,
+  cosmosChains,
   ETHEREUM_SCAN,
-  HIGH_GAS_PRICE,
+  evmChains,
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
-  WalletType as WalletCosmosType,
-  ChainIdEnum,
-  BigDecimal,
-  COSMOS_CHAIN_ID_COMMON,
-  evmChains,
-  cosmosChains
+  WalletType as WalletCosmosType
 } from '@oraichain/oraidex-common';
-import { serializeError } from 'serialize-error';
 import { network } from 'config/networks';
+import { serializeError } from 'serialize-error';
 
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainIcons, chainInfos, chainInfosWithIcon } from 'config/chainInfos';
-import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
-import Keplr from 'libs/keplr';
-import { collectWallet } from 'libs/cosmjs';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
-import { GasPrice } from '@cosmjs/stargate';
-import { isMobile } from '@walletconnect/browser-utils';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { leapSnapId } from './constants';
 import { Bech32Config } from '@keplr-wallet/types';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
+import { isMobile } from '@walletconnect/browser-utils';
+import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { WalletType } from 'components/WalletManagement/walletConfig';
+import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
+import Keplr from 'libs/keplr';
+import { leapSnapId } from './constants';
 
 export interface Tokens {
   denom?: string;
@@ -101,7 +97,7 @@ export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: stri
 
 export const getAccountUrl = (account: string) => {
   return `${network.explorer}/account/${account}`;
-}
+};
 
 export const getNetworkGasPrice = async (chainId): Promise<number> => {
   try {
@@ -149,8 +145,7 @@ export const addNumber = (number1: number, number2: number) => {
 export const handleCheckWallet = async () => {
   const walletType = getWalletByNetworkCosmosFromStorage();
   const keplr = await window.Keplr.getKeplr();
-  const isSnap = await checkSnapExist();
-  if (!keplr && !isSnap && walletType !== 'eip191') {
+  if (!keplr && walletType !== 'eip191') {
     return displayInstallWallet();
   }
 };
@@ -285,9 +280,8 @@ export const switchWalletCosmos = async (type: WalletCosmosType | 'eip191') => {
   window.Keplr = new Keplr(type);
   setStorageKey('typeWallet', type);
   const isKeplr = await window.Keplr.getKeplr();
-  const isLeapSnap = await checkSnapExist();
   const isEip191 = type === 'eip191';
-  if (!isKeplr && !isLeapSnap && !isEip191) {
+  if (!isKeplr && !isEip191) {
     return displayInstallWallet();
   }
 };

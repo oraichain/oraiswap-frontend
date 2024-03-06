@@ -2,7 +2,7 @@ import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
-import { checkSnapExist, getListAddressCosmos, isUnlockMetamask, setStorageKey, switchWalletTron } from 'helper';
+import { getListAddressCosmos, setStorageKey, switchWalletTron } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -14,7 +14,6 @@ import styles from './WalletByNetwork.module.scss';
 import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { connectSnap } from '@leapwallet/cosmos-snap-provider';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 
 export type ConnectStatus = 'init' | 'confirming-switch' | 'confirming-disconnect' | 'loading' | 'failed' | 'success';

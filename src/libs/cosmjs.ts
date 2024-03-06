@@ -5,17 +5,13 @@ import { Coin, GasPrice } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
-import { CosmjsOfflineSigner } from '@leapwallet/cosmos-snap-provider';
-import { checkSnapExist } from 'helper';
 import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
-  const snapInstalled = await checkSnapExist();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
-  if (snapInstalled) return new CosmjsOfflineSigner(chainId);
   return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
 };
 
@@ -68,8 +64,7 @@ class CosmJs {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      const isEnableLeapSnap = await checkSnapExist();
-      if (keplr || isEnableLeapSnap || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && walletType === 'eip191')) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.execute(
           data.walletAddr,
@@ -100,8 +95,7 @@ class CosmJs {
     try {
       const walletType = this.getWalletByFromStorage();
       const keplr = await window.Keplr.getKeplr();
-      const isEnableLeapSnap = await checkSnapExist();
-      if (keplr || isEnableLeapSnap || (walletType && walletType === 'eip191')) {
+      if (keplr || (walletType && walletType === 'eip191')) {
         await window.Keplr.suggestChain(network.chainId);
         const result = await window.client.executeMultiple(data.walletAddr, data.msgs, 'auto', data.memo);
         return {

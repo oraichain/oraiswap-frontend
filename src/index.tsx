@@ -51,28 +51,32 @@ const rpcClient = useHttp ? new HttpClient(network.rpc) : new WebsocketClient(ne
 // @ts-ignore
 window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 
-const root = createRoot(document.getElementById('oraiswap'));
-root.render(
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <ToastProvider>
-        <Router>
-          <ScrollToTop />
-          <QueryClientProvider client={queryClient}>
-            <App />
-          </QueryClientProvider>
-        </Router>
-        <ToastContext.Consumer>
-          {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
-        </ToastContext.Consumer>
-      </ToastProvider>
-    </PersistGate>
-  </Provider>
-);
+const initApp = async () => {
+  const root = createRoot(document.getElementById('oraiswap'));
+  root.render(
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ToastProvider>
+          <Router>
+            <ScrollToTop />
+            <QueryClientProvider client={queryClient}>
+              <App />
+            </QueryClientProvider>
+          </Router>
+          <ToastContext.Consumer>
+            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+          </ToastContext.Consumer>
+        </ToastProvider>
+      </PersistGate>
+    </Provider>
+  );
 
-// init cosmwasm client when user connected cosmos wallet
-const walletType = getWalletByNetworkCosmosFromStorage();
-if (walletType) {
-  const { client } = await getCosmWasmClient({ chainId: network.chainId });
-  window.client = client;
-}
+  // init cosmwasm client when user connected cosmos wallet
+  const walletType = getWalletByNetworkCosmosFromStorage();
+  if (walletType) {
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
+  }
+};
+
+initApp();
