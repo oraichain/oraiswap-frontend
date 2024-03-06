@@ -67,6 +67,9 @@
       border-radius: 99px;
       color: $neutron-text-body-light;
 
+      // TODO: hide filter
+      display: none;
+
       @include mobile() {
         width: 100%;
         justify-content: space-between;

@@ -93,7 +93,7 @@ const PoolDetail: React.FC = () => {
   if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight || quoteToken.Icon : quoteToken.Icon;
 
   return (
-    <Content nonBackground>
+    <Content nonBackground otherBackground>
       <div className={styles.pool_detail}>
         <div className={styles.backWrapper}>
           <div
