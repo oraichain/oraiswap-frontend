@@ -58,6 +58,7 @@ import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { useFillToken } from './hooks/useFillToken';
+import useWalletReducer from 'hooks/useWalletReducer';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -88,6 +89,7 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   useGetFeeConfig();
 
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
@@ -459,10 +461,21 @@ const SwapComponent: React.FC<{
           </div>
 
           {(() => {
+            const canSwapToCosmos = originalToToken.cosmosBased && !walletByNetworks.cosmos;
+            const canSwapToEvm = !originalToToken.cosmosBased && !walletByNetworks.evm;
+            const canSwapToTron = originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+            const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
             const disabledSwapBtn =
-              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+              swapLoading ||
+              !fromAmountToken ||
+              !toAmountToken ||
+              fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+              canSwapTo;
 
             let disableMsg: string;
+            if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
+            if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
+            if (canSwapToTron) disableMsg = `Please connect tron wallet`;
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
             return (
