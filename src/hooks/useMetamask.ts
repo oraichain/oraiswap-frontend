@@ -38,23 +38,23 @@ export function useEagerConnect() {
       if (accounts && accounts?.length > 0) {
         const walletType = getWalletByNetworkCosmosFromStorage();
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-        let addrAccounts = {
-          metamaskAddress,
-          oraiAddress: undefined
-        };
+        let oraiAddress = undefined;
         if (walletType === 'eip191') {
           const isSwitchEIP = true;
-          const oraiAddress = await getAddressByEIP191(isSwitchEIP);
-          addrAccounts = {
-            ...addrAccounts,
-            oraiAddress
-          };
+          oraiAddress = await getAddressByEIP191(isSwitchEIP);
+        }
+        if (oraiAddress) {
           setOraiAddress(oraiAddress);
           setCosmosAddress({
             Oraichain: oraiAddress
           });
+          loadTokenAmounts({
+            oraiAddress
+          });
         }
-        loadTokenAmounts(addrAccounts);
+        loadTokenAmounts({
+          metamaskAddress
+        });
         setMetamaskAddress(metamaskAddress);
       } else {
         setMetamaskAddress(undefined);
