@@ -100,7 +100,7 @@ const Menu: React.FC = () => {
       {renderLink('/co-harvest', 'CO-HARVEST', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
       {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
-      {renderLink('https://beta.oraidex.io', 'BETA', () => {}, true)}
+      {/* {renderLink('https://beta.oraidex.io', 'BETA', () => {}, true)} */}
       {mobileMode ? (
         <>
           {renderLink('#', 'BUY ORAI', () => {
