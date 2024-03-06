@@ -79,9 +79,16 @@ export function useInactiveConnect() {
 
   useEffect(() => {
     const { ethereum } = window;
+    let eventTemp = null;
+
     if (ethereum && ethereum.on) {
       // ethereum.on('connect', connect);
-      ethereum.on('accountsChanged', connect);
+      ethereum.on('accountsChanged', (acc) => {
+        if (acc !== eventTemp) {
+          connect();
+          eventTemp = acc;
+        }
+      });
       return () => {
         if (ethereum.removeListener) {
           // ethereum.removeListener('connect', connect);
