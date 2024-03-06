@@ -59,6 +59,7 @@ import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { useFillToken } from './hooks/useFillToken';
 import useWalletReducer from 'hooks/useWalletReducer';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -461,9 +462,10 @@ const SwapComponent: React.FC<{
           </div>
 
           {(() => {
-            const canSwapToCosmos = originalToToken.cosmosBased && !walletByNetworks.cosmos;
-            const canSwapToEvm = !originalToToken.cosmosBased && !walletByNetworks.evm;
-            const canSwapToTron = originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+            const mobileMode = isMobile();
+            const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
+            const canSwapToEvm = !mobileMode && !originalToToken.cosmosBased && !walletByNetworks.evm;
+            const canSwapToTron = !mobileMode && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
             const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
             const disabledSwapBtn =
               swapLoading ||
