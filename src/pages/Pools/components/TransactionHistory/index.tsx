@@ -9,8 +9,8 @@ import { network } from 'config/networks';
 import { getAccountUrl, getTransactionUrl } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getUsd } from 'libs/utils';
-import { formatDateV2, formatTime, shortenAddress } from 'pages/CoHarvest/helpers';
+import { getUsd, reduceString } from 'libs/utils';
+import { formatDateV2, formatTime } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { useTransactionHistory } from 'pages/Pools/hooks/useTransactionHistory';
 import styles from './index.module.scss';
@@ -63,7 +63,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                           <div className={styles.hashWrapper}>
                             <div className={styles.titleItem}>TxHash</div>
                             <div className={styles.hash}>
-                              <span className={styles.txhash}>{shortenAddress(item.txhash || '', 4, 4)}</span>
+                              <span className={styles.txhash}>{reduceString(item.txhash || '', 4, 4)}</span>
                               <a
                                 href={getTransactionUrl(network.chainId, item.txhash || '')}
                                 target="_blank"
@@ -77,7 +77,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                             <div className={styles.titleItem}>Address</div>
                             <div className={styles.address}>
                               <span className={styles.txt}>
-                                {!item.sender ? '-' : shortenAddress(item.sender || '', 5, 5)}
+                                {!item.sender ? '-' : reduceString(item.sender || '', 5, 5)}
                               </span>
                               {!item.sender ? null : (
                                 <a href={getAccountUrl(item.sender || '')} target="_blank" rel="noopener noreferrer">
@@ -175,7 +175,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                       return (
                         <tr className={styles.item} key={index}>
                           <td className={styles.hash}>
-                            <span className={styles.txhash}>{shortenAddress(item.txhash || '', 4, 4)}</span>
+                            <span className={styles.txhash}>{reduceString(item.txhash || '', 4, 4)}</span>
                             <a
                               href={getTransactionUrl(network.chainId, item.txhash || '')}
                               target="_blank"
@@ -216,7 +216,7 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                           </td>
                           {/* <td className={styles.address}>
                             <span className={styles.txt}>
-                              {!item.sender ? '-' : shortenAddress(item.sender || '', 5, 5)}
+                              {!item.sender ? '-' : reduceString(item.sender || '', 5, 5)}
                             </span>
                             {!item.sender ? null : (
                               <a href={getAccountUrl(item.sender || '')} target="_blank" rel="noopener noreferrer">

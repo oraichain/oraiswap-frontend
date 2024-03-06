@@ -47,10 +47,6 @@ export function dateFormat(date) {
   return `${MONTHS_ARR[MONTHS_ARR.indexOf(month)]} ${day} ${year} ${time}`;
 }
 
-export function shortenAddress(address: string, start: number = 8, end: number = 7) {
-  return address.substring(0, start) + '...' + address.substring(address.length - end, address.length);
-}
-
 export const formatUTCDateString = (date) => {
   // Get the current date and time
   const currentDate = new Date(date);

@@ -2,9 +2,9 @@ import { oraichainTokens, toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as NoDataDark } from 'assets/images/nodata-bid-dark.svg';
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { getUsd } from 'libs/utils';
+import { getUsd, reduceString } from 'libs/utils';
 import { TIMER } from 'pages/CoHarvest/constants';
-import { dateFormat, shortenAddress } from 'pages/CoHarvest/helpers';
+import { dateFormat } from 'pages/CoHarvest/helpers';
 import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import styles from './index.module.scss';
 
@@ -23,7 +23,7 @@ const AllBidding = ({ list, isLoading }) => {
                 <div className={styles.right}>
                   <div className={styles.percent}>{item.premium_slot} %</div>
                   <div className={styles.info}>
-                    <div className={styles.wallet}>{shortenAddress(item.bidder)}</div>
+                    <div className={styles.wallet}>{reduceString(item.bidder, 8, 7)}</div>
                     <div>{dateFormat(new Date(item.timestamp * TIMER.MILLISECOND))}</div>
                   </div>
                 </div>
