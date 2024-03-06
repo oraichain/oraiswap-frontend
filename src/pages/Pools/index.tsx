@@ -1,20 +1,19 @@
-import Content from 'layouts/Content';
-import React, { useState } from 'react';
-import NewPoolModal from './NewPoolModal/NewPoolModal';
-import NewTokenModal from './NewTokenModal/NewTokenModal';
-import { Header } from './components/Header';
-import { ListPools } from './components/ListPool';
-import { ListPoolsMobile } from './components/ListPoolMobile';
 import { CW20_DECIMALS, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
+import Content from 'layouts/Content';
 import isEqual from 'lodash/isEqual';
+import React, { useState } from 'react';
 import { PoolInfoResponse } from 'types/pool';
+import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Filter } from './components/Filter';
+import { Header } from './components/Header';
+import { ListPools } from './components/ListPool';
+import { ListPoolsMobile } from './components/ListPoolMobile';
 import { getSymbolPools, parseAssetOnlyDenom, reverseSymbolArr } from './helpers';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import {
   useFetchCacheRewardAssetForAllPools,
   useFetchLpPoolsV3,

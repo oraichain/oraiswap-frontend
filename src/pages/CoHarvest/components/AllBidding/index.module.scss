@@ -58,9 +58,9 @@
         border: 1px solid;
 
         @include theme {
-          border-color: theme-get('primary-surface-default-dark');
+          border-color: theme-get('primary-surface-default');
           background: theme-get('primary-surface-default-subtle');
-          color: theme-get('primary-surface-default-dark');
+          color: theme-get('primary-surface-default');
         }
         font-size: 16px;
         font-weight: 500;

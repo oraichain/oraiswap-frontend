@@ -39,31 +39,31 @@
 }
 
 .secondary {
-  background-color: transparent;
-  border: 1px solid;
+  // border: 1px solid;
   padding: 14.5px 39px;
   border-radius: 99px;
 
   @include theme() {
-    border-color: theme-get('neutral-text-text-token-name');
+    background-color: theme-get('neutral-surface-bg-section-3');
+    // border-color: theme-get('neutral-text-text-token-name');
     color: theme-get('neutral-text-text-token-name');
   }
 }
 
 .secondary-sm {
-  background-color: transparent;
-  border: 1px solid;
+  // border: 1px solid;
   padding: 8px 16px;
   border-radius: 99px;
   height: 36px;
 
   @include theme() {
-    border-color: theme-get('neutral-text-text-token-name');
+    background-color: theme-get('neutral-surface-bg-section-3');
+    // border-color: theme-get('neutral-text-text-token-name');
     color: theme-get('neutral-text-text-token-name');
 
     svg {
       path {
-        fill: theme-get('neutral-text-text-token-name');
+        // fill: theme-get('neutral-text-text-token-name');
       }
     }
   }
