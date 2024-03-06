@@ -38,23 +38,25 @@ export function useEagerConnect() {
       if (accounts && accounts?.length > 0) {
         const walletType = getWalletByNetworkCosmosFromStorage();
         const metamaskAddress = ethers.utils.getAddress(accounts[0]);
-        let oraiAddress = undefined;
+        let addrAccounts = {
+          metamaskAddress,
+          oraiAddress: undefined
+        };
+
         if (walletType === 'eip191') {
           const isSwitchEIP = true;
-          oraiAddress = await getAddressByEIP191(isSwitchEIP);
-        }
-        if (oraiAddress) {
+          const oraiAddress = await getAddressByEIP191(isSwitchEIP);
+          addrAccounts = {
+            ...addrAccounts,
+            oraiAddress
+          };
           setOraiAddress(oraiAddress);
           setCosmosAddress({
             Oraichain: oraiAddress
           });
-          loadTokenAmounts({
-            oraiAddress
-          });
         }
-        loadTokenAmounts({
-          metamaskAddress
-        });
+
+        loadTokenAmounts(addrAccounts);
         setMetamaskAddress(metamaskAddress);
       } else {
         setMetamaskAddress(undefined);
@@ -79,16 +81,9 @@ export function useInactiveConnect() {
 
   useEffect(() => {
     const { ethereum } = window;
-    let eventTemp = null;
-
     if (ethereum && ethereum.on) {
       // ethereum.on('connect', connect);
-      ethereum.on('accountsChanged', (acc) => {
-        if (acc !== eventTemp) {
-          connect();
-          eventTemp = acc;
-        }
-      });
+      ethereum.on('accountsChanged', connect);
       return () => {
         if (ethereum.removeListener) {
           // ethereum.removeListener('connect', connect);
