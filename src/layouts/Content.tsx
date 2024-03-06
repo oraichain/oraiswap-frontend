@@ -5,15 +5,17 @@ import useTheme from 'hooks/useTheme';
 
 interface ContentProps {
   nonBackground?: boolean;
+  otherBackground?: boolean;
   children: any;
 }
 
-const Content: React.FC<ContentProps> = ({ children, nonBackground }) => {
+const Content: React.FC<ContentProps> = ({ children, nonBackground, otherBackground }) => {
   const theme = useTheme();
   return (
     <div
       className={classNames(styles.content, styles[theme], {
-        non_background: nonBackground
+        non_background: nonBackground,
+        otherBackground: otherBackground
       })}
     >
       {children}
