@@ -15,7 +15,7 @@ import useWalletReducer from 'hooks/useWalletReducer';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
@@ -23,6 +23,7 @@ import { PERSIST_VER } from 'store/constants';
 import Instruct from './Instruct';
 import Menu from './Menu';
 import './index.scss';
+import { NoticeBanner } from './NoticeBanner';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -198,15 +199,15 @@ const App = () => {
     }
   };
 
-  // const [openBanner, setOpenBanner] = useState(true);
+  const [openBanner, setOpenBanner] = useState(true);
 
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
         <Menu />
-        {/* <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div> */}
-        {routes()}
+        <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
+        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div>
+        {/* {routes()} */}
         {!isMobile() && <Instruct />}
         {/* {!isMobile() && <FutureCompetition />} */}
       </div>

@@ -42,6 +42,15 @@
       font-size: 14px;
     }
 
+    &.onlyText {
+      font-size: 16px;
+      font-weight: 500;
+
+      @include mobile {
+        font-size: 14px;
+      }
+    }
+
     .text {
       display: flex;
       align-items: center;
@@ -54,6 +63,16 @@
       .title {
         font-size: 18px;
         font-weight: 600;
+      }
+
+      .link {
+        font-size: 15px;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
       }
     }
   }

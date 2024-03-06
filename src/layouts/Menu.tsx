@@ -100,14 +100,13 @@ const Menu: React.FC = () => {
       {renderLink('/co-harvest', 'CO-HARVEST', setLink)}
       {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
       {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
+      {renderLink('https://beta.oraidex.io', 'BETA', () => {}, true)}
       {mobileMode ? (
         <>
-          {/* {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)} */}
           {renderLink('#', 'BUY ORAI', () => {
             setOpenBuy(true);
           })}
           {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-          {/* {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)} */}
         </>
       ) : (
         <>
@@ -129,14 +128,11 @@ const Menu: React.FC = () => {
             setVisible={() => setOtherActive(!otherActive)}
             content={
               <div className={classNames(styles.menu_others_list, styles[theme])}>
-                {/* {renderLink('https://payment.orai.io/', 'BUY ORAI', () => {}, true)} */}
-
                 {renderLink('#', 'BUY ORAI', () => {
                   setOpenBuy(true);
                   setOtherActive(!otherActive);
                 })}
                 {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-                {/* {renderLink('https://futures-legacy.oraidex.io/', 'Futures Legacy', () => {}, true)} */}
               </div>
             }
           />
