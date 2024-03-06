@@ -1,8 +1,13 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { HttpClient, Tendermint37Client, WebsocketClient } from '@cosmjs/tendermint-rpc';
+
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
+import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import mixpanel from 'mixpanel-browser';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -11,12 +16,9 @@ import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from 'store/configure';
-import mixpanel from 'mixpanel-browser';
 import './index.scss';
 import App from './layouts/App';
 import ScrollToTop from './layouts/ScrollToTop';
-import { getCosmWasmClient } from 'libs/cosmjs';
-import { getWalletByNetworkCosmosFromStorage } from 'helper';
 
 const queryClient = new QueryClient();
 
@@ -43,35 +45,34 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
   mixpanel.init(process.env.REACT_APP_MIX_PANEL_ENVIRONMENT);
 }
 
-const initApp = async () => {
-  // @ts-ignore
-  window.client = await SigningCosmWasmClient.connect(network.rpc);
+// init queryClient
+const useHttp = network.rpc.startsWith('http://') || network.rpc.startsWith('https://');
+const rpcClient = useHttp ? new HttpClient(network.rpc) : new WebsocketClient(network.rpc);
+// @ts-ignore
+window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 
-  const root = createRoot(document.getElementById('oraiswap'));
-  root.render(
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ToastProvider>
-          <Router>
-            <ScrollToTop />
-            <QueryClientProvider client={queryClient}>
-              <App />
-            </QueryClientProvider>
-          </Router>
-          <ToastContext.Consumer>
-            {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
-          </ToastContext.Consumer>
-        </ToastProvider>
-      </PersistGate>
-    </Provider>
-  );
+const root = createRoot(document.getElementById('oraiswap'));
+root.render(
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <ToastProvider>
+        <Router>
+          <ScrollToTop />
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
+        </Router>
+        <ToastContext.Consumer>
+          {(value) => <ToastContainer transition={Bounce} toastClassName={value.theme} />}
+        </ToastContext.Consumer>
+      </ToastProvider>
+    </PersistGate>
+  </Provider>
+);
 
-  // init cosmwasm client when user connected cosmos wallet
-  const walletType = getWalletByNetworkCosmosFromStorage();
-  if (walletType) {
-    const { client } = await getCosmWasmClient({ chainId: network.chainId });
-    window.client = client;
-  }
-};
-
-initApp();
+// init cosmwasm client when user connected cosmos wallet
+const walletType = getWalletByNetworkCosmosFromStorage();
+if (walletType) {
+  const { client } = await getCosmWasmClient({ chainId: network.chainId });
+  window.client = client;
+}

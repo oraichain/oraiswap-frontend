@@ -27,9 +27,8 @@ const getCosmWasmClient = async (
     const { chainId, rpc, signer } = config;
     const wallet = signer ?? (await collectWallet(chainId));
     const defaultAddress = (await wallet.getAccounts())[0];
-    const tmClient = await Tendermint37Client.connect(rpc ?? (network.rpc as string));
     const client = await cosmwasm.SigningCosmWasmClient.createWithSigner(
-      tmClient,
+      window.client.tmClient,
       wallet,
       options ?? {
         gasPrice: GasPrice.fromString(network.fee.gasPrice + network.denom)
