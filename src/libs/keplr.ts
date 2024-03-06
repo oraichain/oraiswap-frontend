@@ -9,8 +9,15 @@ import { suggestChain as suggestChainLeap } from '@leapwallet/cosmos-snap-provid
 import { CosmjsOfflineSigner, ChainInfo as ChainInfoLeap } from '@leapwallet/cosmos-snap-provider';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { CosmosChainId, CosmosWallet } from '@oraichain/oraidex-common';
-import { chainInfoWithoutIcon, checkSnapExist, getAddressByEIP191, getAddressBySnap, getChainSupported } from 'helper';
-import { MetamaskOfflineSigner } from './eip191';
+import {
+  chainInfoWithoutIcon,
+  checkSnapExist,
+  getAddress,
+  getAddressByEIP191,
+  getAddressBySnap,
+  getChainSupported
+} from 'helper';
+import { EIP_EIP_STORAGE_KEY_ACC, MetamaskOfflineSigner } from './eip191';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
@@ -146,7 +153,14 @@ export default class Keplr extends CosmosWallet {
     try {
       if (this.typeWallet === ('eip191' as any)) {
         // TODO: cache if type wallet is eip191 ( metamask cosmos )
-        if (chainId !== 'Oraichain') return null;
+
+        // use for universal swap from oraichain to EVM
+        if (chainId === 'oraibridge-subnet-2') {
+          const result = localStorage.getItem(EIP_EIP_STORAGE_KEY_ACC);
+          const parsedResult = JSON.parse(result);
+          const oraiAddress = parsedResult ? parsedResult.accounts[0].address : null;
+          return getAddress(oraiAddress, 'oraib');
+        }
         return getAddressByEIP191();
       }
 

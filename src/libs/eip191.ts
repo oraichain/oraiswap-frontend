@@ -48,6 +48,7 @@ export interface IEthProvider {
 }
 
 const GET_COSMOS_ADDRESS_MESSAGE = 'Get cosmos address';
+export const EIP_EIP_STORAGE_KEY_ACC = 'eip191-account';
 
 type CosmosToEvm = {
   [key: string]: string;
@@ -56,7 +57,6 @@ type CosmosToEvm = {
 export class MetamaskOfflineSigner implements OfflineAminoSigner {
   cosmosToEvm: CosmosToEvm = {};
   accounts: AccountData[] = [];
-  storageKey: string = 'eip191-account';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private constructor(
@@ -67,7 +67,7 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
 
   public getAccountFromStorage() {
     try {
-      const result = localStorage.getItem(this.storageKey);
+      const result = localStorage.getItem(EIP_EIP_STORAGE_KEY_ACC);
       const parsedResult = JSON.parse(result);
       return (
         {
@@ -132,7 +132,7 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
           }
         ];
         localStorage.setItem(
-          this.storageKey,
+          EIP_EIP_STORAGE_KEY_ACC,
           JSON.stringify({
             accounts: [{ ...this.accounts[0], pubkey: this.uint8ArrayToString(this.accounts[0].pubkey) }],
             cosmosToEvm: this.cosmosToEvm
