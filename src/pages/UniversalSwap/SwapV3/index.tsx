@@ -367,7 +367,7 @@ const SwapComponent: React.FC<{
   useEffect(() => {
     const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
     getAddressTransfer(findNetwork);
-  }, [originalToToken]);
+  }, [originalToToken, oraiAddress]);
 
   const getAddressTransfer = async (network: CustomChainInfo) => {
     let address: string = '';
