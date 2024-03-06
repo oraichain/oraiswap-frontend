@@ -41,7 +41,9 @@
     }
 
     .percent {
-      background: #5ea402;
+      @include theme {
+        background: theme-get('primary-highlight-section');
+      }
       border-radius: 99px;
     }
   }

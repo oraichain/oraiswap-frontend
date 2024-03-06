@@ -44,6 +44,7 @@
       color: var(--colors-neutral-text-text-btn-default, #163300);
     }
     .title {
+      white-space: nowrap;
       font-size: 14px;
       font-style: normal;
       font-weight: 400;

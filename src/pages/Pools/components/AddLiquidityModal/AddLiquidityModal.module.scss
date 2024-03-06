@@ -182,9 +182,9 @@
         padding: 24px 16px;
         border-radius: 8px;
 
-        color: $primary-surface-default;
-        border: 1px solid $primary-text-link;
-        background: $primary-surface-default-subtle;
+        color: $primary-text-highlight;
+        border: 1px solid $primary-border-highlight;
+        background: $primary-surface-default-subtle-2;
 
         &.light {
           color: $primary-surface-default-light;

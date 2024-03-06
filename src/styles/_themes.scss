@@ -36,6 +36,10 @@ $primary-surface-light-default: #efefef;
 
 $primary-banner-default: #c9ff85;
 
+$primary-surface-default-subtle-2: #292f23;
+$primary-border-highlight: #89a571;
+$primary-text-highlight: #d7f5bf;
+
 // for dark-light mode
 $themes: (
   dark: ('text-color': white,
@@ -95,15 +99,17 @@ $themes: (
     'neutral-text-text-token-name': #f7f7f7,
     'neutral-surface-bg-section-2': #31332e,
     'neutral-border-border-bold': #494949,
-    'primary-surface-default': #92e54c,
+    'primary-surface-default': #d7f5bf,
     'neutral-surface-bg': #121511,
+    'neutral-surface-bg-2': #181a17,
     'neutral-text-body-on-section': #979995,
     'neutral-text-text-btn-default': #163300,
     'neutral-surface-bg-toast': #232521,
     'neutral-surface-bg-dropdown-hover': #494949,
     'success-surface-default': #00ad26,
     'primary-surface-default-dark': #92e54c,
-    'primary-surface-default-subtle': #111900,
+    'primary-surface-default-subtle': #292f23,
+    'primary-surface-default-subtle-2': #152703,
     'primary-surface-default-light': #e5f7d6,
     'neutral-text-text-dropdown': #f7f7f7,
     'neutral-surface-bg-section-3': #31332e,
@@ -111,11 +117,14 @@ $themes: (
     'neutral-surface-bg-section-active': #494949,
     'warning-surface-default': #e6cf00,
     'basic-primary-surface-default': #ffffff,
-    'primary-text-text-link': #78ca11,
+    'primary-text-text-link': #89a571,
+    'primary-highlight-section': #aee67f,
     'primary-surface-default-dark-2': #2f5711,
+    'primary-surface-default-dark-3': #aee67f,
     'bg-section-05': #1b1c1a,
     'neutral-text-text-disabled': #494949,
     'neutral-surface-bg-modal': #232521,
+    'bg-overlay-section': rgba(7, 10, 19, 0.4),
     'bg-iframe-modal': #0a121f),
   light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
@@ -175,7 +184,8 @@ $themes: (
     'neutral-border-border-bold': #dfe0de,
     'primary-surface-default': #2f5711,
     'neutral-surface-bg': #fff,
-    'neutral-text-body-on-section': #686A66,
+    'neutral-surface-bg-2': #fff,
+    'neutral-text-body-on-section': #686a,
     'neutral-text-text-token-name': #232521,
     'neutral-text-text-btn-default': #232521,
     'neutral-surface-bg-toast': #f7f7f7,
@@ -183,6 +193,7 @@ $themes: (
     'neutral-surface-bg-dropdown-hover': #efefef,
     'primary-surface-default-dark': #2f5711,
     'primary-surface-default-subtle': #eef9e5,
+    'primary-surface-default-subtle-2': #eef9e5,
     'primary-surface-default-light': #e5f7d6,
     'neutral-text-text-dropdown': #232521,
     'neutral-surface-bg-section-3': #efefef,
@@ -191,9 +202,12 @@ $themes: (
     'warning-surface-default': #979995,
     'basic-primary-surface-default': #000000,
     'primary-text-text-link': #5ea402,
+    'primary-highlight-section': #5ea402,
     'primary-surface-default-dark-2': #000,
+    'primary-surface-default-dark-3': #2f5711,
     'bg-section-05': #f7f7f7,
     'neutral-text-text-disabled': #c7c8c6,
     'neutral-surface-bg-modal': #fff,
+    'bg-overlay-section': rgba(255, 255, 255, 0.5),
     'bg-iframe-modal': #fff)
 );
