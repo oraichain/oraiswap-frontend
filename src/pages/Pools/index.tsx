@@ -138,7 +138,7 @@ const Pools: React.FC<{}> = () => {
   };
 
   return (
-    <Content nonBackground>
+    <Content nonBackground otherBackground>
       <div className={styles.pools}>
         <Header dataSource={pools} />
         <div>

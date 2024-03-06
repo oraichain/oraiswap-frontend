@@ -235,7 +235,7 @@ export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) =
         </div>
         <div className={styles.header_claim_reward}>
           <div className={styles.claim_reward_bg}>
-            <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+            {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
           </div>
           <Button
             type="primary-sm"
