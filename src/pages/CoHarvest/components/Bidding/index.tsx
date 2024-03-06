@@ -13,7 +13,7 @@ import { getTransactionUrl, handleErrorTransaction } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd } from 'libs/utils';
-import { INIT_AMOUNT_SIMULATE, TIMER } from 'pages/CoHarvest/constants';
+import { INIT_AMOUNT_SIMULATE, TF_PRICE_CHANGE, TIMER } from 'pages/CoHarvest/constants';
 import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
 import {
   useGetAllBidPoolInRound,
@@ -30,17 +30,16 @@ import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
 
-const Bidding = ({
-  openExplainModal,
-  isEnd,
-  round,
-  isStarted
-}: {
+export type BiddingProps = {
   openExplainModal: () => void;
   isEnd: boolean;
   round: number;
   isStarted: boolean;
-}) => {
+  isCurrentRound: boolean;
+  backToCurrentRound: () => void;
+};
+
+const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, backToCurrentRound }: BiddingProps) => {
   const [range, setRange] = useState(1);
   const [amount, setAmount] = useState();
   const amounts = useSelector((state: RootState) => state.token.amounts);
@@ -93,9 +92,34 @@ const Bidding = ({
 
   const insufficientFund = amount && amount > toDisplay(balance);
 
+  const coingeckoOraixPrice = prices[ORAIX_TOKEN_INFO.coinGeckoId] || '0';
+
+  if (!isCurrentRound) {
+    return (
+      <div className={`${styles.bidding} ${styles.inPast}`}>
+        <div className={styles.title}>
+          <span>ROUND #{round}</span>
+        </div>
+
+        <div className={styles.contentPast}>
+          <span>This round has ended. Please proceed to the current round to place your bid.</span>
+          <Button type="primary" onClick={() => backToCurrentRound()}>
+            Go to Current round
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.bidding}>
-      <div className={styles.title}>Co-Harvest #{round}</div>
+      <div className={styles.title}>
+        <span>ROUND #{round}</span>
+        <div className={styles.priceOraix}>
+          <div>{theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}</div>
+          <span className={styles.price}>{formatDisplayUsdt(coingeckoOraixPrice)}</span>
+        </div>
+      </div>
       <div className={styles.content}>
         <InputBalance balance={balance} amount={amount} onChangeAmount={setAmount} />
         <div className={styles.interest}>

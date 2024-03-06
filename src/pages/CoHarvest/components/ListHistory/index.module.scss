@@ -1,0 +1,150 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.listHistory {
+  // margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  margin-bottom: 40px;
+
+  .title {
+    @include theme {
+      color: theme-get('sea-stone-200');
+    }
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 150%;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+
+    color: #979995;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 150%;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 415px;
+    height: 100%;
+
+    gap: 8px;
+
+    .bidItem {
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 12px;
+
+      @include theme {
+        background: theme-get('neutral-surface-bg-toast');
+        color: theme-get('neutral-9');
+      }
+
+      &.active {
+        border: 2px solid;
+
+        @include theme() {
+          background: theme-get('primary-surface-default-subtle');
+          border-color: theme-get('primary-text-text-link');
+        }
+      }
+
+      .info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 150%;
+
+        @include theme {
+          color: theme-get('sea-stone-200');
+        }
+
+        .status {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .ONGOING {
+          color: #ad9c00;
+        }
+
+        .ENDED {
+          color: #979995;
+        }
+      }
+
+      .value {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 100%;
+
+        @include theme {
+          color: theme-get('neutral-9');
+        }
+
+        svg {
+          width: 14px;
+          height: 14px;
+          vertical-align: middle;
+          margin-right: 4px;
+        }
+
+        .usdc,
+        .oraix {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+      }
+    }
+  }
+
+  .loadMore {
+    padding: 8px 16px;
+
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    text-decoration-line: underline;
+
+    span {
+      cursor: pointer;
+    }
+  }
+
+  .loadingDivWrapper {
+    border-radius: 24px;
+    background: rgba(79, 79, 79, 0.5);
+  }
+}
