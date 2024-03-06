@@ -56,13 +56,25 @@ type CosmosToEvm = {
 export class MetamaskOfflineSigner implements OfflineAminoSigner {
   cosmosToEvm: CosmosToEvm = {};
   accounts: AccountData[] = [];
+  storageKey: string = 'eip191-account';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private constructor(
     public readonly ethProvider: IEthProvider,
     public readonly ethAddress: string,
-    public readonly prefix: string = 'cosmos'
+    public readonly prefix: string = 'orai'
   ) {}
+
+  public getAccountFromStorage() {
+    try {
+      const result = localStorage.getItem(this.storageKey);
+      const parsedResult = JSON.parse(result);
+      return parsedResult ?? { accounts: [], cosmosToEvm: {} };
+    } catch (error) {
+      console.log('error getAccountFromStorage: ', error);
+      return { accounts: [], cosmosToEvm: {} };
+    }
+  }
 
   public static async connect(ethProvider: IEthProvider, prefix: string = 'orai'): Promise<MetamaskOfflineSigner> {
     // all address in the metamask
@@ -83,6 +95,12 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
 
   async getAccounts(): Promise<readonly AccountData[]> {
     if (this.accounts.length < 1) {
+      // get from cache first
+      // const { accounts, cosmosToEvm } = this.getAccountFromStorage();
+      // if (accounts.length > 0 && cosmosToEvm[accounts[0].address]) {
+      //   this.accounts = accounts
+      //   this.cosmosToEvm[accounts[0].address] = this.ethAddress;
+      // } else {
       const pubKey = await this.getPubkeyFromEthSignature();
       const address = pubkeyToBechAddress(pubKey, this.prefix);
       this.cosmosToEvm[address] = this.ethAddress;
@@ -93,7 +111,11 @@ export class MetamaskOfflineSigner implements OfflineAminoSigner {
           pubkey: pubKey
         }
       ];
+      localStorage.setItem(this.storageKey, JSON.stringify({ accounts: this.accounts, cosmosToEvm: this.cosmosToEvm }));
+      // }
     }
+    console.log('newAcount: ', this.accounts);
+    console.log('cosmosToEVm: ', this.cosmosToEvm);
     return this.accounts;
   }
 
