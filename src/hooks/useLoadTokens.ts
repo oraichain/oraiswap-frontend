@@ -3,7 +3,7 @@ import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
 import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { genAddressCosmos, getAddress, handleCheckWallet } from 'helper';
+import { genAddressCosmos, getAddress, getWalletByNetworkCosmosFromStorage, handleCheckWallet } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
@@ -56,39 +56,54 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 
 const timer = {};
 async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
-  if (oraiAddress) {
-    clearTimeout(timer[oraiAddress]);
-    // case get address when keplr ledger not support kawaii
-    const kawaiiAddress = getAddress(
-      await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
-      'oraie'
-    );
-    timer[oraiAddress] = setTimeout(async () => {
-      await Promise.all([
-        loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
-        loadCw20Balance(dispatch, oraiAddress),
-        // different cointype but also require keplr connected by checking oraiAddress
-        loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
-      ]);
-    }, 2000);
-  }
+  try {
+    if (oraiAddress) {
+      clearTimeout(timer[oraiAddress]);
+      // case get address when keplr ledger not support kawaii
+      // case EIP191
+      const walletType = getWalletByNetworkCosmosFromStorage();
+      if (walletType === 'eip191') {
+        timer[oraiAddress] = setTimeout(async () => {
+          await Promise.all([
+            loadNativeBalance(dispatch, oraiAddress, { chainId: network.chainId, rpc: network.rpc }),
+            loadCw20Balance(dispatch, oraiAddress)
+          ]);
+        }, 2000);
+      } else {
+        const kawaiiAddress = getAddress(
+          await window.Keplr.getKeplrAddr(COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID),
+          'oraie'
+        );
+        timer[oraiAddress] = setTimeout(async () => {
+          await Promise.all([
+            loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
+            loadCw20Balance(dispatch, oraiAddress),
+            // different cointype but also require keplr connected by checking oraiAddress
+            loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
+          ]);
+        }, 2000);
+      }
+    }
 
-  if (metamaskAddress) {
-    clearTimeout(timer[metamaskAddress]);
-    timer[metamaskAddress] = setTimeout(() => {
-      loadEvmAmounts(dispatch, metamaskAddress, evmChains);
-    }, 2000);
-  }
+    if (metamaskAddress) {
+      clearTimeout(timer[metamaskAddress]);
+      timer[metamaskAddress] = setTimeout(() => {
+        loadEvmAmounts(dispatch, metamaskAddress, evmChains);
+      }, 2000);
+    }
 
-  if (tronAddress) {
-    clearTimeout(timer[tronAddress]);
-    timer[tronAddress] = setTimeout(() => {
-      loadEvmAmounts(
-        dispatch,
-        tronToEthAddress(tronAddress),
-        chainInfos.filter((c) => c.chainId == '0x2b6653dc')
-      );
-    }, 2000);
+    if (tronAddress) {
+      clearTimeout(timer[tronAddress]);
+      timer[tronAddress] = setTimeout(() => {
+        loadEvmAmounts(
+          dispatch,
+          tronToEthAddress(tronAddress),
+          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+        );
+      }, 2000);
+    }
+  } catch (error) {
+    console.log('error load balance: ', error);
   }
 }
 

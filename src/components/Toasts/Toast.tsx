@@ -31,7 +31,8 @@ export enum TToastType {
   TX_INFO,
   KEPLR_FAILED,
   METAMASK_FAILED,
-  TRONLINK_FAILED
+  TRONLINK_FAILED,
+  WALLET_FAILED
 }
 
 interface IToastExtra {
@@ -81,6 +82,11 @@ export type DisplayToastFn = ((
     type: TToastType.TX_INFO,
     extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>>,
     options?: Partial<ToastOptions>
+  ) => void) &
+  ((
+    type: TToastType.WALLET_FAILED,
+    extraData?: Partial<Pick<IToastExtra, 'message' | 'customLink' | 'textLink'>>,
+    options?: Partial<ToastOptions>
   ) => void);
 
 export interface DisplayToast {
@@ -104,7 +110,6 @@ export const displayToast: DisplayToastFn = (
     ...refinedOptions,
     closeOnClick: true
   } as ToastOptions;
-
   switch (type) {
     case TToastType.TX_INFO:
       return toast(
@@ -136,6 +141,8 @@ export const displayToast: DisplayToastFn = (
       return toast(<ToastMetamaskFailed message={inputExtraData.message} />, inputOptions);
     case TToastType.TRONLINK_FAILED:
       return toast(<ToastTronLinkFailed message={inputExtraData.message} />, inputOptions);
+    case TToastType.WALLET_FAILED:
+      return toast(<ToastWalletFailed message={inputExtraData.message} />, inputOptions);
     default:
       return console.error(`Undefined toast type - ${type}`);
   }
@@ -204,6 +211,16 @@ const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({ message }
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Tronlink failed</h6>
+      <p>{message}</p>
+    </section>
+  </div>
+);
+
+const ToastWalletFailed: FunctionComponent<{ message: string }> = ({ message }) => (
+  <div className={styles.toast_content}>
+    <FailedIcon />
+    <section className={styles.toast_section}>
+      <h6>Wallet failed</h6>
       <p>{message}</p>
     </section>
   </div>
