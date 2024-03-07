@@ -14,7 +14,7 @@ import {
   ORAIDEX_BID_POOL_CONTRACT
 } from '@oraichain/oraidex-common';
 
-const ORAIDEX_STAKING_CONTRACT = 'orai1ched6d3mn7lewwhr6jk8u7njyjjuyz367mrtm7t7w3khhlx5w5ssk3ccye';
+const ORAIDEX_STAKING_CONTRACT = 'orai1sue8uxvwl4dsdz78zh3ugmxxpcvzt5nyw7f9m3g30eerr6nz7d6s6egk5h';
 
 export const network: CustomChainInfo & NetworkConfig = {
   ...oraichainNetwork,

@@ -45,8 +45,12 @@
     font-weight: 400;
     line-height: 100%;
 
+    // @include theme {
+    //   color: theme-get('primary-surface-default-dark');
+    // }
+
     @include theme {
-      color: theme-get('primary-surface-default-dark');
+      color: theme-get('primary-text-text-link');
     }
 
     @include small-mobile {
