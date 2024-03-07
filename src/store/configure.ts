@@ -3,6 +3,7 @@ import tokenReducer from '../reducer/token';
 import configReducer from '../reducer/config';
 import pairInfosReduce from '../reducer/pairs';
 import tradingReducer from '../reducer/tradingSlice';
+import walletReducer from '../reducer/wallet';
 import poolChartReducer from '../reducer/poolChartSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   token: tokenReducer,
   pairInfos: pairInfosReduce,
   trading: tradingReducer,
+  wallet: walletReducer,
   poolChart: poolChartReducer
 });
 

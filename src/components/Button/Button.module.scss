@@ -39,7 +39,7 @@
 }
 
 .secondary {
-  // border: 1px solid;
+  border: 1px solid;
   padding: 14.5px 39px;
   border-radius: 99px;
 
@@ -51,7 +51,7 @@
 }
 
 .secondary-sm {
-  // border: 1px solid;
+  border: 1px solid;
   padding: 8px 16px;
   border-radius: 99px;
   height: 36px;
@@ -73,6 +73,20 @@
   line-height: 150%;
 
   white-space: nowrap;
+}
+
+.disable-sm {
+  background-color: #EFEFEF;
+  color: #979995;
+
+  @include theme() {
+    color: theme-get('neutral-text-body');
+    background-color: theme-get('neutral-surface-bg-section-2');
+  }
+}
+
+.disable-sm.dark {
+  background-color: #31332E;
 }
 
 .third {

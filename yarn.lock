@@ -2983,9 +2983,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.58":
-  version "1.0.70"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.70.tgz#ec68f38b43b25affcec684183bc6514e86520aa1"
-  integrity sha512-DZY5M/4JGwhEZJULHE+rfoET7dAw8FpnS/M3404xZ/GV1q9t6935M0qSzNiy2yk4PHJaWq+DxN8hPAYiiSTe9Q==
+  version "1.0.73"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.73.tgz#e6de6d0bfb82eff54e02fb621770d6bae60c4720"
+  integrity sha512-nz06M/dMaiZQAbmJLu2ReeDg99AT0UG0uPJPRgTCshXCN0NmnQtv4hGpxHn4j0Hj0SqUHv6mobK5Seo5aos3Gg==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
@@ -3006,14 +3006,14 @@
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
 "@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26", "@oraichain/oraidex-contracts-sdk@^1.0.30":
-  version "1.0.31"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
-  integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
+  version "1.0.35"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.35.tgz#d8231d3af62172bd488d364c7ced238393f26695"
+  integrity sha512-c4qyt6CUEdI4+NgX4vWmVVctcQqEle0S6ExKp+d94C5UsRBELxvmJWkCZczvtTtLEvSsydv+7PKwrPoROgV2BA==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.54"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.54.tgz#51ca11b0a2ad56450e54b96f7993ba5ae1df74f8"
-  integrity sha512-MKG9yL1FXqc1k43i0g1S6lUiefvcnQZ8DsSVMf/7b4d9GCDiHOJhrRKOzWVwoH3Lew+Ly8IGwi8KmJm5dKcu9w==
+  version "1.0.57"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.57.tgz#ef79a8bccae8289e867ff0ba78337b5ac2c9f709"
+  integrity sha512-tPF/oGF6QnOhVgSwdwcQWPDTe/H4hmh1V08EQoK0AYpQeQPy+O1vxnP4kX7g6v5cI3lMYxPkZohYRKeZ24Fk7g==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"

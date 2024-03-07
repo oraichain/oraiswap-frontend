@@ -42,8 +42,7 @@ $primary-text-highlight: #d7f5bf;
 
 // for dark-light mode
 $themes: (
-  dark: (
-    'text-color': white,
+  dark: ('text-color': white,
     'text-color-secondary': #fff,
     'bg-connect-wallet': #232521,
     'text-color-third': #fff,
@@ -126,10 +125,8 @@ $themes: (
     'neutral-text-text-disabled': #494949,
     'neutral-surface-bg-modal': #232521,
     'bg-overlay-section': rgba(7, 10, 19, 0.4),
-    'bg-iframe-modal': #0a121f
-  ),
-  light: (
-    'text-color': #272b30,
+    'bg-iframe-modal': #0a121f),
+  light: ('text-color': #272b30,
     'bg-connect-wallet': #f7f7f7,
     'text-color-secondary': #a871df,
     'text-color-third': #484d56,
@@ -212,6 +209,5 @@ $themes: (
     'neutral-text-text-disabled': #c7c8c6,
     'neutral-surface-bg-modal': #fff,
     'bg-overlay-section': rgba(255, 255, 255, 0.5),
-    'bg-iframe-modal': #fff
-  )
+    'bg-iframe-modal': #fff)
 );

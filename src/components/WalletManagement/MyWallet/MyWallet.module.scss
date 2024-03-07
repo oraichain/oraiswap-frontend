@@ -1,0 +1,210 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+
+.myWallets {
+  width: 25%;
+  max-width: 350px;
+  height: 100vh;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 1020;
+  overflow: auto;
+  transition: right 0.4s ease-in-out;
+  background-color: #fff;
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+  border-left: 1px solid;
+
+  @include theme() {
+    border-left-color: theme-get('neutral-border-border-bold');
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #EFEFEF;
+
+    .balance {
+      @include theme() {
+        color: theme-get('neutral-text-title');
+      }
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+
+  .myWalletsWrapper {
+    display: flex;
+    flex-direction: column;
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      padding-bottom: 16px;
+
+      .toggleMode {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .toggleModeIcon {
+          justify-content: space-between;
+          display: flex;
+          align-items: center;
+
+          .text {
+            font-weight: 500;
+            font-size: 12px;
+            line-height: 100%;
+
+            @include theme() {
+              color: theme-get('neutral-text-title');
+            }
+          }
+        }
+      }
+    }
+
+    .listAddressByNetwork {
+      background-color: #f7f7f7;
+      border-radius: 8px;
+
+      &>div:last-child {
+        border-bottom: none;
+      }
+
+      .addressByNetworkItem {
+        border-bottom: 1px solid #DFE0DE;
+
+        .addressByChainInNetwork {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 8px;
+
+          .left {
+            display: flex;
+            align-items: center;
+            gap: 29px;
+
+            .icon {
+              position: relative;
+              width: fit-content;
+
+              .iconWalletByChain {
+                position: absolute;
+                bottom: -4px;
+                right: -13px;
+                border-radius: 50%;
+                padding: 2px;
+                width: 24px;
+                height: 24px;
+              }
+            }
+
+            .info {
+              .chainName {
+                font-size: 15px;
+                font-style: normal;
+                font-weight: 500;
+                line-height: 150%;
+
+                @include theme() {
+                  color: theme-get('neutral-text-text-token-name');
+                }
+
+              }
+
+              .chainAddress {
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 150%;
+                letter-spacing: 0.013px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                @include theme() {
+                  color: theme-get('neutral-text-body-on-section');
+                }
+
+                .copyBtn {
+                  display: flex;
+                  cursor: pointer;
+
+                  @include theme() {
+                    color: theme-get('neutral-text-body-on-section');
+                  }
+                }
+              }
+            }
+          }
+
+          .right {
+            .disconnectBtn {
+              padding: 6px;
+              border-radius: 50%;
+              background-color: transparent;
+              display: flex;
+              cursor: pointer;
+
+              &:hover {
+                @include theme() {
+                  background-color: theme-get('neutral-border-border-bold');
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+  }
+}
+
+.open {
+  right: 0;
+}
+
+.close {
+  right: -25%;
+}
+
+.dark {
+  background: #121511;
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.05);
+
+  .header {
+    border-bottom: 1px solid #232521;
+  }
+
+  .myWalletsWrapper {
+    .listAddressByNetwork {
+      background-color: #222521;
+
+      .addressByNetworkItem {
+        border-bottom: 1px solid #494949;
+
+        .addressByChainInNetwork {
+          .left {
+            .icon {
+              .iconWalletByChain {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
