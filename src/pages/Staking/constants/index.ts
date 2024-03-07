@@ -26,17 +26,5 @@ export enum STAKE_TAB {
   UnStake = 'Unstake'
 }
 
-// export const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
-// export const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
-
-// TODO: HARDCODE ORAIX_STAKING_TEST
-export const ORAIX_TOKEN_INFO = {
-  ...oraichainTokens.find((e) => e.coinGeckoId === 'oraidex'),
-  contractAddress: 'orai16n6xlcda2grn6wt0h9247mexnm638evdj4sam022zh8zlhewkr4s02gc9t',
-  denom: 'oraix_test'
-};
-
-export const USDC_TOKEN_INFO = {
-  ...oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin'),
-  contractAddress: 'orai186yw5xzyge8hf0u5fyp0532ggpsa8dsupken50phz6vhha2u5x7sjk4vzj'
-};
+export const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
+export const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');

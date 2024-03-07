@@ -29,6 +29,10 @@
       border: 2px solid #000;
       background: $primary-banner-default;
 
+      &.inPast {
+        background: $primary-surface-light-default;
+      }
+
       .value {
         display: flex;
         flex-direction: column;

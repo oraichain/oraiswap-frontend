@@ -1,0 +1,57 @@
+.chooseWalletModalContainer {
+  z-index: 1021;
+
+  .chooseWalletModalWrapper {
+    width: 580px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #232521;
+    border-radius: 12px;
+    padding: 24px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      margin-bottom: 24px;
+
+      .closeIcon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    .listWalletNetworkWrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+    }
+  }
+}
+
+.dark {
+  .chooseWalletModalWrapper {
+    color: #f7f7f7;
+    background: #121511;
+
+    .wallets_wrapper {
+      .wallet_item {
+        &:hover {
+          background: #31332e;
+        }
+      }
+    }
+  }
+}

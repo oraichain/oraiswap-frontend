@@ -1,0 +1,116 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.chartDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+
+    .tabWrapper {
+      display: flex;
+      height: 36px;
+      padding: 4px;
+      align-items: center;
+      gap: 4px;
+      border-radius: 99px;
+      color: $neutron-text-body-light;
+
+      @include mobile() {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      @include theme() {
+        background: theme-get('neutral-border-border-default');
+      }
+
+      .tab {
+        display: flex;
+        padding: 0px 24px;
+
+        height: 28px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        border-radius: 99px;
+
+        width: 100%;
+
+        &.active {
+          background: $white-color;
+
+          @include theme() {
+            color: theme-get('neutral-text-text-btn-default');
+          }
+        }
+      }
+    }
+
+    .filter_day_wrapper {
+      display: flex;
+      height: 36px;
+      padding: 4px;
+      align-items: center;
+      gap: 4px;
+      border-radius: 99px;
+      color: $neutron-text-body-light;
+
+      @include mobile() {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      @include theme() {
+        background: theme-get('neutral-border-border-default');
+      }
+
+      .filter_day {
+        display: flex;
+        padding: 0px 24px;
+        height: 28px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        border-radius: 99px;
+
+        width: 100%;
+
+        &.active {
+          background: $white-color;
+
+          @include theme() {
+            color: theme-get('neutral-text-text-btn-default');
+          }
+        }
+      }
+    }
+  }
+
+  .chartWrapper {
+    .chartItem {
+      display: none;
+      border-radius: 12px;
+      margin-top: 0px;
+
+      // @include theme {
+      //   background: theme-get('neutral-surface-bg-2');
+      // }
+
+      &.activeChart {
+        display: block;
+      }
+    }
+  }
+}

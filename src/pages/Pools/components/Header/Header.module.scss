@@ -13,12 +13,32 @@
     flex-wrap: wrap;
     margin-bottom: 16px;
 
-    // TODO: disable when has filter day
-    @include mobile() {
-      display: none;
-    }
+    // // TODO: disable when has filter day
+    // @include mobile() {
+    //   display: none;
+    // }
 
     &_text {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      font-size: 24px;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        vertical-align: top;
+      }
+
+      .priceOrai {
+        @include theme() {
+          color: theme-get('neutral-9');
+        }
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 120%; /* 28.8px */
+      }
+
       @include mobile() {
         display: none;
       }
@@ -44,9 +64,17 @@
       border-radius: 99px;
       color: $neutron-text-body-light;
 
+      // TODO: hide filter
+      display: none;
+
       @include mobile() {
+        margin-top: 80px;
         width: 100%;
         justify-content: space-between;
+      }
+
+      @include small-mobile {
+        margin-top: 0px;
       }
 
       @include theme() {
@@ -93,24 +121,70 @@
       display: flex;
       padding: 16px;
       flex-direction: column;
-      gap: 8px;
       flex: 1 0 0;
+      // transition: all ease-in-out 0.5s;
+
+      // &.activeChart {
+      //   gap: 16px;
+      // }
 
       color: $neutron-text-body-light;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%;
-      /* 24px */
+      line-height: 100%;
 
       @include mobile() {
         width: 100%;
       }
 
+      .info {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          gap: 16px;
+        }
+      }
+
+      .chart {
+        // display: none;
+        max-height: 0px;
+        padding: 0px 16px;
+        border-radius: 12px;
+        margin-top: 0px;
+
+        overflow: hidden;
+        transition: max-height ease-in-out 0.5s, padding ease-in-out 0.5s, margin-top ease-in-out 0.5s;
+
+        @include theme {
+          background: theme-get('neutral-surface-bg-2');
+        }
+
+        &.active {
+          // display: block;
+          padding: 16px;
+          margin-top: 16px;
+          max-height: 300px;
+        }
+      }
+
       &:nth-child(even) {
+        border-start-end-radius: 12px;
+        border-end-end-radius: 12px;
 
         // odd
         @include theme() {
           background-color: theme-get('neutral-surface-bg-section-3');
+        }
+
+        @include mobile {
+          border-radius: unset;
+          border-end-start-radius: 12px;
+          border-end-end-radius: 12px;
         }
       }
 
@@ -165,6 +239,7 @@
 
     @include mobile() {
       flex-direction: column;
+      padding: 16px;
     }
   }
 
@@ -188,7 +263,7 @@
 
     &_name {
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 500;
       line-height: 150%;
       white-space: nowrap;
 
@@ -202,7 +277,7 @@
     }
 
     &_value {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 500;
       line-height: 120%;
 

@@ -17,8 +17,8 @@ export const ListPoolsMobile: React.FC<ListPoolProps> = ({ poolTableData, genera
   const theme = useTheme();
   const renderListPool =
     poolTableData.length > 0 ? (
-      poolTableData.map((pool) => (
-        <PoolMobileItem pool={pool} setPairDenomsDeposit={setPairDenomsDeposit} generateIcon={generateIcon} />
+      poolTableData.map((pool, key) => (
+        <PoolMobileItem key={key} pool={pool} setPairDenomsDeposit={setPairDenomsDeposit} generateIcon={generateIcon} />
       ))
     ) : (
       <div className={styles.no_data}>

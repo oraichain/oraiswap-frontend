@@ -32,8 +32,8 @@ const StakeTab = () => {
   const loadTokenAmounts = useLoadTokens();
 
   // TODO: HARDCODE ORAIX_STAKING_TEST
-  // const balance = amounts['oraix'];
-  const balance = amounts['oraix_test'];
+  // const balance = amounts['oraix_test'];
+  const balance = amounts['oraix'];
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
 
