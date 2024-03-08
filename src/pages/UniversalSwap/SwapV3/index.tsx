@@ -501,9 +501,11 @@ const SwapComponent: React.FC<{
               !fromAmountToken ||
               !toAmountToken ||
               fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+              !addressTransfer ||
               canSwapTo;
 
             let disableMsg: string;
+            if (addressTransfer) disableMsg = `Recipient address not found`;
             if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
             if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
             if (canSwapToTron) disableMsg = `Please connect tron wallet`;
