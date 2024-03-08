@@ -363,8 +363,22 @@ const SwapComponent: React.FC<{
 
   useEffect(() => {
     (async () => {
-      if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) return setAddressTransfer('');
-      // TODO: need check originalToToken chainId with walletByNetworks
+      if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) {
+        return setAddressTransfer('');
+      }
+
+      if (originalToToken.cosmosBased && !walletByNetworks.cosmos) {
+        return setAddressTransfer('');
+      }
+
+      if (!originalToToken.cosmosBased && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron) {
+        return setAddressTransfer('');
+      }
+
+      if (!originalToToken.cosmosBased && !walletByNetworks.evm) {
+        return setAddressTransfer('');
+      }
+
       if (originalToToken.chainId) {
         const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
         const address = await getAddressTransfer(findNetwork, walletByNetworks);
@@ -505,7 +519,7 @@ const SwapComponent: React.FC<{
               canSwapTo;
 
             let disableMsg: string;
-            if (addressTransfer) disableMsg = `Recipient address not found`;
+            if (!addressTransfer) disableMsg = `Recipient address not found`;
             if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
             if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
             if (canSwapToTron) disableMsg = `Please connect tron wallet`;
