@@ -84,7 +84,53 @@ import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 const [otherChainTokens, oraichainTokens] = tokens;
 type TokenIcon = Pick<TokenItemType, 'coinGeckoId' | 'Icon' | 'IconLight'>;
 type ChainIcon = Pick<CustomChainInfo, 'chainId' | 'Icon' | 'IconLight'>;
+export const bitcoinMainnet: CustomChainInfo = {
+  rest: 'https://blockstream.info/api',
+  rpc: 'https://blockstream.info/api',
+  chainId: ChainIdEnum.Bitcoin,
+  chainName: 'Bitcoin',
+  bip44: {
+    coinType: 0
+  },
+  coinType: 0,
+  Icon: BTCIcon,
+  IconLight: BTCIcon,
+  stakeCurrency: {
+    coinDenom: 'BTC',
+    coinMinimalDenom: 'btc',
+    coinDecimals: 8,
+    coinGeckoId: 'bitcoin',
+    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
+  },
+  bech32Config: defaultBech32Config('bc'),
+  networkType: 'bitcoin',
+  currencies: [
+    {
+      coinDenom: 'BTC',
+      coinMinimalDenom: 'btc',
+      coinDecimals: 8,
+      bridgeTo: ['Oraichain'],
+      Icon: BTCIcon,
+      coinGeckoId: 'bitcoin',
+      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+      gasPriceStep: {
+        low: 0,
+        average: 0,
+        high: 0
+      }
+    }
+  ],
+  get feeCurrencies() {
+    return this.currencies;
+  },
 
+  features: ['isBtc'],
+  txExplorer: {
+    name: 'BlockStream',
+    txUrl: 'https://blockstream.info/tx/{txHash}',
+    accountUrl: 'https://blockstream.info/address/{address}'
+  }
+};
 export const tokensIcon: TokenIcon[] = [
   {
     coinGeckoId: 'oraichain-token',
@@ -270,7 +316,7 @@ export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[]
 };
 
 // mapped chain info with icon
-export const chainInfosWithIcon = mapListWithIcon(customChainInfos, chainIcons, 'chainId');
+export const chainInfosWithIcon = mapListWithIcon([...customChainInfos, bitcoinMainnet], chainIcons, 'chainId');
 
 // mapped token with icon
 export const oraichainTokensWithIcon = mapListWithIcon(oraichainTokens, tokensIcon, 'coinGeckoId');
@@ -586,53 +632,6 @@ const bitcoinTestnet: CustomChainInfo = {
     name: 'BlockStream',
     txUrl: 'https://blockstream.info/testnet/tx/{txHash}',
     accountUrl: 'https://blockstream.info/testnet/address/{address}'
-  }
-};
-const bitcoinMainnet: CustomChainInfo = {
-  rest: 'https://blockstream.info/api',
-  rpc: 'https://blockstream.info/api',
-  chainId: ChainIdEnum.Bitcoin,
-  chainName: 'Bitcoin',
-  bip44: {
-    coinType: 0
-  },
-  coinType: 0,
-  Icon: BTCIcon,
-  IconLight: BTCIcon,
-  stakeCurrency: {
-    coinDenom: 'BTC',
-    coinMinimalDenom: 'btc',
-    coinDecimals: 8,
-    coinGeckoId: 'bitcoin',
-    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-  },
-  bech32Config: defaultBech32Config('bc'),
-  networkType: 'bitcoin',
-  currencies: [
-    {
-      coinDenom: 'BTC',
-      coinMinimalDenom: 'btc',
-      coinDecimals: 8,
-      bridgeTo: ['Oraichain'],
-      Icon: BTCIcon,
-      coinGeckoId: 'bitcoin',
-      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-      gasPriceStep: {
-        low: 0,
-        average: 0,
-        high: 0
-      }
-    }
-  ],
-  get feeCurrencies() {
-    return this.currencies;
-  },
-
-  features: ['isBtc'],
-  txExplorer: {
-    name: 'BlockStream',
-    txUrl: 'https://blockstream.info/tx/{txHash}',
-    accountUrl: 'https://blockstream.info/address/{address}'
   }
 };
 

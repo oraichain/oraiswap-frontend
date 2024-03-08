@@ -22,6 +22,7 @@ export const WalletManagement: FC<{}> = () => {
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const { handleResetBalance } = useResetBalance();
@@ -63,6 +64,9 @@ export const WalletManagement: FC<{}> = () => {
             case 'eip191':
               isActive = isMetamask;
               break;
+            case 'bitcoin':
+              isActive = isCheckOwallet;
+              break;
           }
           return { ...wallet, isActive };
         });
@@ -85,11 +89,12 @@ export const WalletManagement: FC<{}> = () => {
 
   // reset balance when disconnect
   useEffect(() => {
-    if (!metamaskAddress || !tronAddress || !oraiAddress) {
+    if (!metamaskAddress || !tronAddress || !oraiAddress || !btcAddress) {
       let arrResetBalance: WalletResetType[] = [];
       if (!metamaskAddress) arrResetBalance.push('metamask');
       if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
+      if (!btcAddress) arrResetBalance.push('bitcoin');
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

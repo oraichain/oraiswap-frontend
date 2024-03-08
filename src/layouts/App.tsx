@@ -176,7 +176,7 @@ const App = () => {
         metamaskAddress = await window.Metamask.getEthAddress();
         if (metamaskAddress) setMetamaskAddress(metamaskAddress);
       }
-      if (walletByNetworks.btc === 'owallet' || mobileMode) {
+      if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
         btcAddress = await window.Bitcoin.getAddress();
         if (btcAddress) setBtcAddress(btcAddress);
       }

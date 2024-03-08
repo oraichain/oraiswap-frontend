@@ -24,6 +24,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const theme = useTheme();
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
@@ -75,6 +76,18 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     const { tronAddress } = await switchWalletTron(walletType);
     setTronAddress(tronAddress);
   };
+  const handleConnectWalletInBtcNetwork = async (walletType: WalletType) => {
+    // if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
+    const btcAddress = await window.Bitcoin.getAddress();
+    // // re-polyfill tronWeb
+    // window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
+    // window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
+
+    // window.Metamask = new Metamask(window.tronWebDapp);
+
+    // const { tronAddress } = await switchWalletTron(walletType);
+    setBtcAddress(btcAddress);
+  };
 
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
@@ -88,6 +101,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           break;
         case 'tron':
           await handleConnectWalletInTronNetwork(wallet.nameRegistry as WalletCosmosType);
+          break;
+        case 'bitcoin':
+          await handleConnectWalletInBtcNetwork(wallet.nameRegistry);
           break;
         default:
           setConnectStatus('init');
@@ -141,6 +157,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
         break;
       case 'tron':
         setTronAddress(undefined);
+        break;
+      case 'bitcoin':
+        setBtcAddress(undefined);
         break;
       default:
         break;
