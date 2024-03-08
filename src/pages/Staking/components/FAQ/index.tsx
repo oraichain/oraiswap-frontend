@@ -59,10 +59,10 @@ export const LIST_FAQ = [
         There are few risks to be considered:
         <br />
         <br />
-        The technical risk: OraiDEX Staking Contract gets hacked and staked CAKE are stolen.
+        The technical risk: OraiDEX Staking Contract gets hacked and staked ORAIX are stolen.
         <br />
         <br />
-        The liqudity risk of staking: ORAX tokens got sudden rally or the price suffers high volatile due to negative
+        The liquidity risk of staking: ORAIX tokens got sudden rally or the price suffers high volatile due to negative
         events. In both, users will not able to trade since staked tokens are locked up
       </div>
     )
