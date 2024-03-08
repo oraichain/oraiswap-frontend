@@ -159,7 +159,7 @@ const UnStakeTab = () => {
                               background:
                                 theme === 'light'
                                   ? `conic-gradient(#2F5711 ${percent}%, #EFEFEF ${percent}%)`
-                                  : `conic-gradient(#92E54C ${percent}%, #494949 ${percent}%)`
+                                  : `conic-gradient(#D7F5BF ${percent}%, #494949 ${percent}%)`
                             }}
                           ></div>
                         </div>
