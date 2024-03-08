@@ -102,6 +102,7 @@ declare global {
     request: ({ method }: { method: 'tron_requestAccounts' }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
     sunWeb: sunWeb;
     tronWeb: _TronWeb;
+    isOwallet?: boolean;
   }
 
   declare class Wallet {
