@@ -65,6 +65,7 @@ const Swap: React.FC = () => {
                     currentPair={currentPair}
                     pairsChart={PAIRS_CHART}
                     setChartTimeFrame={handleChangeChartTimeFrame}
+                    baseUrl={process.env.REACT_APP_BASE_API_URL}
                   />
                 </div>
               </>

@@ -85,6 +85,10 @@
       display: flex;
       justify-content: space-between;
       min-width: 900px;
+      padding: 0 16px;
+      @include mobile {
+        padding: 0;
+      }
     }
   }
 }

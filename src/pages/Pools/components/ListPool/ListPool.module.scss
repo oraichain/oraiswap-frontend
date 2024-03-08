@@ -96,7 +96,7 @@
   &_list {
     display: flex;
     gap: 35px;
-    margin-top: 16px;
+    // margin-top: 16px;
     flex-wrap: wrap;
   }
 }
@@ -128,21 +128,35 @@
 }
 
 .apr {
+  .aprValue {
+    display: flex;
+    align-items: center;
+
+    svg {
+      vertical-align: text-top;
+    }
+
+    @include theme {
+      color: theme-get('primary-surface-default-dark-3');
+    }
+  }
+
   .apr_reward {
     display: flex;
     align-items: center;
     margin-top: 6px;
 
     span {
-      padding: 4px;
+      padding: 4px 6px;
       letter-spacing: 0.012px;
+      line-height: 100%;
       font-size: 12px;
       border-radius: 4px;
-      margin-right: 10px;
+      margin-right: 6px;
 
       @include theme() {
-        background-color: theme-get('primary-surface-default-light');
-        color: theme-get('neutral-text-text-btn-default');
+        background-color: theme-get('neutral-surface-bg-section-2');
+        color: theme-get('sea-stone-200');
       }
     }
   }

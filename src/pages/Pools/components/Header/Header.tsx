@@ -1,5 +1,7 @@
 import { ExecuteInstruction } from '@cosmjs/cosmwasm-stargate';
 import { CW20_DECIMALS, ORAI, ORAI_INFO, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { ReactComponent as UpIcon } from 'assets/icons/up-arrow.svg';
+import { ReactComponent as DownIcon } from 'assets/icons/down-arrow-v2.svg';
 import { ReactComponent as OraiIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import bg_claim_btn from 'assets/images/bg_claim_btn.svg';
@@ -13,7 +15,6 @@ import { handleErrorTransaction } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import CosmJs from 'libs/cosmjs';
-import { PoolTableData } from 'pages/Pools';
 import {
   getStatisticData,
   useGetMyStake,
@@ -22,7 +23,12 @@ import {
   useGetTotalClaimable
 } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
+import { PoolInfoResponse } from 'types/pool';
+import LiquidityChart from '../LiquidityChart';
+import VolumeChart from '../VolumeChart';
 import styles from './Header.module.scss';
+import { isMobile } from '@walletconnect/browser-utils';
+import { FILTER_DAY } from 'reducer/type';
 
 export const useGetOraiPrice = () => {
   const pools = useGetPools();
@@ -48,7 +54,7 @@ export const useGetOraiPrice = () => {
   return oraiPrice;
 };
 
-export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
+export const Header: FC<{ dataSource: PoolInfoResponse[] }> = ({ dataSource }) => {
   const theme = useTheme();
   const [address] = useConfigReducer('address');
   const { totalStaked, totalEarned } = useGetMyStake({
@@ -56,38 +62,46 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
   });
   const oraiPrice = useGetOraiPrice();
   const { totalRewardInfoData, refetchRewardInfo } = useGetRewardInfo({ stakerAddr: address });
+  const isMobileMode = isMobile();
 
   const [claimLoading, setClaimLoading] = useState(false);
-
-  const [filterDay, setFilterDay] = useState(30);
-  const statisticData = getStatisticData(dataSource);
+  // const statisticData = getStatisticData(dataSource);
   const totalClaimable = useGetTotalClaimable({ poolTableData: dataSource, totalRewardInfoData });
 
-  // TODO: get data statistic changed (suffix) by api
+  const [openChart, setOpenChart] = useState(!isMobileMode);
+  const [filterDay, setFilterDay] = useState(FILTER_DAY.DAY);
+  const [liquidityDataChart, setLiquidityDataChart] = useState(0);
+  const [volumeDataChart, setVolumeDataChart] = useState(0);
+
+  const ORAI_INFO = {
+    name: 'Orai Price',
+    Icon: theme === 'light' ? OraiLightIcon : OraiIcon,
+    suffix: -2.25,
+    value: oraiPrice,
+    isNegative: true,
+    decimal: 2
+  };
+
   const liquidityData = [
     {
-      name: 'Orai Price',
-      Icon: theme === 'light' ? OraiLightIcon : OraiIcon,
-      suffix: -2.25,
-      value: oraiPrice,
-      isNegative: true,
-      decimal: 2
+      name: 'Total Liquidity',
+      Icon: null,
+      suffix: 5.25,
+      value: liquidityDataChart, // || statisticData.totalLiquidity,
+      isNegative: false,
+      decimal: 2,
+      chart: <LiquidityChart filterDay={filterDay} onUpdateCurrentItem={setLiquidityDataChart} />,
+      openChart: openChart
     },
     {
       name: 'Volume',
       Icon: null,
       suffix: 3.93,
-      value: statisticData.volume,
+      value: volumeDataChart, // || statisticData.volume,
       isNegative: false,
-      decimal: 2
-    },
-    {
-      name: 'Total Liquidity',
-      Icon: null,
-      suffix: 5.25,
-      value: toDisplay(parseInt(statisticData.totalLiquidity.toString()).toString()),
-      isNegative: false,
-      decimal: 2
+      decimal: 2,
+      chart: <VolumeChart filterDay={filterDay} onUpdateCurrentItem={setVolumeDataChart} />,
+      openChart: openChart
     }
   ];
 
@@ -130,41 +144,57 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
   return (
     <div className={styles.header}>
       <div className={styles.header_title}>
-        <span className={styles.header_title_text}>POOLS</span>
-        {/* <div className={styles.filter_day_wrapper}>
-          {[1, 7, 30].map((e) => {
+        {/* <span className={styles.header_title_text}>POOLS</span> */}
+        <div className={styles.header_title_text}>
+          <div>
+            <ORAI_INFO.Icon />
+          </div>
+          <span className={styles.priceOrai}>ORAI Price</span>
+          <TokenBalance
+            balance={ORAI_INFO.value}
+            prefix="$"
+            className={styles.liq_value}
+            decimalScale={ORAI_INFO.decimal || 6}
+          />
+        </div>
+        <div className={styles.filter_day_wrapper}>
+          {LIST_FILTER_DAY.map((e) => {
             return (
               <button
-                key={'day-key-' + e}
-                className={`${styles.filter_day}${' '}${e === filterDay ? styles.active : ''}`}
-                onClick={() => setFilterDay(e)}
+                key={'day-key-' + e.label}
+                className={`${styles.filter_day}${' '}${e.value === filterDay ? styles.active : ''}`}
+                onClick={() => setFilterDay(e.value)}
               >
-                {e}D
+                {e.label}
               </button>
             );
           })}
-        </div> */}
+        </div>
       </div>
 
       <div className={styles.header_liquidity}>
         {liquidityData.map((e) => (
-          <div key={e.name} className={styles.header_liquidity_item}>
-            <span>{e.name}</span>
-            <div className={styles.header_liquidity_item_info}>
-              {e.Icon && (
-                <div>
-                  <e.Icon />
+          <div key={e.name} className={`${styles.header_liquidity_item} ${openChart ? styles.activeChart : ''}`}>
+            <div className={styles.info} onClick={() => setOpenChart((open) => !open)}>
+              <div className={styles.content}>
+                <span>{e.name}</span>
+                <div className={styles.header_liquidity_item_info}>
+                  {e.Icon && (
+                    <div>
+                      <e.Icon />
+                    </div>
+                  )}
+                  <TokenBalance
+                    balance={e.value}
+                    prefix="$"
+                    className={styles.liq_value}
+                    decimalScale={e.decimal || 6}
+                  />
                 </div>
-              )}
-              <TokenBalance balance={e.value} prefix="$" className={styles.liq_value} decimalScale={e.decimal || 6} />
-              {/* <TokenBalance
-                balance={e.suffix}
-                prefix={e.isNegative ? '' : '+'}
-                suffix="%"
-                className={`${styles.liq_suffix}${' '}${e.isNegative ? styles.negative : ''}`}
-                decimalScale={2}
-              /> */}
+              </div>
+              <div>{openChart ? <UpIcon /> : <DownIcon />}</div>
             </div>
+            <div className={`${styles.chart} ${openChart ? styles.active : ''}`}>{e.chart}</div>
           </div>
         ))}
       </div>
@@ -179,13 +209,6 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
               className={styles.header_data_value}
               decimalScale={4}
             />
-            {/* &nbsp;
-            <TokenBalance
-              balance={-0.2}
-              suffix="%"
-              className={styles.header_data_change}
-              decimalScale={2}
-            /> */}
           </div>
           <div className={styles.header_data_item}>
             <span className={styles.header_data_name}>Total Earned</span>
@@ -212,7 +235,7 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
         </div>
         <div className={styles.header_claim_reward}>
           <div className={styles.claim_reward_bg}>
-            <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" />
+            {/* <img src={theme === 'light' ? bg_claim_btn : bg_claim_btn_light} alt="bg-claim-reward" /> */}
           </div>
           <Button
             type="primary-sm"
@@ -227,3 +250,18 @@ export const Header: FC<{ dataSource: PoolTableData[] }> = ({ dataSource }) => {
     </div>
   );
 };
+
+export const LIST_FILTER_DAY = [
+  {
+    label: 'D',
+    value: FILTER_DAY.DAY
+  },
+  {
+    label: 'W',
+    value: FILTER_DAY.WEEK
+  },
+  {
+    label: 'M',
+    value: FILTER_DAY.MONTH
+  }
+];

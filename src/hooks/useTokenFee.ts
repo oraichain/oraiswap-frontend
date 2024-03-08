@@ -5,7 +5,9 @@ import {
   oraichainTokens,
   toDisplay,
   toAmount,
-  BigDecimal
+  BigDecimal,
+  ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+  ORAI_BRIDGE_EVM_DENOM_PREFIX
 } from '@oraichain/oraidex-common';
 import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
 import { handleSimulateSwap, isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
@@ -34,7 +36,15 @@ export default function useTokenFee(
     if (isEvmNetworkNativeSwapSupported(fromChainId) && fromChainId === toChainId) return;
 
     const { token_fees: tokenFees } = feeConfig;
-    const tokenFee = tokenFees.find((tokenFee) => tokenFee.token_denom === remoteTokenDenom);
+    const isNativeEth = remoteTokenDenom === 'eth';
+    const isNativeBnb = remoteTokenDenom === 'bnb';
+    const tokenFee = tokenFees.find(
+      (tokenFee) =>
+        tokenFee.token_denom === remoteTokenDenom ||
+        // TODO
+        (isNativeEth && tokenFee.token_denom.includes(ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX)) ||
+        (isNativeBnb && tokenFee.token_denom.includes(ORAI_BRIDGE_EVM_DENOM_PREFIX))
+    );
     if (tokenFee) fee = (tokenFee.ratio.nominator / tokenFee.ratio.denominator) * 100;
 
     setBridgeFee(fee);
@@ -48,18 +58,16 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
   const [relayerFeeInOrai, setRelayerFeeInOrai] = useState(0);
   const [relayerFee, setRelayerFeeAmount] = useState(0);
   const feeConfig = useSelector((state: RootState) => state.token.feeConfigs);
-  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
-  const oraiToken = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
 
-  const isWeth = originalToToken?.coinGeckoId === 'weth';
-  const CONSTANTS_ORAI_SIMULATE_WETH = 10;
   const { data: relayerFeeAmount } = useQuery(
     ['simulate-relayer-data', originalFromToken, originalToToken, relayerFeeInOrai],
     () => {
+      const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+      const oraiToken = oraichainTokens.find((token) => token.coinGeckoId === 'oraichain-token');
       return handleSimulateSwap({
         originalFromInfo: oraiToken,
         originalToInfo: originalToToken,
-        originalAmount: isWeth ? CONSTANTS_ORAI_SIMULATE_WETH : relayerFeeInOrai,
+        originalAmount: relayerFeeInOrai,
         routerClient
       });
     },
@@ -70,19 +78,16 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
-    if (relayerFeeAmount)
-      setRelayerFeeAmount(
-        new BigDecimal(relayerFeeAmount.displayAmount).div(isWeth ? CONSTANTS_ORAI_SIMULATE_WETH : 1).toNumber()
-      );
+    if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount.displayAmount).toNumber());
   }, [relayerFeeAmount]);
 
   // get relayer fee in ORAI
   useEffect(() => {
     if (!originalFromToken || !originalToToken || !feeConfig) return;
-    const isFromChainIdEvm = EVM_CHAIN_ID.includes(originalFromToken.chainId);
-    const isToChainIdEvm = EVM_CHAIN_ID.includes(originalToToken.chainId);
-
-    if (isToChainIdEvm && isFromChainIdEvm === isToChainIdEvm) {
+    if (
+      isEvmNetworkNativeSwapSupported(originalFromToken.chainId) &&
+      originalFromToken.chainId === originalToToken.chainId
+    ) {
       setRelayerFeeAmount(0);
       setRelayerFeeInOrai(0);
       return;
@@ -130,7 +135,6 @@ export const useUsdtToBtc = (amount: number = 50) => {
 
 export const useGetFeeConfig = () => {
   const dispatch = useDispatch();
-
   useEffect(() => {
     const queryRelayerFee = async () => {
       const feeConfig = await fetchFeeConfig();

@@ -1,23 +1,19 @@
 import {
+  COSMOS_CHAIN_ID_COMMON,
   NetworkChainId,
   TokenItemType,
   getSubAmountDetails,
   toAmount,
-  toDisplay,
-  COSMOS_CHAIN_ID_COMMON
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { TokenInfo } from 'types/token';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
 
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
@@ -161,30 +157,34 @@ export const buildUnsubscribeMessage = () => {
 };
 
 export const processWsResponseMsg = (message: any): string => {
-  if (message === null || message.result === null) {
-    return null;
-  }
-  const { result } = message;
-  if (
-    result && // 👈 null and undefined check
-    (Object.keys(result).length !== 0 || result.constructor !== Object)
-  ) {
-    if (!result.events) return null;
-    const events = result.events;
-    const packets = events['recv_packet.packet_data'];
-    if (!packets) return null;
-    let tokens = '';
-    for (let packetRaw of packets) {
-      const packet = JSON.parse(packetRaw);
-      // we look for the true denom information with decimals to process
-      // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
-      const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
-      const displayAmount = toDisplay(packet.amount, receivedToken.decimals);
-      tokens = tokens.concat(`${displayAmount} ${receivedToken.name}, `);
+  try {
+    if (message === null || message.result === null) {
+      return null;
     }
-    return tokens.substring(0, tokens.length - 2); // remove , due to concat
+    const { result } = message;
+    if (
+      result && // 👈 null and undefined check
+      (Object.keys(result).length !== 0 || result.constructor !== Object)
+    ) {
+      if (!result.events) return null;
+      const events = result.events;
+      const packets = events['recv_packet.packet_data'];
+      if (!packets) return null;
+      let tokens = '';
+      for (let packetRaw of packets) {
+        const packet = JSON.parse(packetRaw);
+        // we look for the true denom information with decimals to process
+        // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
+        const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
+        const displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
+        tokens = tokens.concat(`${displayAmount} ${receivedToken?.name}, `);
+      }
+      return tokens.substring(0, tokens.length - 2); // remove , due to concat
+    }
+    return null;
+  } catch (error) {
+    console.error({ errorProcessWsResponseMsg: error });
   }
-  return null;
 };
 
 export const generateError = (message: string) => {
@@ -193,7 +193,7 @@ export const generateError = (message: string) => {
 
 export const initEthereum = async () => {
   // support only https
-  if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
+  if (isMobile() && !window.ethereumDapp && window.location.protocol === 'https:') {
     const bscChain = chainInfos.find((c) => c.chainId === '0x38');
     const provider = new WalletConnectProvider({
       chainId: Networks.bsc,
@@ -205,37 +205,26 @@ export const initEthereum = async () => {
       }
     });
     await provider.enable();
-    (window.ethereum as any) = provider;
+    (window.ethereumDapp as any) = provider;
   }
 };
 
 export const initClient = async () => {
   try {
-    switchWallet(getStorageKey() as WalletType);
-    const keplr = await window.Keplr.getKeplr();
-
     // suggest our chain
-    if (keplr) {
-      // always trigger suggest chain when users enter the webpage
-      for (const networkId of [
-        network.chainId,
-        COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
-        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
-      ] as NetworkChainId[]) {
-        try {
-          await window.Keplr.suggestChain(networkId);
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-      const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      window.client = client;
+    const arrChainIds = [
+      network.chainId,
+      COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
+      COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
+    ] as NetworkChainId[];
+    for (const chainId of arrChainIds) {
+      await window.Keplr.suggestChain(chainId);
     }
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
   } catch (ex) {
-    console.log(ex);
-    displayToast(TToastType.KEPLR_FAILED, {
-      message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
-    });
+    console.log({ errorInitClient: ex });
+    throw new Error(ex?.message ?? 'Error when suggestChain');
   }
 };
 

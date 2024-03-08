@@ -35,6 +35,7 @@ import useLoadTokens from 'hooks/useLoadTokens';
 import useTokenFee, { useGetFeeConfig, useRelayerFeeToken } from 'hooks/useTokenFee';
 import Metamask from 'libs/metamask';
 import { getUsd, toSubAmount } from 'libs/utils';
+import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
 import { generateNewSymbol } from 'pages/UniversalSwap/helpers';
@@ -52,9 +53,13 @@ import {
   getSwapType
 } from '../helpers';
 import InputSwap from './InputSwapV3';
-import { useGetTransHistory, useSimulate, useTaxRate } from './hooks';
+import { useGetTransHistory, useSimulate } from './hooks';
 import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
+import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
+import { useFillToken } from './hooks/useFillToken';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -85,7 +90,11 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   useGetFeeConfig();
+
+  const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
+
   const refreshBalances = async () => {
     try {
       if (loadingRefresh) return;
@@ -132,16 +141,14 @@ const SwapComponent: React.FC<{
     ? tokenMap[toTokenDenom]
     : getTokenOnOraichain(tokenMap[toTokenDenom].coinGeckoId) ?? tokenMap[toTokenDenom];
 
-  const fromTokenFee = useTokenFee(
-    originalFromToken.prefix + originalFromToken.contractAddress,
-    fromToken.chainId,
-    toToken.chainId
-  );
-  const toTokenFee = useTokenFee(
-    originalToToken.prefix + originalToToken.contractAddress,
-    fromToken.chainId,
-    toToken.chainId
-  );
+  const remoteTokenDenomFrom = originalFromToken.contractAddress
+    ? originalFromToken.prefix + originalFromToken.contractAddress
+    : originalFromToken.denom;
+  const remoteTokenDenomTo = originalToToken.contractAddress
+    ? originalToToken.prefix + originalToToken.contractAddress
+    : originalToToken.denom;
+  const fromTokenFee = useTokenFee(remoteTokenDenomFrom, fromToken.chainId, toToken.chainId);
+  const toTokenFee = useTokenFee(remoteTokenDenomTo, fromToken.chainId, toToken.chainId);
 
   const {
     data: [fromTokenInfoData, toTokenInfoData]
@@ -175,7 +182,12 @@ const SwapComponent: React.FC<{
     setFilteredFromTokens(filteredFromTokens);
   }, [fromTokenDenom, toTokenDenom]);
 
-  const taxRate = useTaxRate();
+  const { fee } = useSwapFee({
+    fromToken: originalFromToken,
+    toToken: originalToToken
+  });
+
+  // const taxRate = useTaxRate();
   const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
   const { simulateData, setSwapAmount, fromAmountToken, toAmountToken } = useSimulate(
     'simulate-data',
@@ -186,30 +198,14 @@ const SwapComponent: React.FC<{
     routerClient
   );
 
-  // TODO: use this constant so we can temporary simulate for all pair (specifically AIRI/USDC, ORAIX/USDC), update later after migrate contract
-  const isFromAiriToUsdc = originalFromToken.coinGeckoId === 'airight' && originalToToken.coinGeckoId === 'usd-coin';
-  const isFromOraixToUsdc = originalFromToken.coinGeckoId === 'oraidex' && originalToToken.coinGeckoId === 'usd-coin';
-  const isToWETH = originalToToken.coinGeckoId === 'weth';
-
-  const isFromUsdc = originalFromToken.coinGeckoId === 'usd-coin';
   const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
 
-  const INIT_SIMULATE_THOUNDSAND_AMOUNT = 1000;
-  const INIT_SIMULATE_TEN_AMOUNT = 10;
   const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.00001;
 
   let INIT_AMOUNT = 1;
 
-  if (isFromAiriToUsdc || isFromOraixToUsdc || isToWETH) {
-    INIT_AMOUNT = INIT_SIMULATE_THOUNDSAND_AMOUNT
-  }
-
-  if (isFromUsdc) {
-    INIT_AMOUNT = INIT_SIMULATE_TEN_AMOUNT
-  }
-
   if (isFromBTC) {
-    INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT
+    INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT;
   }
 
   const { simulateData: averageRatio } = useSimulate(
@@ -227,7 +223,11 @@ const SwapComponent: React.FC<{
     contractAddress: originalFromToken.contractAddress,
     cachePrices: prices
   });
-  const usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+
+  let usdPriceShow = ((price || prices?.[originalFromToken?.coinGeckoId]) * fromAmountToken).toFixed(6);
+  if (!Number(usdPriceShow)) {
+    usdPriceShow = (prices?.[originalToToken?.coinGeckoId] * simulateData?.displayAmount).toFixed(6);
+  }
 
   const { relayerFee, relayerFeeInOraiToAmount: relayerFeeToken } = useRelayerFeeToken(
     originalFromToken,
@@ -244,12 +244,12 @@ const SwapComponent: React.FC<{
   const isSimulateDataDisplay = simulateData && simulateData.displayAmount;
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
-      // @ts-ignore
-      Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
-      fromAmountTokenBalance.toString(),
-      userSlippage,
-      originalFromToken.decimals
-    )
+        // @ts-ignore
+        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        fromAmountTokenBalance.toString(),
+        userSlippage,
+        originalFromToken.decimals
+      )
     : '0';
   const isWarningSlippage = +minimumReceive > +simulateData?.amount;
   const simulateDisplayAmount = simulateData && simulateData.displayAmount ? simulateData.displayAmount : 0;
@@ -260,8 +260,8 @@ const SwapComponent: React.FC<{
 
   const minimumReceiveDisplay = isSimulateDataDisplay
     ? new BigDecimal(
-      simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
-    ).toNumber()
+        simulateDisplayAmount - (simulateDisplayAmount * userSlippage) / 100 - relayerFee - bridgeTokenFee
+      ).toNumber()
     : 0;
 
   const expectOutputDisplay = isSimulateDataDisplay
@@ -302,7 +302,7 @@ const SwapComponent: React.FC<{
             averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
@@ -344,6 +344,17 @@ const SwapComponent: React.FC<{
       });
     } finally {
       setSwapLoading(false);
+      const address = [oraiAddress, metamaskAddress, tronAddress].filter(Boolean).join(' ');
+      const logEvent = {
+        address,
+        fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,
+        fromAmount: `${fromAmountToken}`,
+        toToken: `${originalToToken.name} - ${originalToToken.chainId}`,
+        toAmount: `${toAmountToken}`,
+        fromNetwork: originalFromToken.chainId,
+        toNetwork: originalToToken.chainId
+      };
+      mixpanel.track('Universal Swap Oraidex', logEvent);
     }
   };
 
@@ -452,17 +463,30 @@ const SwapComponent: React.FC<{
               />
 
               <div className={cx('ratio')}>
-                {`1 ${originalFromToken.name} ≈ ${averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
-                  } ${originalToToken.name}`}
+                {`1 ${originalFromToken.name} ≈ ${
+                  averageRatio ? Number((averageRatio.displayAmount / INIT_AMOUNT).toFixed(6)) : '0'
+                } ${originalToToken.name}`}
               </div>
             </div>
           </div>
 
           {(() => {
+            const mobileMode = isMobile();
+            const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
+            const canSwapToEvm = !mobileMode && !originalToToken.cosmosBased && !walletByNetworks.evm;
+            const canSwapToTron = !mobileMode && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+            const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
             const disabledSwapBtn =
-              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+              swapLoading ||
+              !fromAmountToken ||
+              !toAmountToken ||
+              fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+              canSwapTo;
 
             let disableMsg: string;
+            if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
+            if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
+            if (canSwapToTron) disableMsg = `Please connect tron wallet`;
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
             return (
@@ -518,12 +542,13 @@ const SwapComponent: React.FC<{
                 </div>
               </div>
             )}
-            {!fromTokenFee && !toTokenFee && (
+            {!fromTokenFee && !toTokenFee && fee && (
               <div className={cx('row')}>
                 <div className={cx('title')}>
-                  <span>Tax rate</span>
+                  <span>Swap Fees</span>
                 </div>
-                <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span>
+                {/* <span>{taxRate && floatToPercent(parseFloat(taxRate)) + '%'}</span> */}
+                <span>{fee && floatToPercent(fee) + '%'}</span>
               </div>
             )}
           </div>
@@ -538,6 +563,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([fromTokenDenom, denom]);
+            handleUpdateQueryURL([fromTokenDenom, denom]);
           }}
           setSearchTokenName={setSearchTokenName}
           searchTokenName={searchTokenName}
@@ -553,6 +579,7 @@ const SwapComponent: React.FC<{
           amounts={amounts}
           setToken={(denom) => {
             setSwapTokens([denom, toTokenDenom]);
+            handleUpdateQueryURL([denom, toTokenDenom]);
           }}
           setSearchTokenName={setSearchTokenName}
           searchTokenName={searchTokenName}

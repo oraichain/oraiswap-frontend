@@ -37,7 +37,7 @@ const DisconnectModal: React.FC<{
         <div className={cx('connect_error', theme)}>
           <div className={cx('content')}>
             <p className={cx('label')}>
-              Are you sure you want to disconnect <span className={cx('wallet-type')}>{walletActive.name}</span>
+              Are you sure you want to disconnect <span className={cx('wallet-type')}>{walletActive?.name}</span>
             </p>
             <div className={cx('content-2')}>
               {theme === 'light' ? (

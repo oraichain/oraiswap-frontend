@@ -1,3 +1,4 @@
+import { formatDisplayUsdt } from 'pages/Pools/helpers';
 import { MONTHS_ARR, TIMER } from '../constants';
 
 export const formatCountdownTime = (milliseconds: number) => {
@@ -46,10 +47,6 @@ export function dateFormat(date) {
   return `${MONTHS_ARR[MONTHS_ARR.indexOf(month)]} ${day} ${year} ${time}`;
 }
 
-export function shortenAddress(address: string) {
-  return address.substring(0, 8) + '...' + address.substring(address.length - 7, address.length);
-}
-
 export const formatUTCDateString = (date) => {
   // Get the current date and time
   const currentDate = new Date(date);
@@ -82,13 +79,14 @@ export const dateFormatter = new Intl.DateTimeFormat('en-US', {
 });
 
 export const timeFormatter = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
+  hour: '2-digit',
   minute: '2-digit',
-  second: '2-digit'
+  second: '2-digit',
+  hourCycle: 'h24'
 });
 
 export const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-  year: 'numeric',
+  year: '2-digit',
   month: '2-digit',
   day: '2-digit',
   hour: '2-digit',
@@ -112,9 +110,19 @@ export function formatDate(date: Date | number) {
   return `${obj.month} ${obj.day}, ${obj.year}`;
 }
 
+export function formatDateV2(date: Date | number) {
+  const obj = dateTimeFormatter.formatToJson(date);
+  return `${obj.day}/${obj.month}/${obj.year}`;
+}
+
+export function formatDateChart(date: Date | number) {
+  const obj = dateFormatter.formatToJson(date);
+  return `${obj.day} ${obj.month}`;
+}
+
 export function formatTime(date: Date | number) {
   const obj = timeFormatter.formatToJson(date);
-  return `${obj.hour}:${obj.minute}:${obj.second}`; // ${obj.dayPeriod}
+  return `${obj.hour}:${obj.minute}`; // ${obj.dayPeriod} //:${obj.second}
 }
 
 export const getUTCTime = (date: Date | number) => {
@@ -126,4 +134,26 @@ export const getUTCTime = (date: Date | number) => {
   const utcSeconds = String(currentDate.getUTCSeconds()).padStart(2, '0');
 
   return `${utcHours}:${utcMinutes}:${utcSeconds}`;
+};
+
+export const formatNumberKMB = (num: number) => {
+  if (num >= 1e9) {
+    return '$' + (num / 1e9).toFixed(2) + 'B';
+  }
+
+  if (num >= 1e6) {
+    return '$' + (num / 1e6).toFixed(2) + 'M';
+  }
+
+  if (num >= 1e3) {
+    return '$' + (num / 1e3).toFixed(2) + 'K';
+  }
+  return formatDisplayUsdt(num, 2);
+};
+
+export const checkTimeIsMillisecond = (timestamp: number) => {
+  if (Math.abs(Date.now() - timestamp) < Math.abs(Date.now() - timestamp * 1000)) {
+    return true;
+  }
+  return false;
 };

@@ -1,4 +1,6 @@
-import { ReactComponent as DownIcon } from 'assets/icons/ic_down.svg';
+import { ReactComponent as AprIcon } from 'assets/icons/ic_apr.svg';
+import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
+import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -164,68 +166,115 @@ export const Earning = ({ onLiquidityChange }: { onLiquidityChange: () => void }
 
   const totalEarned = myStakes[0]?.earnAmountInUsdt || 0;
 
+  const aprBoost = Number(poolDetailData.info?.aprBoost || 0).toFixed(2);
+  const isApproximatelyZero = Number(aprBoost) === 0;
+  const totalApr = poolDetailData.info?.apr ? poolDetailData.info.apr.toFixed(2) : 0;
+  const originalApr = Number(totalApr) - Number(aprBoost);
+
+  const { liquidityAddr: stakingToken } = poolDetailData.info || {};
+  const [cachedReward] = useConfigReducer('rewardPools');
+  let poolReward = {
+    reward: []
+  };
+
+  if (cachedReward && cachedReward.length > 0) {
+    poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+  }
+
   return (
-    <section className={styles.earning}>
-      <div className={styles.earningLeft}>
-        <div className={`${styles.assetEarning}${' '}${pendingRewards.length === 1 ? styles.single : ''}`}>
-          <div className={styles.title}>
-            <span>Total Earned</span>
+    <div className={styles.earningWrapper}>
+      <div className={styles.apr}>
+        {/* <div className={styles.icon}>
+          <AprIcon />
+        </div> */}
+        <div className={styles.header}>
+          <div className={styles.title}>Total APR</div>
+          <div className={styles.volumeAmount}>{totalApr}%</div>
+        </div>
+        <div className={styles.aprDetail}>
+          <div className={styles.fee}>
+            <span>Earn swap fees</span>
+            <span>
+              <span>{isApproximatelyZero ? '≈ ' : ''}</span>
+              {aprBoost}%
+            </span>
           </div>
-          <div className={styles.amount}>
-            <TokenBalance
-              balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
-              prefix="$"
-              decimalScale={4}
-            />
+          <div className={styles.aprBoost}>
+            <div className={styles.text}>
+              <div>{theme === 'light' ? <BoostIconLight /> : <BoostIconDark />}</div>
+              <span>{poolReward?.reward?.join('+')}</span>
+              Boost
+            </div>
+
+            <span>{`${originalApr.toFixed(2)}%`}</span>
           </div>
         </div>
-        {pendingRewards.length > 0 &&
-          pendingRewards
-            .sort((a, b) => a.denom.localeCompare(b.denom))
-            .map((pendingReward, idx) => {
-              return (
-                <div className={styles.assetEarning} key={idx}>
-                  <div className={styles.title}>
-                    {generateIcon(pendingReward)}
-                    <span>{pendingReward.denom.toUpperCase()} Earning</span>
-                  </div>
-                  <div className={styles.amount}>
-                    <TokenBalance
-                      balance={getUsd(
-                        pendingReward.amount,
-                        pendingReward,
-                        cachePrices,
-                        pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
-                      )}
-                      prefix="$"
-                      decimalScale={4}
-                    />
-                  </div>
-                  <div className={styles.amountOrai}>
-                    <TokenBalance
-                      balance={{
-                        amount: pendingReward.amount,
-                        denom: pendingReward?.denom.toUpperCase(),
-                        decimals: 6
-                      }}
-                      decimalScale={6}
-                    />
-                  </div>
-                </div>
-              );
-            })}
       </div>
 
-      <div className={styles.claim}>
-        <Button
-          type="primary"
-          onClick={() => handleClaimReward()}
-          disabled={disabledClaim}
-          icon={actionLoading ? <Loader width={20} height={20} /> : null}
-        >
-          Claim Rewards
-        </Button>
-      </div>
-    </section>
+      <section className={styles.earning}>
+        <div className={styles.earningLeft}>
+          {pendingRewards.length > 0 &&
+            pendingRewards
+              .sort((a, b) => a.denom.localeCompare(b.denom))
+              .map((pendingReward, idx) => {
+                return (
+                  <div className={styles.assetEarning} key={idx}>
+                    <div className={styles.title}>
+                      {generateIcon(pendingReward)}
+                      <span>{pendingReward.denom.toUpperCase()} Earning</span>
+                    </div>
+                    <div className={styles.amountWrapper}>
+                      <div className={styles.amount}>
+                        <TokenBalance
+                          balance={getUsd(
+                            pendingReward.amount,
+                            pendingReward,
+                            cachePrices,
+                            pendingReward.coinGeckoId === 'scatom' && xOCH_PRICE
+                          )}
+                          prefix="$"
+                          decimalScale={4}
+                        />
+                      </div>
+                      <div className={styles.amountOrai}>
+                        <TokenBalance
+                          balance={{
+                            amount: pendingReward.amount,
+                            denom: pendingReward?.denom.toUpperCase(),
+                            decimals: 6
+                          }}
+                          decimalScale={6}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          <div className={`${styles.assetEarning}${' '}${pendingRewards.length === 1 ? styles.single : ''}`}>
+            <div className={styles.title}>
+              <span>Total Earned</span>
+            </div>
+            <div className={styles.amount}>
+              <TokenBalance
+                balance={toDisplay(BigInt(Math.trunc(totalEarned)), CW20_DECIMALS)}
+                prefix="$"
+                decimalScale={4}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.claim}>
+          <Button
+            type="primary"
+            onClick={() => handleClaimReward()}
+            disabled={disabledClaim}
+            icon={actionLoading ? <Loader width={20} height={20} /> : null}
+          >
+            Claim Rewards
+          </Button>
+        </div>
+      </section>
+    </div>
   );
 };

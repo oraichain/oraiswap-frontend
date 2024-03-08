@@ -49,7 +49,7 @@ export default function InputSwapV3({
             decimalScale={6}
           />
         </div>
-        <div>≈ ${amount ? usdPrice : 0}</div>
+        <div>≈ ${amount ? Number(usdPrice) || 0 : 0}</div>
       </div>
       <div className={cx('input-swap-box')}>
         <div className={cx('box-select')} onClick={() => setIsSelectFrom(true)}>

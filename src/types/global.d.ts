@@ -132,6 +132,12 @@ declare global {
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
     duckDb: DuckDb;
     TradingView: { version: Function; widget: Class };
+    ethereumDapp: MetaMaskEthereumProvider;
+    tronWebDapp: _TronWeb;
+    tronLinkDapp: TronLink;
+    eth_owallet: MetaMaskEthereumProvider;
+    tronWeb_owallet: _TronWeb;
+    tronLink_owallet: TronLink;
   }
 
   declare const APP_SETTINGS: Record<string, any>;

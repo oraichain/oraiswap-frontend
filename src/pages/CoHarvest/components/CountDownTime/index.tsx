@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { TooltipIconBtn } from '../Tooltip';
 import styles from './index.module.scss';
 
-const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
+const CountDownTime = ({ bidInfo, onStart, onEnd, isCurrentRound }: CountDownType & { isCurrentRound: boolean }) => {
   const { timeRemaining, percent, isEnd, start, end, isStarted } = useCountdown({
     bidInfo,
     onStart,
@@ -19,44 +19,56 @@ const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
   const startDateStr = formatDate(start);
   const startTimeStr = getUTCTime(start);
 
+  const endDateStr = formatDate(end);
+  const endTimeStr = getUTCTime(end);
+
   return (
     <div className={styles.countdownWrapper}>
       <div className={styles.title}>
         <span>{isStarted ? 'Round Ending In' : 'Round Start In'}</span>
         {/* <TooltipIcon /> */}
-        <TooltipIconBtn
-          placement="auto"
-          visible={visible}
-          setVisible={setVisible}
-          content={
-            <div className={`${styles.tooltip} ${styles[theme]}`}>
-              Current round period: {formatUTCDateString(start)} - {formatUTCDateString(end)}
-            </div>
-          }
-        />
+        {!bidInfo?.round ? null : (
+          <TooltipIconBtn
+            placement="auto"
+            visible={visible}
+            setVisible={setVisible}
+            content={
+              <div className={`${styles.tooltip} ${styles[theme]}`}>
+                Current round period: {formatUTCDateString(start)} - {formatUTCDateString(end)}
+              </div>
+            }
+          />
+        )}
       </div>
 
       {isStarted ? (
-        <div className={styles.countdown}>
-          <div className={styles.unit}>
-            <span>{days}</span>
-            <span className={styles.symbol}>Days</span>
-          </div>
+        isCurrentRound ? (
+          <div className={styles.countdown}>
+            <div className={styles.unit}>
+              <span>{days}</span>
+              <span className={styles.symbol}>Days</span>
+            </div>
 
-          <div className={styles.unit}>
-            <span>{hours}</span>
-            <span className={styles.symbol}>Hours</span>
-          </div>
+            <div className={styles.unit}>
+              <span>{hours}</span>
+              <span className={styles.symbol}>Hours</span>
+            </div>
 
-          <div className={styles.unit}>
-            <span>{minutes}</span>
-            <span className={styles.symbol}>Minutes</span>
+            <div className={styles.unit}>
+              <span>{minutes}</span>
+              <span className={styles.symbol}>Minutes</span>
+            </div>
+            <div className={styles.unit}>
+              <span>{seconds}</span>
+              <span className={styles.symbol}>Seconds</span>
+            </div>
           </div>
-          <div className={styles.unit}>
-            <span>{seconds}</span>
-            <span className={styles.symbol}>Seconds</span>
+        ) : (
+          <div className={styles.countdownStart}>
+            <span className={styles.startDate}>{endDateStr}</span>
+            <span className={styles.startTime}>{endTimeStr}&nbsp;UTC</span>
           </div>
-        </div>
+        )
       ) : (
         <div className={styles.countdownStart}>
           <span className={styles.startDate}>{startDateStr}</span>
@@ -64,7 +76,7 @@ const CountDownTime = ({ bidInfo, onStart, onEnd }: CountDownType) => {
         </div>
       )}
 
-      {isStarted && (
+      {isStarted && isCurrentRound && (
         <div className={styles.pie}>
           <div
             className={styles.progress}

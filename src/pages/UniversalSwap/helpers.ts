@@ -38,8 +38,8 @@ export interface SwapData {
 }
 
 export const TYPE_TAB_HISTORY = {
-  ASSETS: 'Assets',
-  HISTORY: 'History'
+  ASSETS: 'assets',
+  HISTORY: 'history'
 };
 
 export interface NetworkFilter {
@@ -75,7 +75,7 @@ export function filterNonPoolEvmTokens(
   direction: SwapDirection // direction = to means we are filtering to tokens
 ) {
   // basic filter. Dont include itself & only collect tokens with searched letters
-  const listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
+  let listTokens = direction === SwapDirection.From ? swapFromTokens : swapToTokens;
   let filteredToTokens = listTokens.filter(
     (token) => token.denom !== denom && token.name.toLowerCase().includes(searchTokenName.toLowerCase())
   );
@@ -116,7 +116,7 @@ export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: strin
     case '0x01':
     case '0x38':
       if (!metamaskAddress) {
-        throw generateError('Please login Metamask wallet!');
+        throw generateError('Please login EVM wallet!');
       }
       break;
     case '0x2b6653dc':
@@ -235,4 +235,15 @@ export const generateNewSymbol = (
     newTVPair.info = findedPair.info;
   }
   return newTVPair;
+};
+
+export const calculateFinalPriceChange = (
+  isPairReverseSymbol: boolean,
+  currentPrice: number,
+  percentPriceChange: number
+) => {
+  if (!isPairReverseSymbol) return percentPriceChange;
+
+  if (currentPrice === 0) return 0;
+  return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
 };

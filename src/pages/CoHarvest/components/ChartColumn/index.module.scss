@@ -17,8 +17,13 @@
     line-height: 100%;
     letter-spacing: 0.013px;
     writing-mode: vertical-lr;
-
-    height: 50px;
+    transform-origin: center center;
+    transform: rotate(-45deg);
+    @include mobile {
+      transform-origin: unset;
+      transform: unset;
+    }
+    height: 60px;
   }
 
   .percentWrapper {
@@ -36,7 +41,9 @@
     }
 
     .percent {
-      background: #5ea402;
+      @include theme {
+        background: theme-get('primary-highlight-section');
+      }
       border-radius: 99px;
     }
   }

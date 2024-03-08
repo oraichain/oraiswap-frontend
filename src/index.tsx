@@ -1,9 +1,13 @@
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { HttpClient, Tendermint37Client, WebsocketClient } from '@cosmjs/tendermint-rpc';
+
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, ToastProvider } from 'components/Toasts/context';
 import { network } from 'config/networks';
-import { initClient } from 'libs/utils';
+import { getWalletByNetworkCosmosFromStorage } from 'helper';
+import { getCosmWasmClient } from 'libs/cosmjs';
+import mixpanel from 'mixpanel-browser';
 import 'polyfill';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -30,18 +34,24 @@ if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
       /^chrome-extension:\/\//i,
       /^moz-extension:\/\//i
     ],
-    ignoreErrors: ['Request rejected', 'Failed to fetch', 'Load failed'],
+    ignoreErrors: ['Request rejected', 'Failed to fetch', 'Load failed', 'User rejected the request'],
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: 1
   });
+
+  // init mixpanel track event
+  mixpanel.init(process.env.REACT_APP_MIX_PANEL_ENVIRONMENT);
 }
 
-const initApp = async () => {
-  // @ts-ignore
-  window.client = await SigningCosmWasmClient.connect(network.rpc);
+// init queryClient
+const useHttp = network.rpc.startsWith('http://') || network.rpc.startsWith('https://');
+const rpcClient = useHttp ? new HttpClient(network.rpc) : new WebsocketClient(network.rpc);
+// @ts-ignore
+window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 
+const initApp = async () => {
   const root = createRoot(document.getElementById('oraiswap'));
   root.render(
     <Provider store={store}>
@@ -61,7 +71,12 @@ const initApp = async () => {
     </Provider>
   );
 
-  await initClient();
+  // init cosmwasm client when user connected cosmos wallet
+  const walletType = getWalletByNetworkCosmosFromStorage();
+  if (walletType) {
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
+  }
 };
 
 initApp();

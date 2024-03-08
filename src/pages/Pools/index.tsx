@@ -1,24 +1,19 @@
-import Content from 'layouts/Content';
-import React, { useState } from 'react';
-import NewPoolModal from './NewPoolModal/NewPoolModal';
-import NewTokenModal from './NewTokenModal/NewTokenModal';
-import { Header } from './components/Header';
-import { ListPools } from './components/ListPool';
-import { ListPoolsMobile } from './components/ListPoolMobile';
-import {
-  CW20_DECIMALS,
-  TokenItemType,
-  toDisplay,
-} from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, TokenItemType, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { oraichainTokensWithIcon } from 'config/chainInfos';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
+import Content from 'layouts/Content';
 import isEqual from 'lodash/isEqual';
+import React, { useState } from 'react';
 import { PoolInfoResponse } from 'types/pool';
+import NewTokenModal from './NewTokenModal/NewTokenModal';
 import { Filter } from './components/Filter';
+import { Header } from './components/Header';
+import { ListPools } from './components/ListPool';
+import { ListPoolsMobile } from './components/ListPoolMobile';
 import { getSymbolPools, parseAssetOnlyDenom, reverseSymbolArr } from './helpers';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import {
   useFetchCacheRewardAssetForAllPools,
   useFetchLpPoolsV3,
@@ -70,12 +65,17 @@ const Pools: React.FC<{}> = () => {
   const poolTableData: PoolTableData[] = filteredPools
     .map((pool) => {
       const { liquidityAddr: stakingToken, totalSupply, totalLiquidity, firstAssetInfo, secondAssetInfo } = pool;
-      const poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+      let poolReward = {
+        reward: []
+      };
+      if (cachedReward && cachedReward.length > 0) {
+        poolReward = cachedReward.find((item) => item.liquidity_token === stakingToken);
+      }
 
       // calculate my stake in usdt, we calculate by bond_amount from contract and totalLiquidity from backend.
       const myStakedLP = stakingToken
         ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, stakingToken))?.bond_amount ||
-        '0'
+          '0'
         : 0;
       const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
       const myStakeLPInUsdt = +myStakedLP * lpPrice;
@@ -138,11 +138,11 @@ const Pools: React.FC<{}> = () => {
   };
 
   return (
-    <Content nonBackground>
+    <Content nonBackground otherBackground>
       <div className={styles.pools}>
-        <Header dataSource={poolTableData} />
+        <Header dataSource={pools} />
         <div>
-          <Filter setFilteredPools={setFilteredPools} setIsOpenNewTokenModal={setIsOpenNewTokenModal} />
+          <Filter setFilteredPools={setFilteredPools} pools={pools} setIsOpenNewTokenModal={setIsOpenNewTokenModal} />
           {mobileMode ? (
             <ListPoolsMobile poolTableData={poolTableData} generateIcon={generateIcon} />
           ) : (
@@ -150,11 +150,11 @@ const Pools: React.FC<{}> = () => {
           )}
         </div>
 
-        <NewPoolModal
+        {/* <NewPoolModal
           isOpen={isOpenNewPoolModal}
           open={() => setIsOpenNewPoolModal(true)}
           close={() => setIsOpenNewPoolModal(false)}
-        />
+        /> */}
         <NewTokenModal
           isOpen={isOpenNewTokenModal}
           open={() => setIsOpenNewTokenModal(true)}

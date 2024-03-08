@@ -6,7 +6,8 @@ import {
   TokenItemType,
   findToTokenOnOraiBridge,
   toAmount,
-  tronToEthAddress
+  tronToEthAddress,
+  CosmosChainId
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -32,7 +33,8 @@ import {
   handleCheckWallet,
   handleErrorTransaction,
   networks,
-  EVM_CHAIN_ID
+  EVM_CHAIN_ID,
+  handleCheckAddress
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -435,7 +437,7 @@ const Balance: React.FC<BalanceProps> = () => {
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
-      const latestOraiAddress = await window.Keplr.getKeplrAddr();
+      const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
 
       const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
       const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
@@ -452,17 +454,16 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: latestOraiAddress, evm: latestEvmAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
 
-      const { swapRoute } = addOraiBridgeRoute(latestOraiAddress, from, newToToken);
-
+      const { swapRoute } = addOraiBridgeRoute(cosmosAddress, from, newToToken);
       // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
       // so we use this func just for Noble, and handleTransferIBC for other.
       if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble

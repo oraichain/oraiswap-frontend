@@ -16,6 +16,7 @@ export type PairInfoData = {
 
 export type PoolInfoResponse = PairInfoData & {
   apr: number;
+  aprBoost: number;
   totalLiquidity: number;
   volume24Hour: string;
   volume24hChange: string;
