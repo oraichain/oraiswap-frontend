@@ -110,7 +110,9 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                             <div>
                               <BaseTokenIcon />
                             </div>
-                            <span>{numberWithCommas(toDisplay(item.offerAmount))}</span>
+                            <span>
+                              {numberWithCommas(toDisplay(item.offerAmount), undefined, { maximumFractionDigits: 6 })}
+                            </span>
                             <span className={styles.symbol}>{offerToken.name}</span>
                           </div>
                         </div>
@@ -121,7 +123,9 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                             <div>
                               <QuoteTokenIcon />
                             </div>
-                            <span>{numberWithCommas(toDisplay(item.returnAmount))}</span>
+                            <span>
+                              {numberWithCommas(toDisplay(item.returnAmount), undefined, { maximumFractionDigits: 6 })}
+                            </span>
                             <span className={styles.symbol}>{returnToken.name}</span>
                           </div>
                         </div>
@@ -195,7 +199,9 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                               <div>
                                 <BaseTokenIcon />
                               </div>
-                              <span>{numberWithCommas(toDisplay(item.offerAmount))}</span>
+                              <span>
+                                {numberWithCommas(toDisplay(item.offerAmount), undefined, { maximumFractionDigits: 6 })}
+                              </span>
                               <span className={styles.symbol}>{offerToken.name}</span>
                             </div>
                           </td>
@@ -204,7 +210,11 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
                               <div>
                                 <QuoteTokenIcon />
                               </div>
-                              <span>{numberWithCommas(toDisplay(item.returnAmount))}</span>
+                              <span>
+                                {numberWithCommas(toDisplay(item.returnAmount), undefined, {
+                                  maximumFractionDigits: 6
+                                })}
+                              </span>
                               <span className={styles.symbol}>{returnToken.name}</span>
                             </div>
                           </td>
