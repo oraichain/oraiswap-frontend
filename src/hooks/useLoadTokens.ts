@@ -2,8 +2,8 @@ import { fromBinary, toBinary } from '@cosmjs/cosmwasm-stargate';
 import { StargateClient } from '@cosmjs/stargate';
 import { MulticallQueryClient } from '@oraichain/common-contracts-sdk';
 import { OraiswapTokenTypes } from '@oraichain/oraidex-contracts-sdk';
-import { cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { genAddressCosmos, getAddress, getWalletByNetworkCosmosFromStorage, handleCheckWallet } from 'helper';
+import { btcTokens, cosmosTokens, evmTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
+import { genAddressCosmos, getAddress, handleCheckWallet, getWalletByNetworkCosmosFromStorage } from 'helper';
 import flatten from 'lodash/flatten';
 import { updateAmounts } from 'reducer/token';
 import { ContractCallResults, Multicall } from '@oraichain/ethereum-multicall';
@@ -23,12 +23,17 @@ import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-sw
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
+import axios from 'rest/request';
+import { reduce } from 'lodash';
+import { getUtxos } from 'pages/Balance/helpers';
+import { bitcoinChainId } from 'helper/constants';
 
 export type LoadTokenParams = {
   refresh?: boolean;
   metamaskAddress?: string;
   oraiAddress?: string;
   tronAddress?: string;
+  btcAddress?: string;
 };
 
 async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo: { chainId: string; rpc: string }) {
@@ -55,7 +60,10 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 }
 
 const timer = {};
-async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tronAddress }: LoadTokenParams) {
+async function loadTokens(
+  dispatch: Dispatch,
+  { oraiAddress, metamaskAddress, tronAddress, btcAddress }: LoadTokenParams
+) {
   try {
     if (oraiAddress) {
       clearTimeout(timer[oraiAddress]);
@@ -99,6 +107,17 @@ async function loadTokens(dispatch: Dispatch, { oraiAddress, metamaskAddress, tr
           dispatch,
           tronToEthAddress(tronAddress),
           chainInfos.filter((c) => c.chainId == '0x2b6653dc')
+        );
+      }, 2000);
+    }
+    if (btcAddress) {
+      clearTimeout(timer[btcAddress]);
+      timer[btcAddress] = setTimeout(() => {
+        loadBtcAmounts(
+          dispatch,
+          btcAddress,
+          // TODO: hardcode check bitcoinTestnet need update later
+          chainInfos.filter((c) => c.chainId == bitcoinChainId)
         );
       }, 2000);
     }
@@ -159,6 +178,18 @@ async function loadNativeEvmBalance(address: string, chain: CustomChainInfo) {
     console.log('error load native evm balance: ', error);
   }
 }
+async function loadNativeBtcBalance(address: string, chain: CustomChainInfo) {
+  const data = await getUtxos(address, chain.rest);
+  const total = reduce(
+    data,
+    function (sum, n) {
+      return sum + n.value;
+    },
+    0
+  );
+
+  return total;
+}
 
 async function loadEvmEntries(
   address: string,
@@ -206,10 +237,38 @@ async function loadEvmEntries(
     return loadEvmEntries(address, chain, multicallCustomContractAddress, retry);
   }
 }
+async function loadBtcEntries(
+  address: string,
+  chain: CustomChainInfo,
+
+  retryCount?: number
+): Promise<[string, string][]> {
+  try {
+    const nativeBtc = btcTokens.find((t) => chain.chainId === t.chainId);
+
+    const nativeBalance = await loadNativeBtcBalance(address, chain);
+    let entries: [string, string][] = [[nativeBtc.denom, nativeBalance.toString()]];
+    return entries;
+  } catch (error) {
+    console.log('error querying BTC balance: ', error);
+    let retry = retryCount ? retryCount + 1 : 1;
+    if (retry >= EVM_BALANCE_RETRY_COUNT) throw generateError(`Cannot query BTC balance with error: ${error}`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return loadBtcEntries(address, chain, retry);
+  }
+}
 
 async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: CustomChainInfo[]) {
   const amountDetails = Object.fromEntries(
     flatten(await Promise.all(chains.map((chain) => loadEvmEntries(evmAddress, chain))))
+  );
+
+  dispatch(updateAmounts(amountDetails));
+}
+
+async function loadBtcAmounts(dispatch: Dispatch, btcAddress: string, chains: CustomChainInfo[]) {
+  const amountDetails = Object.fromEntries(
+    flatten(await Promise.all(chains.map((chain) => loadBtcEntries(btcAddress, chain))))
   );
 
   dispatch(updateAmounts(amountDetails));

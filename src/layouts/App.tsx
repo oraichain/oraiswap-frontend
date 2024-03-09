@@ -29,6 +29,7 @@ const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [walletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -151,7 +152,7 @@ const App = () => {
 
   const keplrHandler = async () => {
     try {
-      let metamaskAddress, oraiAddress, tronAddress;
+      let metamaskAddress, oraiAddress, tronAddress, btcAddress;
 
       if (mobileMode) {
         window.tronWebDapp = window.tronWeb;
@@ -175,7 +176,10 @@ const App = () => {
         metamaskAddress = await window.Metamask.getEthAddress();
         if (metamaskAddress) setMetamaskAddress(metamaskAddress);
       }
-
+      if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
+        btcAddress = await window.Bitcoin.getAddress();
+        if (btcAddress) setBtcAddress(btcAddress);
+      }
       if (walletByNetworks.tron === 'owallet' || mobileMode) {
         const res = await window.tronLinkDapp.request({
           method: 'tron_requestAccounts'
@@ -188,7 +192,8 @@ const App = () => {
       loadTokenAmounts({
         oraiAddress,
         metamaskAddress,
-        tronAddress
+        tronAddress,
+        btcAddress
       });
     } catch (error) {
       console.log('Error: ', error.message);

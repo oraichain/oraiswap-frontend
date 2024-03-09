@@ -19,18 +19,18 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
-import { evmChains } from 'config/chainInfos';
+import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { calcMaxAmount } from '../helpers';
+import { calcMaxAmount, checkDisableTransferBtc, useGetFeeBitcoin } from '../helpers';
 import useWalletReducer from 'hooks/useWalletReducer';
 
 interface TransferConvertProps {
@@ -95,7 +95,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const getAddressTransfer = async (network: CustomChainInfo) => {
     let address: string = '';
     try {
-      if (network.networkType === 'evm') {
+      if (network.networkType === ('bitcoin' as string)) {
+        address = await window.Bitcoin.getAddress();
+      } else if (network.networkType === 'evm') {
         if (network.chainId === '0x2b6653dc') {
           if (!isMobile && !walletByNetworks.tron) {
             setAddressTransfer('');
@@ -153,6 +155,8 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount, toNetworkChainId);
         return;
       }
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ toNetworkChainId:', toNetworkChainId);
+      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ convertAmount:', convertAmount);
       await onClickTransfer(convertAmount, toNetworkChainId);
       return;
     } catch (error) {
@@ -179,6 +183,11 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
+  console.log('🚀 ~ to:', to);
+  console.log('🚀 ~ token:', token);
+  console.log('🚀 ~ relayerFeeTokenFee:', relayerFeeTokenFee);
+
+  const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
 
   const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
   const renderBridgeFee = () => {
@@ -199,6 +208,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           {' '}
           {receivedAmount.toFixed(6)} {token.name}
         </span>
+        {!!toDisplayBTCFee && (
+          <>
+            {' '}
+            - BTC fee: <span>{toDisplayBTCFee} BTC </span>
+          </>
+        )}
       </div>
     );
   };
@@ -210,7 +225,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
     return buttonName;
   };
-
+  const usdt = useUsdtToBtc();
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
@@ -370,10 +385,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       </div>
       <div className={styles.transferTab}>
         {(() => {
-          if (listedTokens.length > 0 || evmChains.find((chain) => chain.chainId === token.chainId)) {
+          if (
+            listedTokens.length > 0 ||
+            evmChains.find((chain) => chain.chainId === token.chainId) ||
+            btcChains.find((chain) => chain.chainId !== token.chainId)
+          ) {
             return (
               <button
-                disabled={transferLoading || !addressTransfer || receivedAmount < 0}
+                disabled={
+                  transferLoading ||
+                  !addressTransfer ||
+                  receivedAmount < 0 ||
+                  checkDisableTransferBtc(convertAmount, usdt.displayAmount, token.coinGeckoId)
+                }
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >

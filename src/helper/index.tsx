@@ -16,8 +16,9 @@ import { network } from 'config/networks';
 import { serializeError } from 'serialize-error';
 
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { Bech32Config } from '@keplr-wallet/types';
+import { bitcoinChainId, leapSnapId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { Bech32Config } from '@keplr-wallet/types';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -25,7 +26,6 @@ import { WalletType } from 'components/WalletManagement/walletConfig';
 import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
-import { leapSnapId } from './constants';
 
 export interface Tokens {
   denom?: string;
@@ -46,6 +46,7 @@ export const cosmosNetworks = chainInfos.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
 
+export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === bitcoinChainId);
 export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
   (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
 );
@@ -58,6 +59,7 @@ export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
+export const btcNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === bitcoinChainId);
 
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -399,7 +401,7 @@ const checkErrorObj = (info) => {
 };
 export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
   let chainInfoData = [...chainInfos];
-  return (chainInfoData as any).map((info) => {
+  return chainInfoData.map((info) => {
     const infoWithoutIcon = checkErrorObj(info);
 
     const currenciesWithoutIcons = info.currencies.map((currency) => {
@@ -440,6 +442,16 @@ export const getListAddressCosmosByLeapSnap = async () => {
     }
   }
   return { listAddressCosmos };
+};
+export const timeAgo = (timestamp = 0) => {
+  if (!timestamp) return 'in 0 day';
+  const now = Date.now();
+  const diffInSeconds = Math.floor((now - timestamp) / 1000);
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  return rtf.format(-diffInDays, 'day');
 };
 
 export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {

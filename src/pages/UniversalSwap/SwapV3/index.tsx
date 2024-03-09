@@ -198,7 +198,16 @@ const SwapComponent: React.FC<{
     routerClient
   );
 
-  const INIT_AMOUNT = 1;
+  const isFromBTC = originalFromToken.coinGeckoId === 'bitcoin';
+
+  const INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT = 0.00001;
+
+  let INIT_AMOUNT = 1;
+
+  if (isFromBTC) {
+    INIT_AMOUNT = INIT_SIMULATE_NOUGHT_POINT_OH_ONE_AMOUNT;
+  }
+
   const { simulateData: averageRatio } = useSimulate(
     'simulate-average-data',
     fromTokenInfoData,

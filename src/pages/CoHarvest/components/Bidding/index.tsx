@@ -213,10 +213,9 @@ const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, ba
             }
           }}
           icon={null}
-          disabled={!isStarted || isEnd || loading || !amount || insufficientFund} // || !Number(estimateReceive)
+          disabled={!isStarted || isEnd || loading || !amount} // || !Number(estimateReceive)
         >
-          {loading && <Loader width={22} height={22} />}&nbsp;
-          {insufficientFund ? 'Insufficient Funds' : 'Place a bid'}
+          {loading && <Loader width={22} height={22} />}&nbsp;Place a bid
         </Button>
       </div>
     </div>

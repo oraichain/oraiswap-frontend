@@ -8,6 +8,7 @@ import { useGetPairInfo } from 'pages/Pools/hooks/useGetPairInfo';
 import { useState } from 'react';
 import { PoolDetail } from 'types/pool';
 import styles from './OverviewPool.module.scss';
+import { isMobile } from '@walletconnect/browser-utils';
 
 export const OverviewPool = ({ poolDetailData }: { poolDetailData: PoolDetail }) => {
   const theme = useTheme();
