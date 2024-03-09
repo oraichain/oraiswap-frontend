@@ -78,7 +78,7 @@ import {
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
-import { bitcoinChainId, btcNetwork } from 'helper/constants';
+import { bitcoinChainId } from 'helper/constants';
 import { OBTCContractAddress } from 'libs/nomic/models/ibc-chain';
 
 const [otherChainTokens, oraichainTokens] = tokens;
@@ -587,53 +587,6 @@ export const oraichainNetwork: CustomChainInfo = {
     // }
   ]
 };
-const bitcoinTestnet: CustomChainInfo = {
-  rest: 'https://blockstream.info/testnet/api',
-  rpc: 'https://blockstream.info/testnet/api',
-  chainId: ChainIdEnum.BitcoinTestnet,
-  chainName: 'Bitcoin Testnet',
-  bip44: {
-    coinType: 1
-  },
-  coinType: 1,
-  Icon: BTCIcon,
-  IconLight: BTCIcon,
-  stakeCurrency: {
-    coinDenom: 'BTC',
-    coinMinimalDenom: 'btc',
-    coinDecimals: 8,
-    coinGeckoId: 'bitcoin',
-    coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png'
-  },
-  bech32Config: defaultBech32Config('tb'),
-  networkType: 'bitcoin',
-  currencies: [
-    {
-      coinDenom: 'BTC',
-      coinMinimalDenom: 'btc',
-      coinDecimals: 8,
-      bridgeTo: ['Oraichain'],
-      Icon: BTCIcon,
-      coinGeckoId: 'bitcoin',
-      coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-      gasPriceStep: {
-        low: 0,
-        average: 0,
-        high: 0
-      }
-    }
-  ],
-  get feeCurrencies() {
-    return this.currencies;
-  },
-
-  features: ['isBtc'],
-  txExplorer: {
-    name: 'BlockStream',
-    txUrl: 'https://blockstream.info/testnet/tx/{txHash}',
-    accountUrl: 'https://blockstream.info/testnet/address/{address}'
-  }
-};
 
 export const OraiBTCBridgeNetwork = {
   chainId: 'oraibtc-mainnet-1',
@@ -691,7 +644,7 @@ export const OraiBTCBridgeNetwork = {
   }
 };
 
-const bitcoinNetwork = btcNetwork === 'testnet' ? bitcoinTestnet : bitcoinMainnet;
+const bitcoinNetwork = bitcoinMainnet;
 export const chainInfos: CustomChainInfo[] = [
   // networks to add on keplr
   oraichainNetwork,

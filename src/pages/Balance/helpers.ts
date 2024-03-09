@@ -511,7 +511,7 @@ const MIN_TX_FEE = 1000;
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;
 
-export const BTC_SCAN = btcNetwork === 'testnet' ? 'https://blockstream.info/testnet' : 'https://blockstream.info';
+export const BTC_SCAN = 'https://blockstream.info';
 
 const inputBytes = (input) => {
   return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
