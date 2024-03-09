@@ -102,7 +102,7 @@
     }
   }
 
-  &_liquidity {
+  &_overrall {
     display: flex;
     align-items: center;
     border-radius: 12px;
@@ -199,7 +199,7 @@
           height: 18px;
         }
 
-        .liq_value {
+        .overrall_value {
           font-size: 24px;
           font-weight: 500;
           line-height: 120%;
@@ -224,13 +224,17 @@
     }
   }
 
-  &_claimable {
+  &_detail_checkpoint {
     display: flex;
     justify-content: space-between;
     border-radius: 12px;
     margin-bottom: 32px;
     padding: 24px;
     gap: 8px;
+
+    @media (max-width: 1280px) {
+      flex-wrap: wrap;
+    }
 
     @include theme() {
       border: 1px solid theme-get('primary-text-text-link');
@@ -246,8 +250,14 @@
   &_data {
     display: flex;
     align-items: flex-start;
+    justify-content: center;
     gap: 12px;
     flex: 1 0 0;
+
+    @media (max-width: 1280px) {
+      width: 100%;
+      justify-content: center;
+    }
 
     &_change {
       color: $error-color;
@@ -291,10 +301,11 @@
     }
   }
 
-  &_claim_reward {
+  &_search_checkpoint {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    width: 100%;
     padding: 0 30px;
     margin-right: 24px;
     position: relative;
@@ -306,21 +317,19 @@
       padding: 0;
     }
 
-    .claim_reward_bg {
-      position: absolute;
-      top: -35px;
-
-      @include small-mobile() {
-        display: none;
-      }
+    @media (max-width: 1280px) {
+      margin-top: 24px;
+      justify-content: flex-start;
+      padding: 0 0px;
+      max-width: unset;
     }
 
-    button {
-      z-index: 1;
+    &_input {
+      width: 100%;
+      max-width: 420px;
 
-      @include small-mobile() {
-        width: 100%;
-        z-index: 0;
+      @media (max-width: 1280px) {
+        max-width: unset;
       }
     }
   }
