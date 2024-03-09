@@ -1,0 +1,130 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.stakeTab {
+  display: flex;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+
+  border-radius: 24px;
+
+  @include theme {
+    background: theme-get('neutral-6');
+  }
+
+  @include small-mobile {
+    padding: 16px;
+  }
+
+  .result {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 100%;
+
+      @include theme {
+        color: theme-get('neutral-text-text-dropdown');
+      }
+
+      .highlight {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding: 0px 8px;
+        border-radius: 99px;
+        border: 1px solid;
+
+        @include theme {
+          border-color: theme-get('primary-surface-default');
+          background: theme-get('neutral-surface-btn-default');
+
+          color: theme-get('primary-surface-default');
+        }
+
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%;
+        letter-spacing: 0.1px;
+
+        svg {
+          path {
+            @include theme {
+              fill: theme-get('primary-surface-default');
+            }
+          }
+        }
+      }
+    }
+
+    .list {
+      width: 100%;
+      display: flex;
+      gap: 16px;
+
+      @include small-mobile {
+        flex-wrap: wrap;
+      }
+
+      .item {
+        display: flex;
+        padding: 16px;
+        flex-direction: column;
+        gap: 12px;
+        border-radius: 12px;
+        width: 100%;
+
+        @include theme {
+          background: theme-get('neutral-surface-bg-section-4');
+        }
+
+        .title {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          @include theme {
+            color: theme-get('neutral-9');
+          }
+
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 150%; /* 21px */
+          letter-spacing: 0.1px;
+        }
+
+        .value {
+          display: flex;
+          align-items: center;
+
+          gap: 6px;
+
+          svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          @include theme {
+            color: theme-get('neutral-text-text-dropdown');
+          }
+
+          font-size: 20px;
+          font-weight: 600;
+          line-height: 100%;
+        }
+      }
+    }
+  }
+}

@@ -14,5 +14,6 @@ export interface NetworkConfig {
   converter: string;
   bid_pool: string;
   oraidex_listing: string;
+  staking_oraix: string;
   multicall: string;
 }

@@ -122,8 +122,10 @@ async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddr
 
 async function loadCw20Balance(dispatch: Dispatch, address: string) {
   if (!address) return;
+
   // get all cw20 token contract
-  const cw20Tokens = oraichainTokens.filter((t) => t.contractAddress);
+  const cw20Tokens = [...oraichainTokens.filter((t) => t.contractAddress)];
+
   const data = toBinary({
     balance: { address }
   });
@@ -147,6 +149,7 @@ async function loadCw20Balance(dispatch: Dispatch, address: string) {
       return [t.denom, amount];
     })
   );
+
   dispatch(updateAmounts(amountDetails));
 }
 

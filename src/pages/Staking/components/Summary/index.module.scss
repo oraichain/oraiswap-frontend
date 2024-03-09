@@ -1,0 +1,85 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.summary {
+  display: flex;
+  width: 100%;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  align-self: stretch;
+
+  border-radius: 24px;
+
+  @include small-mobile {
+    padding: 16px;
+  }
+
+  @include theme {
+    background: theme-get('bg-linear-section');
+  }
+
+  .title {
+    @include theme {
+      color: theme-get('neutral-text-text-dropdown');
+    }
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+
+    @include theme {
+      background: theme-get('neutral-border-border-bold');
+    }
+  }
+
+  .statistic {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .overview {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 120%;
+
+    .header {
+      font-size: 20px;
+      font-weight: 600;
+
+      @include theme {
+        color: theme-get('neutral-text-text-dropdown');
+      }
+    }
+
+    svg {
+      path {
+        @include theme {
+          fill: theme-get('neutral-9');
+          stroke: theme-get('neutral-9');
+        }
+      }
+    }
+  }
+}
