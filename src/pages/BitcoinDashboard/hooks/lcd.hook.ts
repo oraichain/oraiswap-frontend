@@ -4,13 +4,20 @@ import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-comm
 import {
   BitcoinConfigInterface,
   CheckpointData,
+  CheckpointFeeInfoInterface,
+  CheckpointParsedData,
   CheckpointQueueInterface,
   CheckpointStatus,
   DepositFeeInterface,
   TotalValueLockedInterface,
+  TransactionInput,
+  TransactionOutput,
+  TransactionParsedInput,
+  TransactionParsedOutput,
   WithdrawalFeeInterface
 } from '../@types';
 import { useQuery } from '@tanstack/react-query';
+import { convertScriptPubkeyToBtcAddress } from '../utils/bitcoin';
 
 const axios = Axios.create({
   timeout: AXIOS_TIMEOUT,
@@ -153,12 +160,30 @@ export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number
   return data;
 };
 
-const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointData> => {
+const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointParsedData> => {
   try {
     const res = await axios.get(`/bitcoin/checkpoint/${checkpointIndex}`, {});
-    return res.data;
+    let data = res.data.data;
+    let status = data.status;
+    // Slice 1 to remove the input of previosu checkpoint
+    data.transaction.data.input = data.transaction.data.input.slice(1).map((item: TransactionInput) => {
+      let [txid, vout] = item.previous_output.split(':');
+      return {
+        txid,
+        vout
+      };
+    }) as TransactionParsedInput;
+    // Slice 2 to remove the two addition outputs of complete checkpoint
+    data.transaction.data.output = data.transaction.data.output
+      .slice(status == CheckpointStatus.Building ? 0 : 2)
+      .map((item: TransactionOutput) => {
+        return {
+          address: convertScriptPubkeyToBtcAddress(item.script_pubkey),
+          value: item.value
+        };
+      }) as TransactionParsedOutput;
+    return data;
   } catch (e) {
-    console.error('getCheckpointData', e);
     return {
       fee_collected: 0,
       fee_rate: 0,
@@ -185,6 +210,27 @@ const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointDa
 
 export const useGetCheckpointData = (checkpointIndex?: number) => {
   const { data } = useQuery(['bitcoin_checkpoint', checkpointIndex], () => getCheckpointData(checkpointIndex), {
+    refetchOnWindowFocus: true,
+    staleTime: 10 * 60 * 1000
+  });
+  return data;
+};
+
+const getCheckpointFeeInfo = async (): Promise<CheckpointFeeInfoInterface> => {
+  try {
+    const res = await axios.get(`/bitcoin/checkpoint_fee_info`, {});
+    return res.data;
+  } catch (e) {
+    console.error('getCheckpointFeeInfo', e);
+    return {
+      fees_collected: 0,
+      miner_fee: 0
+    };
+  }
+};
+
+export const useGetCheckpointFeeInfo = () => {
+  const { data } = useQuery(['checkpoint_fee_info'], getCheckpointFeeInfo, {
     refetchOnWindowFocus: true,
     staleTime: 10 * 60 * 1000
   });

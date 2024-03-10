@@ -3,6 +3,7 @@ import styles from './Checkpoint.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import {
   useGetCheckpointData,
+  useGetCheckpointFeeInfo,
   useGetCheckpointQueue,
   useGetDepositFee,
   useGetWithdrawalFee
@@ -11,15 +12,21 @@ import useConfigReducer from 'hooks/useConfigReducer';
 import { toDisplay } from '@oraichain/oraidex-common';
 import Search from 'components/SearchInput';
 import useTheme from 'hooks/useTheme';
+import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
+import { TransactionInput } from './Transactions/TransactionInput';
+import { TransactionOutput } from './Transactions/TransactionOutput';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 
 const Checkpoint: React.FC<{}> = ({}) => {
   const theme = useTheme();
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
-  const [checkpointIndex, setCheckpointIndex] = useState<number | null>(null);
   const checkpointQueue = useGetCheckpointQueue();
+  const [checkpointInputValue, setCheckpointInputValue] = useState<number | null>(checkpointQueue?.index || null);
+  const checkpointIndex = useDebounce(checkpointInputValue, 500);
   const depositFee = useGetDepositFee(checkpointIndex);
   const withdrawalFee = useGetWithdrawalFee(btcAddress, checkpointIndex);
   const checkpointData = useGetCheckpointData(checkpointIndex);
+  const checkpointFeeInfo = useGetCheckpointFeeInfo();
 
   useEffect(() => {
     (async () => {
@@ -32,6 +39,7 @@ const Checkpoint: React.FC<{}> = ({}) => {
 
   return (
     <div className={styles.checkpoint}>
+      <h2 className={styles.checkpoint_title}>Checkpoint: </h2>
       <div className={styles.checkpoint_detail_checkpoint}>
         <div className={styles.checkpoint_data}>
           <div className={styles.checkpoint_data_item}>
@@ -80,7 +88,7 @@ const Checkpoint: React.FC<{}> = ({}) => {
             className={styles.checkpoint_search_checkpoint_input}
             onChange={(e) => {
               if (e.target.value.length != 0) {
-                setCheckpointIndex(parseInt(e.target.value));
+                setCheckpointInputValue(parseInt(e.target.value));
               }
             }}
             placeholder="Search checkpoint index number"
@@ -88,6 +96,24 @@ const Checkpoint: React.FC<{}> = ({}) => {
           />
         </div>
       </div>
+      <div className={styles.explain}>
+        <div>
+          <TooltipIcon width={20} height={20} />
+        </div>
+        {checkpointIndex == checkpointQueue?.index ? (
+          <span>{`Predict Hash: ${checkpointData?.transaction.hash}, We need at least ${toDisplay(
+            BigInt(checkpointFeeInfo?.miner_fee - checkpointFeeInfo?.fees_collected || 0),
+            8
+          )} BTC fee to make this checkpoint executed. (${toDisplay(
+            BigInt(checkpointFeeInfo?.fees_collected || 0),
+            8
+          )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
+        ) : (
+          <span>{`Hash: ${checkpointData?.transaction.hash}`}</span>
+        )}
+      </div>
+      {checkpointData?.transaction ? <TransactionInput data={checkpointData.transaction.data.input} /> : <></>}
+      {checkpointData?.transaction ? <TransactionOutput data={checkpointData.transaction.data.output} /> : <></>}
     </div>
   );
 };

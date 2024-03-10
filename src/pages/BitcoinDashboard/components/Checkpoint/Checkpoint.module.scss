@@ -4,6 +4,14 @@
 .checkpoint {
   display: flex;
   flex-direction: column;
+  &_title {
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 24px;
+    @include theme() {
+      color: theme-get('color');
+    }
+  }
 
   &_detail_checkpoint {
     display: flex;
@@ -132,6 +140,39 @@
       &_item:last-child {
         margin-top: 24px;
         width: 100%;
+      }
+    }
+  }
+}
+
+.explain {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  @include theme {
+    border-color: theme-get('primary-text-text-link');
+    background: theme-get('primary-surface-default-subtle');
+  }
+
+  svg {
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  @include theme {
+    color: theme-get('primary-surface-default');
+
+    svg {
+      path {
+        stroke: theme-get('primary-surface-default');
       }
     }
   }

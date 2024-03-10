@@ -54,8 +54,18 @@ export interface TransactionInput {
   witness: String[];
 }
 
+export interface TransactionParsedInput {
+  txid: String;
+  vout: number;
+}
+
 export interface TransactionOutput {
   script_pubkey: String;
+  value: number;
+}
+
+export interface TransactionParsedOutput {
+  address: String;
   value: number;
 }
 
@@ -63,6 +73,12 @@ export interface TransactionData {
   input: TransactionInput[];
   lock_time: number;
   output: TransactionOutput[];
+}
+
+export interface TransactionParsedData {
+  input: TransactionParsedInput[];
+  lock_time: number;
+  output: TransactionParsedOutput[];
 }
 
 export interface CheckpointData {
@@ -75,4 +91,21 @@ export interface CheckpointData {
     hash: String;
     data: TransactionData;
   };
+}
+
+export interface CheckpointParsedData {
+  fee_rate: number;
+  fee_collected: number;
+  signed_at_btc_height: number;
+  sigset: SigsetInterface;
+  status: CheckpointStatus;
+  transaction: {
+    hash: String;
+    data: TransactionParsedData;
+  };
+}
+
+export interface CheckpointFeeInfoInterface {
+  fees_collected: number;
+  miner_fee: number;
 }
