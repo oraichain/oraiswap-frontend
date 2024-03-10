@@ -16,7 +16,7 @@ import {
   useGetDepositFee,
   useGetTotalValueLocked,
   useGetWithdrawalFee
-} from '../hooks';
+} from '../../hooks';
 import { PendingDeposits } from '../PendingDeposits/PendingDeposits';
 
 // TODO: Update this method when BTC is added to pool

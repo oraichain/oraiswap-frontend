@@ -36,8 +36,7 @@ const getPendingDeposits = async (address?: String): Promise<DepositInfo[]> => {
 export const useGetPendingDeposits = (address?: String) => {
   const { data } = useQuery(['pending_deposits', address], () => getPendingDeposits(address), {
     refetchOnWindowFocus: true,
-    staleTime: 1000,
-    initialData: []
+    staleTime: 1000
   });
   console.log('Data', data);
   return data;

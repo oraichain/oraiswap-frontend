@@ -14,8 +14,8 @@ import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import { useGetPendingDeposits } from '../hooks/relayer.hook';
-import { DepositInfo } from '../@types';
+import { useGetPendingDeposits } from '../../hooks/relayer.hook';
+import { DepositInfo } from '../../@types';
 
 type Icons = {
   Light: any;
@@ -109,7 +109,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     <div className={styles.listpools}>
       <h2 className={styles.listpools_title}>Pending Deposits:</h2>
       <div className={styles.listpools_list}>
-        {data.length > 0 ? (
+        {(data?.length || 0) > 0 ? (
           <Table headers={headers} data={data} defaultSorted="confirmations" />
         ) : (
           <FallbackEmptyData />
