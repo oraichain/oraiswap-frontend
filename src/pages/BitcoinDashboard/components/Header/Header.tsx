@@ -1,23 +1,11 @@
-import { CW20_DECIMALS, ORAI, USDT_CONTRACT, toDecimal, toDisplay } from '@oraichain/oraidex-common';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import TokenBalance from 'components/TokenBalance';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useTheme from 'hooks/useTheme';
-import { useGetMyStake, useGetPools, useGetRewardInfo } from 'pages/Pools/hooks';
 import { FC, useEffect, useState } from 'react';
 import styles from './Header.module.scss';
-import { isMobile } from '@walletconnect/browser-utils';
-import { FILTER_DAY } from 'reducer/type';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import Search from 'components/SearchInput';
-import {
-  useGetBitcoinConfig,
-  useGetCheckpointQueue,
-  useGetDepositFee,
-  useGetTotalValueLocked,
-  useGetWithdrawalFee
-} from '../../hooks';
-import { PendingDeposits } from '../PendingDeposits/PendingDeposits';
+import { useGetBitcoinConfig, useGetCheckpointQueue, useGetTotalValueLocked } from '../../hooks';
 
 // TODO: Update this method when BTC is added to pool
 // CURRENT REPLACEMENT: Fetch price from other platform
@@ -139,7 +127,6 @@ export const Header: FC<{}> = ({}) => {
           </div>
         ))}
       </div>
-      <PendingDeposits />
     </div>
   );
 };

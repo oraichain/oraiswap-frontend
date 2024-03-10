@@ -1,12 +1,7 @@
-import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
-import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
-import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
-import { Button } from 'components/Button';
+import { toDisplay } from '@oraichain/oraidex-common';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { PoolTableData } from 'pages/Pools';
-import { formatDisplayClaimable, formatDisplayUsdt, parseAssetOnlyDenom } from 'pages/Pools/helpers';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PendingDeposits.module.scss';
