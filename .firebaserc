@@ -1,30 +1,12 @@
 {
   "projects": {
-    "default": "oraichain-mainnet"
+    "default": "oraichain-dapp"
   },
   "targets": {
-    "oraichain-mainnet": {
+    "oraichain-dapp": {
       "hosting": {
-        "oraiswap": [
-          "oraiswap"
-        ],
-        "oraiswap-staging": [
-          "oraiswap-staging"
-        ],
-        "oraiswap-testnet": [
-          "oraiswap-testnet"
-        ],
-        "oraiswap-ibc": [
-          "oraiswap-ibc"
-        ],
-        "oraiswap-staging-v1": [
-          "oraiswap-staging-v1"
-        ],
-        "oraiswap-legacy": [
-          "oraiswap-legacy"
-        ],
-        "oraiswap-pre-mainnet": [
-          "oraiswap-pre-mainnet"
+        "oraiswap-prod-08032024": [
+          "oraiswap-prod-08032024"
         ]
       }
     }
