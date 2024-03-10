@@ -17,6 +17,7 @@ import {
   useGetTotalValueLocked,
   useGetWithdrawalFee
 } from '../hooks';
+import { PendingDeposits } from '../PendingDeposits/PendingDeposits';
 
 // TODO: Update this method when BTC is added to pool
 // CURRENT REPLACEMENT: Fetch price from other platform
@@ -142,6 +143,7 @@ export const Header: FC<{}> = ({}) => {
           </div>
         ))}
       </div>
+      <PendingDeposits />
       <div className={styles.header_detail_checkpoint}>
         <div className={styles.header_data}>
           <div className={styles.header_data_item}>
