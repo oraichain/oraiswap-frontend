@@ -3,7 +3,9 @@ import { throttleAdapterEnhancer, retryAdapterEnhancer } from 'axios-extensions'
 import { AXIOS_TIMEOUT, AXIOS_THROTTLE_THRESHOLD } from '@oraichain/oraidex-common';
 import {
   BitcoinConfigInterface,
+  CheckpointData,
   CheckpointQueueInterface,
+  CheckpointStatus,
   DepositFeeInterface,
   TotalValueLockedInterface,
   WithdrawalFeeInterface
@@ -148,5 +150,43 @@ export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number
       staleTime: 10 * 60 * 1000
     }
   );
+  return data;
+};
+
+const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointData> => {
+  try {
+    const res = await axios.get(`/bitcoin/checkpoint/${checkpointIndex}`, {});
+    return res.data;
+  } catch (e) {
+    console.error('getCheckpointData', e);
+    return {
+      fee_collected: 0,
+      fee_rate: 0,
+      signed_at_btc_height: 0,
+      sigset: {
+        create_time: 0,
+        index: 0,
+        possible_vp: 0,
+        present_vp: 0,
+        signatories: []
+      },
+      status: CheckpointStatus.Building,
+      transaction: {
+        hash: '',
+        data: {
+          input: [],
+          output: [],
+          lock_time: 0
+        }
+      }
+    };
+  }
+};
+
+export const useGetCheckpointData = (checkpointIndex?: number) => {
+  const { data } = useQuery(['bitcoin_checkpoint', checkpointIndex], () => getCheckpointData(checkpointIndex), {
+    refetchOnWindowFocus: true,
+    staleTime: 10 * 60 * 1000
+  });
   return data;
 };

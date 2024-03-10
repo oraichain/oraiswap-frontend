@@ -35,13 +35,9 @@ export const useGetBitcoinPrice = () => {
 };
 
 export const Header: FC<{}> = ({}) => {
-  const theme = useTheme();
-  const [checkpointIndex, setCheckpointIndex] = useState<number | null>(null);
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const btcPrice = useGetBitcoinPrice();
   const valueLocked = useGetTotalValueLocked();
-  const depositFee = useGetDepositFee(checkpointIndex);
-  const withdrawalFee = useGetWithdrawalFee(btcAddress, checkpointIndex);
   const bitcoinConfig = useGetBitcoinConfig();
   const checkpointQueue = useGetCheckpointQueue();
   //   const withdrawalFees = useGetWithdrawalFee(checkpointIndex);
@@ -144,57 +140,6 @@ export const Header: FC<{}> = ({}) => {
         ))}
       </div>
       <PendingDeposits />
-      <div className={styles.header_detail_checkpoint}>
-        <div className={styles.header_data}>
-          <div className={styles.header_data_item}>
-            <span className={styles.header_data_name}>Current Checkpoint</span>
-            <br />
-            <TokenBalance
-              balance={checkpointIndex || checkpointQueue?.index || 0}
-              prefix=""
-              suffix=""
-              className={styles.header_data_value}
-              decimalScale={6}
-            />
-          </div>
-          <div className={styles.header_data_item}>
-            <span className={styles.header_data_name}>Deposit Fee</span>
-            <br />
-            <TokenBalance
-              balance={toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)}
-              prefix=""
-              suffix="BTC"
-              className={styles.header_data_value}
-              decimalScale={6}
-            />
-          </div>
-          <div className={styles.header_data_item}>
-            <span className={styles.header_data_name}>Withdrawal Fee</span>
-            <br />
-            <span className={styles.header_data_value}>
-              <TokenBalance
-                balance={toDisplay(BigInt(withdrawalFee?.withdrawal_fees || 0), 14)}
-                prefix=""
-                suffix="BTC"
-                className={styles.header_data_value}
-                decimalScale={6}
-              />
-            </span>
-          </div>
-        </div>
-        <div className={styles.header_search_checkpoint}>
-          <Search
-            className={styles.header_search_checkpoint_input}
-            onChange={(e) => {
-              if (e.target.value.length != 0) {
-                setCheckpointIndex(parseInt(e.target.value));
-              }
-            }}
-            placeholder="Search checkpoint index number"
-            theme={theme}
-          />
-        </div>
-      </div>
     </div>
   );
 };

@@ -32,3 +32,47 @@ export interface DepositFeeInterface {
 export interface WithdrawalFeeInterface {
   withdrawal_fees: number;
 }
+
+export enum CheckpointStatus {
+  Building = 'Building',
+  Signing = 'Signing',
+  Complete = 'Complete'
+}
+
+export interface SigsetInterface {
+  create_time: number;
+  index: number;
+  possible_vp: number;
+  present_vp: number;
+  signatories: any[]; // we will not use this, so i put any here
+}
+
+export interface TransactionInput {
+  previous_output: String;
+  script_sig: String;
+  sequence: number;
+  witness: String[];
+}
+
+export interface TransactionOutput {
+  script_pubkey: String;
+  value: number;
+}
+
+export interface TransactionData {
+  input: TransactionInput[];
+  lock_time: number;
+  output: TransactionOutput[];
+}
+
+export interface CheckpointData {
+  fee_rate: number;
+  fee_collected: number;
+  signed_at_btc_height: number;
+  sigset: SigsetInterface;
+  status: CheckpointStatus;
+  transaction: {
+    hash: String;
+    data: TransactionData;
+  };
+}
