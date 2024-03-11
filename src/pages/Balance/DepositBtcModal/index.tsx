@@ -15,9 +15,10 @@ import { timeAgo } from 'helper';
 
 import { satToBTC, useDepositFeesBitcoin, useGetInfoBtc } from '../helpers';
 import { useCopy } from 'hooks/useCopy';
-import { DepositPending } from 'libs/nomic/models/nomic-client/nomic-client-interface';
-import { BigDecimal } from '@oraichain/oraidex-common';
+
+import { Link } from 'react-router-dom';
 import { flattenTokens } from 'config/bridgeTokens';
+import { BigDecimal } from '@oraichain/oraidex-common';
 import { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
 
 interface ModalProps {
@@ -34,8 +35,6 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const [urlQRCode, setUrlQRCode] = useState(null);
   const nomic = useContext(NomicContext);
   const { infoBTC } = useGetInfoBtc();
-  const [oraiAddress] = useConfigReducer('address');
-  const [depositPendings, setDepositPendings] = useState<DepositPending[]>();
   const fromToken = flattenTokens.find((flat) => flat.chainId === ('bitcoin' as any));
   const toToken = flattenTokens.find((flat) => flat.chainId === 'Oraichain' && flat.coinGeckoId === 'bitcoin');
   const { deposit_fees } = useDepositFeesBitcoin(true);
@@ -45,22 +44,7 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const { displayAmount } = useUsdtToBtc(minimumDeposit);
 
   const expiration = nomic.depositAddress?.expirationTimeMs;
-  useEffect(() => {
-    let intervalId;
-    if (oraiAddress) {
-      intervalId = setInterval(async () => {
-        const res = await nomic.getDepositsPending(oraiAddress);
-        if (res?.length > 0) {
-          setDepositPendings(res);
-        }
-      }, 10000);
-      return;
-    }
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [oraiAddress]);
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
@@ -108,15 +92,12 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             </span>
           </div>
         </div>
-        {depositPendings?.length > 0 && (
-          <div className={styles.estimate}>
-            <div className={styles.timeMinerFee}>
-              <span className={styles.fee}>
-                Deposits Pending: <b>{depositPendings?.length}</b> transaction{depositPendings?.length > 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-        )}
+
+        <div className={styles.estimate}>
+          <Link to={'/bitcoin-dashboard?tab=pending_deposits'} className={styles.viewTxs}>
+            View your transactions
+          </Link>
+        </div>
 
         <div className={styles.estimate}>
           <div className={styles.timeMinerFee}>

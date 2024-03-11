@@ -46,7 +46,7 @@ import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotal
 import isEqual from 'lodash/isEqual';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useNavigation, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
@@ -194,7 +194,8 @@ const Balance: React.FC<BalanceProps> = () => {
         await getAddress();
         //@ts-ignore
         displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log
+          message: result?.log,
+          customLink: '/bitcoin-dashboard?tab=pending_withdraws'
         });
       }
     } catch (error) {
@@ -292,7 +293,7 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
       if (rs?.rawTxHex) {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+          customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
         setTxHash(rs.rawTxHex);
         return;
@@ -301,6 +302,7 @@ const Balance: React.FC<BalanceProps> = () => {
         message: 'Transaction failed'
       });
     } catch (error) {
+      console.log('🚀 ~ handleTransferBTCToOraichain ~ error:', error);
       displayToast(TToastType.TX_FAILED, {
         message: JSON.stringify(error)
       });
