@@ -78,7 +78,7 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
-    if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount.displayAmount).toNumber());
+    if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount?.displayAmount || 0).toNumber());
   }, [relayerFeeAmount]);
 
   // get relayer fee in ORAI

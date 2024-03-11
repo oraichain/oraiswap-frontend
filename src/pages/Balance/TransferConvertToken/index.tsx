@@ -355,7 +355,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                   transferLoading ||
                   !addressTransfer ||
                   receivedAmount < 0 ||
-                  checkDisableTransferBtc(convertAmount, usdt.displayAmount, token.coinGeckoId)
+                  checkDisableTransferBtc(convertAmount, usdt?.displayAmount, token.coinGeckoId)
                 }
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}

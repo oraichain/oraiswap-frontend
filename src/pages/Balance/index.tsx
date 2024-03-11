@@ -292,7 +292,7 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
       if (rs?.rawTxHex) {
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `${BTC_SCAN}/tx/${rs.rawTxHex}`
+          customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
         setTxHash(rs.rawTxHex);
         return;
@@ -301,6 +301,7 @@ const Balance: React.FC<BalanceProps> = () => {
         message: 'Transaction failed'
       });
     } catch (error) {
+      console.log('🚀 ~ handleTransferBTCToOraichain ~ error:', error);
       displayToast(TToastType.TX_FAILED, {
         message: JSON.stringify(error)
       });
