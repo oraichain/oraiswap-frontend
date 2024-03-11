@@ -13,8 +13,7 @@ import { toDisplay } from '@oraichain/oraidex-common';
 import Search from 'components/SearchInput';
 import useTheme from 'hooks/useTheme';
 import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
-import { TransactionInput } from './Transactions/TransactionInput';
-import { TransactionOutput } from './Transactions/TransactionOutput';
+import { TransactionInput, TransactionOutput } from './Transactions';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 
 const Checkpoint: React.FC<{}> = ({}) => {
@@ -39,7 +38,6 @@ const Checkpoint: React.FC<{}> = ({}) => {
 
   return (
     <div className={styles.checkpoint}>
-      <h2 className={styles.checkpoint_title}>Checkpoint: </h2>
       <div className={styles.checkpoint_detail_checkpoint}>
         <div className={styles.checkpoint_data}>
           <div className={styles.checkpoint_data_item}>

@@ -82,9 +82,9 @@ export const TransactionInput: React.FC<{ data: TransactionParsedInput[] }> = ({
   };
 
   return (
-    <div className={styles.listpools}>
-      <h2 className={styles.listpools_title}>Transaction Inputs:</h2>
-      <div className={styles.listpools_list}>
+    <div className={styles.transactions}>
+      <h2 className={styles.transactions_title}>Transaction Inputs:</h2>
+      <div className={styles.transactions_list}>
         {(data?.length || 0) > 0 ? <Table headers={headers} data={data} defaultSorted="txid" /> : <FallbackEmptyData />}
       </div>
     </div>

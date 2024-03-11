@@ -2,12 +2,13 @@ import { toDisplay } from '@oraichain/oraidex-common';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import useConfigReducer from 'hooks/useConfigReducer';
-import styles from './Transaction.module.scss';
+import styles from './PendingWithdraw.module.scss';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
+import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
 
 type Icons = {
   Light: any;
@@ -25,8 +26,13 @@ const tokens = {
   } as Icons
 };
 
-export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = ({ data }) => {
+export const PendingWithdraws: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
+  const btcAddress = useConfigReducer('btcAddress');
+  const checkpointQueue = useGetCheckpointQueue();
+  const checkpointData = useGetCheckpointData(checkpointQueue?.index);
+  const allOutputs = checkpointData?.transaction.data.output || [];
+  const data = allOutputs.filter((item) => item.address == btcAddress[0]);
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
@@ -78,9 +84,9 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
   };
 
   return (
-    <div className={styles.transactions}>
-      <h2 className={styles.transactions_title}>Transaction Outputs:</h2>
-      <div className={styles.transactions_list}>
+    <div className={styles.pending_withdraws}>
+      <h2 className={styles.pending_withdraws_title}>Pending Withdraws:</h2>
+      <div className={styles.pending_withdraws_list}>
         {(data?.length || 0) > 0 ? (
           <Table headers={headers} data={data} defaultSorted="address" />
         ) : (

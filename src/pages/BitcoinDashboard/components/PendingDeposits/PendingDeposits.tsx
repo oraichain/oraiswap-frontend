@@ -2,8 +2,6 @@ import { toDisplay } from '@oraichain/oraidex-common';
 import { FallbackEmptyData } from 'components/FallbackEmptyData';
 import { Table, TableHeaderProps } from 'components/Table';
 import useConfigReducer from 'hooks/useConfigReducer';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './PendingDeposits.module.scss';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
@@ -31,7 +29,6 @@ const tokens = {
 
 export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
-  const navigate = useNavigate();
   const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
   const data = useGetPendingDeposits(oraichainAddress);
 
@@ -101,7 +98,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   };
 
   return (
-    <div className={styles.listpools}>
+    <div className={styles.pending_deposits}>
       <div className={styles.explain}>
         <div>
           <TooltipIcon width={20} height={20} />
@@ -110,8 +107,8 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
           After a pending deposit disappears, it will show up as transaction hash in lastest checkpoint index.
         </span>
       </div>
-      <h2 className={styles.listpools_title}>Pending Deposits:</h2>
-      <div className={styles.listpools_list}>
+      <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
+      <div className={styles.pending_deposits_list}>
         {(data?.length || 0) > 0 ? (
           <Table headers={headers} data={data} defaultSorted="confirmations" />
         ) : (

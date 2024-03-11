@@ -1,7 +1,7 @@
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
 
-.listpools {
+.pending_deposits {
   &_title {
     font-weight: 500;
     font-size: 24px;
@@ -10,7 +10,7 @@
     }
   }
 
-  .listpools_all {
+  .pending_deposits_all {
     display: flex;
     justify-content: space-between;
 

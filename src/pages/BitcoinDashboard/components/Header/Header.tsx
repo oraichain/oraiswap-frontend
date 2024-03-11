@@ -43,9 +43,9 @@ export const Header: FC<{}> = ({}) => {
 
   const overallData = [
     {
-      name: 'Capacity Limit',
+      name: 'Min Confirmations',
       Icon: null,
-      value: toDisplay(BigInt(bitcoinConfig?.capacity_limit || 0), 8), // || statisticData.totalLiquidity,
+      value: bitcoinConfig?.min_confirmations || 0, // || statisticData.totalLiquidity,
       isNegative: false,
       decimal: 2
       //   openChart: false

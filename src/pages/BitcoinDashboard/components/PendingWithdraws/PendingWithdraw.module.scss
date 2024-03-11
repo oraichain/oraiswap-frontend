@@ -1,7 +1,7 @@
 @import 'src/styles/mixins';
 @import 'src/styles/themes';
 
-.transactions {
+.pending_withdraws {
   &_title {
     font-weight: 500;
     font-size: 24px;
@@ -10,7 +10,7 @@
     }
   }
 
-  .transactions_all {
+  .pending_withdraws_all {
     display: flex;
     justify-content: space-between;
 
