@@ -32,6 +32,7 @@ import { ReactComponent as NobleLightIcon } from 'assets/icons/ic_noble_light.sv
 import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
+import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 
 import {
   AIRI_BSC_CONTRACT,
@@ -231,6 +232,11 @@ export const tokensIcon: TokenIcon[] = [
     coinGeckoId: 'och',
     Icon: OrchaiIcon,
     IconLight: OrchaiIcon
+  },
+  {
+    coinGeckoId: 'bitcoin',
+    Icon: BitcoinIcon,
+    IconLight: BitcoinIcon
   }
 ];
 
@@ -294,6 +300,11 @@ export const chainIcons: ChainIcon[] = [
     chainId: 'Neutaro-1',
     Icon: NeutaroIcon,
     IconLight: NeutaroIcon
+  },
+  {
+    chainId: 'oraibtc-mainnet-1',
+    Icon: BitcoinIcon,
+    IconLight: BitcoinIcon
   }
 ];
 export const mapListWithIcon = (list: any[], listIcon: ChainIcon[] | TokenIcon[], key: 'chainId' | 'coinGeckoId') => {
@@ -343,6 +354,17 @@ export const OraiToken: BridgeAppCurrency = {
 const OraiBToken: BridgeAppCurrency = {
   coinDenom: 'ORAIB',
   coinMinimalDenom: 'uoraib',
+  coinDecimals: 6,
+  gasPriceStep: {
+    low: 0,
+    average: 0,
+    high: 0
+  }
+};
+
+const OraiBTCToken: BridgeAppCurrency = {
+  coinDenom: 'ORAIBTC',
+  coinMinimalDenom: 'uoraibtc',
   coinDecimals: 6,
   gasPriceStep: {
     low: 0,
@@ -862,6 +884,31 @@ export const chainInfos: CustomChainInfo[] = [
         bridgeTo: ['Oraichain'],
         Icon: OsmoIcon,
         IconLight: OsmoIcon
+      }
+    ]
+  },
+  {
+    rpc: 'https://btc.rpc.orai.io',
+    rest: 'https://btc.lcd.orai.io/',
+    chainId: 'oraibtc-mainnet-1',
+    chainName: 'OraiBTC',
+    networkType: 'cosmos',
+    bip44: {
+      coinType: 118
+    },
+    Icon: BitcoinIcon,
+    IconLight: BitcoinIcon,
+    bech32Config: defaultBech32Config('oraibtc'),
+    feeCurrencies: [OraiBTCToken],
+    currencies: [
+      {
+        coinDenom: 'BTC',
+        coinMinimalDenom: 'uoraibtc',
+        coinDecimals: 6,
+        coinGeckoId: 'bitcoin',
+        bridgeTo: ['Oraichain'],
+        Icon: BitcoinIcon,
+        IconLight: BitcoinIcon
       }
     ]
   },
