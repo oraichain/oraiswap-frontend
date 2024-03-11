@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './Checkpoint.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import {
@@ -35,6 +35,33 @@ const Checkpoint: React.FC<{}> = ({}) => {
       } catch (e) {}
     })();
   }, []);
+
+  const renderNotification = () => {
+    if (checkpointIndex == checkpointQueue?.index) {
+      if (checkpointFeeInfo?.miner_fee > checkpointFeeInfo?.fees_collected) {
+        return (
+          <span>{`Predict Hash: ${checkpointData?.transaction.hash}, We need at least ${toDisplay(
+            BigInt(checkpointFeeInfo?.miner_fee - checkpointFeeInfo?.fees_collected || 0),
+            8
+          )} BTC fee to make this checkpoint executed. (${toDisplay(
+            BigInt(checkpointFeeInfo?.fees_collected || 0),
+            8
+          )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
+        );
+      }
+
+      return (
+        <span>{`Predict Hash: ${
+          checkpointData?.transaction.hash
+        }, Enough fee waiting for previous checkpoint to be completed (${toDisplay(
+          BigInt(checkpointFeeInfo?.fees_collected || 0),
+          8
+        )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
+      );
+    } else {
+      return <span>{`Hash: ${checkpointData?.transaction.hash}`}</span>;
+    }
+  };
 
   return (
     <div className={styles.checkpoint}>
@@ -98,17 +125,7 @@ const Checkpoint: React.FC<{}> = ({}) => {
         <div>
           <TooltipIcon width={20} height={20} />
         </div>
-        {checkpointIndex == checkpointQueue?.index ? (
-          <span>{`Predict Hash: ${checkpointData?.transaction.hash}, We need at least ${toDisplay(
-            BigInt(checkpointFeeInfo?.miner_fee - checkpointFeeInfo?.fees_collected || 0),
-            8
-          )} BTC fee to make this checkpoint executed. (${toDisplay(
-            BigInt(checkpointFeeInfo?.fees_collected || 0),
-            8
-          )}/${toDisplay(BigInt(checkpointFeeInfo?.miner_fee || 0), 8)} BTC)`}</span>
-        ) : (
-          <span>{`Hash: ${checkpointData?.transaction.hash}`}</span>
-        )}
+        {renderNotification()}
       </div>
       {checkpointData?.transaction ? <TransactionInput data={checkpointData.transaction.data.input} /> : <></>}
       {checkpointData?.transaction ? <TransactionOutput data={checkpointData.transaction.data.output} /> : <></>}
