@@ -5,7 +5,8 @@ import {
   NetworkChainId,
   ORAI,
   toDisplay,
-  TokenItemType
+  TokenItemType,
+  BigDecimal
   // flattenTokens
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
@@ -24,13 +25,13 @@ import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, getAddressTransfer, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import useTokenFee, { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
+import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
 import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';
-import { calcMaxAmount, checkDisableTransferBtc, useGetFeeBitcoin } from '../helpers';
+import { calcMaxAmount, useDepositFeesBitcoin, useGetWithdrawlFeesBitcoin } from '../helpers';
 import useWalletReducer from 'hooks/useWalletReducer';
 
 interface TransferConvertProps {
@@ -141,16 +142,27 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
+  const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && to.chainId === ('bitcoin' as string);
+  const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && to.chainId === 'Oraichain';
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
-  console.log('🚀 ~ to:', to);
-  console.log('🚀 ~ token:', token);
-  console.log('🚀 ~ relayerFeeTokenFee:', relayerFeeTokenFee);
+  const { deposit_fees } = useDepositFeesBitcoin(isFromBitcoinToOraichain);
+  const { withdrawal_fees } = useGetWithdrawlFeesBitcoin({
+    enabled: isFromOraichainToBitcoin,
+    bitcoinAddress: addressTransfer
+  });
 
-  const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
+  let toDisplayBTCFee = 0;
+  if (deposit_fees && isFromOraichainToBitcoin) {
+    // TODO: usat decimal 14
+    toDisplayBTCFee = new BigDecimal(deposit_fees).div(1e14).toNumber();
+  }
 
-  const receivedAmount = convertAmount
-    ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - Number(toDisplayBTCFee)
-    : 0;
+  if (withdrawal_fees && isFromBitcoinToOraichain) {
+    // TODO: usat decimal 14
+    toDisplayBTCFee = new BigDecimal(withdrawal_fees).div(1e14).toNumber();
+  }
+
+  let receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - toDisplayBTCFee : 0;
 
   const renderBridgeFee = () => {
     return (
@@ -186,7 +198,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
     if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
     return buttonName;
   };
-  const usdt = useUsdtToBtc();
+
   return (
     <div className={classNames(styles.tokenFromGroup, styles.small)} style={{ flexWrap: 'wrap' }}>
       <div className={styles.tokenSubAmouts}>
@@ -354,12 +366,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
           ) {
             return (
               <button
-                disabled={
-                  transferLoading ||
-                  !addressTransfer ||
-                  receivedAmount < 0 ||
-                  checkDisableTransferBtc(convertAmount, usdt.displayAmount, token.coinGeckoId)
-                }
+                disabled={transferLoading || !addressTransfer || receivedAmount < 0}
                 className={classNames(styles.tfBtn, styles[theme])}
                 onClick={onTransferConvert}
               >

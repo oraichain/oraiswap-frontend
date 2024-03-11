@@ -13,10 +13,12 @@ import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { reduceString } from 'libs/utils';
 import { timeAgo } from 'helper';
 
-import { satToBTC, useGetInfoBtc } from '../helpers';
-import { useUsdtToBtc } from 'hooks/useTokenFee';
+import { satToBTC, useDepositFeesBitcoin, useGetInfoBtc } from '../helpers';
 import { useCopy } from 'hooks/useCopy';
 import { DepositPending } from 'libs/nomic/models/nomic-client/nomic-client-interface';
+import { BigDecimal } from '@oraichain/oraidex-common';
+import { flattenTokens } from 'config/bridgeTokens';
+import { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
 
 interface ModalProps {
   isOpen: boolean;
@@ -34,8 +36,13 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const { infoBTC } = useGetInfoBtc();
   const [oraiAddress] = useConfigReducer('address');
   const [depositPendings, setDepositPendings] = useState<DepositPending[]>();
-
-  const usdt = useUsdtToBtc();
+  const fromToken = flattenTokens.find((flat) => flat.chainId === ('bitcoin' as any));
+  const toToken = flattenTokens.find((flat) => flat.chainId === 'Oraichain' && flat.coinGeckoId === 'bitcoin');
+  const { deposit_fees } = useDepositFeesBitcoin(true);
+  const { relayerFee } = useRelayerFeeToken(fromToken, toToken);
+  // TODO:  usat decimal 14
+  const minimumDeposit = new BigDecimal(deposit_fees).div(1e14).toNumber() + relayerFee;
+  const { displayAmount } = useUsdtToBtc(minimumDeposit);
 
   const expiration = nomic.depositAddress?.expirationTimeMs;
   useEffect(() => {
@@ -119,7 +126,9 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span className={styles.fee}>Bridge Fee:</span>
           </div>
           <div className={styles.value}>
-            <span>{usdt?.displayAmount} BTC (≈$50)</span>
+            <span>
+              {minimumDeposit} BTC (≈${displayAmount})
+            </span>
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>
