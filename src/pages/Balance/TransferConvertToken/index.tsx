@@ -5,8 +5,8 @@ import {
   NetworkChainId,
   ORAI,
   toDisplay,
-  TokenItemType,
-  flattenTokens
+  TokenItemType
+  // flattenTokens
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
@@ -18,7 +18,7 @@ import Input from 'components/Input';
 import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
+import { cosmosTokens, tokenMap, flattenTokens } from 'config/bridgeTokens';
 import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { feeEstimate, filterChainBridge, getAddressTransfer, networks, subNumber } from 'helper';
@@ -148,7 +148,10 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   const { toDisplayBTCFee } = useGetFeeBitcoin(token, addressTransfer);
 
-  const receivedAmount = convertAmount ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee : 0;
+  const receivedAmount = convertAmount
+    ? convertAmount * (1 - bridgeFee / 100) - relayerFeeTokenFee - Number(toDisplayBTCFee)
+    : 0;
+
   const renderBridgeFee = () => {
     return (
       <div className={styles.bridgeFee}>

@@ -111,6 +111,7 @@ export const bitcoinMainnet: CustomChainInfo = {
       coinMinimalDenom: 'btc',
       coinDecimals: 8,
       bridgeTo: ['Oraichain'],
+      prefixToken: 'oraibtc',
       Icon: BTCIcon,
       coinGeckoId: 'bitcoin',
       coinImageUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
@@ -588,7 +589,7 @@ export const oraichainNetwork: CustomChainInfo = {
     {
       coinDenom: 'BTC',
       coinGeckoId: 'bitcoin',
-      coinMinimalDenom: 'obtc',
+      coinMinimalDenom: 'usat',
       type: 'cw20',
       contractAddress: OBTCContractAddress,
       bridgeTo: [bitcoinChainId],
