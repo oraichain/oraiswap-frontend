@@ -142,8 +142,15 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
 
   // bridge fee & relayer fee
   const bridgeFee = fromTokenFee + toTokenFee;
-  const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && to.chainId === ('bitcoin' as string);
-  const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && to.chainId === 'Oraichain';
+  console.log({
+    token,
+    to,
+    toNetwork,
+    toNetworkChainId
+  });
+
+  const isFromOraichainToBitcoin = token.chainId === 'Oraichain' && toNetworkChainId === ('bitcoin' as any);
+  const isFromBitcoinToOraichain = token.chainId === ('bitcoin' as string) && toNetworkChainId === 'Oraichain';
   const { relayerFee: relayerFeeTokenFee } = useRelayerFeeToken(token, to);
   const { deposit_fees } = useDepositFeesBitcoin(isFromBitcoinToOraichain);
   const { withdrawal_fees } = useGetWithdrawlFeesBitcoin({
@@ -152,12 +159,12 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   });
 
   let toDisplayBTCFee = 0;
-  if (deposit_fees && isFromOraichainToBitcoin) {
+  if (deposit_fees && isFromBitcoinToOraichain) {
     // TODO: usat decimal 14
     toDisplayBTCFee = new BigDecimal(deposit_fees).div(1e14).toNumber();
   }
 
-  if (withdrawal_fees && isFromBitcoinToOraichain) {
+  if (withdrawal_fees && isFromOraichainToBitcoin) {
     // TODO: usat decimal 14
     toDisplayBTCFee = new BigDecimal(withdrawal_fees).div(1e14).toNumber();
   }
