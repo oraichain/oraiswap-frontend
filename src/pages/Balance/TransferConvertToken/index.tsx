@@ -21,7 +21,7 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
-import { feeEstimate, filterChainBridge, networks, subNumber } from 'helper';
+import { feeEstimate, filterChainBridge, getAddressTransfer, networks, subNumber } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
@@ -49,7 +49,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   subAmounts
 }) => {
   const bridgeNetworks = networks.filter((item) => filterChainBridge(token, item));
-
   const [[convertAmount, convertUsd], setConvertAmount] = useState([undefined, 0]);
   const [transferLoading, setTransferLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -62,17 +61,19 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   useEffect(() => {
-    if (chainInfo) {
-      setConvertAmount([undefined, 0]);
-    }
+    if (chainInfo) setConvertAmount([undefined, 0]);
   }, [chainInfo]);
 
   useEffect(() => {
-    const defaultToChainId = bridgeNetworks[0]?.chainId;
-    setToNetworkChainId(defaultToChainId);
-
-    const findNetwork = networks.find((net) => net.chainId === defaultToChainId);
-    getAddressTransfer(findNetwork);
+    (async () => {
+      if (token.chainId) {
+        const defaultToChainId = bridgeNetworks[0]?.chainId;
+        const findNetwork = networks.find((net) => net.chainId === defaultToChainId);
+        const address = await getAddressTransfer(findNetwork, walletByNetworks);
+        setAddressTransfer(address);
+        setToNetworkChainId(defaultToChainId);
+      }
+    })();
   }, [token.chainId]);
 
   // list of tokens where it exists in at least two different chains
@@ -90,45 +91,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       return false;
     }
     return true;
-  };
-
-  const getAddressTransfer = async (network: CustomChainInfo) => {
-    let address: string = '';
-    try {
-      if (network.networkType === ('bitcoin' as string)) {
-        address = await window.Bitcoin.getAddress();
-      } else if (network.networkType === 'evm') {
-        if (network.chainId === '0x2b6653dc') {
-          if (!isMobile && !walletByNetworks.tron) {
-            setAddressTransfer('');
-            return;
-          }
-          // TODO: Check owallet mobile
-          if (isMobile()) {
-            //@ts-ignore
-            const addressTronMobile = await window.tronLinkDapp.request({
-              method: 'tron_requestAccounts'
-            });
-            //@ts-ignore
-            address = addressTronMobile?.base58;
-          } else {
-            address = window?.tronWeb?.defaultAddress?.base58;
-          }
-        } else {
-          if ((walletByNetworks.evm || isMobile()) && window.Metamask.isWindowEthereum())
-            address = await window.Metamask.getEthAddress();
-        }
-      } else {
-        if (walletByNetworks.cosmos || isMobile()) {
-          address = await window.Keplr.getKeplrAddr(network.chainId);
-        }
-      }
-    } catch (error) {
-      console.log({
-        error
-      });
-    }
-    setAddressTransfer(address);
   };
 
   const onTransferConvert = async (event: React.MouseEvent) => {
@@ -155,10 +117,7 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         await onClickTransfer(convertAmount, toNetworkChainId);
         return;
       }
-      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ toNetworkChainId:', toNetworkChainId);
-      console.log('🚀 ~ file: index.tsx:154 ~ onTransferConvert ~ convertAmount:', convertAmount);
-      await onClickTransfer(convertAmount, toNetworkChainId);
-      return;
+      return await onClickTransfer(convertAmount, toNetworkChainId);
     } catch (error) {
       console.log({ error });
     } finally {
@@ -221,7 +180,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
   const renderTransferConvertButton = () => {
     let buttonName = toNetworkChainId === token.chainId ? 'Convert to ' : 'Transfer to ';
     if (toNetwork) buttonName += toNetwork.chainName;
-
     if (receivedAmount < 0) buttonName = 'Not enought amount to pay fee';
     return buttonName;
   };
@@ -312,8 +270,9 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
                             key={net.chainId}
                             onClick={async (e) => {
                               e.stopPropagation();
+                              const address = await getAddressTransfer(net, walletByNetworks);
+                              setAddressTransfer(address);
                               setToNetworkChainId(net.chainId);
-                              await getAddressTransfer(net);
                               setIsOpen(false);
                             }}
                           >

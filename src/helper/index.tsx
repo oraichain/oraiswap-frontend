@@ -10,6 +10,7 @@ import {
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
+  EVM_CHAIN_ID_COMMON,
   WalletType as WalletCosmosType
 } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
@@ -26,6 +27,7 @@ import { WalletType } from 'components/WalletManagement/walletConfig';
 import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
+import { WalletsByNetwork } from 'reducer/wallet';
 
 export interface Tokens {
   denom?: string;
@@ -288,15 +290,18 @@ export const switchWalletCosmos = async (type: WalletCosmosType | 'eip191') => {
   }
 };
 
+export interface interfaceRequestTron {
+  code: number;
+  message: string;
+  base58?: string;
+}
+
 export const switchWalletTron = async (walletType: WalletType) => {
   let tronAddress: string;
-  // @ts-ignore
-  const res = await window.tronLinkDapp.request({
+  const res: interfaceRequestTron = await window.tronLinkDapp.request({
     method: 'tron_requestAccounts'
   });
-  // @ts-ignore
   if (isMobile() || (walletType === 'owallet' && window.tronLinkDapp?.isOwallet)) {
-    // @ts-ignore
     tronAddress = res?.base58;
   } else {
     const { code, message = 'Tronlink is not ready' } = res;
@@ -309,6 +314,32 @@ export const switchWalletTron = async (walletType: WalletType) => {
   return {
     tronAddress
   };
+};
+
+export const getAddressTransfer = async (network: CustomChainInfo, walletByNetworks: WalletsByNetwork) => {
+  try {
+    let address;
+    if (network.networkType === 'evm') {
+      if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
+        if (isMobile() && walletByNetworks.tron) {
+          const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
+            method: 'tron_requestAccounts'
+          });
+          address = accountTron.base58;
+        } else {
+          address = window?.tronWebDapp?.defaultAddress?.base58;
+        }
+      } else if ((walletByNetworks.evm || isMobile()) && window.Metamask.isWindowEthereum()) {
+        address = await window.Metamask.getEthAddress();
+      }
+    } else if (walletByNetworks.cosmos || isMobile()) {
+      address = await window.Keplr.getKeplrAddr(network.chainId);
+    }
+    return address;
+  } catch (error) {
+    console.log({ error });
+    return '';
+  }
 };
 
 export const getAddress = (addr, prefix: string) => {

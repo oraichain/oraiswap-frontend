@@ -10,6 +10,7 @@ import PoolDetail from 'pages/Pools/PoolDetail';
 import UniversalSwap from 'pages/UniversalSwap/index';
 import CoHarvest from 'pages/CoHarvest';
 import BitcoinDashboard from 'pages/BitcoinDashboard';
+import StakingPage from 'pages/Staking';
 
 export default () => (
   <Suspense
@@ -33,6 +34,7 @@ export default () => (
       <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
+      <Route path="/staking" element={<StakingPage />} />
       <Route path="/co-harvest" element={<CoHarvest />} />
       <Route path="/pools/:poolUrl" element={<PoolDetail />} />
       <Route path="*" element={<NotFound />} />

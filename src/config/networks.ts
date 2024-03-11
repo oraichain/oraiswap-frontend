@@ -11,7 +11,8 @@ import {
   REWARDER_CONTRACT,
   ROUTER_V2_CONTRACT,
   STAKING_CONTRACT,
-  ORAIDEX_BID_POOL_CONTRACT
+  ORAIDEX_BID_POOL_CONTRACT,
+  CW20_STAKING_CONTRACT
 } from '@oraichain/oraidex-common';
 
 export const network: CustomChainInfo & NetworkConfig = {
@@ -29,6 +30,7 @@ export const network: CustomChainInfo & NetworkConfig = {
   converter: CONVERTER_CONTRACT,
   oraidex_listing: ORAIDEX_LISTING_CONTRACT,
   bid_pool: ORAIDEX_BID_POOL_CONTRACT,
+  staking_oraix: CW20_STAKING_CONTRACT,
   multicall: MULTICALL_CONTRACT,
   explorer: 'https://scan.orai.io'
 };
