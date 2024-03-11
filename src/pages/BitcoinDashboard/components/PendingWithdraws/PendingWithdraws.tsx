@@ -7,7 +7,7 @@ import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import { TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
+import { CheckpointStatus, TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
 import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
 
 type Icons = {
@@ -30,9 +30,20 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const btcAddress = useConfigReducer('btcAddress');
   const checkpointQueue = useGetCheckpointQueue();
-  const checkpointData = useGetCheckpointData(checkpointQueue?.index);
+  const buildingCheckpointIndex = checkpointQueue?.index || 0;
+  const checkpointData = useGetCheckpointData(buildingCheckpointIndex);
+  const checkpointPreviousData = useGetCheckpointData(
+    buildingCheckpointIndex > 1 ? buildingCheckpointIndex - 1 : buildingCheckpointIndex
+  );
+  /**
+   * @dev: If we has signing checkpoint after latest building checkpoint, we will append outputs of pending withdraws in signing to current building checkpoint.
+   */
+  const hasSigningCheckpoint =
+    buildingCheckpointIndex == 0 ? false : checkpointPreviousData?.status == CheckpointStatus.Signing;
   const allOutputs = checkpointData?.transaction.data.output || [];
-  const data = allOutputs.filter((item) => item.address == btcAddress[0]);
+  const previousOutputs = checkpointPreviousData?.transaction.data.output || [];
+  const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
+  const data = finalOutputs.filter((item) => item.address == btcAddress[0]);
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
