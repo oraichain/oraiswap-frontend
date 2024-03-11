@@ -363,20 +363,22 @@ const SwapComponent: React.FC<{
 
   useEffect(() => {
     (async () => {
-      if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) {
-        return setAddressTransfer('');
-      }
+      if (!isMobile()) {
+        if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) {
+          return setAddressTransfer('');
+        }
 
-      if (originalToToken.cosmosBased && !walletByNetworks.cosmos) {
-        return setAddressTransfer('');
-      }
+        if (originalToToken.cosmosBased && !walletByNetworks.cosmos) {
+          return setAddressTransfer('');
+        }
 
-      if (!originalToToken.cosmosBased && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron) {
-        return setAddressTransfer('');
-      }
+        if (!originalToToken.cosmosBased && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron) {
+          return setAddressTransfer('');
+        }
 
-      if (!originalToToken.cosmosBased && !walletByNetworks.evm) {
-        return setAddressTransfer('');
+        if (!originalToToken.cosmosBased && !walletByNetworks.evm) {
+          return setAddressTransfer('');
+        }
       }
 
       if (originalToToken.chainId) {
