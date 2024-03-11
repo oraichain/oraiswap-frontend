@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './Checkpoint.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import {
