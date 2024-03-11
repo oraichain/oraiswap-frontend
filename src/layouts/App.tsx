@@ -7,7 +7,7 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
+import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron } from 'helper';
 import { leapWalletType } from 'helper/constants';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -177,10 +177,9 @@ const App = () => {
       }
 
       if (walletByNetworks.tron === 'owallet' || mobileMode) {
-        const res = await window.tronLinkDapp.request({
+        const res: interfaceRequestTron = await window.tronLinkDapp.request({
           method: 'tron_requestAccounts'
         });
-        // @ts-ignore
         tronAddress = res?.base58;
         if (tronAddress) setTronAddress(tronAddress);
       }

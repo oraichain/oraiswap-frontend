@@ -12,7 +12,8 @@ export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await this.getKeplr();
     if (keplr) return await keplr.getOfflineSignerAuto(chainId);
-    return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
+    if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
+    throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
   }
 
   typeWallet: WalletType | 'eip191';
