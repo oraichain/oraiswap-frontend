@@ -194,7 +194,8 @@ const Balance: React.FC<BalanceProps> = () => {
         await getAddress();
         //@ts-ignore
         displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log
+          message: result?.log,
+          customLink: '/bitcoin-dashboard?tab=pending_withdraws'
         });
       }
     } catch (error) {
