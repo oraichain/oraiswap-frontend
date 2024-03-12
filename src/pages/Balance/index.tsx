@@ -289,16 +289,20 @@ const Balance: React.FC<BalanceProps> = () => {
       amount: amountLasted,
       feeRate: feeRate
     };
+    console.log('🚀 ~ handleTransferBTCToOraichain ~ dataRequest:', dataRequest);
 
     try {
       // @ts-ignore-check
       const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
       console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
       if (rs?.rawTxHex) {
+        setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
-        setTxHash(rs.rawTxHex);
+        setTimeout(async () => {
+          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+        }, 5000);
         return;
       }
       displayToast(TToastType.TX_FAILED, {
