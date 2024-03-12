@@ -83,7 +83,6 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-import { delay } from 'lodash';
 
 interface BalanceProps {}
 
@@ -290,6 +289,7 @@ const Balance: React.FC<BalanceProps> = () => {
       amount: amountLasted,
       feeRate: feeRate
     };
+    console.log('🚀 ~ handleTransferBTCToOraichain ~ dataRequest:', dataRequest);
 
     try {
       // @ts-ignore-check
@@ -297,12 +297,12 @@ const Balance: React.FC<BalanceProps> = () => {
       console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
-        delay(async () => {
-          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
-        }, 3000);
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
+        setTimeout(async () => {
+          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+        }, 5000);
         return;
       }
       displayToast(TToastType.TX_FAILED, {
