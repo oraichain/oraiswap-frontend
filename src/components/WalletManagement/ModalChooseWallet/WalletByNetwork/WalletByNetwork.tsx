@@ -22,7 +22,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
-  const [oraiAddress, setOraiAddress] = useConfigReducer('address');
+  const [, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
@@ -76,16 +76,12 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     const { tronAddress } = await switchWalletTron(walletType);
     setTronAddress(tronAddress);
   };
+
   const handleConnectWalletInBtcNetwork = async (walletType: WalletType) => {
-    // if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
+    if (walletType === 'owallet') {
+      // TODO: need check when use multi wallet support bitcoin
+    }
     const btcAddress = await window.Bitcoin.getAddress();
-    // // re-polyfill tronWeb
-    // window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
-    // window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
-
-    // window.Metamask = new Metamask(window.tronWebDapp);
-
-    // const { tronAddress } = await switchWalletTron(walletType);
     setBtcAddress(btcAddress);
   };
 
