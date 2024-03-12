@@ -41,6 +41,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
   try {
     const client = await StargateClient.connect(tokenInfo.rpc);
     const amountAll = await client.getAllBalances(address);
+
     let amountDetails: AmountDetails = {};
 
     // reset native balances
@@ -55,6 +56,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 
     dispatch(updateAmounts(amountDetails));
   } catch (ex) {
+    console.trace('errror');
     console.log(ex);
   }
 }
@@ -130,7 +132,10 @@ async function loadTokensCosmos(dispatch: Dispatch, kwtAddress: string, oraiAddr
   if (!kwtAddress && !oraiAddress) return;
   await handleCheckWallet();
   const cosmosInfos = chainInfos.filter(
-    (chainInfo) => chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118
+    (chainInfo) =>
+      (chainInfo.networkType === 'cosmos' || chainInfo.bip44.coinType === 118) &&
+      // TODO: ignore oraibtc
+      chainInfo.chainId !== ('oraibtc-mainnet-1' as string)
   );
   for (const chainInfo of cosmosInfos) {
     const { cosmosAddress } = genAddressCosmos(chainInfo, kwtAddress, oraiAddress);
