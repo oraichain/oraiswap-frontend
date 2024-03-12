@@ -47,12 +47,14 @@ export const networks = chainInfos.filter(
   (c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any) && c.chainId !== '0x1ae6'
 );
 export const cosmosNetworks = chainInfos.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
+  (c) =>
+    c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any)
 );
 
 export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === bitcoinChainId);
 export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
+  (c) =>
+    c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any)
 );
 
 export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
