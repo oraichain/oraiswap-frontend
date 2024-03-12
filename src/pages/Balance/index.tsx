@@ -34,7 +34,8 @@ import {
   handleErrorTransaction,
   networks,
   EVM_CHAIN_ID,
-  handleCheckAddress
+  handleCheckAddress,
+  subNumber
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -253,10 +254,12 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-
+    console.log(totalFee, 'totalFee');
     const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
+
+    const amountLasted = subNumber(amount, totalFee);
 
     const dataRequest = {
       memo: '',
@@ -273,7 +276,7 @@ const Balance: React.FC<BalanceProps> = () => {
       msgs: {
         address: address,
         changeAddress: btcAddress,
-        amount: amount,
+        amount: amountLasted,
         message: '',
         totalFee: totalFee,
         selectedCrypto: fromToken.chainId,
@@ -283,7 +286,7 @@ const Balance: React.FC<BalanceProps> = () => {
       confirmedBalance: utxosMapped.balance,
       utxos: utxosMapped.utxos,
       blacklistedUtxos: [],
-      amount: amount,
+      amount: amountLasted,
       feeRate: feeRate
     };
 
