@@ -195,8 +195,7 @@ const Balance: React.FC<BalanceProps> = () => {
         await getAddress();
         //@ts-ignore
         displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log,
-          customLink: '/bitcoin-dashboard?tab=pending_withdraws'
+          message: result?.log
         });
       }
     } catch (error) {
@@ -349,8 +348,13 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         'auto'
       );
-      // @ts-ignore-check
-      processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
+
+      processTxResult(
+        fromToken.rpc,
+        // @ts-ignore-check
+        result,
+        '/bitcoin-dashboard?tab=pending_withdraws'
+      );
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
