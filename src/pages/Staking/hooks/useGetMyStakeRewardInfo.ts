@@ -10,11 +10,27 @@ export const useGetMyStakeRewardInfo = (stakingToken, stakerAddr) => {
       stakerAddr
     });
 
+    // console.log('cw20Staking', data);
+
     const rewardPending = data?.reward_infos?.reduce((acc, cur) => {
       acc = Number(cur.pending_reward) + acc;
 
       return acc;
     }, 0);
+
+    let withdrawPendingAmount = 0;
+
+    for (const rw of data?.reward_infos || []) {
+      const pendingWithdrawArr = rw.pending_withdraw || [];
+
+      withdrawPendingAmount = pendingWithdrawArr.reduce((acc, cur) => {
+        acc = Number(cur.amount) + acc;
+
+        return acc;
+      }, 0);
+    }
+
+    const totalReward = rewardPending + withdrawPendingAmount;
 
     const stakedAmount = data?.reward_infos?.reduce((acc, cur) => {
       acc = Number(cur.bond_amount) + acc;
@@ -22,12 +38,17 @@ export const useGetMyStakeRewardInfo = (stakingToken, stakerAddr) => {
       return acc;
     }, 0);
 
+    // console.log('data reward', {
+    //   rewardPending,
+    //   withdrawPendingAmount
+    // });
+
     return {
       ...(data || {
         reward_infos: [],
         staker_addr: stakerAddr
       }),
-      rewardPending: rewardPending.toString(),
+      rewardPending: totalReward.toString(),
       stakedAmount: stakedAmount.toString()
     };
   };
