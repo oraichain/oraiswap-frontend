@@ -40,6 +40,7 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
    */
   const hasSigningCheckpoint =
     buildingCheckpointIndex == 0 ? false : checkpointPreviousData?.status == CheckpointStatus.Signing;
+
   const allOutputs = checkpointData?.transaction.data.output || [];
   const previousOutputs = checkpointPreviousData?.transaction.data.output || [];
   const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
