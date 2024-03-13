@@ -633,8 +633,6 @@ export const OraiBTCBridgeNetwork = {
   bip44: {
     coinType: 118
   },
-  Icon: BTCIcon,
-  IconLight: BTCIcon,
   coinType: 118,
   bech32Config: defaultBech32Config('oraibtc'),
   currencies: [

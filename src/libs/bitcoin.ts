@@ -5,7 +5,7 @@ import { network } from 'config/networks';
 import { bitcoinChainId } from 'helper/constants';
 export type BitcoinMode = 'core' | 'extension' | 'mobile-web' | 'walletconnect';
 // import { CosmosChainId, BitcoinWallet } from '@oraichain/oraidex-common';
-type BtcChainId = 'bitcoin' | 'bitcoinTestnet';
+type BitcoinChainId = 'bitcoin' | 'bitcoinTestnet';
 export interface IBitcoin {
   readonly version: string;
   /**
@@ -25,45 +25,45 @@ export interface IBitcoin {
 
 export default class Bitcoin {
   constructor() {}
-
-  disconnect() {
-    // clear data?
-  }
-
+  disconnect() {}
   async getBitcoinKey(chainId?: string): Promise<Key | undefined> {
     try {
       chainId = chainId ?? network.chainId;
       if (!chainId) return undefined;
 
-      const bitcoin = window.owallet;
-      if (bitcoin) {
-        return bitcoin.getKey(chainId);
+      if (!window.owallet) {
+        console.error('OWallet not found.');
+        return undefined;
       }
+
+      return window.owallet.getKey(chainId);
     } catch (error) {
-      console.log('🚀 ~ file: keplr.ts:112 ~ Keplr ~ getKeplrKey ~ error:', error);
+      console.error('Error while getting Bitcoin key:', error);
+      return undefined;
     }
   }
 
-  async getAddress(chainId: BtcChainId = bitcoinChainId): Promise<string | undefined> {
+  async getAddress(chainId: BitcoinChainId = bitcoinChainId): Promise<string | undefined> {
     try {
       const key = await this.getBitcoinKey(chainId);
       return key?.bech32Address;
-    } catch (ex) {
-      console.log(ex, chainId);
+    } catch (error) {
+      console.error('Error while getting Bitcoin address:', error);
+      return undefined;
     }
   }
-  async signAndBroadCast(
-    chainId: BtcChainId = bitcoinChainId,
-    data: object
-  ): Promise<{
-    rawTxHex: string;
-  }> {
+
+  async signAndBroadCast(chainId: BitcoinChainId = bitcoinChainId, data: object): Promise<{ rawTxHex: string }> {
     try {
-      //TODO: hotfix for wallet connect to DApp
+      if (!window.bitcoin) {
+        throw new Error('Bitcoin wallet not found.');
+      }
+
       const rs = await window.bitcoin.signAndBroadcast(chainId, data);
       return rs;
-    } catch (ex) {
-      console.log(ex, chainId);
+    } catch (error) {
+      console.error('Error while signing and broadcasting Bitcoin transaction:', error);
+      throw new Error(`Error while signing and broadcasting Bitcoin transaction:  ${JSON.stringify(error)}`);
     }
   }
 }
