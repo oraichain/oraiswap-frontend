@@ -134,7 +134,7 @@ const Menu: React.FC = () => {
                   setOtherActive(!otherActive);
                 })}
                 {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-                {renderLink('/bitcoin-dashboard', 'Bitcoin Dashboard', () => {}, true)}
+                {renderLink('/bitcoin-dashboard?tab=pending_deposits', 'Bitcoin Dashboard', () => {}, false)}
               </div>
             }
           />
