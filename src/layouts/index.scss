@@ -6,7 +6,8 @@
 @import 'src/styles/mixins';
 
 html {
-  background-color: $primary-background;
+  // background-color: $primary-background;
+  background-color: $primary-background-other;
 }
 
 .app {
@@ -21,7 +22,8 @@ html {
     padding-top: 0;
   }
 
-  background-color: $primary-background;
+  // background-color: $primary-background;
+  background-color: $primary-background-other;
 
   &.light {
     background-color: $white-color;

@@ -1,0 +1,58 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.chartModal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  z-index: 100;
+
+  display: flex;
+  justify-content: flex-end;
+  display: none;
+
+  &.active {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  .chart {
+    padding: 16px;
+    width: 100%;
+    height: fit-content;
+
+    z-index: 1;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+
+    @include theme {
+      background: theme-get('bg-chart');
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 150%;
+      margin-bottom: 24px;
+
+      @include theme {
+        color: theme-get('sea-stone-200');
+      }
+    }
+  }
+}

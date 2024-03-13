@@ -1,0 +1,25 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/themes';
+
+.FAQ {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+
+  margin-top: 40px;
+
+  @include theme {
+    color: theme-get('neutral-text-text-dropdown');
+  }
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 150%;
+
+  .content {
+    width: 100%;
+  }
+}

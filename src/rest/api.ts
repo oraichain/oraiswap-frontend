@@ -55,6 +55,7 @@ export enum Type {
   'WITHDRAW' = 'Withdraw',
   'INCREASE_ALLOWANCE' = 'Increase allowance',
   'BOND_LIQUIDITY' = 'Bond liquidity',
+  'BOND_STAKING_CW20' = 'StakingCw20',
   'WITHDRAW_LIQUIDITY_MINING' = 'Withdraw Liquidity Mining Rewards',
   'UNBOND_LIQUIDITY' = 'Unbond Liquidity Tokens',
   'CONVERT_TOKEN' = 'Convert IBC or CW20 Tokens',
@@ -495,6 +496,21 @@ function generateMiningMsgs(data: MiningLP): ExecuteInstruction {
       input = {
         send: {
           contract: network.staking,
+          amount: bondMsgs.amount.toString(),
+          msg: toBinary({
+            bond: {}
+          })
+        }
+      };
+      contractAddr = bondMsgs.lpAddress;
+      break;
+    }
+    case Type.BOND_STAKING_CW20: {
+      const bondMsgs = params as BondLP;
+      // currently only support cw20 token pool
+      input = {
+        send: {
+          contract: network.staking_oraix,
           amount: bondMsgs.amount.toString(),
           msg: toBinary({
             bond: {}

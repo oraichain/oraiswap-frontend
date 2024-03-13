@@ -25,6 +25,7 @@ import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
 import { ReactComponent as ScAtomIcon } from 'assets/icons/scatom.svg';
 import { ReactComponent as InjIcon } from 'assets/icons/inj.svg';
 import { ReactComponent as NobleIcon } from 'assets/icons/noble.svg';
+import { ReactComponent as NobleLightIcon } from 'assets/icons/ic_noble_light.svg';
 import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
 import { ReactComponent as NeutaroIcon } from 'assets/icons/neutaro.svg';
 import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
@@ -69,7 +70,8 @@ import {
   USDT_ETH_CONTRACT,
   NEUTARO_ORAICHAIN_DENOM,
   OCH_CONTRACT,
-  OCH_ETH_CONTRACT
+  OCH_ETH_CONTRACT,
+  ORAIX_ETH_CONTRACT
 } from '@oraichain/oraidex-common';
 import { BridgeAppCurrency, CustomChainInfo, defaultBech32Config } from '@oraichain/oraidex-common';
 import { flatten } from 'lodash';
@@ -225,7 +227,7 @@ export const chainIcons: ChainIcon[] = [
   {
     chainId: 'noble-1',
     Icon: NobleIcon,
-    IconLight: NobleIcon
+    IconLight: NobleLightIcon
   },
   {
     chainId: 'Neutaro-1',
@@ -316,7 +318,7 @@ export const oraichainNetwork: CustomChainInfo = {
 
   Icon: OraiIcon,
   IconLight: OraiLightIcon,
-  features: ['ibc-transfer', 'cosmwasm', 'wasmd_0.24+'],
+  features: ['ibc-transfer', 'cosmwasm', 'wasmd_0.24+', 'eip191'],
   currencies: [
     OraiToken,
     {
@@ -424,6 +426,7 @@ export const oraichainNetwork: CustomChainInfo = {
       contractAddress: ORAIX_CONTRACT,
       coinGeckoId: 'oraidex',
       coinDecimals: 6,
+      bridgeTo: ['0x01'],
       Icon: OraixIcon,
       IconLight: OraixLightIcon
     },
@@ -637,6 +640,15 @@ export const chainInfos: CustomChainInfo[] = [
         prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
         coinImageUrl:
           'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670'
+      },
+      {
+        coinDenom: 'ORAIX',
+        coinMinimalDenom: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX + ORAIX_ETH_CONTRACT,
+        bridgeNetworkIdentifier: '0x01',
+        coinDecimals: 18,
+        coinGeckoId: 'oraidex',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        coinImageUrl: 'https://i.ibb.co/VmMJtf7/oraix.png'
       }
     ]
   },
@@ -956,6 +968,16 @@ export const chainInfos: CustomChainInfo[] = [
         coinImageUrl:
           'https://assets.coingecko.com/coins/images/34236/standard/orchai_logo_white_copy_4x-8_%281%29.png?1704307670',
         Icon: OrchaiIcon
+      },
+      {
+        coinDenom: 'ORAIX',
+        coinMinimalDenom: 'erc20_oraix',
+        contractAddress: ORAIX_ETH_CONTRACT,
+        coinDecimals: 18,
+        bridgeTo: ['Oraichain'],
+        coinGeckoId: 'oraidex',
+        prefixToken: ORAI_BRIDGE_EVM_ETH_DENOM_PREFIX,
+        Icon: OraixIcon
       }
     ]
   },

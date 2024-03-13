@@ -102,6 +102,7 @@ declare global {
     request: ({ method }: { method: 'tron_requestAccounts' }) => Promise<{ code: number; message: string }>; // The method of tuning plugins for dapp website
     sunWeb: sunWeb;
     tronWeb: _TronWeb;
+    isOwallet?: boolean;
   }
 
   declare class Wallet {
@@ -129,6 +130,12 @@ declare global {
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
     duckDb: DuckDb;
     TradingView: { version: Function; widget: Class };
+    ethereumDapp: MetaMaskEthereumProvider;
+    tronWebDapp: _TronWeb;
+    tronLinkDapp: TronLink;
+    eth_owallet: MetaMaskEthereumProvider;
+    tronWeb_owallet: _TronWeb;
+    tronLink_owallet: TronLink;
   }
 
   declare const APP_SETTINGS: Record<string, any>;

@@ -14,7 +14,7 @@ export function useTronEventListener() {
     window.dispatchEvent(new Event('tronLink#initialized'));
     // Example
     // Suggested reception method
-    if (window.tronLink) {
+    if (window.tronLinkDapp) {
       handleTronLink();
     } else {
       window.addEventListener('tronLink#initialized', handleTronLink, {
@@ -28,13 +28,14 @@ export function useTronEventListener() {
   }, [mobileMode]);
 
   async function handleTronLink() {
-    const { tronLink, tronWeb } = window;
-    if (tronLink && tronWeb) {
-      const addressTronMobile = await window.tronLink.request({
+    const { tronLinkDapp, tronWebDapp } = window;
+    if (tronLinkDapp && tronWebDapp) {
+      // @ts-ignore
+      const addressTronMobile = await tronLinkDapp.request({
         method: 'tron_requestAccounts'
       });
       // TODO: Check owallet mobile
-      if (!tronWeb?.defaultAddress?.base58 || isMobile()) {
+      if (!tronWebDapp?.defaultAddress?.base58 || isMobile()) {
         //@ts-ignore
         const tronAddress = addressTronMobile?.base58;
         loadTokenAmounts({ tronAddress });
@@ -43,8 +44,8 @@ export function useTronEventListener() {
       }
 
       console.log('tronLink & tronWeb successfully detected!');
-      if (tronWeb?.defaultAddress?.base58) {
-        const tronAddress = tronWeb.defaultAddress.base58;
+      if (tronWebDapp.defaultAddress?.base58) {
+        const tronAddress = tronWebDapp.defaultAddress.base58;
         console.log('tronAddress', tronAddress);
         loadTokenAmounts({ tronAddress });
         setTronAddress(tronAddress);

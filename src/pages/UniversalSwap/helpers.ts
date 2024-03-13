@@ -116,7 +116,7 @@ export const checkEvmAddress = (chainId: NetworkChainId, metamaskAddress?: strin
     case '0x01':
     case '0x38':
       if (!metamaskAddress) {
-        throw generateError('Please login Metamask wallet!');
+        throw generateError('Please login EVM wallet!');
       }
       break;
     case '0x2b6653dc':

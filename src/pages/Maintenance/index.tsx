@@ -4,7 +4,7 @@ import styles from './index.module.scss';
 
 const Maintenance: FunctionComponent = () => {
   return (
-    <Content>
+    <Content otherBackground>
       <div
         style={{
           width: '100%',

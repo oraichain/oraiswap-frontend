@@ -28,7 +28,14 @@ import LoadingBox from 'components/LoadingBox';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { tokenMap } from 'config/bridgeTokens';
 import { ethers } from 'ethers';
-import { floatToPercent, getTransactionUrl, handleCheckAddress, handleErrorTransaction } from 'helper';
+import {
+  floatToPercent,
+  getAddressTransfer,
+  getTransactionUrl,
+  handleCheckAddress,
+  handleErrorTransaction,
+  networks
+} from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -58,6 +65,9 @@ import { useGetPriceByUSD } from './hooks/useGetPriceByUSD';
 import { useSwapFee } from './hooks/useSwapFee';
 import styles from './index.module.scss';
 import { useFillToken } from './hooks/useFillToken';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { isMobile } from '@walletconnect/browser-utils';
+import { reduceString } from 'libs/utils';
 
 const cx = cn.bind(styles);
 // TODO: hardcode decimal relayerFee
@@ -88,6 +98,8 @@ const SwapComponent: React.FC<{
   const [filteredFromTokens, setFilteredFromTokens] = useState([] as TokenItemType[]);
   const currentPair = useSelector(selectCurrentToken);
   const { refetchTransHistory } = useGetTransHistory();
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
+  const [addressTransfer, setAddressTransfer] = useState('');
   useGetFeeConfig();
 
   const { handleUpdateQueryURL } = useFillToken(setSwapTokens);
@@ -290,7 +302,7 @@ const SwapComponent: React.FC<{
             averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {
@@ -348,6 +360,42 @@ const SwapComponent: React.FC<{
 
   const FromIcon = theme === 'light' ? originalFromToken.IconLight || originalFromToken.Icon : originalFromToken.Icon;
   const ToIcon = theme === 'light' ? originalToToken.IconLight || originalToToken.Icon : originalToToken.Icon;
+
+  useEffect(() => {
+    (async () => {
+      if (!isMobile()) {
+        if (!walletByNetworks.evm && !walletByNetworks.cosmos && !walletByNetworks.tron) {
+          return setAddressTransfer('');
+        }
+
+        if (originalToToken.cosmosBased && !walletByNetworks.cosmos) {
+          return setAddressTransfer('');
+        }
+
+        if (!originalToToken.cosmosBased && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron) {
+          return setAddressTransfer('');
+        }
+
+        if (!originalToToken.cosmosBased && !walletByNetworks.evm) {
+          return setAddressTransfer('');
+        }
+      }
+
+      if (originalToToken.chainId) {
+        const findNetwork = networks.find((net) => net.chainId === originalToToken.chainId);
+        const address = await getAddressTransfer(findNetwork, walletByNetworks);
+        setAddressTransfer(address);
+      }
+    })();
+  }, [
+    originalToToken,
+    oraiAddress,
+    metamaskAddress,
+    tronAddress,
+    walletByNetworks.evm,
+    walletByNetworks.cosmos,
+    walletByNetworks.tron
+  ]);
 
   return (
     <div className={cx('swap-box-wrapper')}>
@@ -458,11 +506,33 @@ const SwapComponent: React.FC<{
             </div>
           </div>
 
+          <div className={cx('recipient')}>
+            <div className={cx('label')}>Recipient address:</div>
+            <div>
+              <span className={cx('address')}>{reduceString(addressTransfer, 10, 8)}</span>
+              {/* <span className={cx('paste')}>PASTE</span> */}
+            </div>
+          </div>
+
           {(() => {
+            const mobileMode = isMobile();
+            const canSwapToCosmos = !mobileMode && originalToToken.cosmosBased && !walletByNetworks.cosmos;
+            const canSwapToEvm = !mobileMode && !originalToToken.cosmosBased && !walletByNetworks.evm;
+            const canSwapToTron = !mobileMode && originalToToken.chainId === '0x2b6653dc' && !walletByNetworks.tron;
+            const canSwapTo = canSwapToCosmos || canSwapToEvm || canSwapToTron;
             const disabledSwapBtn =
-              swapLoading || !fromAmountToken || !toAmountToken || fromAmountTokenBalance > fromTokenBalance; // insufficent fund
+              swapLoading ||
+              !fromAmountToken ||
+              !toAmountToken ||
+              fromAmountTokenBalance > fromTokenBalance || // insufficent fund
+              !addressTransfer ||
+              canSwapTo;
 
             let disableMsg: string;
+            if (!addressTransfer) disableMsg = `Recipient address not found`;
+            if (canSwapToCosmos) disableMsg = `Please connect cosmos wallet`;
+            if (canSwapToEvm) disableMsg = `Please connect evm wallet`;
+            if (canSwapToTron) disableMsg = `Please connect tron wallet`;
             if (!simulateData || simulateData.displayAmount <= 0) disableMsg = 'Enter an amount';
             if (fromAmountTokenBalance > fromTokenBalance) disableMsg = `Insufficient funds`;
             return (

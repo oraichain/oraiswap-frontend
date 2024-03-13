@@ -2983,9 +2983,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.58":
-  version "1.0.70"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.70.tgz#ec68f38b43b25affcec684183bc6514e86520aa1"
-  integrity sha512-DZY5M/4JGwhEZJULHE+rfoET7dAw8FpnS/M3404xZ/GV1q9t6935M0qSzNiy2yk4PHJaWq+DxN8hPAYiiSTe9Q==
+  version "1.0.74"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.74.tgz#8858c2bb8adacfdf8e6e9362c1875cfff1888c12"
+  integrity sha512-g8zIMEmN8gGJkLgP7/wSev4BgwLb8WZ/IkclQsp7jvg/mNbBLQ+f8lRJCm3JqF8jMs1YL9DmymxGGgnUoFGCPA==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
@@ -3006,14 +3006,14 @@
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
 
 "@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26", "@oraichain/oraidex-contracts-sdk@^1.0.30":
-  version "1.0.31"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.31.tgz#98e5eb3a8d995febb40fcd188709255e3ecd624c"
-  integrity sha512-bwOs9+xKtlGVOy5vM1oNw54MeoRYLTY+3f4K2oNyAv0Y8QCEeQFt0g2l7LkpzyjXh5OVyu8nOKzx70XW5zajlA==
+  version "1.0.35"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.35.tgz#d8231d3af62172bd488d364c7ced238393f26695"
+  integrity sha512-c4qyt6CUEdI4+NgX4vWmVVctcQqEle0S6ExKp+d94C5UsRBELxvmJWkCZczvtTtLEvSsydv+7PKwrPoROgV2BA==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.54"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.54.tgz#51ca11b0a2ad56450e54b96f7993ba5ae1df74f8"
-  integrity sha512-MKG9yL1FXqc1k43i0g1S6lUiefvcnQZ8DsSVMf/7b4d9GCDiHOJhrRKOzWVwoH3Lew+Ly8IGwi8KmJm5dKcu9w==
+  version "1.0.57"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.57.tgz#ef79a8bccae8289e867ff0ba78337b5ac2c9f709"
+  integrity sha512-tPF/oGF6QnOhVgSwdwcQWPDTe/H4hmh1V08EQoK0AYpQeQPy+O1vxnP4kX7g6v5cI3lMYxPkZohYRKeZ24Fk7g==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
@@ -8401,6 +8401,11 @@ extsprintf@^1.2.0:
   resolved "https://registry.npmjs.org/extsprintf/-/extsprintf-1.4.1.tgz"
   integrity sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==
 
+fancy-canvas@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/fancy-canvas/-/fancy-canvas-2.1.0.tgz#44b40e40419ad8ef8304df365e4276767e918552"
+  integrity sha512-nifxXJ95JNLFR2NgRV4/MxVP45G9909wJTEKz5fg/TZS20JJZA6hfgRVh/bC9bwl2zBtBNcYPjiBE4njQHVBwQ==
+
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
@@ -11230,6 +11235,13 @@ libsodium@^0.7.13:
   version "0.7.13"
   resolved "https://registry.npmjs.org/libsodium/-/libsodium-0.7.13.tgz"
   integrity sha512-mK8ju0fnrKXXfleL53vtp9xiPq5hKM0zbDQtcxQIsSmxNgSxqCj6R7Hl9PkrNe2j29T4yoDaF7DJLK9/i5iWUw==
+
+lightweight-charts@^4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/lightweight-charts/-/lightweight-charts-4.1.3.tgz#467fb88a5efc3665bea64c193591cfc082d84300"
+  integrity sha512-SJacmEyx3LmT2Qsc7Kq7cEX7nEHtQv0MOlujhRlcDxhW62pG6nkBlcM52/jNqkq8B28KQeVmgOQ7zrdJ4BCPDw==
+  dependencies:
+    fancy-canvas "2.1.0"
 
 lilconfig@^2.0.3, lilconfig@^2.0.5, lilconfig@^2.1.0:
   version "2.1.0"

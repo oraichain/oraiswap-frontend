@@ -247,7 +247,7 @@ const Balance: React.FC<BalanceProps> = () => {
           fromAmount,
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWeb) }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
 
       const { swapRoute } = addOraiBridgeRoute(cosmosAddress, from, newToToken);

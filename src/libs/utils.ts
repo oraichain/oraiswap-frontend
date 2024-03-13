@@ -1,23 +1,19 @@
 import {
+  COSMOS_CHAIN_ID_COMMON,
   NetworkChainId,
   TokenItemType,
   getSubAmountDetails,
   toAmount,
-  toDisplay,
-  COSMOS_CHAIN_ID_COMMON
+  toDisplay
 } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import bech32 from 'bech32';
 import { cosmosTokens, tokenMap } from 'config/bridgeTokens';
 import { chainInfos } from 'config/chainInfos';
-import { WalletType } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
-import { getStorageKey, switchWallet, switchWalletCosmos } from 'helper';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
 import { getCosmWasmClient } from 'libs/cosmjs';
-import { TokenInfo } from 'types/token';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
 
 export const checkRegex = (str: string, regex?: RegExp) => {
   const re = regex ?? /^[a-zA-Z\-]{3,12}$/;
@@ -197,7 +193,7 @@ export const generateError = (message: string) => {
 
 export const initEthereum = async () => {
   // support only https
-  if (isMobile() && !window.ethereum && window.location.protocol === 'https:') {
+  if (isMobile() && !window.ethereumDapp && window.location.protocol === 'https:') {
     const bscChain = chainInfos.find((c) => c.chainId === '0x38');
     const provider = new WalletConnectProvider({
       chainId: Networks.bsc,
@@ -209,36 +205,26 @@ export const initEthereum = async () => {
       }
     });
     await provider.enable();
-    (window.ethereum as any) = provider;
+    (window.ethereumDapp as any) = provider;
   }
 };
 
-export const initClient = async (type: WalletType) => {
+export const initClient = async () => {
   try {
-    await switchWalletCosmos(type);
-
-    const keplr = await window.Keplr.getKeplr();
     // suggest our chain
-    if (keplr) {
-      for (const networkId of [
-        network.chainId,
-        COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
-        COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
-      ] as NetworkChainId[]) {
-        try {
-          await window.Keplr.suggestChain(networkId);
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-      const { client } = await getCosmWasmClient({ chainId: network.chainId });
-      window.client = client;
+    const arrChainIds = [
+      network.chainId,
+      COSMOS_CHAIN_ID_COMMON.ORAIBRIDGE_CHAIN_ID,
+      COSMOS_CHAIN_ID_COMMON.INJECTVE_CHAIN_ID
+    ] as NetworkChainId[];
+    for (const chainId of arrChainIds) {
+      await window.Keplr.suggestChain(chainId);
     }
+    const { client } = await getCosmWasmClient({ chainId: network.chainId });
+    window.client = client;
   } catch (ex) {
-    console.log('error initClient:', ex);
-    displayToast(TToastType.KEPLR_FAILED, {
-      message: 'Cannot initialize wallet client. Please notify the developers to fix this problem!'
-    });
+    console.log({ errorInitClient: ex });
+    throw new Error(ex?.message ?? 'Error when suggestChain');
   }
 };
 
