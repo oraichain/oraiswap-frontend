@@ -176,7 +176,13 @@ export const processWsResponseMsg = (message: any): string => {
         // we look for the true denom information with decimals to process
         // format: {"amount":"100000000000000","denom":"oraib0xA325Ad6D9c92B55A3Fc5aD7e412B1518F96441C0","receiver":"orai...","sender":"oraib..."}
         const receivedToken = cosmosTokens.find((token) => token.denom === packet.denom);
-        const displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
+        let displayAmount: number;
+        //TODO: Hard code decimal is 14 for usat denom
+        if (receivedToken.denom === 'usat') {
+          displayAmount = toDisplay(packet?.amount, 14);
+        } else {
+          displayAmount = toDisplay(packet?.amount, receivedToken?.decimals);
+        }
         tokens = tokens.concat(`${displayAmount} ${receivedToken?.name}, `);
       }
       return tokens.substring(0, tokens.length - 2); // remove , due to concat
