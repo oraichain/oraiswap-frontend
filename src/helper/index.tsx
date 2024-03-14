@@ -180,6 +180,9 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 
 const transferMsgError = (message: string, info?: InfoError) => {
   if (message.includes('invalid hash')) return `Transation was not included to block`;
+  if (message.includes('Send some tokens there before trying to query sequence'))
+    return `Seems like you’re using new wallet. You must have at least 0.01 ORAI for transaction fee`;
+
   if (message.includes('Assertion failed; minimum receive amount'))
     return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
