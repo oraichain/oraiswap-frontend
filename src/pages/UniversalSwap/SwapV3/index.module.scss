@@ -5,7 +5,7 @@
 .swap-box-wrapper {
   border-radius: 24px;
   position: sticky;
-  top: 125px;
+  top: 151px;
   z-index: 1;
 
   .custom-loader-root {
@@ -286,7 +286,9 @@
     /* identical to box height, or 24px */
 
     text-align: center;
-    font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+    font-feature-settings: 'tnum' on,
+    'lnum' on,
+    'zero' on;
 
     .token {
       cursor: pointer;
@@ -361,16 +363,19 @@
     background-color: theme-get('neutral-6');
     color: theme-get('neutral-9');
   }
+
   border-radius: 8px;
   font-size: 16px;
 
   @include mobile() {
     font-size: 14px;
   }
+
   .address {
     cursor: pointer;
     // padding-right: 6px;
   }
+
   .paste {
     padding: 2px 8px;
     // background: #494949;
@@ -493,6 +498,7 @@
     .warning-slippage-0 {
       color: $warning-color;
     }
+
     .title {
       width: 70%;
       display: flex;
