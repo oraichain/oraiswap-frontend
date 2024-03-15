@@ -9,8 +9,8 @@ import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { useGetPendingDeposits } from '../../hooks/relayer.hook';
-import { CheckpointStatus, DepositInfo, DepositInfoWithCheckpoint, TransactionParsedInput } from '../../@types';
-import { useEffect, useState } from 'react';
+import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
+import { useEffect } from 'react';
 import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
@@ -34,20 +34,15 @@ const tokens = {
 export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
-  const key = `pending_deposits_${oraichainAddress}`;
   const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
-  let data = useGetPendingDeposits(oraichainAddress);
+  const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
   const checkpointQueue = useGetCheckpointQueue();
   const buildingCheckpointIndex = checkpointQueue?.index || 0;
   const checkpointData = useGetCheckpointData(buildingCheckpointIndex);
   const checkpointPreviousData = useGetCheckpointData(
     buildingCheckpointIndex > 1 ? buildingCheckpointIndex - 1 : buildingCheckpointIndex
   );
-  const hasSigningCheckpoint =
-    buildingCheckpointIndex == 0 ? false : checkpointPreviousData?.status == CheckpointStatus.Signing;
-  const [pendingDeposits, setPendingDeposits] = useState<DepositInfo[]>([]);
-  let cachePendingDeposits = localStorage.getItem(key) ? (JSON.parse(localStorage.getItem(key)) as DepositInfo[]) : [];
-  console.log('🚀 ~ cachePendingDeposits:', cachePendingDeposits);
+  const [allPendingDeposits, setAllPendingDeposits] = useConfigReducer('allPendingDeposits');
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
@@ -68,7 +63,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   };
 
   const validateExistenceOnPendingDeposits = (
-    arr: DepositInfoWithCheckpoint[] | DepositInfo[] | TransactionParsedInput[],
+    arr: DepositInfo[] | TransactionParsedInput[],
     findItem: DepositInfo
   ): boolean => {
     let filteredArr = arr.filter((item) => {
@@ -86,8 +81,12 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
    * checkpoint index to 1).
    */
   useEffect(() => {
-    if (!checkpointQueue || !oraichainAddress || !checkpointData || !checkpointPreviousData) return;
-    cachePendingDeposits = cachePendingDeposits.filter((item) => {
+    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
+      return;
+    }
+
+    let pendingDeposits = allPendingDeposits ? allPendingDeposits[oraichainAddress] || [] : [];
+    pendingDeposits = pendingDeposits.filter((item) => {
       const isExistOnBuildingCheckpoint = validateExistenceOnPendingDeposits(
         checkpointData.transaction.data.input,
         item
@@ -95,37 +94,46 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       const isExistOnSigningCheckpoint =
         validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item) &&
         checkpointPreviousData.status == CheckpointStatus.Signing;
-      const isExistOnPendingDeposits = validateExistenceOnPendingDeposits(data, item);
+      const isExistOnPendingDeposits = validateExistenceOnPendingDeposits(fetchedPendingDeposits, item);
 
       return isExistOnSigningCheckpoint || isExistOnBuildingCheckpoint || isExistOnPendingDeposits ? true : false;
     });
-    setPendingDeposits(cachePendingDeposits);
-    localStorage.setItem(key, JSON.stringify(cachePendingDeposits));
-  }, [checkpointData, checkpointPreviousData, oraichainAddress, hasSigningCheckpoint]);
 
-  /**
-   * @devs: This one will handle update pendingDeposits to localStorage,
-   * if there is no cache, set current pending deposits with latest building
-   * checkpoint index.
-   */
+    setAllPendingDeposits({
+      ...allPendingDeposits,
+      [oraichainAddress]: pendingDeposits
+    });
+  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits]);
+
+  // /**
+  //  * @devs: This one will handle update pendingDeposits to localStorage,
+  //  * if there is no cache, set current pending deposits with latest building
+  //  * checkpoint index.
+  //  */
   useEffect(() => {
-    if (oraichainAddress && data && checkpointQueue?.index) {
-      if (!cachePendingDeposits) {
-        cachePendingDeposits = data;
-      } else {
-        for (const item of data) {
-          if (!validateExistenceOnPendingDeposits(cachePendingDeposits, item)) {
-            cachePendingDeposits = [...cachePendingDeposits, item];
-          } else {
-            const txIndex = cachePendingDeposits.findIndex((data) => data.txid === item.txid);
-            cachePendingDeposits[txIndex] = item;
-          }
-        }
-      }
-      setPendingDeposits(cachePendingDeposits);
-      localStorage.setItem(key, JSON.stringify(cachePendingDeposits));
+    if (!oraichainAddress || !fetchedPendingDeposits || !checkpointQueue) {
+      return;
     }
-  }, [data, oraichainAddress, checkpointQueue]);
+
+    let pendingDeposits =
+      allPendingDeposits && allPendingDeposits[oraichainAddress] ? [...allPendingDeposits[oraichainAddress]] : [];
+    for (let i = 0; i < fetchedPendingDeposits.length; i++) {
+      try {
+        if (!validateExistenceOnPendingDeposits(pendingDeposits, fetchedPendingDeposits[i])) {
+          pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
+          continue;
+        }
+        pendingDeposits[i] = fetchedPendingDeposits[i];
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    setAllPendingDeposits({
+      ...allPendingDeposits,
+      [oraichainAddress]: pendingDeposits
+    });
+  }, [fetchedPendingDeposits, oraichainAddress, checkpointQueue]);
 
   const headers: TableHeaderProps<DepositInfo> = {
     flow: {
@@ -184,8 +192,10 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       </div>
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
       <div className={styles.pending_deposits_list}>
-        {(data?.length || 0) > 0 ? (
-          <Table headers={headers} data={pendingDeposits} defaultSorted="confirmations" />
+        {allPendingDeposits &&
+        allPendingDeposits[oraichainAddress] &&
+        allPendingDeposits[oraichainAddress].length > 0 ? (
+          <Table headers={headers} data={[...allPendingDeposits[oraichainAddress]]} defaultSorted="confirmations" />
         ) : (
           <FallbackEmptyData />
         )}
