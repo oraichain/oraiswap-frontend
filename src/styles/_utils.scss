@@ -52,10 +52,3 @@
 .otherBackground {
   background-color: $primary-background-other;
 }
-
-.contentWithBanner {
-  margin-top: 70px;
-
-  @include mobile {
-  }
-}
