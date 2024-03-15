@@ -38,6 +38,5 @@ export const useGetPendingDeposits = (address?: String) => {
     refetchOnWindowFocus: true,
     refetchInterval: 10000
   });
-  console.log('Data', data);
   return data;
 };
