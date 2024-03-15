@@ -116,6 +116,9 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
         for (const item of data) {
           if (!validateExistenceOnPendingDeposits(cachePendingDeposits, item)) {
             cachePendingDeposits = [...cachePendingDeposits, item];
+          } else {
+            const txIndex = cachePendingDeposits.findIndex((data) => data.txid === item.txid);
+            cachePendingDeposits[txIndex] = item;
           }
         }
       }
