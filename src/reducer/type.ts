@@ -1,3 +1,4 @@
+import { NetworkName, TokenItemType } from '@oraichain/oraidex-common';
 import { OrderDirection } from '@oraichain/oraidex-contracts-sdk/build/OraiswapLimitOrder.types';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
@@ -78,11 +79,15 @@ export type InfoAToken = {
 export interface TradingState {
   currentToken: PairToken | null;
   chartTimeFrame: number;
+  currentToChain: NetworkName | '';
+  currentToToken: TokenItemType | null;
 }
 
 export interface PoolChartState {
   filterDay: FILTER_DAY;
   tabChart: TAB_CHART;
+  filterTimeSwap: FILTER_TIME_CHART;
+  tabChartSwap: TAB_CHART_SWAP;
 }
 
 export interface TypeDecimal {
@@ -192,7 +197,19 @@ export enum FILTER_DAY {
   MONTH = 'month'
 }
 
+export enum FILTER_TIME_CHART {
+  ONE_HOUR = '1H',
+  FOUR_HOUR = '4H',
+  DAY = '1D',
+  MONTH = '1M'
+}
+
 export enum TAB_CHART {
   LIQUIDITY = 'Liquidity',
   VOLUME = 'Volume'
+}
+
+export enum TAB_CHART_SWAP {
+  ORIGINAL = 'Original',
+  TRADING_VIEW = 'Trading View'
 }

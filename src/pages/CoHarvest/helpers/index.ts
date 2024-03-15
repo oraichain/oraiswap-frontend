@@ -85,6 +85,12 @@ export const timeFormatter = new Intl.DateTimeFormat('en-US', {
   hourCycle: 'h24'
 });
 
+export const timeWithPeriodFormatter = new Intl.DateTimeFormat('en-US', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
 export const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
   year: '2-digit',
   month: '2-digit',
@@ -122,7 +128,18 @@ export function formatDateChart(date: Date | number) {
 
 export function formatTime(date: Date | number) {
   const obj = timeFormatter.formatToJson(date);
+
+  // check case 24h
+  if (obj.hour === '24') {
+    obj.hour = '00';
+  }
+
   return `${obj.hour}:${obj.minute}`; // ${obj.dayPeriod} //:${obj.second}
+}
+
+export function formatTimeWithPeriod(date: Date | number) {
+  const obj = timeWithPeriodFormatter.formatToJson(date);
+  return `${obj.hour}:${obj.minute} ${obj.dayPeriod}`; //:${obj.second}
 }
 
 export const getUTCTime = (date: Date | number) => {

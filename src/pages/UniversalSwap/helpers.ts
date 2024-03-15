@@ -10,7 +10,8 @@ import {
   ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
   getTokenOnOraichain,
-  getTokenOnSpecificChainId
+  getTokenOnSpecificChainId,
+  NetworkName
 } from '@oraichain/oraidex-common';
 import {
   isEvmNetworkNativeSwapSupported,
@@ -19,8 +20,12 @@ import {
 } from '@oraichain/oraidex-universal-swap';
 import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { PAIRS_CHART } from 'config/pools';
+import { networks } from 'helper';
 import { generateError } from 'libs/utils';
-import { PairToken } from 'reducer/type';
+import { TIMER } from 'pages/CoHarvest/constants';
+import { formatDate, formatTimeWithPeriod } from 'pages/CoHarvest/helpers';
+import { endOfMonth, endOfWeek } from 'pages/Pools/helpers';
+import { FILTER_TIME_CHART, PairToken } from 'reducer/type';
 
 export enum SwapDirection {
   From,
@@ -246,4 +251,45 @@ export const calculateFinalPriceChange = (
 
   if (currentPrice === 0) return 0;
   return (currentPrice / (1 + percentPriceChange) - currentPrice) / currentPrice;
+};
+
+// generate chain base on to token in universal-swap
+export const genCurrentChain = ({
+  toToken,
+  currentToChain
+}: {
+  toToken: TokenItemType;
+  currentToChain: NetworkName | '';
+}): NetworkName | '' => {
+  let newCurrentToChain: NetworkName | '' = currentToChain;
+
+  newCurrentToChain = networks?.find((chain) => chain.chainId === toToken.chainId)?.chainName || '';
+
+  return newCurrentToChain;
+};
+
+export const formatTimeDataChart = (
+  time: number | string,
+  type: FILTER_TIME_CHART,
+  lastDate: number,
+  currentText: string = 'Now'
+) => {
+  if (!time) {
+    return currentText;
+  }
+
+  const fmtTime = typeof time === 'string' ? new Date(time).getTime() : time * TIMER.MILLISECOND;
+  const date = new Date(fmtTime);
+
+  switch (type) {
+    case FILTER_TIME_CHART.ONE_HOUR:
+    case FILTER_TIME_CHART.FOUR_HOUR:
+      return formatDate(fmtTime) + ' - ' + formatTimeWithPeriod(fmtTime);
+
+    case FILTER_TIME_CHART.DAY:
+      return time === lastDate ? currentText : formatDate(fmtTime);
+
+    case FILTER_TIME_CHART.MONTH:
+      return formatDate(fmtTime) + ' - ' + formatDate(endOfMonth(date));
+  }
 };
