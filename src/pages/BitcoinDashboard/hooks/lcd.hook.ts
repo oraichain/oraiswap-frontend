@@ -48,7 +48,7 @@ const getCheckpointQueue = async (): Promise<CheckpointQueueInterface> => {
 export const useGetCheckpointQueue = () => {
   const { data } = useQuery(['checkpoint_queue'], getCheckpointQueue, {
     refetchOnWindowFocus: true,
-    staleTime: 10 * 60 * 1000
+    staleTime: 30 * 1000
   });
   return data;
 };
@@ -70,7 +70,7 @@ const getTotalValueLocked = async (): Promise<TotalValueLockedInterface> => {
 export const useGetTotalValueLocked = () => {
   const { data } = useQuery(['value_locked'], () => getTotalValueLocked(), {
     refetchOnWindowFocus: true,
-    staleTime: 10 * 60 * 1000
+    staleTime: 30 * 1000
   });
   return data;
 };
@@ -211,7 +211,7 @@ const getCheckpointData = async (checkpointIndex?: number): Promise<CheckpointPa
 export const useGetCheckpointData = (checkpointIndex?: number) => {
   const { data } = useQuery(['bitcoin_checkpoint', checkpointIndex], () => getCheckpointData(checkpointIndex), {
     refetchOnWindowFocus: true,
-    staleTime: 10 * 60 * 1000
+    staleTime: 30 * 1000
   });
   return data;
 };
@@ -232,7 +232,7 @@ const getCheckpointFeeInfo = async (): Promise<CheckpointFeeInfoInterface> => {
 export const useGetCheckpointFeeInfo = () => {
   const { data } = useQuery(['checkpoint_fee_info'], getCheckpointFeeInfo, {
     refetchOnWindowFocus: true,
-    staleTime: 10 * 60 * 1000
+    staleTime: 30 * 1000
   });
   return data;
 };
