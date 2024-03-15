@@ -47,6 +47,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     buildingCheckpointIndex == 0 ? false : checkpointPreviousData?.status == CheckpointStatus.Signing;
   const [pendingDeposits, setPendingDeposits] = useState<DepositInfo[]>([]);
   let cachePendingDeposits = localStorage.getItem(key) ? (JSON.parse(localStorage.getItem(key)) as DepositInfo[]) : [];
+  console.log('🚀 ~ cachePendingDeposits:', cachePendingDeposits);
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
@@ -85,25 +86,21 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
    * checkpoint index to 1).
    */
   useEffect(() => {
-    if (checkpointQueue && oraichainAddress && checkpointData && checkpointPreviousData) {
-      cachePendingDeposits = cachePendingDeposits.filter((item) => {
-        const isExistOnBuildingCheckpoint = validateExistenceOnPendingDeposits(
-          checkpointData.transaction.data.input,
-          item
-        );
-        const isExistOnSigningCheckpoint =
-          validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item) &&
-          checkpointPreviousData.status == CheckpointStatus.Signing;
+    if (!checkpointQueue || !oraichainAddress || !checkpointData || !checkpointPreviousData) return;
+    cachePendingDeposits = cachePendingDeposits.filter((item) => {
+      const isExistOnBuildingCheckpoint = validateExistenceOnPendingDeposits(
+        checkpointData.transaction.data.input,
+        item
+      );
+      const isExistOnSigningCheckpoint =
+        validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item) &&
+        checkpointPreviousData.status == CheckpointStatus.Signing;
+      const isExistOnPendingDeposits = validateExistenceOnPendingDeposits(data, item);
 
-        // If a transaction have confirmations > 0, and exists on builidng or signing checkpoint then keep it
-        if (item.confirmations >= 1) {
-          return isExistOnSigningCheckpoint || isExistOnBuildingCheckpoint ? true : false;
-        }
-        return true;
-      });
-      setPendingDeposits(cachePendingDeposits);
-      localStorage.setItem(key, JSON.stringify(cachePendingDeposits));
-    }
+      return isExistOnSigningCheckpoint || isExistOnBuildingCheckpoint || isExistOnPendingDeposits ? true : false;
+    });
+    setPendingDeposits(cachePendingDeposits);
+    localStorage.setItem(key, JSON.stringify(cachePendingDeposits));
   }, [checkpointData, checkpointPreviousData, oraichainAddress, hasSigningCheckpoint]);
 
   /**
@@ -114,13 +111,11 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   useEffect(() => {
     if (oraichainAddress && data && checkpointQueue?.index) {
       if (!cachePendingDeposits) {
-        cachePendingDeposits = data.map((item) => {
-          return { ...item };
-        });
+        cachePendingDeposits = data;
       } else {
         for (const item of data) {
           if (!validateExistenceOnPendingDeposits(cachePendingDeposits, item)) {
-            cachePendingDeposits = [...cachePendingDeposits, { ...item }];
+            cachePendingDeposits = [...cachePendingDeposits, item];
           }
         }
       }
