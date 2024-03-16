@@ -52,17 +52,7 @@ const initialState: ConfigState = {
   tronAddress: '',
   walletTypeStore: 'owallet',
   cosmosAddress: {},
-  allPendingDeposits: {
-    // orai1ehmhqcn8erf3dgavrca69zgp4rtxj5kqgtcnyd: [
-    //   {
-    //     txid: 'd360d3cf992f7ec39b8152a91a483e07891aab7010c34bcda65019107815c05f',
-    //     vout: 1,
-    //     amount: 1000,
-    //     height: 834150,
-    //     confirmations: 3
-    //   }
-    // ]
-  },
+  allPendingDeposits: {},
   chainId: 'Oraichain',
   filterNetwork: 'Oraichain',
   chainInfo: {},
