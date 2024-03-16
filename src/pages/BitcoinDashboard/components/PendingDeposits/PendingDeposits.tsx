@@ -77,7 +77,6 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     return [filteredArr.length > 0, index];
   };
 
-  console.log(allPendingDeposits);
   /**
    * @devs: This will pop out pending deposits if stored building checkpoint is less than
    * current building checkpoint index. (if there is any signing state, minus building
