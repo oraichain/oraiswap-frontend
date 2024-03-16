@@ -77,6 +77,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     return [filteredArr.length > 0, index];
   };
 
+  console.log(allPendingDeposits);
   /**
    * @devs: This will pop out pending deposits if stored building checkpoint is less than
    * current building checkpoint index. (if there is any signing state, minus building
@@ -92,7 +93,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       if (validateExistenceOnPendingDeposits(checkpointData.transaction.data.input, item)[0]) {
         return true;
       }
-      if (validateExistenceOnPendingDeposits(checkpointData.transaction.data.input, item)[0]) {
+      if (validateExistenceOnPendingDeposits(fetchedPendingDeposits, item)[0]) {
         return true;
       }
       if (
@@ -123,6 +124,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
 
     let pendingDeposits =
       allPendingDeposits && allPendingDeposits[oraichainAddress] ? [...allPendingDeposits[oraichainAddress]] : [];
+
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
         let [isExist, itemIndex] = validateExistenceOnPendingDeposits(pendingDeposits, fetchedPendingDeposits[i]);
