@@ -65,14 +65,16 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const validateExistenceOnPendingDeposits = (
     arr: DepositInfo[] | TransactionParsedInput[],
     findItem: DepositInfo
-  ): boolean => {
-    let filteredArr = arr.filter((item) => {
+  ): [boolean, number] => {
+    let index = -1;
+    let filteredArr = arr.filter((item, idx) => {
       if (item.txid == findItem.txid) {
+        index = idx;
         return true;
       }
       return false;
     });
-    return filteredArr.length > 0;
+    return [filteredArr.length > 0, index];
   };
 
   /**
@@ -87,16 +89,20 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
 
     let pendingDeposits = allPendingDeposits ? allPendingDeposits[oraichainAddress] || [] : [];
     pendingDeposits = pendingDeposits.filter((item) => {
-      const isExistOnBuildingCheckpoint = validateExistenceOnPendingDeposits(
-        checkpointData.transaction.data.input,
-        item
-      );
-      const isExistOnSigningCheckpoint =
-        validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item) &&
-        checkpointPreviousData.status == CheckpointStatus.Signing;
-      const isExistOnPendingDeposits = validateExistenceOnPendingDeposits(fetchedPendingDeposits, item);
+      if (validateExistenceOnPendingDeposits(checkpointData.transaction.data.input, item)[0]) {
+        return true;
+      }
+      if (validateExistenceOnPendingDeposits(checkpointData.transaction.data.input, item)[0]) {
+        return true;
+      }
+      if (
+        validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item)[0] &&
+        checkpointPreviousData.status == CheckpointStatus.Signing
+      ) {
+        return true;
+      }
 
-      return isExistOnSigningCheckpoint || isExistOnBuildingCheckpoint || isExistOnPendingDeposits ? true : false;
+      return false;
     });
 
     setAllPendingDeposits({
@@ -119,11 +125,12 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       allPendingDeposits && allPendingDeposits[oraichainAddress] ? [...allPendingDeposits[oraichainAddress]] : [];
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
-        if (!validateExistenceOnPendingDeposits(pendingDeposits, fetchedPendingDeposits[i])) {
+        let [isExist, itemIndex] = validateExistenceOnPendingDeposits(pendingDeposits, fetchedPendingDeposits[i]);
+        if (!isExist) {
           pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
           continue;
         }
-        pendingDeposits[i] = fetchedPendingDeposits[i];
+        pendingDeposits[itemIndex] = fetchedPendingDeposits[i];
       } catch (err) {
         console.log(err);
       }
