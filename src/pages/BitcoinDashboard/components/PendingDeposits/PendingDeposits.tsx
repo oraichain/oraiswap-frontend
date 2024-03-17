@@ -70,22 +70,25 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
 
 
   useEffect(() => {
+    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits || !checkpointQueue) {
+      return;
+    }
     const depositPendingUpdate = handleUpdateTxPending();
+    if(!depositPendingUpdate) return;
     const depositPendingPopout =  handlePopOutPending(depositPendingUpdate);
+    if(!depositPendingPopout) return;
     setAllPendingDeposits({
       ...allPendingDeposits,
       [oraichainAddress]: depositPendingPopout
     });
-  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits,checkpointQueue]);
+  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits, checkpointQueue]);
   const handleUpdateTxPending = () => {
     // /**
     //  * @devs: This one will handle update pendingDeposits to localStorage,
     //  * if there is no cache, set current pending deposits with latest building
     //  * checkpoint index.
     //  */
-    if (!oraichainAddress || !fetchedPendingDeposits || !checkpointQueue) {
-      return;
-    }
+
     let pendingDeposits = [...(allPendingDeposits?.[oraichainAddress] ?? [])]; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
@@ -107,9 +110,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
      * current building checkpoint index. (if there is any signing state, minus building
      * checkpoint index to 1).
      */
-    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
-      return;
-    }
+
     const checkpointInput = checkpointData.transaction.data.input;
     const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
     const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
