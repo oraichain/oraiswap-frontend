@@ -11,7 +11,7 @@ import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { useGetPendingDeposits } from '../../hooks/relayer.hook';
 import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
 import { useEffect } from 'react';
-import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
+import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
 
@@ -35,6 +35,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
   const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
+  const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
   const checkpointQueue = useGetCheckpointQueue();
   const buildingCheckpointIndex = checkpointQueue?.index || 0;
@@ -63,7 +64,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   };
 
   const isExitsDeposit = (arr: DepositInfo[] | TransactionParsedInput[], findItem: DepositInfo): [boolean, number] => {
-    let indexFinded = arr.findIndex((item, idx) => item.txid === findItem.txid);
+    let indexFinded = arr.findIndex((item, _) => item.txid === findItem.txid);
     return [indexFinded === -1 ? false : true, indexFinded];
   };
 
@@ -73,8 +74,10 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
    * checkpoint index to 1).
    */
   useEffect(() => {
-    handlePopOutPending();
-  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits]);
+    setTimeout(() => {
+      handlePopOutPending();
+    }, 100);
+  }, [fetchedPendingDeposits, checkpointData, checkpointPreviousData, oraichainAddress]);
 
   const handlePopOutPending = () => {
     if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
@@ -84,15 +87,14 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     const checkpointInput = checkpointData.transaction.data.input;
     const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
     const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
-    pendingDeposits.filter(
-      (item) =>
-        isExitsDeposit(checkpointInput, item)[0] ||
-        isExitsDeposit(fetchedPendingDeposits, item)[0] ||
-        (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
-    );
     setAllPendingDeposits({
       ...allPendingDeposits,
-      [oraichainAddress]: pendingDeposits
+      [oraichainAddress]: pendingDeposits.filter(
+        (item) =>
+          isExitsDeposit(checkpointInput, item)[0] ||
+          isExitsDeposit(fetchedPendingDeposits, item)[0] ||
+          (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
+      )
     });
   };
   // /**
@@ -108,11 +110,11 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     if (!oraichainAddress || !fetchedPendingDeposits || !checkpointQueue) {
       return;
     }
-    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? [];
+    let pendingDeposits = [...(allPendingDeposits?.[oraichainAddress] ?? [])]; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
-        let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
-        if (isExits) {
+        let [isExist, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
+        if (!isExist) {
           pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
           continue;
         }
@@ -153,7 +155,16 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       width: '13%',
       align: 'left',
       sortField: 'amount',
-      accessor: (data) => <span>{(toDisplay(BigInt(data.amount || 0), 8) - fee.relayerFee).toFixed(6)} BTC</span>
+      accessor: (data) => (
+        <span>
+          {(
+            toDisplay(BigInt(data.amount || 0), 8) -
+            fee.relayerFee -
+            toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
+          ).toFixed(6)}{' '}
+          BTC
+        </span>
+      )
     },
     vout: {
       name: 'Vout',
