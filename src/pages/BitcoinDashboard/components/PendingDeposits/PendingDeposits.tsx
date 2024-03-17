@@ -66,15 +66,8 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     arr: DepositInfo[] | TransactionParsedInput[],
     findItem: DepositInfo
   ): [boolean, number] => {
-    let index = -1;
-    let filteredArr = arr.filter((item, idx) => {
-      if (item.txid == findItem.txid) {
-        index = idx;
-        return true;
-      }
-      return false;
-    });
-    return [filteredArr.length > 0, index];
+    let findedIndex = arr.findIndex((item) => item.txid == findItem.txid);
+    return findedIndex == -1 ? [false, findedIndex] : [true, findedIndex];
   };
 
   /**
