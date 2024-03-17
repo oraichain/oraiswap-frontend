@@ -34,7 +34,8 @@ import {
   handleErrorTransaction,
   networks,
   EVM_CHAIN_ID,
-  handleCheckAddress
+  handleCheckAddress,
+  subNumber
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -194,8 +195,7 @@ const Balance: React.FC<BalanceProps> = () => {
         await getAddress();
         //@ts-ignore
         displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log,
-          customLink: '/bitcoin-dashboard?tab=pending_withdraws'
+          message: result?.log
         });
       }
     } catch (error) {
@@ -253,10 +253,12 @@ const Balance: React.FC<BalanceProps> = () => {
       message: '',
       transactionFee: feeRate
     });
-
+    console.log(totalFee, 'totalFee');
     const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
+
+    const amountLasted = subNumber(amount, totalFee);
 
     const dataRequest = {
       memo: '',
@@ -273,7 +275,7 @@ const Balance: React.FC<BalanceProps> = () => {
       msgs: {
         address: address,
         changeAddress: btcAddress,
-        amount: amount,
+        amount: amountLasted,
         message: '',
         totalFee: totalFee,
         selectedCrypto: fromToken.chainId,
@@ -283,19 +285,23 @@ const Balance: React.FC<BalanceProps> = () => {
       confirmedBalance: utxosMapped.balance,
       utxos: utxosMapped.utxos,
       blacklistedUtxos: [],
-      amount: amount,
+      amount: amountLasted,
       feeRate: feeRate
     };
+    console.log('🚀 ~ handleTransferBTCToOraichain ~ dataRequest:', dataRequest);
 
     try {
       // @ts-ignore-check
       const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
       console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
       if (rs?.rawTxHex) {
+        setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
-        setTxHash(rs.rawTxHex);
+        setTimeout(async () => {
+          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+        }, 5000);
         return;
       }
       displayToast(TToastType.TX_FAILED, {
@@ -342,8 +348,13 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         'auto'
       );
-      // @ts-ignore-check
-      processTxResult(fromToken.rpc, result, getTransactionUrl(fromToken.chainId, result.transactionHash));
+
+      processTxResult(
+        fromToken.rpc,
+        // @ts-ignore-check
+        result,
+        '/bitcoin-dashboard?tab=pending_withdraws'
+      );
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,

@@ -45,7 +45,7 @@ import { useEffect, useState } from 'react';
 import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { BitcoinUnit } from 'bitcoin-units';
-import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, bitcoinChainId, btcNetwork } from 'helper/constants';
+import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, bitcoinChainId, bitcoinLcd, btcNetwork } from 'helper/constants';
 import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
 import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
 
@@ -609,6 +609,55 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
   return fee;
 };
 
+export const useGetWithdrawlFeesBitcoin = ({
+  enabled,
+  bitcoinAddress
+}: {
+  enabled: boolean;
+  bitcoinAddress: string;
+}) => {
+  const getWithdrawFeeBTC = async (bitcoinAddr) => {
+    if (!bitcoinAddr) return 0;
+    const { data } = await axios({
+      baseURL: bitcoinLcd,
+      method: 'get',
+      url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
+    });
+    return data;
+  };
+
+  const { data } = useQuery(['withdrawl_fees', bitcoinAddress, enabled], () => getWithdrawFeeBTC(bitcoinAddress), {
+    refetchOnWindowFocus: true,
+    enabled: !!bitcoinAddress && !!enabled,
+    placeholderData: {
+      withdrawal_fees: 0
+    }
+  });
+
+  return data;
+};
+
+export const useDepositFeesBitcoin = (enabled: boolean) => {
+  const getDepositFeeBTC = async () => {
+    const { data } = await axios({
+      baseURL: bitcoinLcd,
+      method: 'get',
+      url: `/bitcoin/deposit_fees`
+    });
+    return data;
+  };
+
+  const { data } = useQuery(['deposit_fees', enabled], () => getDepositFeeBTC(), {
+    refetchOnWindowFocus: true,
+    enabled: !!enabled,
+    placeholderData: {
+      deposit_fees: 0
+    }
+  });
+
+  return data;
+};
+
 export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
   const validatedAmount = validateNumber(amount);
   return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
@@ -659,60 +708,6 @@ export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSiz
   return (minerFeeRate * 10 ** 8) / estWitnessSize; // miner fee rate is in BTC, we * 10**8 to convert to sats
 };
 
-const calculateDepositFees = async () => {
-  const { signatories, minerFeeRate, index } = await (await fetch(`${config.relayerUrl}/sigset`)).json();
-  const witnessSize = calculateEstWitnessSize(signatories.length);
-  const feeRate = calculateFeeRateFromMinerFee(minerFeeRate, witnessSize);
-  const inputSize = calculateInputSize(witnessSize);
-
-  // calculate the actual fees
-  const depositFees = inputSize * feeRate;
-  return { depositFees, index, witnessSize, feeRate };
-};
-
-const calculateCheckpointFees = async (feeRate: number, witnessSize: number) => {
-  const { checkpoint_vsize: vsizeCheckpointTx, total_input_size: inputLength } = await (
-    await fetch(`${config.restUrl}/bitcoin/checkpoint/current_checkpoint_size`)
-  ).json();
-  const totalCheckpointInputWitnessSize = inputLength * witnessSize;
-  const estVsize = vsizeCheckpointTx + totalCheckpointInputWitnessSize;
-  return feeRate * estVsize;
-};
-
-const calculateWithdrawFees = async (feeRate: number, dest: string) => {
-  const scriptPubkey = await (await fetch(`${config.restUrl}/bitcoin/script_pubkey/${dest}`)).json();
-  console.log('base64 script pubkey: ', scriptPubkey);
-  return (9 + Buffer.from(scriptPubkey, 'base64').length) * feeRate; // 9 is the magic number
-};
-
-export const useGetFeeBitcoin = (fromToken: TokenItemType, btcAddress?: string) => {
-  const { data: btcFee } = useQuery(
-    ['fee-deposit-withdraw-btc-oraichain', fromToken.coinGeckoId, btcAddress],
-    async () => {
-      const { depositFees, witnessSize, feeRate } = await calculateDepositFees();
-      if (fromToken.chainId === 'Oraichain') {
-        //ORAICHAIN -> BTC
-        const withdrawalFees = await calculateWithdrawFees(feeRate, btcAddress);
-        const widthdrawFee = satToBTC(withdrawalFees, true);
-        return widthdrawFee;
-      }
-      // BTC -> ORAICHAIN
-      const checkpointFees = await calculateCheckpointFees(feeRate, witnessSize);
-      let btcFee = satToBTC(checkpointFees, true);
-      if (depositFees > checkpointFees) btcFee = satToBTC(depositFees, true);
-      return btcFee;
-    },
-    {
-      placeholderData: 0,
-      enabled: fromToken.coinGeckoId === 'bitcoin' && !!btcAddress
-    }
-  );
-  return {
-    toDisplayBTCFee: btcFee
-    // toAmountBTCFee: btcFee
-  };
-};
-
 export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
   try {
     amount = Number(amount);
@@ -722,21 +717,9 @@ export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
     console.log(e);
   }
 };
+
 export const BTCtoSat = (sat = 0, isDisplayAmount?: boolean) => {
   if (!sat) return 0;
   if (isDisplayAmount) return new BitcoinUnit(sat, 'BTC').to('satoshi').getValueAsString();
   return new BitcoinUnit(sat, 'BTC').to('satoshi').getValue();
-};
-
-export const checkDisableTransferBtc = (fromAmount: number, minimumAmount: number, chainId: string) => {
-  if (chainId === bitcoinChainId) {
-    if (!fromAmount || !minimumAmount) return true;
-    const fromSat = BTCtoSat(fromAmount);
-    const minimumSat = BTCtoSat(minimumAmount);
-    if (fromSat >= minimumSat) {
-      return false;
-    }
-    return true;
-  }
-  return false;
 };

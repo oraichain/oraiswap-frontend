@@ -78,14 +78,22 @@ export const WalletManagement: FC<{}> = () => {
       setWalletProviderWithStatus(updatedWalletProvider);
     }
     updateWalletProvider();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCheckOwallet, isCheckKeplr, isMetamask]);
 
   // load balance every time change address
   useEffect(() => {
-    loadTokenAmounts({ oraiAddress, tronAddress, metamaskAddress });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+    const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress };
+    const filteredAddresses = {};
+    
+    for (const key in addresses) {
+      if (addresses[key]) {
+        filteredAddresses[key] = addresses[key];
+      }
+    }
+    if (Object.keys(filteredAddresses).length > 0) {
+      loadTokenAmounts(filteredAddresses);
+    }
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   // reset balance when disconnect
   useEffect(() => {
@@ -98,7 +106,7 @@ export const WalletManagement: FC<{}> = () => {
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   const isAnyWalletConnected = Object.values(walletByNetworks).some((wallet) => wallet !== null);
   useEffect(() => {

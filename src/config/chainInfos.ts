@@ -593,7 +593,7 @@ export const oraichainNetwork: CustomChainInfo = {
       type: 'cw20',
       contractAddress: OBTCContractAddress,
       bridgeTo: [bitcoinChainId],
-      coinDecimals: 14,
+      coinDecimals: 6,
       Icon: BTCIcon,
       IconLight: BTCIcon,
       coinImageUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'
@@ -633,8 +633,6 @@ export const OraiBTCBridgeNetwork = {
   bip44: {
     coinType: 118
   },
-  Icon: BTCIcon,
-  IconLight: BTCIcon,
   coinType: 118,
   bech32Config: defaultBech32Config('oraibtc'),
   currencies: [

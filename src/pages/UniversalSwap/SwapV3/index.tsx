@@ -396,7 +396,15 @@ const SwapComponent: React.FC<{
         setAddressTransfer(address);
       }
     })();
-  }, [originalToToken, walletByNetworks.evm, walletByNetworks.cosmos, walletByNetworks.tron]);
+  }, [
+    originalToToken,
+    oraiAddress,
+    metamaskAddress,
+    tronAddress,
+    walletByNetworks.evm,
+    walletByNetworks.cosmos,
+    walletByNetworks.tron
+  ]);
 
   return (
     <div className={cx('swap-box-wrapper')}>
