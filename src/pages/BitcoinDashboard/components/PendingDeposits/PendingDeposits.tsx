@@ -62,19 +62,9 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     window.open(`https://blockstream.info/tx/${txid}`, '_blank');
   };
 
-  const validateExistenceOnPendingDeposits = (
-    arr: DepositInfo[] | TransactionParsedInput[],
-    findItem: DepositInfo
-  ): [boolean, number] => {
-    let index = -1;
-    let filteredArr = arr.filter((item, idx) => {
-      if (item.txid == findItem.txid) {
-        index = idx;
-        return true;
-      }
-      return false;
-    });
-    return [filteredArr.length > 0, index];
+  const isExitsDeposit = (arr: DepositInfo[] | TransactionParsedInput[], findItem: DepositInfo): [boolean, number] => {
+    let indexFined = arr.findIndex((item, idx) => item.txid === findItem.txid);
+    return [indexFined === -1 ? false : true, indexFined];
   };
 
   /**
@@ -83,51 +73,46 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
    * checkpoint index to 1).
    */
   useEffect(() => {
+    handlePopOutPending();
+  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits]);
+
+  const handlePopOutPending = () => {
     if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
       return;
     }
-
-    let pendingDeposits = allPendingDeposits ? allPendingDeposits[oraichainAddress] || [] : [];
-    pendingDeposits = pendingDeposits.filter((item) => {
-      if (validateExistenceOnPendingDeposits(checkpointData.transaction.data.input, item)[0]) {
-        return true;
-      }
-      if (validateExistenceOnPendingDeposits(fetchedPendingDeposits, item)[0]) {
-        return true;
-      }
-      if (
-        validateExistenceOnPendingDeposits(checkpointPreviousData.transaction.data.input, item)[0] &&
-        checkpointPreviousData.status == CheckpointStatus.Signing
-      ) {
-        return true;
-      }
-
-      return false;
-    });
-
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? [];
+    const checkpointInput = checkpointData.transaction.data.input;
+    const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
+    const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
+    pendingDeposits.filter(
+      (item) =>
+        isExitsDeposit(checkpointInput, item)[0] ||
+        isExitsDeposit(fetchedPendingDeposits, item)[0] ||
+        (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
+    );
     setAllPendingDeposits({
       ...allPendingDeposits,
       [oraichainAddress]: pendingDeposits
     });
-  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits]);
-
+  };
   // /**
   //  * @devs: This one will handle update pendingDeposits to localStorage,
   //  * if there is no cache, set current pending deposits with latest building
   //  * checkpoint index.
   //  */
   useEffect(() => {
+    handleUpdateTxPending();
+  }, [fetchedPendingDeposits, oraichainAddress, checkpointQueue]);
+
+  const handleUpdateTxPending = () => {
     if (!oraichainAddress || !fetchedPendingDeposits || !checkpointQueue) {
       return;
     }
-
-    let pendingDeposits =
-      allPendingDeposits && allPendingDeposits[oraichainAddress] ? [...allPendingDeposits[oraichainAddress]] : [];
-
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? [];
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
-        let [isExist, itemIndex] = validateExistenceOnPendingDeposits(pendingDeposits, fetchedPendingDeposits[i]);
-        if (!isExist) {
+        let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
+        if (isExits) {
           pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
           continue;
         }
@@ -136,13 +121,11 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
         console.log(err);
       }
     }
-
     setAllPendingDeposits({
       ...allPendingDeposits,
       [oraichainAddress]: pendingDeposits
     });
-  }, [fetchedPendingDeposits, oraichainAddress, checkpointQueue]);
-
+  };
   const headers: TableHeaderProps<DepositInfo> = {
     flow: {
       name: 'Flow',
@@ -200,9 +183,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       </div>
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
       <div className={styles.pending_deposits_list}>
-        {allPendingDeposits &&
-        allPendingDeposits[oraichainAddress] &&
-        allPendingDeposits[oraichainAddress].length > 0 ? (
+        {allPendingDeposits?.[oraichainAddress]?.length > 0 ? (
           <Table headers={headers} data={[...allPendingDeposits[oraichainAddress]]} defaultSorted="confirmations" />
         ) : (
           <FallbackEmptyData />
