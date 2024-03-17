@@ -68,53 +68,29 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     return [indexFinded === -1 ? false : true, indexFinded];
   };
 
-  /**
-   * @devs: This will pop out pending deposits if stored building checkpoint is less than
-   * current building checkpoint index. (if there is any signing state, minus building
-   * checkpoint index to 1).
-   */
-  useEffect(() => {
-    setTimeout(() => {
-      handlePopOutPending();
-    }, 100);
-  }, [fetchedPendingDeposits, checkpointData, checkpointPreviousData, oraichainAddress]);
 
-  const handlePopOutPending = () => {
-    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
-      return;
-    }
-    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? [];
-    const checkpointInput = checkpointData.transaction.data.input;
-    const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
-    const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
+  useEffect(() => {
+    const depositPendingUpdate = handleUpdateTxPending();
+    const depositPendingPopout =  handlePopOutPending(depositPendingUpdate);
     setAllPendingDeposits({
       ...allPendingDeposits,
-      [oraichainAddress]: pendingDeposits.filter(
-        (item) =>
-          isExitsDeposit(checkpointInput, item)[0] ||
-          isExitsDeposit(fetchedPendingDeposits, item)[0] ||
-          (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
-      )
+      [oraichainAddress]: depositPendingPopout
     });
-  };
-  // /**
-  //  * @devs: This one will handle update pendingDeposits to localStorage,
-  //  * if there is no cache, set current pending deposits with latest building
-  //  * checkpoint index.
-  //  */
-  useEffect(() => {
-    handleUpdateTxPending();
-  }, [fetchedPendingDeposits, oraichainAddress, checkpointQueue]);
-
+  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits,checkpointQueue]);
   const handleUpdateTxPending = () => {
+    // /**
+    //  * @devs: This one will handle update pendingDeposits to localStorage,
+    //  * if there is no cache, set current pending deposits with latest building
+    //  * checkpoint index.
+    //  */
     if (!oraichainAddress || !fetchedPendingDeposits || !checkpointQueue) {
       return;
     }
     let pendingDeposits = [...(allPendingDeposits?.[oraichainAddress] ?? [])]; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
-        let [isExist, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
-        if (!isExist) {
+        let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
+        if (!isExits) {
           pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
           continue;
         }
@@ -123,11 +99,29 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
         console.log(err);
       }
     }
-    setAllPendingDeposits({
-      ...allPendingDeposits,
-      [oraichainAddress]: pendingDeposits
-    });
+    return pendingDeposits;
   };
+  const handlePopOutPending = (depositPendingUpdate:DepositInfo[]) => {
+    /**
+     * @devs: This will pop out pending deposits if stored building checkpoint is less than
+     * current building checkpoint index. (if there is any signing state, minus building
+     * checkpoint index to 1).
+     */
+    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits) {
+      return;
+    }
+    const checkpointInput = checkpointData.transaction.data.input;
+    const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
+    const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
+    const pendingDeposits = depositPendingUpdate.filter(
+      (item) =>
+        isExitsDeposit(checkpointInput, item)[0] ||
+        isExitsDeposit(fetchedPendingDeposits, item)[0] ||
+        (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
+    );
+    return pendingDeposits ?? [];
+  };
+
   const headers: TableHeaderProps<DepositInfo> = {
     flow: {
       name: 'Flow',
