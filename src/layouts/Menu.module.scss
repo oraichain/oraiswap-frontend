@@ -55,8 +55,8 @@
 }
 
 .sideMenu {
-  margin-left: -53%;
-  width: 53%;
+  margin-left: -55%;
+  width: 55%;
   height: 100vh;
   padding: 40px 15px;
   display: flex;
@@ -68,6 +68,7 @@
   z-index: $zindex-sticky;
   overflow: auto;
   transition: margin-left 0.2s ease-in-out;
+  overflow-x: hidden;
 
   &.open {
     margin-left: 0;
@@ -82,6 +83,19 @@
     flex-direction: column;
     margin-left: 0;
 
+    .menu_item_help {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      &_left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+    }
+
     .divider {
       @include theme() {
         background-color: theme-get('neutral-border-border-default');
@@ -91,6 +105,14 @@
       height: 1px;
       margin-bottom: 12px;
     }
+  }
+
+  .mobile_sub_menu {
+    display: none;
+  }
+
+  .openSubMenu {
+    display: block;
   }
 }
 

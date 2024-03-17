@@ -35,6 +35,7 @@ const Menu: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [openBuy, setOpenBuy] = useState(false);
   const [isLoadedIframe, setIsLoadedIframe] = useState(false); // check iframe data loaded
+  const [isOpenSubMenuMobile, setIsOpenSubMenuMobile] = useState(false);
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
@@ -124,29 +125,23 @@ const Menu: React.FC = () => {
       <div className={styles.divider}></div>
       <div
         onClick={() => {
-          setOtherActive(!otherActive);
+          setIsOpenSubMenuMobile(!isOpenSubMenuMobile);
         }}
-        className={classNames(styles.menu_item, { [styles.active]: otherActive }, styles[theme], styles.spin)}
+        className={classNames(styles.menu_item, styles.menu_item_help, styles[theme])}
       >
-        <HelpIcon />
-        <span className={classNames(styles.menu_item_text, { [styles.active]: otherActive }, styles[theme])}>
-          {'Help'}
-        </span>
+        <div className={styles.menu_item_help_left}>
+          <HelpIcon />
+          <span className={classNames(styles.menu_item_text, styles[theme])}>{'Help'}</span>
+        </div>
         <DownArrowIcon />
       </div>
-
-      <TooltipContainer
-        placement="bottom-end"
-        visible={otherActive}
-        setVisible={() => setOtherActive(!otherActive)}
-        content={
-          <div className={classNames(styles.menu_others_list, styles[theme])}>
-            {renderLink('https://legacy-v2.oraidex.io/', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
-            {renderLink('https://legacy-v2.oraidex.io/', 'Twitter', () => {}, true, <TwitterIcon />, false)}
-            {renderLink('https://legacy-v2.oraidex.io/', 'Contact us', () => {}, true, <SupportIcon />, false)}
-          </div>
-        }
-      />
+      <div
+        className={classNames(styles.mobile_sub_menu, isOpenSubMenuMobile ? styles.openSubMenu : null, styles[theme])}
+      >
+        {renderLink('https://legacy-v2.oraidex.io/', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
+        {renderLink('https://legacy-v2.oraidex.io/', 'Twitter', () => {}, true, <TwitterIcon />, false)}
+        {renderLink('https://legacy-v2.oraidex.io/', 'Contact us', () => {}, true, <SupportIcon />, false)}
+      </div>
       {renderLink(
         '#',
         'Buy ORAI',
