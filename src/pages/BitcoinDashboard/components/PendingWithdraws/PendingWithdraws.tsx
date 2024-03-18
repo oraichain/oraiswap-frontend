@@ -45,8 +45,15 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
   const hasSigningCheckpoint =
     buildingCheckpointIndex == 0 ? false : checkpointPreviousData?.status == CheckpointStatus.Signing;
 
-  const allOutputs = checkpointData?.transaction.data.output || [];
-  const previousOutputs = checkpointPreviousData?.transaction.data.output || [];
+  const allOutputs = checkpointData?.transaction.data.output
+    ? checkpointData?.transaction.data.output.map((item) => ({ ...item, txid: checkpointData.transaction.hash }))
+    : [];
+  const previousOutputs = checkpointPreviousData?.transaction.data.output
+    ? checkpointPreviousData.transaction.data.output.map((item) => ({
+        ...item,
+        txid: checkpointPreviousData.transaction.hash
+      }))
+    : [];
   const finalOutputs = hasSigningCheckpoint ? [...allOutputs, ...previousOutputs] : allOutputs;
   const data = finalOutputs.filter((item) => item.address == btcAddress[0]);
 
@@ -79,15 +86,15 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
       width: '12%',
       align: 'left'
     },
-    address: {
-      name: 'Address',
+    txid: {
+      name: 'Txid',
       width: '60%',
       accessor: (data) => (
-        <div onClick={() => handleNavigate(data.address)}>
-          <span>{`${data.address}`}</span>
+        <div onClick={() => handleNavigate(data.txid)}>
+          <span>{`${data.txid}`}</span>
         </div>
       ),
-      sortField: 'address',
+      sortField: 'txid',
       align: 'left'
     },
     amount: {
@@ -104,7 +111,7 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
       <h2 className={styles.pending_withdraws_title}>Pending Withdraws:</h2>
       <div className={styles.pending_withdraws_list}>
         <RenderIf isTrue={!mobile && (data?.length || 0) > 0}>
-          <Table headers={headers} data={data} defaultSorted="address" />
+          <Table headers={headers} data={data} defaultSorted="txid" />
         </RenderIf>
         <RenderIf isTrue={mobile && (data?.length || 0) > 0}>
           <TransactionsMobile

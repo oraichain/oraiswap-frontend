@@ -65,6 +65,7 @@ export interface TransactionOutput {
 }
 
 export interface TransactionParsedOutput {
+  txid: String;
   address: String;
   value: number;
 }
