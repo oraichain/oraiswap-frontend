@@ -295,7 +295,8 @@ const SwapComponent: React.FC<{
           originalFromToken,
           originalToToken,
           fromAmount: fromAmountToken,
-          simulateAmount: simulateData.amount,
+          // simulateAmount: simulateData.amount,
+          simulateAmount: toAmount(simulateData.amount, originalToToken.decimals).toString(),
           userSlippage,
           simulatePrice:
             // @ts-ignore
