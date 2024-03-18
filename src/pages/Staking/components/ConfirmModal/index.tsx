@@ -1,11 +1,11 @@
-import { useRef } from 'react';
-import styles from './index.module.scss';
-import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { isMobile } from '@walletconnect/browser-utils';
+import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';
 import { Button } from 'components/Button';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import { isMobile } from '@walletconnect/browser-utils';
 import Loader from 'components/Loader';
+import useOnClickOutside from 'hooks/useOnClickOutside';
+import { FunctionComponent, ReactNode, useRef } from 'react';
+import styles from './index.module.scss';
 
 export type ModalConfirmProps = {
   showLoading?: boolean;
@@ -15,10 +15,11 @@ export type ModalConfirmProps = {
   onClose: () => void;
   onConfirm: () => void;
   confirmBtnText?: string;
-  content?: string;
+  content?: ReactNode;
   title?: string;
   width?: number;
   showIcon?: boolean;
+  Icon?: FunctionComponent;
 };
 
 const ModalConfirm = ({
@@ -27,12 +28,13 @@ const ModalConfirm = ({
   open,
   onClose,
   onOpen,
-  confirmBtnText = 'Confirm',
+  confirmBtnText = 'Confirmation',
   content,
   title,
   width,
   onConfirm,
-  showIcon = true
+  showIcon = true,
+  Icon = InfoIcon
 }: ModalConfirmProps) => {
   const ref = useRef(null);
   const mobileMode = isMobile();
@@ -61,7 +63,7 @@ const ModalConfirm = ({
 
         {showIcon && (
           <div className={styles.logo}>
-            <InfoIcon />
+            <Icon />
           </div>
         )}
 

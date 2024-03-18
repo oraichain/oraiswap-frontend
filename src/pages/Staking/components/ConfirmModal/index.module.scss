@@ -12,9 +12,7 @@
 
   z-index: 30;
 
-  padding-top: 91px;
-
-  @include medium_mobile {
+  @include small_mobile {
     align-items: flex-end;
   }
 
@@ -31,37 +29,39 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 576px;
-    padding: 24px 12px;
+    max-width: 500px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 
     border-radius: 12px;
-    border: 0.8px solid;
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
 
     @include theme {
-      border-color: theme-get('neutral-border-border-default');
-      background: theme-get('neutral-surface-bg-modal');
+      background: theme-get('neutral-surface-bg-2');
     }
 
     @include small-mobile {
-      padding: 10px 5px;
+      max-width: 576px;
+
+      padding: 10px;
       border-end-end-radius: 0px;
       border-end-start-radius: 0px;
       max-width: unset;
+
+      gap: 16px;
     }
 
     .closeIcon {
       cursor: pointer;
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 24px;
+      right: 24px;
 
       @include mobile {
-        top: 5px;
-        right: 5px;
+        top: 10px;
+        right: 10px;
       }
     }
 
@@ -74,7 +74,7 @@
       line-height: 150%;
 
       width: 100%;
-      text-align: center;
+      text-align: left;
     }
 
     .logo {

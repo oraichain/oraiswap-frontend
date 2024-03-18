@@ -3,6 +3,8 @@ import { Cw20StakingClient } from '@oraichain/oraidex-contracts-sdk';
 import { LockInfoResponse } from '@oraichain/oraidex-contracts-sdk/build/Cw20Staking.types';
 import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
 import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
+import { ReactComponent as ConfirmIcon } from 'assets/images/restake.svg';
+import { ReactComponent as ConfirmIconLight } from 'assets/images/restaking-light.svg';
 import { Button } from 'components/Button';
 import Loader from 'components/Loader';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
@@ -202,8 +204,18 @@ const UnStakeTab = () => {
         onOpen={() => setOpen(false)}
         onClose={() => setOpen(false)}
         onConfirm={() => handleUnstake()}
-        content={'Unstaking would stop the reward & lock the token during unbonding period. Are you sure? '}
-        title="Confirm unstake"
+        content={
+          <div className={styles.contentConfirm}>
+            <div className={styles.desc}>
+              Unstaking <span className={styles.noteHighlight}>would stop the reward</span> and lock the token for a
+              <span className={styles.noteHighlight}>30-day unbonding period</span>. You can also choose to cancel the
+              unstaking process during cooldown.
+            </div>
+            <div>Are you sure you want to unstake?</div>
+          </div>
+        }
+        Icon={theme === 'light' ? ConfirmIconLight : ConfirmIcon}
+        title="Unstaking confirmation"
         // showIcon={false}
       />
     </div>
