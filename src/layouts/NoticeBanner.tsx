@@ -44,7 +44,14 @@ export const NoticeBanner = ({
   }, []);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (banners.length <= 0) {
+      setOpenBanner(false);
+      return;
+    }
+
+    setOpenBanner(true);
+
+    if (banners.length === 1) return;
 
     const carousel = () => {
       setBannersIdx((bannerIdx) => {
