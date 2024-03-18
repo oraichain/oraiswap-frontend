@@ -14,6 +14,9 @@ import { useEffect } from 'react';
 import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
 import { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
+import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
+import { isMobile } from '@walletconnect/browser-utils';
+import RenderIf from '../RenderIf/RenderIf';
 
 type Icons = {
   Light: any;
@@ -33,6 +36,7 @@ const tokens = {
 
 export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
+  const mobile = isMobile();
   const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
   const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
   const depositFee = useGetDepositFee();
@@ -189,11 +193,19 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       </div>
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
       <div className={styles.pending_deposits_list}>
-        {allPendingDeposits?.[oraichainAddress]?.length > 0 ? (
+        <RenderIf isTrue={!mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
           <Table headers={headers} data={[...allPendingDeposits[oraichainAddress]]} defaultSorted="confirmations" />
-        ) : (
+        </RenderIf>
+        <RenderIf isTrue={mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
+          <TransactionsMobile
+            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
+            symbols={'BTC/ORAI'}
+            transactions={allPendingDeposits[oraichainAddress]}
+          />
+        </RenderIf>
+        <RenderIf isTrue={!(allPendingDeposits?.[oraichainAddress]?.length > 0)}>
           <FallbackEmptyData />
-        )}
+        </RenderIf>
       </div>
     </div>
   );
