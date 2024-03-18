@@ -198,7 +198,7 @@ const App = () => {
     }
   };
 
-  const [openBanner, setOpenBanner] = useState(true);
+  const [openBanner, setOpenBanner] = useState(false);
 
   return (
     <ThemeProvider>
