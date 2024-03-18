@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { Themes } from 'context/theme-context';
 import { CoinGeckoPrices } from 'hooks/useCoingecko';
+import { DepositInfo } from 'pages/BitcoinDashboard/@types';
 import { KeyFilterPool } from 'pages/Pools/components/Filter';
 import { PERSIST_VER } from 'store/constants';
 // import { PERSIST_VERSION } from 'store/configure';
@@ -24,6 +25,7 @@ export interface ConfigState {
   tronAddress: string | null;
   btcAddress: string | null;
   cosmosAddress: { [key: string]: string };
+  allPendingDeposits: { [key: string]: DepositInfo[] };
   chainId: string;
   chainInfo: ChainInfoType;
   infoEvm: ChainInfoType;
@@ -50,6 +52,7 @@ const initialState: ConfigState = {
   tronAddress: '',
   walletTypeStore: 'owallet',
   cosmosAddress: {},
+  allPendingDeposits: {},
   chainId: 'Oraichain',
   filterNetwork: 'Oraichain',
   chainInfo: {},

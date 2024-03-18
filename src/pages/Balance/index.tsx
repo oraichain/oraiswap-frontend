@@ -258,7 +258,7 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
 
-    const amountLasted = subNumber(amount, totalFee);
+    // const amountLasted = subNumber(amount, totalFee);
 
     const dataRequest = {
       memo: '',
@@ -275,7 +275,7 @@ const Balance: React.FC<BalanceProps> = () => {
       msgs: {
         address: address,
         changeAddress: btcAddress,
-        amount: amountLasted,
+        amount: amount,
         message: '',
         totalFee: totalFee,
         selectedCrypto: fromToken.chainId,
@@ -285,10 +285,10 @@ const Balance: React.FC<BalanceProps> = () => {
       confirmedBalance: utxosMapped.balance,
       utxos: utxosMapped.utxos,
       blacklistedUtxos: [],
-      amount: amountLasted,
+      amount: amount,
       feeRate: feeRate
     };
-    console.log('🚀 ~ handleTransferBTCToOraichain ~ dataRequest:', dataRequest);
+
 
     try {
       // @ts-ignore-check
