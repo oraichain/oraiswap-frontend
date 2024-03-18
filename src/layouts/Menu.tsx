@@ -138,9 +138,9 @@ const Menu: React.FC = () => {
       <div
         className={classNames(styles.mobile_sub_menu, isOpenSubMenuMobile ? styles.openSubMenu : null, styles[theme])}
       >
-        {renderLink('https://legacy-v2.oraidex.io/', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
-        {renderLink('https://legacy-v2.oraidex.io/', 'Twitter', () => {}, true, <TwitterIcon />, false)}
-        {renderLink('https://legacy-v2.oraidex.io/', 'Contact us', () => {}, true, <SupportIcon />, false)}
+        {renderLink('https://t.me/oraidex', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
+        {renderLink('https://twitter.com/oraidex', 'Twitter', () => {}, true, <TwitterIcon />, false)}
+        {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
       </div>
       {renderLink(
         '#',
@@ -204,16 +204,9 @@ const Menu: React.FC = () => {
                 setVisible={() => setOtherActive(!otherActive)}
                 content={
                   <div className={classNames(styles.menu_others_list, styles[theme])}>
-                    {renderLink(
-                      'https://legacy-v2.oraidex.io/',
-                      'Join our Community',
-                      () => {},
-                      true,
-                      <TelegramIcon />,
-                      false
-                    )}
-                    {renderLink('https://legacy-v2.oraidex.io/', 'Twitter', () => {}, true, <TwitterIcon />, false)}
-                    {renderLink('https://legacy-v2.oraidex.io/', 'Contact us', () => {}, true, <SupportIcon />, false)}
+                    {renderLink('https://t.me/oraidex', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
+                    {renderLink('https://twitter.com/oraidex', 'Twitter', () => {}, true, <TwitterIcon />, false)}
+                    {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
                   </div>
                 }
               />
