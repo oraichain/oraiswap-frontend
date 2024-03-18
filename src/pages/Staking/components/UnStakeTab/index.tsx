@@ -20,6 +20,7 @@ import { useGetLockInfo, useGetMyStakeRewardInfo, useGetStakeInfo } from 'pages/
 import { useState } from 'react';
 import InputBalance from '../InputBalance';
 import styles from './index.module.scss';
+import ModalConfirm from '../ConfirmModal';
 
 const UnStakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -28,6 +29,7 @@ const UnStakeTab = () => {
   const loadTokenAmounts = useLoadTokens();
   const [amount, setAmount] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   const [loadingWithdraw, setLoadingWithdraw] = useState<boolean>(false);
 
   const { refetchStakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
@@ -68,6 +70,7 @@ const UnStakeTab = () => {
         refetchMyStakeRewardInfo();
         refetchLockInfo();
         loadTokenAmounts({ oraiAddress: address });
+        setOpen(false);
       }
     } catch (error) {
       console.log('error in unbond: ', error);
@@ -111,13 +114,14 @@ const UnStakeTab = () => {
   return (
     <div className={styles.unstakeTab}>
       <InputBalance
-        onSubmit={() => handleUnstake()}
+        onSubmit={() => setOpen(true)}
         balance={stakedAmount}
         label="Staked amount"
         type={STAKE_TAB.UnStake}
         amount={amount}
         loading={loading}
         setAmount={setAmount}
+        showLoading={false}
       />
 
       <div className={styles.note}>
@@ -177,6 +181,17 @@ const UnStakeTab = () => {
           </div>
         )}
       </div>
+
+      <ModalConfirm
+        loading={loading}
+        open={open}
+        onOpen={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+        onConfirm={() => handleUnstake()}
+        content={'Unstaking would stop the reward & lock the token during unbonding period. Are you sure? '}
+        title="Confirm unstake"
+        // showIcon={false}
+      />
     </div>
   );
 };

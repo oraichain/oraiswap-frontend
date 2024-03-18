@@ -16,6 +16,7 @@ import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
 import { ORAIX_TOKEN_INFO, STAKE_TAB } from 'pages/Staking/constants';
 
 export type InputBalanceType = {
+  showLoading?: boolean;
   balance: string;
   type?: STAKE_TAB;
   label?: string;
@@ -26,6 +27,7 @@ export type InputBalanceType = {
 };
 
 const InputBalance = ({
+  showLoading = true,
   onSubmit,
   balance,
   type = STAKE_TAB.Stake,
@@ -113,7 +115,7 @@ const InputBalance = ({
       </div>
       <div className={`${styles.stakeBtn} ${styles.inMobile}`}>
         <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
-          {loading && <Loader width={22} height={22} />}&nbsp;
+          {showLoading && loading && <Loader width={22} height={22} />}&nbsp;
           {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
         </Button>
       </div>
