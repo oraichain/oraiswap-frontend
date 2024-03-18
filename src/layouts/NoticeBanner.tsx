@@ -1,15 +1,25 @@
-import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseBannerIcon } from 'assets/icons/close.svg';
-import { ReactComponent as OrchaiIcon } from 'assets/icons/orchaiIcon.svg';
-import { ReactComponent as INJIcon } from 'assets/icons/inj.svg';
-import { ReactComponent as OraixIcon } from 'assets/icons/oraix_light.svg';
-import { ReactComponent as TimpiIcon } from 'assets/icons/timpiIcon.svg';
-import useTheme from 'hooks/useTheme';
 import { ReactElement, useEffect, useState } from 'react';
+import axios from 'rest/request';
 import styles from './NoticeBanner.module.scss';
 
 const INTERVAL_TIME = 5000;
 
+export type Banner = {
+  attributes: {
+    headline: string;
+    body_message: string;
+    slider_time: number;
+    media: any;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    link?: string;
+    icon?: ReactElement;
+    linkText?: string;
+  };
+  id: number;
+};
 export const NoticeBanner = ({
   openBanner,
   setOpenBanner
@@ -17,20 +27,38 @@ export const NoticeBanner = ({
   openBanner: boolean;
   setOpenBanner: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const [noteIdx, setNoteIdx] = useState(0);
-
-  const note = LIST_NOTICES[noteIdx];
+  const [bannerIdx, setBannersIdx] = useState(0);
+  const [banners, setBanners] = useState<Banner[]>([]);
 
   useEffect(() => {
-    if (LIST_NOTICES.length <= 1) return;
+    const fetchBanners = async () => {
+      try {
+        const BASE_URL = process.env.REACT_APP_STRAPI_BASE_URL || 'https://fresh-harmony-bf37524082.strapiapp.com';
+        const res = await axios.get('api/banners?populate=*', { baseURL: BASE_URL });
+        return res.data.data;
+      } catch (error) {
+        return [];
+      }
+    };
+    fetchBanners().then((banners) => setBanners(banners));
+  }, []);
+
+  useEffect(() => {
+    if (banners.length <= 0) {
+      setOpenBanner(false);
+      return;
+    }
+
+    setOpenBanner(true);
+
+    if (banners.length === 1) return;
 
     const carousel = () => {
-      setNoteIdx((noteIdx) => {
-        if (noteIdx === LIST_NOTICES.length - 1) {
+      setBannersIdx((bannerIdx) => {
+        if (bannerIdx === banners.length - 1) {
           return 0;
         }
-
-        return noteIdx + 1;
+        return bannerIdx + 1;
       });
     };
 
@@ -39,63 +67,33 @@ export const NoticeBanner = ({
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [banners]);
 
-  if (!openBanner) return null;
+  if (!openBanner || !banners[bannerIdx]) return <></>;
+
+  const bannerInfo = banners[bannerIdx].attributes;
 
   return (
-    <>
-      <div className={styles.noticeWrapper}>
-        {/* <div className={styles.noteList}>
-          {LIST_NOTICES.map((note, index) => {
-            return ( */}
-        <div className={`${styles.note} ${!note.title ? styles.onlyText : ''}`}>
-          <div className={styles.icon}>{note.icon}</div>
-          <div className={`${styles.text}`}>
-            {!note.title ? null : <span className={styles.title}>{note.title}</span>}
-            <span>
-              {!note.content ? null : <span>{note.content} &nbsp;</span>}
-              {!note.link ? null : (
-                <a className={styles.link} href={note.link || ''} target={note.target || '_blank'}>
-                  {note.linkText || 'Click here'}
-                </a>
-              )}
-            </span>
-          </div>
-        </div>
-        {/* );
-          })}
-        </div> */}
-        <div className={styles.closeBanner} onClick={() => setOpenBanner(false)}>
-          <CloseBannerIcon />
+    <div className={styles.noticeWrapper}>
+      <div className={`${styles.note} ${bannerInfo.headline ? '' : styles.onlyText}`}>
+        {bannerInfo.media?.data?.attributes?.url && (
+          <img src={bannerInfo.media.data.attributes.url} alt="banner-icon" width="30" height="30" />
+        )}
+        <div className={`${styles.text}`}>
+          {bannerInfo.headline && <span className={styles.title}>{bannerInfo.headline}</span>}
+          <span>
+            {bannerInfo.body_message && <span>{bannerInfo.body_message} &nbsp;</span>}
+            {bannerInfo.link && (
+              <a className={styles.link} rel="noreferrer" href={bannerInfo.link || ''} target="_blank">
+                {bannerInfo.linkText || 'Click here'}
+              </a>
+            )}
+          </span>
         </div>
       </div>
-    </>
+      <div className={styles.closeBanner} onClick={() => setOpenBanner(false)}>
+        <CloseBannerIcon />
+      </div>
+    </div>
   );
 };
-
-export const LIST_NOTICES: {
-  title: string;
-  content: string;
-  icon: ReactElement;
-  link?: string;
-  linkText?: string;
-  target?: string;
-}[] = [
-  {
-    title: 'ORAIX Listing on Uniswap',
-    content: 'ORAIX/ETH is live on Uniswap with $1,000,000 liquidity',
-    icon: <OraixIcon />,
-    link: 'https://app.uniswap.org/swap?inputCurrency=ETH&outputCurrency=0x2d869aE129e308F94Cc47E66eaefb448CEe0d03e&chain=mainnet',
-    linkText: 'Trade now',
-    target: '_blank'
-  },
-  {
-    title: 'Trading INJ/USDC futures',
-    content: 'Trading INJ/USDC futures with more liquidity and low slippage.', //'Trading INJ/USDC futures with more liquidity and low slippage',
-    icon: <INJIcon />,
-    link: 'https://futures.oraidex.io/INJ_USDC',
-    linkText: 'Trade now',
-    target: '_blank'
-  }
-];

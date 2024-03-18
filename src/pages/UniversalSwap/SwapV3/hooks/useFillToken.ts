@@ -51,7 +51,7 @@ export const useFillToken = (setSwapTokens: (denoms: [string, string]) => void) 
     const originalToToken = tokenMap[toDenom];
 
     // TODO: check kwt or milky
-    if ([originalFromToken, originalToToken].find((e) => ['kawaii-islands', 'milky-token'].includes(e.coinGeckoId))) {
+    if ([originalFromToken, originalToToken].find((e) => ['kawaii-islands', 'milky-token'].includes(e?.coinGeckoId))) {
       navigate(pathname);
       return;
     }
