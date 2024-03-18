@@ -13,6 +13,7 @@ import useTheme from 'hooks/useTheme';
 import QRCode from 'qrcode';
 import { useEffect, useState } from 'react';
 import styles from './ModalDownloadOwallet.module.scss';
+import { owalletAndroidDownloadUrl, owalletExtensionDownloadUrl, owalletIosDownloadUrl } from 'pages/DownloadApp';
 
 const ModalDownloadOwallet: React.FC<{
   close: () => void;
@@ -55,10 +56,14 @@ const ModalDownloadOwallet: React.FC<{
         </div>
         <div className={styles.downloadPlatform}>
           <div className={styles.appStore}>
-            {theme === 'light' ? <AppstoreOWalletIcon /> : <AppstoreOWalletDarkIcon />}
-            {theme === 'light' ? <GooglePlayOWalletIcon /> : <GooglePlayOWalletDarkIcon />}
+            <div onClick={() => window.open(owalletIosDownloadUrl)}>
+              {theme === 'light' ? <AppstoreOWalletIcon /> : <AppstoreOWalletDarkIcon />}
+            </div>
+            <div onClick={() => window.open(owalletAndroidDownloadUrl)}>
+              {theme === 'light' ? <GooglePlayOWalletIcon /> : <GooglePlayOWalletDarkIcon />}
+            </div>
           </div>
-          <div className={styles.chromeExt}>
+          <div className={styles.chromeExt} onClick={() => window.open(owalletExtensionDownloadUrl)}>
             {theme === 'light' ? <ChromeExtOWalletIcon /> : <ChromeExtOWalletDarkIcon />}
           </div>
         </div>
