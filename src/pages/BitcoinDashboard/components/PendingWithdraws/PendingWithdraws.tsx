@@ -9,6 +9,9 @@ import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { CheckpointStatus, TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
 import { useGetCheckpointData, useGetCheckpointQueue } from 'pages/BitcoinDashboard/hooks';
+import { isMobile } from '@walletconnect/browser-utils';
+import RenderIf from '../RenderIf/RenderIf';
+import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
 
 type Icons = {
   Light: any;
@@ -28,6 +31,7 @@ const tokens = {
 
 export const PendingWithdraws: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
+  const mobile = isMobile();
   const btcAddress = useConfigReducer('btcAddress');
   const checkpointQueue = useGetCheckpointQueue();
   const buildingCheckpointIndex = checkpointQueue?.index || 0;
@@ -99,11 +103,19 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
     <div className={styles.pending_withdraws}>
       <h2 className={styles.pending_withdraws_title}>Pending Withdraws:</h2>
       <div className={styles.pending_withdraws_list}>
-        {(data?.length || 0) > 0 ? (
+        <RenderIf isTrue={!mobile && (data?.length || 0) > 0}>
           <Table headers={headers} data={data} defaultSorted="address" />
-        ) : (
+        </RenderIf>
+        <RenderIf isTrue={mobile && (data?.length || 0) > 0}>
+          <TransactionsMobile
+            generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
+            symbols={'ORAI/BTC'}
+            transactions={data}
+          />
+        </RenderIf>
+        <RenderIf isTrue={!((data?.length || 0) > 0)}>
           <FallbackEmptyData />
-        )}
+        </RenderIf>
       </div>
     </div>
   );

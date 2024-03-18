@@ -15,6 +15,7 @@ import useTheme from 'hooks/useTheme';
 import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
 import { TransactionInput, TransactionOutput } from './Transactions';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
+import { isMobile } from '@walletconnect/browser-utils';
 
 const Checkpoint: React.FC<{}> = ({}) => {
   const theme = useTheme();
@@ -26,6 +27,7 @@ const Checkpoint: React.FC<{}> = ({}) => {
   const withdrawalFee = useGetWithdrawalFee(btcAddress, checkpointIndex);
   const checkpointData = useGetCheckpointData(checkpointIndex);
   const checkpointFeeInfo = useGetCheckpointFeeInfo();
+  const mobileMode = isMobile();
 
   useEffect(() => {
     (async () => {
