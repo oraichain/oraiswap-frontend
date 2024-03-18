@@ -86,7 +86,7 @@ const InputBalance = ({
         <div className={`${styles.stakeBtn} ${styles.inDesktop}`}>
           <Button type="primary" onClick={() => onSubmit()} disabled={disabled}>
             {loading && <Loader width={22} height={22} />}&nbsp;
-            {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Active cooldown'}
+            {isInsufficient ? 'Insufficient' : type === STAKE_TAB.Stake ? 'Stake' : 'Unstake'}
           </Button>
         </div>
       </div>

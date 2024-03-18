@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import styles from './index.module.scss';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as InfoIcon } from 'assets/icons/toast_info.svg';

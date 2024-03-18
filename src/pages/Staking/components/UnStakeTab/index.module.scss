@@ -47,13 +47,42 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
+
+      @include small-mobile {
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 12px;
+      }
 
       @include theme {
         color: theme-get('neutral-text-text-dropdown');
       }
+
       font-size: 18px;
       font-weight: 600;
       line-height: 100%;
+
+      .btnGroup {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+
+        @include small-mobile {
+          width: 100%;
+        }
+
+        button {
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 100%;
+
+          @include small-mobile {
+            width: 100%;
+          }
+        }
+      }
     }
 
     .list {

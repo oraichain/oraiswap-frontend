@@ -31,6 +31,7 @@ const UnStakeTab = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [loadingWithdraw, setLoadingWithdraw] = useState<boolean>(false);
+  const [loadingRestake, setLoadingRestake] = useState<boolean>(false);
 
   const { refetchStakeInfo } = useGetStakeInfo(ORAIX_TOKEN_INFO.contractAddress);
   const { myStakeRewardInfo, refetchMyStakeRewardInfo } = useGetMyStakeRewardInfo(
@@ -134,9 +135,22 @@ const UnStakeTab = () => {
         {listUnstake?.length <= 0 ? null : (
           <div className={styles.header}>
             <span>Available to withdraw</span>
-            <Button type="primary-sm" onClick={() => handleWithdraw()} disabled={loadingWithdraw || !isEnableWithdraw}>
-              {loadingWithdraw && <Loader width={18} height={18} />}&nbsp; Withdraw All
-            </Button>
+            <div className={styles.btnGroup}>
+              <Button
+                type="secondary-sm"
+                onClick={() => handleWithdraw()}
+                disabled={loadingRestake || listUnstake?.length <= 0}
+              >
+                {loadingWithdraw && <Loader width={18} height={18} />}&nbsp; Cancel Unstaking
+              </Button>
+              <Button
+                type="primary-sm"
+                onClick={() => handleWithdraw()}
+                disabled={loadingWithdraw || !isEnableWithdraw}
+              >
+                {loadingWithdraw && <Loader width={18} height={18} />}&nbsp; Withdraw All
+              </Button>
+            </div>
           </div>
         )}
 
