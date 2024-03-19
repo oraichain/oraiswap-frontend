@@ -4,7 +4,6 @@
 
 .bannerWrapper {
   z-index: 30;
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,7 +11,8 @@
   top: 91px;
   padding: 16px;
   gap: 16px;
-
+  left: 218px;
+  right: 0;
   padding-left: 120px;
   padding-right: 120px;
 
@@ -40,7 +40,8 @@
     .text {
       font-size: 14px;
       font-weight: 500;
-      line-height: 150%; /* 21px */
+      line-height: 150%;
+      /* 21px */
 
       @include theme() {
         color: theme-get('primary-surface-default');
@@ -72,10 +73,12 @@
           }
         }
       }
+
       text-align: center;
       font-size: 16px;
       font-weight: 500;
-      line-height: 150%; /* 24px */
+      line-height: 150%;
+      /* 24px */
 
       cursor: pointer;
 

@@ -20,10 +20,10 @@ import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
 import { PERSIST_VER } from 'store/constants';
-import Instruct from './Instruct';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
+import Sidebar from './Sidebar';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
@@ -205,10 +205,10 @@ const App = () => {
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div>
-        {/* {routes()} */}
-        {!isMobile() && <Instruct />}
-        {/* {!isMobile() && <FutureCompetition />} */}
+        <div className="main">
+          <Sidebar />
+          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+        </div>
       </div>
     </ThemeProvider>
   );
