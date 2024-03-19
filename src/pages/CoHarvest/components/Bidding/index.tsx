@@ -1,31 +1,31 @@
-import {toBinary} from '@cosmjs/cosmwasm-stargate';
-import {BigDecimal, ORAIX_CONTRACT, oraichainTokens, toAmount, toDisplay, tokenMap} from '@oraichain/oraidex-common';
-import {OraiswapRouterQueryClient} from '@oraichain/oraidex-contracts-sdk';
-import {ReactComponent as OraiXIcon} from 'assets/icons/oraix.svg';
-import {ReactComponent as OraiXLightIcon} from 'assets/icons/oraix_light.svg';
-import {ReactComponent as UsdcIcon} from 'assets/icons/usd_coin.svg';
-import {ReactComponent as TooltipIcon} from 'assets/icons/icon_tooltip.svg';
-import {Button} from 'components/Button';
+import { toBinary } from '@cosmjs/cosmwasm-stargate';
+import { BigDecimal, ORAIX_CONTRACT, oraichainTokens, toAmount, toDisplay, tokenMap } from '@oraichain/oraidex-common';
+import { OraiswapRouterQueryClient } from '@oraichain/oraidex-contracts-sdk';
+import { ReactComponent as OraiXIcon } from 'assets/icons/oraix.svg';
+import { ReactComponent as OraiXLightIcon } from 'assets/icons/oraix_light.svg';
+import { ReactComponent as UsdcIcon } from 'assets/icons/usd_coin.svg';
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
+import { Button } from 'components/Button';
 import Loader from 'components/Loader';
-import {TToastType, displayToast} from 'components/Toasts/Toast';
-import {network} from 'config/networks';
-import {getTransactionUrl, handleErrorTransaction} from 'helper';
-import {useCoinGeckoPrices} from 'hooks/useCoingecko';
+import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { network } from 'config/networks';
+import { getTransactionUrl, handleErrorTransaction } from 'helper';
+import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
-import {getUsd} from 'libs/utils';
-import {INIT_AMOUNT_SIMULATE, TF_PRICE_CHANGE, TIMER} from 'pages/CoHarvest/constants';
-import {useDebounce} from 'pages/CoHarvest/hooks/useDebounce';
+import { getUsd } from 'libs/utils';
+import { INIT_AMOUNT_SIMULATE, TF_PRICE_CHANGE, TIMER } from 'pages/CoHarvest/constants';
+import { useDebounce } from 'pages/CoHarvest/hooks/useDebounce';
 import {
     useGetAllBidPoolInRound,
     useGetBidding,
     useGetHistoryBid,
     useGetPotentialReturn
 } from 'pages/CoHarvest/hooks/useGetBidRound';
-import {formatDisplayUsdt, numberWithCommas} from 'pages/Pools/helpers';
-import {useSimulate} from 'pages/UniversalSwap/SwapV3/hooks';
-import {memo, useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {RootState} from 'store/configure';
+import { formatDisplayUsdt, numberWithCommas } from 'pages/Pools/helpers';
+import { useSimulate } from 'pages/UniversalSwap/SwapV3/hooks';
+import { memo, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store/configure';
 import InputBalance from '../InputBalance';
 import InputRange from '../InputRange';
 import styles from './index.module.scss';
@@ -39,11 +39,11 @@ export type BiddingProps = {
     backToCurrentRound: () => void;
 };
 
-const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, backToCurrentRound}: BiddingProps) => {
+const Bidding = ({ openExplainModal, isEnd, round, isStarted, isCurrentRound, backToCurrentRound }: BiddingProps) => {
     const [range, setRange] = useState(1);
     const [amount, setAmount] = useState();
     const amounts = useSelector((state: RootState) => state.token.amounts);
-    const {data: prices} = useCoinGeckoPrices();
+    const { data: prices } = useCoinGeckoPrices();
     const balance = amounts['oraix'];
     const ORAIX_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'oraidex');
     const USDC_TOKEN_INFO = oraichainTokens.find((e) => e.coinGeckoId === 'usd-coin');
@@ -58,10 +58,10 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
     const [loading, setLoading] = useState(false);
     const [theme] = useConfigReducer('theme');
 
-    const {refetchAllBidPoolRound} = useGetAllBidPoolInRound(round);
-    const {refetchHistoryBidPool} = useGetHistoryBid(round);
-    const {refetchBiddingInfo} = useGetBidding(round);
-    const {simulateData: averageRatio} = useSimulate(
+    const { refetchAllBidPoolRound } = useGetAllBidPoolInRound(round);
+    const { refetchHistoryBidPool } = useGetHistoryBid(round);
+    const { refetchBiddingInfo } = useGetBidding(round);
+    const { simulateData: averageRatio } = useSimulate(
         'simulate-average-data-co-harvest',
         ORAIX_TOKEN_INFO,
         USDC_TOKEN_INFO,
@@ -71,7 +71,7 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
         INIT_AMOUNT_SIMULATE
     );
 
-    const {potentialReturn, refetchPotentialReturn} = useGetPotentialReturn({
+    const { potentialReturn, refetchPotentialReturn } = useGetPotentialReturn({
         bidAmount: toAmount(amount).toString(),
         exchangeRate: new BigDecimal(averageRatio?.displayAmount || 0).div(INIT_AMOUNT_SIMULATE).toString(),
         round: round,
@@ -116,17 +116,17 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
             <div className={styles.title}>
                 <span>ROUND #{round}</span>
                 <div className={styles.priceOraix}>
-                    <div>{theme === 'light' ? <OraiXLightIcon/> : <OraiXIcon/>}</div>
+                    <div>{theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}</div>
                     <span className={styles.price}>{formatDisplayUsdt(coingeckoOraixPrice)}</span>
                 </div>
             </div>
             <div className={styles.content}>
-                <InputBalance balance={balance} amount={amount} onChangeAmount={setAmount}/>
+                <InputBalance balance={balance} amount={amount} onChangeAmount={setAmount} />
                 <div className={styles.interest}>
                     <div className={styles.interestTitle}>
                         Select Pool <span className={styles.note}>(Bonus)</span>
                     </div>
-                    <InputRange className={styles.range} value={range} onChange={(value) => setRange(+value)}/>
+                    <InputRange className={styles.range} value={range} onChange={(value) => setRange(+value)} />
                     <div className={styles.explain}>
                         Selecting this pool also means you will get a {range}% bonus on your rewards if your bid wins.
                     </div>
@@ -149,14 +149,14 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
                         <div className={styles.balance}>
                             <div>Rewards with Bonus</div>
                             <div className={styles.priceValue}>
-                                <UsdcIcon/>
+                                <UsdcIcon />
                                 <span>{numberWithCommas(toDisplay(estimateReceive))} USDC</span>
                             </div>
                         </div>
                         <div className={styles.balance}>
                             <div>Refund</div>
                             <div className={styles.priceValue}>
-                                {theme === 'light' ? <OraiXLightIcon/> : <OraiXIcon/>}
+                                {theme === 'light' ? <OraiXLightIcon /> : <OraiXIcon />}
                                 <span>{numberWithCommas(toDisplay(estimateResidueBid))} ORAIX</span>
                             </div>
                         </div>
@@ -164,7 +164,7 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
                 </div>
                 <div className={styles.calcExplain}>
                     <div>
-                        <TooltipIcon onClick={openExplainModal} width={20} height={20}/>
+                        <TooltipIcon onClick={openExplainModal} width={20} height={20} />
                     </div>
                     <span onClick={openExplainModal}>How are my returns calculated?</span>
                 </div>
@@ -203,7 +203,7 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
                                 // setRange(1);
                             }
                         } catch (error) {
-                            console.log({error});
+                            console.log({ error });
                             handleErrorTransaction(error, {
                                 tokenName: 'ORAIX',
                                 chainName: network.chainId
@@ -215,7 +215,7 @@ const Bidding = ({openExplainModal, isEnd, round, isStarted, isCurrentRound, bac
                     icon={null}
                     disabled={!isStarted || isEnd || loading || !amount || insufficientFund} // || !Number(estimateReceive)
                 >
-                    {loading && <Loader width={22} height={22}/>}&nbsp;
+                    {loading && <Loader width={22} height={22} />}&nbsp;
                     {insufficientFund ? 'Insufficient Funds' : 'Place a bid'}
                 </Button>
             </div>

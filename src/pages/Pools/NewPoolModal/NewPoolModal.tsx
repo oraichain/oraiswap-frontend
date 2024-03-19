@@ -4,7 +4,7 @@ import cn from 'classnames/bind';
 import Modal from 'components/Modal';
 import Pie from 'components/Pie';
 import TokenBalance from 'components/TokenBalance';
-import { TokenItemType, PAIRS } from '@oraichain/oraidex-common';
+import { TokenItemType } from '@oraichain/oraidex-common';
 import { getPoolTokens } from 'config/pools';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { toDisplay } from '@oraichain/oraidex-common';
