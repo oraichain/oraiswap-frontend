@@ -257,9 +257,6 @@ const Balance: React.FC<BalanceProps> = () => {
     const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
-
-    // const amountLasted = subNumber(amount, totalFee);
-
     const dataRequest = {
       memo: '',
       fee: {
@@ -293,7 +290,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       // @ts-ignore-check
       const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
-      console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
+
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
