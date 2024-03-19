@@ -81,11 +81,11 @@ export const MyWallet: React.FC<{
     return (
       <div className={styles.addressByNetworkItem}>
         {cosmosNetworksWithIcon.map((network, index) => {
-          const chainAddress = cosmosAddresses[network?.chainId];
+          const chainAddress = cosmosAddresses && cosmosAddresses[network.chainId];
           let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
           if (!NetworkIcon) NetworkIcon = DefaultIcon;
 
-          return !cosmosAddresses[network.chainId] ? null : (
+          return !chainAddress ? null : (
             <div className={styles.addressByChainInNetwork} key={network.chainId}>
               <div className={styles.left}>
                 <div className={styles.icon}>
