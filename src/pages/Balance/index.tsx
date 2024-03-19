@@ -110,8 +110,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
-  const [open, setOpen] = useState<boolean>(true);
-  const [confirmRecovery, setConfirmRecovery] = useState<boolean>(false);
+
   const ref = useRef(null);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
@@ -172,8 +171,6 @@ const Balance: React.FC<BalanceProps> = () => {
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
       if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
-        setOpen(true)
-        if(confirmRecovery){
           const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
           const signDoc = {
             account_number: accountInfo?.account?.account_number,
@@ -203,7 +200,7 @@ const Balance: React.FC<BalanceProps> = () => {
           });
         }
 
-      }
+
     } catch (error) {
       handleErrorTransaction(error);
     }
@@ -369,7 +366,6 @@ const Balance: React.FC<BalanceProps> = () => {
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
     if (isBTCToOraichain) {
       await handleRecoveryAddress();
-
       return handleTransferBTCToOraichain(fromToken, transferAmount);
     }
     return handleTransferOraichainToBTC(fromToken, transferAmount);
@@ -672,29 +668,7 @@ const Balance: React.FC<BalanceProps> = () => {
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
         />
-        <ModalConfirm
-            loading={false}
-            open={open}
-            onOpen={() => setOpen(false)}
-            onClose={() => {
-              setOpen(false)
-            }}
-            onConfirm={() => {setConfirmRecovery(true)}}
-            content={
-              <div >
 
-                <div>You currently don't have a recovery address set up. Would you like to set one now?
-                  </div>
-                <p style={{
-                  color:"red",
-                  fontSize:14
-                }}>Note: For Ledger users, please switch on "Cosmos App"to approve this transaction. </p>
-              </div>
-            }
-            Icon={BitcoinIcon}
-            title="Set a Recovery Address"
-            // showIcon={false}
-        />
       </div>
     </Content>
   );
