@@ -11,6 +11,7 @@ import { checkTimeIsMillisecond } from './helpers';
 import { useGetBidding, useGetRound } from './hooks/useGetBidRound';
 import styles from './index.module.scss';
 import { useRoundRoute } from './hooks/useQueryRoute';
+import Content from 'layouts/Content';
 
 const CoHarvest = () => {
   const mobileMode = isMobile();
@@ -53,77 +54,79 @@ const CoHarvest = () => {
   const { handleUpdateRoundURL } = useRoundRoute(currentActiveRound, setSelectedRound);
 
   return (
-    <div className={styles.pageWrapper}>
+    <Content nonBackground>
       <BannerHistory openBanner={openBanner} setOpenBanner={setOpenBanner} />
-      <div className={`${styles.container} ${openBanner ? styles.withBanner : ''}`}>
-        <ExplainReturnModal open={isOpen} onClose={() => setIsOpen(false)} />
+      <div className={styles.pageWrapper}>
+        <div className={`${styles.container} ${openBanner ? styles.withBanner : ''}`}>
+          <ExplainReturnModal open={isOpen} onClose={() => setIsOpen(false)} />
 
-        {!mobileMode ? (
-          <div className={styles.auction}>
-            <div className={styles.top}>
-              <div className={styles.bid}>
-                <Bidding
-                  openExplainModal={() => setIsOpen(true)}
-                  round={selectedRound}
-                  isEnd={isEnd}
-                  isStarted={isStarted}
-                  isCurrentRound={isCurrentRound}
-                  backToCurrentRound={() => {
-                    // setSelectedRound(currentActiveRound)
-                    handleUpdateRoundURL(currentActiveRound);
-                  }}
-                />
+          {!mobileMode ? (
+            <div className={styles.auction}>
+              <div className={styles.top}>
+                <div className={styles.bid}>
+                  <Bidding
+                    openExplainModal={() => setIsOpen(true)}
+                    round={selectedRound}
+                    isEnd={isEnd}
+                    isStarted={isStarted}
+                    isCurrentRound={isCurrentRound}
+                    backToCurrentRound={() => {
+                      // setSelectedRound(currentActiveRound)
+                      handleUpdateRoundURL(currentActiveRound);
+                    }}
+                  />
+                </div>
+                <div className={styles.info}>
+                  <HarvestInfo
+                    openExplainModal={() => setIsOpen(true)}
+                    poolValue={poolValue}
+                    bidInfo={biddingInfo.bid_info}
+                    onEnd={onEnd}
+                    onStart={onStart}
+                    isCurrentRound={isCurrentRound}
+                  />
+                  <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
+                </div>
               </div>
-              <div className={styles.info}>
-                <HarvestInfo
-                  openExplainModal={() => setIsOpen(true)}
-                  poolValue={poolValue}
-                  bidInfo={biddingInfo.bid_info}
-                  onEnd={onEnd}
-                  onStart={onStart}
-                  isCurrentRound={isCurrentRound}
-                />
-                <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
-              </div>
+              <BiddingHistory
+                handleUpdateRoundURL={handleUpdateRoundURL}
+                round={currentActiveRound}
+                filterRound={selectedRound}
+                setFilterRound={setSelectedRound}
+              />
             </div>
-            <BiddingHistory
-              handleUpdateRoundURL={handleUpdateRoundURL}
-              round={currentActiveRound}
-              filterRound={selectedRound}
-              setFilterRound={setSelectedRound}
-            />
-          </div>
-        ) : (
-          <div className={styles.auction}>
-            <HarvestInfo
-              openExplainModal={() => setIsOpen(true)}
-              poolValue={poolValue}
-              bidInfo={biddingInfo.bid_info}
-              onEnd={onEnd}
-              onStart={onStart}
-              isCurrentRound={isCurrentRound}
-            />
-            <Bidding
-              openExplainModal={() => setIsOpen(true)}
-              round={selectedRound}
-              isEnd={isEnd}
-              isStarted={isStarted}
-              isCurrentRound={isCurrentRound}
-              backToCurrentRound={() => {
-                handleUpdateRoundURL(currentActiveRound);
-              }}
-            />
-            <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
-            <BiddingHistory
-              handleUpdateRoundURL={handleUpdateRoundURL}
-              round={currentActiveRound}
-              filterRound={selectedRound}
-              setFilterRound={setSelectedRound}
-            />
-          </div>
-        )}
+          ) : (
+            <div className={styles.auction}>
+              <HarvestInfo
+                openExplainModal={() => setIsOpen(true)}
+                poolValue={poolValue}
+                bidInfo={biddingInfo.bid_info}
+                onEnd={onEnd}
+                onStart={onStart}
+                isCurrentRound={isCurrentRound}
+              />
+              <Bidding
+                openExplainModal={() => setIsOpen(true)}
+                round={selectedRound}
+                isEnd={isEnd}
+                isStarted={isStarted}
+                isCurrentRound={isCurrentRound}
+                backToCurrentRound={() => {
+                  handleUpdateRoundURL(currentActiveRound);
+                }}
+              />
+              <BiddingChart bidInfo={biddingInfo.bid_info} round={selectedRound} />
+              <BiddingHistory
+                handleUpdateRoundURL={handleUpdateRoundURL}
+                round={currentActiveRound}
+                filterRound={selectedRound}
+                setFilterRound={setSelectedRound}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Content>
   );
 };
 

@@ -37,7 +37,7 @@ const tokens = {
 export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
   const mobile = isMobile();
-  const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
+  const [oraichainAddress] = useConfigReducer('address');
   const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
   const depositFee = useGetDepositFee();
   const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
@@ -81,6 +81,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     if(!depositPendingUpdate) return;
     const depositPendingPopout =  handlePopOutPending(depositPendingUpdate);
     if(!depositPendingPopout) return;
+    console.log(allPendingDeposits,"allPendingDeposits")
     setAllPendingDeposits({
       ...allPendingDeposits,
       [oraichainAddress]: depositPendingPopout
@@ -93,7 +94,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     //  * checkpoint index.
     //  */
 
-    let pendingDeposits = [...(allPendingDeposits?.[oraichainAddress] ?? [])]; // Fix read-only
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? []; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
         let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
@@ -194,13 +195,13 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
       <div className={styles.pending_deposits_list}>
         <RenderIf isTrue={!mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
-          <Table headers={headers} data={[...allPendingDeposits[oraichainAddress]]} defaultSorted="confirmations" />
+          <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />
         </RenderIf>
         <RenderIf isTrue={mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
           <TransactionsMobile
             generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
             symbols={'BTC/ORAI'}
-            transactions={allPendingDeposits[oraichainAddress]}
+            transactions={allPendingDeposits?.[oraichainAddress]}
           />
         </RenderIf>
         <RenderIf isTrue={!(allPendingDeposits?.[oraichainAddress]?.length > 0)}>

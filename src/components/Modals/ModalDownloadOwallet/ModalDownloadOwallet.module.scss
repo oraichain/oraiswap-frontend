@@ -1,0 +1,73 @@
+.chooseWalletModalContainer {
+  z-index: 1021;
+
+  .chooseWalletModalWrapper {
+    width: 470px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #232521;
+    border-radius: 12px;
+    padding: 24px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      margin-bottom: 24px;
+
+      .closeIcon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    .downloadInfo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+      .qrCode {
+        margin: 15px 0;
+      }
+    }
+
+    .downloadPlatform {
+      margin-top: 30px;
+
+      svg {
+        cursor: pointer;
+      }
+
+      .appStore {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .chromeExt {
+        display: flex;
+        justify-content: center;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+.dark {
+  .chooseWalletModalWrapper {
+    color: #f7f7f7;
+    background: #121511;
+
+    .downloadPlatform {}
+  }
+}

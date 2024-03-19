@@ -2,8 +2,6 @@
 @import 'src/styles/themes';
 
 .wrapper {
-  padding: 32px;
-
   @include mobile {
     padding: 0;
     margin-top: 85px;
