@@ -84,8 +84,6 @@ const UnStakeTab = () => {
   };
 
   const handleWithdraw = async () => {
-    // if (!amount) return displayToast(TToastType.TX_FAILED, { message: 'Stake Amount is required' });
-
     setLoadingWithdraw(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
@@ -111,6 +109,34 @@ const UnStakeTab = () => {
       handleErrorTransaction(error);
     } finally {
       setLoadingWithdraw(false);
+    }
+  };
+
+  const handleRestake = async () => {
+    setLoadingRestake(true);
+    displayToast(TToastType.TX_BROADCASTING);
+    try {
+      const cw20StakingClient = new Cw20StakingClient(window.client, address, network.staking_oraix);
+
+      const result = await cw20StakingClient.restake({
+        stakingToken: ORAIX_TOKEN_INFO.contractAddress
+      });
+
+      if (result) {
+        displayToast(TToastType.TX_SUCCESSFUL, {
+          customLink: `${network.explorer}/txs/${result.transactionHash}`
+        });
+
+        refetchStakeInfo();
+        refetchMyStakeRewardInfo();
+        refetchLockInfo();
+        loadTokenAmounts({ oraiAddress: address });
+      }
+    } catch (error) {
+      console.log('error in restake: ', error);
+      handleErrorTransaction(error);
+    } finally {
+      setLoadingRestake(false);
     }
   };
 
@@ -140,10 +166,10 @@ const UnStakeTab = () => {
             <div className={styles.btnGroup}>
               <Button
                 type="secondary-sm"
-                onClick={() => handleWithdraw()}
+                onClick={() => handleRestake()}
                 disabled={loadingRestake || listUnstake?.length <= 0}
               >
-                {loadingWithdraw && <Loader width={18} height={18} />}&nbsp; Cancel Unstaking
+                {loadingRestake && <Loader width={18} height={18} />}&nbsp; Cancel Unstaking
               </Button>
               <Button
                 type="primary-sm"
