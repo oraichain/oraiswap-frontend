@@ -110,7 +110,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(true);
   const [confirmRecovery, setConfirmRecovery] = useState<boolean>(false);
   const ref = useRef(null);
   //@ts-ignore
@@ -172,36 +172,37 @@ const Balance: React.FC<BalanceProps> = () => {
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
       if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
-        if(!confirmRecovery){
-          //TODO:
-        }
-        const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
-        const signDoc = {
-          account_number: accountInfo?.account?.account_number,
-          chain_id: OraiBtcSubnetChain.chainId,
-          fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
-          memo: '',
-          msgs: [
-            {
-              type: 'nomic/MsgSetRecoveryAddress',
-              value: {
-                recovery_address: btcAddress
+        setOpen(true)
+        if(confirmRecovery){
+          const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
+          const signDoc = {
+            account_number: accountInfo?.account?.account_number,
+            chain_id: OraiBtcSubnetChain.chainId,
+            fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
+            memo: '',
+            msgs: [
+              {
+                type: 'nomic/MsgSetRecoveryAddress',
+                value: {
+                  recovery_address: btcAddress
+                }
               }
-            }
-          ],
-          sequence: accountInfo?.account?.sequence
-        };
+            ],
+            sequence: accountInfo?.account?.sequence
+          };
 
-        const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
-        const tx = makeStdTx(signDoc, signature.signature);
-        const tmClient = await Tendermint37Client.connect(config.rpcUrl);
+          const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
+          const tx = makeStdTx(signDoc, signature.signature);
+          const tmClient = await Tendermint37Client.connect(config.rpcUrl);
 
-        const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-        await getAddress();
-        //@ts-ignore
-        displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-          message: result?.log
-        });
+          const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
+          await getAddress();
+          //@ts-ignore
+          displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
+            message: result?.log
+          });
+        }
+
       }
     } catch (error) {
       handleErrorTransaction(error);
@@ -680,17 +681,18 @@ const Balance: React.FC<BalanceProps> = () => {
             }}
             onConfirm={() => {setConfirmRecovery(true)}}
             content={
-              <div className={styles.contentConfirm}>
-                {/*<div className={styles.desc}>*/}
-                {/*  Unstaking <span className={styles.noteHighlight}>would stop the reward</span> and lock the token for a*/}
-                {/*  <span className={styles.noteHighlight}> 30-day unbonding period</span>. You can also choose to cancel the*/}
-                {/*  unstaking process during cooldown.*/}
-                {/*</div>*/}
-                <div>Are you want to set recovery address?</div>
+              <div >
+
+                <div>You currently don't have a recovery address set up. Would you like to set one now?
+                  </div>
+                <p style={{
+                  color:"red",
+                  fontSize:14
+                }}>Note: For Ledger users, please switch on "Cosmos App"to approve this transaction. </p>
               </div>
             }
             Icon={BitcoinIcon}
-            title="Set Recovery Address"
+            title="Set a Recovery Address"
             // showIcon={false}
         />
       </div>
