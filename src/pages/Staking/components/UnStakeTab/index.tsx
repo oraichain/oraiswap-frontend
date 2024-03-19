@@ -22,7 +22,7 @@ import { useGetLockInfo, useGetMyStakeRewardInfo, useGetStakeInfo } from 'pages/
 import { useState } from 'react';
 import InputBalance from '../InputBalance';
 import styles from './index.module.scss';
-import ModalConfirm from '../ConfirmModal';
+import ModalConfirm from '../../../../components/ConfirmModal';
 
 const UnStakeTab = () => {
   const { data: prices } = useCoinGeckoPrices();
@@ -234,7 +234,7 @@ const UnStakeTab = () => {
           <div className={styles.contentConfirm}>
             <div className={styles.desc}>
               Unstaking <span className={styles.noteHighlight}>would stop the reward</span> and lock the token for a
-              <span className={styles.noteHighlight}>30-day unbonding period</span>. You can also choose to cancel the
+              <span className={styles.noteHighlight}> 30-day unbonding period</span>. You can also choose to cancel the
               unstaking process during cooldown.
             </div>
             <div>Are you sure you want to unstake?</div>
