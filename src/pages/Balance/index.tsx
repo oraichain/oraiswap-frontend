@@ -83,7 +83,8 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-
+import ModalConfirm from "../../components/ConfirmModal";
+import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -109,7 +110,8 @@ const Balance: React.FC<BalanceProps> = () => {
   const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
-
+  const [open, setOpen] = useState<boolean>(false);
+  const [confirmRecovery, setConfirmRecovery] = useState<boolean>(false);
   const ref = useRef(null);
   //@ts-ignore
   const isOwallet = window.owallet?.isOwallet;
@@ -170,6 +172,9 @@ const Balance: React.FC<BalanceProps> = () => {
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
       if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
+        if(!confirmRecovery){
+          //TODO:
+        }
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
           account_number: accountInfo?.account?.account_number,
@@ -363,6 +368,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
     if (isBTCToOraichain) {
       await handleRecoveryAddress();
+
       return handleTransferBTCToOraichain(fromToken, transferAmount);
     }
     return handleTransferOraichainToBTC(fromToken, transferAmount);
@@ -664,6 +670,28 @@ const Balance: React.FC<BalanceProps> = () => {
           handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
+        />
+        <ModalConfirm
+            loading={false}
+            open={open}
+            onOpen={() => setOpen(false)}
+            onClose={() => {
+              setOpen(false)
+            }}
+            onConfirm={() => {setConfirmRecovery(true)}}
+            content={
+              <div className={styles.contentConfirm}>
+                {/*<div className={styles.desc}>*/}
+                {/*  Unstaking <span className={styles.noteHighlight}>would stop the reward</span> and lock the token for a*/}
+                {/*  <span className={styles.noteHighlight}> 30-day unbonding period</span>. You can also choose to cancel the*/}
+                {/*  unstaking process during cooldown.*/}
+                {/*</div>*/}
+                <div>Are you want to set recovery address?</div>
+              </div>
+            }
+            Icon={BitcoinIcon}
+            title="Set Recovery Address"
+            // showIcon={false}
         />
       </div>
     </Content>
