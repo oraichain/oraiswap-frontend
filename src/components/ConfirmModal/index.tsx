@@ -28,7 +28,7 @@ const ModalConfirm = ({
   open,
   onClose,
   onOpen,
-  confirmBtnText = 'Confirmation',
+  confirmBtnText = 'Confirm',
   content,
   title,
   width,
