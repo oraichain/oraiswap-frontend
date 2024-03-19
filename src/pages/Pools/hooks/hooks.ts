@@ -77,7 +77,8 @@ export const useFetchLpPoolsV3 = (lpAddresses: string[]) => {
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
   try {
     const res = await axios.get('/v1/pools/', {});
-    return res.data;
+    // return res.data;
+    return res.data ? res.data.filter((pool) => pool.symbols !== 'ORAI/BTC') : [];
   } catch (e) {
     console.error('getPools', e);
     return [];
