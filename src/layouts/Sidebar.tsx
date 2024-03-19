@@ -1,5 +1,6 @@
 import { ReactComponent as BridgeIcon } from 'assets/icons/ic_bridge.svg';
 import { ReactComponent as CohavestIcon } from 'assets/icons/ic_cohavest.svg';
+import { ReactComponent as BtcDashboardIcon } from 'assets/icons/ic_btc_dashboard.svg';
 import { ReactComponent as PoolIcon } from 'assets/icons/ic_pools.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_staking.svg';
 import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
@@ -72,7 +73,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
-              {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <CohavestIcon />)}
+              {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
           </div>
         </div>
 
