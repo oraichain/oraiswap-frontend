@@ -15,14 +15,14 @@ import styles from './Sidebar.module.scss';
 
 const Sidebar: React.FC<{}> = React.memo((props) => {
   const location = useLocation();
-  const [link, setLink] = useState('/');
+  const [link, setLink] = useState('');
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [isOpenQrCodeOwallet, setIsOpenQrCodeOwallet] = useState(false);
 
   useEffect(() => {
     setLink(location.pathname);
-  }, []);
+  }, [location]);
 
   const renderLink = (to: string, title: string, onClick: any, icon: ReactElement, externalLink = false) => {
     if (externalLink)
@@ -48,7 +48,11 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
           setOpen(!open);
           onClick(to);
         }}
-        className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme])}
+        className={classNames(
+          styles.menu_item,
+          { [styles.active]: link.includes(to) || (link === '/' && to === '/universalswap') },
+          styles[theme]
+        )}
       >
         {icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
