@@ -122,6 +122,12 @@ export function formatDateChart(date: Date | number) {
 
 export function formatTime(date: Date | number) {
   const obj = timeFormatter.formatToJson(date);
+
+  // check case 24h
+  if (obj.hour === '24') {
+    obj.hour = '00';
+  }
+
   return `${obj.hour}:${obj.minute}`; // ${obj.dayPeriod} //:${obj.second}
 }
 
