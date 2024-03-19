@@ -168,9 +168,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const handleRecoveryAddress = async () => {
     try {
+      const btcAddr = await window.Bitcoin.getAddress();
+      if (!btcAddr) throw Error('Not found your bitcoin address!');
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
-      if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
+      if (btcAddr && addressRecovery !== btcAddr && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
           account_number: accountInfo?.account?.account_number,
@@ -181,7 +183,7 @@ const Balance: React.FC<BalanceProps> = () => {
             {
               type: 'nomic/MsgSetRecoveryAddress',
               value: {
-                recovery_address: btcAddress
+                recovery_address: btcAddr
               }
             }
           ],
