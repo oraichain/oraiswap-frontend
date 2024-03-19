@@ -20,7 +20,6 @@ import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
 import { PERSIST_VER } from 'store/constants';
-import Instruct from './Instruct';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
@@ -210,7 +209,6 @@ const App = () => {
           <Sidebar />
           <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
         </div>
-        {!isMobile() && <Instruct />}
       </div>
     </ThemeProvider>
   );
