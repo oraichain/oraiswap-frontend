@@ -27,6 +27,7 @@ import {
   switchWalletCosmos,
   getListAddressCosmos,
   switchWalletTron,
+  bitcoinNetworks,
   getListAddressCosmosByLeapSnap,
   getAddressBySnap,
   checkSnapExist
@@ -35,6 +36,8 @@ import { network } from 'config/networks';
 import MetamaskImage from 'assets/images/metamask.png';
 import LeapImage from 'assets/images/leap-cosmos-logo.svg';
 import OwalletImage from 'assets/images/owallet-logo.png';
+import BitcoinWallet from 'assets/images/image-btc.png';
+
 import KeplrImage from 'assets/images/keplr.png';
 import TronWalletImage from 'assets/images/tronlink.jpg';
 import DisconnectModal from './Disconnect';
@@ -54,7 +57,9 @@ export enum WALLET_TYPES {
   KEPLR = 'KEPLR',
   OWALLET = 'OWALLET',
   TRON = 'TRON',
+  BITCOIN = 'BITCOIN',
   PHANTOM = 'PHANTOM',
+  SNAP = 'SNAP',
   LEDGER = 'LEDGER',
   GOOGLE = 'GOOGLE',
   APPLE = 'APPLE',
@@ -97,6 +102,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddress, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const walletType = getStorageKey() as WalletType;
   const [walletTypeStore, setWalletTypeStore] = useConfigReducer('walletTypeStore');
@@ -139,14 +145,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!metamaskAddress || !tronAddress || !oraiAddress) {
+    if (!metamaskAddress || !tronAddress || !oraiAddress || !btcAddress) {
       let arrResetBalance: Wallet[] = [];
       if (!metamaskAddress) arrResetBalance.push('metamask');
       if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
+      if (!btcAddress) arrResetBalance.push('bitcoin');
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   let walletInit = [
     {
@@ -157,7 +164,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       totalUsd: 0,
       isOpen: false,
       isConnect: !!metamaskAddress,
-      networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }]
+      networks: [{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' }]
     },
     OwalletInfo,
     {
@@ -172,6 +179,19 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         item.address = tronAddress;
         return item;
       })
+    },
+    {
+      id: 4,
+      name: 'Bitcoin',
+      code: WALLET_TYPES.BITCOIN,
+      icon: BitcoinWallet,
+      totalUsd: 0,
+      isOpen: false,
+      isConnect: !!btcAddress,
+      networks: bitcoinNetworks.map((item: any) => {
+        item.address = btcAddress;
+        return item;
+      })
     }
   ];
 
@@ -181,9 +201,13 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
         ...OwalletInfo,
         networks: [
           ...OwalletInfo.networks,
-          ...[{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' as any }],
+          ...[{ ...evmChains[0], address: metamaskAddress, chainName: 'Ethereum, BNB Chain' }],
           ...tronNetworks.map((item: any) => {
             item.address = tronAddress;
+            return item;
+          }),
+          ...bitcoinNetworks.map((item: any) => {
+            item.address = btcAddress;
             return item;
           })
         ]
@@ -222,8 +246,23 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       throw new Error('Connect Metamask failed');
     }
   };
+  const connectBitcoin = async () => {
+    try {
+      const btcAddress = await window.Bitcoin.getAddress();
+      if (!btcAddress) {
+        displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Owallet to get address bitcoin!' });
+        throw Error('Please install Owallet to get address bitcoin!');
+      }
 
-  const isConnected = !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
+      setBtcAddress(btcAddress);
+      loadTokenAmounts({ btcAddress });
+    } catch (ex) {
+      console.log('error in connecting metamask: ', ex);
+      throw new Error('Connect Bitcoin failed');
+    }
+  };
+
+  const isConnected = !!btcAddress || !!metamaskAddress || !!tronAddress || !isEmptyObject(cosmosAddress);
 
   useEffect(() => {
     (async () => {
@@ -267,9 +306,10 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       }
       return item;
     });
+    console.log('🚀 ~ file: index.tsx:265 ~ walletData ~ walletData:', walletData);
     setWallets(walletData);
     return () => {};
-  }, [metamaskAddress, cosmosAddress, tronAddress, walletTypeActive]);
+  }, [metamaskAddress, cosmosAddress, tronAddress, btcAddress, walletTypeActive]);
 
   const connectTronLink = async () => {
     try {
@@ -300,6 +340,7 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       await initClient();
 
       const oraiAddr = await window.Keplr.getKeplrAddr();
+      if (!oraiAddr) return;
       loadTokenAmounts({ oraiAddress: oraiAddr });
       setOraiAddress(oraiAddr);
       const { listAddressCosmos } =
@@ -330,7 +371,15 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       console.log(ex);
     }
   };
-
+  const disconnectBitcoin = async () => {
+    try {
+      // window.Bitcoin.disconnect();
+      handleResetBalance(['bitcoin']);
+      setBtcAddress('');
+    } catch (ex) {
+      console.log(ex);
+    }
+  };
   const startMetamask = async () => {
     const isUnlock = await isUnlockMetamask();
     if (!!isUnlock && !!metamaskAddress) {
@@ -362,6 +411,14 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       return;
     }
     await requestMethod(WALLET_TYPES.OWALLET, METHOD_WALLET_TYPES.CONNECT);
+    return;
+  };
+  const startBitcoin = async () => {
+    if (!btcAddress && walletTypeActive === WALLET_TYPES.BITCOIN) {
+      setConnectStatus(CONNECT_STATUS.DONE);
+      return;
+    }
+    await requestMethod(WALLET_TYPES.BITCOIN, METHOD_WALLET_TYPES.CONNECT);
     return;
   };
   const startTron = async () => {
@@ -429,6 +486,16 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           await disconnectKeplr();
         }
         break;
+      case WALLET_TYPES.BITCOIN:
+        if (method === METHOD_WALLET_TYPES.START) {
+          await startBitcoin();
+        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
+          await handleConnectWallet(connectBitcoin);
+        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
+          await disconnectBitcoin();
+        }
+        break;
+
       case WALLET_TYPES.KEPLR:
         if (method === METHOD_WALLET_TYPES.START) {
           await startKeplr();
@@ -447,11 +514,27 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
           await disconnectTronLink();
         }
         break;
+      case WALLET_TYPES.SNAP:
+        connectSnap();
+        break;
       default:
         break;
     }
   };
+  const connectSnap = async () => {
+    try {
+      const result = await window.ethereum.request({
+        method: 'wallet_requestSnaps',
+        params: {
+          'npm:@oraichain/metamask-oraichain-snap-test': {}
+        }
+      });
 
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const toggleShowNetworks = (id: number) => {
     const walletsModified = wallets.map((w) => {
       if (w.id === id) w.isOpen = !w.isOpen;
@@ -470,6 +553,8 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
       walletType === WALLET_TYPES.METAMASK_LEAP_SNAP
     ) {
       return oraiAddress;
+    } else if (walletType === WALLET_TYPES.BITCOIN) {
+      return btcAddress;
     }
   };
   const handleDisconnectWallet = (walletType) => {

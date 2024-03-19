@@ -3,7 +3,8 @@ import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types
 import { CosmosChainId, CosmosWallet, NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { chainInfos } from 'config/chainInfos';
+import { cosmosTokens } from 'config/bridgeTokens';
+import { OraiBTCBridgeNetwork, chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { getAddress, getAddressByEIP191 } from 'helper';
 import { EIP_EIP_STORAGE_KEY_ACC, MetamaskOfflineSigner } from './eip191';
@@ -51,7 +52,8 @@ export default class Keplr extends CosmosWallet {
     const isEnableKeplr = await this.getKeplr();
     if (isEnableKeplr) {
       if (!window.keplr) return;
-      const chainInfo = chainInfos.find((chainInfo) => chainInfo.chainId === chainId);
+      // TODO: hotfix add oraiBTC bridge network
+      const chainInfo = [...chainInfos, OraiBTCBridgeNetwork].find((chainInfo) => chainInfo.chainId === chainId);
 
       // do nothing without chainInfo
       if (!chainInfo) return;

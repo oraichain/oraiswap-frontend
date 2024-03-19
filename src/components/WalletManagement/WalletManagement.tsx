@@ -22,6 +22,7 @@ export const WalletManagement: FC<{}> = () => {
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
   const [tronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const { handleResetBalance } = useResetBalance();
@@ -63,6 +64,9 @@ export const WalletManagement: FC<{}> = () => {
             case 'eip191':
               isActive = isMetamask;
               break;
+            case 'bitcoin':
+              isActive = isCheckOwallet;
+              break;
           }
           return { ...wallet, isActive };
         });
@@ -74,26 +78,35 @@ export const WalletManagement: FC<{}> = () => {
       setWalletProviderWithStatus(updatedWalletProvider);
     }
     updateWalletProvider();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCheckOwallet, isCheckKeplr, isMetamask]);
 
   // load balance every time change address
   useEffect(() => {
-    loadTokenAmounts({ oraiAddress, tronAddress, metamaskAddress });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+    const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress };
+    const filteredAddresses = {};
+    
+    for (const key in addresses) {
+      if (addresses[key]) {
+        filteredAddresses[key] = addresses[key];
+      }
+    }
+    if (Object.keys(filteredAddresses).length > 0) {
+      loadTokenAmounts(filteredAddresses);
+    }
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   // reset balance when disconnect
   useEffect(() => {
-    if (!metamaskAddress || !tronAddress || !oraiAddress) {
+    if (!metamaskAddress || !tronAddress || !oraiAddress || !btcAddress) {
       let arrResetBalance: WalletResetType[] = [];
       if (!metamaskAddress) arrResetBalance.push('metamask');
       if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
+      if (!btcAddress) arrResetBalance.push('bitcoin');
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress]);
+  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
 
   const isAnyWalletConnected = Object.values(walletByNetworks).some((wallet) => wallet !== null);
   useEffect(() => {

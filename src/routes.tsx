@@ -9,6 +9,7 @@ import Pools from 'pages/Pools';
 import PoolDetail from 'pages/Pools/PoolDetail';
 import UniversalSwap from 'pages/UniversalSwap/index';
 import CoHarvest from 'pages/CoHarvest';
+import BitcoinDashboard from 'pages/BitcoinDashboard';
 import StakingPage from 'pages/Staking';
 import DownloadApp from 'pages/DownloadApp';
 
@@ -31,6 +32,7 @@ export default () => (
     <Routes>
       <Route path="/" element={<UniversalSwap />} />
       <Route path="/bridge" element={<Balance />} />
+      <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
       <Route path="/universalswap" element={<UniversalSwap />} />
       <Route path="/pools" element={<Pools />} />
       <Route path="/staking" element={<StakingPage />} />
