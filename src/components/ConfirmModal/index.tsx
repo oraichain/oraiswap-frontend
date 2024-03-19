@@ -78,7 +78,7 @@ const ModalConfirm = ({
               onConfirm();
             }}
           >
-            {loading && <Loader width={22} height={22} />}&nbsp;
+            {showLoading && loading && <Loader width={22} height={22} />}&nbsp;
             {confirmBtnText}
           </Button>
         </div>
