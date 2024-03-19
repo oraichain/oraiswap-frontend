@@ -29,10 +29,34 @@
     font-weight: 400;
     line-height: 150%;
     letter-spacing: 0.1px;
+  }
 
-    .noteHighlight {
-      @include theme {
-        color: theme-get('warning-text-default');
+  .noteHighlight {
+    @include theme {
+      color: theme-get('warning-text-default');
+    }
+  }
+
+  .contentConfirm {
+    @include theme {
+      color: theme-get('neutral-9');
+    }
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+
+    margin-bottom: 16px;
+
+    @include small-mobile {
+      margin-bottom: 0px;
+    }
+
+    .desc {
+      margin-bottom: 16px;
+
+      @include small-mobile {
+        margin-bottom: 8px;
       }
     }
   }
@@ -47,13 +71,44 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
+
+      @include small-mobile {
+        flex-direction: column;
+        align-items: flex-start;
+
+        gap: 12px;
+      }
 
       @include theme {
         color: theme-get('neutral-text-text-dropdown');
       }
+
       font-size: 18px;
       font-weight: 600;
       line-height: 100%;
+
+      .btnGroup {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+
+        @include small-mobile {
+          width: 100%;
+        }
+
+        button {
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 100%;
+
+          @include small-mobile {
+            width: 100%;
+
+            font-size: 12px;
+          }
+        }
+      }
     }
 
     .list {
