@@ -2995,11 +2995,11 @@
   version "1.0.22"
   resolved "https://registry.npmjs.org/@oraichain/oraidex-contracts-build/-/oraidex-contracts-build-1.0.22.tgz"
   integrity sha512-eJniKkXlOghPhgSYeH59szYjT3aWaE4K04HZaTPhi435sm9kaTfESj68pr0AsGepf4YeAcoQ9ZwUMbIeSmZtYw==
-
+  
 "@oraichain/oraidex-contracts-sdk@^1.0.24", "@oraichain/oraidex-contracts-sdk@^1.0.26", "@oraichain/oraidex-contracts-sdk@^1.0.30":
-  version "1.0.41"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.41.tgz#70e88603d8db51b7116d0ed9e9e35700e594aa58"
-  integrity sha512-FHzAwyds/jMZ6Z6cYyLlLqOdw3RjnTYU3VGZwSzAwCteKFhiwWOlolDo7UWKs3MjSe4+kfW75m+f5S1LtaqDXA==
+  version "1.0.42"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-contracts-sdk/-/oraidex-contracts-sdk-1.0.42.tgz#600910cd841ed14436e5ab49d7ba85e3712d81fd"
+  integrity sha512-fxfzYJWYFl4eLFwnENTm1CeL838cTU4MriLA8AwzFGodQyoxaxs4f/uqFbS/mDjWct4yVJm9rqi0T3UOIkTW4g==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
   version "1.0.57"
