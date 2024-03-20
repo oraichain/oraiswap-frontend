@@ -83,7 +83,8 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-
+import ModalConfirm from '../../components/ConfirmModal';
+import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -167,9 +168,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const handleRecoveryAddress = async () => {
     try {
+      const btcAddr = await window.Bitcoin.getAddress();
+      if (!btcAddr) throw Error('Not found your bitcoin address!');
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
-      if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
+      if (btcAddr && addressRecovery !== btcAddr && oraiBtcAddress) {
         const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
         const signDoc = {
           account_number: accountInfo?.account?.account_number,
@@ -180,7 +183,7 @@ const Balance: React.FC<BalanceProps> = () => {
             {
               type: 'nomic/MsgSetRecoveryAddress',
               value: {
-                recovery_address: btcAddress
+                recovery_address: btcAddr
               }
             }
           ],
@@ -238,15 +241,15 @@ const Balance: React.FC<BalanceProps> = () => {
     processTxResult(fromToken.rpc, result);
   };
 
-  const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number) => {
-    const utxos = await getUtxos(btcAddress, fromToken.rpc);
+  const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
+    const utxos = await getUtxos(btcAddr, fromToken.rpc);
     const feeRate = await getFeeRate({
       url: from.rpc
     });
 
     const utxosMapped = mapUtxos({
       utxos,
-      address: btcAddress
+      address: btcAddr
     });
     const totalFee = calculatorTotalFeeBtc({
       utxos: utxosMapped.utxos,
@@ -257,9 +260,6 @@ const Balance: React.FC<BalanceProps> = () => {
     const { bitcoinAddress: address } = nomic.depositAddress;
     if (!address) throw Error('Not found address OraiBtc');
     const amount = new BitcoinUnit(transferAmount, 'BTC').to('satoshi').getValue();
-
-    const amountLasted = subNumber(amount, totalFee);
-
     const dataRequest = {
       memo: '',
       fee: {
@@ -271,11 +271,11 @@ const Balance: React.FC<BalanceProps> = () => {
           }
         ]
       },
-      address: btcAddress,
+      address: btcAddr,
       msgs: {
         address: address,
-        changeAddress: btcAddress,
-        amount: amountLasted,
+        changeAddress: btcAddr,
+        amount: amount,
         message: '',
         totalFee: totalFee,
         selectedCrypto: fromToken.chainId,
@@ -285,22 +285,21 @@ const Balance: React.FC<BalanceProps> = () => {
       confirmedBalance: utxosMapped.balance,
       utxos: utxosMapped.utxos,
       blacklistedUtxos: [],
-      amount: amountLasted,
+      amount: amount,
       feeRate: feeRate
     };
-    console.log('🚀 ~ handleTransferBTCToOraichain ~ dataRequest:', dataRequest);
 
     try {
       // @ts-ignore-check
       const rs = await window.Bitcoin.signAndBroadCast(fromToken.chainId, dataRequest);
-      console.log('🚀 ~ handleTransferBTCToOraichain ~ rs:', rs);
+
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
         setTimeout(async () => {
-          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr });
         }, 5000);
         return;
       }
@@ -315,7 +314,7 @@ const Balance: React.FC<BalanceProps> = () => {
     }
   };
 
-  const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number) => {
+  const handleTransferOraichainToBTC = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
     const { bitcoinAddress: address } = nomic.depositAddress;
 
     if (!address) throw Error('Not found Orai BTC Address');
@@ -325,10 +324,7 @@ const Balance: React.FC<BalanceProps> = () => {
     const DEFAULT_TIMEOUT = 60 * 60;
     const amountInput = BigInt(Decimal.fromUserInput(toAmount(transferAmount, 6).toString(), 8).atomics.toString());
     const amount = Decimal.fromAtomics(amountInput.toString(), 8).toString();
-    const btcAddr = btcAddress ?? (await window.Bitcoin.getAddress());
-    if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (!destinationAddress) throw Error('Not found your oraibtc-subnet address!');
-    setBtcAddress(btcAddr);
     try {
       const result = await window.client.execute(
         oraiAddress,
@@ -364,11 +360,13 @@ const Balance: React.FC<BalanceProps> = () => {
   };
 
   const handleTransferBTC = async ({ isBTCToOraichain, fromToken, transferAmount }) => {
+    const btcAddr = await window.Bitcoin.getAddress();
+    if (!btcAddr) throw Error('Not found your bitcoin address!');
     if (isBTCToOraichain) {
       await handleRecoveryAddress();
-      return handleTransferBTCToOraichain(fromToken, transferAmount);
+      return handleTransferBTCToOraichain(fromToken, transferAmount, btcAddr);
     }
-    return handleTransferOraichainToBTC(fromToken, transferAmount);
+    return handleTransferOraichainToBTC(fromToken, transferAmount, btcAddr);
   };
 
   const onClickTransfer = async (
@@ -662,6 +660,7 @@ const Balance: React.FC<BalanceProps> = () => {
           }}
         />
         <DepositBtcModal
+          prices={prices}
           isOpen={isDepositBtcModal}
           addressRecovery={addressRecovery}
           handleRecoveryAddress={handleRecoveryAddress}

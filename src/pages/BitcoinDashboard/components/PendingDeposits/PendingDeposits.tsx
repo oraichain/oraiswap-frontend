@@ -9,7 +9,14 @@ import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { useGetPendingDeposits } from '../../hooks/relayer.hook';
-import { DepositInfo } from '../../@types';
+import { CheckpointStatus, DepositInfo, TransactionParsedInput } from '../../@types';
+import { useEffect } from 'react';
+import { useGetCheckpointData, useGetCheckpointQueue, useGetDepositFee } from 'pages/BitcoinDashboard/hooks';
+import { useRelayerFeeToken } from 'hooks/useTokenFee';
+import { btcTokens, oraichainTokens } from 'config/bridgeTokens';
+import TransactionsMobile from '../Checkpoint/Transactions/TransactionMobiles/TransactionMobile';
+import { isMobile } from '@walletconnect/browser-utils';
+import RenderIf from '../RenderIf/RenderIf';
 
 type Icons = {
   Light: any;
@@ -29,8 +36,18 @@ const tokens = {
 
 export const PendingDeposits: React.FC<{}> = ({}) => {
   const [theme] = useConfigReducer('theme');
-  const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
-  const data = useGetPendingDeposits(oraichainAddress);
+  const mobile = isMobile();
+  const [oraichainAddress] = useConfigReducer('address');
+  const fee = useRelayerFeeToken(btcTokens[0], oraichainTokens[19]);
+  const depositFee = useGetDepositFee();
+  const fetchedPendingDeposits = useGetPendingDeposits(oraichainAddress);
+  const checkpointQueue = useGetCheckpointQueue();
+  const buildingCheckpointIndex = checkpointQueue?.index || 0;
+  const checkpointData = useGetCheckpointData(buildingCheckpointIndex);
+  const checkpointPreviousData = useGetCheckpointData(
+    buildingCheckpointIndex > 1 ? buildingCheckpointIndex - 1 : buildingCheckpointIndex
+  );
+  const [allPendingDeposits, setAllPendingDeposits] = useConfigReducer('allPendingDeposits');
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
@@ -50,7 +67,66 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     window.open(`https://blockstream.info/tx/${txid}`, '_blank');
   };
 
-  console.log(data);
+  const isExitsDeposit = (arr: DepositInfo[] | TransactionParsedInput[], findItem: DepositInfo): [boolean, number] => {
+    let indexFinded = arr.findIndex((item, _) => item.txid === findItem.txid);
+    return [indexFinded === -1 ? false : true, indexFinded];
+  };
+
+
+  useEffect(() => {
+    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits || !checkpointQueue) {
+      return;
+    }
+    const depositPendingUpdate = handleUpdateTxPending();
+    if(!depositPendingUpdate) return;
+    const depositPendingPopout =  handlePopOutPending(depositPendingUpdate);
+    if(!depositPendingPopout) return;
+    console.log(allPendingDeposits,"allPendingDeposits")
+    setAllPendingDeposits({
+      ...allPendingDeposits,
+      [oraichainAddress]: depositPendingPopout
+    });
+  }, [checkpointData, checkpointPreviousData, oraichainAddress, fetchedPendingDeposits, checkpointQueue]);
+  const handleUpdateTxPending = () => {
+    // /**
+    //  * @devs: This one will handle update pendingDeposits to localStorage,
+    //  * if there is no cache, set current pending deposits with latest building
+    //  * checkpoint index.
+    //  */
+
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress]?[...allPendingDeposits[oraichainAddress]] : []; // Fix read-only
+    for (let i = 0; i < fetchedPendingDeposits.length; i++) {
+      try {
+        let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
+        if (!isExits) {
+          pendingDeposits = [...pendingDeposits, fetchedPendingDeposits[i]];
+          continue;
+        }
+        pendingDeposits[itemIndex] = fetchedPendingDeposits[i];
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    return pendingDeposits;
+  };
+  const handlePopOutPending = (depositPendingUpdate:DepositInfo[]) => {
+    /**
+     * @devs: This will pop out pending deposits if stored building checkpoint is less than
+     * current building checkpoint index. (if there is any signing state, minus building
+     * checkpoint index to 1).
+     */
+
+    const checkpointInput = checkpointData.transaction.data.input;
+    const checkpointPreviousInput = checkpointPreviousData.transaction.data.input;
+    const isSigningStatus = checkpointPreviousData.status === CheckpointStatus.Signing;
+    const pendingDeposits = depositPendingUpdate.filter(
+      (item) =>
+        isExitsDeposit(checkpointInput, item)[0] ||
+        isExitsDeposit(fetchedPendingDeposits, item)[0] ||
+        (isExitsDeposit(checkpointPreviousInput, item)[0] && isSigningStatus)
+    );
+    return pendingDeposits ?? [];
+  };
 
   const headers: TableHeaderProps<DepositInfo> = {
     flow: {
@@ -79,7 +155,16 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       width: '13%',
       align: 'left',
       sortField: 'amount',
-      accessor: (data) => <span>{toDisplay(BigInt(data.amount || 0), 8)} BTC</span>
+      accessor: (data) => (
+        <span>
+          {(
+            toDisplay(BigInt(data.amount || 0), 8) -
+            fee.relayerFee -
+            toDisplay(BigInt(depositFee?.deposit_fees || 0), 14)
+          ).toFixed(6)}{' '}
+          BTC
+        </span>
+      )
     },
     vout: {
       name: 'Vout',
@@ -109,11 +194,19 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       </div>
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
       <div className={styles.pending_deposits_list}>
-        {(data?.length || 0) > 0 ? (
-          <Table headers={headers} data={data} defaultSorted="confirmations" />
-        ) : (
+        <RenderIf isTrue={!mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
+          <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />
+        </RenderIf>
+        <RenderIf isTrue={mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
+          <TransactionsMobile
+            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
+            symbols={'BTC/ORAI'}
+            transactions={allPendingDeposits?.[oraichainAddress]}
+          />
+        </RenderIf>
+        <RenderIf isTrue={!(allPendingDeposits?.[oraichainAddress]?.length > 0)}>
           <FallbackEmptyData />
-        )}
+        </RenderIf>
       </div>
     </div>
   );

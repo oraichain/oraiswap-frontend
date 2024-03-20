@@ -592,7 +592,7 @@ export const oraichainNetwork: CustomChainInfo = {
       coinMinimalDenom: 'usat',
       type: 'cw20',
       contractAddress: OBTCContractAddress,
-      bridgeTo: ['bitcoin'],
+      bridgeTo: [bitcoinChainId],
       coinDecimals: 6,
       Icon: BTCIcon,
       IconLight: BTCIcon,

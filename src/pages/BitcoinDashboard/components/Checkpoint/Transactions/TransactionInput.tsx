@@ -8,6 +8,9 @@ import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
 import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
 import { TransactionParsedInput } from 'pages/BitcoinDashboard/@types';
+import TransactionsMobile from './TransactionMobiles/TransactionMobile';
+import { isMobile } from '@walletconnect/browser-utils';
+import RenderIf from '../../RenderIf/RenderIf';
 
 type Icons = {
   Light: any;
@@ -27,8 +30,7 @@ const tokens = {
 
 export const TransactionInput: React.FC<{ data: TransactionParsedInput[] }> = ({ data }) => {
   const [theme] = useConfigReducer('theme');
-  const navigate = useNavigate();
-  const oraichainAddress = useConfigReducer('cosmosAddress')[0]?.Oraichain;
+  const mobile = isMobile();
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
@@ -85,7 +87,19 @@ export const TransactionInput: React.FC<{ data: TransactionParsedInput[] }> = ({
     <div className={styles.transactions}>
       <h2 className={styles.transactions_title}>Transaction Inputs:</h2>
       <div className={styles.transactions_list}>
-        {(data?.length || 0) > 0 ? <Table headers={headers} data={data} defaultSorted="txid" /> : <FallbackEmptyData />}
+        <RenderIf isTrue={!mobile && (data?.length || 0) > 0}>
+          <Table headers={headers} data={data} defaultSorted="txid" />
+        </RenderIf>
+        <RenderIf isTrue={mobile && (data?.length || 0) > 0}>
+          <TransactionsMobile
+            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
+            symbols={'BTC/ORAI'}
+            transactions={data}
+          />
+        </RenderIf>
+        <RenderIf isTrue={!((data?.length || 0) > 0)}>
+          <FallbackEmptyData />
+        </RenderIf>
       </div>
     </div>
   );

@@ -19,13 +19,19 @@
     flex-wrap: wrap;
 
     gap: 8px;
+
     @include theme {
       color: theme-get('sea-stone-200');
     }
 
     font-size: 18px;
     font-weight: 600;
-    line-height: 150%; /* 27px */
+    line-height: 150%;
+    /* 27px */
+
+    @include mobile {
+      font-size: 14px;
+    }
 
     .titleLeft {
       flex: 1;
@@ -59,8 +65,9 @@
         align-items: center;
 
         @include mobile {
-          font-size: 16px;
+          font-size: 13px;
         }
+
         .usd {
           @include theme {
             color: theme-get('sea-stone-200');
@@ -69,6 +76,10 @@
           font-size: 18px;
           font-weight: 600;
           line-height: 150%;
+
+          @include mobile {
+            font-size: 13px;
+          }
         }
       }
     }
@@ -76,16 +87,19 @@
 
   .content {
     overflow-x: auto;
+
     &::-webkit-scrollbar {
       height: 8px;
     }
+
     min-height: 350px;
 
     .columnList {
       display: flex;
       justify-content: space-between;
-      min-width: 900px;
+      // min-width: 900px;
       padding: 0 16px;
+
       @include mobile {
         padding: 0;
       }
@@ -97,7 +111,8 @@
   color: #efefef;
   font-size: 14px;
   font-weight: 400;
-  line-height: 150%; /* 21px */
+  line-height: 150%;
+  /* 21px */
   text-align: left;
 
   width: 100%;

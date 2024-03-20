@@ -15,3 +15,12 @@ export interface DepositInfo {
   height: number | null;
   confirmations: number;
 }
+
+export interface DepositInfoWithCheckpoint {
+  txid: string;
+  vout: number;
+  amount: number;
+  height: number | null;
+  checkpointIndex: number;
+  confirmations: number;
+}
