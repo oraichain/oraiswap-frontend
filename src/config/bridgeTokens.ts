@@ -98,7 +98,7 @@ export const kawaiiTokens = uniqBy(
   (c) => c.denom
 );
 
-const notAllowSwapCoingeckoIds = ['kawaii-islands', 'milky-token', 'injective-protocol'];
+const notAllowSwapCoingeckoIds = ['kawaii-islands', 'milky-token', 'injective-protocol', 'bitcoin'];
 // universal swap. Currently we dont support from tokens that are not using the ibc wasm channel
 const notAllowSwapFromChainIds = [
   'kawaii_6886-1',
