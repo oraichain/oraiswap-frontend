@@ -7,8 +7,8 @@
   width: 100%;
 
   @include mobile {
-    min-height: calc(100vh - 110px);
-    margin-top: 80px;
+    min-height: calc(100vh - 90px);
+    margin-top: $menu-height;
   }
 
   @include theme {

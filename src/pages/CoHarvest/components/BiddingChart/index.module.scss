@@ -89,7 +89,7 @@
     overflow-x: auto;
 
     &::-webkit-scrollbar {
-      height: 8px;
+      height: 4px;
     }
 
     min-height: 350px;
@@ -102,6 +102,7 @@
 
       @include mobile {
         padding: 0;
+        min-width: 900px;
       }
     }
   }
