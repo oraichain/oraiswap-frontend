@@ -15,7 +15,7 @@ html {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-top: 68px;
+  padding-top: $menu-height;
 
   @include mobile {
     padding-top: 0;

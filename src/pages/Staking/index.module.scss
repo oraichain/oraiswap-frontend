@@ -8,7 +8,7 @@
 
   @include mobile {
     min-height: calc(100vh - 90px);
-    margin-top: 68px;
+    margin-top: $menu-height;
   }
 
   @include theme {

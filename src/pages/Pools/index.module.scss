@@ -22,7 +22,7 @@
   }
 
   @include small-mobile {
-    margin-top: 68px;
+    margin-top: $menu-height;
   }
 }
 
