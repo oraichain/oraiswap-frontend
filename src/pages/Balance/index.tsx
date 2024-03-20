@@ -660,6 +660,7 @@ const Balance: React.FC<BalanceProps> = () => {
           }}
         />
         <DepositBtcModal
+          prices={prices}
           isOpen={isDepositBtcModal}
           addressRecovery={addressRecovery}
           handleRecoveryAddress={handleRecoveryAddress}
