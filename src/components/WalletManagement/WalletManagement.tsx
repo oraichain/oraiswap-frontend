@@ -78,13 +78,13 @@ export const WalletManagement: FC<{}> = () => {
       setWalletProviderWithStatus(updatedWalletProvider);
     }
     updateWalletProvider();
-  }, [isCheckOwallet, isCheckKeplr, isMetamask]);
+  }, [isCheckOwallet, isCheckKeplr, isMetamask, isTronLink]);
 
   // load balance every time change address
   useEffect(() => {
     const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress };
     const filteredAddresses = {};
-    
+
     for (const key in addresses) {
       if (addresses[key]) {
         filteredAddresses[key] = addresses[key];
