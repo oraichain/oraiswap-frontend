@@ -7,6 +7,8 @@ import { getWalletByNetworkCosmosFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
 import Metamask from 'libs/metamask';
 
+import Bitcoin from 'libs/bitcoin';
+
 // polyfill
 Tendermint37Client.detectVersion = () => {};
 Tendermint37Client.prototype.status = function () {
@@ -28,6 +30,7 @@ const walletType = getWalletByNetworkCosmosFromStorage();
 window.Keplr = new Keplr(walletType);
 
 window.ethereumDapp = window.ethereum;
+window.Bitcoin = new Bitcoin();
 window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');

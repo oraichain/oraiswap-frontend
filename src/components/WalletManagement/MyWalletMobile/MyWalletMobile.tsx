@@ -8,7 +8,7 @@ import ToggleSwitch from 'components/ToggleSwitch';
 import { type NetworkType } from 'components/WalletManagement/walletConfig';
 import { ThemeContext } from 'context/theme-context';
 import copy from 'copy-to-clipboard';
-import { cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworksWithIcon } from 'helper';
+import { btcNetworksWithIcon, cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworksWithIcon } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -31,6 +31,7 @@ export const MyWalletMobile: React.FC<{
   const [tronAddress] = useConfigReducer('tronAddress');
   const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddresses] = useConfigReducer('cosmosAddress');
+  const [btcAddress] = useConfigReducer('btcAddress');
 
   const [currentDisconnectingNetwork, setCurrentDisconnectingNetwork] = useState<NetworkType>(null);
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
@@ -184,6 +185,42 @@ export const MyWalletMobile: React.FC<{
       </div>
     );
   };
+  const renderBtcAddresses = () => {
+    if (!btcAddress) return <></>;
+
+    return (
+      <div className={styles.addressByNetworkItem}>
+        {btcNetworksWithIcon.map((network) => {
+          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+          if (!NetworkIcon) NetworkIcon = DefaultIcon;
+          return (
+            <div key={network.chainId} className={styles.addressByChainInNetwork}>
+              <div className={styles.left}>
+                <div className={styles.icon}>
+                  <div className={styles.iconChain}>
+                    <NetworkIcon width={30} height={30} />
+                  </div>
+                </div>
+                <div className={styles.info}>
+                  <div className={styles.chainName}>{network.chainName}</div>
+                  <div className={styles.chainAddress}>
+                    <span>{reduceString(btcAddress, 6, 6)}</span>
+                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, btcAddress)}>
+                      {copiedValue === btcAddress ? (
+                        <SuccessIcon width={15} height={15} />
+                      ) : (
+                        <CopyIcon width={15} height={15} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -237,6 +274,7 @@ export const MyWalletMobile: React.FC<{
           {renderCosmosAddresses()}
           {renderEvmAddresses()}
           {renderTronAddresses()}
+          {renderBtcAddresses()}
         </div>
       </div>
     </div>

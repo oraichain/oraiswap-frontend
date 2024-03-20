@@ -33,7 +33,7 @@ export const NoticeBanner = ({
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const BASE_URL = process.env.REACT_APP_STRAPI_BASE_URL || 'https://fresh-harmony-bf37524082.strapiapp.com';
+        const BASE_URL = process.env.REACT_APP_STRAPI_BASE_URL || 'https://nice-fireworks-d26703b63e.strapiapp.com';
         const res = await axios.get('api/banners?populate=*', { baseURL: BASE_URL });
         return res.data.data;
       } catch (error) {
@@ -44,7 +44,14 @@ export const NoticeBanner = ({
   }, []);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (banners.length <= 0) {
+      setOpenBanner(false);
+      return;
+    }
+
+    setOpenBanner(true);
+
+    if (banners.length === 1) return;
 
     const carousel = () => {
       setBannersIdx((bannerIdx) => {

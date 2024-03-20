@@ -68,7 +68,6 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
         const isValidNetwork = !networkFilter || token.chainId === networkFilter;
         if (isValidNetwork) {
           const amount = BigInt(amounts[token.denom] ?? 0);
-
           const isHaveSubAmounts = token.contractAddress && token.evmDenoms;
           const subAmounts = isHaveSubAmounts ? getSubAmountDetails(amounts, token) : {};
           const totalAmount = amount + (isHaveSubAmounts ? toAmount(toSumDisplay(subAmounts), token.decimals) : 0n);
@@ -93,6 +92,7 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
           });
         }
       }
+
       return result;
     }, [])
     .sort((a, b) => b.value - a.value);
@@ -131,7 +131,8 @@ export const AssetsTab: FC<{ networkFilter: string }> = ({ networkFilter }) => {
       align: 'left',
       accessor: (data) => (
         <div className={cx('balance', `${!data.balance && 'balance-low'}`)}>
-          {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))}{' '}
+          {toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6)}
+          {/* {numberWithCommas(toFixedIfNecessary(data.balance.toString(), isMobile() ? 3 : 6))}{' '} */}
           <span className={cx('balance-assets')}>{data.asset}</span>
         </div>
       )

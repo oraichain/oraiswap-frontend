@@ -5,6 +5,7 @@ import Modal from 'components/Modal';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ReactComponent as CloseIcon } from 'assets/icons/close-icon.svg';
 import { ReactComponent as OwalletIcon } from 'assets/icons/owallet-icon.svg';
+import { ReactComponent as BitcoinIcon } from 'assets/icons/btc-icon.svg';
 import { ReactComponent as MetamaskIcon } from 'assets/icons/metamask-icon.svg';
 import { ReactComponent as MetamaskLeapIcon } from 'assets/images/leap-cosmos-logo.svg';
 import { ReactComponent as TronIcon } from 'assets/icons/tron-icon.svg';
@@ -49,6 +50,7 @@ const ChooseWalletModal: React.FC<{
   const isTron = !!window.tronLink;
   const WALLETS: WalletItem[] = [
     { name: 'Owallet', icon: OwalletIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.OWALLET },
+    { name: 'Bitcoin', icon: BitcoinIcon, isActive: isCheckOwallet, walletType: WALLET_TYPES.BITCOIN },
     { name: 'Metamask', icon: MetamaskIcon, isActive: isMetamask, walletType: WALLET_TYPES.METAMASK },
     {
       name: 'Metamask (Leap Snap)',
@@ -56,13 +58,13 @@ const ChooseWalletModal: React.FC<{
       isActive: isMetamask,
       walletType: WALLET_TYPES.METAMASK_LEAP_SNAP
     },
-    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
-    { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
     { name: 'Keplr', icon: KeplrIcon, isActive: isCheckKeplr, walletType: WALLET_TYPES.KEPLR },
+    { name: 'Phantom', icon: PhantomIcon, walletType: WALLET_TYPES.PHANTOM },
 
     { name: 'Connect with Google', icon: GoogleIcon, walletType: WALLET_TYPES.GOOGLE },
+    { name: 'TronLink', icon: TronIcon, isActive: isTron, walletType: WALLET_TYPES.TRON },
     { name: 'Connect with Apple', icon: AppleIcon, walletType: WALLET_TYPES.APPLE },
-    { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
+    // { name: 'Use phone number', icon: PhoneIcon, walletType: WALLET_TYPES.PHONE }
   ];
 
   const content = useMemo(() => {
@@ -85,7 +87,11 @@ const ChooseWalletModal: React.FC<{
                   <wallet.icon />
                 </div>
                 {WALLET_TYPES.METAMASK_LEAP_SNAP === wallet.walletType ? (
-                  <div className={cx('wallet_name')}><span>Metamask <br /> (Leap Snap)</span></div>
+                  <div className={cx('wallet_name')}>
+                    <span>
+                      Metamask <br /> (Leap Snap)
+                    </span>
+                  </div>
                 ) : (
                   <div className={cx('wallet_name')}>{wallet.name}</div>
                 )}

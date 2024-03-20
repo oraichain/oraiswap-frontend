@@ -20,15 +20,16 @@ import useWebSocket from 'react-use-websocket';
 import routes from 'routes';
 import { persistor } from 'store/configure';
 import { PERSIST_VER } from 'store/constants';
-import Instruct from './Instruct';
 import Menu from './Menu';
 import './index.scss';
 import { NoticeBanner } from './NoticeBanner';
+import Sidebar from './Sidebar';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [walletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
   const loadTokenAmounts = useLoadTokens();
@@ -151,7 +152,7 @@ const App = () => {
 
   const keplrHandler = async () => {
     try {
-      let metamaskAddress, oraiAddress, tronAddress;
+      let metamaskAddress, oraiAddress, tronAddress, btcAddress;
 
       if (mobileMode) {
         window.tronWebDapp = window.tronWeb;
@@ -175,7 +176,10 @@ const App = () => {
         metamaskAddress = await window.Metamask.getEthAddress();
         if (metamaskAddress) setMetamaskAddress(metamaskAddress);
       }
-
+      if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
+        btcAddress = await window.Bitcoin.getAddress();
+        if (btcAddress) setBtcAddress(btcAddress);
+      }
       if (walletByNetworks.tron === 'owallet' || mobileMode) {
         const res: interfaceRequestTron = await window.tronLinkDapp.request({
           method: 'tron_requestAccounts'
@@ -187,7 +191,8 @@ const App = () => {
       loadTokenAmounts({
         oraiAddress,
         metamaskAddress,
-        tronAddress
+        tronAddress,
+        btcAddress
       });
     } catch (error) {
       console.log('Error: ', error.message);
@@ -198,17 +203,17 @@ const App = () => {
     }
   };
 
-  const [openBanner, setOpenBanner] = useState(true);
+  const [openBanner, setOpenBanner] = useState(false);
 
   return (
     <ThemeProvider>
       <div className={`app ${theme}`}>
         <Menu />
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
-        <div className={openBanner ? 'contentWithBanner' : ''}>{routes()}</div>
-        {/* {routes()} */}
-        {!isMobile() && <Instruct />}
-        {/* {!isMobile() && <FutureCompetition />} */}
+        <div className="main">
+          <Sidebar />
+          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+        </div>
       </div>
     </ThemeProvider>
   );

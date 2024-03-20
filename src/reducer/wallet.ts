@@ -5,6 +5,7 @@ export type WalletsByNetwork = {
   cosmos: 'owallet' | 'keplr' | 'leapSnap' | 'eip191';
   evm: 'owallet' | 'metamask' | null;
   tron: 'owallet' | 'tronLink' | null;
+  bitcoin: 'owallet' | null;
 };
 
 export interface WalletState {
@@ -15,7 +16,8 @@ const initialState: WalletState = {
   walletsByNetwork: {
     cosmos: null,
     evm: null,
-    tron: null
+    tron: null,
+    bitcoin: null
   }
 };
 

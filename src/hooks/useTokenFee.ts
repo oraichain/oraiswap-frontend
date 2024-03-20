@@ -46,6 +46,7 @@ export default function useTokenFee(
         (isNativeBnb && tokenFee.token_denom.includes(ORAI_BRIDGE_EVM_DENOM_PREFIX))
     );
     if (tokenFee) fee = (tokenFee.ratio.nominator / tokenFee.ratio.denominator) * 100;
+
     setBridgeFee(fee);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,7 +78,7 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
 
   // get relayer fee in token, by simulate orai vs to token.
   useEffect(() => {
-    if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount.displayAmount).toNumber());
+    if (relayerFeeAmount) setRelayerFeeAmount(new BigDecimal(relayerFeeAmount?.displayAmount || 0).toNumber());
   }, [relayerFeeAmount]);
 
   // get relayer fee in ORAI
@@ -110,6 +111,30 @@ export const useRelayerFeeToken = (originalFromToken: TokenItemType, originalToT
     relayerFeeInOraiToDisplay: relayerFeeInOrai,
     relayerFeeInOraiToAmount: toAmount(relayerFeeInOrai)
   };
+};
+export const useUsdtToBtc = (amount) => {
+  const routerClient = new OraiswapRouterQueryClient(window.client, network.router);
+  const originalFromToken = oraichainTokens.find((token) => token.coinGeckoId === 'tether');
+  const originalToToken = oraichainTokens.find((token) => token.coinGeckoId === 'bitcoin');
+  const { data } = useQuery(
+    ['convert-btc-to-usdt', originalFromToken, originalToToken],
+    () => {
+      return handleSimulateSwap({
+        originalFromInfo: originalToToken,
+        originalToInfo: originalFromToken,
+        originalAmount: amount,
+        routerClient
+      });
+    },
+    {
+      enabled: !!originalFromToken && !!originalToToken && !!amount,
+      placeholderData: {
+        displayAmount: 0,
+        amount: '0'
+      }
+    }
+  );
+  return data;
 };
 
 export const useGetFeeConfig = () => {

@@ -3,8 +3,9 @@ import styles from './index.module.scss';
 import TokenBalance from 'components/TokenBalance';
 import TransferConvertToken from '../TransferConvertToken';
 import { TokenItemType } from '@oraichain/oraidex-common';
+
 import { tokensIcon } from 'config/chainInfos';
-interface TokenItemProps {
+export interface TokenItemProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };
   name?: string;
@@ -16,6 +17,7 @@ interface TokenItemProps {
   convertKwt?: any;
   subAmounts?: AmountDetails;
   theme?: string;
+  onDepositBtc?: Function;
 }
 
 const TokenItem: React.FC<TokenItemProps> = ({

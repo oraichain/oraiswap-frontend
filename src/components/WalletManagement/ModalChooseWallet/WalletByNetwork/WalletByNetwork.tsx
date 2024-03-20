@@ -22,8 +22,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>('init');
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
-  const [oraiAddress, setOraiAddress] = useConfigReducer('address');
+  const [, setOraiAddress] = useConfigReducer('address');
   const [, setTronAddress] = useConfigReducer('tronAddress');
+  const [, setBtcAddress] = useConfigReducer('btcAddress');
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
@@ -76,6 +77,14 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     setTronAddress(tronAddress);
   };
 
+  const handleConnectWalletInBtcNetwork = async (walletType: WalletType) => {
+    if (walletType === 'owallet') {
+      // TODO: need check when use multi wallet support bitcoin
+    }
+    const btcAddress = await window.Bitcoin.getAddress();
+    setBtcAddress(btcAddress);
+  };
+
   const handleConnectWalletByNetwork = async (wallet: WalletNetwork) => {
     try {
       setConnectStatus('loading');
@@ -88,6 +97,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
           break;
         case 'tron':
           await handleConnectWalletInTronNetwork(wallet.nameRegistry as WalletCosmosType);
+          break;
+        case 'bitcoin':
+          await handleConnectWalletInBtcNetwork(wallet.nameRegistry);
           break;
         default:
           setConnectStatus('init');
@@ -141,6 +153,9 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
         break;
       case 'tron':
         setTronAddress(undefined);
+        break;
+      case 'bitcoin':
+        setBtcAddress(undefined);
         break;
       default:
         break;
