@@ -94,7 +94,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     //  * checkpoint index.
     //  */
 
-    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ?? []; // Fix read-only
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress]?[...allPendingDeposits[oraichainAddress]] : []; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
         let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
