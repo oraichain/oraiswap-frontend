@@ -83,7 +83,7 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-import ModalConfirm from "../../components/ConfirmModal";
+import ModalConfirm from '../../components/ConfirmModal';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 interface BalanceProps {}
 
@@ -171,36 +171,34 @@ const Balance: React.FC<BalanceProps> = () => {
       // @ts-ignore-check
       const oraiBtcAddress = await window.Keplr.getKeplrAddr(OraiBtcSubnetChain.chainId);
       if (btcAddress && addressRecovery !== btcAddress && oraiBtcAddress) {
-          const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
-          const signDoc = {
-            account_number: accountInfo?.account?.account_number,
-            chain_id: OraiBtcSubnetChain.chainId,
-            fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
-            memo: '',
-            msgs: [
-              {
-                type: 'nomic/MsgSetRecoveryAddress',
-                value: {
-                  recovery_address: btcAddress
-                }
+        const accountInfo = await nomic.getAccountInfo(oraiBtcAddress);
+        const signDoc = {
+          account_number: accountInfo?.account?.account_number,
+          chain_id: OraiBtcSubnetChain.chainId,
+          fee: { amount: [{ amount: '0', denom: 'uoraibtc' }], gas: '10000' },
+          memo: '',
+          msgs: [
+            {
+              type: 'nomic/MsgSetRecoveryAddress',
+              value: {
+                recovery_address: btcAddress
               }
-            ],
-            sequence: accountInfo?.account?.sequence
-          };
+            }
+          ],
+          sequence: accountInfo?.account?.sequence
+        };
 
-          const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
-          const tx = makeStdTx(signDoc, signature.signature);
-          const tmClient = await Tendermint37Client.connect(config.rpcUrl);
+        const signature = await window.owallet.signAmino(config.chainId, oraiBtcAddress, signDoc);
+        const tx = makeStdTx(signDoc, signature.signature);
+        const tmClient = await Tendermint37Client.connect(config.rpcUrl);
 
-          const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
-          await getAddress();
-          //@ts-ignore
-          displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
-            message: result?.log
-          });
-        }
-
-
+        const result = await tmClient.broadcastTxSync({ tx: Uint8Array.from(Buffer.from(JSON.stringify(tx))) });
+        await getAddress();
+        //@ts-ignore
+        displayToast(result.code === 0 ? TToastType.TX_SUCCESSFUL : TToastType.TX_FAILED, {
+          message: result?.log
+        });
+      }
     } catch (error) {
       handleErrorTransaction(error);
     }
@@ -288,7 +286,6 @@ const Balance: React.FC<BalanceProps> = () => {
       amount: amount,
       feeRate: feeRate
     };
-
 
     try {
       // @ts-ignore-check
@@ -662,13 +659,13 @@ const Balance: React.FC<BalanceProps> = () => {
           }}
         />
         <DepositBtcModal
+          prices={prices}
           isOpen={isDepositBtcModal}
           addressRecovery={addressRecovery}
           handleRecoveryAddress={handleRecoveryAddress}
           open={() => setIsDepositBtcModal(true)}
           close={() => setIsDepositBtcModal(false)}
         />
-
       </div>
     </Content>
   );

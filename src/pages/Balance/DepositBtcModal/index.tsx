@@ -18,8 +18,8 @@ import { useCopy } from 'hooks/useCopy';
 
 import { Link } from 'react-router-dom';
 import { flattenTokens } from 'config/bridgeTokens';
-import { BigDecimal } from '@oraichain/oraidex-common';
-import { useRelayerFeeToken, useUsdtToBtc } from 'hooks/useTokenFee';
+import { BigDecimal, CoinGeckoPrices } from '@oraichain/oraidex-common';
+import { useRelayerFeeToken } from 'hooks/useTokenFee';
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,9 +27,10 @@ interface ModalProps {
   close: () => void;
   handleRecoveryAddress: () => void;
   addressRecovery: string;
+  prices: CoinGeckoPrices<string>;
 }
 
-const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAddress, addressRecovery }) => {
+const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAddress, addressRecovery, prices }) => {
   const [theme] = useConfigReducer('theme');
   const { isCopied, setIsCopied } = useCopy();
   const [urlQRCode, setUrlQRCode] = useState(null);
@@ -41,10 +42,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const { relayerFee } = useRelayerFeeToken(fromToken, toToken);
   // TODO:  usat decimal 14
   const minimumDeposit = new BigDecimal(deposit_fees).div(1e14).toNumber() + relayerFee;
-  const { displayAmount } = useUsdtToBtc(minimumDeposit);
-
   const expiration = nomic.depositAddress?.expirationTimeMs;
-
+  const displayAmount = prices?.['bitcoin'] * minimumDeposit || '0';
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
