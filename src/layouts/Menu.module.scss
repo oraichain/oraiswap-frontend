@@ -10,6 +10,8 @@
   top: 0;
   z-index: 999;
 
+  height: 68px;
+
   .logo {
     display: flex;
   }
@@ -30,6 +32,8 @@
   position: fixed;
   top: 0;
   left: 0;
+
+  height: 68px;
 
   &_text {
     font-weight: 600;
@@ -76,7 +80,6 @@
 
   @include theme() {
     background-color: theme-get('bg-color');
-    border-bottom: 1px solid theme-get('neutron-5');
   }
 
   .menu_list {
@@ -169,7 +172,6 @@
     display: flex;
     align-items: center;
   }
-
   .divider {
     @include theme() {
       border: 1px solid theme-get('neutral-border-border-bold');
@@ -186,6 +188,23 @@
   align-items: center;
   gap: 16px;
   font-weight: 500;
+
+  @include medium-desktop {
+    gap: 10px;
+  }
+
+  .divider {
+    @include theme() {
+      border: 1px solid theme-get('neutral-border-border-bold');
+    }
+
+    width: 1px;
+    height: 40px;
+
+    // @include medium-desktop {
+    //   display: none;
+    // }
+  }
 
   .menu_list_right {
     display: flex;
@@ -228,7 +247,6 @@
   }
 
   .menu_item {
-
     @include theme() {
       svg {
         path {
@@ -250,11 +268,6 @@
       @include theme() {
         background-color: theme-get('neutral-border-border-bold');
       }
-    }
-
-    @include medium-desktop {
-      margin-left: 0px;
-      margin-right: 5px;
     }
 
     &_text {
@@ -298,6 +311,12 @@
   cursor: pointer;
   border-radius: 99px;
   gap: 10px;
+
+  @include medium-desktop {
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 8px;
+  }
 
   @include theme() {
     color: theme-get('neutral-text-title');
