@@ -13,6 +13,7 @@ export interface TransactionInfo {
   vout?: number;
   confirmations?: number;
 }
+
 export interface ListTransactionsMobileInterface {
   generateIcon: () => JSX.Element;
   symbols: String;
@@ -30,36 +31,36 @@ const TransactionMobileItem: React.FC<TransactionInfo> = ({ txid, value, address
 
   return (
     <div className={styles.poolInfo}>
-      <RenderIf isTrue={!isNull(txid)}>
+      {!isNull(txid) && (
         <div onClick={() => handleTxNavigate(txid)}>
           <div className={styles.title}>Txid</div>
           <span className={styles.value}>{sortAddress(txid || '')}</span>
         </div>
-      </RenderIf>
-      <RenderIf isTrue={!isNull(address)}>
+      )}
+      {!isNull(address) && (
         <div onClick={() => handleAddressNavigate(address)}>
           <div className={styles.title}>Address</div>
           <span className={styles.value}>{sortAddress(address || '')}</span>
         </div>
-      </RenderIf>
-      <RenderIf isTrue={!isNull(vout)}>
+      )}
+      {!isNull(vout) && (
         <div>
           <div className={styles.title}>Vout</div>
           <span className={styles.value}>{vout}</span>
         </div>
-      </RenderIf>
-      <RenderIf isTrue={!isNull(amount) || !isNull(value)}>
+      )}
+      {(!isNull(amount) || !isNull(value)) && (
         <div>
           <div className={styles.title}>Amount</div>
           <span className={styles.value}>{toDisplay(BigInt(amount || value || 0), 8)} BTC</span>
         </div>
-      </RenderIf>
-      <RenderIf isTrue={!isNull(confirmations)}>
+      )}
+      {!isNull(confirmations) && (
         <div>
           <div className={styles.title}>Confirmations</div>
           <span className={styles.value}>{confirmations}</span>
         </div>
-      </RenderIf>
+      )}
     </div>
   );
 };

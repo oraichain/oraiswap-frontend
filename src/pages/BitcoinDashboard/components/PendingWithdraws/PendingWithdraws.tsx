@@ -105,25 +105,24 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
       accessor: (data) => <span>{toDisplay(BigInt(data.value || 0), 8)} BTC</span>
     }
   };
-
-  return (
-    <div className={styles.pending_withdraws}>
-      <h2 className={styles.pending_withdraws_title}>Pending Withdraws:</h2>
-      <div className={styles.pending_withdraws_list}>
-        <RenderIf isTrue={!mobile && (data?.length || 0) > 0}>
-          <Table headers={headers} data={data} defaultSorted="txid" />
-        </RenderIf>
-        <RenderIf isTrue={mobile && (data?.length || 0) > 0}>
+  const checkRenderUI = () => {
+    if (data?.length > 0) {
+      if (mobile)
+        return (
           <TransactionsMobile
             generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
             symbols={'ORAI/BTC'}
             transactions={data}
           />
-        </RenderIf>
-        <RenderIf isTrue={!((data?.length || 0) > 0)}>
-          <FallbackEmptyData />
-        </RenderIf>
-      </div>
+        );
+      return <Table headers={headers} data={data} defaultSorted="txid" />;
+    }
+    return <FallbackEmptyData />;
+  };
+  return (
+    <div className={styles.pending_withdraws}>
+      <h2 className={styles.pending_withdraws_title}>Pending Withdraws:</h2>
+      <div className={styles.pending_withdraws_list}>{checkRenderUI()}</div>
     </div>
   );
 };

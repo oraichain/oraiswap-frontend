@@ -72,16 +72,21 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     return [indexFinded === -1 ? false : true, indexFinded];
   };
 
-
   useEffect(() => {
-    if (!oraichainAddress || !checkpointData || !checkpointPreviousData || !fetchedPendingDeposits || !checkpointQueue) {
+    if (
+      !oraichainAddress ||
+      !checkpointData ||
+      !checkpointPreviousData ||
+      !fetchedPendingDeposits ||
+      !checkpointQueue
+    ) {
       return;
     }
     const depositPendingUpdate = handleUpdateTxPending();
-    if(!depositPendingUpdate) return;
-    const depositPendingPopout =  handlePopOutPending(depositPendingUpdate);
-    if(!depositPendingPopout) return;
-    console.log(allPendingDeposits,"allPendingDeposits")
+    if (!depositPendingUpdate) return;
+    const depositPendingPopout = handlePopOutPending(depositPendingUpdate);
+    if (!depositPendingPopout) return;
+    console.log(allPendingDeposits, 'allPendingDeposits');
     setAllPendingDeposits({
       ...allPendingDeposits,
       [oraichainAddress]: depositPendingPopout
@@ -94,7 +99,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     //  * checkpoint index.
     //  */
 
-    let pendingDeposits = allPendingDeposits?.[oraichainAddress]?[...allPendingDeposits[oraichainAddress]] : []; // Fix read-only
+    let pendingDeposits = allPendingDeposits?.[oraichainAddress] ? [...allPendingDeposits[oraichainAddress]] : []; // Fix read-only
     for (let i = 0; i < fetchedPendingDeposits.length; i++) {
       try {
         let [isExits, itemIndex] = isExitsDeposit(pendingDeposits, fetchedPendingDeposits[i]);
@@ -109,7 +114,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     }
     return pendingDeposits;
   };
-  const handlePopOutPending = (depositPendingUpdate:DepositInfo[]) => {
+  const handlePopOutPending = (depositPendingUpdate: DepositInfo[]) => {
     /**
      * @devs: This will pop out pending deposits if stored building checkpoint is less than
      * current building checkpoint index. (if there is any signing state, minus building
@@ -181,7 +186,20 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       accessor: (data) => <span>{data.confirmations}</span>
     }
   };
-
+  const checkRenderUI = () => {
+    if (allPendingDeposits?.[oraichainAddress]?.length > 0) {
+      if (mobile)
+        return (
+          <TransactionsMobile
+            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
+            symbols={'BTC/ORAI'}
+            transactions={allPendingDeposits?.[oraichainAddress]}
+          />
+        );
+      return <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />;
+    }
+    return <FallbackEmptyData />;
+  };
   return (
     <div className={styles.pending_deposits}>
       <div className={styles.explain}>
@@ -193,21 +211,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
         </span>
       </div>
       <h2 className={styles.pending_deposits_title}>Pending Deposits:</h2>
-      <div className={styles.pending_deposits_list}>
-        <RenderIf isTrue={!mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
-          <Table headers={headers} data={allPendingDeposits?.[oraichainAddress]} defaultSorted="confirmations" />
-        </RenderIf>
-        <RenderIf isTrue={mobile && allPendingDeposits?.[oraichainAddress]?.length > 0}>
-          <TransactionsMobile
-            generateIcon={() => generateIcon(tokens.bitcoin, tokens.oraichain)}
-            symbols={'BTC/ORAI'}
-            transactions={allPendingDeposits?.[oraichainAddress]}
-          />
-        </RenderIf>
-        <RenderIf isTrue={!(allPendingDeposits?.[oraichainAddress]?.length > 0)}>
-          <FallbackEmptyData />
-        </RenderIf>
-      </div>
+      <div className={styles.pending_deposits_list}>{checkRenderUI()}</div>
     </div>
   );
 };
