@@ -77,7 +77,7 @@ export const useFetchLpPoolsV3 = (lpAddresses: string[]) => {
 export const getPools = async (): Promise<PoolInfoResponse[]> => {
   try {
     const res = await axios.get('/v1/pools/', {});
-    return res.data ? res.data.filter(pool => pool.symbols !== 'ORAI/BTC') : [];
+    return res.data;
   } catch (e) {
     console.error('getPools', e);
     return [];
@@ -162,7 +162,7 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
     const { totalSupply, totalLiquidity } = pool;
     const myStakedLP = pool.liquidityAddr
       ? totalRewardInfoData?.reward_infos.find((item) => isEqual(item.staking_token, pool.liquidityAddr))
-        ?.bond_amount || '0'
+          ?.bond_amount || '0'
       : 0;
 
     const lpPrice = Number(totalSupply) ? totalLiquidity / Number(totalSupply) : 0;
@@ -173,9 +173,9 @@ export const useGetMyStake = ({ stakerAddress, pairDenoms, tf }: GetStakedByUser
 
   const totalEarned = myStakes
     ? myStakes.reduce((total, current) => {
-      total += current.earnAmountInUsdt;
-      return total;
-    }, 0)
+        total += current.earnAmountInUsdt;
+        return total;
+      }, 0)
     : 0;
 
   return {
