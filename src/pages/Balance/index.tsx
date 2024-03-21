@@ -485,10 +485,9 @@ const Balance: React.FC<BalanceProps> = () => {
           originalToToken: newToToken,
           fromAmount,
           amounts: amountsBalance,
-          isSourceReceiverTest: true,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp), ibcInfoTestMode: true }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
