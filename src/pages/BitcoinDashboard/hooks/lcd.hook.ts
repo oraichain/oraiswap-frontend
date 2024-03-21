@@ -132,28 +132,31 @@ export const useGetDepositFee = (checkpointIndex?: number) => {
   return data;
 };
 
-const getWithdrawalFee = async (btcAddress: String, checkpointIndex?: number): Promise<WithdrawalFeeInterface> => {
-  try {
-    const res = await axios.get(`/bitcoin/withdrawal_fees/${btcAddress}`, {
-      params: {
-        checkpoint_index: checkpointIndex
-      }
-    });
-    return res.data;
-  } catch (e) {
-    console.error('getDepositFee', e);
-    return {
-      withdrawal_fees: 0
-    };
-  }
-};
+
 
 export const useGetWithdrawalFee = (btcAddress: string, checkpointIndex?: number) => {
+  const getWithdrawalFee = async (btcAddress: String, checkpointIndex?: number): Promise<WithdrawalFeeInterface> => {
+    try {
+      const res = await axios.get(`/bitcoin/withdrawal_fees/${btcAddress}`, {
+        params: {
+          checkpoint_index: checkpointIndex
+        }
+      });
+      return res.data;
+    } catch (e) {
+      console.error('getDepositFee', e);
+      return {
+        withdrawal_fees: 0
+      };
+    }
+  };
+  
   const { data } = useQuery(
     ['withdrawal_fees', btcAddress, checkpointIndex],
     () => getWithdrawalFee(btcAddress, checkpointIndex),
     {
       refetchOnWindowFocus: true,
+      enabled: !!btcAddress && !!checkpointIndex,
       staleTime: 10 * 60 * 1000
     }
   );
