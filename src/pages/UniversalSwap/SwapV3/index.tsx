@@ -328,13 +328,12 @@ const SwapComponent: React.FC<{
           simulateAmount,
           userSlippage,
           amounts: amountsBalance,
-          isSourceReceiverTest: true,
           simulatePrice:
             // @ts-ignore
             averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp), ibcInfoTestMode: true }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
       const { transactionHash } = await univeralSwapHandler.processUniversalSwap();
       if (transactionHash) {

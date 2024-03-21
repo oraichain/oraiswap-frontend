@@ -9,7 +9,8 @@ import {
   tronToEthAddress,
   CosmosChainId,
   INJECTIVE_ORAICHAIN_DENOM,
-  INJECTIVE_CONTRACT
+  INJECTIVE_CONTRACT,
+  flattenTokens
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -429,12 +430,15 @@ const Balance: React.FC<BalanceProps> = () => {
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
+        // newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
+        newToToken = flattenTokens.find(
+          (flat) => flat.chainId == toNetworkChainId && flat.coinGeckoId === from.coinGeckoId
+        );
 
-        const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
-        if (isBridgeToCosmosNetwork) {
-          newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
-        }
+        // const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
+        // if (isBridgeToCosmosNetwork) {
+        //   newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
+        // }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
 
@@ -485,10 +489,9 @@ const Balance: React.FC<BalanceProps> = () => {
           originalToToken: newToToken,
           fromAmount,
           amounts: amountsBalance,
-          isSourceReceiverTest: true,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp), ibcInfoTestMode: true }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
