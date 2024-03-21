@@ -7,7 +7,7 @@
   justify-content: space-between;
   align-items: center;
   position: fixed;
-  top: 93px;
+  top: $menu-height;
   left: 218px;
 
   @include mobile {
@@ -15,7 +15,7 @@
   }
 
   right: 0;
-  padding: 10px;
+  padding: 14px;
   padding-left: 80px;
   padding-right: 80px;
 
@@ -28,7 +28,7 @@
   }
 
   @include mobile {
-    top: 85px;
+    top: $menu-height;
     padding: 10px 8px;
   }
 

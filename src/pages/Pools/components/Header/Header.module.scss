@@ -240,6 +240,7 @@
     @include mobile() {
       flex-direction: column;
       padding: 16px;
+      margin-bottom: 0px;
     }
   }
 
@@ -259,6 +260,10 @@
 
     &_item {
       margin-right: 100px;
+
+      @include medium-desktop {
+        margin-right: 50px;
+      }
     }
 
     &_name {

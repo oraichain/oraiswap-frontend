@@ -254,7 +254,7 @@ const SwapComponent: React.FC<{
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
         // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
         fromAmountTokenBalance.toString(),
         userSlippage,
         originalFromToken.decimals
@@ -308,7 +308,7 @@ const SwapComponent: React.FC<{
           userSlippage,
           simulatePrice:
             // @ts-ignore
-            averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+            averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
@@ -346,7 +346,7 @@ const SwapComponent: React.FC<{
         refetchTransHistory();
       }
     } catch (error) {
-      console.log({ error });
+      console.trace({ error });
       handleErrorTransaction(error, {
         tokenName: originalToToken.name,
         chainName: originalToToken.chainId
