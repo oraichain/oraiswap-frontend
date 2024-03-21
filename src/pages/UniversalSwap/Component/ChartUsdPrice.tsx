@@ -8,16 +8,19 @@ import { FILTER_DAY, FILTER_TIME_CHART } from 'reducer/type';
 import styles from './ChartUsdPrice.module.scss';
 import { useChartUsdPrice } from '../hooks/useChartUsdPrice';
 import { formatTimeDataChart } from '../helpers';
+import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
+import { selectCurrentToToken } from 'reducer/tradingSlice';
+import { useSelector } from 'react-redux';
 
 const ChartUsdPrice = ({
   filterDay,
   onUpdateCurrentItem,
-  token,
+  // token,
   activeAnimation = false
 }: {
   filterDay: FILTER_TIME_CHART;
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
-  token?: string;
+  // token?: CoinGeckoId;
   activeAnimation?: boolean;
 }) => {
   const chartRef = useRef(null);
@@ -25,13 +28,14 @@ const ChartUsdPrice = ({
   const serieRef = useRef(null);
   const resizeObserver = useRef(null);
   const [theme] = useConfigReducer('theme');
+  const currentToToken = useSelector(selectCurrentToToken);
 
   const {
     currentData: data,
     currentItem,
     onCrossMove: crossMove,
     onMouseLeave
-  } = useChartUsdPrice(filterDay, onUpdateCurrentItem, token);
+  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -206,7 +210,7 @@ const ChartUsdPrice = ({
   return (
     <div className={`${styles.chartUsdPrice} ${activeAnimation ? styles.activeAnimation : ''}`}>
       <div className={styles.header}>
-        {!token ? null : <div className={styles.value}>{formatDisplayUsdt(currentItem.value || '0')}</div>}
+        {/* {!token ? null : <div className={styles.value}>{formatDisplayUsdt(currentItem.value || '0')}</div>} */}
         <div>{showTime}</div>
       </div>
       <div className={styles.chartContainer}>

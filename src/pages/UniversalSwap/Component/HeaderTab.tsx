@@ -4,7 +4,7 @@ import ChartImg from 'assets/icons/chart.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { reverseSymbolArr } from 'pages/Pools/helpers';
+import { formatDisplayUsdt, numberWithCommas, reverseSymbolArr } from 'pages/Pools/helpers';
 import { useGetPriceChange } from 'pages/Pools/hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -32,7 +32,11 @@ export const HeaderTab: React.FC<{
   setHideChart: (isHideChart: boolean) => void;
   toTokenDenom: string;
   priceUsd: number;
-}> = ({ setHideChart, hideChart, priceUsd }) => {
+  priceChange: {
+    price_change: number;
+    price: number;
+  };
+}> = ({ setHideChart, hideChart, priceUsd, priceChange }) => {
   const theme = useTheme();
 
   const filterTime = useSelector(selectCurrentSwapFilterTime);
@@ -40,6 +44,27 @@ export const HeaderTab: React.FC<{
   const currentToChain = useSelector(selectCurrentToChain);
   const currentToToken = useSelector(selectCurrentToToken);
   const dispatch = useDispatch();
+
+  const { data: prices } = useCoinGeckoPrices();
+  const filterTimeChartUsd = useSelector(selectCurrentSwapFilterTime);
+  const currentPair = useSelector(selectCurrentToken);
+
+  const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
+  const isPairReverseSymbol = reverseSymbolArr.find(
+    (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
+  );
+  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
+
+  const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
+
+  const percentPriceChange = calculateFinalPriceChange(
+    !!isPairReverseSymbol,
+    priceChange.price,
+    priceChange.price_change
+  );
+
+  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
+  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
 
   let IconToToken = DefaultIcon;
   if (currentToToken && Object.keys(currentToToken.IconLight || currentToToken.Icon).length > 0) {
@@ -93,7 +118,22 @@ export const HeaderTab: React.FC<{
       </div>
 
       <div className={cx('headerBottom')}>
-        <div className={cx('priceUsd')}>${priceUsd}</div>
+        <div className={cx('priceUsd')}>
+          {tab === TAB_CHART_SWAP.ORIGINAL ? (
+            <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+          ) : (
+            <div className={cx('bottom')}>
+              <div className={cx('balance')}>
+                {`1 ${baseDenom} ≈ ${
+                  isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
+                } ${isOchOraiPair ? 'USD' : quoteDenom}`}
+              </div>
+              <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
+                {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%
+              </div>
+            </div>
+          )}
+        </div>
         {tab === TAB_CHART_SWAP.ORIGINAL && !hideChart && (
           <div className={cx('filter_day_wrapper')}>
             {LIST_FILTER_TIME.map((e) => {

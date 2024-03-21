@@ -22,7 +22,7 @@ import { PAIRS_CHART } from 'config/pools';
 import { useGetPriceChange } from 'pages/Pools/hooks';
 import ChartUsdPrice from './Component/ChartUsdPrice';
 import { FILTER_DAY, FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
-import { selectCurrentSwapTabChart } from 'reducer/chartSlice';
+import { selectCurrentSwapFilterTime, selectCurrentSwapTabChart } from 'reducer/chartSlice';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import { reverseSymbolArr } from 'pages/Pools/helpers';
 const cx = cn.bind(styles);
@@ -45,13 +45,14 @@ const Swap: React.FC = () => {
 
   const [priceUsd, setPriceUsd] = useState(0);
   const currentPair = useSelector(selectCurrentToken);
-  // const { data: prices } = useCoinGeckoPrices();
+  const { data: prices } = useCoinGeckoPrices();
+  const filterTimeChartUsd = useSelector(selectCurrentSwapFilterTime);
 
   const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
   const isPairReverseSymbol = reverseSymbolArr.find(
     (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
   );
-  // const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
+  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
 
   const tf = useSelector(selectChartTimeFrame);
   const { isLoading, priceChange } = useGetPriceChange({
@@ -60,22 +61,22 @@ const Swap: React.FC = () => {
     tf
   });
 
-  // useEffect(() => {
-  //   if (priceChange && priceChange.price) {
-  //     setPriceUsd(priceChange.price);
-  //   }
-  // }, [priceChange]);
+  useEffect(() => {
+    if (priceChange && priceChange.price) {
+      setPriceUsd(priceChange.price);
+    }
+  }, [priceChange]);
 
   const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
 
-  // const percentPriceChange = calculateFinalPriceChange(
-  //   !!isPairReverseSymbol,
-  //   priceChange.price,
-  //   priceChange.price_change
-  // );
+  const percentPriceChange = calculateFinalPriceChange(
+    !!isPairReverseSymbol,
+    priceChange.price,
+    priceChange.price_change
+  );
 
-  // const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
-  // const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
+  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
+  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
 
   useEffect(() => {
     if (!window.duckDb) initDuckdb();
@@ -98,6 +99,7 @@ const Swap: React.FC = () => {
                     hideChart={hideChart}
                     toTokenDenom={toTokenDenom}
                     priceUsd={priceUsd}
+                    priceChange={priceChange}
                   />
                 )}
                 <div className={cx('tv-chart', hideChart || priceChange.isError ? 'hidden' : '')}>
@@ -111,7 +113,7 @@ const Swap: React.FC = () => {
                   >
                     <ChartUsdPrice
                       activeAnimation={hideChart}
-                      filterDay={FILTER_TIME_CHART.DAY}
+                      filterDay={filterTimeChartUsd}
                       onUpdateCurrentItem={setPriceUsd}
                     />
                   </div>
