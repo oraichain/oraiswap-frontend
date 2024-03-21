@@ -104,7 +104,7 @@ const notAllowSwapFromChainIds = ['0x1ae6', 'kawaii_6886-1', 'oraibridge-subnet-
 const notAllowDenom = Object.values(evmDenomsMap).flat();
 export const swapFromTokens = flattenTokens.filter((token) => {
   return (
-    // token.chainId === 'Oraichain' &&
+    token.chainId === 'Oraichain' &&
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
     !notAllowSwapFromChainIds.includes(token.chainId)
@@ -114,7 +114,7 @@ export const swapFromTokens = flattenTokens.filter((token) => {
 const notAllowSwapToChainIds = ['0x1ae6', 'kawaii_6886-1', 'oraibridge-subnet-2', 'oraibtc-mainnet-1'];
 export const swapToTokens = flattenTokens.filter((token) => {
   return (
-    // token.chainId === 'Oraichain' &&
+    token.chainId === 'Oraichain' &&
     !notAllowDenom.includes(token?.denom) &&
     !notAllowSwapCoingeckoIds.includes(token.coinGeckoId) &&
     !notAllowSwapToChainIds.includes(token.chainId)
