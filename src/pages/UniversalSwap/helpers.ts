@@ -16,9 +16,10 @@ import {
 import {
   isEvmNetworkNativeSwapSupported,
   isSupportedNoPoolSwapEvm,
-  swapEvmRoutes
+  swapEvmRoutes,
+  swapFromTokens,
+  swapToTokens
 } from '@oraichain/oraidex-universal-swap';
-import { swapFromTokens, swapToTokens } from 'config/bridgeTokens';
 import { PAIRS_CHART } from 'config/pools';
 import { networks } from 'helper';
 import { generateError } from 'libs/utils';

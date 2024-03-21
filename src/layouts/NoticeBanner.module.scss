@@ -3,16 +3,21 @@
 
 .noticeWrapper {
   z-index: 900;
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: fixed;
-  top: 91px;
-  padding: 16px;
+  top: $menu-height;
+  left: 218px;
 
-  padding-left: 120px;
-  padding-right: 120px;
+  @include mobile {
+    left: 0;
+  }
+
+  right: 0;
+  padding: 14px;
+  padding-left: 80px;
+  padding-right: 80px;
 
   background: $primary-banner-default;
   color: $dropdown-bg-color-hover-dark;
@@ -23,7 +28,7 @@
   }
 
   @include mobile {
-    top: 85px;
+    top: $menu-height;
     padding: 10px 8px;
   }
 
@@ -86,6 +91,7 @@
 
   .closeBanner {
     cursor: pointer;
+
     svg {
       margin-left: 4px;
       vertical-align: middle;

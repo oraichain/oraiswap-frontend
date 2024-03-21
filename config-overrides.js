@@ -4,7 +4,8 @@ const path = require('path');
 const webpack = require('webpack');
 const { execFileSync } = require('child_process');
 const paths = require('react-scripts/config/paths');
-
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const fallback = {
   fs: false,
   tls: false,
@@ -20,7 +21,6 @@ const fallback = {
   buffer: require.resolve('buffer'),
   https: require.resolve('https-browserify')
 };
-
 const fixBabelRules = (config) => {
   // find first loader and use babel.config.js
   let ruleInd = 0;
@@ -48,18 +48,26 @@ const fixBabelRules = (config) => {
     ruleInd++;
   }
 };
-
 module.exports = {
   fallback,
   webpack: function (config, env) {
-    const isDevelopment = env === 'development';
     fixBabelRules(config);
-
-    config.resolve.fallback = fallback;
+    config.module.rules = [
+      ...config.module.rules,
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
+      }
+    ];
+    const isDevelopment = env === 'development';
 
     // do not check issues
     config.plugins = config.plugins.filter((plugin) => plugin.constructor.name !== 'ForkTsCheckerWebpackPlugin');
+    config.resolve.plugins = config.resolve.plugins.filter((plugin) => !(plugin instanceof ModuleScopePlugin));
 
+    config.plugins = [...config.plugins, new NodePolyfillPlugin()];
     // update vendor hash
     const vendorPath = path.resolve('node_modules', '.cache', 'vendor');
     const vendorHash = webpack.util.createHash('sha256').update(fs.readFileSync('yarn.lock')).digest('hex').slice(-8);
@@ -100,11 +108,11 @@ module.exports = {
     config.plugins.push(
       new webpack.DllReferencePlugin({
         context: __dirname,
-        manifest
+        manifest,
+        scope: 'src'
       })
     );
     return config;
-    // return rewiredEsbuild(config, env);
   },
   jest: (config) => {
     config.setupFiles = ['<rootDir>/jest.setup.ts'];

@@ -21,6 +21,7 @@ export const ModalDisconnect: React.FC<{
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
   const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
+  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const { isCopied, copiedValue, handleCopy } = useCopyClipboard();
 
@@ -36,6 +37,9 @@ export const ModalDisconnect: React.FC<{
     switch (currentDisconnectingNetwork) {
       case 'cosmos':
         choosedAddressDisplayByNetwork = oraiAddress;
+        break;
+      case 'bitcoin':
+        choosedAddressDisplayByNetwork = btcAddress;
         break;
       case 'evm':
         choosedAddressDisplayByNetwork = metamaskAddress;
@@ -64,6 +68,9 @@ export const ModalDisconnect: React.FC<{
         break;
       case 'evm':
         setMetamaskAddress(undefined);
+        break;
+      case 'bitcoin':
+        setBtcAddress(undefined);
         break;
       case 'tron':
         setTronAddress(undefined);

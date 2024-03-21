@@ -1,20 +1,31 @@
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
 import { ReactComponent as DownArrowIcon } from 'assets/icons/down-arrow.svg';
+import { ReactComponent as BridgeIcon } from 'assets/icons/ic_bridge.svg';
+import { ReactComponent as CohavestIcon } from 'assets/icons/ic_cohavest.svg';
+import { ReactComponent as ExternalLinkIcon } from 'assets/icons/ic_external_link.svg';
+import { ReactComponent as FuturesIcon } from 'assets/icons/ic_futures.svg';
+import { ReactComponent as HelpIcon } from 'assets/icons/ic_help.svg';
+import { ReactComponent as KadoIcon } from 'assets/icons/ic_kado.svg';
+import { ReactComponent as OrderbookIcon } from 'assets/icons/ic_orderbook.svg';
+import { ReactComponent as PoolIcon } from 'assets/icons/ic_pools.svg';
+import { ReactComponent as StakingIcon } from 'assets/icons/ic_staking.svg';
+import { ReactComponent as SupportIcon } from 'assets/icons/ic_support.svg';
+import { ReactComponent as TelegramIcon } from 'assets/icons/ic_telegram.svg';
+import { ReactComponent as TwitterIcon } from 'assets/icons/ic_twitter.svg';
+import { ReactComponent as UniversalSwapIcon } from 'assets/icons/ic_universalswap.svg';
 import { ReactComponent as MenuIcon } from 'assets/icons/menu.svg';
-import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import LogoFullImgDark from 'assets/images/OraiDEX_full_dark.svg';
+import LogoFullImgLight from 'assets/images/OraiDEX_full_light.svg';
 import classNames from 'classnames';
-// import ConnectWallet from 'components/ConnectWallet';
 import TooltipContainer from 'components/ConnectWallet/TooltipContainer';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
+import { WalletManagement } from 'components/WalletManagement/WalletManagement';
 import { ThemeContext } from 'context/theme-context';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import styles from './Menu.module.scss';
 import BuyOraiModal from './BuyOraiModal';
-import { WalletManagement } from 'components/WalletManagement/WalletManagement';
+import styles from './Menu.module.scss';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -24,6 +35,7 @@ const Menu: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [openBuy, setOpenBuy] = useState(false);
   const [isLoadedIframe, setIsLoadedIframe] = useState(false); // check iframe data loaded
+  const [isOpenSubMenuMobile, setIsOpenSubMenuMobile] = useState(false);
 
   const ref = useRef(null);
   useOnClickOutside(ref, () => {
@@ -36,22 +48,14 @@ const Menu: React.FC = () => {
     setLink(location.pathname);
   }, [location.pathname]);
 
-  const renderLink = (to: string, title: string, onClick: any, externalLink = false) => {
-    if (to === 'coming-soon') {
-      return (
-        <span
-          className={classNames(styles.menu_item, { [styles.active]: link === to }, styles[theme], styles.spin)}
-          onClick={() => {
-            displayToast(TToastType.TX_INFO, {
-              message: `Coming soon!`
-            });
-          }}
-        >
-          <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
-        </span>
-      );
-    }
-
+  const renderLink = (
+    to: string,
+    title: string,
+    onClick: any,
+    externalLink = false,
+    Icon?: ReactNode,
+    isExternalIcon = true
+  ) => {
     if (externalLink)
       return (
         <a
@@ -64,7 +68,13 @@ const Menu: React.FC = () => {
           }}
           rel="noreferrer"
         >
+          {Icon}
           <span className={classNames(styles[theme], styles.menu_item_text)}>{title}</span>
+          {isExternalIcon && (
+            <div className={styles.hoverIcon}>
+              <ExternalLinkIcon />
+            </div>
+          )}
         </a>
       );
     return (
@@ -81,6 +91,7 @@ const Menu: React.FC = () => {
           styles.spin
         )}
       >
+        {Icon}
         <span className={classNames(styles.menu_item_text, { [styles.active]: link === to }, styles[theme])}>
           {title}
         </span>
@@ -94,62 +105,51 @@ const Menu: React.FC = () => {
 
   const menuList = (
     <div className={classNames(styles.menu_list)}>
-      {renderLink('/universalswap', 'SWAP', setLink)}
-      {renderLink('/bridge', 'BRIDGE', setLink)}
-      {renderLink('/pools', 'POOLS', setLink)}
-      {renderLink('/staking', 'STAKING', setLink)}
-      {renderLink('/co-harvest', 'CO-HARVEST', setLink)}
-      {renderLink('https://orderbook.oraidex.io', 'ORDER BOOK', () => {}, true)}
-      {renderLink('https://futures.oraidex.io', 'FUTURES', () => {}, true)}
-      {/* {renderLink('https://beta.oraidex.io', 'BETA', () => {}, true)} */}
-      {mobileMode ? (
-        <>
-          {renderLink('#', 'BUY ORAI', () => {
-            setOpenBuy(true);
-          })}
-          {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-        </>
-      ) : (
-        <>
-          <div
-            onClick={() => {
-              setOtherActive(!otherActive);
-            }}
-            className={classNames(styles.menu_item, { [styles.active]: otherActive }, styles[theme], styles.spin)}
-          >
-            <span className={classNames(styles.menu_item_text, { [styles.active]: otherActive }, styles[theme])}>
-              {'OTHERS'}
-              <DownArrowIcon />
-            </span>
-          </div>
+      <div className={classNames(styles.menu_list_left)}>
+        {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
+        {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
+      </div>
+    </div>
+  );
 
-          <TooltipContainer
-            placement="bottom-end"
-            visible={otherActive}
-            setVisible={() => setOtherActive(!otherActive)}
-            content={
-              <div className={classNames(styles.menu_others_list, styles[theme])}>
-                {renderLink('#', 'BUY ORAI', () => {
-                  setOpenBuy(true);
-                  setOtherActive(!otherActive);
-                })}
-                {renderLink('https://legacy-v2.oraidex.io/', 'OraiDEX Legacy', () => {}, true)}
-              </div>
-            }
-          />
-        </>
-      )}
-
-      {openBuy && (
-        <BuyOraiModal
-          open={openBuy}
-          close={() => {
-            setOpenBuy(false);
-            setIsLoadedIframe(false);
-          }}
-          onAfterLoad={() => setIsLoadedIframe(true)}
-          isLoadedIframe={isLoadedIframe}
-        />
+  const menuListMobile = (
+    <div className={classNames(styles.menu_list)}>
+      {renderLink('/universalswap', 'Swap', setLink, false, <UniversalSwapIcon />)}
+      {renderLink('/bridge', 'Bridge', setLink, false, <BridgeIcon />)}
+      {renderLink('/pools', 'Pools', setLink, false, <PoolIcon />)}
+      {renderLink('/staking', 'Staking', setLink, false, <StakingIcon />)}
+      {renderLink('/co-harvest', 'Co-Harvest', setLink, false, <CohavestIcon />)}
+      <div className={styles.divider}></div>
+      {renderLink('https://orderbook.oraidex.io', 'Order Book', () => {}, true, <OrderbookIcon />)}
+      {renderLink('https://futures.oraidex.io', 'Futures Trading', () => {}, true, <FuturesIcon />)}
+      <div className={styles.divider}></div>
+      <div
+        onClick={() => {
+          setIsOpenSubMenuMobile(!isOpenSubMenuMobile);
+        }}
+        className={classNames(styles.menu_item, styles.menu_item_help, styles[theme])}
+      >
+        <div className={styles.menu_item_help_left}>
+          <HelpIcon />
+          <span className={classNames(styles.menu_item_text, styles[theme])}>{'Help'}</span>
+        </div>
+        <DownArrowIcon />
+      </div>
+      <div
+        className={classNames(styles.mobile_sub_menu, isOpenSubMenuMobile ? styles.openSubMenu : null, styles[theme])}
+      >
+        {renderLink('https://t.me/oraidex', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
+        {renderLink('https://twitter.com/oraidex', 'Twitter', () => {}, true, <TwitterIcon />, false)}
+        {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
+      </div>
+      {renderLink(
+        '#',
+        'Buy ORAI',
+        () => {
+          setOpenBuy(true);
+        },
+        false,
+        <KadoIcon />
       )}
     </div>
   );
@@ -169,22 +169,75 @@ const Menu: React.FC = () => {
           </div>
 
           <div ref={ref} className={classNames(styles.sideMenu, { [styles.open]: open })}>
-            {menuList}
+            {menuListMobile}
           </div>
         </>
       ) : (
         <div className={classNames(styles.menu)}>
           <div className={styles.menuLeft}>
-            <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-              <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
-            </Link>
-            <div className={styles.divider}></div>
+            <div className={styles.logoWrapper}>
+              <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
+                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+              </Link>
+              <div className={styles.divider}></div>
+            </div>
             {menuList}
           </div>
-          <div className={classNames(styles.connect_wallet_wrapper)}>
-            <span>
-              <WalletManagement />
-            </span>
+          <div className={classNames(styles.menuRight)}>
+            <div className={classNames(styles.menu_list_right)}>
+              <div
+                onClick={() => {
+                  setOtherActive(!otherActive);
+                }}
+                className={classNames(styles.menu_item, { [styles.active]: otherActive }, styles[theme], styles.spin)}
+              >
+                <HelpIcon />
+                <span className={classNames(styles.menu_item_text, { [styles.active]: otherActive }, styles[theme])}>
+                  {'Help'}
+                </span>
+                <DownArrowIcon />
+              </div>
+
+              <TooltipContainer
+                placement="auto-end"
+                visible={otherActive}
+                setVisible={() => setOtherActive(!otherActive)}
+                content={
+                  <div className={classNames(styles.menu_others_list, styles[theme])}>
+                    {renderLink('https://t.me/oraidex', 'Join our Community', () => {}, true, <TelegramIcon />, false)}
+                    {renderLink('https://twitter.com/oraidex', 'Twitter', () => {}, true, <TwitterIcon />, false)}
+                    {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
+                  </div>
+                }
+              />
+              {renderLink(
+                '#',
+                'Buy ORAI',
+                () => {
+                  setOpenBuy(true);
+                },
+                false,
+                <KadoIcon />
+              )}
+            </div>
+
+            {openBuy && (
+              <BuyOraiModal
+                open={openBuy}
+                close={() => {
+                  setOpenBuy(false);
+                  setIsLoadedIframe(false);
+                }}
+                onAfterLoad={() => setIsLoadedIframe(true)}
+                isLoadedIframe={isLoadedIframe}
+              />
+            )}
+            <div className={styles.divider}></div>
+            <div className={classNames(styles.connect_wallet_wrapper)}>
+              <span>
+                <WalletManagement />
+              </span>
+            </div>
           </div>
         </div>
       )}

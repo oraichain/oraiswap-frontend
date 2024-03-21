@@ -24,47 +24,47 @@ const BiddingChart = (props: { round: number; bidInfo }) => {
   const [theme] = useConfigReducer('theme');
 
   return (
-    <div className={styles.biddingChart}>
-      <div className={styles.title}>
-        <span className={styles.titleLeft}>Pools</span>
-        <div className={styles.titleRight}>
-          <div className={styles.subtitle}>
-            <span>Total Bid</span>
-            <TooltipIconBtn
-              placement="auto"
-              visible={visible}
-              setVisible={setVisible}
-              content={
-                <div className={`${styles.tooltip} ${styles[theme]}`}>
-                  Total amount of ORAIX currently allocated across all Co-Harvest Pools (Bonus levels)
-                </div>
-              }
-            />
-          </div>
-          <div className={styles.balance}>
-            <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
-            {'('}
-            <div className={styles.token}>{numberWithCommas(toDisplay(totalBidAmount))} ORAIX</div>
-            {')'}
+      <div className={styles.biddingChart}>
+        <div className={styles.title}>
+          <span className={styles.titleLeft}>Pools</span>
+          <div className={styles.titleRight}>
+            <div className={styles.subtitle}>
+              <span>Total Bid</span>
+              <TooltipIconBtn
+                  placement="auto"
+                  visible={visible}
+                  setVisible={setVisible}
+                  content={
+                    <div className={`${styles.tooltip} ${styles[theme]}`}>
+                      Total amount of ORAIX currently allocated across all Co-Harvest Pools (Bonus levels)
+                    </div>
+                  }
+              />
+            </div>
+            <div className={styles.balance}>
+              <div className={styles.usd}>{formatDisplayUsdt(amountUsd)}</div>
+              {'('}
+              <div className={styles.token}>{numberWithCommas(toDisplay(totalBidAmount))} ORAIX</div>
+              {')'}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.content}>
-        <div className={styles.columnList}>
-          {allBidPoolRound.map((e, key) => (
-            <ChartColumn
-              key={key}
-              data={{
-                percent: e.percentage,
-                volume: formatNumberKMB(getUsd(e.total_bid_amount, ORAIX_TOKEN_INFO, prices)),
-                interest: e.slot
-              }}
-            />
-          ))}
+        <div className={styles.content}>
+          <div className={styles.columnList}>
+            {allBidPoolRound.map((e, key) => (
+                <ChartColumn
+                    key={key}
+                    data={{
+                      percent: e.percentage,
+                      volume: formatNumberKMB(getUsd(e.total_bid_amount, ORAIX_TOKEN_INFO, prices)),
+                      interest: e.slot
+                    }}
+                />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

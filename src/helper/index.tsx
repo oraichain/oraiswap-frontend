@@ -17,8 +17,9 @@ import { network } from 'config/networks';
 import { serializeError } from 'serialize-error';
 
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { Bech32Config } from '@keplr-wallet/types';
+import { bitcoinChainId, leapSnapId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
+import { Bech32Config } from '@keplr-wallet/types';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -26,7 +27,6 @@ import { WalletType } from 'components/WalletManagement/walletConfig';
 import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
-import { leapSnapId } from './constants';
 import { WalletsByNetwork } from 'reducer/wallet';
 
 export interface Tokens {
@@ -43,13 +43,18 @@ export interface InfoError {
 export type DecimalLike = string | number | bigint | BigDecimal;
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const EVM_CHAIN_ID: NetworkChainId[] = evmChains.map((c) => c.chainId);
-export const networks = chainInfos.filter((c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== '0x1ae6');
+export const networks = chainInfos.filter(
+  (c) => c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any) && c.chainId !== '0x1ae6'
+);
 export const cosmosNetworks = chainInfos.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
+  (c) =>
+    c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any)
 );
 
+export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === bitcoinChainId);
 export const cosmosNetworksWithIcon = chainInfosWithIcon.filter(
-  (c) => c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge
+  (c) =>
+    c.networkType === 'cosmos' && c.chainId !== ChainIdEnum.OraiBridge && c.chainId !== ('oraibtc-mainnet-1' as any)
 );
 
 export const evmNetworksWithoutTron = chainInfos.filter((c) => c.networkType === 'evm' && c.chainId !== '0x2b6653dc');
@@ -60,6 +65,7 @@ export const evmNetworksIconWithoutTron = chainInfosWithIcon.filter(
 // export const bitcoinNetworks = chainInfos.filter((c) => c.chainId === ChainIdEnum.Bitcoin);
 export const tronNetworks = chainInfos.filter((c) => c.chainId === '0x2b6653dc');
 export const tronNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === '0x2b6653dc');
+export const btcNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId === bitcoinChainId);
 
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
@@ -430,7 +436,7 @@ const checkErrorObj = (info) => {
 };
 export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
   let chainInfoData = [...chainInfos];
-  return (chainInfoData as any).map((info) => {
+  return chainInfoData.map((info) => {
     const infoWithoutIcon = checkErrorObj(info);
 
     const currenciesWithoutIcons = info.currencies.map((currency) => {
@@ -471,6 +477,16 @@ export const getListAddressCosmosByLeapSnap = async () => {
     }
   }
   return { listAddressCosmos };
+};
+export const timeAgo = (timestamp = 0) => {
+  if (!timestamp) return 'in 0 day';
+  const now = Date.now();
+  const diffInSeconds = Math.floor((now - timestamp) / 1000);
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  return rtf.format(-diffInDays, 'day');
 };
 
 export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
