@@ -611,7 +611,7 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
 
 export const useGetWithdrawlFeesBitcoin = ({
   enabled,
-  bitcoinAddress
+  bitcoinAddress,
 }: {
   enabled: boolean;
   bitcoinAddress: string;
