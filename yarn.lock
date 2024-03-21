@@ -2996,9 +2996,9 @@
     react-use-websocket "^4.5.0"
 
 "@oraichain/oraidex-common@^1.0.58":
-  version "1.0.74"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.74.tgz#8858c2bb8adacfdf8e6e9362c1875cfff1888c12"
-  integrity sha512-g8zIMEmN8gGJkLgP7/wSev4BgwLb8WZ/IkclQsp7jvg/mNbBLQ+f8lRJCm3JqF8jMs1YL9DmymxGGgnUoFGCPA==
+  version "1.0.78"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-common/-/oraidex-common-1.0.78.tgz#4f17359f333ba1e4bae803b7c4b0ee4ec8f98fa1"
+  integrity sha512-CZvjODAQf3G4J/W5UE97uQteNQ/9a34Ff+EtTRn99li78YLG45OinzNl+AN8sSSUw7KMbdNWI7249z51J2jEOg==
   dependencies:
     "@cosmjs/amino" "^0.31.0"
     "@cosmjs/cosmwasm-stargate" "^0.31.0"
@@ -3007,6 +3007,7 @@
     "@cosmjs/stargate" "^0.31.0"
     "@cosmjs/tendermint-rpc" "0.31.0"
     "@ethersproject/providers" "^5.0.10"
+    "@injectivelabs/sdk-ts" "1.12.1"
     "@keplr-wallet/types" "^0.11.38"
     "@oraichain/oraidex-contracts-sdk" "^1.0.30"
     bignumber.js "^9.0.1"
@@ -3024,15 +3025,16 @@
   integrity sha512-fxfzYJWYFl4eLFwnENTm1CeL838cTU4MriLA8AwzFGodQyoxaxs4f/uqFbS/mDjWct4yVJm9rqi0T3UOIkTW4g==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.58"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.58.tgz#37156ce8532fced5174aacb61716a2d05d4f15d8"
-  integrity sha512-2DJrzEo6l8JfJTkqcpMgS/vcI8hvPRmlsQW0xgN1TKMwa3u6Q2A6QS9MToHdlR9BE+EWXLkq1lkunAm5mTmQIA==
+  version "1.0.59"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.59.tgz#d562e46434041ff770154c3694091ed068e792fb"
+  integrity sha512-RkYmpyUPrvLrx65mIN3/p0yCFCef1OgIjoRgBFRV8WsDXnfazbskIXFnULEXL5e8xvkdKwQWJ5J3n+/BZYvcSA==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.58"
     "@oraichain/oraidex-contracts-sdk" "^1.0.24"
     bech32 "1.1.4"
     ethers "^5.0.15"
     tronweb "5.3.0"
+    ts-protoc-gen "^0.15.0"
 
 "@oraichain/wasm-json-toolkit@^1.0.24":
   version "1.0.24"
@@ -9197,7 +9199,7 @@ google-p12-pem@^4.0.0:
   dependencies:
     node-forge "^1.3.1"
 
-google-protobuf@^3.14.0, google-protobuf@^3.19.4, google-protobuf@^3.21.0:
+google-protobuf@^3.14.0, google-protobuf@^3.15.5, google-protobuf@^3.19.4, google-protobuf@^3.21.0:
   version "3.21.2"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.21.2.tgz#4580a2bea8bbb291ee579d1fefb14d6fa3070ea4"
   integrity sha512-3MSOYFO5U9mPGikIYCzK0SaThypfGgS6bHqrUGXG3DPHCrb+txNqeEcns1W0lkGfk0rCyNXm7xB9rMxnCiZOoA==
@@ -15811,6 +15813,13 @@ ts-jest@^29.1.1:
     make-error "1.x"
     semver "^7.5.3"
     yargs-parser "^21.0.1"
+
+ts-protoc-gen@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/ts-protoc-gen/-/ts-protoc-gen-0.15.0.tgz#2fec5930b46def7dcc9fa73c060d770b7b076b7b"
+  integrity sha512-TycnzEyrdVDlATJ3bWFTtra3SCiEP0W0vySXReAuEygXCUr1j2uaVyL0DhzjwuUdQoW5oXPwk6oZWeA0955V+g==
+  dependencies:
+    google-protobuf "^3.15.5"
 
 ts-results@^3.3.0:
   version "3.3.0"
