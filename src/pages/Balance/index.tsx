@@ -460,6 +460,7 @@ const Balance: React.FC<BalanceProps> = () => {
       }
 
       let amountsBalance = amounts;
+      let simulateAmount = toAmount(fromAmount).toString();
       if (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') {
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, INJECTIVE_ORAICHAIN_DENOM),
@@ -474,6 +475,7 @@ const Balance: React.FC<BalanceProps> = () => {
           [INJECTIVE_CONTRACT]: cw20Amount?.balance,
           injective: cw20Amount?.balance
         };
+        simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
       const universalSwapHandler = new UniversalSwapHandler(
@@ -484,7 +486,7 @@ const Balance: React.FC<BalanceProps> = () => {
           fromAmount,
           amounts: amountsBalance,
           isSourceReceiverTest: true,
-          simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
+          simulateAmount
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp), ibcInfoTestMode: true }
       );
