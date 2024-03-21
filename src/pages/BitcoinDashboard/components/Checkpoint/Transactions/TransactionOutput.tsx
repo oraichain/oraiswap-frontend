@@ -80,25 +80,24 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
       accessor: (data) => <span>{toDisplay(BigInt(data.value || 0), 8)} BTC</span>
     }
   };
-
-  return (
-    <div className={styles.transactions}>
-      <h2 className={styles.transactions_title}>Transaction Outputs:</h2>
-      <div className={styles.transactions_list}>
-        <RenderIf isTrue={!mobile && (data?.length || 0) > 0}>
-          <Table headers={headers} data={data} defaultSorted="address" />
-        </RenderIf>
-        <RenderIf isTrue={mobile && (data?.length || 0) > 0}>
+  const checkRenderUI = () => {
+    if (data?.length > 0) {
+      if (mobile)
+        return (
           <TransactionsMobile
             generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
             symbols={'ORAI/BTC'}
             transactions={data}
           />
-        </RenderIf>
-        <RenderIf isTrue={!((data?.length || 0) > 0)}>
-          <FallbackEmptyData />
-        </RenderIf>
-      </div>
+        );
+      return <Table headers={headers} data={data} defaultSorted="address" />;
+    }
+    return <FallbackEmptyData />;
+  };
+  return (
+    <div className={styles.transactions}>
+      <h2 className={styles.transactions_title}>Transaction Outputs:</h2>
+      <div className={styles.transactions_list}>{checkRenderUI()}</div>
     </div>
   );
 };

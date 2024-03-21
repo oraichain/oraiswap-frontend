@@ -21,7 +21,12 @@
 
     @include mobile {
       width: 100%;
-      margin-top: 16px;
+      margin-top: 8px;
+
+      input {
+        width: 100%;
+        margin-right: 0;
+      }
     }
   }
 }
