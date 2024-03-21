@@ -1,6 +1,6 @@
 import styles from './index.module.scss';
-import StakingImg from 'assets/images/staking.svg';
-import StakingDarkImg from 'assets/images/staking_dark.svg';
+import StakingImg from 'assets/images/staking.webp';
+import StakingDarkImg from 'assets/images/staking_dark.webp';
 import useConfigReducer from 'hooks/useConfigReducer';
 
 const Header = () => {
