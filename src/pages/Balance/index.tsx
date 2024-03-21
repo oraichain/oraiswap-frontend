@@ -7,7 +7,9 @@ import {
   findToTokenOnOraiBridge,
   toAmount,
   tronToEthAddress,
-  CosmosChainId
+  CosmosChainId,
+  INJECTIVE_ORAICHAIN_DENOM,
+  INJECTIVE_CONTRACT
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -439,12 +441,6 @@ const Balance: React.FC<BalanceProps> = () => {
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
-      // TODO: hardcode check case USDC oraichain -> USDC noble
-      const isToNobleChain = toNetworkChainId === 'noble-1';
-      if (from.cosmosBased && !isToNobleChain) {
-        return await handleTransferIBC(from, newToToken, fromAmount);
-      }
-
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
@@ -463,23 +459,37 @@ const Balance: React.FC<BalanceProps> = () => {
         latestEvmAddress = await window.Metamask.getEthAddress();
       }
 
+      let amountsBalance = amounts;
+      if (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') {
+        const [nativeAmount, cw20Amount] = await Promise.all([
+          window.client.getBalance(oraiAddress, INJECTIVE_ORAICHAIN_DENOM),
+          window.client.queryContractSmart(INJECTIVE_CONTRACT, {
+            balance: {
+              address: oraiAddress
+            }
+          })
+        ]);
+        amountsBalance = {
+          [INJECTIVE_ORAICHAIN_DENOM]: nativeAmount?.amount,
+          [INJECTIVE_CONTRACT]: cw20Amount?.balance,
+          injective: cw20Amount?.balance
+        };
+      }
+
       const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
+          amounts: amountsBalance,
+          isSourceReceiverTest: true,
           simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
+        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp), ibcInfoTestMode: true }
       );
 
-      const { swapRoute } = addOraiBridgeRoute(cosmosAddress, from, newToToken);
-      // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
-      // so we use this func just for Noble, and handleTransferIBC for other.
-      if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
-      else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
-
+      result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex, {
@@ -487,7 +497,11 @@ const Balance: React.FC<BalanceProps> = () => {
         chainName: toNetworkChainId
       });
       // Add log sentry Oraichain -> Noble-1
-      if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
+      if (
+        process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production' &&
+        from.chainId === 'Oraichain' &&
+        toNetworkChainId === 'noble-1'
+      ) {
         const errorMsg = handleErrorMsg(ex);
         Sentry.captureException(
           `${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`

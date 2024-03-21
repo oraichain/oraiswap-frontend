@@ -313,7 +313,8 @@ const SwapComponent: React.FC<{
         ]);
         amountsBalance = {
           [INJECTIVE_ORAICHAIN_DENOM]: nativeAmount?.amount,
-          [INJECTIVE_CONTRACT]: cw20Amount?.balance
+          [INJECTIVE_CONTRACT]: cw20Amount?.balance,
+          injective: cw20Amount?.balance
         };
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
