@@ -444,6 +444,9 @@ const Balance: React.FC<BalanceProps> = () => {
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
 
+      // TODO: hardcode case Neutaro-1
+      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
+
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
