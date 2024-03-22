@@ -38,7 +38,8 @@ import {
   networks,
   EVM_CHAIN_ID,
   handleCheckAddress,
-  subNumber
+  subNumber,
+  handleCheckChainEvmWallet
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -380,6 +381,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     await handleCheckWallet();
 
+    await handleCheckChainEvmWallet(from.chainId);
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
@@ -501,17 +503,6 @@ const Balance: React.FC<BalanceProps> = () => {
         tokenName: from.name,
         chainName: toNetworkChainId
       });
-      // Add log sentry Oraichain -> Noble-1
-      if (
-        process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production' &&
-        from.chainId === 'Oraichain' &&
-        toNetworkChainId === 'noble-1'
-      ) {
-        const errorMsg = handleErrorMsg(ex);
-        Sentry.captureException(
-          `${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`
-        );
-      }
     }
   };
 
