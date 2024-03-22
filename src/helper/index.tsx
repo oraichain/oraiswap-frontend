@@ -166,7 +166,7 @@ export const handleCheckChainEvmWallet = async (fromChainId) => {
     const fromChainInfo = evmChainInfos.find((evm) => Number(evm.chainId) === Number(fromChainId));
     if (fromChainInfo) {
       try {
-        await window.ethereum.request({
+        await window.ethereumDapp.request({
           method: 'wallet_addEthereumChain',
           params: [fromChainInfo]
         });
