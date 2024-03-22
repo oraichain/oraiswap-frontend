@@ -1,4 +1,4 @@
-import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { TokenItemType, toDisplay, pairLpTokens } from '@oraichain/oraidex-common';
 import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
@@ -70,21 +70,23 @@ export const PoolMobileItem: React.FC<PoolMobileItemProps> = ({ pool, setPairDen
           </span>
         </div>
       </div>
-      <div className={styles.btnAddLp}>
-        <Button
-          type="primary-sm"
-          onClick={(event) => {
-            event.stopPropagation();
-            setPairDenomsDeposit(
-              `${parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo))}_${parseAssetOnlyDenom(
-                JSON.parse(pool.secondAssetInfo)
-              )}`
-            );
-          }}
-        >
-          Add
-        </Button>
-      </div>
+      {pool?.liquidityAddr !== pairLpTokens.ORAI_BTC && (
+        <div className={styles.btnAddLp}>
+          <Button
+            type="primary-sm"
+            onClick={(event) => {
+              event.stopPropagation();
+              setPairDenomsDeposit(
+                `${parseAssetOnlyDenom(JSON.parse(pool.firstAssetInfo))}_${parseAssetOnlyDenom(
+                  JSON.parse(pool.secondAssetInfo)
+                )}`
+              );
+            }}
+          >
+            Add
+          </Button>
+        </div>
+      )}
     </article>
   );
 };

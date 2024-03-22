@@ -1,4 +1,4 @@
-import { CW20_DECIMALS, toDisplay } from '@oraichain/oraidex-common';
+import { CW20_DECIMALS, toDisplay, pairLpTokens } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as DepositIcon } from 'assets/icons/ic_deposit.svg';
 import { ReactComponent as StakingIcon } from 'assets/icons/ic_stake.svg';
@@ -87,9 +87,11 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
           >
             Withdraw LP
           </Button>
-          <Button type={primaryType} onClick={() => setModal('deposit')} icon={<DepositIcon />}>
-            Deposit
-          </Button>
+          {poolDetail?.info?.liquidityAddr !== pairLpTokens.ORAI_BTC && (
+            <Button type={primaryType} onClick={() => setModal('deposit')} icon={<DepositIcon />}>
+              Deposit
+            </Button>
+          )}
         </div>
       </div>
 
@@ -132,9 +134,11 @@ export const MyPoolInfo: FC<Props> = ({ myLpBalance, onLiquidityChange }) => {
             >
               Unstake LP
             </Button>
-            <Button type={primaryType} onClick={() => setModal('stake')} icon={<StakingIcon />}>
-              Stake LP
-            </Button>{' '}
+            {poolDetail?.info?.liquidityAddr !== pairLpTokens.ORAI_BTC && (
+              <Button type={primaryType} onClick={() => setModal('stake')} icon={<StakingIcon />}>
+                Stake LP
+              </Button>
+            )}
           </div>
         </div>
       </div>

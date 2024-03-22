@@ -1,4 +1,4 @@
-import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { TokenItemType, toDisplay, pairLpTokens } from '@oraichain/oraidex-common';
 import { ReactComponent as BoostIconDark } from 'assets/icons/boost-icon-dark.svg';
 import { ReactComponent as BoostIconLight } from 'assets/icons/boost-icon.svg';
 import { Button } from 'components/Button';
@@ -101,19 +101,21 @@ export const ListPools: React.FC<ListPoolProps> = ({ poolTableData, generateIcon
           <span style={{ marginRight: 15 }}>
             {formatDisplayUsdt(toDisplay(parseInt(data.totalLiquidity.toString()).toString()))}
           </span>
-          <Button
-            type="primary-sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              setPairDenomsDeposit(
-                `${parseAssetOnlyDenom(JSON.parse(data.firstAssetInfo))}_${parseAssetOnlyDenom(
-                  JSON.parse(data.secondAssetInfo)
-                )}`
-              );
-            }}
-          >
-            Add
-          </Button>
+          {data?.liquidityAddr !== pairLpTokens.ORAI_BTC && (
+            <Button
+              type="primary-sm"
+              onClick={(event) => {
+                event.stopPropagation();
+                setPairDenomsDeposit(
+                  `${parseAssetOnlyDenom(JSON.parse(data.firstAssetInfo))}_${parseAssetOnlyDenom(
+                    JSON.parse(data.secondAssetInfo)
+                  )}`
+                );
+              }}
+            >
+              Add
+            </Button>
+          )}
         </div>
       )
     }
