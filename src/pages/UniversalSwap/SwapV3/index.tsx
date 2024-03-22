@@ -35,6 +35,7 @@ import {
   getAddressTransfer,
   getTransactionUrl,
   handleCheckAddress,
+  handleCheckChainEvmWallet,
   handleErrorTransaction,
   networks
 } from 'helper';
@@ -288,6 +289,8 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      await handleCheckChainEvmWallet(originalFromToken.chainId);
+
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );

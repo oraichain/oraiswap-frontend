@@ -28,6 +28,7 @@ import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
+import { evmChainInfos } from 'config/evmChainInfos';
 
 export interface Tokens {
   denom?: string;
@@ -155,6 +156,24 @@ export const handleCheckWallet = async () => {
   const keplr = await window.Keplr.getKeplr();
   if (!keplr && walletType !== 'eip191') {
     return displayInstallWallet();
+  }
+};
+
+export const handleCheckChainEvmWallet = async (fromChainId) => {
+  const supportedChainIds = ['0x01', '0x38'];
+
+  if (supportedChainIds.includes(fromChainId)) {
+    const fromChainInfo = evmChainInfos.find((evm) => Number(evm.chainId) === Number(fromChainId));
+    if (fromChainInfo) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [fromChainInfo]
+        });
+      } catch (error) {
+        console.error('Error adding Ethereum chain:', error);
+      }
+    }
   }
 };
 
