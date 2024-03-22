@@ -381,7 +381,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     await handleCheckWallet();
 
-    await handleCheckChainEvmWallet(from.chainId);
+    // await handleCheckChainEvmWallet(from.chainId);
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
