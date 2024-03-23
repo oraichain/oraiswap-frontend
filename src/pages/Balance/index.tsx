@@ -444,12 +444,12 @@ const Balance: React.FC<BalanceProps> = () => {
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
 
-      // TODO: hardcode case Neutaro-1
-      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
-
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
+      // TODO: hardcode case Neutaro-1 & Noble-1
+      if (from.chainId === 'Neutaro-1' || from.chainId === 'noble-1')
+        return await handleTransferIBC(from, newToToken, fromAmount);
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
@@ -498,6 +498,11 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
+
+      const toAddress = await universalSwapHandler.getUniversalSwapToAddress(from.chainId, {
+        metamaskAddress: latestEvmAddress,
+        tronAddress: tronAddress
+      });
 
       result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
