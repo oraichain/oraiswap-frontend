@@ -142,7 +142,9 @@ export const useGetFeeConfig = () => {
   useEffect(() => {
     const queryRelayerFee = async () => {
       const feeConfig = await fetchFeeConfig();
-      dispatch(updateFeeConfig(feeConfig));
+      if (feeConfig) {
+        dispatch(updateFeeConfig(feeConfig));
+      }
     };
 
     queryRelayerFee();
