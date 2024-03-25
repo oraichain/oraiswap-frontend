@@ -38,10 +38,13 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const { infoBTC } = useGetInfoBtc();
   const fromToken = flattenTokens.find((flat) => flat.chainId === ('bitcoin' as any));
   const toToken = flattenTokens.find((flat) => flat.chainId === 'Oraichain' && flat.coinGeckoId === 'bitcoin');
-  const { deposit_fees } = useDepositFeesBitcoin(true);
+  const depositFeeBtc = useDepositFeesBitcoin(true);
   const { relayerFee } = useRelayerFeeToken(fromToken, toToken);
+
   // TODO:  usat decimal 14
-  const minimumDeposit = new BigDecimal(deposit_fees).div(1e14).toNumber() + relayerFee;
+  const minimumDeposit = depositFeeBtc
+    ? new BigDecimal(depositFeeBtc.deposit_fees ?? 0).div(1e14).toNumber() + relayerFee
+    : relayerFee;
   const expiration = nomic.depositAddress?.expirationTimeMs;
   const displayAmount = prices?.['bitcoin'] * minimumDeposit || '0';
   useEffect(() => {
