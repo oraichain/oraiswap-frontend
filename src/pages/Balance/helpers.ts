@@ -611,7 +611,7 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
 
 export const useGetWithdrawlFeesBitcoin = ({
   enabled,
-  bitcoinAddress,
+  bitcoinAddress
 }: {
   enabled: boolean;
   bitcoinAddress: string;
@@ -639,20 +639,24 @@ export const useGetWithdrawlFeesBitcoin = ({
 
 export const useDepositFeesBitcoin = (enabled: boolean) => {
   const getDepositFeeBTC = async () => {
-    const { data } = await axios({
-      baseURL: bitcoinLcd,
-      method: 'get',
-      url: `/bitcoin/deposit_fees`
-    });
-    return data;
+    try {
+      const { data } = await axios({
+        baseURL: bitcoinLcd,
+        method: 'get',
+        url: `/bitcoin/deposit_fees`
+      });
+      return data;
+    } catch (error) {
+      console.log({ errorGetDepositFeeBTC: error });
+      return {
+        deposit_fees: 0
+      };
+    }
   };
 
   const { data } = useQuery(['deposit_fees', enabled], () => getDepositFeeBTC(), {
     refetchOnWindowFocus: true,
-    enabled: !!enabled,
-    placeholderData: {
-      deposit_fees: 0
-    }
+    enabled
   });
 
   return data;
