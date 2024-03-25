@@ -299,7 +299,8 @@ async function fetchRoundBid(): Promise<Number> {
 
     return data;
   } catch (error) {
-    throw new Error(`Error when query Round bid using: ${error}`);
+    console.log(`Error when query Round bid using: ${error}`);
+    return 0;
   }
 }
 
@@ -328,7 +329,8 @@ export async function fetchFeeConfig(): Promise<ConfigResponse> {
   try {
     return await ics20Contract.config();
   } catch (error) {
-    throw new Error(`Error when query fee config using oracle: ${error}`);
+    console.log(`Error when query fee config using oracle: ${error}`);
+    return;
   }
 }
 
