@@ -618,20 +618,24 @@ export const useGetWithdrawlFeesBitcoin = ({
 }) => {
   const getWithdrawFeeBTC = async (bitcoinAddr) => {
     if (!bitcoinAddr) return 0;
-    const { data } = await axios({
-      baseURL: bitcoinLcd,
-      method: 'get',
-      url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
-    });
-    return data;
+    try {
+      const { data } = await axios({
+        baseURL: bitcoinLcd,
+        method: 'get',
+        url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
+      });
+      return data;
+    } catch (error) {
+      console.log({ errorGetWithdrawFeeBTC: error });
+      return {
+        withdrawal_fees: 0
+      };
+    }
   };
 
   const { data } = useQuery(['withdrawl_fees', bitcoinAddress, enabled], () => getWithdrawFeeBTC(bitcoinAddress), {
     refetchOnWindowFocus: true,
-    enabled: !!bitcoinAddress && !!enabled,
-    placeholderData: {
-      withdrawal_fees: 0
-    }
+    enabled: !!bitcoinAddress && !!enabled
   });
 
   return data;
