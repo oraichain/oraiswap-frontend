@@ -1,7 +1,8 @@
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
+import { oraichainTokens, parseTokenInfoRawDenom } from '@oraichain/oraidex-common';
 import { useEffect, useState } from 'react';
 import { FILTER_TIME_CHART } from 'reducer/type';
-import axios from 'axios';
+import axios from 'rest/request';
 
 export const useChartUsdPrice = (
   type: FILTER_TIME_CHART,
@@ -18,6 +19,8 @@ export const useChartUsdPrice = (
   }>({ value: 0, time: 0 });
 
   const onCrossMove = (item) => {
+    if (!item) return;
+
     setCurrentItem(item);
     onUpdateCurrentItem && onUpdateCurrentItem(item?.value || 0);
   };
@@ -26,20 +29,34 @@ export const useChartUsdPrice = (
     if (currentData.length > 0) {
       setCurrentItem(currentData[currentData.length - 1]);
       onUpdateCurrentItem && onUpdateCurrentItem(currentData[currentData.length - 1]?.value || 0);
+    } else {
+      setCurrentItem({ value: 0, time: 0 });
+      onUpdateCurrentItem && onUpdateCurrentItem(0);
     }
   };
 
   const onChangeRange = async (type: FILTER_TIME_CHART = FILTER_TIME_CHART.DAY) => {
     try {
       setIsLoading(true);
-      let data = [];
+      const tokenOnOraichain = oraichainTokens.find((t) => t.coinGeckoId === token);
+      const tokenDenom = parseTokenInfoRawDenom(tokenOnOraichain);
 
-      data = await getCoinPriceMarket(token, type);
+      const data = await getDataPriceMarket(tokenDenom, type);
 
-      setCurrentData(data);
-      if (data.length > 0) {
-        setCurrentItem({ ...data[data.length - 1] });
-        onUpdateCurrentItem && onUpdateCurrentItem(data[data.length - 1]?.value || 0);
+      const fmtData = (data || []).map((item) => {
+        return {
+          time: Number(item.time) * 1000,
+          value: item.close || 0
+        };
+      });
+
+      setCurrentData(fmtData);
+      if (fmtData.length > 0) {
+        setCurrentItem({ ...fmtData[fmtData.length - 1] });
+        onUpdateCurrentItem && onUpdateCurrentItem(fmtData[fmtData.length - 1]?.value || 0);
+      } else {
+        setCurrentItem({ value: 0, time: 0 });
+        onUpdateCurrentItem && onUpdateCurrentItem(0);
       }
       setIsLoading(false);
     } catch (e) {
@@ -52,6 +69,10 @@ export const useChartUsdPrice = (
     onChangeRange(type);
   }, [type, token]);
 
+  // useEffect(() => {
+  //   onMouseLeave();
+  // }, [currentData]);
+
   return {
     currentData,
     currentItem,
@@ -61,38 +82,39 @@ export const useChartUsdPrice = (
 };
 export const MINIMUM_YEAR_STATISTIC = 2000;
 
+// map to seconds
 export const FILTER_DAYS = {
-  '1H': 90,
-  '4H': 90,
-  '1D': 'max',
-  '1M': 'max'
+  '1H': {
+    range: 60 * 60,
+    tf: 60
+  },
+  '4H': {
+    range: 4 * 60 * 60,
+    tf: 4 * 60
+  },
+  '1D': {
+    range: 24 * 60 * 60,
+    tf: 10 * 60
+  },
+  '1M': {
+    range: 30 * 24 * 60 * 60,
+    tf: 4 * 60 * 60
+  }
 };
 
-export const getCoinPriceMarket = async (
-  coinId: CoinGeckoId,
-  type: FILTER_TIME_CHART = FILTER_TIME_CHART.DAY,
-  currency: string = 'usd'
-) => {
+export const getDataPriceMarket = async (tokenDenom: string, type: FILTER_TIME_CHART = FILTER_TIME_CHART.DAY) => {
   try {
-    const res = await axios.get(`https://price-v2.market.orai.io/api/v3/coins/${coinId}/market_chart`, {
+    const now = Math.floor(Date.now() / 1000);
+    const res = await axios.get(`v2/candles`, {
       params: {
-        vs_currency: currency,
-        days: FILTER_DAYS[type] || 'max'
+        denom: tokenDenom,
+        tf: FILTER_DAYS[type].tf,
+        startTime: now - FILTER_DAYS[type].range,
+        endTime: now
       }
     });
 
-    const usdMarket = [];
-
-    for (const price of res?.data?.prices) {
-      usdMarket.push({
-        time: price[0],
-        value: price[1]
-      });
-    }
-
-    const fmtData = groupDataByTime(type, usdMarket);
-
-    return fmtData || [];
+    return res?.data || [];
   } catch (e) {
     console.error('getCoinPriceMarket', e);
     return [];

@@ -11,6 +11,7 @@ import { formatTimeDataChart } from '../helpers';
 import { CoinGeckoId } from '@oraichain/oraidex-common/build/network';
 import { selectCurrentToToken } from 'reducer/tradingSlice';
 import { useSelector } from 'react-redux';
+import { parseTokenInfoRawDenom } from '@oraichain/oraidex-common';
 
 const ChartUsdPrice = ({
   filterDay,
@@ -39,12 +40,19 @@ const ChartUsdPrice = ({
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
-      const { width, height } = entries[0].contentRect;
-      chartRef.current.applyOptions({ width, height });
-      setTimeout(() => {
-        chartRef.current.timeScale().fitContent();
-      }, 0);
+      window.requestAnimationFrame((): void | undefined => {
+        if (!Array.isArray(entries) || !entries.length) {
+          return;
+        }
+
+        const { width, height } = entries[0].contentRect;
+        chartRef.current.applyOptions({ width, height });
+        setTimeout(() => {
+          chartRef.current.timeScale().fitContent();
+        }, 0);
+      });
     });
+
     resizeObserver.current.observe(containerRef.current, {
       box: 'content-box'
     });
@@ -150,7 +158,7 @@ const ChartUsdPrice = ({
     }
 
     const hover = (event) => {
-      let item = event?.seriesData?.get(serieRef.current) || { time: '', value: '' };
+      let item = event?.seriesData?.get(serieRef.current); // || { time: '', value: '' };
       crossMove(item);
     };
     chartRef.current.subscribeCrosshairMove(hover);
@@ -199,13 +207,7 @@ const ChartUsdPrice = ({
     chartRef?.current?.timeScale()?.fitContent();
   }, [data]);
 
-  useEffect(() => {
-    if (!currentItem.time || !currentItem.value) {
-      onMouseLeave();
-    }
-  }, [currentItem]);
-
-  const showTime = formatTimeDataChart(currentItem.time, filterDay, data?.[data?.length - 1]?.time);
+  const showTime = formatTimeDataChart(currentItem?.time || 0, filterDay, data?.[data?.length - 1]?.time);
 
   return (
     <div className={`${styles.chartUsdPrice} ${activeAnimation ? styles.activeAnimation : ''}`}>

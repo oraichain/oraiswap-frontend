@@ -80,8 +80,8 @@ export const HeaderTab: React.FC<{
               <div>
                 <IconToToken />
               </div>
-              <span>{currentToChain}</span>
-              <span className={cx('tokenName')}>{currentToToken?.name || currentToToken?.denom}</span>
+              <span>{currentToToken?.name || currentToToken?.denom}</span>
+              <span className={cx('tokenName')}>{currentToChain}</span>
             </div>
           )}
         </div>

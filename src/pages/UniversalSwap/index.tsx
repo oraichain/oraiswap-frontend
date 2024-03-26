@@ -1,34 +1,28 @@
+import { TVChartContainer } from '@oraichain/oraidex-common-ui';
 import { isMobile } from '@walletconnect/browser-utils';
 import cn from 'classnames/bind';
-import { TVChartContainer } from '@oraichain/oraidex-common-ui';
+import { PAIRS_CHART } from 'config/pools';
+import useTheme from 'hooks/useTheme';
 import Content from 'layouts/Content';
+import { DuckDb } from 'libs/duckdb';
+import { useGetPriceChange } from 'pages/Pools/hooks';
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import { selectCurrentSwapFilterTime, selectCurrentSwapTabChart } from 'reducer/chartSlice';
+import { selectChartTimeFrame, selectCurrentToken, setChartTimeFrame } from 'reducer/tradingSlice';
+import { TAB_CHART_SWAP } from 'reducer/type';
 import { AssetsTab, HeaderTab, HistoryTab, TabsTxs } from './Component';
+import ChartUsdPrice from './Component/ChartUsdPrice';
 import { TransactionProcess } from './Modals';
 import SwapComponent from './SwapV3';
-import { NetworkFilter, TYPE_TAB_HISTORY, calculateFinalPriceChange, initNetworkFilter } from './helpers';
+import { initPairSwap } from './SwapV3/hooks/useFillToken';
+import { NetworkFilter, TYPE_TAB_HISTORY, initNetworkFilter } from './helpers';
 import styles from './index.module.scss';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectChartTimeFrame,
-  selectCurrentToChain,
-  selectCurrentToken,
-  setChartTimeFrame
-} from 'reducer/tradingSlice';
-import { DuckDb } from 'libs/duckdb';
-import useTheme from 'hooks/useTheme';
-import { PAIRS_CHART } from 'config/pools';
-import { useGetPriceChange } from 'pages/Pools/hooks';
-import ChartUsdPrice from './Component/ChartUsdPrice';
-import { FILTER_DAY, FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
-import { selectCurrentSwapFilterTime, selectCurrentSwapTabChart } from 'reducer/chartSlice';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { reverseSymbolArr } from 'pages/Pools/helpers';
 const cx = cn.bind(styles);
 
 const Swap: React.FC = () => {
-  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(['orai', 'usdt']);
+  const [[fromTokenDenom, toTokenDenom], setSwapTokens] = useState<[string, string]>(initPairSwap);
   const [hideChart, setHideChart] = useState<boolean>(false);
   const [isTxsProcess, setIsTxsProcress] = useState<boolean>(false);
   const [networkFilter, setNetworkFilter] = useState<NetworkFilter>(initNetworkFilter);
@@ -45,14 +39,7 @@ const Swap: React.FC = () => {
 
   const [priceUsd, setPriceUsd] = useState(0);
   const currentPair = useSelector(selectCurrentToken);
-  const { data: prices } = useCoinGeckoPrices();
   const filterTimeChartUsd = useSelector(selectCurrentSwapFilterTime);
-
-  const [baseContractAddr, quoteContractAddr] = currentPair.info.split('-');
-  const isPairReverseSymbol = reverseSymbolArr.find(
-    (pair) => pair.filter((item) => item.denom === baseContractAddr || item.denom === quoteContractAddr).length === 2
-  );
-  const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
 
   const tf = useSelector(selectChartTimeFrame);
   const { isLoading, priceChange } = useGetPriceChange({
@@ -60,23 +47,6 @@ const Swap: React.FC = () => {
     quote_denom: currentPair.info.split('-')[1],
     tf
   });
-
-  useEffect(() => {
-    if (priceChange && priceChange.price) {
-      setPriceUsd(priceChange.price);
-    }
-  }, [priceChange]);
-
-  const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
-
-  const percentPriceChange = calculateFinalPriceChange(
-    !!isPairReverseSymbol,
-    priceChange.price,
-    priceChange.price_change
-  );
-
-  const isOchOraiPair = baseDenom === 'OCH' && quoteDenom === 'ORAI';
-  const currentPrice = isOchOraiPair ? priceChange.price * prices['oraichain-token'] : priceChange.price;
 
   useEffect(() => {
     if (!window.duckDb) initDuckdb();

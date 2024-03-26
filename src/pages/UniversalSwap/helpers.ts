@@ -280,17 +280,5 @@ export const formatTimeDataChart = (
   }
 
   const fmtTime = typeof time === 'string' ? new Date(time).getTime() : time * TIMER.MILLISECOND;
-  const date = new Date(fmtTime);
-
-  switch (type) {
-    case FILTER_TIME_CHART.ONE_HOUR:
-    case FILTER_TIME_CHART.FOUR_HOUR:
-      return formatDate(fmtTime) + ' - ' + formatTimeWithPeriod(fmtTime);
-
-    case FILTER_TIME_CHART.DAY:
-      return time === lastDate ? currentText : formatDate(fmtTime);
-
-    case FILTER_TIME_CHART.MONTH:
-      return formatDate(fmtTime) + ' - ' + formatDate(endOfMonth(date));
-  }
+  return time === lastDate ? currentText : `${formatDate(fmtTime)} ${formatTimeWithPeriod(fmtTime)}`;
 };

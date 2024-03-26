@@ -21,7 +21,6 @@ const chartSlice = createSlice({
       state.tabChart = action.payload;
     },
     setFilterTimeSwap: (state, action: PayloadAction<FILTER_TIME_CHART>) => {
-      console.log('first', action.payload);
       state.filterTimeSwap = action.payload;
     },
     setTabChartSwap: (state, action: PayloadAction<TAB_CHART_SWAP>) => {
