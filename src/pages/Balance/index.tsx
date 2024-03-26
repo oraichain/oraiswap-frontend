@@ -478,9 +478,9 @@ const Balance: React.FC<BalanceProps> = () => {
       if (isSpecialFromCoingecko) {
         const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
         const IBC_DECIMALS = 18;
-        const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
-          window.client.getBalance(oraiAddress, toTokenInOrai.denom),
+          window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
           window.client.queryContractSmart(tokenInfo.contractAddress, {
             balance: {
               address: oraiAddress
@@ -489,7 +489,7 @@ const Balance: React.FC<BalanceProps> = () => {
         ]);
 
         amountsBalance = {
-          [toTokenInOrai.denom]: nativeAmount?.amount,
+          [fromTokenInOrai.denom]: nativeAmount?.amount,
           [from.denom]: cw20Amount.balance
         };
       }
