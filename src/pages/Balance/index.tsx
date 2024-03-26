@@ -479,12 +479,14 @@ const Balance: React.FC<BalanceProps> = () => {
       );
 
       if (isSpecialFromCoingecko || isSpecialToCoingecko) {
-        const tokenInfo = isSpecialFromCoingecko ? from : newToToken;
+        const tokenInfo = isSpecialFromCoingecko
+          ? getTokenOnOraichain(from.coinGeckoId)
+          : getTokenOnOraichain(newToToken.coinGeckoId);
         const IBC_DECIMALS = 18;
         const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, toTokenInOrai.denom),
-          window.client.queryContractSmart(from.contractAddress, {
+          window.client.queryContractSmart(tokenInfo.contractAddress, {
             balance: {
               address: oraiAddress
             }
