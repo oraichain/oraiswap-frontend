@@ -33,6 +33,7 @@ import { ethers } from 'ethers';
 import {
   floatToPercent,
   getAddressTransfer,
+  getSpecialCoingecko,
   getTransactionUrl,
   handleCheckAddress,
   handleCheckChainEvmWallet,
@@ -305,10 +306,9 @@ const SwapComponent: React.FC<{
 
       let amountsBalance = amounts;
       let simulateAmount = simulateData.amount;
-      const isSpecialFromCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
-        originalFromToken.coinGeckoId
-      );
-      const isSpecialToCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
+
+      const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(
+        originalFromToken.coinGeckoId,
         originalToToken.coinGeckoId
       );
 

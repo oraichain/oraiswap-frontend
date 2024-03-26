@@ -84,6 +84,17 @@ export const getDenomEvm = (): EvmDenom => {
   }
 };
 
+export const getSpecialCoingecko = (fromCoingecko: string, toCoingecko: string) => {
+  const isSpecialCoingecko = (coinGeckoId) =>
+    ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(coinGeckoId);
+  const isSpecialFromCoingecko = isSpecialCoingecko(fromCoingecko);
+  const isSpecialToCoingecko = isSpecialCoingecko(toCoingecko);
+  return {
+    isSpecialFromCoingecko,
+    isSpecialToCoingecko
+  };
+};
+
 export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
   switch (Number(chainId)) {
     case Networks.bsc:

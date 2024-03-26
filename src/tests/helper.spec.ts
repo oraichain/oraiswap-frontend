@@ -10,7 +10,7 @@ import {
   AIRI_CONTRACT,
   OSMOSIS_ORAICHAIN_DENOM
 } from '@oraichain/oraidex-common';
-import { isEmptyObject } from 'helper';
+import { getSpecialCoingecko, isEmptyObject } from 'helper';
 
 describe('should utils functions in libs/utils run exactly', () => {
   const amounts: AmountDetails = {
@@ -172,4 +172,15 @@ describe('should utils functions in libs/utils run exactly', () => {
       expect(result).toEqual(expectedResult);
     }
   );
+
+  it.each([
+    ['cosmos', 'oraidex', false, false],
+    ['kawaii-islands', 'oraidex', true, false],
+    ['injective-protocol', 'milky-token', true, true],
+    ['cosmos', 'milky-token', false, true]
+  ])('test-getSpecialCoingecko', (fromCoingecko, toCoingecko, expectedFrom, expectedTo) => {
+    const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(fromCoingecko, toCoingecko);
+    expect(isSpecialFromCoingecko).toEqual(expectedFrom);
+    expect(isSpecialToCoingecko).toEqual(expectedTo);
+  });
 });

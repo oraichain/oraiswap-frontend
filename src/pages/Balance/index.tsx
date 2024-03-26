@@ -41,7 +41,8 @@ import {
   EVM_CHAIN_ID,
   handleCheckAddress,
   subNumber,
-  handleCheckChainEvmWallet
+  handleCheckChainEvmWallet,
+  getSpecialCoingecko
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -472,8 +473,8 @@ const Balance: React.FC<BalanceProps> = () => {
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
 
-      const isSpecialFromCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(from.coinGeckoId);
-      const isSpecialToCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
+      const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(
+        from.coinGeckoId,
         newToToken.coinGeckoId
       );
 
