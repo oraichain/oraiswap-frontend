@@ -10,7 +10,9 @@ import {
   CosmosChainId,
   INJECTIVE_ORAICHAIN_DENOM,
   INJECTIVE_CONTRACT,
-  flattenTokens
+  flattenTokens,
+  getTokenOnOraichain,
+  toDisplay
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -39,7 +41,8 @@ import {
   EVM_CHAIN_ID,
   handleCheckAddress,
   subNumber,
-  handleCheckChainEvmWallet
+  handleCheckChainEvmWallet,
+  getSpecialCoingecko
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -448,8 +451,7 @@ const Balance: React.FC<BalanceProps> = () => {
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
       // TODO: hardcode case Neutaro-1 & Noble-1
-      if (from.chainId === 'Neutaro-1' || from.chainId === 'noble-1')
-        return await handleTransferIBC(from, newToToken, fromAmount);
+      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
@@ -470,20 +472,32 @@ const Balance: React.FC<BalanceProps> = () => {
 
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
-      if (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') {
+
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
+
+      if (isSpecialFromCoingecko && from.chainId === 'Oraichain') {
+        const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
+        const IBC_DECIMALS = 18;
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
-          window.client.getBalance(oraiAddress, INJECTIVE_ORAICHAIN_DENOM),
-          window.client.queryContractSmart(INJECTIVE_CONTRACT, {
+          window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
+          window.client.queryContractSmart(tokenInfo.contractAddress, {
             balance: {
               address: oraiAddress
             }
           })
         ]);
+
         amountsBalance = {
-          [INJECTIVE_ORAICHAIN_DENOM]: nativeAmount?.amount,
-          [INJECTIVE_CONTRACT]: cw20Amount?.balance,
-          injective: cw20Amount?.balance
+          [fromTokenInOrai.denom]: nativeAmount?.amount,
+          [from.denom]: cw20Amount.balance
         };
+      }
+
+      if (
+        (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') ||
+        newToToken.chainId === 'kawaii_6886-1'
+      ) {
         simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
       }
 
@@ -498,11 +512,6 @@ const Balance: React.FC<BalanceProps> = () => {
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
-
-      const toAddress = await universalSwapHandler.getUniversalSwapToAddress(from.chainId, {
-        metamaskAddress: latestEvmAddress,
-        tronAddress: tronAddress
-      });
 
       result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));

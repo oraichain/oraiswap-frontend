@@ -33,6 +33,7 @@ import { ethers } from 'ethers';
 import {
   floatToPercent,
   getAddressTransfer,
+  getSpecialCoingecko,
   getTransactionUrl,
   handleCheckAddress,
   handleCheckChainEvmWallet,
@@ -305,20 +306,35 @@ const SwapComponent: React.FC<{
 
       let amountsBalance = amounts;
       let simulateAmount = simulateData.amount;
-      if (originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol') {
+
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(
+        originalFromToken.coinGeckoId,
+        originalToToken.coinGeckoId
+      );
+
+      if (isSpecialFromCoingecko && originalFromToken.chainId === 'Oraichain') {
+        const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
+        const IBC_DECIMALS = 18;
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
-          window.client.getBalance(oraiAddress, INJECTIVE_ORAICHAIN_DENOM),
-          window.client.queryContractSmart(INJECTIVE_CONTRACT, {
+          window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
+          window.client.queryContractSmart(tokenInfo.contractAddress, {
             balance: {
               address: oraiAddress
             }
           })
         ]);
+
         amountsBalance = {
-          [INJECTIVE_ORAICHAIN_DENOM]: nativeAmount?.amount,
-          [INJECTIVE_CONTRACT]: cw20Amount?.balance,
-          injective: cw20Amount?.balance
+          [fromTokenInOrai.denom]: nativeAmount?.amount,
+          [originalFromToken.denom]: cw20Amount.balance
         };
+      }
+
+      if (
+        (originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol') ||
+        originalToToken.chainId === 'kawaii_6886-1'
+      ) {
         simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
       }
 

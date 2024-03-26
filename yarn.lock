@@ -3014,9 +3014,9 @@
   integrity sha512-FpCnSjgMPsyTnkwiq/myYtOE4fN6B0gStJfskDen3TxYZc0SKxYzCt7jLP02gkEHnMl4QAiaa4QFBlnC2Lcm8g==
 
 "@oraichain/oraidex-universal-swap@^1.0.49":
-  version "1.0.60"
-  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.60.tgz#03a107dfda4a7b2522425f4eacf79031da07a1e8"
-  integrity sha512-g2iWpZEeR/+l0bVGd7RK/PSqu9PYtXHCv0X3l3K6prD823y/0rxUH0QA4irufRkaeu4WXgXqfvOLMLG5zKnQFw==
+  version "1.0.64"
+  resolved "https://registry.yarnpkg.com/@oraichain/oraidex-universal-swap/-/oraidex-universal-swap-1.0.64.tgz#9d368f31225c21ca7772742b3b15e9d2a1ba63de"
+  integrity sha512-Y6QusSbHuDmSRx2Ni+pJVwoxVZFsfd96AspWtY+0Zwtk4JEXAVXl1cZJvG1kRRG6L2i/eLGSf9G3Kufk8XI0qQ==
   dependencies:
     "@oraichain/oraidex-common" "^1.0.78"
     "@oraichain/oraidex-contracts-sdk" "^1.0.43"
