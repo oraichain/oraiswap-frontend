@@ -307,15 +307,13 @@ const SwapComponent: React.FC<{
       let amountsBalance = amounts;
       let simulateAmount = simulateData.amount;
 
-      const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(
         originalFromToken.coinGeckoId,
         originalToToken.coinGeckoId
       );
 
-      if (isSpecialFromCoingecko || isSpecialToCoingecko) {
-        const tokenInfo = isSpecialFromCoingecko
-          ? getTokenOnOraichain(originalFromToken.coinGeckoId)
-          : getTokenOnOraichain(originalToToken.coinGeckoId);
+      if (isSpecialFromCoingecko) {
+        const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
         const IBC_DECIMALS = 18;
         const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
@@ -327,9 +325,8 @@ const SwapComponent: React.FC<{
           })
         ]);
 
-        const displayAmountNative = toDisplay(nativeAmount?.amount || '0', toTokenInOrai.decimals);
         amountsBalance = {
-          [toTokenInOrai.denom]: displayAmountNative ? nativeAmount?.amount : '0',
+          [toTokenInOrai.denom]: nativeAmount?.amount,
           [originalFromToken.denom]: cw20Amount.balance
         };
       }

@@ -473,15 +473,10 @@ const Balance: React.FC<BalanceProps> = () => {
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
 
-      const { isSpecialFromCoingecko, isSpecialToCoingecko } = getSpecialCoingecko(
-        from.coinGeckoId,
-        newToToken.coinGeckoId
-      );
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
 
-      if (isSpecialFromCoingecko || isSpecialToCoingecko) {
-        const tokenInfo = isSpecialFromCoingecko
-          ? getTokenOnOraichain(from.coinGeckoId)
-          : getTokenOnOraichain(newToToken.coinGeckoId);
+      if (isSpecialFromCoingecko) {
+        const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
         const IBC_DECIMALS = 18;
         const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
@@ -493,9 +488,8 @@ const Balance: React.FC<BalanceProps> = () => {
           })
         ]);
 
-        const displayAmountNative = toDisplay(nativeAmount?.amount || '0', toTokenInOrai.decimals);
         amountsBalance = {
-          [toTokenInOrai.denom]: displayAmountNative ? nativeAmount?.amount : '0',
+          [toTokenInOrai.denom]: nativeAmount?.amount,
           [from.denom]: cw20Amount.balance
         };
       }
