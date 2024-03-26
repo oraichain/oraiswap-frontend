@@ -305,14 +305,17 @@ const SwapComponent: React.FC<{
 
       let amountsBalance = amounts;
       let simulateAmount = simulateData.amount;
-      const isSpecialChain = ['kawaii_6886-1', 'injective-1'].includes(originalToToken.chainId);
-      const isSpecialCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
+      const isSpecialFromCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
+        originalFromToken.coinGeckoId
+      );
+      const isSpecialToCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
         originalToToken.coinGeckoId
       );
 
-      if (isSpecialChain && isSpecialCoingecko) {
+      if (isSpecialFromCoingecko || isSpecialToCoingecko) {
+        const tokenInfo = isSpecialFromCoingecko ? originalFromToken : originalToToken;
         const IBC_DECIMALS = 18;
-        const toTokenInOrai = getTokenOnOraichain(originalToToken.coinGeckoId, IBC_DECIMALS);
+        const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, toTokenInOrai.denom),
           window.client.queryContractSmart(originalFromToken.contractAddress, {
@@ -321,8 +324,10 @@ const SwapComponent: React.FC<{
             }
           })
         ]);
+
+        const displayAmountNative = toDisplay(nativeAmount?.amount || '0', toTokenInOrai.decimals);
         amountsBalance = {
-          [toTokenInOrai.denom]: nativeAmount.amount,
+          [toTokenInOrai.denom]: displayAmountNative ? nativeAmount?.amount : '0',
           [originalFromToken.denom]: cw20Amount.balance
         };
       }

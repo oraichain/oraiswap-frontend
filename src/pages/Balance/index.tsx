@@ -11,7 +11,8 @@ import {
   INJECTIVE_ORAICHAIN_DENOM,
   INJECTIVE_CONTRACT,
   flattenTokens,
-  getTokenOnOraichain
+  getTokenOnOraichain,
+  toDisplay
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -470,14 +471,16 @@ const Balance: React.FC<BalanceProps> = () => {
 
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
-      const isSpecialChain = ['kawaii_6886-1', 'injective-1'].includes(newToToken.chainId);
-      const isSpecialCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
+
+      const isSpecialFromCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(from.coinGeckoId);
+      const isSpecialToCoingecko = ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(
         newToToken.coinGeckoId
       );
 
-      if (isSpecialChain && isSpecialCoingecko) {
+      if (isSpecialFromCoingecko || isSpecialToCoingecko) {
+        const tokenInfo = isSpecialFromCoingecko ? from : newToToken;
         const IBC_DECIMALS = 18;
-        const toTokenInOrai = getTokenOnOraichain(newToToken.coinGeckoId, IBC_DECIMALS);
+        const toTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
         const [nativeAmount, cw20Amount] = await Promise.all([
           window.client.getBalance(oraiAddress, toTokenInOrai.denom),
           window.client.queryContractSmart(from.contractAddress, {
@@ -486,8 +489,10 @@ const Balance: React.FC<BalanceProps> = () => {
             }
           })
         ]);
+
+        const displayAmountNative = toDisplay(nativeAmount?.amount || '0', toTokenInOrai.decimals);
         amountsBalance = {
-          [toTokenInOrai.denom]: nativeAmount.amount,
+          [toTokenInOrai.denom]: displayAmountNative ? nativeAmount?.amount : '0',
           [from.denom]: cw20Amount.balance
         };
       }
