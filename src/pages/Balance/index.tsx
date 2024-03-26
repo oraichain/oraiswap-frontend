@@ -475,7 +475,7 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
 
-      if (isSpecialFromCoingecko) {
+      if (isSpecialFromCoingecko && from.chainId === 'Oraichain') {
         const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
         const IBC_DECIMALS = 18;
         const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);

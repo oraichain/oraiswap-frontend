@@ -312,7 +312,7 @@ const SwapComponent: React.FC<{
         originalToToken.coinGeckoId
       );
 
-      if (isSpecialFromCoingecko) {
+      if (isSpecialFromCoingecko && originalFromToken.chainId === 'Oraichain') {
         const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
         const IBC_DECIMALS = 18;
         const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
