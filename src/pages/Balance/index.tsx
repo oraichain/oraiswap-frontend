@@ -654,7 +654,7 @@ const Balance: React.FC<BalanceProps> = () => {
                         <div>
                           <TooltipIcon width={20} height={20} />
                         </div>
-                        <span>Feature only supported on owallet wallet. Please connect Cosmos with Owallet wallet</span>
+                        <span>Feature only supported on Owallet. Please connect Cosmos with Owallet</span>
                       </div>
                     )}
                     <TokenItemELement
