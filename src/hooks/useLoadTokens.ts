@@ -240,7 +240,7 @@ async function loadEvmEntries(
   } catch (error) {
     console.log('error querying EVM balance: ', error);
     let retry = retryCount ? retryCount + 1 : 1;
-    if (retry >= EVM_BALANCE_RETRY_COUNT) throw generateError(`Cannot query EVM balance with error: ${error}`);
+    if (retry >= EVM_BALANCE_RETRY_COUNT) console.error(`Cannot query EVM balance with error: ${error}`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return loadEvmEntries(address, chain, multicallCustomContractAddress, retry);
   }
