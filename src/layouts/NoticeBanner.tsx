@@ -44,7 +44,7 @@ export const NoticeBanner = ({
   }, []);
 
   useEffect(() => {
-    if (banners.length <= 0) {
+    if (!banners?.length) {
       setOpenBanner(false);
       return;
     }
