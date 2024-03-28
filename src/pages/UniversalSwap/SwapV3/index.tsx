@@ -259,7 +259,6 @@ const SwapComponent: React.FC<{
     // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
     const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
 
-    console.log('newTVPair', newTVPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);

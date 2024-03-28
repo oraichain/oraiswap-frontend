@@ -14,11 +14,13 @@ import styles from './ChartUsdPrice.module.scss';
 const ChartUsdPrice = ({
   filterDay,
   onUpdateCurrentItem,
+  onUpdatePricePercent,
   // token,
   activeAnimation = false
 }: {
   filterDay: FILTER_TIME_CHART;
   onUpdateCurrentItem?: React.Dispatch<React.SetStateAction<number>>;
+  onUpdatePricePercent?: React.Dispatch<React.SetStateAction<number>>;
   // token?: CoinGeckoId;
   activeAnimation?: boolean;
 }) => {
@@ -33,8 +35,9 @@ const ChartUsdPrice = ({
     currentData: data,
     currentItem,
     onCrossMove: crossMove,
-    onMouseLeave
-  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem);
+    onMouseLeave,
+    changePercent
+  } = useChartUsdPrice(filterDay, currentToToken?.coinGeckoId, onUpdateCurrentItem, onUpdatePricePercent);
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
@@ -64,8 +67,8 @@ const ChartUsdPrice = ({
       borderColor: theme === 'light' ? '#EFEFEF' : '#232521',
       borderVisible: false,
       scaleMargins: {
-        top: 0.1,
-        bottom: 0.05
+        top: 0.2,
+        bottom: 0.2
       }
     },
     leftPriceScale: {
@@ -75,7 +78,6 @@ const ChartUsdPrice = ({
     layout: {
       background: {
         type: ColorType.Solid,
-        // color: theme === 'light' ? '#FFF' : '#181A17'
         color: 'transparent'
       },
       textColor: theme === 'light' ? '#686A66' : '#979995'
@@ -193,7 +195,7 @@ const ChartUsdPrice = ({
 
     serieRef?.current?.setData(newData);
     chartRef?.current?.timeScale()?.fitContent();
-  }, [theme]);
+  }, [theme, data]);
 
   useEffect(() => {
     // When data is updated

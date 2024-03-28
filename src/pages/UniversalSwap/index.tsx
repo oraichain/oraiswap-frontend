@@ -45,6 +45,7 @@ const Swap: React.FC = () => {
   const tabChart = useSelector(selectCurrentSwapTabChart);
 
   const [priceUsd, setPriceUsd] = useState(0);
+  const [percentChangeUsd, setPercentChangeUsd] = useState<string | number>(0);
   const currentPair = useSelector(selectCurrentToken);
   const currentFromToken = useSelector(selectCurrentFromToken);
   const currentToToken = useSelector(selectCurrentToToken);
@@ -79,6 +80,7 @@ const Swap: React.FC = () => {
                   toTokenDenom={toTokenDenom}
                   priceUsd={priceUsd}
                   priceChange={priceChange}
+                  percentChangeUsd={percentChangeUsd}
                 />
                 {/* )} */}
                 <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
@@ -94,6 +96,7 @@ const Swap: React.FC = () => {
                       activeAnimation={hideChart}
                       filterDay={filterTimeChartUsd}
                       onUpdateCurrentItem={setPriceUsd}
+                      onUpdatePricePercent={setPercentChangeUsd}
                     />
                   </div>
 
@@ -107,7 +110,7 @@ const Swap: React.FC = () => {
                         baseUrl={process.env.REACT_APP_BASE_API_URL}
                       />
                     ) : (
-                      <div className={cx('nodata-wrapper')}>
+                      <div className={cx('nodata-wrapper', hideChart ? 'hidden' : '')}>
                         <NoChartData />
                         <div className={cx('nodata-content')}>
                           <p className={cx('nodata-title')}>No data available</p>

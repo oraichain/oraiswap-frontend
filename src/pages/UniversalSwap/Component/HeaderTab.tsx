@@ -1,5 +1,5 @@
 import ChartImg from 'assets/icons/chart.svg';
-import HideImg from 'assets/icons/hidden.svg';
+import HideImg from 'assets/icons/show.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -34,7 +34,8 @@ export const HeaderTab: React.FC<{
     price: number;
     isError?: boolean;
   };
-}> = ({ setHideChart, hideChart, priceUsd, priceChange }) => {
+  percentChangeUsd: string | number;
+}> = ({ setHideChart, hideChart, priceUsd, priceChange, percentChangeUsd }) => {
   const theme = useTheme();
 
   const filterTime = useSelector(selectCurrentSwapFilterTime);
@@ -55,6 +56,7 @@ export const HeaderTab: React.FC<{
   const [baseDenom, quoteDenom] = currentPair.symbol.split('/');
 
   const isIncrement = priceChange && Number(priceChange.price_change) > 0 && !isPairReverseSymbol;
+  const isIncrementUsd = percentChangeUsd && Number(percentChangeUsd) > 0;
 
   const percentPriceChange = calculateFinalPriceChange(
     !!isPairReverseSymbol,
@@ -126,13 +128,8 @@ export const HeaderTab: React.FC<{
               </button>
             </div>
           )}
-          <div className={cx('eyesWrapper')}>
-            <img
-              className={cx('eyes')}
-              src={hideChart ? ChartImg : HideImg}
-              alt="eyes"
-              onClick={() => setHideChart(!hideChart)}
-            />
+          <div className={cx('eyesWrapper')} onClick={() => setHideChart(!hideChart)}>
+            <img className={cx('eyes')} src={hideChart ? ChartImg : HideImg} alt="eyes" />
           </div>
         </div>
       </div>
@@ -140,7 +137,12 @@ export const HeaderTab: React.FC<{
       <div className={cx('headerBottom')}>
         <div className={cx('priceUsd')}>
           {tab === TAB_CHART_SWAP.TOKEN ? (
-            <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+            <div>
+              <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
+              <span className={cx('percent', isIncrementUsd ? 'increment' : 'decrement')}>
+                {(isIncrementUsd ? '+' : '') + percentChangeUsd}%
+              </span>
+            </div>
           ) : (
             !priceChange.isError && (
               <div className={cx('bottom')}>
