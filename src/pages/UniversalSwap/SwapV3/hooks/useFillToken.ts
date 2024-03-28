@@ -14,7 +14,7 @@ export const initPairSwap = (): [string, string] => {
   const currentFromDenom = params.get(FROM_QUERY_KEY);
   const currentToDenom = params.get(TO_QUERY_KEY);
 
-  return [currentFromDenom || 'orai', currentToDenom || 'usdt'];
+  return [currentFromDenom || 'usdt', currentToDenom || 'orai'];
 };
 
 // URL: /universalswap?from=orai&to=usdt
