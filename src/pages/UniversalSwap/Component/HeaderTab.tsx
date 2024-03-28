@@ -1,5 +1,5 @@
 import ChartImg from 'assets/icons/chart.svg';
-import HideImg from 'assets/icons/hidden.svg';
+import HideImg from 'assets/icons/show.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
