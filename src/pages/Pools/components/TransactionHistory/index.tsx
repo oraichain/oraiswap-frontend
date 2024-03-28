@@ -1,4 +1,4 @@
-import { TokenItemType, toDisplay } from '@oraichain/oraidex-common';
+import { TokenItemType, parseTokenInfoRawDenom, toDisplay } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { ReactComponent as LinkIcon } from 'assets/icons/link.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
@@ -6,7 +6,7 @@ import { ReactComponent as NoDataDark } from 'assets/images/nodata-bid-dark.svg'
 import { ReactComponent as NoData } from 'assets/images/nodata-bid.svg';
 import LoadingBox from 'components/LoadingBox';
 import { network } from 'config/networks';
-import { getAccountUrl, getTransactionUrl } from 'helper';
+import { getTransactionUrl } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import { getUsd, reduceString } from 'libs/utils';
@@ -21,8 +21,9 @@ const TransactionHistory = ({ baseToken, quoteToken }: { baseToken: TokenItemTyp
   const { data: prices } = useCoinGeckoPrices();
 
   let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
-  const baseDenom = baseToken.contractAddress || baseToken.denom;
-  const quoteDenom = quoteToken.contractAddress || quoteToken.denom;
+
+  const baseDenom = baseToken && parseTokenInfoRawDenom(baseToken);
+  const quoteDenom = quoteToken && parseTokenInfoRawDenom(quoteToken);
 
   const { txHistories, isLoading } = useTransactionHistory(baseDenom, quoteDenom);
 

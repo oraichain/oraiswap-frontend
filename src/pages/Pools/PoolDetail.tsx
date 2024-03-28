@@ -88,9 +88,8 @@ const PoolDetail: React.FC = () => {
   const baseToken = (token1?.contractAddress || token1?.denom) === params.base_denom ? token1 : token2;
   const quoteToken = (token2?.contractAddress || token2?.denom) === params.base_denom ? token1 : token2;
 
-  let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
+  let BaseTokenIcon = DefaultIcon;
   if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.IconLight || baseToken.Icon : baseToken.Icon;
-  if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.IconLight || quoteToken.Icon : quoteToken.Icon;
 
   return (
     <Content nonBackground otherBackground>
@@ -110,7 +109,6 @@ const PoolDetail: React.FC = () => {
               <BaseTokenIcon />
             </div>
             1 {baseToken?.name} = {(priceChange?.price || 0).toFixed(6)} {quoteToken?.name}
-            {/* ≈ */}
           </div>
         </div>
         <div className={styles.summary}>

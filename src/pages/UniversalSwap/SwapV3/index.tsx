@@ -3,6 +3,8 @@ import {
   CosmosChainId,
   DEFAULT_SLIPPAGE,
   GAS_ESTIMATION_SWAP_DEFAULT,
+  INJECTIVE_CONTRACT,
+  INJECTIVE_ORAICHAIN_DENOM,
   TRON_DENOM,
   TokenItemType,
   calculateMinReceive,
@@ -31,8 +33,10 @@ import { ethers } from 'ethers';
 import {
   floatToPercent,
   getAddressTransfer,
+  getSpecialCoingecko,
   getTransactionUrl,
   handleCheckAddress,
+  handleCheckChainEvmWallet,
   handleErrorTransaction,
   networks
 } from 'helper';
@@ -270,7 +274,7 @@ const SwapComponent: React.FC<{
   const minimumReceive = isAverageRatio
     ? calculateMinReceive(
         // @ts-ignore
-        Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+        new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
         fromAmountTokenBalance.toString(),
         userSlippage,
         originalFromToken.decimals
@@ -302,6 +306,8 @@ const SwapComponent: React.FC<{
     setSwapLoading(true);
     displayToast(TToastType.TX_BROADCASTING);
     try {
+      // await handleCheckChainEvmWallet(originalFromToken.chainId);
+
       const cosmosAddress = await handleCheckAddress(
         originalFromToken.cosmosBased ? (originalFromToken.chainId as CosmosChainId) : 'Oraichain'
       );
@@ -314,17 +320,52 @@ const SwapComponent: React.FC<{
         relayerDecimals: RELAYER_DECIMAL
       };
 
+      let amountsBalance = amounts;
+      let simulateAmount = simulateData.amount;
+
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(
+        originalFromToken.coinGeckoId,
+        originalToToken.coinGeckoId
+      );
+
+      if (isSpecialFromCoingecko && originalFromToken.chainId === 'Oraichain') {
+        const tokenInfo = getTokenOnOraichain(originalFromToken.coinGeckoId);
+        const IBC_DECIMALS = 18;
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const [nativeAmount, cw20Amount] = await Promise.all([
+          window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
+          window.client.queryContractSmart(tokenInfo.contractAddress, {
+            balance: {
+              address: oraiAddress
+            }
+          })
+        ]);
+
+        amountsBalance = {
+          [fromTokenInOrai.denom]: nativeAmount?.amount,
+          [originalFromToken.denom]: cw20Amount.balance
+        };
+      }
+
+      if (
+        (originalToToken.chainId === 'injective-1' && originalToToken.coinGeckoId === 'injective-protocol') ||
+        originalToToken.chainId === 'kawaii_6886-1'
+      ) {
+        simulateAmount = toAmount(simulateData.displayAmount, originalToToken.decimals).toString();
+      }
+
       const univeralSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: checksumMetamaskAddress, tron: tronAddress },
           originalFromToken,
           originalToToken,
           fromAmount: fromAmountToken,
-          simulateAmount: simulateData.amount,
+          simulateAmount,
           userSlippage,
+          amounts: amountsBalance,
           simulatePrice:
             // @ts-ignore
-            averageRatio?.amount && Math.trunc(new BigDecimal(averageRatio.amount) / INIT_AMOUNT).toString(),
+            averageRatio?.amount && new BigDecimal(averageRatio.amount).div(INIT_AMOUNT).toString(),
           relayerFee: relayerFeeUniversal
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
@@ -362,24 +403,26 @@ const SwapComponent: React.FC<{
         refetchTransHistory();
       }
     } catch (error) {
-      console.log({ error });
+      console.trace({ error });
       handleErrorTransaction(error, {
         tokenName: originalToToken.name,
         chainName: originalToToken.chainId
       });
     } finally {
       setSwapLoading(false);
-      const address = [oraiAddress, metamaskAddress, tronAddress].filter(Boolean).join(' ');
-      const logEvent = {
-        address,
-        fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,
-        fromAmount: `${fromAmountToken}`,
-        toToken: `${originalToToken.name} - ${originalToToken.chainId}`,
-        toAmount: `${toAmountToken}`,
-        fromNetwork: originalFromToken.chainId,
-        toNetwork: originalToToken.chainId
-      };
-      mixpanel.track('Universal Swap Oraidex', logEvent);
+      if (process.env.REACT_APP_SENTRY_ENVIRONMENT === 'production') {
+        const address = [oraiAddress, metamaskAddress, tronAddress].filter(Boolean).join(' ');
+        const logEvent = {
+          address,
+          fromToken: `${originalFromToken.name} - ${originalFromToken.chainId}`,
+          fromAmount: `${fromAmountToken}`,
+          toToken: `${originalToToken.name} - ${originalToToken.chainId}`,
+          toAmount: `${toAmountToken}`,
+          fromNetwork: originalFromToken.chainId,
+          toNetwork: originalToToken.chainId
+        };
+        mixpanel.track('Universal Swap Oraidex', logEvent);
+      }
     }
   };
 

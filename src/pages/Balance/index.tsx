@@ -7,7 +7,12 @@ import {
   findToTokenOnOraiBridge,
   toAmount,
   tronToEthAddress,
-  CosmosChainId
+  CosmosChainId,
+  INJECTIVE_ORAICHAIN_DENOM,
+  INJECTIVE_CONTRACT,
+  flattenTokens,
+  getTokenOnOraichain,
+  toDisplay
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
@@ -35,7 +40,9 @@ import {
   networks,
   EVM_CHAIN_ID,
   handleCheckAddress,
-  subNumber
+  subNumber,
+  handleCheckChainEvmWallet,
+  getSpecialCoingecko
 } from 'helper';
 import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -73,7 +80,7 @@ import { useGetFeeConfig, useUsdtToBtc } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
-
+import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { NomicContext } from 'context/nomic-context';
 import { Decimal } from '@cosmjs/math';
 import { OBTCContractAddress, OraiBtcSubnetChain, OraichainChain } from 'libs/nomic/models/ibc-chain';
@@ -85,6 +92,9 @@ import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
 import ModalConfirm from '../../components/ConfirmModal';
 import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
+import useWalletReducer from 'hooks/useWalletReducer';
+import { isMobile } from '@walletconnect/browser-utils';
+
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = () => {
@@ -101,6 +111,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [, setTxHash] = useState('');
   const [[from, to], setTokenBridge] = useState<TokenItemType[]>([]);
   const [[otherChainTokens, oraichainTokens], setTokens] = useState<TokenItemType[][]>([[], []]);
+  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
@@ -377,6 +388,7 @@ const Balance: React.FC<BalanceProps> = () => {
   ) => {
     await handleCheckWallet();
 
+    // await handleCheckChainEvmWallet(from.chainId);
     // disable send amount < 0
     if (!from || !to) {
       displayToast(TToastType.TX_FAILED, {
@@ -427,24 +439,23 @@ const Balance: React.FC<BalanceProps> = () => {
       let newToToken = to;
       if (toNetworkChainId) {
         // ORAICHAIN -> EVM (BSC/ETH/TRON) ( TO: TOKEN ORAIBRIDGE)
-        newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
+        // newToToken = findToTokenOnOraiBridge(from.coinGeckoId, toNetworkChainId);
+        newToToken = flattenTokens.find(
+          (flat) => flat.chainId == toNetworkChainId && flat.coinGeckoId === from.coinGeckoId
+        );
 
-        const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
-        if (isBridgeToCosmosNetwork) {
-          newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
-        }
+        // const isBridgeToCosmosNetwork = !EVM_CHAIN_ID.includes(toNetworkChainId);
+        // if (isBridgeToCosmosNetwork) {
+        //   newToToken = cosmosTokens.find((t) => t.chainId === toNetworkChainId && t.coinGeckoId === from.coinGeckoId);
+        // }
         if (!newToToken) throw generateError('Cannot find newToToken token that matches from token to bridge!');
       }
 
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
-      // TODO: hardcode check case USDC oraichain -> USDC noble
-      const isToNobleChain = toNetworkChainId === 'noble-1';
-      if (from.cosmosBased && !isToNobleChain) {
-        return await handleTransferIBC(from, newToToken, fromAmount);
-      }
-
+      // TODO: hardcode case Neutaro-1 & Noble-1
+      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
@@ -463,36 +474,56 @@ const Balance: React.FC<BalanceProps> = () => {
         latestEvmAddress = await window.Metamask.getEthAddress();
       }
 
+      let amountsBalance = amounts;
+      let simulateAmount = toAmount(fromAmount).toString();
+
+      const { isSpecialFromCoingecko } = getSpecialCoingecko(from.coinGeckoId, newToToken.coinGeckoId);
+
+      if (isSpecialFromCoingecko && from.chainId === 'Oraichain') {
+        const tokenInfo = getTokenOnOraichain(from.coinGeckoId);
+        const IBC_DECIMALS = 18;
+        const fromTokenInOrai = getTokenOnOraichain(tokenInfo.coinGeckoId, IBC_DECIMALS);
+        const [nativeAmount, cw20Amount] = await Promise.all([
+          window.client.getBalance(oraiAddress, fromTokenInOrai.denom),
+          window.client.queryContractSmart(tokenInfo.contractAddress, {
+            balance: {
+              address: oraiAddress
+            }
+          })
+        ]);
+
+        amountsBalance = {
+          [fromTokenInOrai.denom]: nativeAmount?.amount,
+          [from.denom]: cw20Amount.balance
+        };
+      }
+
+      if (
+        (newToToken.chainId === 'injective-1' && newToToken.coinGeckoId === 'injective-protocol') ||
+        newToToken.chainId === 'kawaii_6886-1'
+      ) {
+        simulateAmount = toAmount(fromAmount, newToToken.decimals).toString();
+      }
+
       const universalSwapHandler = new UniversalSwapHandler(
         {
           sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
-          simulateAmount: toAmount(fromAmount, newToToken.decimals).toString()
+          amounts: amountsBalance,
+          simulateAmount
         },
         { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
       );
 
-      const { swapRoute } = addOraiBridgeRoute(cosmosAddress, from, newToToken);
-      // TODO: processUniversalSwap can lead to error when bridge INJ (sdk block injective network),
-      // so we use this func just for Noble, and handleTransferIBC for other.
-      if (isToNobleChain) result = await universalSwapHandler.processUniversalSwap(); // Oraichain -> Noble
-      else result = await universalSwapHandler.transferEvmToIBC(swapRoute); // EVM -> Oraichain
-
+      result = await universalSwapHandler.processUniversalSwap();
       processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
     } catch (ex) {
       handleErrorTransaction(ex, {
         tokenName: from.name,
         chainName: toNetworkChainId
       });
-      // Add log sentry Oraichain -> Noble-1
-      if (from.chainId === 'Oraichain' && toNetworkChainId === 'noble-1') {
-        const errorMsg = handleErrorMsg(ex);
-        Sentry.captureException(
-          `${from.chainId} to ${toNetworkChainId}: ${fromAmount} ${from.denom} - ${oraiAddress} - ${errorMsg}`
-        );
-      }
     }
   };
 
@@ -607,40 +638,58 @@ const Balance: React.FC<BalanceProps> = () => {
                   usd += getUsd(subAmount, t, prices);
                 }
                 // TODO: hardcode check bitcoinTestnet need update later
-                const TokenItemELement: React.FC<TokenItemProps> =
-                  t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin' ? TokenItemBtc : TokenItem;
+                const isOwallet =
+                  walletByNetworks.cosmos &&
+                  walletByNetworks.cosmos === 'owallet' &&
+                  window.owallet &&
+                  //@ts-ignore
+                  window.owallet?.isOwallet;
 
+                const isBtcToken = t.chainId === bitcoinChainId && t?.coinGeckoId === 'bitcoin';
+                const TokenItemELement: React.FC<TokenItemProps> = isBtcToken ? TokenItemBtc : TokenItem;
                 return (
-                  <TokenItemELement
-                    onDepositBtc={async () => {
-                      setIsDepositBtcModal(true);
-                    }}
-                    className={classNames(styles.tokens_element, styles[theme])}
-                    key={t.denom}
-                    amountDetail={{ amount: amount.toString(), usd }}
-                    subAmounts={subAmounts}
-                    active={from?.denom === t.denom}
-                    token={t}
-                    theme={theme}
-                    onClick={() => {
-                      if (t.denom !== from?.denom) {
-                        onClickToken(t);
-                      }
-                    }}
-                    onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
-                      await onClickTransfer(fromAmount, from, to, filterNetwork);
-                    }}
-                    convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
-                      try {
-                        const result = await convertKwt(transferAmount, fromToken);
-                        processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
-                      } catch (ex) {
-                        displayToast(TToastType.TX_FAILED, {
-                          message: ex.message
-                        });
-                      }
-                    }}
-                  />
+                  <div key={t.denom}>
+                    {!isOwallet && !isMobile() && isBtcToken && (
+                      <div className={styles.info}>
+                        <div>
+                          <TooltipIcon width={20} height={20} />
+                        </div>
+                        <span>Feature only supported on Owallet. Please connect Cosmos with Owallet</span>
+                      </div>
+                    )}
+                    <TokenItemELement
+                      onDepositBtc={async () => {
+                        setIsDepositBtcModal(true);
+                      }}
+                      isBtcOfOwallet={isOwallet || isMobile()}
+                      isBtcToken={isBtcToken}
+                      className={classNames(styles.tokens_element, styles[theme])}
+                      key={t.denom}
+                      amountDetail={{ amount: amount.toString(), usd }}
+                      subAmounts={subAmounts}
+                      active={from?.denom === t.denom}
+                      token={t}
+                      theme={theme}
+                      onClick={() => {
+                        if (t.denom !== from?.denom) {
+                          onClickToken(t);
+                        }
+                      }}
+                      onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
+                        await onClickTransfer(fromAmount, from, to, filterNetwork);
+                      }}
+                      convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
+                        try {
+                          const result = await convertKwt(transferAmount, fromToken);
+                          processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
+                        } catch (ex) {
+                          displayToast(TToastType.TX_FAILED, {
+                            message: ex.message
+                          });
+                        }
+                      }}
+                    />
+                  </div>
                 );
               })}
             </div>

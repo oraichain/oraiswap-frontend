@@ -64,7 +64,6 @@ export function useEagerConnect() {
       }
     } catch (error) {
       console.log({ errorConnectMetmask: error });
-      throw new Error(error?.message ?? JSON.stringify(error));
     }
   };
 

@@ -16,32 +16,36 @@ export const useGetRound = () => {
   const [round, setRound] = useState(0);
 
   const queryRoundBid = async () => {
-    const currentRound = await fetchRoundBid();
+    try {
+      const currentRound = await fetchRoundBid();
 
-    const prevRound = Number(currentRound) - 1;
-    const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
-    const currentBid = await coHavestBidPool.biddingInfo({
-      round: +currentRound
-    });
+      const prevRound = Number(currentRound) - 1;
+      const coHavestBidPool = new CoharvestBidPoolQueryClient(window.client, network.bid_pool);
+      const currentBid = await coHavestBidPool.biddingInfo({
+        round: +currentRound
+      });
 
-    const now = Date.now();
+      const now = Date.now();
 
-    if (
-      !(prevRound >= 0 && currentBid?.bid_info?.round && now < currentBid?.bid_info?.start_time * TIMER.MILLISECOND)
-    ) {
+      if (
+        !(prevRound >= 0 && currentBid?.bid_info?.round && now < currentBid?.bid_info?.start_time * TIMER.MILLISECOND)
+      ) {
+        setRound(currentRound as number);
+        return;
+      }
+
+      const prevBid = await coHavestBidPool.biddingInfo({
+        round: prevRound
+      });
+
+      if (prevBid?.bid_info?.end_time * TIMER.MILLISECOND >= now) {
+        setRound(prevRound);
+        return;
+      }
       setRound(currentRound as number);
-      return;
+    } catch (error) {
+      console.log('error queryRoundBid >>', error);
     }
-
-    const prevBid = await coHavestBidPool.biddingInfo({
-      round: prevRound
-    });
-
-    if (prevBid?.bid_info?.end_time * TIMER.MILLISECOND >= now) {
-      setRound(prevRound);
-      return;
-    }
-    setRound(currentRound as number);
   };
 
   useEffect(() => {

@@ -34,12 +34,19 @@ const LiquidityChart = ({
 
   useEffect(() => {
     resizeObserver.current = new ResizeObserver((entries, b) => {
-      const { width, height } = entries[0].contentRect;
-      chartRef.current.applyOptions({ width, height });
-      setTimeout(() => {
-        chartRef.current.timeScale().fitContent();
-      }, 0);
+      window.requestAnimationFrame((): void | undefined => {
+        if (!Array.isArray(entries) || !entries.length) {
+          return;
+        }
+
+        const { width, height } = entries[0].contentRect;
+        chartRef.current.applyOptions({ width, height });
+        setTimeout(() => {
+          chartRef.current.timeScale().fitContent();
+        }, 0);
+      });
     });
+
     resizeObserver.current.observe(containerRef.current, {
       box: 'content-box'
     });

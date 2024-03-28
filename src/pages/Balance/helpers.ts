@@ -618,20 +618,24 @@ export const useGetWithdrawlFeesBitcoin = ({
 }) => {
   const getWithdrawFeeBTC = async (bitcoinAddr) => {
     if (!bitcoinAddr) return 0;
-    const { data } = await axios({
-      baseURL: bitcoinLcd,
-      method: 'get',
-      url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
-    });
-    return data;
+    try {
+      const { data } = await axios({
+        baseURL: bitcoinLcd,
+        method: 'get',
+        url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
+      });
+      return data;
+    } catch (error) {
+      console.log({ errorGetWithdrawFeeBTC: error });
+      return {
+        withdrawal_fees: 0
+      };
+    }
   };
 
   const { data } = useQuery(['withdrawl_fees', bitcoinAddress, enabled], () => getWithdrawFeeBTC(bitcoinAddress), {
     refetchOnWindowFocus: true,
-    enabled: !!bitcoinAddress && !!enabled,
-    placeholderData: {
-      withdrawal_fees: 0
-    }
+    enabled: !!bitcoinAddress && !!enabled
   });
 
   return data;
@@ -639,20 +643,24 @@ export const useGetWithdrawlFeesBitcoin = ({
 
 export const useDepositFeesBitcoin = (enabled: boolean) => {
   const getDepositFeeBTC = async () => {
-    const { data } = await axios({
-      baseURL: bitcoinLcd,
-      method: 'get',
-      url: `/bitcoin/deposit_fees`
-    });
-    return data;
+    try {
+      const { data } = await axios({
+        baseURL: bitcoinLcd,
+        method: 'get',
+        url: `/bitcoin/deposit_fees`
+      });
+      return data;
+    } catch (error) {
+      console.log({ errorGetDepositFeeBTC: error });
+      return {
+        deposit_fees: 0
+      };
+    }
   };
 
   const { data } = useQuery(['deposit_fees', enabled], () => getDepositFeeBTC(), {
     refetchOnWindowFocus: true,
-    enabled: !!enabled,
-    placeholderData: {
-      deposit_fees: 0
-    }
+    enabled
   });
 
   return data;

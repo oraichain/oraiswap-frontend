@@ -73,7 +73,7 @@ const Sidebar: React.FC<{}> = React.memo((props) => {
             {renderLink('/pools', 'Pools', setLink, <PoolIcon />)}
             {renderLink('/staking', 'Staking', setLink, <StakingIcon />)}
             {renderLink('/co-harvest', 'Co-Harvest', setLink, <CohavestIcon />)}
-              {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
+            {renderLink('/bitcoin-dashboard', 'BTC Dashboard', setLink, <BtcDashboardIcon />)}
           </div>
         </div>
 

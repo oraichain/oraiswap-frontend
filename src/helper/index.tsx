@@ -28,6 +28,7 @@ import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
 import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
+import { evmChainInfos } from 'config/evmChainInfos';
 
 export interface Tokens {
   denom?: string;
@@ -81,6 +82,17 @@ export const getDenomEvm = (): EvmDenom => {
     default:
       return 'kawaii_orai';
   }
+};
+
+export const getSpecialCoingecko = (fromCoingecko: string, toCoingecko: string) => {
+  const isSpecialCoingecko = (coinGeckoId) =>
+    ['kawaii-islands', 'milky-token', 'injective-protocol'].includes(coinGeckoId);
+  const isSpecialFromCoingecko = isSpecialCoingecko(fromCoingecko);
+  const isSpecialToCoingecko = isSpecialCoingecko(toCoingecko);
+  return {
+    isSpecialFromCoingecko,
+    isSpecialToCoingecko
+  };
 };
 
 export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
@@ -158,6 +170,24 @@ export const handleCheckWallet = async () => {
   }
 };
 
+export const handleCheckChainEvmWallet = async (fromChainId) => {
+  const supportedChainIds = ['0x01', '0x38'];
+
+  if (supportedChainIds.includes(fromChainId)) {
+    const fromChainInfo = evmChainInfos.find((evm) => Number(evm.chainId) === Number(fromChainId));
+    if (fromChainInfo) {
+      try {
+        await window.ethereumDapp.request({
+          method: 'wallet_addEthereumChain',
+          params: [fromChainInfo]
+        });
+      } catch (error) {
+        console.error('Error adding Ethereum chain:', error);
+      }
+    }
+  }
+};
+
 export const checkSnapExist = async (): Promise<boolean> => {
   return window.ethereum?.isMetaMask && !!(await getSnap());
 };
@@ -186,6 +216,9 @@ export const handleCheckAddress = async (chainId: CosmosChainId): Promise<string
 
 const transferMsgError = (message: string, info?: InfoError) => {
   if (message.includes('invalid hash')) return `Transation was not included to block`;
+  if (message.includes('Send some tokens there before trying to query sequence'))
+    return `Seems like you’re using new wallet. You must have at least 0.01 ORAI for transaction fee`;
+
   if (message.includes('Assertion failed; minimum receive amount'))
     return `Because of high demand, You can increase slippage to increase success rate of the swap!`;
   if (message.includes("Cannot read properties of undefined (reading 'signed')")) return `User rejected transaction`;
