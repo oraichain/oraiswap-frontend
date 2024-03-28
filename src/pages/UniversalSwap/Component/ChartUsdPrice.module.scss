@@ -1,0 +1,62 @@
+@import 'src/styles/mixins';
+@import 'src/styles/themes';
+
+.chartUsdPrice {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .header {
+    color: $neutron-text-body-light;
+
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%; /* 21px */
+
+    .value {
+      @include theme {
+        color: theme-get('sea-stone-200');
+      }
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 120%;
+      margin-bottom: 16px;
+    }
+  }
+
+  .chartContainer {
+    position: relative;
+    height: 450px;
+    width: 100%;
+    transition: all ease-in-out 1s;
+
+    .chartRoot {
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+
+      table > tr {
+        border-left: 1px solid;
+        border-color: transparent;
+
+        &:first-of-type {
+          @include theme {
+            border-color: theme-get('neutral-surface-bg-btn-disabled');
+          }
+        }
+      }
+    }
+  }
+}
+
+.activeAnimation {
+  .chartContainer {
+    height: 0px;
+    overflow: hidden;
+  }
+}

@@ -99,9 +99,9 @@ export const parseAssetOnlyDenom = (assetInfo: AssetInfo) => {
 };
 
 // TODO: need to seperate format funcs to format module later.
-export const formatDisplayUsdt = (amount: number | string, dp = 2): string => {
+export const formatDisplayUsdt = (amount: number | string, dp = 2, dpMin = 4): string => {
   const validatedAmount = validateNumber(amount);
-  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), 4).toString()}`;
+  if (validatedAmount < 1) return `$${toFixedIfNecessary(amount.toString(), dpMin).toString()}`;
 
   return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp), undefined, { maximumFractionDigits: 6 })}`;
   // return `$${numberWithCommas(toFixedIfNecessary(amount.toString(), dp))}`;

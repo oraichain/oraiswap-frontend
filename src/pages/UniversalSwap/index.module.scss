@@ -27,6 +27,29 @@
   }
 }
 
+.chartItem {
+  height: 100%;
+  display: none;
+  border-radius: 12px;
+  margin-top: 0px;
+  transition: height ease-in-out 1s;
+
+  overflow: unset;
+
+  &.hidden {
+    height: 0%;
+    overflow: hidden;
+  }
+
+  // @include theme {
+  //   background: theme-get('neutral-surface-bg-2');
+  // }
+
+  &.activeChart {
+    display: block;
+  }
+}
+
 @include mobile {
   .swap-container {
     padding: 0;
