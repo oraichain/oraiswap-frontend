@@ -64,8 +64,8 @@ const ChartUsdPrice = ({
       borderColor: theme === 'light' ? '#EFEFEF' : '#232521',
       borderVisible: false,
       scaleMargins: {
-        top: 0.1,
-        bottom: 0.05
+        top: 0.2,
+        bottom: 0.2
       }
     },
     leftPriceScale: {
@@ -75,7 +75,6 @@ const ChartUsdPrice = ({
     layout: {
       background: {
         type: ColorType.Solid,
-        // color: theme === 'light' ? '#FFF' : '#181A17'
         color: 'transparent'
       },
       textColor: theme === 'light' ? '#686A66' : '#979995'
@@ -193,7 +192,7 @@ const ChartUsdPrice = ({
 
     serieRef?.current?.setData(newData);
     chartRef?.current?.timeScale()?.fitContent();
-  }, [theme]);
+  }, [theme, data]);
 
   useEffect(() => {
     // When data is updated
