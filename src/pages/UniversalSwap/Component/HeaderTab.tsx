@@ -150,7 +150,7 @@ export const HeaderTab: React.FC<{
 
 export const LIST_FILTER_TIME = [
   {
-    label: 'D',
+    label: '24H',
     value: FILTER_TIME_CHART['DAY']
   },
   {

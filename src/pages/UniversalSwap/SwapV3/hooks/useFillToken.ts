@@ -8,7 +8,6 @@ export const TYPE_QUERY_TYPE = 'type';
 
 export const initPairSwap = (): [string, string] => {
   const queryString = window.location?.search;
-  const path = window.location?.pathname;
 
   const params = new URLSearchParams(queryString || '');
 
