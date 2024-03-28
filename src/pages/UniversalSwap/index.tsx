@@ -107,7 +107,7 @@ const Swap: React.FC = () => {
                         baseUrl={process.env.REACT_APP_BASE_API_URL}
                       />
                     ) : (
-                      <div className={cx('nodata-wrapper')}>
+                      <div className={cx('nodata-wrapper', hideChart ? 'hidden' : '')}>
                         <NoChartData />
                         <div className={cx('nodata-content')}>
                           <p className={cx('nodata-title')}>No data available</p>
