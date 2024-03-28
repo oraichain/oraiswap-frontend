@@ -236,8 +236,7 @@ export const transferTokenErc20Cw20Map = async ({
   const { client } = await getCosmWasmClient(
     { rpc: fromToken.rpc, chainId: fromToken.chainId },
     {
-      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromToken.chainId)}${network.denom}`),
-      broadcastPollIntervalMs: 600
+      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromToken.chainId)}${network.denom}`)
     }
   );
   const result = await client.signAndBroadcast(
