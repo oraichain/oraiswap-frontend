@@ -8,12 +8,12 @@
   .tv-chart {
     position: relative;
     height: 500px;
-    padding-top: 10px;
+    padding-top: 18px;
     transition: all 1s ease;
-    margin-top: 8px;
 
     &.hidden {
       height: 0;
+      padding-top: 0px;
     }
   }
 
@@ -60,8 +60,14 @@
     align-items: center;
     gap: 16px;
 
+
     @include theme() {
       border: 1px solid theme-get('neutral-border-border-default');
+    }
+
+    &.hidden {
+      padding: 0;
+      border: none;
     }
 
     svg {
@@ -78,11 +84,12 @@
       justify-content: center;
       flex-direction: column;
       gap: 16px;
-
+      overflow: hidden;
       text-align: center;
       font-size: 14px;
       font-weight: 400;
       line-height: 150%;
+
 
       @include theme() {
         color: theme-get('neutral-9');
