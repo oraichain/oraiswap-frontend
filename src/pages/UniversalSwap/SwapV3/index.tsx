@@ -558,6 +558,7 @@ const SwapComponent: React.FC<{
                     return;
                   setSwapTokens([toTokenDenom, fromTokenDenom]);
                   setSwapAmount([toAmountToken, fromAmountToken]);
+                  handleUpdateQueryURL([toTokenDenom, fromTokenDenom]);
                 }}
                 alt="ant"
               />
