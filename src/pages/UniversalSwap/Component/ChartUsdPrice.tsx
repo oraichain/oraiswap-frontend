@@ -1,7 +1,8 @@
 import useConfigReducer from 'hooks/useConfigReducer';
 import { ChartOptions, ColorType, DeepPartial, LineStyle, TickMarkType, Time, createChart } from 'lightweight-charts';
 import { TIMER } from 'pages/CoHarvest/constants';
-import { formatDateChart, formatNumberKMB } from 'pages/CoHarvest/helpers';
+import { formatDateChart } from 'pages/CoHarvest/helpers';
+import { numberWithCommas, toFixedIfNecessary } from 'pages/Pools/helpers';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentToToken } from 'reducer/tradingSlice';
@@ -83,7 +84,9 @@ const ChartUsdPrice = ({
       locale: 'en-US',
       dateFormat: 'dd MMM, yyyy',
       priceFormatter: (price) => {
-        return formatNumberKMB(Number(price));
+        return `$${numberWithCommas(toFixedIfNecessary(Number(price).toString(), 6), undefined, {
+          maximumFractionDigits: 6
+        })}`;
       }
     },
     grid: {

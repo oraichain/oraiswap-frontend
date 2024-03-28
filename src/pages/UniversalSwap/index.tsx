@@ -83,7 +83,7 @@ const Swap: React.FC = () => {
                     className={cx(
                       `chartItem`,
                       hideChart || priceChange.isError ? 'hidden' : '',
-                      tabChart === TAB_CHART_SWAP.ORIGINAL ? 'activeChart' : ''
+                      tabChart === TAB_CHART_SWAP.TOKEN ? 'activeChart' : ''
                     )}
                   >
                     <ChartUsdPrice
@@ -93,7 +93,7 @@ const Swap: React.FC = () => {
                     />
                   </div>
 
-                  <div className={cx(`chartItem`, tabChart === TAB_CHART_SWAP.TRADING_VIEW ? 'activeChart' : '')}>
+                  <div className={cx(`chartItem`, tabChart === TAB_CHART_SWAP.POOL ? 'activeChart' : '')}>
                     <TVChartContainer
                       theme={theme}
                       currentPair={currentPair}

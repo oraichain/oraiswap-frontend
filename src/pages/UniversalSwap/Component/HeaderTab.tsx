@@ -89,20 +89,20 @@ export const HeaderTab: React.FC<{
           {!hideChart && (
             <div className={cx('tabWrapper')}>
               <button
-                className={cx('tab', tab === TAB_CHART_SWAP.ORIGINAL ? 'active' : '')}
+                className={cx('tab', tab === TAB_CHART_SWAP.TOKEN ? 'active' : '')}
                 onClick={() => {
-                  dispatch(setTabChartSwap(TAB_CHART_SWAP.ORIGINAL));
+                  dispatch(setTabChartSwap(TAB_CHART_SWAP.TOKEN));
                 }}
               >
-                {TAB_CHART_SWAP.ORIGINAL}
+                {TAB_CHART_SWAP.TOKEN}
               </button>
               <button
-                className={cx('tab', tab === TAB_CHART_SWAP.TRADING_VIEW ? 'active' : '')}
+                className={cx('tab', tab === TAB_CHART_SWAP.POOL ? 'active' : '')}
                 onClick={() => {
-                  dispatch(setTabChartSwap(TAB_CHART_SWAP.TRADING_VIEW));
+                  dispatch(setTabChartSwap(TAB_CHART_SWAP.POOL));
                 }}
               >
-                {TAB_CHART_SWAP.TRADING_VIEW}
+                {TAB_CHART_SWAP.POOL}
               </button>
             </div>
           )}
@@ -119,7 +119,7 @@ export const HeaderTab: React.FC<{
 
       <div className={cx('headerBottom')}>
         <div className={cx('priceUsd')}>
-          {tab === TAB_CHART_SWAP.ORIGINAL ? (
+          {tab === TAB_CHART_SWAP.TOKEN ? (
             <span>${!priceUsd ? '--' : numberWithCommas(priceUsd, undefined, { maximumFractionDigits: 6 })}</span>
           ) : (
             <div className={cx('bottom')}>
@@ -134,7 +134,7 @@ export const HeaderTab: React.FC<{
             </div>
           )}
         </div>
-        {tab === TAB_CHART_SWAP.ORIGINAL && !hideChart && (
+        {tab === TAB_CHART_SWAP.TOKEN && !hideChart && (
           <div className={cx('filter_day_wrapper')}>
             {LIST_FILTER_TIME.map((e) => {
               return (
@@ -158,19 +158,19 @@ export const HeaderTab: React.FC<{
 
 export const LIST_FILTER_TIME = [
   {
-    label: '1H',
-    value: FILTER_TIME_CHART.ONE_HOUR
-  },
-  {
-    label: '4H',
-    value: FILTER_TIME_CHART.FOUR_HOUR
-  },
-  {
     label: 'D',
-    value: FILTER_TIME_CHART.DAY
+    value: FILTER_TIME_CHART['DAY']
+  },
+  {
+    label: '7D',
+    value: FILTER_TIME_CHART['7DAY']
   },
   {
     label: 'M',
-    value: FILTER_TIME_CHART.MONTH
+    value: FILTER_TIME_CHART['MONTH']
+  },
+  {
+    label: '3M',
+    value: FILTER_TIME_CHART['3MONTH']
   }
 ];

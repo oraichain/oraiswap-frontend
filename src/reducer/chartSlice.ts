@@ -7,7 +7,7 @@ const initialState: PoolChartState = {
   filterDay: FILTER_DAY.DAY,
   tabChart: TAB_CHART.LIQUIDITY,
   filterTimeSwap: FILTER_TIME_CHART.DAY,
-  tabChartSwap: TAB_CHART_SWAP.ORIGINAL
+  tabChartSwap: TAB_CHART_SWAP.TOKEN
 };
 
 const chartSlice = createSlice({

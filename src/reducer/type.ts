@@ -198,10 +198,10 @@ export enum FILTER_DAY {
 }
 
 export enum FILTER_TIME_CHART {
-  ONE_HOUR = '1H',
-  FOUR_HOUR = '4H',
-  DAY = '1D',
-  MONTH = '1M'
+  'DAY' = '1D',
+  '7DAY' = '7D',
+  'MONTH' = '1M',
+  '3MONTH' = '3M'
 }
 
 export enum TAB_CHART {
@@ -210,6 +210,6 @@ export enum TAB_CHART {
 }
 
 export enum TAB_CHART_SWAP {
-  ORIGINAL = 'Original',
-  TRADING_VIEW = 'Trading View'
+  TOKEN = 'Token Price',
+  POOL = 'Pool Price'
 }
