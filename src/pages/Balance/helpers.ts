@@ -184,7 +184,8 @@ export const transferIBCMultiple = async (
   const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
   const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromChainId)}${feeDenom}`)
+    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromChainId)}${feeDenom}`),
+    broadcastPollIntervalMs: 600
   });
   // hardcode fix bug osmosis
   let fee: 'auto' | number = 'auto';
