@@ -40,17 +40,25 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
   const toToken = flattenTokens.find((flat) => flat.chainId === 'Oraichain' && flat.coinGeckoId === 'bitcoin');
   const depositFeeBtc = useDepositFeesBitcoin(true);
   const { relayerFee } = useRelayerFeeToken(fromToken, toToken);
+  const [addrOrai, setAddrOrai] = useState('');
+  const [addrOraiBtc, setAddrOraiBtc] = useState('');
 
   // TODO:  usat decimal 14
   const minimumDeposit = depositFeeBtc
     ? new BigDecimal(depositFeeBtc.deposit_fees ?? 0).div(1e14).toNumber() + relayerFee
     : relayerFee;
   const expiration = nomic.depositAddress?.expirationTimeMs;
-  const displayAmount = prices?.['bitcoin'] * minimumDeposit || '0';
+  const displayAmount = (prices?.['bitcoin'] * minimumDeposit).toFixed(2) || '0';
   useEffect(() => {
     (async () => {
       if (nomic.depositAddress?.bitcoinAddress) {
-        const url = await QRCode.toDataURL(nomic.depositAddress.bitcoinAddress);
+        const [url, addrOrai, addrOraiBTC] = await Promise.all([
+          QRCode.toDataURL(nomic.depositAddress.bitcoinAddress),
+          window.Keplr.getKeplrAddr('Oraichain'),
+          window.Keplr.getKeplrAddr('oraibtc-mainnet-1' as any)
+        ]);
+        setAddrOrai(addrOrai);
+        setAddrOraiBtc(addrOraiBTC);
         setUrlQRCode(url);
       }
     })();
@@ -107,6 +115,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span className={styles.time}>Expected transaction time:</span>
             <span className={styles.miner}>Bitcoin Miner Fee:</span>
             <span className={styles.fee}>Bridge Fee:</span>
+            <span className={styles.addr}>Oraichain Address:</span>
+            <span className={styles.addr}>OraiBTC Address:</span>
           </div>
           <div className={styles.value}>
             <span>
@@ -115,6 +125,8 @@ const DepositBtcModal: FC<ModalProps> = ({ isOpen, open, close, handleRecoveryAd
             <span>20 mins - 1.5 hours</span>
             <span>{nomic.depositAddress?.minerFeeRate} BTC</span>
             <span>{nomic.depositAddress?.bridgeFeeRate * 100}%</span>
+            <span>{reduceString(addrOrai, 8, 8)} </span>
+            <span>{reduceString(addrOraiBtc, 8, 8)} </span>
           </div>
         </div>
         <div className={styles.warning}>

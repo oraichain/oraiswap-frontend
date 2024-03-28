@@ -231,6 +231,39 @@
     @include mobile {
       width: 100%;
     }
+
+    .info {
+      font-size: 14px;
+      line-height: 150%;
+
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid;
+      @include theme {
+        border-color: theme-get('warning-text-default');
+        background: theme-get('primary-surface-default-subtle');
+      }
+
+      svg {
+        cursor: pointer;
+        vertical-align: middle;
+      }
+
+      @include theme {
+        color: theme-get('warning-text-default');
+
+        svg {
+          path {
+            stroke: theme-get('warning-text-default');
+          }
+        }
+      }
+    }
   }
 
   &_element {
@@ -251,12 +284,11 @@
   width: 100%;
 
   .light {
-    color: #A871DF;
+    color: #a871df;
   }
 
   .box {
     width: 100%;
-
 
     @include desktop {
       @media (max-width: 1024px) {
