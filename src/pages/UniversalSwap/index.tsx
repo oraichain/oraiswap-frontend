@@ -63,26 +63,21 @@ const Swap: React.FC = () => {
           <div>
             {!mobileMode && (
               <>
-                {!priceChange.isError && (
-                  <HeaderTab
-                    setHideChart={setHideChart}
-                    hideChart={hideChart}
-                    toTokenDenom={toTokenDenom}
-                    priceUsd={priceUsd}
-                    priceChange={priceChange}
-                  />
-                )}
-                <div
-                  className={cx(
-                    'tv-chart'
-                    // hideChart || priceChange.isError ? 'hidden' : ''
-                  )}
-                >
+                {/* {!priceChange.isError && ( */}
+                <HeaderTab
+                  setHideChart={setHideChart}
+                  hideChart={hideChart}
+                  toTokenDenom={toTokenDenom}
+                  priceUsd={priceUsd}
+                  priceChange={priceChange}
+                />
+                {/* )} */}
+                <div className={cx('tv-chart', hideChart ? 'hidden' : '')}>
                   {isTxsProcess && <TransactionProcess close={() => setIsTxsProcress(!isTxsProcess)} />}
                   <div
                     className={cx(
                       `chartItem`,
-                      hideChart || priceChange.isError ? 'hidden' : '',
+                      hideChart ? 'hidden' : '',
                       tabChart === TAB_CHART_SWAP.TOKEN ? 'activeChart' : ''
                     )}
                   >

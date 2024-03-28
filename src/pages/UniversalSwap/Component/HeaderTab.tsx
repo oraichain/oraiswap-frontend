@@ -1,29 +1,21 @@
-import HideImg from 'assets/icons/hidden.svg';
-import ShowImg from 'assets/icons/show.svg';
 import ChartImg from 'assets/icons/chart.svg';
+import HideImg from 'assets/icons/hidden.svg';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import cn from 'classnames/bind';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import { formatDisplayUsdt, numberWithCommas, reverseSymbolArr } from 'pages/Pools/helpers';
-import { useGetPriceChange } from 'pages/Pools/hooks';
+import useTheme from 'hooks/useTheme';
+import { numberWithCommas, reverseSymbolArr } from 'pages/Pools/helpers';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectChartTimeFrame,
-  selectCurrentToChain,
-  selectCurrentToToken,
-  selectCurrentToken
-} from 'reducer/tradingSlice';
-import { calculateFinalPriceChange } from '../helpers';
-import styles from './HeaderTab.module.scss';
-import { FILTER_TIME_CHART, TAB_CHART, TAB_CHART_SWAP } from 'reducer/type';
 import {
   selectCurrentSwapFilterTime,
   selectCurrentSwapTabChart,
   setFilterTimeSwap,
   setTabChartSwap
 } from 'reducer/chartSlice';
-import { useEffect, useState } from 'react';
-import useTheme from 'hooks/useTheme';
+import { selectCurrentToChain, selectCurrentToToken, selectCurrentToken } from 'reducer/tradingSlice';
+import { FILTER_TIME_CHART, TAB_CHART_SWAP } from 'reducer/type';
+import { calculateFinalPriceChange } from '../helpers';
+import styles from './HeaderTab.module.scss';
 
 const cx = cn.bind(styles);
 
@@ -126,7 +118,7 @@ export const HeaderTab: React.FC<{
               <div className={cx('balance')}>
                 {`1 ${baseDenom} ≈ ${
                   isPairReverseSymbol ? (1 / currentPrice || 0).toFixed(6) : currentPrice.toFixed(6)
-                } ${isOchOraiPair ? 'USD' : quoteDenom}`}
+                } ${quoteDenom}`}
               </div>
               <div className={cx('percent', isIncrement ? 'increment' : 'decrement')}>
                 {(isIncrement ? '+' : '') + percentPriceChange.toFixed(2)}%

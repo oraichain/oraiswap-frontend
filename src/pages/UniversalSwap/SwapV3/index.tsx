@@ -49,7 +49,7 @@ import { getUsd, toSubAmount } from 'libs/utils';
 import mixpanel from 'mixpanel-browser';
 import { calcMaxAmount } from 'pages/Balance/helpers';
 import { numberWithCommas } from 'pages/Pools/helpers';
-import { genCurrentChain, generateNewSymbol } from 'pages/UniversalSwap/helpers';
+import { genCurrentChain, generateNewSymbol, generateNewSymbolV2 } from 'pages/UniversalSwap/helpers';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -254,7 +254,10 @@ const SwapComponent: React.FC<{
     originalToToken
   );
   useEffect(() => {
-    const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    // const newTVPair = generateNewSymbol(fromToken, toToken, currentPair);
+    const newTVPair = generateNewSymbolV2(fromToken, toToken, currentPair);
+
+    console.log('newTVPair', newTVPair);
     if (newTVPair) dispatch(setCurrentToken(newTVPair));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromToken, toToken]);

@@ -85,16 +85,16 @@ export const MINIMUM_YEAR_STATISTIC = 2000;
 // map to seconds
 export const FILTER_DAYS = {
   [FILTER_TIME_CHART['DAY']]: {
-    range: 60 * 60,
+    range: 24 * 60 * 60,
     tf: 10 * 60
   },
   [FILTER_TIME_CHART['7DAY']]: {
-    range: 4 * 60 * 60,
-    tf: 1 * 60 * 60
+    range: 7 * 24 * 60 * 60,
+    tf: 60 * 60
   },
   [FILTER_TIME_CHART['MONTH']]: {
     range: 30 * 24 * 60 * 60,
-    tf: 3 * 60 * 60
+    tf: 1 * 60 * 60
   },
   [FILTER_TIME_CHART['3MONTH']]: {
     range: 90 * 24 * 60 * 60,

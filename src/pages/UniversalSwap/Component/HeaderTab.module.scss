@@ -116,8 +116,13 @@
 
     font-size: 16px;
     font-weight: 600;
+    line-height: 100%;
 
     .priceUsd {
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 100%;
+
       @include theme {
         // color: $neutron-text-body-light;
         color: theme-get('neutral-1');
@@ -126,7 +131,7 @@
 
     .bottom {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: 4px;
 
       @include theme() {
@@ -135,8 +140,9 @@
       }
 
       .balance {
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 100%;
       }
 
       .icon {
@@ -151,6 +157,7 @@
       .percent {
         font-size: 14px;
         font-weight: 400;
+        line-height: 100%;
         padding-left: 6px;
 
         &.increment {
@@ -172,6 +179,11 @@
       align-items: center;
       gap: 4px;
       border-radius: 99px;
+
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 150%; /* 24px */
+
       color: $neutron-text-body-light;
 
       @include mobile() {
@@ -180,7 +192,7 @@
       }
 
       @include theme() {
-        background: theme-get('neutral-border-border-default');
+        border: 1px solid theme-get('neutral-border-border-default');
       }
 
       .filter_day {
@@ -195,10 +207,9 @@
         width: 100%;
 
         &.active {
-          background: $white-color;
-
           @include theme() {
-            color: theme-get('neutral-text-text-btn-default');
+            background: theme-get('neutral-surface-bg-section-5');
+            color: theme-get('neutral-surface-bg-3');
           }
         }
       }
